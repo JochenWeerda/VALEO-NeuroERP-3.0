@@ -7,14 +7,10 @@ Registrierung erfolgt beim Laden von app.api.v1.api (siehe register_command_muta
 from __future__ import annotations
 
 import logging
-import os
-from datetime import date, datetime
 
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.action_execution import ActionExecutionRequest, ActionExecutionResult
-from app.services.numbering_service import get_numbering
 
 logger = logging.getLogger(__name__)
 
@@ -24,89 +20,30 @@ def _create_purchase_order_mutation(
     request: ActionExecutionRequest,
     result: ActionExecutionResult,
 ) -> None:
+    """Bestellentwurf in DocFlow, wenn der Payload ``lieferant_id`` traegt (BELEG-052, 09.11.2026).
+
+    Vorher ein Kopf ohne Positionen in ``public.einkauf_bestellungen``, mit ``lieferant_id`` als Ganzzahl (Lieferanten
+    tragen UUIDs) und Summen aus dem Payload. Jetzt der Entwurf der Belegart ``purchase_order`` mit den Positionen des
+    Payloads (``positionen``: artikel_nr, menge, einheit, einzelpreis, preis_einheit); Summen rechnet DocFlow.
+    Wiederholungsschutz ueber den Idempotenzschluessel des Kommandos.
     """
-    Legt eine Bestellzeile an, wenn Payload `lieferant_id` und optional `bestellnummer` enthaelt.
-    Idempotenz: gleiche bestellnummer pro Tenant wird uebersprungen.
-    """
+    from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit
+
     payload = request.payload or {}
-    lid = payload.get("lieferant_id")
-    if lid is None:
-        logger.debug("CreatePurchaseOrder: keine lieferant_id im Payload — keine DB-Mutation")
+    lieferant = str(payload.get("lieferant_id") or "").strip()
+    if not lieferant:
+        logger.debug("CreatePurchaseOrder: keine lieferant_id im Payload - keine DB-Mutation")
         return
-
-    try:
-        lieferant_id = int(lid)
-    except (TypeError, ValueError):
-        logger.warning("CreatePurchaseOrder: ungueltige lieferant_id: %s", lid)
-        return
-
-    tenant_id = request.tenant_id
-    if payload.get("bestellnummer") or payload.get("order_number"):
-        bn = str(
-            payload.get("bestellnummer") or payload.get("order_number")
-        ).strip()[:80]
-    else:
-        safe_tenant = "".join(c if c.isalnum() else "_" for c in tenant_id)[:48]
-        tenant_prefix = os.environ.get(f"TENANT_PO_PREFIX_{safe_tenant.upper()}")
-        core = get_numbering().next_number("purchase_order")
-        bn = (
-            f"{tenant_prefix}{core}"
-            if tenant_prefix
-            else core
-        )[:80]
-    if not bn:
-        bn = f"AE-{request.idempotency_key}"[:40]
-    check = db.execute(
-        text(
-            "SELECT id FROM einkauf_bestellungen "
-            "WHERE bestellnummer = :nummer AND tenant_id = :tenant_id LIMIT 1"
-        ),
-        {"nummer": bn, "tenant_id": tenant_id},
-    ).fetchone()
-    if check:
-        logger.debug("CreatePurchaseOrder: Bestellnummer %s existiert bereits", bn)
-        return
-
-    bestelldatum = date.today()
-    gd = payload.get("gewuenschtes_lieferdatum")
-    gew_dt = None
-    if isinstance(gd, str) and gd:
-        try:
-            gew_dt = datetime.fromisoformat(gd[:10]).date()
-        except Exception:
-            gew_dt = None
-
-    status = str(payload.get("status") or "entwurf")[:50]
-    netto = payload.get("netto_summe")
-    mwst = payload.get("mwst_betrag")
-    brutto = payload.get("brutto_summe")
-    erstellt = str(payload.get("erstellt_von") or request.issuer_role or "kernel")[:100]
-
-    db.execute(
-        text(
-            """
-            INSERT INTO einkauf_bestellungen (
-                bestellnummer, lieferant_id, bestelldatum, gewuenschtes_lieferdatum,
-                status, netto_summe, mwst_betrag, brutto_summe, erstellt_von, tenant_id
-            ) VALUES (
-                :bestellnummer, :lieferant_id, :bestelldatum, :gewuenschtes_lieferdatum,
-                :status, :netto_summe, :mwst_betrag, :brutto_summe, :erstellt_von, :tenant_id
-            )
-            """
-        ),
-        {
-            "bestellnummer": bn,
-            "lieferant_id": lieferant_id,
-            "bestelldatum": bestelldatum,
-            "gewuenschtes_lieferdatum": gew_dt,
-            "status": status,
-            "netto_summe": float(netto) if netto is not None else None,
-            "mwst_betrag": float(mwst) if mwst is not None else None,
-            "brutto_summe": float(brutto) if brutto is not None else None,
-            "erstellt_von": erstellt,
-            "tenant_id": tenant_id,
-        },
-    )
+    nummer = str(payload.get("bestellnummer") or payload.get("order_number") or "").strip()[:60] or None
+    positionen = [position_in_preiseinheit(
+        artikel_nr=str(p.get("artikel_nr") or p.get("article_id") or ""), bezeichnung=p.get("artikel_bezeichnung"),
+        menge=p.get("menge"), einheit=p.get("einheit"), einzelpreis=p.get("einzelpreis"),
+        preis_einheit=p.get("preis_einheit")) for p in (payload.get("positionen") or []) if isinstance(p, dict)]
+    akteur = str(payload.get("erstellt_von") or request.issuer_role or "kernel")[:100]
+    lege_beleg_an(db, request.tenant_id, "purchase_order", partner_id=lieferant, positionen=positionen,
+                  quelle="process_kernel", referenz=str(request.idempotency_key or nummer or "kernel"),
+                  entwurf_nr=nummer, akteur=akteur,
+                  idempotenz=f"kernel-create-po-{request.idempotency_key}"[:120] if request.idempotency_key else None)
 
 
 def register_command_mutations() -> None:

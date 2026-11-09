@@ -407,6 +407,8 @@ class BusinessPartnerDiscountItem(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     article_number = Column(String(64), nullable=False)
     description = Column(String(255), nullable=True)
     discount_percent = Column(DECIMAL(7, 2), nullable=False, default=0)
@@ -427,6 +429,8 @@ class BusinessPartnerPriceAgreement(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     article_number = Column(String(64), nullable=False)
     description = Column(String(255), nullable=True)
     valid_from = Column(Date, nullable=True)
@@ -453,6 +457,8 @@ class BusinessPartnerInstruction(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     instruction_text = Column(Text, nullable=False)
     instruction_priority = Column(String(20), nullable=False, default="normal")
     valid_from = Column(Date, nullable=True)
@@ -470,6 +476,8 @@ class BusinessPartnerContact(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     priority = Column(Integer, nullable=False, default=0)
     salutation = Column(String(40), nullable=True)
     brief_salutation = Column(String(120), nullable=True)
@@ -508,6 +516,8 @@ class BusinessPartnerAddress(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     address_type = Column(String(20), nullable=False, default="customer")  # customer|invoice|shipping|postal
     name_1 = Column(String(255), nullable=True)
     name_2 = Column(String(255), nullable=True)
@@ -575,6 +585,8 @@ class BusinessPartnerCpdAccount(Base):
 
     id = Column(String(36), primary_key=True, default=uuid7)
     partner_id = Column(String(36), ForeignKey("domain_crm.business_partners.partner_id"), nullable=False, index=True)
+    # Mandant (RLS-Migration legte die Spalte an, Vorgabe rls_current_tenant()); der Dienst filtert und setzt ihn.
+    tenant_id = Column(String, nullable=False, index=True)
     cpd_customer_number = Column(String(64), nullable=False, unique=True)
     debtor_account = Column(String(40), nullable=True)
     search_term = Column(String(120), nullable=True)

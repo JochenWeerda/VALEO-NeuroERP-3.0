@@ -9,7 +9,6 @@ und der gemeinsame Freigabeweg ``/approvals``.
 from __future__ import annotations
 
 import uuid
-from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -18,7 +17,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from app.api.v1.endpoints import (
-    ap_approval_workflow, ap_invoices, approvals, docflow, finance_invoices, kontrolle, sales_credit_notes,
+    ap_invoices, approvals, docflow, finance_invoices, kontrolle,
 )
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
@@ -84,12 +83,10 @@ def haus(monkeypatch):
     from app.services.ap_invoice_approval_service import APApprovalWorkflowService
     monkeypatch.setattr(APApprovalWorkflowService, "status", freigegeben)
     monkeypatch.setattr(docflow_service, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
-    monkeypatch.setattr(sales_credit_notes, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     monkeypatch.setattr(finance_invoices, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
     register_domain_exception_handlers(app)
     app.include_router(ap_invoices.router)
-    app.include_router(sales_credit_notes.router)
     app.include_router(finance_invoices.router)
     app.include_router(docflow.router, prefix="/docflow")
     app.include_router(approvals.router, prefix="/approvals")
@@ -232,52 +229,6 @@ def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus, monkeypatch
 
 
 # ── Verkaufsgutschrift ────────────────────────────────────────────────────────
-
-def _gutschrift(haus, netto: float, rechnung: str | None = "RE-1") -> str:
-    gs = f"gu-{uuid.uuid4().hex[:8]}"
-    brutto = round(netto * 1.19, 2)
-    with SessionLocal() as db:
-        db.execute(text(
-            "INSERT INTO domain_sales.sales_credit_notes "
-            "(id, tenant_id, credit_note_number, customer_id, invoice_reference, reason, total_amount, status, correction_type) "
-            "VALUES (:id, :t, :nr, 'kunde-1', :re, 'Retoure', :total, 'draft', 'rechnungskorrektur')"),
-            {"id": gs, "t": haus["mandant"], "nr": gs.upper(), "re": rechnung, "total": brutto})
-        db.execute(text(
-            "INSERT INTO domain_sales.sales_credit_note_lines "
-            "(id, credit_note_id, line_number, description, quantity, unit_price, tax_code, tax_rate, line_total, tenant_id) "
-            "VALUES (:id, :gs, 1, 'Position', 1, :netto, '3', 19, :netto, (SELECT tenant_id FROM domain_sales.sales_credit_notes WHERE id = :gs))"), {"id": f"{gs}-1", "gs": gs, "netto": netto})
-        db.commit()
-    return gs
-
-
-def test_die_gutschrift_mit_rechnungsbezug_ist_routine_auf_beiden_buchungswegen(haus):
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100)}/post").status_code == 200
-    kommando = haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100, 'RE-2')}/actions/buchen", json={"_mode": "execute"})
-    assert kommando.json().get("success") is True, kommando.text
-    assert _buchungen(haus) == 2 and _korb(haus) == []
-
-
-def test_grosse_und_gestueckelte_gutschriften_sieht_der_controller(haus):
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 1000, 'RE-A')}/post").status_code == 200  # 1.190 EUR
-    _gutschrift(haus, 500, "RE-B")
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 500, 'RE-B')}/post").status_code == 200   # zusammen 1.190
-    assert _korb(haus) == [("sales_credit_note", "betrag", "warnung"), ("sales_credit_note", "stueckelung", "warnung")]
-
-
-def test_die_gutschrift_ohne_rechnungsbezug_ueber_der_schwelle_ist_gesperrt(haus):
-    ohne = _gutschrift(haus, 1000, None)
-    gesperrt = haus["als"](ANNA).post(f"/sales/credit-notes/{ohne}/post")
-    assert gesperrt.status_code == 409 and "ohne Bezugsrechnung" in gesperrt.text
-    assert _buchungen(haus) == 0
-    fid = _frage(haus, ANNA, "sales_credit_note", ohne).json()["id"]
-    assert _entscheide(haus, ANNA, "sales_credit_note", ohne, fid).status_code == 403
-    assert _entscheide(haus, BERND, "sales_credit_note", ohne, fid).status_code == 200
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{ohne}/post").status_code == 200
-    # Klein und ohne Bezug: Routine.
-    assert haus["als"](ANNA).post(f"/sales/credit-notes/{_gutschrift(haus, 100, None)}/post").status_code == 200
-
-
-# ── Alter Rechnungsweg ────────────────────────────────────────────────────────
 
 def _alte_rechnung(nummer: str, preis: float, status: str = "VERSENDET") -> dict:
     return {"number": nummer, "date": "2026-10-13", "customerId": "kunde-1", "dueDate": "2026-11-12", "status": status,

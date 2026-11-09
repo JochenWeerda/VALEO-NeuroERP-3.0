@@ -61,7 +61,6 @@ from app.core.screen_definitions_capture import (
     build_personal_bewerbung_einwilligung_screen_definition,
     build_personal_einwilligungserklaerungen_screen_definition,
     build_admin_postfaecher_screen_definition,
-    build_sales_gutschrift_screen_definition,
     build_finance_steuerschluessel_screen_definition,
     build_nawaro_ernterklaerung_drucken_screen_definition,
     build_strecke_dokumente_drucken_screen_definition,
@@ -563,7 +562,43 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
         edit["kind"] = "primary"
         definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    _partnerstamm_pflege(definition)
     return definition
+
+
+# Tabelle der Kundenakte -> Bereich der Partnerstamm-Pflege (app/api/v1/endpoints/kunden_stamm_pflege.py).
+_PFLEGE_TABELLEN = {"anschriften": "anschrift", "contacts": "ansprechpartner", "cpd": "cpd", "rabatte": "rabatt",
+                    "preise": "preis", "chefanweisungen": "anweisung"}
+
+
+def _partnerstamm_pflege(definition: dict[str, Any]) -> None:
+    """Anlegen, Aendern und Entfernen der Untertabellen in der Maske selbst (09.11.2026).
+
+    Bis dahin sprang "Erweiterte Pflege" in den handgebauten Kundenstamm ``verkauf/kunden-stamm``; der entfaellt.
+    """
+    from app.api.v1.endpoints.kunden_stamm_pflege import BEREICHE, eingabefelder
+
+    definition["actions"] = [a for a in definition["actions"] if a["key"] != "edit"]
+    for tab in definition.get("tabs") or []:
+        for tabelle in tab.get("tables") or []:
+            bereich = BEREICHE.get(_PFLEGE_TABELLEN.get(tabelle["key"], ""))
+            if bereich is None:
+                continue
+            felder = eingabefelder(bereich)
+            definition["actions"].append({
+                "key": f"{bereich.key}_anlegen", "label": f"{bereich.label} anlegen", "kind": "secondary",
+                "dangerLevel": "low", "permission": "crm.customer.update", "zone": "header",
+                "commandEndpoint": f"/api/v1/crm/customers/{{entity_id}}/actions/{bereich.key}_anlegen",
+                "method": "POST", "requiresConfirmation": False, "inputFields": felder})
+            pfad = f"/api/v1/crm/kunden-stamm/{bereich.key}/{{entity_id}}/actions/"
+            tabelle["rowActions"] = [
+                {"key": "aendern", "label": "Ändern", "dangerLevel": "moderate", "permission": "crm.customer.update",
+                 "commandEndpoint": pfad + "aendern", "method": "POST", "requiresConfirmation": False,
+                 "inputFields": felder},
+                {"key": "entfernen", "label": "Entfernen", "dangerLevel": "moderate",
+                 "permission": "crm.customer.update", "commandEndpoint": pfad + "entfernen", "method": "POST",
+                 "requiresConfirmation": True, "auditReasonRequired": True},
+            ]
 
 
 def build_sales_order_screen_definition() -> dict[str, Any]:
@@ -1312,74 +1347,6 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
         "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
     }
 
-
-def build_sales_invoices_worklist_screen_definition() -> dict[str, Any]:
-    """Native Worklist fuer die Ausgangsrechnungen (FSX-RECHNUNGSMASKE-MERIDIAN).
-
-    Die Faktura-Liste war bis heute eine handgeschriebene Seite, die auf einen
-    Endpunkt zeigte, den es nicht gab. Jetzt gibt es den Endpunkt — und die
-    Liste ist eine `worklist`: Suchen, sortieren, blaettern und auswaehlen
-    laufen serverseitig, die Spaltennavigation kommt aus dem Floorplan.
-
-    Die Spalte **Positionen** steht bewusst in der Liste: Eine Rechnung mit
-    null Positionen ist ein Befund und soll auffallen, ohne den Beleg zu
-    oeffnen.
-    """
-    return {
-        "schemaVersion": 1,
-        "id": "sales/invoices",
-        "domain": "sales",
-        "mode": "list",
-        "title": "Ausgangsrechnungen",
-        "subtitle": "Faktura / Forderungen",
-        "adapter": {"type": "native", "sourceId": "sales/invoices", "temporary": False},
-        "dataSources": [
-            {"key": "list", "endpoint": "/api/v1/sales/invoices", "pageSize": 50},
-        ],
-        "tabs": [
-            {
-                "key": "rechnungen", "label": "Rechnungen", "lazy": False, "keepAlive": True,
-                "tables": [{"key": "list", "label": "Ausgangsrechnungen", "dataSourceKey": "list",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "rowRouteTemplate": "/belege/sales_invoice/{id}",
-                            "columns": [
-                                {"key": "invoice_number", "label": "Rechnungsnr.", "sortable": True, "filterable": True, "width": 150},
-                                {"key": "customer_id", "label": "Kunde", "sortable": True, "filterable": True, "width": 160},
-                                {"key": "invoice_date", "label": "Rechnungsdatum", "renderKind": "date", "sortable": True, "width": 140},
-                                {"key": "due_date", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 120},
-                                {"key": "line_count", "label": "Positionen", "numeric": True, "width": 100},
-                                {"key": "net_amount", "label": "Netto", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                {"key": "gross_amount", "label": "Brutto", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {
-                "key": "export",
-                "label": "Liste exportieren",
-                "kind": "secondary",
-                "dangerLevel": "safe",
-                "permission": "sales.rechnung.lesen",
-                "zone": "footer",
-            },
-        ],
-        "noWorkflowReason": "Die Worklist sucht und priorisiert Rechnungen; Status und Zahlungsstand haengen am Beleg und an den offenen Posten.",
-        "agentContract": {
-            "businessPurpose": "Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.",
-            "examplePrompts": [
-                "Welche Rechnungen sind noch im Entwurf?",
-                "Zeige die Rechnungen des Kunden K-100 aus diesem Monat.",
-                "Gibt es Rechnungen ohne Positionen?",
-            ],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='sales-invoices-worklist']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "none",
-                   "tableProfile": "financial", "preferredMode": "desktopDense",
-                   "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
-    }
 
 
 def build_sales_invoice_screen_definition() -> dict[str, Any]:
@@ -5316,7 +5283,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "lager/article-stock": build_lager_article_stock_screen_definition,
     "sales/delivery-note": build_sales_delivery_note_screen_definition,
     "sales/invoice": build_sales_invoice_screen_definition,
-    "sales/invoices": build_sales_invoices_worklist_screen_definition,
     "strecke/streckengeschaeft": build_strecke_streckengeschaeft_screen_definition,
     "versand/versand-avis": build_versand_avis_screen_definition,
     "strecke/vorlaeufig": build_strecke_vorlaeufig_screen_definition,
@@ -5344,7 +5310,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "admin/postfaecher": build_admin_postfaecher_screen_definition,
     "admin/webhooks-liste": build_webhooks_workbench,
     "admin/control-center": build_control_center_workbench,
-    "sales/gutschrift": build_sales_gutschrift_screen_definition,
     "finance/steuerschluessel": build_finance_steuerschluessel_screen_definition,
     "logistik/frachtbrief": build_logistik_frachtbrief_screen_definition,
     "logistik/verladung": build_logistik_verladung_screen_definition,
@@ -5961,7 +5926,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/invoice": ["rechnung", "ausgangsrechnung", "faktura", "sammelrechnung", "herkunft der menge"],
-    "sales/invoices": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
+    "beleg-liste/sales-invoice": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
     "strecke/streckengeschaeft": ["streckengeschaeft", "strecke", "drop ship"],
     "versand/versand-avis": ["versand avis", "avis drucken", "versandbenachrichtigung"],
     "strecke/vorlaeufig": ["vorlaeufige streckengeschaefte", "geplante tour", "offene strecke"],
@@ -5984,7 +5949,6 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "personal/bewerbung-einwilligung": ["einwilligung", "talentpool", "widerruf", "aufbewahrung"],
     "personal/einwilligungserklaerungen": ["einwilligungserklaerung", "fassung", "wortlaut"],
     "admin/postfaecher": ["postfach", "mailkonto", "e-mail", "absender", "smtp", "ionos", "gmail"],
-    "sales/gutschrift": ["gutschrift", "rechnungskorrektur", "credit note", "erloesminderung", "retoure gutschrift"],
     "finance/steuerschluessel": ["steuerschluessel", "umsatzsteuer", "mehrwertsteuer", "vorsteuer", "steuersatz", "tax key"],
     "logistik/tourenplanung": ["tourenplanung", "tour disponieren", "lieferschein tour"],
     "transporte/fahrer": ["fahrer", "fahrerliste", "touren heute"],
@@ -6045,7 +6009,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "start-dashboard": "/start-dashboard",
     "finance/bookings/new": "/finance/bookings/new",
     "fibu/kostenstellenrechnung": "/fibu/kostenstellenrechnung",
-    "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
     "transporte/fahrer/neu": "/transporte/fahrer/neu",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "auswertungen/dms-volltext": "/auswertungen/dms-volltext",
@@ -6102,7 +6065,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "qualitaet/reklamation": "/qualitaet/reklamationen",
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/invoice": "/verkauf/rechnungen",
-    "sales/invoices": "/verkauf/rechnungen",
+    "beleg-liste/sales-invoice": "/belege/sales_invoice",
     "strecke/streckengeschaeft": "/strecke/streckengeschaeft",
     "versand/versand-avis": "/versand/versand-avis",
     "strecke/vorlaeufig": "/strecke/vorlaeufige-streckengeschaefte",
@@ -6127,7 +6090,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "admin/postfaecher": "/admin/postfaecher",
     "admin/webhooks-liste": "/admin/webhooks",
     "admin/control-center": "/admin/control-center",
-    "sales/gutschrift": "/sales/credit-notes",
     "finance/steuerschluessel": "/finance/steuerschluessel",
     "logistik/frachtbrief": "/logistik/frachtbriefe",
     "logistik/verladung": "/verladung",

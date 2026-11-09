@@ -1,0 +1,1550 @@
+{
+  "bases": {
+    "1.0.0": {
+      "definition": {
+        "domain": "agrar",
+        "identityField": "contract_no",
+        "mode": "detail",
+        "noProcessChainReason": "Kontrakt-Vorgang ohne Belegkette; Folgebelege entstehen in Annahme und Abrechnung.",
+        "noWorkflowReason": "Der Stand des Kontrakts (Erfuellung, Fixierung, Abrechnung) kommt je Kontrakt vom Server; die Maske fuehrt keinen eigenen Ablauf.",
+        "performance": {
+          "bundleGroup": "kontrakte",
+          "initialPayloadBudgetKb": 36,
+          "lookupMinChars": 2,
+          "requiresLazyTabs": true,
+          "requiresVirtualTables": true
+        },
+        "schemaVersion": 1,
+        "subtitle": "Kontrakt-Vorgang"
+      },
+      "hash": "2960a83352234b83e62f4c0ba8cf5a97cf451c8b5320f7cc994598f4ff457dd9"
+    }
+  },
+  "current": {
+    "abrechnung": "1.0.0",
+    "erfuellung": "1.0.0",
+    "fixierung": "1.0.0"
+  },
+  "family": "kontrakt",
+  "schemaVersion": 1,
+  "variants": {
+    "abrechnung": {
+      "1.0.0": {
+        "baseHash": "2960a83352234b83e62f4c0ba8cf5a97cf451c8b5320f7cc994598f4ff457dd9",
+        "baseVersion": "1.0.0",
+        "definitionHash": "b079da1b5ac17718467d1371783a047e36c2227479e15042d0024cbf7b48ce52",
+        "patch": {
+          "actions": [
+            {
+              "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben",
+              "dangerLevel": "moderate",
+              "inputFields": [
+                {
+                  "helpText": "Leer = je Bewegung ABR-<Kontrakt>-<lfd. Nr.>.",
+                  "key": "rechnung_nr",
+                  "label": "Abrechnungsnummer",
+                  "type": "text"
+                }
+              ],
+              "key": "abrechnung_uebergeben",
+              "kind": "primary",
+              "label": "An Abrechnung übergeben",
+              "method": "POST",
+              "permission": "kontrakt.update",
+              "requiresConfirmation": true,
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Kontrakterfüllung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontrakterfüllung desselben Kontrakts.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Kontraktfixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontraktfixierung desselben Kontrakts.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt/abrechnung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Abrufbewegungen an die Abrechnung uebergeben und Bewegungen oder Fixierungen stornieren.",
+            "examplePrompts": [
+              "Uebergib die offenen Abrufe von K-1001 an die Abrechnung."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "primaryAction": "[data-testid='action-abrechnung_uebergeben']",
+              "screenRoot": "[data-testid='kontrakt-abrechnung']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/positionen",
+              "key": "positionen",
+              "pageSize": 200
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/bewegungen",
+              "key": "bewegungen",
+              "pageSize": 200
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/fixierungen",
+              "key": "fixierungen",
+              "pageSize": 200
+            }
+          ],
+          "id": "kontrakt/abrechnung",
+          "layout": {
+            "columnNavigation": "single",
+            "contextRail": "combined",
+            "density": "compact",
+            "floorplan": "objectPage",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "sectionNavigation": "anchors",
+            "stickyFooter": true,
+            "stickyHeader": true,
+            "summaryPlacement": "header",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "summary": [
+            {
+              "key": "abgerufen",
+              "label": "Abgerufen",
+              "tone": "neutral"
+            },
+            {
+              "key": "abgerechnet",
+              "label": "Abgerechnet",
+              "tone": "neutral"
+            },
+            {
+              "key": "offen_abruf",
+              "label": "Offen zur Abrechnung",
+              "tone": "warning"
+            },
+            {
+              "key": "fixiert_aktiv",
+              "label": "Fixiert (aktiv)",
+              "tone": "neutral"
+            }
+          ],
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "contract_type",
+                  "label": "Art",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "valid_from",
+                  "label": "Gültig ab",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "preismodell",
+                  "label": "Preismodell",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "basis",
+                  "label": "Basis",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "praemie_wert",
+                  "label": "Prämie",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "menge_kontrakt",
+                  "label": "Kontrahiert",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "abgerufen",
+                  "label": "Abgerufen",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "abgerechnet",
+                  "label": "Abgerechnet",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "offen_abruf",
+                  "label": "Offen zur Abrechnung",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "fixiert_aktiv",
+                  "label": "Fixiert (aktiv)",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Kontrakt",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "position_no",
+                      "label": "Pos.",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel",
+                      "label": "Artikel",
+                      "priority": "primary",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge_kontrakt",
+                      "label": "Kontrahiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "abgerufen",
+                      "label": "Abgerufen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "fixiert",
+                      "label": "Fixiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "bewegungen",
+              "label": "Bewegungen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "priority": "primary",
+                      "renderKind": "date",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "filterable": true,
+                      "key": "status",
+                      "label": "Status",
+                      "priority": "primary",
+                      "renderKind": "status",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "invoice_no",
+                      "label": "Abrechnung",
+                      "priority": "secondary",
+                      "sortable": true
+                    },
+                    {
+                      "key": "settled_at",
+                      "label": "Übergeben am",
+                      "priority": "secondary",
+                      "renderKind": "date",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "storno_grund",
+                      "label": "Storno-Grund",
+                      "priority": "tertiary",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "bewegungen",
+                  "key": "bewegungen",
+                  "label": "Bewegungen",
+                  "pageSize": 50,
+                  "rowActions": [
+                    {
+                      "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/abrechnen",
+                      "dangerLevel": "moderate",
+                      "inputFields": [
+                        {
+                          "key": "rechnung_nr",
+                          "label": "Abrechnungsnummer",
+                          "type": "text"
+                        }
+                      ],
+                      "key": "abrechnen",
+                      "label": "Abrechnen",
+                      "method": "POST",
+                      "permission": "kontrakt.update",
+                      "requiresConfirmation": true,
+                      "visibleWhen": {
+                        "field": "status",
+                        "values": [
+                          "offen"
+                        ]
+                      }
+                    },
+                    {
+                      "auditReasonRequired": true,
+                      "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/stornieren",
+                      "dangerLevel": "critical",
+                      "forbiddenForAgents": true,
+                      "key": "stornieren",
+                      "label": "Stornieren",
+                      "method": "POST",
+                      "permission": "kontrakt.update",
+                      "requiresConfirmation": true,
+                      "visibleWhen": {
+                        "field": "status",
+                        "values": [
+                          "offen"
+                        ]
+                      }
+                    }
+                  ],
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "fixierungen",
+              "label": "Fixierungen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "fixing_no",
+                      "label": "Nr.",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "position_no",
+                      "label": "Pos.",
+                      "numeric": true,
+                      "priority": "secondary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "matif_price",
+                      "label": "MATIF",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "praemie",
+                      "label": "Prämie",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "effektiv_preis",
+                      "label": "Effektiv",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "priority": "secondary",
+                      "renderKind": "date",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "referenz",
+                      "label": "Referenz",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "status",
+                      "label": "Status",
+                      "priority": "primary",
+                      "renderKind": "status",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bediener",
+                      "label": "Bediener",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "storno_grund",
+                      "label": "Storno-Grund",
+                      "priority": "tertiary",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "fixierungen",
+                  "key": "fixierungen",
+                  "label": "Fixierungen",
+                  "pageSize": 50,
+                  "rowActions": [
+                    {
+                      "auditReasonRequired": true,
+                      "commandEndpoint": "/api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren",
+                      "dangerLevel": "critical",
+                      "forbiddenForAgents": true,
+                      "key": "stornieren",
+                      "label": "Stornieren",
+                      "method": "POST",
+                      "permission": "kontrakt.update",
+                      "requiresConfirmation": true,
+                      "visibleWhen": {
+                        "field": "status",
+                        "values": [
+                          "aktiv"
+                        ]
+                      }
+                    }
+                  ],
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Kontraktabrechnung",
+          "variant": {
+            "family": "kontrakt",
+            "id": "abrechnung"
+          }
+        },
+        "patchHash": "e9d266d6c5e3b2fa02bda6bc06665cfd32e456d6b14496380010a64a8cb7c44d"
+      }
+    },
+    "erfuellung": {
+      "1.0.0": {
+        "baseHash": "2960a83352234b83e62f4c0ba8cf5a97cf451c8b5320f7cc994598f4ff457dd9",
+        "baseVersion": "1.0.0",
+        "definitionHash": "d6ef450c52f7f3591ec7aa005a20499a2bcc3c381777e3b5fd485d1ceb7d6c4b",
+        "patch": {
+          "actions": [
+            {
+              "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+              "dangerLevel": "moderate",
+              "inputFields": [
+                {
+                  "key": "text",
+                  "label": "Mahntext",
+                  "type": "textarea"
+                }
+              ],
+              "key": "mahnen",
+              "kind": "primary",
+              "label": "Mahnen",
+              "method": "POST",
+              "permission": "kontrakt.update",
+              "requiresConfirmation": true,
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Kontraktfixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontraktfixierung desselben Kontrakts.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Kontraktabrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontraktabrechnung desselben Kontrakts.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt/erfuellung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Erfuellungsstand eines Kontrakts pruefen, Luecken sehen und ueberfaellige Kontrakte mahnen.",
+            "examplePrompts": [
+              "Wie viel ist von Kontrakt K-1001 noch offen?",
+              "Mahne Kontrakt K-1001."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "primaryAction": "[data-testid='action-mahnen']",
+              "screenRoot": "[data-testid='kontrakt-erfuellung']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/positionen",
+              "key": "positionen",
+              "pageSize": 200
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/luecken",
+              "key": "luecken",
+              "pageSize": 200
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/mahnungen",
+              "key": "mahnungen",
+              "pageSize": 200
+            }
+          ],
+          "id": "kontrakt/erfuellung",
+          "layout": {
+            "columnNavigation": "single",
+            "contextRail": "combined",
+            "density": "compact",
+            "floorplan": "objectPage",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "sectionNavigation": "anchors",
+            "stickyFooter": true,
+            "stickyHeader": true,
+            "summaryPlacement": "header",
+            "tableProfile": "inventory",
+            "touchTargetPx": 44
+          },
+          "summary": [
+            {
+              "key": "abgerufen",
+              "label": "Abgerufen",
+              "tone": "neutral"
+            },
+            {
+              "key": "offen",
+              "label": "Offen",
+              "tone": "warning"
+            },
+            {
+              "key": "erfuellung_pct",
+              "label": "Erfüllung %",
+              "tone": "neutral"
+            },
+            {
+              "key": "offene_luecken",
+              "label": "Lücken",
+              "tone": "warning"
+            }
+          ],
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "contract_type",
+                  "label": "Art",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "valid_from",
+                  "label": "Gültig ab",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "preismodell",
+                  "label": "Preismodell",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "basis",
+                  "label": "Basis",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "praemie_wert",
+                  "label": "Prämie",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "menge_kontrakt",
+                  "label": "Kontrahiert",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "abgerufen",
+                  "label": "Abgerufen",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "offen",
+                  "label": "Offen",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "key": "erfuellung_pct",
+                  "label": "Erfüllung %",
+                  "readOnly": true,
+                  "type": "number"
+                },
+                {
+                  "key": "erfuellung_status",
+                  "label": "Erfüllungsstand",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "ueberfaellig",
+                  "label": "Überfällig",
+                  "readOnly": true,
+                  "type": "checkbox"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Kontrakt",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "position_no",
+                      "label": "Pos.",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel",
+                      "label": "Artikel",
+                      "priority": "primary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bezeichnung",
+                      "label": "Bezeichnung",
+                      "priority": "secondary",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge_kontrakt",
+                      "label": "Kontrahiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "abgerufen",
+                      "label": "Abgerufen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "key": "erfuellung_pct",
+                      "label": "Erfüllung",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "percentage",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "erfuellung_status",
+                      "label": "Stand",
+                      "priority": "primary",
+                      "renderKind": "status",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "abweichung",
+                      "label": "Übermenge",
+                      "priority": "secondary",
+                      "renderKind": "boolean"
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "luecken",
+              "label": "Lücken",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "filterable": true,
+                      "key": "schwere",
+                      "label": "Schwere",
+                      "priority": "primary",
+                      "renderKind": "status",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "text",
+                      "label": "Hinweis",
+                      "priority": "primary",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "luecken",
+                  "key": "luecken",
+                  "label": "Lücken",
+                  "pageSize": 50,
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "mahnungen",
+              "label": "Mahnungen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "mahnstufe",
+                      "label": "Stufe",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "displayUnit": "dt",
+                      "key": "offen",
+                      "label": "Offen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "filterable": true,
+                      "key": "text",
+                      "label": "Text",
+                      "priority": "secondary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bediener",
+                      "label": "Bediener",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "priority": "primary",
+                      "renderKind": "date",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "mahnungen",
+                  "key": "mahnungen",
+                  "label": "Mahnungen",
+                  "pageSize": 50,
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Kontrakterfüllung",
+          "variant": {
+            "family": "kontrakt",
+            "id": "erfuellung"
+          }
+        },
+        "patchHash": "a3b91200fd71ec47f6fb7b878f4a6858bdf88e13f0dc93eb07661e36370ef065"
+      }
+    },
+    "fixierung": {
+      "1.0.0": {
+        "baseHash": "2960a83352234b83e62f4c0ba8cf5a97cf451c8b5320f7cc994598f4ff457dd9",
+        "baseVersion": "1.0.0",
+        "definitionHash": "f6c4aa13bff20503a7981f2468aa1cc8fc63d65d3faac6831d66ef3ae34b27e6",
+        "patch": {
+          "actions": [
+            {
+              "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren",
+              "dangerLevel": "moderate",
+              "inputFields": [
+                {
+                  "helpText": "Pflicht bei mehreren Positionen.",
+                  "key": "position",
+                  "label": "Position (Nr.)",
+                  "type": "text"
+                },
+                {
+                  "key": "menge",
+                  "label": "Menge (Kontrakteinheit)",
+                  "required": true,
+                  "type": "number"
+                },
+                {
+                  "key": "matif_preis",
+                  "label": "MATIF-Preis je t",
+                  "required": true,
+                  "type": "currency"
+                },
+                {
+                  "helpText": "Leer = Prämie des Kontrakts.",
+                  "key": "praemie",
+                  "label": "Prämie je t",
+                  "type": "currency"
+                },
+                {
+                  "key": "matif_referenz",
+                  "label": "MATIF-Referenz",
+                  "type": "text"
+                },
+                {
+                  "key": "notiz",
+                  "label": "Notiz",
+                  "type": "textarea"
+                }
+              ],
+              "key": "fixieren",
+              "kind": "primary",
+              "label": "Fixieren",
+              "method": "POST",
+              "permission": "kontrakt.update",
+              "requiresConfirmation": true,
+              "zone": "header"
+            },
+            {
+              "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen",
+              "dangerLevel": "low",
+              "inputFields": [
+                {
+                  "key": "symbol",
+                  "label": "Symbol",
+                  "required": true,
+                  "type": "text"
+                },
+                {
+                  "key": "preis",
+                  "label": "Preis je t",
+                  "required": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "datum",
+                  "label": "Datum",
+                  "type": "date"
+                }
+              ],
+              "key": "notierung_erfassen",
+              "kind": "secondary",
+              "label": "Notierung erfassen",
+              "method": "POST",
+              "permission": "kontrakt.update",
+              "requiresConfirmation": false,
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Kontrakterfüllung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontrakterfüllung desselben Kontrakts.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Kontraktabrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+              "stubReason": "Wechselt zur Variante Kontraktabrechnung desselben Kontrakts.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt/fixierung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Teilmengen eines MATIF-Kontrakts fixieren, Notierungen erfassen und Fixierungen stornieren.",
+            "examplePrompts": [
+              "Fixiere 50 t von K-1001 zu 215 EUR/t.",
+              "Welche Fixierungen hat K-1001?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "primaryAction": "[data-testid='action-fixieren']",
+              "screenRoot": "[data-testid='kontrakt-fixierung']",
+              "summaryArea": "[data-testid='mask-summary']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}",
+              "key": "entity"
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/positionen",
+              "key": "positionen",
+              "pageSize": 200
+            },
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/{entity_id}/fixierungen",
+              "key": "fixierungen",
+              "pageSize": 200
+            }
+          ],
+          "id": "kontrakt/fixierung",
+          "layout": {
+            "columnNavigation": "single",
+            "contextRail": "combined",
+            "density": "compact",
+            "floorplan": "objectPage",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "sectionNavigation": "anchors",
+            "stickyFooter": true,
+            "stickyHeader": true,
+            "summaryPlacement": "header",
+            "tableProfile": "inventory",
+            "touchTargetPx": 44
+          },
+          "summary": [
+            {
+              "key": "fixiert",
+              "label": "Fixiert",
+              "tone": "neutral"
+            },
+            {
+              "key": "offen_zu_fixieren",
+              "label": "Offen zu fixieren",
+              "tone": "warning"
+            },
+            {
+              "key": "fixierungsgrad_pct",
+              "label": "Fixierungsgrad %",
+              "tone": "neutral"
+            },
+            {
+              "key": "bewertung_fixiert_eur",
+              "label": "Bewertung fixiert (EUR)",
+              "tone": "neutral"
+            }
+          ],
+          "tabs": [
+            {
+              "dataSourceKey": "entity",
+              "fields": [
+                {
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "contract_type",
+                  "label": "Art",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "label": "Status",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "valid_from",
+                  "label": "Gültig ab",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "readOnly": true,
+                  "type": "date"
+                },
+                {
+                  "key": "preismodell",
+                  "label": "Preismodell",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "basis",
+                  "label": "Basis",
+                  "readOnly": true,
+                  "type": "text"
+                },
+                {
+                  "key": "praemie_wert",
+                  "label": "Prämie",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "menge_kontrakt",
+                  "label": "Kontrahiert",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "fixiert",
+                  "label": "Fixiert",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "offen_zu_fixieren",
+                  "label": "Offen zu fixieren",
+                  "readOnly": true,
+                  "type": "number",
+                  "unitField": "einheit"
+                },
+                {
+                  "key": "fixierungsgrad_pct",
+                  "label": "Fixierungsgrad %",
+                  "readOnly": true,
+                  "type": "number"
+                },
+                {
+                  "key": "bewertung_fixiert_eur",
+                  "label": "Bewertung fixiert",
+                  "readOnly": true,
+                  "type": "currency"
+                },
+                {
+                  "key": "marktwert_offen_eur",
+                  "label": "Marktwert offen",
+                  "readOnly": true,
+                  "type": "currency"
+                }
+              ],
+              "keepAlive": true,
+              "key": "kopf",
+              "label": "Kontrakt",
+              "lazy": false
+            },
+            {
+              "keepAlive": false,
+              "key": "positionen",
+              "label": "Positionen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "position_no",
+                      "label": "Pos.",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "artikel",
+                      "label": "Artikel",
+                      "priority": "primary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "is_matif",
+                      "label": "MATIF",
+                      "priority": "secondary",
+                      "renderKind": "boolean"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge_kontrakt",
+                      "label": "Kontrahiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "fixiert",
+                      "label": "Fixiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "offen_zu_fixieren",
+                      "label": "Offen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "key": "fixierungsgrad_pct",
+                      "label": "Fixierungsgrad",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "percentage",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "avg_fixpreis_effektiv",
+                      "label": "Ø Fixpreis",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "symbol",
+                      "label": "Symbol",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "markt_effektiv",
+                      "label": "Markt effektiv",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "key": "bewertung_fixiert_eur",
+                      "label": "Bewertung fixiert",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "key": "marktwert_offen_eur",
+                      "label": "Marktwert offen",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "positionen",
+                  "key": "positionen",
+                  "label": "Positionen",
+                  "pageSize": 50,
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            },
+            {
+              "keepAlive": false,
+              "key": "fixierungen",
+              "label": "Fixierungen",
+              "lazy": true,
+              "tables": [
+                {
+                  "columns": [
+                    {
+                      "key": "fixing_no",
+                      "label": "Nr.",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "key": "position_no",
+                      "label": "Pos.",
+                      "numeric": true,
+                      "priority": "secondary",
+                      "renderKind": "number",
+                      "sortable": true
+                    },
+                    {
+                      "aggregate": "sum",
+                      "displayUnit": "dt",
+                      "key": "menge",
+                      "label": "Menge",
+                      "numeric": true,
+                      "priority": "primary",
+                      "renderKind": "quantity",
+                      "sortable": true,
+                      "unitField": "einheit"
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "matif_price",
+                      "label": "MATIF",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "praemie",
+                      "label": "Prämie",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "displayPricePer": "dt",
+                      "key": "effektiv_preis",
+                      "label": "Effektiv",
+                      "numeric": true,
+                      "pricePer": "t",
+                      "priority": "primary",
+                      "renderKind": "currency",
+                      "sortable": true
+                    },
+                    {
+                      "key": "datum",
+                      "label": "Datum",
+                      "priority": "secondary",
+                      "renderKind": "date",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "referenz",
+                      "label": "Referenz",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "status",
+                      "label": "Status",
+                      "priority": "primary",
+                      "renderKind": "status",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "bediener",
+                      "label": "Bediener",
+                      "priority": "tertiary",
+                      "sortable": true
+                    },
+                    {
+                      "filterable": true,
+                      "key": "storno_grund",
+                      "label": "Storno-Grund",
+                      "priority": "tertiary",
+                      "sortable": true
+                    }
+                  ],
+                  "dataSourceKey": "fixierungen",
+                  "key": "fixierungen",
+                  "label": "Fixierungen",
+                  "pageSize": 50,
+                  "rowActions": [
+                    {
+                      "auditReasonRequired": true,
+                      "commandEndpoint": "/api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren",
+                      "dangerLevel": "critical",
+                      "forbiddenForAgents": true,
+                      "key": "stornieren",
+                      "label": "Stornieren",
+                      "method": "POST",
+                      "permission": "kontrakt.update",
+                      "requiresConfirmation": true,
+                      "visibleWhen": {
+                        "field": "status",
+                        "values": [
+                          "aktiv"
+                        ]
+                      }
+                    }
+                  ],
+                  "rowHeight": 40,
+                  "serverPagination": false,
+                  "virtualized": true
+                }
+              ]
+            }
+          ],
+          "title": "Kontraktfixierung",
+          "variant": {
+            "family": "kontrakt",
+            "id": "fixierung"
+          }
+        },
+        "patchHash": "d8f933f6502b1cc7ae1226c23922f1a4d633d4fdeadb51fe4c3b351e7473b865"
+      }
+    }
+  }
+}

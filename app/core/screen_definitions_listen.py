@@ -225,52 +225,6 @@ def build_einkauf_lieferanten_liste() -> dict[str, Any]:
 
 
 
-def build_einkauf_bestellungen_liste() -> dict[str, Any]:
-    """Bestellungen aus derselben Quelle wie die Objektmaske ``einkauf/purchase-order``."""
-    pfad = "/api/v1/einkauf/bestellungen/{entity_id}/actions/"
-    return _liste(
-        screen_id="einkauf/bestellungen", domain="einkauf", title="Bestellungen", subtitle="Bestellungen an Lieferanten",
-        endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
-        columns=[
-            {"key": "bestellnummer", "label": "Bestellnr.", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "lieferant_name", "label": "Lieferant", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "bestelldatum", "label": "Bestellt am", "renderKind": "date", "sortable": True,
-             "priority": "secondary"},
-            {"key": "lieferdatum_wunsch", "label": "Liefertermin", "renderKind": "date", "sortable": True,
-             "priority": "secondary"},
-            {"key": "netto_summe", "label": "Netto", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "secondary"},
-            {"key": "positionen_anz", "label": "Positionen", "numeric": True, "priority": "tertiary"},
-            {"key": "versandt_am", "label": "Versandt am", "renderKind": "date", "sortable": True,
-             "priority": "tertiary"},
-        ],
-        actions=[_neu("Neue Bestellung", "/einkauf/bestellungen/neu"), _EXPORT],
-        row_actions=[
-            {"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
-             "permission": "einkauf.bestellung.approve", "commandEndpoint": pfad + "freigeben", "method": "POST",
-             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": _status("ENTWURF", "DRAFT")},
-            {"key": "versenden", "label": "Versenden", "dangerLevel": "moderate",
-             "permission": "einkauf.bestellung.send", "commandEndpoint": pfad + "versenden", "method": "POST",
-             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": _status("ENTWURF", "FREIGEGEBEN", "VERSANDT")},
-            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "high",
-             "permission": "einkauf.bestellung.cancel", "commandEndpoint": pfad + "stornieren", "method": "POST",
-             "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": _status("ENTWURF", "DRAFT", "FREIGEGEBEN", "VERSANDT", "TEILGELIEFERT")},
-        ],
-        dangerous=[
-            {"key": "freigeben", "reason": "Gibt die Bestellung frei und bucht das Obligo; nur Mensch."},
-            {"key": "versenden", "reason": "Sendet die Bestellung an den Lieferanten; nur Mensch."},
-            {"key": "stornieren", "reason": "Storniert eine Bestellung; nur Mensch mit Begruendung."},
-        ],
-        purpose="Bestellungen an Lieferanten finden, freigeben, versenden und stornieren.",
-        prompts=["Welche Bestellungen sind noch Entwurf?", "Welche Liefertermine sind ueberfaellig?"],
-        no_workflow="Der Status steht an der Bestellung; die Liste fuehrt keinen eigenen Ablauf.",
-    )
-
-
 
 def build_agrar_saatgut_liste() -> dict[str, Any]:
     """Saatgut-Stammdaten; Zeile oeffnet die native Objektmaske ``agrar/saatgut``."""
@@ -1318,159 +1272,8 @@ def build_crm_betriebsprofile_liste() -> dict[str, Any]:
     )
 
 
-def build_sales_angebote_liste() -> dict[str, Any]:
-    columns = [
-        {"key": "offer_number", "label": "Angebot-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
-        {"key": "created_at", "label": "Datum", "renderKind": "date", "sortable": True, "filterable": True, "priority": "secondary"},
-        {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
-        {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
-        {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "currencyField": "currency", "sortable": True, "priority": "primary"},
-        {"key": "currency", "label": "Währung", "priority": "secondary"},
-        {"key": "valid_until", "label": "Gültig bis", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-    ]
-    definition = _liste(screen_id="sales/angebote-liste", domain="sales", title="Verkaufsangebote",
-        subtitle="Angebote mit Kunde, Betrag und Gültigkeit", endpoint="/api/v1/sales/offers/",
-        row_route="/sales/angebot/{id}", bundle="sales", columns=columns,
-        actions=[_neu("Neues Angebot", "/sales/angebot/neu"), _EXPORT,
-                 {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print"},
-                 {"key": "import_csv", "label": "CSV importieren", "permission": "sales.offer.import_csv", "dangerLevel": "moderate", "zone": "header",
-                  "commandEndpoint": "/api/v1/sales/offers/actions/import-csv", "method": "POST",
-                  "requiresConfirmation": True, "requiresIdempotencyKey": True, "forbiddenForAgents": True,
-                  "inputFields": [{"key": "csv_content", "label": "CSV-Datei", "type": "file", "required": True,
-                                   "helpText": "UTF-8, Semikolon; Pflichtkopf: offer_number;subject;customer_id;total_amount;currency. Optional: valid_until (ISO-Datum). Alle Zeilen werden gemeinsam importiert.",
-                                   "fileContent": {"encoding": "utf-8", "accept": [".csv"], "maxBytes": 1048576}}]}],
-        row_actions=[], purpose="Verkaufsangebote nach Kunde und Status verfolgen.",
-        prompts=["Welche Angebote laufen diese Woche ab?", "Welche Angebote sind offen?"],
-        no_workflow="Der Status steht am Angebot; die Liste führt keinen eigenen Ablauf.")
-    definition["listExperience"] = {
-        "searchFields": ["offer_number", "customer_name"],
-        "presets": [{"key": "status", "label": "Status", "field": "status", "kind": "choice",
-                     "options": [{"value": "all", "label": "Alle Status"}, {"value": "offen", "label": "Offen"},
-                                 {"value": "angenommen", "label": "Angenommen"}, {"value": "abgelehnt", "label": "Abgelehnt"},
-                                 {"value": "abgelaufen", "label": "Abgelaufen"}]}],
-        "aggregates": [{"key": "total", "label": "Angebote", "conditions": []},
-                       {"key": "open", "label": "Offen", "conditions": [{"field": "status", "op": "eq", "value": "offen"}]}],
-        "export": {"filenamePrefix": "Angebote_", "delimiter": ";", "columns": [{"key": c["key"], "label": c["label"]} for c in columns]},
-        "insightLines": [{"key": "sales", "label": "Vertrieb", "variants": [{"text": "{open} offene Angebote in der aktuellen Sicht."}]},
-                         {"key": "management", "label": "Leitung", "variants": [{"text": "{total} Angebote in der aktuellen Sicht."}]}],
-        "roleFocus": {"defaultKey": "all", "options": [{"key": "all", "label": "Alle Rollen"},
-            {"key": "sales", "label": "Vertrieb", "insightLineKeys": ["sales"]},
-            {"key": "inside-sales", "label": "Innendienst", "insightLineKeys": ["sales"]},
-            {"key": "order-desk", "label": "Auftragsabwicklung", "insightLineKeys": ["sales"]},
-            {"key": "finance", "label": "Finance", "insightLineKeys": ["management"]},
-            {"key": "management", "label": "Leitung", "insightLineKeys": ["management"]}]},
-    }
-    return definition
 
 
-def build_sales_auftraege_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="sales/auftraege-liste", domain="sales", title="Verkaufsauftraege",
-        subtitle="Auftraege mit Kunde, Betrag und Lieferstatus", endpoint="/api/v1/sales/orders/",
-        row_route="/sales/sales-order/{id}", bundle="sales",
-        columns=[
-            {"key": "order_number", "label": "Auftrag-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
-            {"key": "subject", "label": "Betreff", "filterable": True, "priority": "secondary"},
-            {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "primary"},
-            {"key": "delivery_date", "label": "Liefertermin", "renderKind": "date", "sortable": True,
-             "priority": "secondary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Neuer Auftrag", "/sales/order-editor"), _EXPORT],
-        row_actions=[],
-        purpose="Verkaufsauftraege nach Kunde und Lieferstatus steuern.",
-        prompts=["Welche Auftraege sind noch offen?", "Welche Auftraege warten auf Lieferung?"],
-        no_workflow="Der Status steht am Auftrag; die Liste fuehrt keinen eigenen Ablauf.",
-    )
-
-
-def build_sales_lieferungen_liste() -> dict[str, Any]:
-    columns = [
-        {"key": "delivery_note_number", "label": "Lieferschein-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
-        {"key": "delivery_date", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        {"key": "customer_name", "label": "Kunde", "filterable": True, "priority": "primary"},
-        {"key": "customer_id", "label": "Kundenreferenz", "filterable": True, "priority": "secondary"},
-        {"key": "sales_order_number", "label": "Auftrag", "filterable": True, "priority": "primary"},
-        {"key": "sales_order_id", "label": "Auftragsreferenz", "filterable": True, "priority": "secondary"},
-        {"key": "quantity_summary", "label": "Mengen nach Einheit", "priority": "secondary"},
-        {"key": "status", "label": "Belegstatus", "renderKind": "status", "filterable": True, "priority": "primary"},
-        {"key": "is_delivered", "label": "Zugestellt", "renderKind": "boolean", "filterable": True, "priority": "secondary"},
-    ]
-    definition = _liste(
-        screen_id="sales/lieferungen-liste", domain="sales", title="Lieferscheine",
-        subtitle="Ausgehende Lieferungen und Belegstatus", endpoint="/api/v1/sales/delivery-notes?limit=100",
-        row_route="/sales/delivery-editor?id={id}", bundle="sales", columns=columns,
-        actions=[_neu("Lieferschein erfassen", "/sales/delivery-editor"), _EXPORT,
-                 {"key": "print", "label": "Drucken", "dangerLevel": "safe", "zone": "header", "localEffect": "print"}],
-        row_actions=[{"key": "auftrag_oeffnen", "label": "Auftrag öffnen", "dangerLevel": "low",
-                      "navigationRoute": "/sales/order-editor?id={sales_order_id}", "localEffect": "navigation",
-                      "visibleWhen": {"field": "has_sales_order", "values": [True]}}],
-        purpose="Lieferscheine und ihren dokumentierten Status nachverfolgen.",
-        prompts=["Welche Lieferscheine sind offen?", "Welche Lieferungen sind zugestellt?"],
-        no_workflow="Der Belegstatus ist kein Transportstatus.",
-    )
-    definition["listExperience"] = {
-        "searchFields": ["delivery_note_number", "customer_name", "customer_id", "sales_order_number", "sales_order_id"],
-        "presets": [{"key": "status", "label": "Belegstatus", "field": "status", "kind": "choice",
-                     "options": [{"value": "all", "label": "Alle Status"}, {"value": "draft", "label": "Entwurf"},
-                                 {"value": "posted", "label": "Gebucht"}, {"value": "printed", "label": "Gedruckt"},
-                                 {"value": "delivered", "label": "Zugestellt"}, {"value": "cancelled", "label": "Storniert"}]}],
-        "aggregates": [{"key": "total", "label": "Lieferscheine", "conditions": []},
-                       {"key": "draft", "label": "Entwürfe", "conditions": [{"field": "status", "op": "eq", "value": "draft"}]},
-                       {"key": "delivered", "label": "Zugestellt", "conditions": [{"field": "is_delivered", "op": "eq", "value": "true"}]}],
-        "export": {"filenamePrefix": "Lieferungen_", "delimiter": ";", "columns": [{"key": c["key"], "label": c["label"]} for c in columns]},
-        "insightLines": [{"key": "status", "label": "Stand", "variants": [{"text": "{total} Lieferscheine in der aktuellen Sicht; {draft} Entwürfe und {delivered} als zugestellt markiert."}]},
-                         {"key": "shipping", "label": "Versand", "variants": [{"text": "Der Belegstatus belegt keinen Transportstatus."}]}],
-        "roleFocus": {"defaultKey": "all", "options": [{"key": "all", "label": "Alle Rollen"},
-            {"key": "shipping", "label": "Versand", "insightLineKeys": ["shipping", "status"]},
-            {"key": "sales", "label": "Vertrieb", "insightLineKeys": ["status"]},
-            {"key": "logistics", "label": "Logistik", "insightLineKeys": ["shipping"]},
-            {"key": "billing", "label": "Faktura", "insightLineKeys": ["status"]},
-            {"key": "management", "label": "Leitung", "insightLineKeys": ["status", "shipping"]}]},
-    }
-    return definition
-
-
-def build_einkauf_rechnungseingaenge_liste() -> dict[str, Any]:
-    pfad = "/api/v1/einkauf/rechnungseingaenge/{entity_id}/"
-    return _liste(
-        screen_id="einkauf/rechnungseingaenge-liste", domain="einkauf", title="Rechnungseingaenge",
-        subtitle="Eingangsrechnungen vor Freigabe und Verbuchung", endpoint="/api/v1/einkauf/rechnungseingaenge",
-        row_route="/belege/purchase_invoice/{id}", bundle="einkauf",
-        columns=[
-            {"key": "rechnungsNummer", "label": "Rechnung-Nr.", "sortable": True, "filterable": True,
-             "priority": "primary"},
-            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
-            {"key": "rechnungsDatum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-            {"key": "bruttoBetrag", "label": "Betrag", "numeric": True, "renderKind": "currency", "sortable": True,
-             "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-        ],
-        actions=[_neu("Rechnungseingang erfassen", "/einkauf/rechnungseingang/neu"), _EXPORT],
-        row_actions=[
-            {"key": "pruefen", "label": "Pruefen", "dangerLevel": "safe", "permission": "einkauf.rechnungseingang.pruefen",
-             "commandEndpoint": pfad + "pruefen", "method": "POST", "requiresConfirmation": True,
-             "visibleWhen": _status("OFFEN", "ERFASST", "ENTWURF")},
-            {"key": "freigeben", "label": "Freigeben", "dangerLevel": "moderate",
-             "permission": "einkauf.rechnungseingang.freigeben", "commandEndpoint": pfad + "freigeben", "method": "POST",
-             "requiresConfirmation": True, "humanApprovalRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": _status("GEPRUEFT", "OFFEN")},
-            {"key": "verbuchen", "label": "Verbuchen", "dangerLevel": "high", "permission": "einkauf.rechnungseingang.verbuchen",
-             "commandEndpoint": pfad + "verbuchen", "method": "POST", "requiresConfirmation": True,
-             "auditReasonRequired": True, "forbiddenForAgents": True,
-             "visibleWhen": _status("FREIGEGEBEN", "GEPRUEFT")},
-        ],
-        dangerous=[
-            {"key": "freigeben", "reason": "Gibt eine Eingangsrechnung zur Verbuchung frei; nur Mensch."},
-            {"key": "verbuchen", "reason": "Verbucht eine Eingangsrechnung in der FIBU; nur Mensch mit Begruendung."},
-        ],
-        purpose="Eingangsrechnungen vor Pruefung und Verbuchung finden.",
-        prompts=["Welche Rechnungen warten auf Freigabe?", "Welche Eingangsrechnungen sind offen?"],
-        no_workflow="Der Status steht an der Rechnung; die Liste fuehrt keinen eigenen Ablauf.",
-    )
 
 
 def build_service_anfragen_liste() -> dict[str, Any]:
@@ -1761,22 +1564,6 @@ def build_kontrakte_kontraktklassen_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
-def build_kontrakte_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="kontrakte/liste", domain="agrar", title="Kontrakte", subtitle="Einkaufs- und Verkaufskontrakte",
-        endpoint="/api/v1/kontrakte", row_route="/kontrakte/{id}", bundle="agrar",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_neu("Neuer Kontrakt", "/kontrakte/neu"), _EXPORT],
-        row_actions=[],
-        purpose="Kontrakte: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Kontrakte?", "Zeige aktuelle Kontrakte."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
 
 def build_lager_lagerbewegungen_liste() -> dict[str, Any]:
     return _liste(
@@ -1880,22 +1667,6 @@ def build_transporte_fahrer_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
-def build_einkauf_bestellvorschlaege_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="einkauf/bestellvorschlaege-liste", domain="einkauf", title="Bestellvorschlaege", subtitle="Bedarf aus Lager und Verkauf",
-        endpoint="/api/v1/einkauf/bestellvorschlaege", row_route=None, bundle="einkauf",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Bestellvorschlaege: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Bestellvorschlaege?", "Zeige aktuelle Bestellvorschlaege."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
 
 def build_einkauf_frachtauftraege_liste() -> dict[str, Any]:
     return _liste(
@@ -2021,22 +1792,6 @@ def build_finance_audit_trail_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
-def build_finance_ap_invoices_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="finance/ap-invoices-liste", domain="finance", title="AP-Rechnungen", subtitle="Eingangsrechnungen zur Freigabe",
-        endpoint="/api/v1/finance/ap/invoices/", row_route="/belege/purchase_invoice/{id}", bundle="finance",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="AP-Rechnungen: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen AP-Rechnungen?", "Zeige aktuelle AP-Rechnungen."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
 
 def build_finance_payment_matching_liste() -> dict[str, Any]:
     return _liste(
@@ -3236,7 +2991,6 @@ LISTEN_SCREEN_BUILDERS = {
     "einkauf/anlieferavis-liste": build_einkauf_anlieferavis_liste,
     "einkauf/auftragsbestaetigungen": build_einkauf_auftragsbestaetigungen_liste,
     "einkauf/lieferanten": build_einkauf_lieferanten_liste,
-    "einkauf/bestellungen": build_einkauf_bestellungen_liste,
     "agrar/saatgut-liste": build_agrar_saatgut_liste,
     "agrar/duenger-liste": build_agrar_duenger_liste,
     "futtermittel/einzelfuttermittel-liste": build_futtermittel_einzelfuttermittel_liste,
@@ -3276,10 +3030,6 @@ LISTEN_SCREEN_BUILDERS = {
     "qualitaet/labor-liste": build_qualitaet_labor_liste,
     "crm/kontakte-liste": build_crm_kontakte_liste,
     "crm/betriebsprofile-liste": build_crm_betriebsprofile_liste,
-    "sales/angebote-liste": build_sales_angebote_liste,
-    "sales/auftraege-liste": build_sales_auftraege_liste,
-    "sales/lieferungen-liste": build_sales_lieferungen_liste,
-    "einkauf/rechnungseingaenge-liste": build_einkauf_rechnungseingaenge_liste,
     "service/anfragen-liste": build_service_anfragen_liste,
     "compliance/enni-meldungen-liste": build_compliance_enni_meldungen_liste,
     "qualitaet/reklamationen-liste": build_qualitaet_reklamationen_liste,
@@ -3307,7 +3057,6 @@ LISTEN_SCREEN_BUILDERS = {
     "compliance/qs-checkliste-liste": build_compliance_qs_checkliste_liste,
     "crm/aktivitaeten-liste": build_crm_aktivitaeten_liste,
     "crm/leads-liste": build_crm_leads_liste,
-    "einkauf/bestellvorschlaege-liste": build_einkauf_bestellvorschlaege_liste,
     "einkauf/frachtauftraege-liste": build_einkauf_frachtauftraege_liste,
     "fibu/buchungsjournal-liste": build_fibu_buchungsjournal_liste,
     "fibu/kontenplan-liste": build_fibu_kontenplan_liste,
@@ -3315,7 +3064,6 @@ LISTEN_SCREEN_BUILDERS = {
     "fibu/offene-posten-liste": build_fibu_offene_posten_liste,
     "fibu/zahlungseingaenge-liste": build_fibu_zahlungseingaenge_liste,
     "fibu/zahlungslaeufe-liste": build_fibu_zahlungslaeufe_liste,
-    "finance/ap-invoices-liste": build_finance_ap_invoices_liste,
     "finance/audit-trail-liste": build_finance_audit_trail_liste,
     "finance/payment-matching-liste": build_finance_payment_matching_liste,
     "finance/periods-liste": build_finance_periods_liste,
@@ -3324,7 +3072,6 @@ LISTEN_SCREEN_BUILDERS = {
     "fuhrpark/rechnungen-liste": build_fuhrpark_rechnungen_liste,
     "genossenschaft/mitglieder-liste": build_genossenschaft_mitglieder_liste,
     "kontrakte/kontraktklassen-liste": build_kontrakte_kontraktklassen_liste,
-    "kontrakte/liste": build_kontrakte_liste,
     "lager/inventur-liste": build_lager_inventur_liste,
     "lager/lagerbewegungen-liste": build_lager_lagerbewegungen_liste,
     "lager/partiestamm-liste": build_lager_partiestamm_liste,
@@ -3341,7 +3088,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
                 "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
                 "einkauf/lieferanten": "/einkauf/lieferanten",
-                "einkauf/bestellungen": "/einkauf/bestellungen",
                 "agrar/saatgut-liste": "/agrar/saatgut",
                 "agrar/duenger-liste": "/agrar/duenger",
                 "futtermittel/einzelfuttermittel-liste": "/futtermittel/einzelfuttermittel-liste",
@@ -3381,10 +3127,6 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "qualitaet/labor-liste": "/qualitaet/labor-liste",
                 "crm/kontakte-liste": "/crm/kontakte-liste",
                 "crm/betriebsprofile-liste": "/crm/betriebsprofile",
-                "sales/angebote-liste": "/sales/angebote-liste",
-                "sales/auftraege-liste": "/sales/auftraege-liste",
-                "sales/lieferungen-liste": "/sales/lieferungen-liste",
-                "einkauf/rechnungseingaenge-liste": "/einkauf/rechnungseingaenge-liste",
                 "service/anfragen-liste": "/service/anfragen",
                 "compliance/enni-meldungen-liste": "/compliance/enni-meldungen",
                 "qualitaet/reklamationen-liste": "/qualitaet/reklamationen",
@@ -3395,10 +3137,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/feldbuch-massnahmen-liste": "/agrar/feldbuch/massnahmen",
                 "agrar/saatzucht-partien-liste": "/agrar/saatzucht",
                 "einkauf/frachtauftraege-liste": "/einkauf/frachtauftraege-eingang",
-                "finance/ap-invoices-liste": "/finance/ap-invoices-list",
                 "finance/payment-matching-liste": "/finance/payment-matching",
                 "finance/bookings/new": "/finance/bookings/new",
-                "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
                 "dokumente/ablage-liste": "/dokumente/ablage",
                 "vertrag/rahmenvertraege-liste": "/vertrag/rahmenvertraege",
                 "tankstelle/zapfungen-liste": "/tankstelle/zapfungen",
@@ -3464,7 +3204,7 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
                    "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],
                    "einkauf/lieferanten": ["lieferanten", "lieferantenliste", "kreditoren einkauf"],
-                   "einkauf/bestellungen": ["bestellungen", "einkaufsbestellungen", "po"],
+                   "beleg-liste/purchase-order": ["bestellungen", "einkaufsbestellungen", "po"],
                    "agrar/saatgut-liste": ["saatgut", "sorten", "saatgutliste"],
                    "agrar/duenger-liste": ["duenger", "duengemittel", "duengerliste"],
                    "futtermittel/einzelfuttermittel-liste": ["einzelfuttermittel", "futterkatalog", "futtermittel"],
@@ -3499,10 +3239,10 @@ LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "ban
                    "qualitaet/labor-liste": ["laborauftraege", "labor liste", "analysenauftrag"],
                    "crm/kontakte-liste": ["kontakte", "ansprechpartner", "kontaktliste"],
                    "crm/betriebsprofile-liste": ["betriebsprofile", "landwirt", "farm profile"],
-                   "sales/angebote-liste": ["verkaufsangebote", "kundenangebote", "sales offers"],
-                   "sales/auftraege-liste": ["verkaufsauftraege", "kundenauftraege", "sales orders"],
-                   "sales/lieferungen-liste": ["lieferscheine", "auslieferungen", "delivery notes"],
-                   "einkauf/rechnungseingaenge-liste": ["rechnungseingang", "eingangsrechnungen", "ap liste"],
+                   "beleg-liste/sales-offer": ["verkaufsangebote", "kundenangebote", "sales offers"],
+                   "beleg-liste/sales-order": ["verkaufsauftraege", "kundenauftraege", "sales orders"],
+                   "beleg-liste/sales-delivery": ["lieferscheine", "auslieferungen", "delivery notes"],
+                   "beleg-liste/purchase-invoice": ["rechnungseingang", "eingangsrechnungen", "ap liste"],
                    "service/anfragen-liste": ["service", "tickets", "serviceanfragen"],
                    "compliance/enni-meldungen-liste": ["enni", "duengemeldung", "naehrstoffmeldung"],
                    "qualitaet/reklamationen-liste": ["reklamationen", "beanstandungen", "maengel"],

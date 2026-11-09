@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-07
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -137,6 +137,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.partner_klaerfall.neuer_partner` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
 | `crm.partner_klaerfall.zugeordnet` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
+| `crm.vertreterprovision.gruppe_angelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
+| `crm.vertreterprovision.gruppe_stillgelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
+| `crm.vertreterprovision.staffelzeile_angelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf
@@ -209,7 +212,15 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
+| `admin.number_range.configured` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
+| `admin.number_range.deactivated` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
+| `admin.report_permission.created` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.report_permission.deleted` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.report_permission.updated` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.role.created` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
+| `admin.role.deleted` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
+| `admin.role.updated` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
 | `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
@@ -227,6 +238,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
 | `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.bestellvorschlag.bestellt` | outbox | `app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py` |
 | `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
@@ -239,16 +251,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
-| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| … | | 31 weitere |
+| … | | 41 weitere |
 
 ### System
 

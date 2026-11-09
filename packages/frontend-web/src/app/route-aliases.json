@@ -921,6 +921,10 @@
       "path": "crm/vertreterprovisionen"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen-staffeln",
+      "path": "crm/vertreterprovisionen/staffeln"
+    },
+    {
       "module": "@/pages/dashboard/customizable",
       "path": "dashboard/customizable"
     },
@@ -2065,6 +2069,10 @@
       "path": "sales/credit-notes"
     },
     {
+      "module": "@/pages/verkauf/gutschrift-buchungsvorschlaege",
+      "path": "verkauf/gutschrift-buchungsvorschlaege"
+    },
+    {
       "module": "@/pages/verkauf/lieferschein-erfassung",
       "path": "sales/delivery-editor"
     },
@@ -2209,7 +2217,7 @@
       "path": "sales/kalkulationen/neu"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu"
     },
     {
@@ -2287,6 +2295,10 @@
     {
       "module": "@/pages/admin/webshop",
       "path": "admin/webshop"
+    },
+    {
+      "module": "@/pages/admin/webshop-bestellungen",
+      "path": "admin/webshop/bestellungen"
     },
     {
       "module": "@/pages/agrar/erntefenster-konfig",
@@ -3471,6 +3483,22 @@
     {
       "module": "@/pages/fibu/kassenbuch",
       "path": "fibu/kassenbuch"
+    },
+    {
+      "module": "@/pages/kontrakte/vorgang",
+      "path": "kontrakte/vorgang/:variante/:id"
+    },
+    {
+      "module": "@/pages/kontrakte/listen",
+      "path": "kontrakte/listen/:variante"
+    },
+    {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-ansicht",
+      "path": "einkauf/bestellvorschlaege/ansicht/:variante"
     }
   ]
 }

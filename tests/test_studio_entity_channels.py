@@ -89,6 +89,10 @@ def test_signed_http_cli_mcp_share_versioned_sql_command(subject_data, monkeypat
     assert call(token('synthetic-channel-agent','agent',scope=False)).status_code == 403
     assert len(calls) == before  # Scope denied by the real MCP engine before forwarding.
     assert call(token('synthetic-channel-agent','agent',role=False)).status_code == 403
+    # Entwicklungsphase (agent_write_phase, 08.11.2026): Die Rolle prueft der Zielweg, nicht schon das Werkzeug;
+    # abgelehnt wird trotzdem, und geschrieben wird nichts (Version bleibt bis zum berechtigten Aufruf 1).
+    assert len(calls) <= before + 1
+    before = len(calls)
     unconfirmed = copy.deepcopy(request); unconfirmed['parameters']['confirm'] = False
     assert call(agent, unconfirmed).status_code == 422
     assert len(calls) == before

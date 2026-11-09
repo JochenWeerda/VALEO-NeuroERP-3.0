@@ -1,7 +1,6 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { Navigate } from '@/app/routing/typed-router'
 
+/** Alte Seite ohne eigene Maske (screenId unbekannt, nicht verlinkt): fuehrt auf die Erfassung der Erntekampagne. */
 export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="agrar/ernte/neu" testId="screen-agrar/ernte/neu" />
-  )
+  return <Navigate to="/agrar/ernte-kampagne-erfassung" replace />
 }

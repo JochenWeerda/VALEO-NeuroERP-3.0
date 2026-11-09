@@ -74,7 +74,7 @@ export function IntentBar({
       icon: <Receipt className="h-4 w-4" />,
       shortcut: 'R',
       color: 'bg-purple-500 hover:bg-purple-600',
-      action: () => navigate(`/finance/invoices/neu?customerId=${customerId}`),
+      action: () => navigate('/belege/sales_invoice/neu'),
     },
   ]
 
@@ -143,7 +143,7 @@ export function IntentBar({
     } else if (input.startsWith('auftrag') || input.startsWith('order')) {
       navigate(`/sales/auftraege/neu?customerId=${customerId}`)
     } else if (input.startsWith('rechnung') || input.startsWith('invoice')) {
-      navigate(`/finance/invoices/neu?customerId=${customerId}`)
+      navigate('/belege/sales_invoice/neu')
     } else if (input.startsWith('mail') || input.startsWith('email')) {
       if (customerEmail) {
         window.location.href = `mailto:${customerEmail}`

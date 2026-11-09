@@ -13,7 +13,7 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
     const batch3: Array<[string, string]> = [
       ['agrar/biostimulanzien-liste.tsx', 'agrar/biostimulanzien-liste'],
       ['agrar/ernte/liste.tsx', 'agrar/ernte-liste'],
-      ['sales/auftraege-liste.tsx', 'sales/auftraege-liste'],
+      ['sales/auftraege-liste.tsx', 'beleg-liste/sales-order'],
       ['service/anfragen.tsx', 'service/anfragen-liste'],
     ]
     for (const [file, screenId] of batch3) {
@@ -72,13 +72,13 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
     expect(listen).toContain('row_route="/sales/delivery-note/{id}"')
   })
 
-  it('Rechnungseingaenge-Liste nutzt NativeListPage und Beleg-Zeilenroute', () => {
-    expect(read('einkauf/rechnungseingaenge-liste.tsx')).toContain('screenId="einkauf/rechnungseingaenge-liste"')
-    const listen = readFileSync(
-      resolve(__dirname, '../../../../../app/core/screen_definitions_listen.py'),
+  it('Rechnungseingaenge-Liste ist die Eingangsrechnungs-Variante der Belegliste (DocFlow)', () => {
+    expect(read('einkauf/rechnungseingaenge-liste.tsx')).toContain('screenId="beleg-liste/purchase-invoice"')
+    const familie = readFileSync(
+      resolve(__dirname, '../../../../../app/core/screen_definitions_family_beleg_liste.py'),
       'utf8',
     )
-    expect(listen).toContain('row_route="/belege/purchase_invoice/{id}"')
+    expect(familie).toContain('row_route=f"/belege/{belegart}/{{id}}"')
   })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
@@ -102,12 +102,8 @@ describe('Listenfamilien: aktuelles Routeninventar (Quellnachweis)', () => {
     expect(debitoren).toContain('exportToCSV')
   })
 
-  it('Ausgangsrechnungen-Worklist (sales/invoices) zeigt auf Beleg-Detailroute', () => {
-    const sd = readFileSync(
-      resolve(__dirname, '../../../../../app/core/screen_definitions.py'),
-      'utf8',
-    )
-    expect(sd).toContain('"rowRouteTemplate": "/belege/sales_invoice/{id}"')
-    expect(sd).not.toContain('"rowRouteTemplate": "/verkauf/rechnung/{id}"')
+  it('Ausgangsrechnungen-Worklist ist die Rechnungs-Variante der Belegliste (DocFlow)', () => {
+    expect(read('verkauf/rechnungen-worklist.tsx')).toContain('screenId="beleg-liste/sales-invoice"')
+    expect(read('sales/rechnungen-liste.tsx')).toContain('screenId="beleg-liste/sales-invoice"')
   })
 })

@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./wetterwarnung-legacy'))
+/** Wetterwarnungen: Studio-Liste fuer den Betriebsstandort des Mandanten (vorher fest Emden). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="agrar/wetterwarnung" testId="screen-agrar-wetterwarnung" />
+}

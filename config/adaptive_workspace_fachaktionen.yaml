@@ -227,11 +227,11 @@ actions:
     event_out: []
     mcp_tool_id: crm.customer.open
     mask_action_id: null
-    command_endpoint: GET /api/v1/sales/offers
+    command_endpoint: GET /api/v1/belege/sales_offer  # DocFlow einziger Belegspeicher (BELEG-052)
     related_endpoints:
       - POST /api/v1/mcp/tools/call  # crm.customer.open, crm.customer.search
-    screen_id: sales/angebote-liste
-    route_path: /sales/angebote-liste
+    screen_id: beleg-liste/sales-offer
+    route_path: /belege/sales_offer
     follow_up_writes:
       - sales.customer_quote.create
     aliases:
@@ -264,8 +264,8 @@ actions:
         gap: missing_outbox
     mcp_tool_id: null
     mask_action_id: null
-    command_endpoint: POST /api/v1/sales/offers
-    screen_id: sales/angebote/neu
+    command_endpoint: POST /api/v1/docflow/  # Belegmaske beleg/sales-offer, creation docflow.create.v1
+    screen_id: beleg/sales-offer
     route_path: /sales/angebot/neu
     aliases:
       - angebot anlegen
@@ -588,9 +588,9 @@ actions:
     event_out: []
     mcp_tool_id: null
     mask_action_id: null
-    command_endpoint: GET /api/v1/sales/credit-notes
-    screen_id: sales/gutschrift
-    route_path: /sales/credit-notes
+    command_endpoint: GET /api/v1/belege/sales_credit_memo  # DocFlow (BELEG-052)
+    screen_id: beleg-liste/sales-credit-memo
+    route_path: /belege/sales_credit_memo
     follow_up_writes: []
     aliases:
       - sales.credit_note.list
@@ -600,7 +600,7 @@ actions:
       - ausgehende gutschrift
     notes: >
       Frontend catalogId sales.credit_note.list. Uebersicht outgoing unter
-      /sales/credit-notes. Kein Einzelbeleg, kein Prefill. Inbox-Label
+      /belege/sales_credit_memo (DocFlow). Kein Einzelbeleg, kein Prefill. Inbox-Label
       „Zur Übersicht“ bei proposal.direction=outgoing.
 
   - action_id: einkauf.gutschrift.list

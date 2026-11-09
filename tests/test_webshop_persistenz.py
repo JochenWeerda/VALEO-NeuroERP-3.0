@@ -125,26 +125,8 @@ def test_verarbeiten_ohne_zugeordneten_kunden_legt_keinen_auftrag_an(engine, cli
                          {"h": HAUS_A}).scalar() == 0
 
 
-def test_verarbeiten_legt_den_auftrag_fuer_den_kunden_an(engine, client):
-    from sqlalchemy import text
-
-    kunde = str(uuid.uuid4())
-    with engine.begin() as v:
-        v.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, email) "
-                       "VALUES (:i, :h, :n, 'Hof Janssen', 'kunde@example.invalid')"),
-                  {"i": kunde, "h": HAUS_A, "n": f"K-{kunde[:6]}"})
-    kopf = {"X-Tenant-ID": HAUS_A}
-    client.post("/api/v1/webshop/bestellungen/import", headers=kopf,
-                json=[bestellung("WS-MIT", email="Kunde@example.invalid")])
-    antwort = client.post("/api/v1/webshop/bestellungen/WS-MIT/verarbeiten", headers=kopf).json()
-    assert antwort["verarbeitet"] is True, antwort
-    with engine.connect() as v:
-        auftrag = v.execute(text("SELECT customer_id, total_amount FROM domain_crm.sales_orders "
-                                 "WHERE tenant_id = :h AND order_number = :nr"),
-                            {"h": HAUS_A, "nr": antwort["auftrag_nr"]}).mappings().first()
-    assert str(auftrag["customer_id"]) == kunde and float(auftrag["total_amount"]) == 20.0
-    erneut = client.post("/api/v1/webshop/bestellungen/WS-MIT/verarbeiten", headers=kopf).json()
-    assert erneut["auftrag_nr"] == antwort["auftrag_nr"]
+# Verarbeiten -> Auftrag: seit BELEG-052 als DocFlow-Entwurf, geprueft in tests/test_webshop_docflow_auftrag.py
+# (mit Steuerschluessel je Position; ohne ihn bleibt die Bestellung ein Klaerfall).
 
 
 def test_unbekannte_bestellung_ergibt_404(client):

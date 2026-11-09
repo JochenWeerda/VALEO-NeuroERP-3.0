@@ -33,7 +33,6 @@ from app.api.v1.endpoints import (
     sales_blanket_orders,
     credit_management,
     collective_documents,
-    sales_offers,
     docflow,
     warehouses,
     warehouse_wms,
@@ -415,6 +414,8 @@ api_router.include_router(
     tags=["admin", "monitoring"]
 )
 
+from app.api.v1.endpoints import admin_rollen_kommandos  # noqa: E402
+api_router.include_router(admin_rollen_kommandos.router)
 api_router.include_router(
     admin_core.router,
     prefix="/admin",
@@ -445,6 +446,8 @@ api_router.include_router(
     tags=["admin", "settings", "mobile", "routing", "connectors"]
 )
 
+from app.api.v1.endpoints import admin_reporting_kommandos  # noqa: E402
+api_router.include_router(admin_reporting_kommandos.router)
 api_router.include_router(
     admin_reporting.router,
     prefix="/admin",
@@ -515,19 +518,9 @@ api_router.include_router(
     tags=["sales", "collective-documents"]
 )
 
-api_router.include_router(
-    sales_offers.router,
-    prefix="/sales/offers",
-    tags=["sales", "offers"]
-)
-
-# Die Angebotsmaske spricht /sales/quotations — der Beleg heisst intern offer.
-api_router.include_router(
-    sales_offers.router,
-    prefix="/sales/quotations",
-    tags=["sales", "quotations"],
-    include_in_schema=False,
-)
+# Angebote: DocFlow einziger Belegspeicher (BELEG-052, 09.11.2026); /sales/offers und /sales/quotations entfallen.
+from app.api.v1.endpoints import beleg_import  # noqa: E402
+api_router.include_router(beleg_import.router)
 
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
 from .endpoints import scan as scan_module
@@ -565,8 +558,11 @@ api_router.include_router(
 
 api_router.include_router(
     sales_credit_notes.router,
-    tags=["sales", "credit-notes", "returns"]
+    tags=["sales", "returns"]
 )
+# Gutschrift-Buchungsvorschlaege (Agent schlaegt vor, Mensch gibt frei); die Gutschrift selbst liegt in DocFlow.
+from app.api.v1.endpoints import gutschrift_vorschlaege  # noqa: E402
+api_router.include_router(gutschrift_vorschlaege.router)
 
 api_router.include_router(
     sales_reports.router,
@@ -1073,6 +1069,11 @@ api_router.include_router(
     tags=["belege"]
 )
 
+# Beleg versenden (PDF per E-Mail, BELEG-052 Stufe 2b); eigener Router, Pfad /belege/{art}/{id}/actions/versenden
+from app.api.v1.endpoints import beleg_versand  # noqa: E402
+
+api_router.include_router(beleg_versand.router)
+
 from app.api.v1.endpoints import docflow_evidence  # noqa: E402
 
 api_router.include_router(
@@ -1244,6 +1245,11 @@ api_router.include_router(
     contract_settlement.router,
     tags=["contracts", "kontrakte", "agrar"]
 )
+
+# Kontrakt-Vorgang: Lese- und Kommandowege der Maskenfamilien kontrakt / kontrakt-liste (08.11.2026)
+from app.api.v1.endpoints import kontrakt_vorgang  # noqa: E402
+
+api_router.include_router(kontrakt_vorgang.router)
 
 from app.api.v1.endpoints import kaeufergruppe as kaeufergruppe_ep  # noqa: E402
 
@@ -1551,6 +1557,8 @@ api_router.include_router(
     tags=["crm", "business-partners"]
 )
 
+from app.api.v1.endpoints import number_ranges_kommandos  # noqa: E402
+api_router.include_router(number_ranges_kommandos.router)
 api_router.include_router(
     number_ranges.router,
     prefix="/admin/number-ranges",
@@ -1741,6 +1749,11 @@ api_router.include_router(
     einkauf_bestellvorschlag.router,
     tags=["einkauf", "bestellvorschlag", "kontrakte", "lager-konten"]
 )
+
+# Bestellvorschlag als Fachaktion (berechnen und speichern, zu Bestellung in DocFlow) - Familie bestellvorschlag
+from app.api.v1.endpoints import einkauf_bestellvorschlag_kommandos  # noqa: E402
+
+api_router.include_router(einkauf_bestellvorschlag_kommandos.router)
 
 api_router.include_router(
     purchase_invoice_verification.router,
@@ -1972,6 +1985,11 @@ from app.api.v1.endpoints import finance_stammdaten_kommandos  # noqa: E402  # Z
 api_router.include_router(finance_stammdaten_kommandos.router)
 from app.api.v1.endpoints import crm_listen_kommandos  # noqa: E402  # Zeilenaktionen der CRM-Listen
 api_router.include_router(crm_listen_kommandos.router)
+
+# Partnerstamm-Pflege der Studio-Maske crm/customer-360 (Anschriften, Ansprechpartner, CPD, Rabatte, Preise, Anweisungen)
+from app.api.v1.endpoints import kunden_stamm_pflege  # noqa: E402
+
+api_router.include_router(kunden_stamm_pflege.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
@@ -2262,6 +2280,8 @@ api_router.include_router(periodische_buchungen.router)
 # Fachliche Vertiefung Wave 12
 api_router.include_router(zu_abschlaggruppen.router)
 api_router.include_router(vertreterprovisionen.router)
+from app.api.v1.endpoints import vertreterprovisionen_kommandos  # noqa: E402
+api_router.include_router(vertreterprovisionen_kommandos.router)
 
 # Fachliche Vertiefung Wave 13
 api_router.include_router(fibu_stammdaten.router)
@@ -2291,6 +2311,8 @@ register_command_mutations()
 register_finance_command_mutations()
 
 # Wave 105 — Integration stubs
+from app.api.v1.endpoints import webshop_kommandos  # noqa: E402
+api_router.include_router(webshop_kommandos.router)  # vor webshop_integration: /bestellungen/liste
 api_router.include_router(webshop_integration.router, tags=["webshop", "integration"])
 api_router.include_router(atlas_zollausfuhr.router, tags=["zoll", "atlas", "customs"])
 api_router.include_router(saatzucht.router, tags=["saatzucht", "agrar", "saatgut"])

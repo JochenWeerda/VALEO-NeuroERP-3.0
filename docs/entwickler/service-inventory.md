@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-07
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -48,6 +48,9 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
+| `beleg_anlage` | Belege aus Fachwegen anlegen: immer in DocFlow (BELEG-052 Stufe 3, Nutzerentscheidung 08.11.2026). |
+| `beleg_druck` | Belegdruck: ein PDF je DocFlow-Beleg aus dem Belegvertrag (BELEG-052 Stufe 2b, 09.11.2026). |
+| `beleg_liste` | Belegliste aus DocFlow: eine Quelle fuer Maske (Familie ``beleg-liste``), CLI, MCP (``beleg_suchen``) und REST. |
 | `bestell_kommunikation_service` | Kommunikation zu einer Bestellung — wirklich versendet, am fuehrenden Beleg. |
 | `bewerbung_einwilligung_service` | Erteilen und Widerrufen der Aufbewahrungs-Einwilligung. |
 | `bewerbung_loeschlauf_service` | Der Loeschlauf fuer Bewerberdaten. |
@@ -174,6 +177,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
+| `gutschrift_docflow` | Verkaufsgutschrift in DocFlow (BELEG-052, 09.11.2026: DocFlow einziger Belegspeicher). |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
 | `hr_row_delete_commands` | Versioned, transaction-bound deletion for HR rows; no transport registration. |
 | `hrm_abwesenheit_service` | — |
@@ -231,7 +235,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mcp_studio_authoring` | Studio-Authoring fuer Agenten (MCP/CLI): ein LLM baut Masken nur ueber Studio, nie daran vorbei. |
 | `mcp_studio_plans` | Versioned Studio-authoring capability; only the registered HTTP command writes. |
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
-| `mcp_write_capability` | Explicit registry release for generic MCP writes; all other writes fail closed. |
+| `mcp_write_capability` | Freigabe generischer Agenten-Schreibwege (MCP ``mask.action.execute`` und Kommandowege mit Agentenpruefung). |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |
 | `mobile_sync_service` | MOB-SYNC-001: Mobile Offline-Sync Service. |

@@ -1,7 +1,4 @@
-import { useParams } from '@/app/routing/typed-router'
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default function ApInvoiceNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <UniversalNativeDetailPage screenId="finance/ap-invoice" entityId={id} testId="finance-ap-invoice" />
-}
+/** Belegmaske, Variante `purchase_invoice` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('purchase_invoice')

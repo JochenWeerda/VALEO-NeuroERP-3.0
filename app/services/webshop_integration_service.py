@@ -166,23 +166,20 @@ class WebshopIntegrationService:
                 "hinweis": "Webshop-Bestellung hat fachliche Blocker",
                 "blockers": blockers,
             }
-        erp_order_no = self._erp_order_number()
-        total = sum(_money(p.get("menge")) * _money(p.get("preis_brutto"))
-                    for p in (order.get("artikel_positionen") or []))
-        # Auftrag und Verarbeitungsstand in einer Transaktion: kein "angelegt" ohne Auftrag.
-        self.db.execute(text("""
-            INSERT INTO domain_crm.sales_orders
-                (id, tenant_id, order_number, customer_id, customer_name, subject, description, total_amount,
-                 currency, status, notes, created_at, updated_at, version)
-            VALUES (:id, :tid, :on, :cid, :cname, :subj, :descr, :total, 'EUR', 'open', :notes, NOW(), NOW(), 1)
-        """), {
-            "id": str(uuid4()), "tid": self.tenant_id, "on": erp_order_no, "cid": kunde_id,
-            "cname": order.get("kunde_name") or None,
-            "subj": f"Webshop-Import {order.get('externe_bestellnr', '')}",
-            "descr": f"Webshop-Bestellung {order.get('externe_bestellnr', '')} vom {order.get('bestelldatum', '')}",
-            "total": float(total),
-            "notes": f"Webshop: {order.get('shop_system', '')} | ExtNr: {order.get('externe_bestellnr', '')}",
-        })
+        positionen, steuerfehler = self._auftragspositionen(order.get("artikel_positionen") or [])
+        if steuerfehler:
+            return {"verarbeitet": False, "auftrag_nr": None,
+                    "hinweis": "Webshop-Bestellung hat fachliche Blocker", "blockers": steuerfehler}
+        # Auftrag als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher domain_crm.sales_orders).
+        # Der Shop liefert Bruttopreise; netto rechnet der Steuerschluessel der Position (eine Steuerquelle).
+        from app.services.beleg_anlage import lege_beleg_an
+
+        shop = order.get("shop_system") or "CUSTOM"
+        auftrag_id = lege_beleg_an(
+            self.db, self.tenant_id, "sales_order", partner_id=str(kunde_id), positionen=positionen,
+            quelle="webshop", referenz=str(external_order_no), entwurf_nr=f"WS-{external_order_no}",
+            akteur=f"webshop:{shop}", idempotenz=f"webshop-{shop}-{external_order_no}")
+        erp_order_no = auftrag_id
         self.db.execute(text(
             "UPDATE domain_shared.webshop_bestellungen SET status = 'VERARBEITET', erp_order_number = :nr, "
             "processed_at = NOW() WHERE tenant_id = :tid AND externe_bestellnr = :enr"
@@ -190,7 +187,8 @@ class WebshopIntegrationService:
         self._protokoll(order.get("shop_system") or "CUSTOM", "AUFTRAG",
                         f"Bestellung {external_order_no} -> Auftrag {erp_order_no}", erfolgreich=True)
         self.db.commit()
-        return {"verarbeitet": True, "auftrag_nr": erp_order_no, "hinweis": "Auftrag im ERP angelegt"}
+        return {"verarbeitet": True, "auftrag_nr": erp_order_no, "auftrag_id": auftrag_id,
+                "hinweis": "Auftrag als DocFlow-Entwurf angelegt"}
 
     def get_sync_log(self) -> list[dict[str, Any]]:
         """Return last 50 sync events from the log table."""
@@ -260,9 +258,28 @@ class WebshopIntegrationService:
     def _mask_api_key(api_key: str) -> str:
         return f"{api_key[:4]}****" if len(api_key) >= 4 else "****"
 
-    @staticmethod
-    def _erp_order_number() -> str:
-        return f"WS-{uuid4().hex[:8].upper()}"
+    def _auftragspositionen(self, zeilen: list[dict[str, Any]]):
+        """Webshop-Zeilen als Auftragspositionen; Nettopreis aus Bruttopreis und Steuerschluessel der Zeile."""
+        from app.finance.steuerschluessel import Steuerklaerung, satz_des_schluessels
+        from app.services.beleg_anlage import Position
+
+        positionen, fehler = [], []
+        for nr, zeile in enumerate(zeilen, start=1):
+            code = str(zeile.get("steuerschluessel") or "").strip()
+            if not code:
+                fehler.append(f"LINE_{nr}_TAX_KEY_MISSING")
+                continue
+            try:
+                satz = satz_des_schluessels(self.db, self.tenant_id, code, "verkauf")
+            except Steuerklaerung:
+                fehler.append(f"LINE_{nr}_TAX_KEY_UNKNOWN")
+                continue
+            netto = (_money(zeile.get("preis_brutto")) / (Decimal("1") + Decimal(satz) / Decimal("100"))
+                     ).quantize(Decimal("0.0001"))
+            positionen.append(Position(artikel_nr=str(zeile.get("artikel_nr")), menge=float(_money(zeile.get("menge"))),
+                                       einheit=zeile.get("einheit") or None, bezeichnung=zeile.get("bezeichnung") or None,
+                                       einzelpreis=float(netto), steuerschluessel=code))
+        return positionen, fehler
 
     @staticmethod
     def _normalize_db_order(row: dict[str, Any]) -> dict[str, Any]:

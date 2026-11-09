@@ -48,6 +48,7 @@ domains:
       - kaeufergruppe
     endpoint_prefixes:
       - crm
+      - kunden_stamm_pflege
       - business_partner
       - verkauf
       - sales_
@@ -374,6 +375,10 @@ domains:
       - freigabe_
       - kontrollkorb
       - docflow_
+      - beleg_liste
+      - beleg_druck
+      - beleg_anlage
+      - gutschrift_docflow
       - doc_nachweisraum_
       - audit_hardening
       - atlas_customs_
@@ -385,6 +390,9 @@ domains:
       - approvals
       - kontrolle
       - belege
+      - beleg_versand
+      - beleg_import
+      - gutschrift_vorschlaege
       - docflow
       - dokumente
       - doc_nachweisraum
@@ -551,6 +559,7 @@ domains:
       - tapi
       - channel_work
       - webshop_integration
+      - webshop_kommandos
       - edi_api
       - external_agent
       - external_gates

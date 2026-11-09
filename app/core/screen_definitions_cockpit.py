@@ -291,7 +291,7 @@ def build_dashboard_verkauf_screen_definition() -> dict[str, Any]:
         ],
         tiles=[
             cockpit_nav_tile("auftraege", "Auftraege", target_screen_id="sales/sales-order"),
-            cockpit_nav_tile("rechnungen", "Rechnungen", target_screen_id="sales/invoices"),
+            cockpit_nav_tile("rechnungen", "Rechnungen", target_route="/belege/sales_invoice"),
             cockpit_nav_tile("workspace", "Verkauf-Cockpit", target_screen_id="workspace/verkauf"),
         ],
         actions=[cockpit_refresh_action(permission="sales.read")],

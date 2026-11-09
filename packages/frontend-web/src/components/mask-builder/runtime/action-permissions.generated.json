@@ -34,6 +34,13 @@
         ]
       ]
     },
+    "admin/nummernkreise": {
+      "admin.number_range.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/postfaecher": {
       "admin.postfach.write": [
         [
@@ -51,6 +58,20 @@
         ]
       ]
     },
+    "admin/report-berechtigungen": {
+      "admin.report_permission.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/rollen-verwaltung": {
+      "admin.role.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/webhooks-liste": {
       "studio.admin-webhooks.register": [
         [
@@ -59,6 +80,24 @@
       ],
       "studio.admin-webhooks.unregister": [
         [
+          "admin"
+        ]
+      ]
+    },
+    "admin/webshop": {
+      "verkauf.webshop.update": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "admin/webshop-bestellungen": {
+      "verkauf.auftrag.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -632,6 +671,51 @@
         ]
       ]
     },
+    "bestellvorschlag/bedarf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/gespeichert": {
+      "einkauf.bestellung.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/lager": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/rohware": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/verkauf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/aktivitaet": {
       "crm.activity.update": [
         [
@@ -870,6 +954,17 @@
         ]
       ]
     },
+    "crm/vertreterprovisionen": {
+      "crm.vertreter.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/wiedervorlagen": {
       "crm.kontakt.erledigen": [
         [
@@ -1062,29 +1157,6 @@
         ]
       ]
     },
-    "einkauf/bestellungen": {
-      "einkauf.bestellung.approve": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.bestellung.send": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.bestellung.cancel": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "einkauf/purchase-order": {
       "einkauf.bestellung.update": [
         [
@@ -1097,38 +1169,6 @@
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "einkauf/rechnungseingaenge-liste": {
-      "einkauf.rechnungseingang.pruefen": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.rechnungseingang.freigeben": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.rechnungseingang.verbuchen": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "einkauf/rechnungseingang/neu": {
-      "finance.ap.invoice.create": [
-        [
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1287,19 +1327,6 @@
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "finance/invoices/new": {
-      "finance.invoice.create": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1510,6 +1537,50 @@
           "LAGER_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt-liste/mahnung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/abrechnung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/erfuellung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "kontrakt/fixierung": {
+      "kontrakt.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1736,66 +1807,9 @@
         ]
       ]
     },
-    "sales/angebote-liste": {
-      "sales.offer.import_csv": [
-        [
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "sales/credit-notes": {
-      "sales.gutschrift.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "sales.gutschrift.post": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "sales/delivery-note": {
       "sales.lieferschein.drucken": [
         [
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "sales/gutschrift": {
-      "sales.gutschrift.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "sales.gutschrift.post": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -1840,6 +1854,19 @@
           "EINKAUF_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "verkauf/gutschrift-buchungsvorschlaege": {
+      "verkauf.gutschrift.freigeben": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

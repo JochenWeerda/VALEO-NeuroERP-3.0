@@ -215,6 +215,10 @@ def validate_studio_draft(
     if document_template is not None:
         allowed_endpoints = {source["endpoint"] for source in document_template["dataSources"]}
         allowed_endpoints.update(source['endpoint'] for source in (document_template.get('creation') or {}).get('dataSources', []))
+        # Lese-Downloads der festgelegten Belegvariante (Belegdruck); nur genau diese Wege, keine eigenen.
+        allowed_endpoints.update(action['download']['endpoint'] for action in document_template.get('actions') or []
+                                 if isinstance(action.get('download'), dict)
+                                 and isinstance(action['download'].get('endpoint'), str))
     if native_template is not None:
         allowed_endpoints = {node[key] for node in _nodes(native_template)
                              for key in ("endpoint", "summaryEndpoint", "countEndpoint")
@@ -223,6 +227,12 @@ def validate_studio_draft(
     write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
                            for action in catalog_actions.values())
+    if native_template is not None:
+        # Die festgelegten Schreibwege der nativen Vorlage selbst (z. B. Kalender: Neu projizieren, ICS-Token);
+        # genau diese Werte, keine eigenen.
+        write_endpoints.update(node[key] for node in _nodes(native_template)
+                               for key in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint")
+                               if isinstance(node.get(key), str))
     for node in _nodes(definition):
         for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
             endpoint = node.get(field)

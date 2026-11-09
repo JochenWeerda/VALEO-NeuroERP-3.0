@@ -70,9 +70,9 @@ def test_stale_source_hash_does_not_create_a_baseline(boundary):
 
 
 def test_document_import_retains_exact_base_variant_and_materialization_in_history(boundary):
-    from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, screen_id
+    from app.core.screen_definitions_beleg import SICHTPRUEFUNG_MANDANT, screen_id
     app, client = boundary
-    tenant = next(iter(NATIVE_BELEG_TENANTS))
+    tenant = SICHTPRUEFUNG_MANDANT
     app.dependency_overrides[get_tenant_id] = lambda: tenant
     key = screen_id('sales_invoice')
     source = service.source_definition(tenant, key)
@@ -88,7 +88,7 @@ def test_document_import_retains_exact_base_variant_and_materialization_in_histo
     assert record['status'] == 'draft' and record['readiness']['eligible_for_release'] is False
 
 
-@pytest.mark.parametrize('source', ['tenant/foreign-draft', 'beleg/sales-invoice', 'missing/source'])
+@pytest.mark.parametrize('source', ['tenant/foreign-draft', 'beleg/unbekannte-belegart', 'missing/source'])
 def test_unregistered_or_foreign_source_is_not_importable(boundary, source):
     _, client = boundary
     body = payload(); body['screen_id'] = source

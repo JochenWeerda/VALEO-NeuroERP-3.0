@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./maschinenauslastung-legacy'))
+/** Maschinenauslastung: Studio-Liste `agrar/maschinen-auslastung-liste` (gleicher Leseweg /agrar/maschinen). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="agrar/maschinen-auslastung-liste" testId="screen-agrar-maschinenauslastung" />
+}

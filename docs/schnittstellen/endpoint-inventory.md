@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-07
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -30,6 +30,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `admin_monitoring` | Admin monitoring endpoints. |
 | `admin_pos` | Admin POS/TSE settings and DSFinV-K exports. |
 | `admin_reporting` | Admin CRUD for self-service report permissions. |
+| `admin_reporting_kommandos` | Report-Berechtigungen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/report-berechtigungen``). |
+| `admin_rollen_kommandos` | Rollen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/rollen-verwaltung``, 09.11.2026). |
 | `admin_suite` | Read-only Admin Suite production-readiness aggregation. |
 | `agent_context_api` | — |
 | `agent_tool_contracts` | External agent tool contracts. |
@@ -75,6 +77,8 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
+| `beleg_import` | CSV-Import von Angeboten in DocFlow (BELEG-052, 09.11.2026; vorher ``/sales/offers/actions/import-csv``). |
+| `beleg_versand` | Beleg versenden: der Beleg als PDF per E-Mail an seinen Partner (BELEG-052 Stufe 2b, 09.11.2026). |
 | `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
 | `belege` | Lesender Belegweg: jeder Beleg in der Form des Belegvertrags (BELEG-011). |
 | `benchmark_api` | — |
@@ -170,6 +174,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellung_kommandos` | Zeilenaktionen der Bestell-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
+| `einkauf_bestellvorschlag_kommandos` | Bestellvorschlag als Fachaktion fuer Maske, CLI und MCP (Familie ``bestellvorschlag``, 09.11.2026). |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
 | `erechnung_import` | E-Rechnung Import — ZUGFeRD / XRechnung stub. |
@@ -246,6 +251,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `grundfutter_analysen` | Grundfutter-Analysen API |
 | `gs1_barcode` | GS1 Barcode Parse Service |
 | `gs1_parser` | GS1 barcode parser endpoint (l3c-gs1) |
+| `gutschrift_vorschlaege` | Buchungsvorschlaege fuer Verkaufsgutschriften: ein Agent schlaegt vor, ein Mensch gibt frei (09.11.2026). |
 | `harvest_acceptance` | Harvest Acceptance (Ernte-Annahme) API endpoints. |
 | `harvest_rules` | Transport adapter for versioned harvest domain commands, never direct CRUD. |
 | `hausbankenstamm` | Hausbankenstamm — Eigene Bankverbindungen des Mandanten. |
@@ -273,9 +279,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `kontrakt_hedging` | Kontrakt-Hedging und MATIF-Preisbindung. |
 | `kontrakt_klassen` | Kontrakt-Klassen und Kontraktvarianten (Agrar-Spezialsoftware Feature). |
 | `kontrakt_mengenzeitraum` | Kontraktmengenzeitraum — Ratierliche Lieferpläne für Rohwarenkontrakte. |
+| `kontrakt_vorgang` | Kontrakt-Vorgang: Lese- und Kommandowege der Maskenfamilien ``kontrakt`` und ``kontrakt-liste`` (08.11.2026). |
 | `kontrakte` | Kontrakte endpoints — contract CRUD, movements, amendments, dispositionen. |
 | `kontrolle` | Pruefkorb des Controllers (FIN-CONTROL-001). |
 | `kostenrechnung` | Kostenrechnung: Kostenstellen, Kostenarten, Kostenstellen-Buchungen. |
+| `kunden_stamm_pflege` | Partnerstamm-Pflege in der Studio-Maske ``crm/customer-360`` (09.11.2026). |
 | `kundenbanken` | Kundenbanken — IBAN/BIC-Bankverbindungen pro Kunde. |
 | `l3_report_catalog` | Prioritized fixed L3 report catalog API. |
 | `labor` | Laborproben, Laborauftraege und Befunde im Mandanten. |
@@ -321,6 +329,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `neuro_verification` | Neuro Verification Engine — REST API (NC-001). |
 | `neuro_voice` | Voice Adapter Layer — REST API (NC-003). |
 | `number_ranges` | Admin API for configurable number ranges (Debitor/Kreditor accounts, partner numbers). |
+| `number_ranges_kommandos` | Nummernkreise als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/nummernkreise``, 09.11.2026). |
 | `nutrient_compositions` | Nutrient Composition (Düngemittel-Zusammensetzung) management endpoints. |
 | `nve` | NVE / SSCC shipping-unit endpoints (l3c-nve) |
 | `o2c_chain` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot→Auftrag→Lieferschein→Rechnung (read-only). |
@@ -406,12 +415,11 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `saatzucht` | Saatzucht-Modul — certified seed / seed breeding management stub. |
 | `sales_blanket_orders` | Rahmenaufträge / Abrufe (Blanket Orders) — thin-router, sqlalchemy.text(). |
 | `sales_credit` | Kreditlimit-Prüfung & Billing-Status im O2C-Kontext (DOM-SALES-004.3) — read-only. |
-| `sales_credit_notes` | Sales Credit Notes (Gutschriften) and Returns (Retouren) endpoints. |
+| `sales_credit_notes` | Retouren (SALES-DLV-02/03/04). Gutschriften liegen seit BELEG-052 in DocFlow. |
 | `sales_delivery_notes` | Sales Delivery Notes (Lieferscheine) CRUD endpoints. |
 | `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
-| `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
 | `sales_order_commands` | Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019). |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
@@ -462,6 +470,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `versicherungen` | Versicherungen — vollständiges CRUD. |
 | `vertraege` | Verträge API - Rahmenverträge (SQLAlchemy) |
 | `vertreterprovisionen` | Vertreterprovisionsgruppen und -staffeln — Provisionsabrechnung Außendienst. |
+| `vertreterprovisionen_kommandos` | Vertreterprovisionen als Fachaktion fuer Maske, CLI und MCP (Studio-Listen, 09.11.2026). |
 | `vertreterstamm` | Vertreterstamm — Außendienstmitarbeiter und Vertretergruppen. |
 | `waage` | — |
 | `waage_mobile` | WGE-MOB-001: Mobile-Sync für Waagenbelege. |
@@ -474,6 +483,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `webhook_system` | Outbound Webhook Registration |
 | `webhooks` | Webhook management endpoints (l3c-webhook) |
 | `webshop_integration` | B2B webshop integration endpoints. |
+| `webshop_kommandos` | Webshop-Anbindung als Fachaktion fuer Maske, CLI und MCP (Studio-Listen, 09.11.2026). |
 | `websocket` | WebSocket Endpoints |
 | `weighing_tickets` | Weighing tickets endpoints (l3c-wiegeschein) |
 | `wf_cockpit_persist` | WF-COCKPIT-PERSIST-001 — DB-backed Cockpit API (Dead-Letter + Detail). |

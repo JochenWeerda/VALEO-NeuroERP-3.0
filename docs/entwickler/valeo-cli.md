@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb, agent]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-10-19
+last_reviewed: 2026-11-08
 version: 0.1.0
 description: Kommandozeile fuer Maskenaktionen — derselbe Kommandoweg wie Maske und MCP, Anmeldung per Device-Flow.
 ---
@@ -65,6 +65,20 @@ python -m valeo_cli ausfuehren admin/identity-budgets allocate --daten eingabe.j
 
 Exit-Codes: 0 erfolgreich, 1 fachlich abgelehnt oder nicht per CLI ausfuehrbar, 2 Bedienfehler, 3 Anmeldung oder
 Rechte, 4 Server oder Netz.
+
+## Anlegen
+
+```bash
+python -m valeo_cli anlegen einkauf/supplier --feld lieferantennummer=L-7 --feld firmenname="Hof Meyer"
+python -m valeo_cli anlegen crm/customer-360 --daten kunde.json --json
+```
+
+`anlegen` nutzt den `creation`-Block der ScreenDefinition, denselben Vertrag wie die native Anlagemaske
+(`UniversalNativeCreatePage`): nur die nicht schreibgeschuetzten Anlagefelder, Vorgaben der Maske, Pflichtfelder
+vor dem Senden, Wiederholungsschluessel, wenn die Anlage ihn verlangt (`--idempotenz` wiederholt). Unbekannte
+Felder (auch `tenant_id`) lehnt die CLI ab, bevor sie etwas sendet. Erfolg nur mit Datensatz-ID in der Antwort.
+Belegfamilien (`docflow.create.v1`) legen nicht hier an. Agenten duerfen anlegen (Entwicklungsphase,
+Nutzerentscheidung 08.11.2026); Rechte prueft der Server.
 
 ## Masken im Studio erzeugen
 

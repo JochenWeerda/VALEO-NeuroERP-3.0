@@ -1,10 +1,6 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
+/** Etikettendruck: Studio-Liste `etiketten/drucken` (vorher eine screenId ohne ScreenDefinition). */
 export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId="versand/paket-etikett"
-      testId="screen-versand-paket-etikett"
-    />
-  )
+  return <NativeListPage screenId="etiketten/drucken" testId="screen-etiketten/drucken" />
 }

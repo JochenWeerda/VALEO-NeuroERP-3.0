@@ -10,10 +10,10 @@ function read(rel: string): string {
 }
 
 describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
-  it('Bestellungen-Liste ist NativeListPage auf Screen einkauf/bestellungen', () => {
+  it('Bestellungen-Liste ist die Bestell-Variante der Belegliste (DocFlow, BELEG-052)', () => {
     const src = read('einkauf/bestellungen-liste.tsx')
     expect(src).toContain('NativeListPage')
-    expect(src).toContain('screenId="einkauf/bestellungen"')
+    expect(src).toContain('screenId="beleg-liste/purchase-order"')
   })
 
   it('Listen-SD row_route zeigt auf native Singular-Detailroute wenn Listen-Modul vorhanden', () => {
@@ -38,12 +38,7 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
     )
   })
 
-  it('Bestellung-Anlegen resumed auf native Detailroute', () => {
-    const src = read('einkauf/bestellung-anlegen.tsx')
-    expect(src).toContain('`/einkauf/bestellung/${encodeURIComponent(purchaseOrderId)}')
-    expect(src).toContain('`/einkauf/bestellung/${encodeURIComponent(pendingLink.purchaseOrderId)}')
-    expect(src).not.toMatch(
-      /navigate\(\s*`\/einkauf\/bestellungen\/\$\{encodeURIComponent\(purchaseOrderId\)\}/,
-    )
+  it('Bestellung-Anlegen legt ueber die Belegmaske an (DocFlow, BELEG-052)', () => {
+    expect(read('einkauf/bestellung-anlegen.tsx')).toContain("belegSeite('purchase_order')")
   })
 })

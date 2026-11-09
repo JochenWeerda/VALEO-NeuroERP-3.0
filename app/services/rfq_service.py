@@ -188,7 +188,7 @@ class RfqService:
             "quotes": quotes,
         }
 
-    def accept_quote(self, rfq_id: int, quote_id: int) -> dict:
+    def accept_quote(self, rfq_id: int, quote_id: int, akteur: Optional[str] = None) -> dict:
         rfq = self._fetch_rfq(rfq_id)
         if not rfq:
             raise ValueError("Anfrage nicht gefunden")
@@ -229,18 +229,12 @@ class RfqService:
         quantity = _f(rfq[2])
         unit_price = _f(quote[2])
         netto = round(quantity * unit_price, 2)
-        mwst = round(netto * 0.19, 2)
+        # Bestellung aus dem Zuschlag: DocFlow-Entwurf (BELEG-052; vorher domain_einkauf.bestellungen mit fester
+        # Mehrwertsteuer 19 %). create_document schreibt die Statusaenderungen oben in derselben Einheit fest.
         po_id = self._create_purchase_order(
-            lieferant_id=quote[1],
-            article_id=rfq[1],
-            quantity=quantity,
-            unit_price=unit_price,
-            netto=netto,
-            mwst=mwst,
-            delivery_days=quote[3],
-            rfq_id=rfq_id,
+            lieferant_id=quote[1], article_id=rfq[1], quantity=quantity, unit_price=unit_price, rfq_id=rfq_id,
+            quote_id=quote_id, akteur=akteur,
         )
-        self.db.commit()
 
         return {
             "rfq_id": rfq_id,
@@ -253,60 +247,16 @@ class RfqService:
             "status": "ABGESCHLOSSEN",
         }
 
-    def _create_purchase_order(
-        self,
-        *,
-        lieferant_id: str,
-        article_id: str,
-        quantity: float,
-        unit_price: float,
-        netto: float,
-        mwst: float,
-        delivery_days: Optional[int],
-        rfq_id: int,
-    ) -> str:
-        po_id = str(uuid.uuid4())
-        po_nr = f"RFQ-{rfq_id}-{po_id[:8].upper()}"
-        lieferdatum = date.today() + timedelta(days=int(delivery_days or 14))
-        self.db.execute(
-            text(
-                "INSERT INTO domain_einkauf.bestellungen "
-                "(id, tenant_id, bestellnummer, lieferant_id, bestelldatum, lieferdatum_wunsch, "
-                "status, netto_summe, mwst_betrag, brutto_summe, waehrung, notiz) "
-                "VALUES (:id, :tid, :nr, :lf, :bd, :ld, 'bestellt', :netto, :mwst, :brutto, 'EUR', :notiz)"
-            ),
-            {
-                "id": po_id,
-                "tid": self.tenant_id,
-                "nr": po_nr,
-                "lf": lieferant_id,
-                "bd": date.today(),
-                "ld": lieferdatum,
-                "netto": netto,
-                "mwst": mwst,
-                "brutto": round(netto + mwst, 2),
-                "notiz": f"Zuschlag aus RFQ #{rfq_id}",
-            },
-        )
-        pos_id = str(uuid.uuid4())
-        self.db.execute(
-            text(
-                "INSERT INTO domain_einkauf.bestellung_positionen "
-                "(id, bestellung_id, pos_nr, artikel_nr, artikel_bezeichnung, menge, einheit, "
-                "einzelpreis, netto_betrag, mwst_satz, status) "
-                "VALUES (:id, :bid, 1, :anr, :abez, :menge, 't', :preis, :netto, 19, 'offen')"
-            ),
-            {
-                "id": pos_id,
-                "bid": po_id,
-                "anr": article_id,
-                "abez": article_id,
-                "menge": quantity,
-                "preis": unit_price,
-                "netto": netto,
-            },
-        )
-        return po_id
+    def _create_purchase_order(self, *, lieferant_id: str, article_id: str, quantity: float, unit_price: float,
+                               rfq_id: int, quote_id: int, akteur: Optional[str]) -> str:
+        from app.services.beleg_anlage import Position, lege_beleg_an
+
+        return lege_beleg_an(
+            self.db, self.tenant_id, "purchase_order", partner_id=str(lieferant_id),
+            positionen=[Position(artikel_nr=str(article_id), bezeichnung=str(article_id), menge=quantity,
+                                 einheit="t", einzelpreis=unit_price)],
+            quelle="rfq", referenz=f"{rfq_id}-{quote_id}", entwurf_nr=f"RFQ-{rfq_id}",
+            akteur=akteur or "rfq", idempotenz=f"rfq-zuschlag-{rfq_id}-{quote_id}" if akteur else None)
 
     def _fetch_rfq(self, rfq_id: int) -> Any:
         return self.db.execute(

@@ -101,29 +101,6 @@ MANDANT = "00000000-0000-0000-0000-000000000001"
 
 
 @pytest.mark.parametrize("wo", ["fremd", None])
-@pytest.mark.asyncio
-async def test_eine_gutschrift_schreibt_keine_fremde_rechnung_gut(wo):
-    from app.api.v1.endpoints.sales_credit_notes import create_credit_note
-
-    payload = MagicMock(tenant_id=MANDANT, customer_id="K-1", customer_name="K", invoice_reference="RG-1",
-                        reason="Retoure", currency="EUR", status="draft", notes="", lines=[],
-                        credit_note_number="GS-1")
-    rechnung = {"status": "OFFEN", "number": "RG-1", **({"tenantId": wo} if wo else {})}
-    with (
-        patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_invoice"),
-        patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-        patch("app.documents.router_helpers.get_from_store", return_value=rechnung),
-        patch("app.api.v1.endpoints.sales_credit_notes.save_to_store") as speichern,
-        patch("app.api.v1.endpoints.sales_credit_notes.log_fibu_audit"),
-        patch("app.api.v1.endpoints.sales_credit_notes._lege_an",
-              return_value={"id": "CN-1", "total": 0, "netto": 0, "steuer": 0}),
-        patch("app.api.v1.endpoints.sales_credit_notes.CreditNoteOut"),
-    ):
-        await create_credit_note(payload=payload, request=MagicMock(), tenant_id=MANDANT, db=MagicMock())
-    speichern.assert_not_called()
-
-
-@pytest.mark.parametrize("wo", ["fremd", None])
 def test_ein_zahlungseingang_setzt_keine_fremde_rechnung_auf_bezahlt(wo):
     from app.api.v1.endpoints.finance_clearing import record_payment
 

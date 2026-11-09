@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./alerts-legacy'))
+/** Monitoring-Alarme: Studio-Liste `admin/monitoring/alerting` (gleicher Leseweg wie die frühere Seite). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="admin/monitoring/alerting" testId="screen-admin-monitoring-alerts" />
+}

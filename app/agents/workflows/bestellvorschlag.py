@@ -8,7 +8,7 @@ Kein localhost-Loopback, keine Fallback-Bestellnummern und keine Auto-Freigabe.
 from __future__ import annotations
 
 import logging
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Annotated, Any, TypedDict
 
@@ -21,9 +21,7 @@ from app.core.database import SessionLocal
 from app.core.dependency_container import container
 from app.core.human_approval_gate import evaluate_approval_requirement, get_default_approval_rules
 from app.core.uuid7 import uuid7
-from app.infrastructure.models.einkauf_models import EinkaufBestellung, EinkaufBestellungPosition
 from app.infrastructure.repositories import ArticleRepository, StockMovementRepository
-from app.services.numbering_service import get_numbering
 
 logger = logging.getLogger(__name__)
 
@@ -229,45 +227,28 @@ def _persist_purchase_order(
     correlation_id: str,
     ai_recommendations: list[str],
 ) -> str:
+    """Bestellentwurf in DocFlow (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung).
+
+    Die Menge steht in der Einheit des Preises (``beleg_anlage.position_in_preiseinheit``); Steuer erst mit
+    Schluessel. Wiederholungsschutz ueber die Korrelation des Workflows.
+    """
+    from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit
+
     session = SessionLocal()
     try:
-        bestellung = EinkaufBestellung(
-            id=uuid7(),
-            tenant_id=tenant_id,
-            bestellnummer=get_numbering().next_number("purchase_order"),
-            lieferant_id=supplier_id,
-            bestelldatum=date.today(),
-            status="entwurf",
-            versand_art="email",
-            notiz=(
-                "NeuroASSIST Bestellvorschlag "
-                f"({correlation_id}). Empfehlungen: {', '.join(ai_recommendations) or 'keine'}"
-            ),
-            erstellt_von=NEUROASSIST_ISSUER,
-        )
-        session.add(bestellung)
-        session.flush()
-
-        for pos_nr, item in enumerate(items, start=1):
-            session.add(
-                EinkaufBestellungPosition(
-                    id=uuid7(),
-                    bestellung_id=bestellung.id,
-                    pos_nr=pos_nr,
-                    article_id=item["article_id"],
-                    artikel_nr=item["artikel_nr"],
-                    artikel_bezeichnung=item["artikel_bezeichnung"],
-                    menge=item["menge"],
-                    menge_geliefert=0,
-                    menge_offen=item["menge"],
-                    einheit=item["einheit"],
-                    einzelpreis=item["einzelpreis"],
-                    preis_einheit=item["preis_einheit"],
-                )
-            )
-
+        positionen = [position_in_preiseinheit(
+            artikel_nr=item["artikel_nr"], bezeichnung=item.get("artikel_bezeichnung"), menge=item["menge"],
+            einheit=item.get("einheit"), einzelpreis=item.get("einzelpreis"), preis_einheit=item.get("preis_einheit"))
+            for item in items]
+        beleg_id = lege_beleg_an(
+            session, tenant_id, "purchase_order", partner_id=str(supplier_id), positionen=positionen,
+            quelle="neuroassist", referenz=str(correlation_id),
+            entwurf_nr=f"NA-{str(correlation_id)[:8]}", akteur=NEUROASSIST_ISSUER,
+            idempotenz=f"neuroassist-bestellvorschlag-{correlation_id}"[:120])
         session.commit()
-        return str(bestellung.id)
+        logger.info("NeuroASSIST-Bestellentwurf %s (Empfehlungen: %s)", beleg_id,
+                    ", ".join(ai_recommendations) or "keine")
+        return str(beleg_id)
     except Exception:
         session.rollback()
         raise

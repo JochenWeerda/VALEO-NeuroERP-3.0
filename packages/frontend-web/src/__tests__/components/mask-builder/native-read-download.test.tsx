@@ -82,3 +82,14 @@ it.each([{ filename: '../data.csv', csv: 'data' }, { filename: 'data.csv', csv: 
   get.mockResolvedValue({ data })
   await expect(readDownload(action, { typ: 'alle' })).rejects.toThrow()
 })
+
+it('Belegdruck: setzt die Belegkennung in den Weg und liefert das PDF base64-codiert', async () => {
+  const druck = { key: 'drucken', label: 'Drucken',
+    download: { endpoint: '/api/v1/belege/sales_invoice/{entity_id}/druck', contentField: 'pdf', filenameField: 'dateiname',
+      mediaType: 'application/pdf' as const, contentEncoding: 'base64' as const } }
+  get.mockResolvedValue({ data: { dateiname: 'sales_invoice_RE-1.pdf', pdf: 'JVBERi0=' } })
+  const result = await readDownload(druck, {}, 'beleg 1')
+  expect(get).toHaveBeenCalledWith('/api/v1/belege/sales_invoice/beleg%201/druck', { params: {} })
+  expect(result).toEqual({ filename: 'sales_invoice_RE-1.pdf', content: 'JVBERi0=', mediaType: 'application/pdf', encoding: 'base64' })
+  await expect(readDownload(druck, {})).rejects.toThrow('Kennung')
+})

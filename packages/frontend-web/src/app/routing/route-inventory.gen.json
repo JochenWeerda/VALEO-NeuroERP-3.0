@@ -336,6 +336,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/webshop-bestellungen",
+      "path": "admin/webshop/bestellungen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/workflow-editor",
       "path": "admin/workflow-editor",
       "source": "alias"
@@ -1386,6 +1391,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/belege/beleg",
       "path": "belege/:belegart/:id",
       "source": "alias"
@@ -2326,6 +2336,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen-staffeln",
+      "path": "crm/vertreterprovisionen/staffeln",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/vertreterstamm",
       "path": "crm/vertreterstamm",
       "source": "auto"
@@ -2744,6 +2759,11 @@
       "module": "@/pages/einkauf/bestellvorschlaege",
       "path": "einkauf/bestellvorschlaege",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-ansicht",
+      "path": "einkauf/bestellvorschlaege/ansicht/:variante",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/bestellvorschlag-kontrakt",
@@ -4061,6 +4081,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/kontrakte/listen",
+      "path": "kontrakte/listen/:variante",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
       "path": "kontrakte/LstKontraktUebersicht",
       "source": "auto"
@@ -4078,6 +4103,11 @@
     {
       "module": "@/pages/kontrakte/KontraktPositionsmonitor",
       "path": "kontrakte/positionen",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/kontrakte/vorgang",
+      "path": "kontrakte/vorgang/:variante/:id",
       "source": "alias"
     },
     {
@@ -4976,7 +5006,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu",
       "source": "alias"
     },
@@ -5314,6 +5344,11 @@
       "module": "@/pages/verkauf/dauerauftraege",
       "path": "verkauf/dauerauftraege",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/verkauf/gutschrift-buchungsvorschlaege",
+      "path": "verkauf/gutschrift-buchungsvorschlaege",
+      "source": "alias"
     },
     {
       "module": "@/pages/verkauf/kommissions-auftraege",
@@ -5703,8 +5738,6 @@
     "code",
     "code_challenge",
     "code_challenge_method",
-    "contact_id",
-    "contractId",
     "customerId",
     "customerName",
     "customerNumber",
@@ -5714,7 +5747,6 @@
     "fromOffer",
     "id",
     "inbox",
-    "initialName",
     "instanceId",
     "kunde",
     "kundeName",
@@ -5722,26 +5754,19 @@
     "lieferscheinNr",
     "mode",
     "nonce",
-    "op",
-    "opId",
     "page",
     "partnerName",
-    "pflege",
     "qpResult",
     "qualityProtocolId",
     "queueEntryId",
     "rechnung",
     "rechnungId",
     "rechnungsnr",
-    "requisitionId",
-    "returnTo",
-    "rfqId",
     "search",
     "service_request_id",
     "state",
     "subject",
     "vehiclePlate",
-    "vorlage",
     "workflowCase",
     "workflowInstanceId",
     "workflowLabel",
@@ -5763,6 +5788,7 @@
     "taskId",
     "type",
     "variant",
+    "variante",
     "workflowId"
   ]
 }

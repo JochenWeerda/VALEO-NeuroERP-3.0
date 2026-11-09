@@ -24,7 +24,7 @@ export const INBOX_SUPPLIER_INVOICE_CREATE_ROUTE = '/belege/purchase_invoice/neu
 /** Einkaufs-Lieferschein-Übersicht. Kein Prefill, kein Einzelbeleg ohne Detailroute. */
 export const INBOX_DELIVERY_NOTE_ROUTE = '/einkauf/lieferschein-erfassung'
 /** Verkaufs-Gutschriften-Übersicht (outgoing). Kein Einzelbeleg. */
-export const INBOX_SALES_CREDIT_LIST_ROUTE = '/sales/credit-notes'
+export const INBOX_SALES_CREDIT_LIST_ROUTE = '/belege/sales_credit_memo'
 /** Einkaufs-Gutschriften/Belastungen-Übersicht (incoming). Kein Einzelbeleg. */
 export const INBOX_PURCHASE_CREDIT_LIST_ROUTE = '/einkauf/gutschriften-belastungen'
 /** Wiegeschein-Übersicht unter /weighing (ohne :id). */

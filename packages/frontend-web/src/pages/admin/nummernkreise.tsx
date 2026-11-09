@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./nummernkreise-legacy'))
+/** Nummernkreise: Studio-Liste mit Konfigurieren, Aendern und Stilllegen als Kommandowege. */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="admin/nummernkreise" testId="screen-admin-nummernkreise" />
+}

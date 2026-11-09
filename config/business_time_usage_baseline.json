@@ -1,9 +1,6 @@
 {
   "_hinweis": "BUSINESS-TIME-RATCHET-20260930: Direkte Kalenderquellen unter app/. Die Zaehler duerfen nur sinken. Nach bewusster Bereinigung mit python scripts/check_business_time_usage.py --update-baseline absenken.",
   "counts": {
-    "app/agents/workflows/bestellvorschlag.py": {
-      "date.today": 1
-    },
     "app/agrar/rations/assist.py": {
       "date.today": 1
     },
@@ -224,9 +221,6 @@
     "app/services/ai_engineering_metrics_service.py": {
       "datetime.now.date": 1
     },
-    "app/services/command_handlers_procurement.py": {
-      "date.today": 1
-    },
     "app/services/compliance_vvvo_sachkunde_service.py": {
       "date.today": 3
     },
@@ -307,9 +301,6 @@
     },
     "app/services/rations_readiness_service.py": {
       "date.today": 1
-    },
-    "app/services/rfq_service.py": {
-      "date.today": 2
     },
     "app/workers/price_monitoring_worker.py": {
       "date.today": 2

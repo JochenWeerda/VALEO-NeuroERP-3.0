@@ -1,10 +1,6 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { Navigate } from '@/app/routing/typed-router'
 
+/** Alte Einstiegsseite ohne eigene Maske (screenId unbekannt): fuehrt auf die Wissensbasis. */
 export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId="hilfe"
-      testId="screen-hilfe"
-    />
-  )
+  return <Navigate to="/wissen/wissensbasis" replace />
 }

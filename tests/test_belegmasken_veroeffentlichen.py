@@ -1,12 +1,12 @@
-"""Native document definitions are code-owned and visible only in the approved tenant."""
+"""Native document definitions are code-owned; since the rollout (08.11.2026) visible for every tenant."""
 import importlib.util
 from pathlib import Path
 import pytest
 from app.core.belegvertrag import BELEGARTEN
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
-from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, screen_id
+from app.core.screen_definitions_beleg import SICHTPRUEFUNG_MANDANT, screen_id
 
-TENANT = next(iter(NATIVE_BELEG_TENANTS))
+TENANT = SICHTPRUEFUNG_MANDANT
 
 
 def script():
@@ -26,13 +26,15 @@ def test_native_documents_are_not_global_or_editable_studio_definitions(monkeypa
     for art in BELEGARTEN:
         key = screen_id(art)
         assert get_screen_definition(key, tenant_id=TENANT)["title"] == BELEGARTEN[art].bezeichnung
-        assert get_screen_definition(key, tenant_id="foreign") is None
+        # Rollout 08.11.2026: jeder Mandant bekommt dieselbe versionierte Fassung; ohne Mandant keine.
+        fremd = get_screen_definition(key, tenant_id="00000000-0000-0000-0000-000000000001")
+        assert fremd["documentVariant"] == get_screen_definition(key, tenant_id=TENANT)["documentVariant"]
         assert get_screen_definition(key) is None
 
 
-def test_check_rejects_unapproved_tenant():
+def test_check_rejects_missing_tenant():
     with pytest.raises(PermissionError):
-        script().pruefe_native_definitionen("foreign")
+        script().pruefe_native_definitionen("")
 
 
 def test_all_nine_native_document_variants_pass_governance():

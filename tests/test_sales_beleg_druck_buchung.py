@@ -153,34 +153,6 @@ def auftrag(client, kopf, kunde) -> str:
     return antwort.json()["id"]
 
 
-def angebot(client, kopf, kunde) -> str:
-    antwort = client.post(
-        "/api/v1/sales/offers/",
-        headers=kopf,
-        json={
-            "offer_number": f"AN-{uuid.uuid4().hex[:6].upper()}",
-            "customer_id": kunde,
-            "customer_name": "Testkunde",
-            "subject": "Drucktest",
-            "total_amount": 100,
-            "currency": "EUR",
-            "status": "entwurf",
-            "items": [
-                {
-                    "line_number": 1,
-                    "article_number": "10001",
-                    "description": "Weizen A",
-                    "quantity": 1,
-                    "unit_price": 100,
-                    "discount_percent": 0,
-                }
-            ],
-        },
-    )
-    assert antwort.status_code == 201, antwort.text
-    return antwort.json()["id"]
-
-
 # ── Auftrag ────────────────────────────────────────────────────────────────
 
 
@@ -251,36 +223,4 @@ def test_fremder_auftrag_bleibt_unberuehrt(client, kopf, kunde) -> None:
     assert client.post(f"/api/v1/sales/orders/{auftrags_id}/post", headers=fremd).status_code == 404
 
 
-# ── Angebot ────────────────────────────────────────────────────────────────
-
-
-def test_angebot_drucken_und_buchen(client, kopf, kunde) -> None:
-    angebots_id = angebot(client, kopf, kunde)
-
-    gedruckt = client.post(
-        f"/api/v1/sales/offers/{angebots_id}/print",
-        headers=kopf,
-        params={"copies": 1},
-    )
-    assert gedruckt.status_code == 200, gedruckt.text
-    assert gedruckt.json()["print_count"] == 1
-
-    gebucht = client.post(f"/api/v1/sales/offers/{angebots_id}/post", headers=kopf)
-    assert gebucht.status_code == 200, gebucht.text
-    assert gebucht.json()["status"] == "versendet"
-
-
-def test_angenommenes_angebot_faellt_nicht_auf_versendet_zurueck(client, kopf, kunde) -> None:
-    """Der spaetere Stand bleibt stehen — Buchen ist kein Rueckwaertsgang."""
-    from sqlalchemy import create_engine, text
-
-    angebots_id = angebot(client, kopf, kunde)
-    with create_engine(DB_URL).begin() as verbindung:
-        verbindung.execute(
-            text("UPDATE domain_crm.sales_offers SET status = 'angenommen' WHERE id = :id"),
-            {"id": angebots_id},
-        )
-
-    gebucht = client.post(f"/api/v1/sales/offers/{angebots_id}/post", headers=kopf)
-    assert gebucht.status_code == 200
-    assert gebucht.json()["status"] == "angenommen"
+# Angebot: Druck und Versand laufen seit BELEG-052 ueber die Belegmaske (tests/test_beleg_liste.py).

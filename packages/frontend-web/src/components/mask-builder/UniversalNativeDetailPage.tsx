@@ -1,4 +1,5 @@
 import { prefillDeclaredInputs } from './runtime/resource-response-adapter'
+import { readDownload, saveReadDownload } from './runtime/read-download'
 /**
  * Generic page wrapper for native ScreenDefinitions (temporary=False).
  * Replaces legacy handcrafted detail pages when a non-temporary SD is available.
@@ -246,6 +247,15 @@ function NativeExistingDetailPage({
       return
     }
     const actionDef = schemaQuery.data?.actions?.find((a) => a.key === actionKey)
+    // Lese-Download der Objektseite (z. B. Belegdruck als PDF): kein Kommando, kein Pending-Zustand.
+    if (actionDef?.download && !actionDef.inputFields?.length) {
+      try {
+        saveReadDownload(await readDownload(actionDef, {}, entityId))
+      } catch (error) {
+        setActionError(error instanceof Error ? error.message : 'Der Download ist fehlgeschlagen.')
+      }
+      return
+    }
     const routeTemplate = actionDef?.navigationRoute
     if (routeTemplate) {
       const entity = (runtime.entityData ?? {}) as Record<string, unknown>

@@ -122,7 +122,7 @@ describe('situative Inbox-Signale', () => {
     expect(work.actions[0]?.label).toBe('Rechnungseingang erfassen')
     expect(work.actions[1]?.target.route).toBe('/einkauf/lieferschein-erfassung?inbox=INBOX-LS')
     expect(work.actions[1]?.label).toBe('Zur Übersicht')
-    expect(work.actions[2]?.target.route).toBe('/sales/credit-notes?inbox=INBOX-G')
+    expect(work.actions[2]?.target.route).toBe('/belege/sales_credit_memo?inbox=INBOX-G')
     expect(work.actions[2]?.label).toBe('Zur Übersicht')
     expect(work.actions[3]?.target.route).toBe('/weighing?inbox=INBOX-W')
     expect(work.actions[3]?.label).toBe('Zur Übersicht')
@@ -172,7 +172,7 @@ describe('situative Inbox-Signale', () => {
     const note = ranked.find((entry) => entry.action.id === 'inbox.queue.INBOX-LS')
     expect(note?.action.target.route).toBe('/einkauf/lieferschein-erfassung?inbox=INBOX-LS')
     expect(ranked.find((entry) => entry.action.id === 'inbox.queue.INBOX-G')?.action.target.route).toBe(
-      '/sales/credit-notes?inbox=INBOX-G',
+      '/belege/sales_credit_memo?inbox=INBOX-G',
     )
     expect(ranked.find((entry) => entry.action.id === 'inbox.queue.INBOX-W')?.action.target.route).toBe(
       '/weighing?inbox=INBOX-W',

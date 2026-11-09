@@ -320,6 +320,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/nummernkreise": {
+      "definition_hash": "78e59c28409853c26c0830ae5e9902c7c6b9edc8e87e5fc6f32222b37a34515e",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/omnichannel-handelskonflikt": {
       "definition_hash": "7e6c0e96a32d6332ade678ec48ba003c8574e825444ac76737f724bbbaace613",
       "gates_passed": [
@@ -344,6 +355,28 @@
     },
     "admin/qualitaets-cockpit": {
       "definition_hash": "38020ff26fc53faf91997b36c6c9ad82b46081bb2530a7688bc14821eda90f55",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/report-berechtigungen": {
+      "definition_hash": "6a883d22e2d3feb7015311b9ae38ccc9ef0fbf21b72d6b715b620388147c5c38",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/rollen-verwaltung": {
+      "definition_hash": "13bb56ebbf468f2fe4b0141b26657e003759cca5c229e040cd5a6b3020639806",
       "gates_passed": [
         "A",
         "B",
@@ -386,6 +419,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/terminologie": {
+      "definition_hash": "3dcf246b3f9b843e2e7a4dc9f3298d44a3df4d0b755ddc8ec9ca56f61c1cfd4c",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/token-consumption": {
       "definition_hash": "9e4d8cd2c0b45579190d8650f3351e7d05b7fdd6c765acd540ad77619080f8fd",
       "gates_passed": [
@@ -410,6 +454,28 @@
     },
     "admin/webhooks-liste": {
       "definition_hash": "893bebd9188610264a49f039bcfa8896268584d92f23c3943dd7c7998dbd8238",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/webshop": {
+      "definition_hash": "daa900cd64effe6c2578ebce070298f7bfba6a519272ce798764a2c99e3335d0",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/webshop-bestellungen": {
+      "definition_hash": "091ba755ee523a0251531bb9efadbcbab752159d35f3bb1146aba5d8bdeb9ab8",
       "gates_passed": [
         "A",
         "B",
@@ -1497,8 +1563,30 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agrar/wetterwarnung": {
+      "definition_hash": "039be5b30ddaf0c5e67d753c9149b5aff7cf5315d818088fb14b93d2cfcda177",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "agrar/wiegeschein-detail": {
       "definition_hash": "ef3487b2950d134de6f882d71097e5b37cf874a53c78743163260ab78639db32",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "agribusiness/farmers": {
+      "definition_hash": "ec5b2b94e86f680fea7ef46f6b880532d3ec6c77369083f61dcb74b689bca10d",
       "gates_passed": [
         "A",
         "B",
@@ -2872,17 +2960,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "contracts-v2": {
-      "definition_hash": "79dc38139722a1eab53659a8061eb401e75bfb93cd135d835d20bc6ec34de5af",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "contracts/contract": {
       "definition_hash": "0e6042b6077ac50fe454a099ae5cd31f8a8ac0155fcfe4b8d419a8ff30659639",
       "gates_passed": [
@@ -3169,17 +3246,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "crm/angebot-erstellen": {
-      "definition_hash": "baba28d2169a3c8ff79a6d54f74b1891cc48b78283e9c48836843a9a653edb9e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "crm/anruf-protokoll": {
       "definition_hash": "cfac61ec5bfdd9f7359dc1826be069b7c2e3700ffc73ffe5286fe4053374eaa9",
       "gates_passed": [
@@ -3357,7 +3423,7 @@
       "version": "1.0.0"
     },
     "crm/customer-360": {
-      "definition_hash": "8989a2b7983a5766bb8d6217ef915517194f6d0b42c80f075b61f5f94e96128b",
+      "definition_hash": "ebdaca7f2257dd3db035111b447c056ce404d58c0852c0830fa0dc57d4a8297e",
       "gates_passed": [
         "A",
         "B",
@@ -3544,7 +3610,7 @@
       "version": "1.0.0"
     },
     "crm/kunden-cockpit": {
-      "definition_hash": "38d3feab1bd264d31cb344f5c74e0f46374ea7431c80a2324362549f680f7c7c",
+      "definition_hash": "da1bceccaa3b919baf88a56aa80156588c24babb7a817a84ae7f2347bc717bac",
       "gates_passed": [
         "A",
         "B",
@@ -3686,6 +3752,28 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "crm/vertreterprovisionen": {
+      "definition_hash": "4c3b82ac349901d894e33d763474fab1bdf453923ccc4315a0bfda4271697936",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "crm/vertreterprovisionen-staffeln": {
+      "definition_hash": "21b8fe94d439e664e012da6e5b9115b67675854978f2056c742c2fcff27937e8",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "crm/wettbewerber": {
       "definition_hash": "7ca9f1c9f1e045ea4c3989dc6d7462d9eb36e6aefd62c709b772de4acbd5375b",
       "gates_passed": [
@@ -3764,7 +3852,7 @@
       "version": "1.0.0"
     },
     "dashboard/verkauf": {
-      "definition_hash": "8b7e3c49b322162456fa46d228346fa3f6e9d3b27db4579906e7af16079851d4",
+      "definition_hash": "adda8aedbafdfa7fc2f933940d2cfd0b4f5e6885db0925ca0e5e8e294cedd2d2",
       "gates_passed": [
         "A",
         "B",
@@ -3809,6 +3897,17 @@
     },
     "disposition/lager-reichweite": {
       "definition_hash": "211b3e95ea86072915710aada7eccea13134ffb427e53b106a7afabc030b8e3d",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "disposition/regeln": {
+      "definition_hash": "1525781b28b449093bcf8b04d8141b0efb8f671ba48df0090e0f57d5192775ce",
       "gates_passed": [
         "A",
         "B",
@@ -4225,61 +4324,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/bestellungen": {
-      "definition_hash": "3158a009e058e79bc58428ebb3dc6405d9347c1c26cb986b76eb00e2d9e733e0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlaege-liste": {
-      "definition_hash": "f8973523a5361b74d5fc9b2702448c67ba04226da1695dd1813ff08d501f8095",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-kontrakt": {
-      "definition_hash": "cf9b7f963c64a96f3d2e218742259beb2b16cdedaecfa7a0060fbfed021154c8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-lager": {
-      "definition_hash": "dd4b862fd34958713217c5904c6debe577fad3db4854d1196156b0f2e8182d90",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-verbrauch": {
-      "definition_hash": "fcba50a9b2b520fffd0c5b7549b53f3502db5a40062dfda49dd72c04cb13a3ae",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/dienstleistungen-haltung-liste": {
       "definition_hash": "618048e680ca9a0f0d7769e15b90a41df72f7cdfeaada321127387174778a650",
       "gates_passed": [
@@ -4304,17 +4348,6 @@
     },
     "einkauf/frachtauftraege-liste": {
       "definition_hash": "0c7e967add93149e8e438cd542ffea5bfe01336a6d386a047904284bbe595698",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/gutschrift-belastung": {
-      "definition_hash": "7b27a331f3a1ab52cb3394db7fed9f82521e1152cca3bbf7eed61c670010f3f3",
       "gates_passed": [
         "A",
         "B",
@@ -4401,17 +4434,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/lieferschein-erfassen": {
-      "definition_hash": "39d1c023a5924cb51d028e23300522aa8669af9186f1c3fb4b4dfee6d1cd9b8a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/mahnwesen-lieferanten": {
       "definition_hash": "aa88145029b2bb6139cdd10aeaf9de3bee46d824c27765ab162b1b3b8bc929d1",
       "gates_passed": [
@@ -4441,25 +4463,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnungseingaenge-liste": {
-      "definition_hash": "59b29ec51d10fc0dcd00fca321232271752a63758c2622bc8402708d67754bf0",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/rechnungseingang/neu": {
-      "definition_hash": "7381d1db0c71e30e0f85510ea3f4236ce364437d8fe47cd18cab97fcc733e605",
-      "gates_passed": [
-        "B"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -5019,19 +5022,7 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/ap-invoices-liste": {
-      "definition_hash": "aaeae073685d906e8fd468bc57d3ffd0d667d43d1d25171d671a5a1843b58c08",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
+        "C"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -5197,25 +5188,6 @@
         "B",
         "C",
         "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/invoices-list": {
-      "definition_hash": "65d66771dd82a26929d088f0c6bcc8e6c74b7bc66798d720961991bc1622afe6",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "finance/invoices/new": {
-      "definition_hash": "4fa511e29dfaf41e43ec69aa0fbc942cdeef720d4ca813cfd4b42791dd8fbe54",
-      "gates_passed": [
-        "B"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -5902,28 +5874,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "kontrakte/KontraktAlarmDashboard": {
-      "definition_hash": "3ee50b171689d5d3a3eceeebc2e1457bef5392d91e1ec8619eee9c1b34352c3d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "kontrakte/LstKontraktUebersicht": {
-      "definition_hash": "3ca5bb71e4fc73ea1eabd5fc2054381831c96a394f9264d492ca098783ba253e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "kontrakte/kontraktklassen": {
       "definition_hash": "8837912a9ee72aa2e9c3e8588a41ba1cd713e8bbf01cd5b32410ebfdd6177843",
       "gates_passed": [
@@ -5937,17 +5887,6 @@
     },
     "kontrakte/kontraktklassen-liste": {
       "definition_hash": "e22ba929432fa93a4aa57a4a4f7732b196f3833b5e149dec0819749fb987ac8d",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "kontrakte/liste": {
-      "definition_hash": "d3f106447bb6ae4fb8cefa02fed598beb3dafa64c79677affbc5e9567e17256d",
       "gates_passed": [
         "A",
         "B",
@@ -6397,6 +6336,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "nawaro/raps-profil": {
+      "definition_hash": "00c02d8b5b0c90627850e8c03f6efe4802a1015fd2636bf8fefb690505e6f192",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "personal/bewerbung-einwilligung": {
       "definition_hash": "5fd0921423f341592353d0f13a1c2e617d12bf9d6d8dc07f455aee222cbb2297",
       "gates_passed": [
@@ -6559,7 +6509,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": false,
+      "studio_draft_clean": true,
       "version": "1.0.0"
     },
     "platform/analytics": {
@@ -7178,39 +7128,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/angebote-liste": {
-      "definition_hash": "0464f2de0fecd77805b1402c5717334efeeb9a983875cc3b87c04f85b12fe137",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/angebote/neu": {
-      "definition_hash": "acc056cce1b0bdc87c9abdaf9f09ddf9442db9119de352193ffcad9b4223fdaf",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/auftraege-liste": {
-      "definition_hash": "333dca6bb428be1ce1ac0dae5c7b62632ef841bcef79339255e4a529e732fee7",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/auftrag-lieferschein-abgleich": {
       "definition_hash": "326765cc34a93a1adef050e39d2dfcceeed073e35af6c0f9aaecb823f43ec657",
       "gates_passed": [
@@ -7233,74 +7150,18 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/credit-notes": {
-      "definition_hash": "81f87916b000b1b39f67d606956b8b0dca0eccd69e9a82e1496cfa80585d0c46",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/delivery-editor": {
-      "definition_hash": "7a93d679d6f0635e81be01b822702bc6596740ea13dc1da41ac2358ba3fc4f85",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/delivery-editor-new": {
-      "definition_hash": "1fd161a9e588023790e2eb77acd200807dedac0dba98e1fb4ff0cb3cd20f19d2",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/delivery-note": {
       "definition_hash": "09124ca64b0e7519c38343b010893368c02b8c946250ceb2d9da49d4e0b8682e",
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/gutschrift": {
-      "definition_hash": "56cc7d02dc2eb8e75e9183edda024e82cdd424d687cfec65e1113819a797622e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
+        "C"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
     "sales/invoice": {
       "definition_hash": "942fb0aba4e7dacb86cd3ccf2364fdfef2cc4cdbbff4a3d1b7c81caaaa0187c8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "sales/invoices": {
-      "definition_hash": "5f83bdfe233a66858877b70602faae2fd6f3ecba3104e7d3fa8669e91063e0da",
       "gates_passed": [
         "A",
         "B",
@@ -7343,17 +7204,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/lieferungen-liste": {
-      "definition_hash": "c3ba55546c9ef4ed2b6973b292e450995d8ad50b265756725b114f297240a069",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": false,
-      "version": "1.0.0"
-    },
     "sales/sales-order": {
       "definition_hash": "9942f1affcdf32944d334f1bdd345b7927a89400739ae07591744fc035d4a0da",
       "gates_passed": [
@@ -7378,6 +7228,17 @@
     },
     "schaeden/meldung": {
       "definition_hash": "3b3d1938685f196ad1f822457cf599285619478890e46d46b39a26c7e50d76eb",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "schichtplan/liste": {
+      "definition_hash": "295bdf340948419845f7050753d4bc596b1a3efdeb5bf5fc3278820e4da50da4",
       "gates_passed": [
         "A",
         "B",
@@ -7881,6 +7742,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "verkauf/gutschrift-buchungsvorschlaege": {
+      "definition_hash": "d042719e0e970bd4bdfebe5fb7eb10d701c70be1811bfb5761c3afc1ebc2d9d3",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "verkauf/kommissions-auftraege": {
       "definition_hash": "72caf5306ef6f280d2a92d41d8fdc1cda64b795fb37dff5af41f7213e7c92eb5",
       "gates_passed": [
@@ -7925,39 +7797,6 @@
     },
     "verkauf/kunden-stamm-enhanced": {
       "definition_hash": "df0384c14718393b72d043e4da5437ffa9fdfc078d3af5d1e1aeac8ba523d3d8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/lieferschein-erfassung": {
-      "definition_hash": "15654da6b9c23b9d40782787713bc448c48ecc1b74731eef55feb22d9dea307a",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/rechnungen": {
-      "definition_hash": "aa759923e6ff03fcdaa36d96904e7c744f31e27f5da189c240d04e09ef799546",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "verkauf/rechnungen/neu": {
-      "definition_hash": "e4022fe3dab6cedc8e7b33e66748be6ed7c4732480901b41765231e16ab7d36b",
       "gates_passed": [
         "A",
         "B",
@@ -8176,6 +8015,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "wissen/wissensbasis": {
+      "definition_hash": "67d892bac69ff004ba2049e203c35c25ba9cc054f85a73fa48b4d537d3bb7404",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "workflow/flow-spine-complaint-to-resolution": {
       "definition_hash": "f73be495a2063f5508d124cf012656e4b705e9c22bcbdaf5d7e8dc32c18c8e13",
       "gates_passed": [
@@ -8365,6 +8215,17 @@
     },
     "workflows/supervisor": {
       "definition_hash": "52a6433569f57a664649cb4d1cecebe6197a177fcf8e2dc452702daf17f8ce12",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "workflows/trigger": {
+      "definition_hash": "41ac03552f703fdc002fbe29382a14561d7a43948b2c96bbba17e36c9d3bb5ab",
       "gates_passed": [
         "A",
         "B",

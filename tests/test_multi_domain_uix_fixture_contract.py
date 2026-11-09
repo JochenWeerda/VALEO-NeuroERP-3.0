@@ -10,6 +10,6 @@ def test_multi_domain_uix_fixtures_match_registered_builders():
         "packages/frontend-web/src/__tests__/fixtures/multi-domain-uix-builder-contracts.json"
     )
     schemas = json.loads(fixture.read_text(encoding="utf-8"))
-    assert len(schemas) == 48
+    assert len(schemas) == 47  # Eingangsrechnungs-Erfassung seit BELEG-052 in der Belegmaske
     for screen_id, schema in schemas.items():
         assert schema == get_screen_definition(screen_id), screen_id

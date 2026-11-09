@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07",
+  "generatedAt": "2026-11-09",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -4749,6 +4749,40 @@
       ]
     },
     {
+      "mask_id": "agrar/wetterwarnung",
+      "title": "Wetterwarnungen",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__wetterwarnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/wetterwarnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/wetterwarnung/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/wetterwarnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "agrar/wiegeschein-detail",
       "title": "Wiegeschein detail",
       "domain": "agrar",
@@ -4769,6 +4803,40 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agribusiness/farmers",
+      "title": "Landwirte",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agribusiness__farmers/:entityId",
+      "agent_contract_url": "/api/v1/masks/agribusiness/farmers/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agribusiness/farmers/screen-definition",
+      "readiness_url": "/api/v1/masks/agribusiness/farmers/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -5434,6 +5502,40 @@
       ]
     },
     {
+      "mask_id": "disposition/regeln",
+      "title": "Positionsregeln",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/disposition__regeln/:entityId",
+      "agent_contract_url": "/api/v1/masks/disposition/regeln/agent-contract",
+      "screen_definition_url": "/api/v1/masks/disposition/regeln/screen-definition",
+      "readiness_url": "/api/v1/masks/disposition/regeln/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "foerderung/liste",
       "title": "Foerderantraege",
       "domain": "agrar",
@@ -5465,6 +5567,1073 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/abrechnung",
+      "title": "Abrechnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__abrechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/abrechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/abrechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/abrechnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/alarme",
+      "title": "Kontrakt-Alarme",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__alarme/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/alarme/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/alarme/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/alarme/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/engagement-artikel",
+      "title": "Engagement je Artikel",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__engagement-artikel/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/engagement-artikel/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/engagement-artikel/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/engagement-artikel/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/engagement-partei",
+      "title": "Engagement je Partner",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__engagement-partei/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/engagement-partei/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/engagement-partei/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/engagement-partei/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/erfuellung",
+      "title": "Erfüllungsstand",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__erfuellung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/erfuellung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/erfuellung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/erfuellung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/fixierung",
+      "title": "Fixierung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__fixierung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/fixierung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/fixierung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/fixierung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/mahnung",
+      "title": "Kontraktmahnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__mahnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/mahnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/mahnung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/mahnung/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_uebersicht",
+          "label": "Kontrakte",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt-liste/uebersicht",
+      "title": "Kontrakte",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt-liste__uebersicht/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt-liste/uebersicht/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt-liste/uebersicht/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt-liste/uebersicht/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Erfüllungsstand",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Fixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Abrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_mahnung",
+          "label": "Kontraktmahnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_alarme",
+          "label": "Kontrakt-Alarme",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_artikel",
+          "label": "Engagement je Artikel",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste."
+        },
+        {
+          "key": "ansicht_engagement_partei",
+          "label": "Engagement je Partner",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt/abrechnung",
+      "title": "Kontraktabrechnung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt__abrechnung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt/abrechnung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt/abrechnung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt/abrechnung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "abrechnung_uebergeben",
+          "label": "An Abrechnung übergeben",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Kontrakterfüllung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakterfüllung desselben Kontrakts."
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Kontraktfixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktfixierung desselben Kontrakts."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt/erfuellung",
+      "title": "Kontrakterfüllung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt__erfuellung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt/erfuellung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt/erfuellung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt/erfuellung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "mahnen",
+          "label": "Mahnen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_fixierung",
+          "label": "Kontraktfixierung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktfixierung desselben Kontrakts."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Kontraktabrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktabrechnung desselben Kontrakts."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "kontrakt/fixierung",
+      "title": "Kontraktfixierung",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/kontrakt__fixierung/:entityId",
+      "agent_contract_url": "/api/v1/masks/kontrakt/fixierung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/kontrakt/fixierung/screen-definition",
+      "readiness_url": "/api/v1/masks/kontrakt/fixierung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "fixieren",
+          "label": "Fixieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "notierung_erfassen",
+          "label": "Notierung erfassen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "kontrakt.update",
+          "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_erfuellung",
+          "label": "Kontrakterfüllung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontrakterfüllung desselben Kontrakts."
+        },
+        {
+          "key": "ansicht_abrechnung",
+          "label": "Kontraktabrechnung",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Kontraktabrechnung desselben Kontrakts."
         }
       ],
       "sensitive_fields": [],
@@ -5547,27 +6716,16 @@
       ]
     },
     {
-      "mask_id": "kontrakte/liste",
-      "title": "Kontrakte",
+      "mask_id": "nawaro/raps-profil",
+      "title": "Raps-Profile",
       "domain": "agrar",
       "process_keys": [],
-      "rollout_route": "/mask-rollout/kontrakte__liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/kontrakte/liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/kontrakte/liste/screen-definition",
-      "readiness_url": "/api/v1/masks/kontrakte/liste/readiness",
+      "rollout_route": "/mask-rollout/nawaro__raps-profil/:entityId",
+      "agent_contract_url": "/api/v1/masks/nawaro/raps-profil/agent-contract",
+      "screen_definition_url": "/api/v1/masks/nawaro/raps-profil/screen-definition",
+      "readiness_url": "/api/v1/masks/nawaro/raps-profil/readiness",
       "risk_summary": "low",
       "actions": [
-        {
-          "key": "neu",
-          "label": "Neuer Kontrakt",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
         {
           "key": "export",
           "label": "CSV-Export",
@@ -7831,41 +8989,6 @@
       ]
     },
     {
-      "mask_id": "crm/angebot-erstellen",
-      "title": "Angebot erstellen",
-      "domain": "crm",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/crm__angebot-erstellen/:entityId",
-      "agent_contract_url": "/api/v1/masks/crm/angebot-erstellen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/crm/angebot-erstellen/screen-definition",
-      "readiness_url": "/api/v1/masks/crm/angebot-erstellen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "crm.customer.search",
-        "crm.customer.summary360",
-        "crm.customer.open",
-        "crm.contact.log",
-        "crm.activity.create",
-        "crm.activity.update",
-        "crm.activity.delete",
-        "crm.lead.qualify"
-      ]
-    },
-    {
       "mask_id": "crm/anruf-protokoll",
       "title": "Anruf-Protokoll",
       "domain": "crm",
@@ -8593,17 +9716,6 @@
           "stubReason": null
         },
         {
-          "key": "edit",
-          "label": "Erweiterte Pflege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
           "key": "create_activity",
           "label": "Aktivitaet anlegen",
           "dangerLevel": "safe",
@@ -8611,6 +9723,72 @@
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansprechpartner_anlegen",
+          "label": "Ansprechpartner anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anweisung_anlegen",
+          "label": "Chef-Anweisung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anschrift_anlegen",
+          "label": "Anschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "cpd_anlegen",
+          "label": "CPD-Konto anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rabatt_anlegen",
+          "label": "Rabatt anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "preis_anlegen",
+          "label": "Preisvereinbarung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
         }
@@ -9292,17 +10470,6 @@
           "stubReason": null
         },
         {
-          "key": "edit",
-          "label": "Erweiterte Pflege",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
           "key": "create_activity",
           "label": "Aktivitaet anlegen",
           "dangerLevel": "safe",
@@ -9310,6 +10477,72 @@
           "requiresConfirmation": false,
           "permission": "crm.activity.create",
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/create_activity",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansprechpartner_anlegen",
+          "label": "Ansprechpartner anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anweisung_anlegen",
+          "label": "Chef-Anweisung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "anschrift_anlegen",
+          "label": "Anschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "cpd_anlegen",
+          "label": "CPD-Konto anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rabatt_anlegen",
+          "label": "Rabatt anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "preis_anlegen",
+          "label": "Preisvereinbarung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.customer.update",
+          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
         }
@@ -9920,6 +11153,109 @@
       ]
     },
     {
+      "mask_id": "crm/vertreterprovisionen",
+      "title": "Vertreterprovisionen",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__vertreterprovisionen/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/vertreterprovisionen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/vertreterprovisionen/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/vertreterprovisionen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Provisionsgruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.vertreter.update",
+          "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_staffeln",
+          "label": "Staffelzeilen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Staffelzeilen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/vertreterprovisionen-staffeln",
+      "title": "Provisionsstaffeln",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__vertreterprovisionen-staffeln/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "ansicht_vertreterprovisionen",
+          "label": "Provisionsgruppen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Provisionsgruppen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/wettbewerber",
       "title": "Wettbewerber",
       "domain": "crm",
@@ -10509,6 +11845,787 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "beleg-liste/goods-receipt",
+      "title": "Wareneingänge",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__goods-receipt/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/goods-receipt/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/goods-receipt/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/goods-receipt/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Wareneingang anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-credit-memo",
+      "title": "Einkaufsgutschriften",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-credit-memo/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-credit-memo/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Einkaufsgutschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-invoice",
+      "title": "Eingangsrechnungen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-invoice/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Eingangsrechnung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_purchase_order",
+          "label": "Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Bestellungen."
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/purchase-order",
+      "title": "Bestellungen",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__purchase-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-order/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/purchase-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Bestellung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_goods_receipt",
+          "label": "Wareneingänge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Wareneingänge."
+        },
+        {
+          "key": "ansicht_purchase_invoice",
+          "label": "Eingangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Eingangsrechnungen."
+        },
+        {
+          "key": "ansicht_purchase_credit_memo",
+          "label": "Einkaufsgutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/bedarf",
+      "title": "Bestellvorschlag Bedarf",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__bedarf/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/bedarf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/bedarf/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/bedarf/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/gespeichert",
+      "title": "Gespeicherte Bestellvorschläge",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__gespeichert/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/gespeichert/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/gespeichert/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/gespeichert/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/lager",
+      "title": "Bestellvorschlag Lager",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__lager/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/lager/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/lager/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/lager/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/rohware",
+      "title": "Bestellvorschlag Rohware",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__rohware/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/rohware/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/rohware/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/rohware/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/verkauf",
+      "title": "Bestellvorschlag Verkauf",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__verkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/verkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/verkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/verkauf/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "dashboard/einkauf",
       "title": "Einkaufs-Dashboard",
       "domain": "einkauf",
@@ -11086,182 +13203,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/bestellungen",
-      "title": "Bestellungen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellungen/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellungen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neue Bestellung",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlaege-liste",
-      "title": "Bestellvorschlaege",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlaege-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-kontrakt",
-      "title": "Bestellvorschlag Kontrakt",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-kontrakt/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-lager",
-      "title": "Bestellvorschlag Lager",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-lager/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-verbrauch",
-      "title": "Bestellvorschlag Verbrauch",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-verbrauch/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/dienstleistungen-haltung-liste",
       "title": "Dienstleistungen Haltung",
       "domain": "einkauf",
@@ -11348,39 +13289,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/gutschrift-belastung",
-      "title": "Gutschrift/Belastung",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__gutschrift-belastung/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/gutschrift-belastung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/gutschrift-belastung/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/gutschrift-belastung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -11636,39 +13544,6 @@
       ]
     },
     {
-      "mask_id": "einkauf/lieferschein-erfassen",
-      "title": "Lieferschein erfassen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__lieferschein-erfassen/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/lieferschein-erfassen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/lieferschein-erfassen/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/lieferschein-erfassen/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
       "mask_id": "einkauf/mahnwesen-lieferanten",
       "title": "Mahnwesen Lieferanten",
       "domain": "einkauf",
@@ -11784,94 +13659,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rechnungseingaenge-liste",
-      "title": "Rechnungseingaenge",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnungseingaenge-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnungseingaenge-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Rechnungseingang erfassen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/rechnungseingang/neu",
-      "title": "Eingangsrechnung erfassen",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__rechnungseingang__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/rechnungseingang/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/rechnungseingang/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/rechnungseingang/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.ap.invoice.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "save",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.ap.invoice.create",
-          "commandEndpoint": "/api/v1/finance/ap/invoices/",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -13643,36 +15430,6 @@
       ]
     },
     {
-      "mask_id": "finance/ap-invoices-liste",
-      "title": "AP-Rechnungen",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__ap-invoices-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap-invoices-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap-invoices-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap-invoices-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
       "mask_id": "finance/ar-open-item",
       "title": "Offener Posten",
       "domain": "finance",
@@ -14187,77 +15944,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/invoices-list",
-      "title": "Invoices list",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__invoices-list/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/invoices-list/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/invoices-list/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/invoices-list/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/invoices/new",
-      "title": "Ausgangsrechnung erfassen",
-      "domain": "finance",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/finance__invoices__new/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/invoices/new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/invoices/new/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/invoices/new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.invoice.create",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "save",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "finance.invoice.create",
-          "commandEndpoint": "/api/v1/finance/invoices",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [],
@@ -16823,58 +18509,6 @@
       "readiness_url": "/api/v1/masks/kontrakte/FrmKontraktProtokoll/readiness",
       "risk_summary": "low",
       "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "kontrakte/KontraktAlarmDashboard",
-      "title": "KontraktAlarmDashboard",
-      "domain": "kontrakte",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/kontrakte__KontraktAlarmDashboard/:entityId",
-      "agent_contract_url": "/api/v1/masks/kontrakte/KontraktAlarmDashboard/agent-contract",
-      "screen_definition_url": "/api/v1/masks/kontrakte/KontraktAlarmDashboard/screen-definition",
-      "readiness_url": "/api/v1/masks/kontrakte/KontraktAlarmDashboard/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "kontrakte.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "kontrakte/LstKontraktUebersicht",
-      "title": "LstKontraktUebersicht",
-      "domain": "kontrakte",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/kontrakte__LstKontraktUebersicht/:entityId",
-      "agent_contract_url": "/api/v1/masks/kontrakte/LstKontraktUebersicht/agent-contract",
-      "screen_definition_url": "/api/v1/masks/kontrakte/LstKontraktUebersicht/screen-definition",
-      "readiness_url": "/api/v1/masks/kontrakte/LstKontraktUebersicht/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "kontrakte.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -20315,6 +21949,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "schichtplan/liste",
+      "title": "Schichtplan",
+      "domain": "personal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schichtplan__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/schichtplan/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schichtplan/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/schichtplan/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "admin/identity-budgets",
       "title": "Nutzer- und Agentenkontingente",
       "domain": "platform",
@@ -20364,6 +22024,45 @@
         "subject",
         "actor"
       ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "admin/nummernkreise",
+      "title": "Nummernkreise",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__nummernkreise/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/nummernkreise/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/nummernkreise/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/nummernkreise/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "konfigurieren",
+          "label": "Nummernkreis konfigurieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.number_range.update",
+          "commandEndpoint": "/api/v1/admin/number-ranges/actions/konfigurieren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "admin.postfach.speichern"
       ]
@@ -20427,6 +22126,123 @@
       "sensitive_fields": [
         "passwort"
       ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "admin/report-berechtigungen",
+      "title": "Report-Berechtigungen",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__report-berechtigungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/report-berechtigungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/report-berechtigungen/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/report-berechtigungen/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Berechtigung anlegen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.report_permission.update",
+          "commandEndpoint": "/api/v1/admin/report-permissions/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "admin/rollen-verwaltung",
+      "title": "Rollen",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__rollen-verwaltung/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/rollen-verwaltung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/rollen-verwaltung/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/rollen-verwaltung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Rolle anlegen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.role.update",
+          "commandEndpoint": "/api/v1/admin/rollen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rechte",
+          "label": "Berechtigungsmatrix",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Rechte je Rolle pflegt die Berechtigungsmatrix."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "admin/terminologie",
+      "title": "Terminologie",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__terminologie/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/terminologie/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/terminologie/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/terminologie/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "admin.postfach.speichern"
       ]
@@ -20757,6 +22573,34 @@
       ]
     },
     {
+      "mask_id": "wissen/wissensbasis",
+      "title": "Wissensbasis",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/wissen__wissensbasis/:entityId",
+      "agent_contract_url": "/api/v1/masks/wissen/wissensbasis/agent-contract",
+      "screen_definition_url": "/api/v1/masks/wissen/wissensbasis/screen-definition",
+      "readiness_url": "/api/v1/masks/wissen/wissensbasis/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "workflow/workflow-monitoring",
       "title": "Workflow-Monitoring",
       "domain": "platform",
@@ -20781,6 +22625,34 @@
       "agent_contract_url": "/api/v1/masks/workflows/supervisor/agent-contract",
       "screen_definition_url": "/api/v1/masks/workflows/supervisor/screen-definition",
       "readiness_url": "/api/v1/masks/workflows/supervisor/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "workflows/trigger",
+      "title": "Workflow-Trigger",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workflows__trigger/:entityId",
+      "agent_contract_url": "/api/v1/masks/workflows/trigger/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workflows/trigger/screen-definition",
+      "readiness_url": "/api/v1/masks/workflows/trigger/readiness",
       "risk_summary": "low",
       "actions": [
         {
@@ -22576,6 +24448,600 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/webshop",
+      "title": "Webshop-Anbindungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__webshop/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/webshop/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/webshop/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/webshop/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Shop anbinden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "verkauf.webshop.update",
+          "commandEndpoint": "/api/v1/webshop/konfigurationen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_bestellungen",
+          "label": "Webshop-Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Webshop-Bestellungen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "admin/webshop-bestellungen",
+      "title": "Webshop-Bestellungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__webshop-bestellungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/webshop-bestellungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/webshop-bestellungen/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/webshop-bestellungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "ansicht_webshop",
+          "label": "Webshop-Anbindungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Webshop-Anbindungen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-credit-memo",
+      "title": "Gutschriften",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-credit-memo/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-credit-memo/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-credit-memo/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-credit-memo/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Gutschrift anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-delivery",
+      "title": "Lieferscheine",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-delivery/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-delivery/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-delivery/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-delivery/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Lieferschein anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-invoice",
+      "title": "Ausgangsrechnungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-invoice/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-invoice/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-invoice/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-invoice/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Rechnung anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-offer",
+      "title": "Angebote",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-offer/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-offer/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-offer/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-offer/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Angebot anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_sales_order",
+          "label": "Aufträge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Aufträge."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "beleg-liste/sales-order",
+      "title": "Aufträge",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/beleg-liste__sales-order/:entityId",
+      "agent_contract_url": "/api/v1/masks/beleg-liste/sales-order/agent-contract",
+      "screen_definition_url": "/api/v1/masks/beleg-liste/sales-order/screen-definition",
+      "readiness_url": "/api/v1/masks/beleg-liste/sales-order/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "neu",
+          "label": "Auftrag anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "print",
+          "label": "Drucken",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_sales_offer",
+          "label": "Angebote",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Angebote."
+        },
+        {
+          "key": "ansicht_sales_delivery",
+          "label": "Lieferscheine",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Lieferscheine."
+        },
+        {
+          "key": "ansicht_sales_invoice",
+          "label": "Ausgangsrechnungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen."
+        },
+        {
+          "key": "ansicht_sales_credit_memo",
+          "label": "Gutschriften",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Belegliste Gutschriften."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
       "mask_id": "dashboard/sales-dashboard",
       "title": "Verkaufs-Dashboard",
       "domain": "sales",
@@ -22629,149 +25095,6 @@
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/angebote-liste",
-      "title": "Verkaufsangebote",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__angebote-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/angebote-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/angebote-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/angebote-liste/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neues Angebot",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        },
-        {
-          "key": "print",
-          "label": "Drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "import_csv",
-          "label": "CSV importieren",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": true,
-          "permission": "sales.offer.import_csv",
-          "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/angebote/neu",
-      "title": "Angebot erstellen",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__angebote__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/angebote/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/angebote/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/angebote/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/auftraege-liste",
-      "title": "Verkaufsauftraege",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__auftraege-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/auftraege-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/auftraege-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/auftraege-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Neuer Auftrag",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -22851,160 +25174,6 @@
       ]
     },
     {
-      "mask_id": "sales/credit-notes",
-      "title": "Gutschrift",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__credit-notes/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/credit-notes/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/credit-notes/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/credit-notes/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."
-        },
-        {
-          "key": "speichern",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.write",
-          "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "buchen",
-          "label": "Buchen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_freigeben",
-          "label": "Vorschlag freigeben",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_ablehnen",
-          "label": "Vorschlag ablehnen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "neu",
-          "label": "Neue Gutschrift",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/delivery-editor",
-      "title": "Delivery editor",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__delivery-editor/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-editor/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-editor/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-editor/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/delivery-editor-new",
-      "title": "Delivery editor new",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__delivery-editor-new/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-editor-new/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-editor-new/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-editor-new/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/delivery-note",
       "title": "Lieferschein",
       "domain": "sales",
@@ -23040,94 +25209,6 @@
       ]
     },
     {
-      "mask_id": "sales/gutschrift",
-      "title": "Gutschrift",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__gutschrift/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/gutschrift/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/gutschrift/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/gutschrift/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "position",
-          "label": "Position übernehmen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern."
-        },
-        {
-          "key": "speichern",
-          "label": "Als Entwurf speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.write",
-          "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "buchen",
-          "label": "Buchen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_freigeben",
-          "label": "Vorschlag freigeben",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "vorschlag_ablehnen",
-          "label": "Vorschlag ablehnen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": false,
-          "permission": "sales.gutschrift.post",
-          "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "neu",
-          "label": "Neue Gutschrift",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Leert die Eingabe fuer eine neue Gutschrift."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/invoice",
       "title": "Ausgangsrechnung",
       "domain": "sales",
@@ -23138,39 +25219,6 @@
       "readiness_url": "/api/v1/masks/sales/invoice/readiness",
       "risk_summary": "low",
       "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/invoices",
-      "title": "Ausgangsrechnungen",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__invoices/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/invoices/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/invoices/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/invoices/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "Liste exportieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.rechnung.lesen",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "sales.order.status",
@@ -23269,61 +25317,6 @@
       ]
     },
     {
-      "mask_id": "sales/lieferungen-liste",
-      "title": "Lieferscheine",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__lieferungen-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/lieferungen-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/lieferungen-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/lieferungen-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "neu",
-          "label": "Lieferschein erfassen",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
-        },
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        },
-        {
-          "key": "print",
-          "label": "Drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",
@@ -23383,26 +25376,26 @@
       ]
     },
     {
-      "mask_id": "verkauf/rechnungen",
-      "title": "Ausgangsrechnungen",
+      "mask_id": "verkauf/gutschrift-buchungsvorschlaege",
+      "title": "Gutschrift-Buchungsvorschläge",
       "domain": "sales",
       "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__rechnungen/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/rechnungen/readiness",
+      "rollout_route": "/mask-rollout/verkauf__gutschrift-buchungsvorschlaege/:entityId",
+      "agent_contract_url": "/api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/agent-contract",
+      "screen_definition_url": "/api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/screen-definition",
+      "readiness_url": "/api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/readiness",
       "risk_summary": "low",
       "actions": [
         {
           "key": "export",
-          "label": "Liste exportieren",
+          "label": "CSV-Export",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "sales.rechnung.lesen",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -24162,58 +26155,6 @@
       "mcp_tool_ids": []
     },
     {
-      "mask_id": "verkauf/lieferschein-erfassung",
-      "title": "Lieferschein erfassung",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__lieferschein-erfassung/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/lieferschein-erfassung/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/lieferschein-erfassung/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/lieferschein-erfassung/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "verkauf/rechnungen/neu",
-      "title": "Invoice editor",
-      "domain": "verkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/verkauf__rechnungen__neu/:entityId",
-      "agent_contract_url": "/api/v1/masks/verkauf/rechnungen/neu/agent-contract",
-      "screen_definition_url": "/api/v1/masks/verkauf/rechnungen/neu/screen-definition",
-      "readiness_url": "/api/v1/masks/verkauf/rechnungen/neu/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "verkauf.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": []
-    },
-    {
       "mask_id": "verkauf/unerledigte-auftrags-positionen",
       "title": "Unerledigte auftrags positionen",
       "domain": "verkauf",
@@ -24716,35 +26657,6 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
-    },
-    {
-      "mask_id": "contracts-v2",
-      "title": "Contracts v2",
-      "domain": "workspace",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/contracts-v2/:entityId",
-      "agent_contract_url": "/api/v1/masks/contracts-v2/agent-contract",
-      "screen_definition_url": "/api/v1/masks/contracts-v2/screen-definition",
-      "readiness_url": "/api/v1/masks/contracts-v2/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "workspace.fachaktion.katalog",
-        "workspace.fachaktion.resolve"
-      ]
     },
     {
       "mask_id": "inventory-reports",
@@ -25569,5 +27481,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 140
+  "event_count": 153
 }

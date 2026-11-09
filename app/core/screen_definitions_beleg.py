@@ -81,13 +81,19 @@ def alle_beleg_screen_definitions() -> dict[str, dict[str, Any]]:
     return {screen_id(art): build_beleg_screen_definition(art) for art in BELEGARTEN}
 
 
-# Native code release, restricted to the already approved visual-test tenant.
-# These definitions are not editable Studio drafts and never mint Studio proof.
-NATIVE_BELEG_TENANTS = frozenset({"00000000-0000-0000-0000-000000000051"})
+# Native code release. Bis 08.11.2026 nur im Sichtpruefungsmandanten; seit der Rollout-Freigabe des
+# Auftraggebers (08.11.2026) fuer jeden Mandanten. Ausgeliefert wird weiter nur im Mandantenkontext und immer die
+# versionierte Fassung (document_screen_versions); die Definitionen sind keine bearbeitbaren Studio-Entwuerfe.
+SICHTPRUEFUNG_MANDANT = "00000000-0000-0000-0000-000000000051"
+
+
+def beleg_freigegeben(tenant_id: str | None) -> bool:
+    """Die Belegfamilie gilt fuer jeden Mandanten; ohne Mandantenkontext gibt es keine Belegmaske."""
+    return isinstance(tenant_id, str) and bool(tenant_id.strip())
 
 
 def native_beleg_definition(mask_id: str, tenant_id: str) -> dict[str, Any] | None:
-    if tenant_id not in NATIVE_BELEG_TENANTS:
+    if not beleg_freigegeben(tenant_id):
         return None
     for art in BELEGARTEN:
         if screen_id(art) == mask_id:
