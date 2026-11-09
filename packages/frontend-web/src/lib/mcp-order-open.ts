@@ -1,11 +1,11 @@
 /**
  * Deep-Link helper for MCP tool `sales.order.status`.
- * Only relative `/sales/order-editor/{id}` paths are accepted (no open redirect).
+ * Only relative `/belege/sales_order/{id}` paths (Belegmaske, DocFlow) are accepted (no open redirect).
  */
 
 import { apiClient } from '@/lib/api-client'
 
-const ORDER_ROUTE_RE = /^\/sales\/order-editor\/([A-Za-z0-9][A-Za-z0-9._-]{0,63})$/
+const ORDER_ROUTE_RE = /^\/belege\/sales_order\/([A-Za-z0-9][A-Za-z0-9._-]{0,63})$/
 
 export type OrderOpenResult = {
   order_id: string
@@ -50,6 +50,6 @@ export async function callOrderStatusOpen(auftragNr: string): Promise<OrderOpenR
     auftrag_nr: String(body.auftrag_nr ?? key),
     status: String(body.status ?? ''),
     route_path: route,
-    screen_id: String(body.screen_id ?? 'sales/sales-order'),
+    screen_id: String(body.screen_id ?? 'beleg/sales-order'),
   }
 }
