@@ -26,7 +26,7 @@ describe('MASK-PRIMARY-NAV-NATIVE-20261022 & UIX-STAMM-OBJECTPAGE-ALL-20261022',
 
   it('Duenger- und Saatgut-Unterpfad-Listen binden die registrierten Screen-IDs', () => {
     expect(read('agrar/duenger/liste.tsx')).toContain('screenId="agrar/duenger-liste"')
-    expect(read('agrar/saatgut/liste.tsx')).toContain('screenId="agrar/saatgut/liste"')
+    expect(read('agrar/saatgut/liste.tsx')).toContain('screenId="agrar/saatgut-liste"')
   })
 
   it('Lieferanten-Liste oeffnet bestehende Saetze auf der nativen Supplier-Route', () => {

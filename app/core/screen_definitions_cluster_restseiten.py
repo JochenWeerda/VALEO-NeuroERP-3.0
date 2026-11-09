@@ -118,7 +118,8 @@ def _provision_ansicht(ziel: str, label: str) -> dict[str, Any]:
 
 
 def build_crm_vertreterprovisionen() -> dict[str, Any]:
-    from app.api.v1.endpoints.vertreterprovisionen_kommandos import GRUPPE_FELDER, STAFFEL_FELDER
+    from app.core.eingabefelder_stamm import PROVISION_GRUPPE_FELDER as GRUPPE_FELDER
+    from app.core.eingabefelder_stamm import PROVISION_STAFFEL_FELDER as STAFFEL_FELDER
 
     return build_stamm_list_screen(
         screen_id="crm/vertreterprovisionen", domain="crm", bundle="crm", title="Vertreterprovisionen",
@@ -163,7 +164,8 @@ def build_crm_vertreterprovisionen_staffeln() -> dict[str, Any]:
 
 
 def build_admin_nummernkreise() -> dict[str, Any]:
-    from app.api.v1.endpoints.number_ranges_kommandos import AENDERN_FELDER, KONFIGURIEREN_FELDER
+    from app.core.eingabefelder_stamm import NUMMERNKREIS_FORMAT_FELDER as AENDERN_FELDER
+    from app.core.eingabefelder_stamm import NUMMERNKREIS_KONFIGURIEREN_FELDER as KONFIGURIEREN_FELDER
 
     weg = "/api/v1/admin/number-ranges"
     return build_stamm_list_screen(

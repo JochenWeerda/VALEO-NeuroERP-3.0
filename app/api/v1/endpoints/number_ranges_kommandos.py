@@ -14,29 +14,13 @@ from sqlalchemy.orm import Session
 from app.auth.deps import get_current_user, require_roles
 from app.core.akteur import gepruefter_akteur
 from app.core.database import get_db
+from app.core.eingabefelder_stamm import KREISARTEN
 from app.core.tenant import get_tenant_id
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
 router = APIRouter(prefix="/admin/number-ranges", tags=["admin", "number-ranges", "mask-actions"])
 
 _NUR_ADMIN = [Depends(require_roles("admin"))]
-
-KREISARTEN = [("debtor_account", "Debitorenkonto"), ("creditor_account", "Kreditorenkonto"),
-              ("partner_number", "Partnernummer")]
-
-_FORMAT_FELDER: list[dict[str, Any]] = [
-    {"key": "prefix", "label": "Präfix", "type": "text"},
-    {"key": "start_number", "label": "Startnummer", "type": "number", "required": True},
-    {"key": "digit_count", "label": "Stellen", "type": "number", "required": True},
-    {"key": "reserved_prefix_digits", "label": "Reservierte Präfixstellen", "type": "number"},
-]
-KONFIGURIEREN_FELDER: list[dict[str, Any]] = [
-    {"key": "range_type", "label": "Nummernkreis", "type": "select", "required": True,
-     "options": [{"value": w, "label": t} for w, t in KREISARTEN]},
-    *_FORMAT_FELDER,
-]
-AENDERN_FELDER = _FORMAT_FELDER
-
 
 def _blockiert(meldung: str, feld: str = "_entity") -> list[dict]:
     return [{"field": feld, "message": meldung, "severity": "blocking"}]

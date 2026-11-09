@@ -29,26 +29,6 @@ from app.services.mask_action_runtime_service import MaskActionResult, run_deleg
 
 router = APIRouter(prefix="/crm/vertreter/provisionen", tags=["CRM - Vertreterprovisionen", "mask-actions"])
 
-RICHTUNGEN = [("vk", "Verkauf"), ("ek", "Einkauf")]
-PROVISIONSTYPEN = [("fix", "Fester Satz"), ("staffel_optpreis", "Staffel nach OPT-Preis"),
-                   ("staffel_preis_zuab", "Staffel nach Preis + Zu-/Abschlägen")]
-
-GRUPPE_FELDER: list[dict[str, Any]] = [
-    {"key": "gruppe_nr", "label": "Gruppe", "type": "text", "required": True},
-    {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
-    {"key": "richtung", "label": "Richtung", "type": "select", "required": True,
-     "options": [{"value": w, "label": t} for w, t in RICHTUNGEN]},
-    {"key": "provisionstyp", "label": "Provisionstyp", "type": "select", "required": True,
-     "options": [{"value": w, "label": t} for w, t in PROVISIONSTYPEN]},
-    {"key": "provisionssatz", "label": "Provisionssatz %", "type": "number"},
-]
-STAFFEL_FELDER: list[dict[str, Any]] = [
-    {"key": "vertreterklasse", "label": "Vertreterklasse", "type": "text"},
-    {"key": "ab_wert", "label": "Ab Wert (EUR)", "type": "number", "required": True},
-    {"key": "provisionssatz", "label": "Provisionssatz %", "type": "number", "required": True},
-]
-
-
 class StaffelzeileOut(BaseSchema):
     id: str
     gruppe_id: str

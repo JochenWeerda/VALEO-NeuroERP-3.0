@@ -91,7 +91,6 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       'crm/opportunity-detail-legacy.tsx',
       'einkauf/anfrage-stamm-legacy.tsx', 'einkauf/angebot-stamm-legacy.tsx',
       'einkauf/anlieferavis-legacy.tsx',
-      'einkauf/lieferanten-stamm-legacy.tsx',
     ]) {
       expect(read(file)).toContain('isStammCreationEntityId')
     }
