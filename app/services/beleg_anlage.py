@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
@@ -27,6 +27,38 @@ class Position:
     bezeichnung: Optional[str] = None
     einzelpreis: float = 0
     steuerschluessel: Optional[str] = None
+
+
+def _belegtag() -> datetime:
+    """Belegdatum ohne Angabe: der Geschaeftstag (00:00 UTC), nicht die Uhrzeit.
+
+    Mit der Uhrzeit trug jede Wiederholung einen anderen Inhalt, und der Wiederholungsschutz von DocFlow lehnte
+    denselben Auftrag als "anderer Inhalt" ab (09.11.2026).
+    """
+    from datetime import time
+
+    from app.core.business_time import business_today
+
+    return datetime.combine(business_today(), time(), tzinfo=timezone.utc)
+
+
+def position_in_preiseinheit(*, artikel_nr: str, menge: Any, einheit: Optional[str], einzelpreis: Any,
+                             preis_einheit: Optional[str], bezeichnung: Optional[str] = None) -> Position:
+    """Position mit der Menge in der Einheit des Preises (Preis je 100 kg -> Menge in dt).
+
+    Umrechnung nur ueber ``app/core/agrar_units.py``; ohne bekannten Faktor bleiben Menge und Einheit, wie sie sind.
+    """
+    from decimal import Decimal
+
+    from app.core.agrar_units import globaler_faktor
+
+    betrag, einheit_ = Decimal(str(menge or 0)), einheit or "t"
+    preiseinheit = {"100kg": "dt", "je_100kg": "dt"}.get(str(preis_einheit or ""), preis_einheit)
+    faktor = globaler_faktor(einheit_, preiseinheit) if preiseinheit else None
+    if faktor is not None:
+        betrag, einheit_ = (betrag * faktor).quantize(Decimal("0.0001")), preiseinheit
+    return Position(artikel_nr=artikel_nr, bezeichnung=bezeichnung, menge=float(betrag), einheit=einheit_,
+                    einzelpreis=float(Decimal(str(einzelpreis or 0))))
 
 
 def lege_beleg_an(db: Session, tenant_id: str, belegart: str, *, partner_id: Optional[str],
@@ -50,7 +82,7 @@ def lege_beleg_an(db: Session, tenant_id: str, belegart: str, *, partner_id: Opt
     anfrage = DocflowCreateRequest(
         doc_type=belegart, doc_number=entwurf, status="draft",
         source_system=quelle[:40], source_ref=referenz[:80], currency="EUR",
-        document_date=belegdatum or datetime.now(timezone.utc), idempotency_key=idempotenz, **partner,
+        document_date=belegdatum or _belegtag(), idempotency_key=idempotenz, **partner,
         items=[DocflowLineInput(article_number=p.artikel_nr, description=p.bezeichnung, quantity=p.menge,
                                 unit=p.einheit, unit_price=p.einzelpreis if variante.mit_preisen else 0,
                                 tax_code=p.steuerschluessel)

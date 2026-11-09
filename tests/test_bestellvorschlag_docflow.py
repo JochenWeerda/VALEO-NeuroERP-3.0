@@ -108,3 +108,26 @@ def test_berechnung_speichern_und_zu_bestellung_als_kommando(client, umgebung):
     zweit = client.post(f"/api/v1/einkauf/bestellvorschlaege/{angelegt['id']}/actions/zu_bestellung",
                         headers=kopf, json={}).json()
     assert zweit["success"] is False and "bereits bestellt" in zweit["error"]
+
+
+def test_neuroassist_workflow_legt_docflow_entwurf_an(umgebung):
+    """Agenten-Workflow Bestellvorschlag (09.11.2026): derselbe DocFlow-Weg, Menge in der Preiseinheit, wiederholbar."""
+    from sqlalchemy import text
+
+    from app.agents.workflows import bestellvorschlag as workflow
+
+    korrelation = str(uuid.uuid4())
+    posten = [{"article_id": str(uuid.uuid4()), "artikel_nr": "RAPS", "artikel_bezeichnung": "Raps", "menge": 2,
+               "einheit": "t", "einzelpreis": 45.0, "preis_einheit": "100kg"}]
+    erst = workflow._persist_purchase_order(tenant_id=umgebung["mandant"], supplier_id=umgebung["lieferant"],
+                                            items=posten, correlation_id=korrelation, ai_recommendations=[])
+    nochmal = workflow._persist_purchase_order(tenant_id=umgebung["mandant"], supplier_id=umgebung["lieferant"],
+                                               items=posten, correlation_id=korrelation, ai_recommendations=[])
+    assert erst == nochmal
+    with umgebung["engine"].connect() as c:
+        kopf = c.execute(text("SELECT doc_type, status, source_system, created_by FROM domain_docflow.document_headers "
+                              "WHERE id = :id"), {"id": erst}).mappings().one()
+        position = c.execute(text("SELECT quantity, unit FROM domain_docflow.document_items WHERE header_id = :id"),
+                             {"id": erst}).mappings().one()
+    assert (kopf["doc_type"], kopf["status"], kopf["source_system"]) == ("purchase_order", "draft", "neuroassist")
+    assert (float(position["quantity"]), position["unit"]) == (20.0, "dt")

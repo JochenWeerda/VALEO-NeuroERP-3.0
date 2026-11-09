@@ -20707,3 +20707,4 @@ scheiterte beim Berechnen. Umbau auf echte Annahmen (Betrag aus total_net_amount
 der Studio-Maske; /buchen schreibt Kreditoren-OP an der Finanz-Buchungsautoritaet vorbei.
 OFFEN ohne echte Datenquelle: einkauf/lieferantenbewertung (compat liefert feste 80 %/4,0), admin/externe-gates
 (simulierte Demo-Zustaende), agribusiness/field-service-tasks (compat ueber CRM-Faelle mit Demo-Daten).
+BELEG-052 Stufe 3b (09.11.2026): NeuroASSIST-Bestellvorschlag und Kernel-Kommando CreatePurchaseOrder legen DocFlow-Bestellentwuerfe an (vorher EinkaufBestellung bzw. Kopf ohne Positionen in public.einkauf_bestellungen mit lieferant_id als Ganzzahl). Mengenumrechnung in die Preiseinheit gemeinsam (beleg_anlage.position_in_preiseinheit). Behoben: lege_beleg_an setzte das Belegdatum auf die Uhrzeit, jede Wiederholung galt als anderer Inhalt.

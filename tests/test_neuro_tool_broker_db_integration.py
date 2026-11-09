@@ -31,10 +31,10 @@ def _registry_and_idempotency():
 def test_broker_create_purchase_order_command_step_with_db_session():
     db = SessionLocal()
     try:
-        db.execute(text("SELECT 1 FROM public.einkauf_bestellungen LIMIT 1"))
+        db.execute(text("SELECT 1 FROM domain_docflow.document_headers LIMIT 1"))  # Bestellungen in DocFlow (BELEG-052)
         db.rollback()
     except SQLAlchemyError:
-        pytest.skip("DB nicht erreichbar oder einkauf_bestellungen fehlt")
+        pytest.skip("DB nicht erreichbar oder DocFlow fehlt")
     finally:
         db.close()
 

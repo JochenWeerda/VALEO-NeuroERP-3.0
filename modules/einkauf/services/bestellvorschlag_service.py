@@ -895,23 +895,17 @@ def vorschlag_zu_bestellungen(
         # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung mit
         # fester Mehrwertsteuer 7 % und "Preis je 100 kg" gegen Menge in t). Die Menge steht in der Einheit des
         # Preises (z. B. dt bei Preis je 100 kg), umgerechnet ueber app/core/agrar_units.py; Steuer nur per Schluessel.
-        from app.core.agrar_units import globaler_faktor
-        from app.services.beleg_anlage import Position, lege_beleg_an
+        from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit
 
         belegpositionen = []
         netto = Decimal("0")
         for pos in positions:
-            menge = Decimal(str(pos.bestell_menge or pos.vorschlag_menge))
-            preis = Decimal(str(pos.letzter_preis or 0))
-            einheit = pos.einheit or "t"
-            preiseinheit = {"100kg": "dt", "je_100kg": "dt"}.get(str(pos.preis_einheit or "100kg"), pos.preis_einheit)
-            faktor = globaler_faktor(einheit, preiseinheit) if preiseinheit else None
-            if faktor is not None:
-                menge, einheit = (menge * faktor).quantize(Decimal("0.0001")), preiseinheit
-            belegpositionen.append(Position(artikel_nr=pos.artikel_nr or str(pos.article_id or ""),
-                                            bezeichnung=pos.artikel_bezeichnung or None, menge=float(menge),
-                                            einheit=einheit, einzelpreis=float(preis)))
-            netto += menge * preis
+            position = position_in_preiseinheit(
+                artikel_nr=pos.artikel_nr or str(pos.article_id or ""), bezeichnung=pos.artikel_bezeichnung or None,
+                menge=pos.bestell_menge or pos.vorschlag_menge, einheit=pos.einheit,
+                einzelpreis=pos.letzter_preis, preis_einheit=pos.preis_einheit or "100kg")
+            belegpositionen.append(position)
+            netto += Decimal(str(position.menge)) * Decimal(str(position.einzelpreis))
             pos.status = "bestellt"
         db.flush()
         beleg_id = lege_beleg_an(
