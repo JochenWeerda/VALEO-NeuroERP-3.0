@@ -1,6 +1,9 @@
-"""RLS-Domain Sales: Angebote, Auftraege, Lieferscheine, Gutschriften und Positionen als valeo_app.
+"""RLS-Domain Sales: Angebote, Lieferscheine, Gutschriften und Positionen als valeo_app.
 
 Pruefhilfe und Rahmen: tests/rls_domain_support.py (valeo_probe, zurueckgerollt).
+
+Auftraege sind seit BELEG-052 (``docflow_auftraege_uebernahme_20261109``) DocFlow-Belege; ``domain_crm.sales_orders``
+ist eine Sicht mit ``security_invoker`` - ihre Mandantentrennung ist die von DocFlow (``test_rls_domain_docflow``).
 """
 
 from __future__ import annotations
@@ -19,20 +22,21 @@ from rls_domain_support import A, B, SYSTEM
 pytestmark = pytest.mark.integration
 
 OFFERS, OFFER_ITEMS = "domain_crm.sales_offers", "domain_crm.sales_offer_items"
-ORDERS, ORDER_ITEMS = "domain_crm.sales_orders", "domain_crm.sales_order_items"
+ORDERS = "domain_crm.sales_orders"  # Sicht auf DocFlow
+DOCFLOW = "domain_docflow.document_headers"
 NOTES, NOTE_POSITIONS = "domain_sales.delivery_notes", "domain_sales.delivery_note_positions"
 CREDITS, CREDIT_LINES = "domain_sales.sales_credit_notes", "domain_sales.sales_credit_note_lines"
 RECEIPTS = "domain_sales.sales_delivery_notes"
 PICK_LISTS = "domain_inventory.pick_lists"
 CUSTOMERS = "domain_crm.customers"
-HEADS = (OFFERS, ORDERS, NOTES, CREDITS, RECEIPTS)
-CHILDREN = {ORDER_ITEMS: ("order_id", ORDERS), NOTE_POSITIONS: ("delivery_note_id", NOTES),
+HEADS = (OFFERS, NOTES, CREDITS, RECEIPTS)
+CHILDREN = {NOTE_POSITIONS: ("delivery_note_id", NOTES),
             CREDIT_LINES: ("credit_note_id", CREDITS), OFFER_ITEMS: ("offer_id", OFFERS)}
-ISOLATED = HEADS + (ORDER_ITEMS, NOTE_POSITIONS, CREDIT_LINES)
+ISOLATED = HEADS + (NOTE_POSITIONS, CREDIT_LINES)
 
 
 def _head_values(head: str, rows: dict, tenant: str) -> dict:
-    if head in (OFFERS, ORDERS, CREDITS):
+    if head in (OFFERS, CREDITS):
         return {"customer_id": rows["customer", tenant]}
     return {}
 
@@ -40,7 +44,7 @@ def _head_values(head: str, rows: dict, tenant: str) -> dict:
 def _child_values(child: str, parent_id: str, n: int) -> dict:
     column, _ = CHILDREN[child]
     values = {column: parent_id}
-    if child in (ORDER_ITEMS, OFFER_ITEMS, CREDIT_LINES):
+    if child in (OFFER_ITEMS, CREDIT_LINES):
         values["line_number"] = 100 + n
     if child == NOTE_POSITIONS:
         values["pos_nr"] = 100 + n
@@ -49,7 +53,7 @@ def _child_values(child: str, parent_id: str, n: int) -> dict:
 
 @pytest.fixture(scope="module")
 def probe():
-    with support.probe(ISOLATED + (OFFER_ITEMS, PICK_LISTS)) as conn:
+    with support.probe(ISOLATED + (OFFER_ITEMS, PICK_LISTS, DOCFLOW)) as conn:
         for role in support.APP_ROLES:
             for schema in ("domain_crm", "domain_sales", "domain_inventory"):
                 conn.execute(sa.text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {schema} TO {role}"))
@@ -63,6 +67,8 @@ def probe():
             for child, (_column, parent) in CHILDREN.items():
                 rows[child, tenant] = support.insert_row(conn, child, tenant,
                                                          **_child_values(child, rows[parent, tenant], 0))
+            rows[ORDERS, tenant] = support.insert_row(conn, DOCFLOW, tenant, doc_type="sales_order", status="open",
+                                                      customer_id=rows["customer", tenant])
         rows[PICK_LISTS, A] = support.insert_row(conn, PICK_LISTS, A)
         rows[PICK_LISTS, B] = support.insert_row(conn, PICK_LISTS, B)
         support.as_app(conn)
@@ -105,7 +111,7 @@ def test_keine_position_unter_fremdem_kopf(db, child):
     with tenant_scope(A, "test"):
         message = support.rejected_insert_with(conn, child, A, **_child_values(child, foreign, 2))
         assert f"fk_{child.split('.')[1]}_{column}_tenant" in message, message
-        extra = {ORDER_ITEMS: ", line_number = 999", OFFER_ITEMS: ", line_number = 999",
+        extra = {OFFER_ITEMS: ", line_number = 999",
                  CREDIT_LINES: ", line_number = 999", NOTE_POSITIONS: ", pos_nr = 999"}[child]
         message = support.rejected(conn, f"UPDATE {child} SET {column} = :p{extra} WHERE id = :i",
                                    {"p": foreign, "i": rows[child, A]})
@@ -122,7 +128,7 @@ def test_position_erbt_den_mandanten_vom_kontext(db):
 
 def test_kopf_mit_positionen_behaelt_seinen_mandanten(db):
     conn, rows = db
-    for head in (ORDERS, NOTES, CREDITS, OFFERS):
+    for head in (NOTES, CREDITS, OFFERS):
         message = support.as_owner_rejected(conn, f"UPDATE {head} SET tenant_id = :b WHERE id = :i",
                                             {"b": B, "i": rows[head, A]})
         assert "_tenant" in message, (head, message)
@@ -130,7 +136,7 @@ def test_kopf_mit_positionen_behaelt_seinen_mandanten(db):
 
 def test_kontextwechsel_savepoint_hintergrund_pool(db):
     conn, rows = db
-    support.assert_context_switch_and_savepoint(conn, ORDERS, rows[ORDERS, A], rows[ORDERS, B])
+    support.assert_context_switch_and_savepoint(conn, NOTES, rows[NOTES, A], rows[NOTES, B])
     support.assert_background_needs_explicit_context(conn, NOTES, rows[NOTES, A], rows[NOTES, B])
     support.assert_pool_reuse_keeps_no_tenant()
 
@@ -157,8 +163,9 @@ def test_fachkette_pickliste_bucht_nur_eigenen_auftrag(db):
             booked = run(ep.book_pick_list_order(rows[PICK_LISTS, A], ep.PickListBooking(order_id=rows[ORDERS, A]),
                                                  tenant_id=A, db=session))
             assert booked.status == "booked"
-            assert support.keys(conn, ORDERS, "status", "id = :i", {"i": rows[ORDERS, A]}) == {"in_delivery"}
+            # Den Auftrag (DocFlow) schreibt die Pickliste nicht um; sein Stand folgt aus den Folgebelegen.
+            assert support.keys(conn, ORDERS, "status", "id = :i", {"i": rows[ORDERS, A]}) == {"open"}
         with tenant_scope(B, "test"):
-            assert support.keys(conn, ORDERS, "status", "id = :i", {"i": rows[ORDERS, B]}) != {"in_delivery"}
+            assert support.keys(conn, ORDERS, "status", "id = :i", {"i": rows[ORDERS, B]}) == {"open"}
     finally:
         session.close()

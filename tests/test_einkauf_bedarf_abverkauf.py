@@ -352,30 +352,15 @@ def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artike
             ),
             {"k": kunden_id, "t": mandant, "nr": f"K-{uuid.uuid4().hex[:6].upper()}"},
         )
-        v.execute(
-            text(
-                "INSERT INTO domain_crm.sales_orders "
-                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
-                " description, total_amount, currency, status, version, delivery_date) "
-                "VALUES (:id, :t, :nr, :k, 'Testkunde', 'Bedarf aus Verkauf', '', 0, "
-                "        'EUR', 'open', 1, CURRENT_DATE + 7)"
-            ),
-            {
-                "id": auftrag_id,
-                "t": mandant,
-                "nr": f"AU-{uuid.uuid4().hex[:6].upper()}",
-                "k": kunden_id,
-            },
-        )
-        v.execute(
-            text(
-                "INSERT INTO domain_crm.sales_order_items "
-                "(id, tenant_id, order_id, line_number, article_number, description, "
-                " quantity, unit, unit_price, line_total) "
-                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 210, 105000)"
-            ),
-            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
-        )
+        from datetime import date, timedelta
+
+        from docflow_testbelege import lege_auftrag_an
+
+        lege_auftrag_an(v, mandant, kunden_id, f"AU-{uuid.uuid4().hex[:6].upper()}", kennung=auftrag_id,
+                        positionen=[{"artikel": artikel_nr, "bezeichnung": "Testweizen", "menge": 500, "einheit": "t",
+                                     "preis": 210}],
+                        bausteine={"texte": {"betreff": "Bedarf aus Verkauf"},
+                                   "lieferung": {"liefertermin": (date.today() + timedelta(days=7)).isoformat()}})
 
     try:
         zeilen = engine_verkauf(db, tenant_id=mandant)
@@ -389,13 +374,9 @@ def test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege(db, engine, artike
         assert zeile["vorschlag_menge"] == pytest.approx(430.0 * 1.2, rel=0.01)
     finally:
         with engine.begin() as v:
-            v.execute(
-                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
-                {"o": auftrag_id},
-            )
-            v.execute(
-                text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id}
-            )
+            from docflow_testbelege import entferne_belege
+
+            entferne_belege(v, [auftrag_id])
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -444,27 +425,16 @@ def auftrag_mit_position(engine, artikel_mit_abverkauf):
             text("SELECT article_number FROM domain_inventory.articles WHERE id = :a"),
             {"a": artikel_mit_abverkauf["artikel_id"]},
         ).scalar()
-        v.execute(
-            text(
-                "INSERT INTO domain_crm.sales_orders "
-                "(id, tenant_id, order_number, customer_id, customer_name, subject, "
-                " description, total_amount, currency, status, version, "
-                " delivery_date, delivery_address) "
-                "VALUES (:id, :t, :nr, :k, 'Hof Sonnenacker', 'Direktlieferung', '', 0, "
-                "        'EUR', 'open', 1, "
-                "        CURRENT_DATE + 14, 'Sonnenweg 3, 26123 Testdorf')"
-            ),
-            {"id": auftrag_id, "t": mandant, "nr": nummer, "k": kunden_id},
-        )
-        v.execute(
-            text(
-                "INSERT INTO domain_crm.sales_order_items "
-                "(id, tenant_id, order_id, line_number, article_number, description, "
-                " quantity, unit, unit_price, line_total, ek_price) "
-                "VALUES (:id, :t, :o, 1, :nr, 'Testweizen', 500, 't', 230, 115000, 210)"
-            ),
-            {"id": str(uuid.uuid4()), "t": mandant, "o": auftrag_id, "nr": artikel_nr},
-        )
+        from datetime import date, timedelta
+
+        from docflow_testbelege import lege_auftrag_an
+
+        lege_auftrag_an(v, mandant, kunden_id, nummer, kennung=auftrag_id,
+                        positionen=[{"artikel": artikel_nr, "bezeichnung": "Testweizen", "menge": 500, "einheit": "t",
+                                     "preis": 230}],
+                        bausteine={"texte": {"betreff": "Direktlieferung"},
+                                   "lieferung": {"liefertermin": (date.today() + timedelta(days=14)).isoformat(),
+                                                 "lieferadresse": "Sonnenweg 3, 26123 Testdorf"}})
 
     try:
         yield {
@@ -489,11 +459,9 @@ def auftrag_mit_position(engine, artikel_mit_abverkauf):
                 text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :t"),
                 {"t": mandant},
             )
-            v.execute(
-                text("DELETE FROM domain_crm.sales_order_items WHERE order_id = :o"),
-                {"o": auftrag_id},
-            )
-            v.execute(text("DELETE FROM domain_crm.sales_orders WHERE id = :o"), {"o": auftrag_id})
+            from docflow_testbelege import entferne_belege
+
+            entferne_belege(v, [auftrag_id])
             v.execute(
                 text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t"),
                 {"t": mandant},
@@ -596,7 +564,7 @@ def test_deckt_der_bestand_alles_entsteht_keine_bestellung(db, engine, auftrag_m
     # Die Auftragsmenge unter den Bestand druecken.
     with engine.begin() as v:
         v.execute(
-            text("UPDATE domain_crm.sales_order_items SET quantity = 50 WHERE order_id = :o"),
+            text("UPDATE domain_docflow.document_items SET quantity = 50 WHERE header_id = :o"),
             {"o": auftrag_mit_position["auftrag_id"]},
         )
 

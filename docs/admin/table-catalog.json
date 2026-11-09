@@ -14659,7 +14659,7 @@
             "app/services/sales_offer_import.py"
           ]
         },
-        "sales_order_items": {
+        "sales_order_items_vor_docflow": {
           "columns": [
             {
               "name": "id",
@@ -14735,11 +14735,11 @@
           "foreign_keys": [
             {
               "column": "order_id",
-              "references": "domain_crm.sales_orders.id"
+              "references": "domain_crm.sales_orders_vor_docflow.id"
             },
             {
               "column": "tenant_id",
-              "references": "domain_crm.sales_orders.tenant_id"
+              "references": "domain_crm.sales_orders_vor_docflow.tenant_id"
             },
             {
               "column": "tenant_id",
@@ -14747,21 +14747,13 @@
             }
           ],
           "owner_domain": "crm",
-          "ownership_reason": "Sales-Auftragspositionen liegen historisch im CRM-Schema.",
+          "ownership_reason": "Ursprungsdaten der Auftragspositionen vor BELEG-052 (GoBD).",
           "placement": "legacy",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/sales_reports.py",
-            "app/services/docflow_service.py",
-            "app/services/ist_aggregation_service.py",
-            "app/services/procurement_service.py",
-            "app/services/sales_match_service.py"
           ]
         },
-        "sales_orders": {
+        "sales_orders_vor_docflow": {
           "columns": [
             {
               "name": "id",
@@ -14904,40 +14896,10 @@
             }
           ],
           "owner_domain": "crm",
-          "ownership_reason": "Sales-Auftraege liegen historisch im CRM-Schema.",
+          "ownership_reason": "Ursprungsdaten der Auftraege vor BELEG-052 (GoBD), fuehrend DocFlow.",
           "placement": "legacy",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/collective_documents.py",
-            "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/credit_management.py",
-            "app/api/v1/endpoints/crm_360.py",
-            "app/api/v1/endpoints/crm_360_reads.py",
-            "app/api/v1/endpoints/crm_kim.py",
-            "app/api/v1/endpoints/pick_lists.py",
-            "app/api/v1/endpoints/sales_order_commands.py",
-            "app/api/v1/endpoints/sales_reports.py",
-            "app/services/beleg_anlage.py",
-            "app/services/customer_reference.py",
-            "app/services/docflow_service.py",
-            "app/services/ist_aggregation_service.py",
-            "app/services/mcp_execution_service.py",
-            "app/services/o2c_chain_service.py",
-            "app/services/procurement_service.py",
-            "app/services/sales_credit_service.py",
-            "app/services/sales_match_service.py",
-            "app/services/sales_storno_service.py",
-            "app/services/webshop_integration_service.py"
-          ],
-          "screens": [
-            "sales/delivery-note"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/collective_documents.py",
-            "app/api/v1/endpoints/pick_lists.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py"
           ]
         },
         "supplier_tax_profiles": {

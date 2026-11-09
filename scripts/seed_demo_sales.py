@@ -27,9 +27,10 @@ CUST_NAME = "Demo Landhandel Nord eG"
 
 
 def _exists(db, order_number: str) -> bool:
+    # Auftraege stehen seit BELEG-052 in DocFlow; die Entwurfsnummer traegt einen Anhang (beleg_anlage).
     return bool(db.execute(
-        text("SELECT 1 FROM domain_crm.sales_orders WHERE order_number = :o AND tenant_id = :t"),
-        {"o": order_number, "t": TENANT},
+        text("SELECT 1 FROM domain_crm.sales_orders WHERE order_number LIKE :o AND tenant_id = :t"),
+        {"o": f"{order_number}-%", "t": TENANT},
     ).first())
 
 
@@ -46,26 +47,16 @@ def _offer(db, nummer: str, total: float) -> str:
 
 
 def _order(db, nummer: str, offer_id, total: float, positionen: list[dict]) -> str:
-    oid = str(uuid.uuid4())
-    db.execute(
-        text("INSERT INTO domain_crm.sales_orders "
-             "(id, tenant_id, sales_offer_id, order_number, customer_id, customer_name, subject, "
-             "total_amount, currency, status) "
-             "VALUES (:id, :t, :off, :nr, :cid, :cn, :subj, :total, 'EUR', 'bestaetigt')"),
-        {"id": oid, "t": TENANT, "off": offer_id, "nr": nummer, "cid": CUST, "cn": CUST_NAME,
-         "subj": "Futtermittel Q3", "total": total},
+    """Auftrag als DocFlow-Entwurf ueber den kanonischen Anlageweg (BELEG-052: DocFlow einziger Belegspeicher)."""
+    from app.services.beleg_anlage import Position, lege_beleg_an
+
+    del offer_id, total  # Summe rechnet DocFlow aus den Positionen; das Altangebot ist kein DocFlow-Beleg
+    return lege_beleg_an(
+        db, TENANT, "sales_order", partner_id=CUST, quelle="seed_demo_sales", referenz=nummer,
+        akteur="seed_demo_sales", entwurf_nr=nummer, idempotenz=f"seed_demo_sales:{nummer}",
+        positionen=[Position(artikel_nr=p["artikel_nr"], bezeichnung=p["bezeichnung"], menge=p["menge"],
+                             einheit=p["einheit"], einzelpreis=p["preis"]) for p in positionen],
     )
-    for p in positionen:
-        db.execute(
-            text("INSERT INTO domain_crm.sales_order_items "
-                 "(id, tenant_id, order_id, line_number, article_number, description, quantity, unit, "
-                 "unit_price, line_total) "
-                 "VALUES (:id, :t, :oid, :ln, :anr, :desc, :qty, :unit, :price, :lt)"),
-            {"id": str(uuid.uuid4()), "t": TENANT, "oid": oid, "ln": p["ln"], "anr": p["artikel_nr"],
-             "desc": p["bezeichnung"], "qty": p["menge"], "unit": p["einheit"],
-             "price": p["preis"], "lt": round(p["menge"] * p["preis"], 2)},
-        )
-    return oid
 
 
 def _delivery(db, order_id: str, nummer: str, invoice_number: str | None) -> None:

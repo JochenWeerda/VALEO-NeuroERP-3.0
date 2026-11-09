@@ -93,21 +93,46 @@ class TestCollectiveDeliveryValidation:
             await create_collective_delivery(payload=payload, tenant_id=TENANT, db=db)
         assert exc.value.status_code == 409
 
+    @staticmethod
+    def _db(status: str, schon_gesammelt: bool = False):
+        db = MagicMock()
+
+        def execute(sql, params=None):
+            ergebnis = MagicMock()
+            if "source_order_ids ?" in str(sql):
+                ergebnis.first.return_value = ("x",) if schon_gesammelt else None
+            else:
+                ergebnis.mappings.return_value.first.return_value = _order_row(status)
+            return ergebnis
+
+        db.execute.side_effect = execute
+        return db
+
     @pytest.mark.asyncio
-    async def test_marks_orders_as_geliefert(self):
+    async def test_auftrag_wird_nicht_mehr_umgeschrieben(self):
+        """BELEG-052: Der Auftrag ist DocFlow-Beleg (domain_crm.sales_orders ist Sicht); kein Status-UPDATE."""
         from app.api.v1.endpoints.collective_documents import create_collective_delivery, CollectiveDeliveryCreate
 
-        db = MagicMock()
-        fetch_result = MagicMock()
-        fetch_result.mappings.return_value.first.return_value = _order_row("bestaetigt")
-        db.execute.return_value = fetch_result
-
+        db = self._db("bestaetigt")
         payload = CollectiveDeliveryCreate(
             customer_id="CUST-1", order_ids=["ORD-X", "ORD-Y"], delivery_date="2026-06-13"
         )
         await create_collective_delivery(payload=payload, tenant_id=TENANT, db=db)
 
         all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
-        update_sqls = [s for s in all_sqls if "geliefert" in s]
-        assert len(update_sqls) == 2, f"Expected 2 geliefert updates, got {len(update_sqls)}"
+        assert not [s for s in all_sqls if "UPDATE domain_crm.sales_orders" in s]
         db.commit.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_schon_gesammelter_auftrag_wird_abgelehnt(self):
+        """Dublettenschutz ohne Statusfeld: ein Lieferschein fuehrt den Auftrag schon in source_order_ids."""
+        from fastapi import HTTPException
+
+        from app.api.v1.endpoints.collective_documents import create_collective_delivery, CollectiveDeliveryCreate
+
+        db = self._db("bestaetigt", schon_gesammelt=True)
+        payload = CollectiveDeliveryCreate(customer_id="CUST-1", order_ids=["ORD-X"], delivery_date="2026-06-13")
+        with pytest.raises(HTTPException) as fehler:
+            await create_collective_delivery(payload=payload, tenant_id=TENANT, db=db)
+        assert fehler.value.status_code == 409
+        db.commit.assert_not_called()
