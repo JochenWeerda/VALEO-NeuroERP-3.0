@@ -18,7 +18,6 @@ CALLERS = (
     "app/api/v1/endpoints/ers_settlement.py",
     "app/api/v1/endpoints/purchase_invoice_verification.py",
     "app/api/v1/endpoints/rohware_sammelabrechnung.py",
-    "app/api/v1/endpoints/sales_delivery_notes.py",
     "app/api/v1/endpoints/strecke.py",
 )
 

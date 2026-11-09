@@ -41,27 +41,6 @@ def test_customer_360_keeps_customer_actions_in_familiar_footer_zones() -> None:
     _assert_ready(screen)
 
 
-def test_delivery_note_places_totals_after_positions_and_print_in_footer() -> None:
-    screen = get_screen_definition("sales/delivery-note")
-    assert screen is not None
-    assert screen["layout"]["floorplan"] == "transaction"
-    assert screen["layout"]["summaryPlacement"] == "footer"
-    assert screen["interaction"]["enterMovesFocus"] is True
-    assert _action(screen, "drucken") | {
-        "zone": "footer",
-        "keyboardShortcut": "Ctrl+P",
-    } == _action(screen, "drucken")
-    _assert_ready(screen)
-
-
-def test_delivery_note_is_a_single_page_with_section_anchors() -> None:
-    screen = get_screen_definition("sales/delivery-note")
-    assert screen is not None
-    assert screen["layout"]["sectionNavigation"] == "anchors"
-    assert [tab["key"] for tab in screen["tabs"]] == ["kopf", "positionen", "dokumente"]
-    _assert_ready(screen)
-
-
 def _table(screen: dict, tab_key: str, table_key: str) -> dict:
     tab = next(tab for tab in screen["tabs"] if tab["key"] == tab_key)
     return next(table for table in tab["tables"] if table["key"] == table_key)
@@ -69,7 +48,7 @@ def _table(screen: dict, tab_key: str, table_key: str) -> dict:
 
 def test_document_chain_uses_one_page_layout() -> None:
     """Lieferschein, Rechnung und Bestellung lesen sich gleich (Gewohnheits-Prinzip); der Auftrag ist Belegmaske."""
-    for screen_id in ("sales/delivery-note", "sales/invoice", "einkauf/purchase-order"):
+    for screen_id in ("sales/invoice", "einkauf/purchase-order"):
         screen = get_screen_definition(screen_id)
         assert screen is not None, screen_id
         assert screen["layout"]["sectionNavigation"] == "anchors", screen_id
@@ -78,7 +57,7 @@ def test_document_chain_uses_one_page_layout() -> None:
 
 def test_sales_chain_heads_name_the_customer_the_same_way() -> None:
     """Auftrag, Lieferschein und Rechnung: Kunde und Kunden-Nr. statt Referenzschluessel."""
-    for screen_id in ("sales/delivery-note", "sales/invoice"):
+    for screen_id in ("sales/invoice",):
         screen = get_screen_definition(screen_id)
         assert screen is not None, screen_id
         kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
@@ -124,7 +103,6 @@ def test_readiness_rejects_row_detail_that_is_not_an_object() -> None:
 def test_documents_are_named_by_their_number() -> None:
     """Der h1 eines Belegs ist seine Nummer, nicht der Maskentyp."""
     expected = {
-        "sales/delivery-note": "delivery_note_number",
         "sales/invoice": "invoice_number",
         "einkauf/purchase-order": "bestellnummer",
     }
@@ -152,7 +130,7 @@ def _schema_gate_detail(screen: dict) -> tuple[bool, str]:
 
 
 def test_readiness_rejects_unknown_section_navigation() -> None:
-    screen = get_screen_definition("sales/delivery-note")
+    screen = get_screen_definition("sales/invoice")
     assert screen is not None
     screen["layout"]["sectionNavigation"] = "accordion"
     passed, detail = _schema_gate_detail(screen)
@@ -161,7 +139,7 @@ def test_readiness_rejects_unknown_section_navigation() -> None:
 
 
 def test_readiness_rejects_section_anchors_outside_document_floorplans() -> None:
-    screen = get_screen_definition("sales/delivery-note")
+    screen = get_screen_definition("sales/invoice")
     assert screen is not None
     screen["layout"]["floorplan"] = "worklist"
     passed, detail = _schema_gate_detail(screen)
@@ -170,7 +148,7 @@ def test_readiness_rejects_section_anchors_outside_document_floorplans() -> None
 
 
 def test_readiness_rejects_section_anchors_with_column_split() -> None:
-    screen = get_screen_definition("sales/delivery-note")
+    screen = get_screen_definition("sales/invoice")
     assert screen is not None
     screen["layout"]["floorplan"] = "objectPage"
     screen["layout"]["columnNavigation"] = "listDetail"
@@ -180,8 +158,13 @@ def test_readiness_rejects_section_anchors_with_column_split() -> None:
 
 
 def test_readiness_rejects_duplicate_shortcuts_and_unknown_zones() -> None:
-    screen = get_screen_definition("sales/delivery-note")
+    screen = get_screen_definition("sales/invoice")
     assert screen is not None
+    # Erst eine gueltige Aktion mit dem Kuerzel, dann die doppelte (bis 1b trug der alte Lieferscheindruck ctrl+p).
+    screen["actions"].append({
+        "key": "drucken_kopie", "label": "Drucken", "kind": "secondary", "dangerLevel": "safe",
+        "permission": "sales.read", "zone": "footer", "keyboardShortcut": "ctrl+p",
+    })
     screen["actions"].append({
         "key": "invalid",
         "label": "Invalid",
