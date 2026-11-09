@@ -170916,6 +170916,50 @@
         "title": "TriggerIn",
         "type": "object"
       },
+      "TriggerRegelOut": {
+        "properties": {
+          "bedingungen_anzahl": {
+            "title": "Bedingungen Anzahl",
+            "type": "integer"
+          },
+          "beschreibung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Beschreibung"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "trigger_id": {
+            "title": "Trigger Id",
+            "type": "string"
+          },
+          "trigger_typ": {
+            "title": "Trigger Typ",
+            "type": "string"
+          },
+          "workflow_typ": {
+            "title": "Workflow Typ",
+            "type": "string"
+          }
+        },
+        "required": [
+          "trigger_id",
+          "workflow_typ",
+          "trigger_typ",
+          "status",
+          "bedingungen_anzahl"
+        ],
+        "title": "TriggerRegelOut",
+        "type": "object"
+      },
       "TrockenlaufOut": {
         "properties": {
           "aufbewahrung_tage": {
@@ -387929,7 +387973,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ProcessKernelOut"
+                    "$ref": "#/components/schemas/TriggerRegelOut"
                   },
                   "title": "Response Get Trigger Regeln Api V1 Process Trigger Regeln Get",
                   "type": "array"

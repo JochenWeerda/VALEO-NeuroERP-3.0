@@ -352,7 +352,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 962,
+  "kein_endpunkt": 963,
   "pfadparameter": 6
  }
 }

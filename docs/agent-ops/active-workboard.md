@@ -20685,3 +20685,5 @@ stock-management -> /lager/bestandsuebersicht. Stand 795 Studio / 38 screen_defi
 Restseiten-Cluster 2 (09.11.2026): disposition/regeln (Positionsregeln, /positions/rules) und agribusiness/farmers
 (Landwirte, ohne Kontaktdaten in der Liste) als Studio-Listen; nawaro/anbauflaechen zeigt die NawaRo-Kaskade
 (gleicher Leseweg area-sheets).
+workflows/trigger (09.11.2026): Trigger-Regeln des Prozesskerns typisiert (TriggerRegelOut statt extra=allow) und
+als Studio-Liste; Stand 799 Studio / 34 screen_definition.

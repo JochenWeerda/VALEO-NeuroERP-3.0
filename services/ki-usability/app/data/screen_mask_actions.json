@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 774,
-    "screens_with_actions": 396,
+    "actions": 775,
+    "screens_with_actions": 397,
     "domains": 50
   },
   "actions": [
@@ -17319,6 +17319,27 @@
       "required_data": [],
       "source": {
         "screenId": "workflows/supervisor",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:workflows/trigger:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (workflows/trigger)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "workflows/trigger",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "workflows/trigger",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

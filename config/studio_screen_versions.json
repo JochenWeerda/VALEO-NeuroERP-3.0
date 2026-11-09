@@ -8124,6 +8124,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "workflows/trigger": {
+      "definition_hash": "41ac03552f703fdc002fbe29382a14561d7a43948b2c96bbba17e36c9d3bb5ab",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "workspace/einkauf": {
       "definition_hash": "d406d6f37c48dd355e0c57b9b45f2b7127d3045326ffdcddbbe537e11a2cba03",
       "gates_passed": [

@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (773 Masken).
+> Generiert aus `app/core/screen_definitions.py` (774 Masken).
 
 ## Übersicht
 
@@ -781,6 +781,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `workflow/workflow-sandbox` | Workflow sandbox | workflow | niedrig | — | `GET /api/v1/masks/workflow/workflow-sandbox/agent-contract` |
 | `workflows/history` | Workflow monitoring | workflows | niedrig | — | `GET /api/v1/masks/workflows/history/agent-contract` |
 | `workflows/supervisor` | Agentenlaeufe | platform | niedrig | — | `GET /api/v1/masks/workflows/supervisor/agent-contract` |
+| `workflows/trigger` | Workflow-Trigger | platform | niedrig | — | `GET /api/v1/masks/workflows/trigger/agent-contract` |
 | `workspace/einkauf` | Einkauf-Cockpit | einkauf | niedrig | — | `GET /api/v1/masks/workspace/einkauf/agent-contract` |
 | `workspace/fibu` | FiBu-Cockpit | finance | niedrig | — | `GET /api/v1/masks/workspace/fibu/agent-contract` |
 | `workspace/lager` | Lager-Cockpit | lager | niedrig | — | `GET /api/v1/masks/workspace/lager/agent-contract` |
@@ -22719,6 +22720,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Welche Agentenlaeufe sind fehlgeschlagen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `workflows/trigger` — Workflow-Trigger
+
+**Zweck:** Pruefen, welche Regeln einen Workflow ausloesen und welche aktiv sind.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/workflows/trigger/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/workflows/trigger/agent-contract` |
+| Readiness | `GET /api/v1/masks/workflows/trigger/readiness` |
+| Rollout-Route | `/mask-rollout/workflows__trigger/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/process/trigger/regeln`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Trigger loesen eine Kontraktfreigabe aus?
+- Welche Trigger sind inaktiv?
 
 **Actions:**
 

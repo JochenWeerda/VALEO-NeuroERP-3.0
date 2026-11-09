@@ -94,10 +94,25 @@ def build_agribusiness_landwirte() -> dict[str, Any]:
     )
 
 
+def build_workflows_trigger() -> dict[str, Any]:
+    return _liste(
+        screen_id="workflows/trigger", domain="platform", bundle="workflow", title="Workflow-Trigger",
+        subtitle="Regeln, die einen Workflow ausloesen: Art, Bedingungen und Stand",
+        endpoint="/api/v1/process/trigger/regeln",
+        columns=[text("trigger_id", "Trigger", "primary"), text("workflow_typ", "Workflow", "primary"),
+                 text("trigger_typ", "Art"), zahl("bedingungen_anzahl", "Bedingungen"), status(),
+                 text("beschreibung", "Beschreibung")],
+        purpose="Pruefen, welche Regeln einen Workflow ausloesen und welche aktiv sind.",
+        prompts=["Welche Trigger loesen eine Kontraktfreigabe aus?", "Welche Trigger sind inaktiv?"],
+        no_workflow="Regelliste des Prozesskerns; die Bedingungen prueft der Kommandoweg pruefe-bedingungen.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
     "wissen/wissensbasis": build_wissen_wissensbasis,
     "disposition/regeln": build_disposition_positionsregeln,
     "agribusiness/farmers": build_agribusiness_landwirte,
+    "workflows/trigger": build_workflows_trigger,
 }

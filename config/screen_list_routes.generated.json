@@ -466,6 +466,7 @@
     "workflow/workflow-sandbox": "/workflow/workflow-sandbox",
     "workflows/history": "/alerts",
     "workflows/supervisor": "/workflows/supervisor",
+    "workflows/trigger": "/workflows/trigger",
     "zertifikate/neu": "/zertifikate"
   },
   "ohne_route": [

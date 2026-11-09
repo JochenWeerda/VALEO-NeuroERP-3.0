@@ -70,7 +70,6 @@
     "reports/charts/ProductAnalyticsCharts.tsx": "reports/charts/ProductAnalyticsCharts",
     "reports/charts/SalesPerformanceCharts.tsx": "reports/charts/SalesPerformanceCharts",
     "reports/charts/TrendAnalyticsCharts.tsx": "reports/charts/TrendAnalyticsCharts",
-    "workflow/mask-benchmark/MaskBenchmarkRoute.tsx": "dev/mask-benchmark/:domain/:variant/:id",
-    "workflows/trigger.tsx": "workflows/trigger"
+    "workflow/mask-benchmark/MaskBenchmarkRoute.tsx": "dev/mask-benchmark/:domain/:variant/:id"
   }
 }

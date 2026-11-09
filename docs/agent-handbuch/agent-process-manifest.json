@@ -22352,6 +22352,34 @@
       ]
     },
     {
+      "mask_id": "workflows/trigger",
+      "title": "Workflow-Trigger",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/workflows__trigger/:entityId",
+      "agent_contract_url": "/api/v1/masks/workflows/trigger/agent-contract",
+      "screen_definition_url": "/api/v1/masks/workflows/trigger/screen-definition",
+      "readiness_url": "/api/v1/masks/workflows/trigger/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "portal/anfragen",
       "title": "Anfragen",
       "domain": "portal",
