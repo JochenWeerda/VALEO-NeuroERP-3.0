@@ -128,9 +128,6 @@
     "app/api/v1/endpoints/saatzucht.py": {
       "date.today": 4
     },
-    "app/api/v1/endpoints/sales_delivery_notes.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/self_billing.py": {
       "date.today": 2
     },

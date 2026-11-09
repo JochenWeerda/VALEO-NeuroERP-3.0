@@ -54,27 +54,6 @@ Fachliche Sonderteile, die eine Variante einhängt; sie gehören nicht zum Grund
 
 Je Beleg-ScreenDefinition: Feld im Reiter `kopf` und Spalte der Tabelle `positionen`.
 
-### `sales/delivery-note`
-
-| Bereich | Bisher | Im Vertrag |
-|---|---|---|
-| kopf | `delivery_note_number` | `beleg_nr` |
-| kopf | `customer_name` | `partner.name` |
-| kopf | `customer_number` | `partner.nummer` |
-| kopf | `status` | `status` |
-| kopf | `delivery_date` | `belegdatum` |
-| kopf | `sales_order_number` | `kette[].beleg_nr` |
-| kopf | `invoice_number` | `kette[].beleg_nr` |
-| kopf | `is_self_pickup` | `baustein:lieferung` |
-| kopf | `truck_number` | `baustein:lieferung` |
-| kopf | `branch_name` | `baustein:organisation` |
-| positionen | `pos_nr` | `positionen[].pos_nr` |
-| positionen | `artikel_nr` | `positionen[].artikel_nr` |
-| positionen | `bezeichnung` | `positionen[].bezeichnung` |
-| positionen | `menge` | `positionen[].menge` |
-| positionen | `einheit` | `positionen[].einheit` |
-| positionen | `charge` | `positionen[].charge` |
-
 ### `sales/invoice`
 
 | Bereich | Bisher | Im Vertrag |

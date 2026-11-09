@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-09
+# Architecture Index — generiert 2026-11-10
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T22:53:17Z'
+generated_at: '2026-11-09T23:14:43Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -835,7 +835,6 @@ domains:
     - sales_credit_service
     - sales_invoice_mask
     - sales_invoice_service
-    - sales_lieferschein_close_service
     - sales_match_service
     - sales_offer_import
     - sales_posting_service
@@ -904,7 +903,6 @@ domains:
     - sales_blanket_orders
     - sales_credit
     - sales_credit_notes
-    - sales_delivery_notes
     - sales_invoice_einvoice
     - sales_invoices
     - sales_match
@@ -2393,10 +2391,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 345
-  backend_services_mapped: 345
-  backend_endpoints_total: 481
-  backend_endpoints_mapped: 481
+  backend_services_total: 344
+  backend_services_mapped: 344
+  backend_endpoints_total: 480
+  backend_endpoints_mapped: 480
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -7442,11 +7442,11 @@
           "primary_key": [
             "id"
           ],
-          "screens": [
-            "sales/delivery-note"
+          "read_by": [
+            "app/services/docflow_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py"
+            "app/services/docflow_service.py"
           ]
         }
       }
@@ -22549,9 +22549,6 @@
             "app/workers/monthly_report_worker.py",
             "app/workers/weekly_report_worker.py"
           ],
-          "screens": [
-            "sales/delivery-note"
-          ],
           "written_by": [
             "app/api/v1/endpoints/accruals_provisions.py",
             "app/api/v1/endpoints/booking_templates.py",
@@ -22559,7 +22556,6 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/open_items.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py",
             "app/services/finance_closing_service.py"
@@ -23069,8 +23065,7 @@
           "screens": [
             "disposition/strecken-disposition",
             "fibu/op-skonto-auszifferung",
-            "fibu/zahlungsmeldungen",
-            "sales/delivery-note"
+            "fibu/zahlungsmeldungen"
           ],
           "written_by": [
             "app/api/v1/endpoints/collective_documents.py",
@@ -23085,7 +23080,6 @@
             "app/api/v1/endpoints/payment_runs.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/api/v1/endpoints/rohware_sammelabrechnung.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/strecke.py",
             "app/api/v1/endpoints/zinsabrechnung.py",
             "app/services/agrar_settlement_service.py",
@@ -48096,20 +48090,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_invoices.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/services/docflow_service.py",
-            "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_match_service.py",
             "app/services/warehouse_service.py"
-          ],
-          "screens": [
-            "sales/delivery-note"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py"
           ]
         },
         "delivery_notes": {
@@ -48282,8 +48268,6 @@
             "app/api/v1/endpoints/branches.py",
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/logistics_tours.py",
-            "app/api/v1/endpoints/mask_actions.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_invoices.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/sustainability.py",
@@ -48291,7 +48275,6 @@
             "app/services/docflow_service.py",
             "app/services/document_control_projection.py",
             "app/services/logistics_disposition_service.py",
-            "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/o2c_chain_service.py",
             "app/services/sales_credit_service.py",
@@ -48300,15 +48283,13 @@
             "app/services/warehouse_service.py"
           ],
           "screens": [
-            "admin/branches",
-            "sales/delivery-note"
+            "admin/branches"
           ],
           "written_by": [
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/logistics_tours.py",
             "app/api/v1/endpoints/sales_credit_notes.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py",
             "app/services/warehouse_service.py"
@@ -48566,12 +48547,6 @@
           "placement": "prefix",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/services/sales_lieferschein_close_service.py"
-          ],
-          "written_by": [
-            "app/services/sales_lieferschein_close_service.py"
           ]
         },
         "sales_invoice_lines": {
@@ -48800,9 +48775,6 @@
           "placement": "prefix",
           "primary_key": [
             "id"
-          ],
-          "written_by": [
-            "app/services/sales_lieferschein_close_service.py"
           ]
         },
         "sales_preisabweichungen": {
