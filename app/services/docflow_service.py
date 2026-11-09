@@ -379,7 +379,7 @@ class DocflowService:
              "p": json.dumps(response_payload), "h": self._anfrage_hash(inhalt)},
         )
 
-    def _protokolliere(self, command: str, doc_id: str, payload: dict[str, Any]) -> None:
+    def _protokolliere(self, command: str, doc_id: str, payload: dict[str, Any], *, akteur: Optional[str] = None) -> None:
         """Haelt das Kommando verbindlich fest — in dieser Transaktion. Scheitert der Eintrag, scheitert das Kommando.
 
         ``best_effort_audit`` spiegelt zusaetzlich ins zentrale Audit-Log, wo es eines gibt; verlassen kann sich
@@ -390,7 +390,7 @@ class DocflowService:
                 "INSERT INTO domain_docflow.document_command_log (tenant_id, header_id, command, actor, payload) "
                 "VALUES (:t, :h, :c, :a, CAST(:p AS jsonb))"
             ),
-            {"t": self.tenant_id, "h": doc_id, "c": command, "a": self.akteur, "p": json.dumps(payload, default=str)},
+            {"t": self.tenant_id, "h": doc_id, "c": command, "a": akteur or self.akteur, "p": json.dumps(payload, default=str)},
         )
 
     def fetch_command_log(self, doc_id: str) -> list[dict[str, Any]]:
@@ -828,7 +828,7 @@ class DocflowService:
                  "print_count=COALESCE(print_count,0)+1 WHERE id=:id AND tenant_id=:tenant_id"),
             {"id": doc_id, "tenant_id": self.tenant_id, "von": lokal},
         )
-        self._protokolliere("record_print", doc_id, {"druck": bisher + 1, "nachdruck": bisher > 0})
+        self._protokolliere("record_print", doc_id, {"druck": bisher + 1, "nachdruck": bisher > 0}, akteur=lokal)
         return bisher + 1
 
     def record_export(self, doc_id: str, exported_by: Optional[str]) -> None:
