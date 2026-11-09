@@ -123,3 +123,11 @@ def test_die_belegmaske_pflegt_die_bausteine_ihrer_belegart():
             assert erwartet <= eingaben, (art, name)
     lieferschein = build_beleg_screen_definition("sales_delivery")
     assert not any(f["key"].startswith("zahlung__") for t in lieferschein["tabs"] for f in t.get("fields") or [])
+
+
+def test_mcp_auftragsstatus_zaehlt_offene_positionen_aus_docflow(db):
+    """sales.order.status liest den DocFlow-Auftrag, nicht mehr domain_crm.sales_orders (BELEG-052)."""
+    from app.services.mcp_execution_service import _offene_auftragspositionen
+
+    beleg = _auftrag(db)
+    assert _offene_auftragspositionen(db["db"], db["mandant"], beleg) == 1

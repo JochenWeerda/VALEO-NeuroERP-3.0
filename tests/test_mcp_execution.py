@@ -545,7 +545,7 @@ def test_customer_summary360_rejects_mandant_and_propose(client):
 
 
 ORDER_STATUS = {"auftrag_nr": "SO-100"}
-ORDER_ROW = {"id": "ord-1", "auftrag_nr": "SO-100", "status": "confirmed"}
+ORDER_ROW = {"id": "ord-1", "auftrag_nr": "SO-100", "status": "released"}
 
 
 def _as_sales_read(client):
@@ -560,13 +560,19 @@ def _as_sales_read(client):
 def _order_status_execute(sql, params=None):
     result = Mock()
     sql_s = str(sql)
-    if "FROM domain_crm.sales_orders" in sql_s:
+    if "FROM domain_docflow.document_headers" in sql_s:
         result.mappings.return_value.first.return_value = ORDER_ROW
-    elif "sales_order_items" in sql_s:
-        result.mappings.return_value.first.return_value = {"offene_positionen": 3}
     else:
         result.mappings.return_value.first.return_value = None
     return result
+
+
+@pytest.fixture(autouse=True)
+def _offene_positionen_aus_docflow(monkeypatch):
+    """Die Zaehlung selbst ist die der Belegmaske (``_offene_mengen``); hier zaehlt nur, dass das Werkzeug sie nutzt."""
+    import app.services.mcp_execution_service as mcp
+
+    monkeypatch.setattr(mcp, "_offene_auftragspositionen", lambda db, tenant, order_id: 3)
 
 
 def test_order_status_dry_run_returns_lifecycle_without_writing(client):
@@ -581,11 +587,11 @@ def test_order_status_dry_run_returns_lifecycle_without_writing(client):
     assert body["mode"] == "dryRun"
     assert body["order_id"] == "ord-1"
     assert body["auftrag_nr"] == "SO-100"
-    assert body["status"] == "confirmed"
+    assert body["status"] == "released"
     assert body["offene_positionen"] == 3
-    assert body["naechster_schritt"] == "Lieferschein erstellen"
-    assert body["route_path"] == "/sales/order-editor/ord-1"
-    assert body["screen_id"] == "sales/sales-order"
+    assert body["naechster_schritt"] == "Lieferschein oder Rechnung erstellen"
+    assert body["route_path"] == "/belege/sales_order/ord-1"
+    assert body["screen_id"] == "beleg/sales-order"
     db.commit.assert_not_called()
 
 
@@ -612,7 +618,7 @@ def test_order_status_terminal_has_zero_open_lines(client):
     def execute(sql, params=None):
         result = Mock()
         result.mappings.return_value.first.return_value = {
-            "id": "ord-2", "auftrag_nr": "SO-200", "status": "completed",
+            "id": "ord-2", "auftrag_nr": "SO-200", "status": "cancelled",
         }
         return result
 
@@ -624,7 +630,7 @@ def test_order_status_terminal_has_zero_open_lines(client):
     assert response.status_code == 200
     body = response.json()
     assert body["offene_positionen"] == 0
-    assert "abgeschlossen" in body["naechster_schritt"]
+    assert "storniert" in body["naechster_schritt"]
     assert db.execute.call_count == 1
 
 
