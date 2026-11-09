@@ -3852,7 +3852,7 @@
       "version": "1.0.0"
     },
     "dashboard/verkauf": {
-      "definition_hash": "adda8aedbafdfa7fc2f933940d2cfd0b4f5e6885db0925ca0e5e8e294cedd2d2",
+      "definition_hash": "d231a443c72545f5e507cd9b804382e3a5e9c2cc0aba8ebf91b5bdcc59e563bb",
       "gates_passed": [
         "A",
         "B",
@@ -8302,7 +8302,7 @@
       "version": "1.0.0"
     },
     "workspace/verkauf": {
-      "definition_hash": "8f0ddcf89c173d5f1f0fa719bd78a5773b99b68c64054238fbf50431a9d1ff22",
+      "definition_hash": "befe94ffdc0594489cbadfbb525ed16bafe315df12de0325418e1036d61361d6",
       "gates_passed": [
         "A",
         "B",

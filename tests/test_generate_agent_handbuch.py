@@ -65,7 +65,7 @@ def test_risk_summary_escalates_with_danger_level() -> None:
 
 @pytest.mark.unit
 def test_mask_to_processes_links_known_masks() -> None:
-    assert "order-to-cash" in MASK_TO_PROCESSES["sales/sales-order"]
+    assert "order-to-cash" in MASK_TO_PROCESSES["beleg-liste/sales-order"]
     assert "procure-to-pay" in MASK_TO_PROCESSES["einkauf/purchase-order"]
 
 

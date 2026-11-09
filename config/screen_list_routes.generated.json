@@ -143,7 +143,6 @@
     "beleg-liste/sales-credit-memo": "/belege/:belegart",
     "beleg-liste/sales-delivery": "/belege/:belegart",
     "beleg-liste/sales-offer": "/belege/:belegart",
-    "beleg-liste/sales-order": "/belege/:belegart",
     "belege/belegfolge": "/belege/belegfolge",
     "bestellvorschlag/bedarf": "/einkauf/bestellvorschlaege/ansicht/:variante",
     "bestellvorschlag/gespeichert": "/disposition",

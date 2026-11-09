@@ -112,6 +112,13 @@ def beleg_kopf(
             for a in beleg.aktionen if (a.hinweis if a.erlaubt else a.grund)
         ) or None,
     }
+    # Kopfbausteine (Lieferung, Zahlung, Texte, Kontakt, Referenzen) flach: ``<baustein>__<feld>``.
+    from app.core.belegvertrag import BAUSTEIN_FELDER, KOPFBAUSTEINE, TRENNER, kopfbausteine_flach
+
+    # Jedes Feld der Bausteine der Belegart steht im Kopf (leer = None): der Feldvertrag der Maske haelt.
+    kopf.update({f"{name}{TRENNER}{feld}": None for name in KOPFBAUSTEINE.get(belegart, ())
+                 for feld, _label, _typ in BAUSTEIN_FELDER[name]})
+    kopf.update(kopfbausteine_flach(beleg.bausteine))
     # Je Aktion ein Feld, an dem der Knopf der Maske haengt (``enabledWhen``). Was der Beleg nicht anbietet, fehlt.
     for aktion in beleg.aktionen:
         kopf[zustandsfeld(aktion.key)] = aktion.erlaubt

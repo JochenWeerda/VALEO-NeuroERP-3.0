@@ -525,8 +525,8 @@ _PO_STATUS_FILTER = {
 
 _CUSTOMER_SCREEN_ID = "crm/customer-360"
 _CUSTOMER_ROUTE_PREFIX = "/crm/customers"
-_ORDER_SCREEN_ID = "sales/sales-order"
-_ORDER_ROUTE_PREFIX = "/sales/order-editor"
+_ORDER_SCREEN_ID = "beleg/sales-order"
+_ORDER_ROUTE_PREFIX = "/belege/sales_order"
 _LOT_SCREEN_ID = "charge/stamm"
 _LOT_ROUTE_PREFIX = "/charge/stamm"
 _CELL_SCREEN_ID = "lager/silo-cell"
@@ -544,14 +544,15 @@ _WEIGHING_ROUTE_PREFIX = "/waage/wiegeschein"
 _STOCK_SCREEN_ID = "lager/article-stock"
 _STOCK_ROUTE_PREFIX = "/lager/artikel"
 _BILLABLE_DELIVERY_STATUSES = ("posted", "printed", "gebucht")
+# Stand des Auftrags in DocFlow (Pruefbedingung ``chk_docflow_header_status``) - BELEG-052: einziger Belegspeicher.
 _ORDER_NEXT_STEP = {
-    "open": "Auftrag bestätigen",
-    "confirmed": "Lieferschein erstellen",
-    "in_delivery": "Auftrag abschließen",
+    "draft": "Auftrag vervollständigen und freigeben",
+    "open": "Lieferschein oder Rechnung erstellen",
     "completed": "Keine Aktion — Auftrag abgeschlossen",
+    "reversed": "Keine Aktion — Auftrag storniert",
     "cancelled": "Keine Aktion — Auftrag storniert",
 }
-_ORDER_TERMINAL_STATUSES = frozenset({"completed", "cancelled", "storniert"})
+_ORDER_TERMINAL_STATUSES = frozenset({"completed", "reversed", "cancelled"})
 _OPEN_ITEM_KONTO_TYP = {
     "forderung": "debitoren",
     "verbindlichkeit": "kreditoren",
@@ -3428,6 +3429,17 @@ def _list_open_items(db: Session, request: ToolExecutionRequest, actor: str, ten
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
+def _offene_auftragspositionen(db: Session, tenant: str, order_id: str) -> int:
+    """Positionen mit Menge, die noch in keinen Folgebeleg ging - dieselbe Rechnung wie die Belegmaske."""
+    from app.core.belegvertrag import BELEGARTEN
+    from app.services.docflow_belegadapter import _offene_mengen
+    from app.services.docflow_service import DocflowService
+
+    svc = DocflowService(db, tenant, "mcp")
+    offen = _offene_mengen(svc, order_id, BELEGARTEN["sales_order"], svc.fetch_items(order_id))
+    return sum(1 for menge in offen.values() if menge > 0)
+
+
 def _order_status(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
     """Tenant-scoped sales order lifecycle status. Read-only."""
     del actor
@@ -3440,28 +3452,22 @@ def _order_status(db: Session, request: ToolExecutionRequest, actor: str, tenant
     try:
         order = db.execute(text("""
             SELECT id::text AS id,
-                   order_number AS auftrag_nr,
-                   COALESCE(status, 'open') AS status
-            FROM domain_crm.sales_orders
+                   doc_number AS auftrag_nr,
+                   status
+            FROM domain_docflow.document_headers
             WHERE tenant_id::text = :tenant
-              AND deleted_at IS NULL
-              AND (order_number = :ref OR id::text = :ref)
+              AND doc_type = 'sales_order'
+              AND (doc_number = :ref OR id::text = :ref)
             FOR SHARE
         """), {"tenant": tenant, "ref": opened.auftrag_nr}).mappings().first()
         if not order:
             raise HTTPException(404, "Sales order not found in the authenticated tenant")
-        status_value = str(order["status"] or "open")
+        status_value = str(order["status"] or "draft")
+        order_id = str(order["id"])
         if status_value in _ORDER_TERMINAL_STATUSES:
             offene_positionen = 0
         else:
-            offene_positionen = int(_scalar_or_default(db, """
-                SELECT COUNT(*)::int AS offene_positionen
-                FROM domain_crm.sales_order_items
-                WHERE order_id::text = :oid
-                  AND tenant_id::text = :tenant
-                  AND COALESCE(quantity, 0) > 0
-            """, {"oid": order["id"], "tenant": tenant}, "offene_positionen", 0) or 0)
-        order_id = str(order["id"])
+            offene_positionen = _offene_auftragspositionen(db, tenant, order_id)
         result = {
             "success": True,
             "mode": request.mode,

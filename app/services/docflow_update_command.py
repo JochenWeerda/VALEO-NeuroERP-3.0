@@ -88,6 +88,20 @@ def _apply_update(self, doc_id: str, payload: Any) -> None:
         if val is not None:
             set_parts.append(f"{field} = :{field}")
             updates[field] = val
+    if getattr(payload, "bausteine", None) is not None:
+        import json as _json
+
+        from app.services.docflow_create_command import _kopfbausteine
+
+        geprueft = _kopfbausteine(effective_doc_type, payload.bausteine)
+        bisher = dict(header.get("bausteine") or {})
+        for name in payload.bausteine:
+            if name in geprueft:
+                bisher[name] = geprueft[name]
+            else:
+                bisher.pop(name, None)  # alle Felder leer: Baustein entfernt
+        set_parts.append("bausteine = CAST(:bausteine AS jsonb)")
+        updates["bausteine"] = _json.dumps(bisher, default=str)
     self.db.execute(
         text(f"UPDATE domain_docflow.document_headers SET {', '.join(set_parts)} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
         updates,

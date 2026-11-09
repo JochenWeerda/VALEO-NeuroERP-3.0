@@ -49,6 +49,76 @@ BAUSTEINE: dict[str, str] = {
 }
 
 
+# Felder der Kopfbausteine (BELEG-052: was die alten Belegseiten pflegten, muss die Belegmaske tragen). Schluessel in
+# der flachen Maskenform: ``<baustein>__<feld>``. Ein Baustein ohne Eintrag hier ist (noch) kein Kopfbaustein.
+BAUSTEIN_FELDER: dict[str, tuple[tuple[str, str, str], ...]] = {
+    "texte": (("betreff", "Betreff", "text"), ("kopftext", "Kopftext", "textarea"),
+              ("fusstext", "Fusstext", "textarea"), ("notiz", "Interne Notiz", "textarea")),
+    "kontakt": (("ansprechpartner", "Ansprechpartner", "text"), ("telefon", "Telefon", "text"),
+                ("email", "E-Mail", "text")),
+    "lieferung": (("liefertermin", "Liefertermin", "date"), ("versandart", "Versandart", "text"),
+                  ("lieferadresse", "Lieferadresse", "textarea"), ("incoterm", "Incoterm", "text"),
+                  ("selbstabholung", "Selbstabholung", "boolean")),
+    "zahlung": (("zahlungsbedingung", "Zahlungsbedingung", "text"), ("faellig_am", "Faellig am", "date"),
+                ("skonto_prozent", "Skonto %", "number"), ("skonto_tage", "Skonto-Tage", "number")),
+    "referenzen": (("eigene_referenz", "Eigene Referenz", "text"), ("fremde_referenz", "Fremde Referenz", "text")),
+}
+
+# Kopfbausteine je Belegart (Reihenfolge = Reihenfolge in der Maske).
+KOPFBAUSTEINE: dict[str, tuple[str, ...]] = {
+    "sales_offer": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "sales_order": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "sales_delivery": ("texte", "kontakt", "lieferung", "referenzen"),
+    "sales_invoice": ("texte", "zahlung", "referenzen"),
+    "sales_credit_memo": ("texte", "referenzen"),
+    "purchase_order": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "goods_receipt": ("texte", "lieferung", "referenzen"),
+    "purchase_invoice": ("texte", "zahlung", "referenzen"),
+    "purchase_credit_memo": ("texte", "referenzen"),
+}
+
+TRENNER = "__"
+
+
+def pruefe_kopfbausteine(belegart: str, werte: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    """Normalisiert und prueft Kopfbausteine: nur die der Belegart, nur bekannte Felder, Leeres faellt weg.
+
+    Unbekanntes wird abgelehnt (ValueError), nicht still verworfen - sonst verschwaende eine Eingabe unbemerkt.
+    """
+    erlaubt = KOPFBAUSTEINE.get(belegart, ())
+    ergebnis: dict[str, dict[str, Any]] = {}
+    for name, inhalt in (werte or {}).items():
+        if name not in erlaubt:
+            raise ValueError(f"Baustein {name} gehoert nicht zur Belegart {belegart}.")
+        if not isinstance(inhalt, dict):
+            raise ValueError(f"Baustein {name} braucht Felder.")
+        felder = {f for f, _l, _t in BAUSTEIN_FELDER[name]}
+        fremd = set(inhalt) - felder
+        if fremd:
+            raise ValueError(f"Baustein {name} kennt {', '.join(sorted(fremd))} nicht.")
+        sauber = {k: v for k, v in inhalt.items() if v not in (None, "")}
+        if sauber:
+            ergebnis[name] = sauber
+    return ergebnis
+
+
+def kopfbausteine_aus_flach(werte: dict[str, Any]) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Trennt flache Maskenfelder ``<baustein>__<feld>`` vom Rest: (uebrige Felder, Bausteine)."""
+    rest: dict[str, Any] = {}
+    bausteine: dict[str, dict[str, Any]] = {}
+    for key, wert in werte.items():
+        if isinstance(key, str) and TRENNER in key:
+            name, feld = key.split(TRENNER, 1)
+            bausteine.setdefault(name, {})[feld] = wert
+        else:
+            rest[key] = wert
+    return rest, bausteine
+
+
+def kopfbausteine_flach(bausteine: dict[str, dict[str, Any]] | None) -> dict[str, Any]:
+    return {f"{name}{TRENNER}{feld}": wert for name, inhalt in (bausteine or {}).items() for feld, wert in inhalt.items()}
+
+
 class _Teil(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

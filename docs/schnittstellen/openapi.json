@@ -54204,6 +54204,21 @@
       },
       "DocflowCreateRequest": {
         "properties": {
+          "bausteine": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bausteine"
+          },
           "created_by": {
             "anyOf": [
               {
@@ -55071,6 +55086,21 @@
       },
       "DocflowUpdateRequest": {
         "properties": {
+          "bausteine": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bausteine"
+          },
           "currency": {
             "anyOf": [
               {
