@@ -123,7 +123,10 @@ def coverage_changes(root: Path, before: dict, after: dict, base: str,
         elif tracked_name in tracked_before:
             # Rewritten moves can fall below Git's rename similarity. Do not
             # assume newly added app modules are unrelated to retired code.
+            # Eine neue Alembic-Revision ist kein Nachfolger: Sie laeuft nur in der Migration, nie als Laufzeitcode.
+            # Eine Umbenennung dorthin bleibt ein Nachfolger ausserhalb app (oben, eigener Vertrag).
             unprotected = [path for path in sorted(added) if path.endswith('.py') and not path.startswith('tests/')
+                           and not path.startswith('alembic/versions/')
                            and (not path.startswith('app/') or new.get(path.removeprefix('app/'), -1) < old[filename])]
             if unprotected:
                 errors.append(f'{filename}: Loeschung mit ungeschuetzten neuen Modulen: {", ".join(unprotected)}')
