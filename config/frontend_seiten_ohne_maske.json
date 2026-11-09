@@ -3,8 +3,6 @@
   "seiten": {
     "agrar/aussaat/liste.tsx": "agrar/aussaat/liste",
     "agrar/duenger/mischungen.tsx": "agrar/duenger/mischungen",
-    "agrar/ernte/neu.tsx": "agrar/ernte/neu",
-    "agrar/feldbuch/schlag/neu.tsx": "agrar/feldbuch/schlag/neu",
     "agrar/psm/auflagen-manager.tsx": "agrar/psm/auflagen-manager",
     "agrar/psm/resistenz.tsx": "agrar/psm/resistenz",
     "agribusiness/field-service-task-edit.tsx": "agribusiness/field-service-task-edit",

@@ -20687,3 +20687,4 @@ Restseiten-Cluster 2 (09.11.2026): disposition/regeln (Positionsregeln, /positio
 (gleicher Leseweg area-sheets).
 workflows/trigger (09.11.2026): Trigger-Regeln des Prozesskerns typisiert (TriggerRegelOut statt extra=allow) und
 als Studio-Liste; Stand 799 Studio / 34 screen_definition.
+Umleitungen (09.11.2026): agrar/ernte/neu -> Erntekampagne-Erfassung, agrar/feldbuch/schlag/neu -> Schlagkartei (beide unverlinkt, screenId unbekannt).
