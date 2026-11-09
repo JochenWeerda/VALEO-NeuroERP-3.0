@@ -58,6 +58,13 @@
         ]
       ]
     },
+    "admin/report-berechtigungen": {
+      "admin.report_permission.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/webhooks-liste": {
       "studio.admin-webhooks.register": [
         [

@@ -22097,6 +22097,45 @@
       ]
     },
     {
+      "mask_id": "admin/report-berechtigungen",
+      "title": "Report-Berechtigungen",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__report-berechtigungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/report-berechtigungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/report-berechtigungen/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/report-berechtigungen/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Berechtigung anlegen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.report_permission.update",
+          "commandEndpoint": "/api/v1/admin/report-permissions/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "admin/token-consumption",
       "title": "Technisches Verbrauchsnebenbuch",
       "domain": "platform",
@@ -27286,5 +27325,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 146
+  "event_count": 149
 }

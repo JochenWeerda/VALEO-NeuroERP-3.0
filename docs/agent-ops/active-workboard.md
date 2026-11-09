@@ -20695,3 +20695,4 @@ Ausserdem: Partnerstamm-Pflege war per Ersetzen ohne Anzahl zwoelfmal in screen_
 bereinigt und per Vertragstest an die Kundenakte gebunden.
 Nummernkreise (09.11.2026): admin/nummernkreise als Studio-Liste (Leseweg typisiert NumberRangeOut) mit Konfigurieren/Aendern/Stilllegen als Admin-Kommandowege; handgebaute Seite und Frontend-Client entfernt.
 CI-Fix (09.11.2026): Eingabefelder der Stamm-Kommandos in app/core/eingabefelder_stamm.py (ScreenDefinitions ohne API-Schemapaket importierbar, Doku-Job ohne email-validator).
+Report-Berechtigungen (09.11.2026): admin/report-berechtigungen als Studio-Liste mit Anlegen/Aendern/Entfernen (Admin-Kommandowege, eine Berechtigung je Rolle und Auswertung); handgebaute Seite entfernt.

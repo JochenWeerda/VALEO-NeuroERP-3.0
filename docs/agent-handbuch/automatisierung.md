@@ -215,6 +215,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `admin.number_range.configured` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.number_range.deactivated` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
+| `admin.report_permission.created` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.report_permission.deleted` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.report_permission.updated` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
 | `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
@@ -248,10 +251,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
 | `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| … | | 34 weitere |
+| … | | 37 weitere |
 
 ### System
 

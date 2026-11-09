@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 786,
-    "screens_with_actions": 400,
+    "actions": 790,
+    "screens_with_actions": 401,
     "domains": 50
   },
   "actions": [
@@ -591,6 +591,101 @@
         "command": "admin.postfachTesten",
         "method": "POST",
         "permission": "admin.postfach.testen",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/report-permissions/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:anlegen",
+      "label": "Berechtigung anlegen",
+      "description": "Berechtigung anlegen (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Berechtigung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/report-permissions/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/admin/report-permissions/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
         "dangerLevel": "safe"
       }
     },

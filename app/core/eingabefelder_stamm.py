@@ -42,3 +42,11 @@ NUMMERNKREIS_KONFIGURIEREN_FELDER: list[dict[str, Any]] = [
      "options": _auswahl(KREISARTEN)},
     *NUMMERNKREIS_FORMAT_FELDER,
 ]
+
+REPORT_BERECHTIGUNG_FELDER: list[dict[str, Any]] = [
+    {"key": "role_id", "label": "Rolle", "type": "text", "required": True},
+    {"key": "report_key", "label": "Auswertung (Schlüssel)", "type": "text", "required": True},
+    {"key": "can_view", "label": "Ansehen", "type": "boolean"},
+    {"key": "can_export", "label": "Exportieren", "type": "boolean"},
+    {"key": "allowed_scopes", "label": "Bereiche (Komma-getrennt)", "type": "text"},
+]

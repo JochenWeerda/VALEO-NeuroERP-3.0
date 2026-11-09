@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (777 Masken).
+> Generiert aus `app/core/screen_definitions.py` (778 Masken).
 
 ## Übersicht
 
@@ -50,6 +50,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/omnichannel-handelskonflikt` | Omnichannel handelskonflikt | admin | niedrig | — | `GET /api/v1/masks/admin/omnichannel-handelskonflikt/agent-contract` |
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `admin/qualitaets-cockpit` | Qualitaets-Cockpit | qualitaet | niedrig | — | `GET /api/v1/masks/admin/qualitaets-cockpit/agent-contract` |
+| `admin/report-berechtigungen` | Report-Berechtigungen | platform | mittel | — | `GET /api/v1/masks/admin/report-berechtigungen/agent-contract` |
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
 | `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
@@ -22364,6 +22365,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `testen` | Testmail senden | safe | nein | `/api/v1/admin/postfaecher/{entity_id}/testen` |
 | `anmelden` | Beim Anbieter anmelden | safe | nein | `Fuehrt zur Anmeldung bei Google bzw. Microsoft fuer das geladene Postfach.` |
 | `neu` | Neues Postfach | safe | nein | `Leert die Eingabe fuer ein neues Postfach.` |
+
+---
+
+### `admin/report-berechtigungen` — Report-Berechtigungen
+
+**Zweck:** Festlegen, welche Rolle welche Auswertung sehen und exportieren darf.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/report-berechtigungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/report-berechtigungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/report-berechtigungen/readiness` |
+| Rollout-Route | `/mask-rollout/admin__report-berechtigungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin/report-permissions?active_only=false`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Darf der Controller die BWA exportieren?
+- Gib der Rolle Vertrieb Leserecht auf die Umsatzstatistik.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Berechtigung anlegen | moderate | nein | `/api/v1/admin/report-permissions/actions/anlegen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

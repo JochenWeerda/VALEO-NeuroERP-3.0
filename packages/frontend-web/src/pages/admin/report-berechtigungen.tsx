@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./report-berechtigungen-legacy'))
+/** Report-Berechtigungen: Studio-Liste mit Anlegen, Aendern und Entfernen als Admin-Kommandowege. */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="admin/report-berechtigungen" testId="screen-admin-report-berechtigungen" />
+}

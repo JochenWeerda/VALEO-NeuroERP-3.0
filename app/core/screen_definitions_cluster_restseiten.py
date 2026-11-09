@@ -195,6 +195,35 @@ def build_admin_nummernkreise() -> dict[str, Any]:
     )
 
 
+def build_admin_report_berechtigungen() -> dict[str, Any]:
+    from app.core.eingabefelder_stamm import REPORT_BERECHTIGUNG_FELDER
+
+    weg = "/api/v1/admin/report-permissions"
+    return build_stamm_list_screen(
+        screen_id="admin/report-berechtigungen", domain="platform", bundle="admin", title="Report-Berechtigungen",
+        subtitle="Welche Rolle welche Auswertung sehen und exportieren darf",
+        endpoint=f"{weg}?active_only=false", row_route=None,
+        columns=[text("role_id", "Rolle", "primary"), text("report_key", "Auswertung", "primary"),
+                 janein("can_view", "Ansehen"), janein("can_export", "Exportieren"), janein("active", "Aktiv"),
+                 datum("updated_at", "Geändert", "tertiary")],
+        actions=[{"key": "anlegen", "label": "Berechtigung anlegen", "kind": "primary", "zone": "header",
+                  "dangerLevel": "moderate", "permission": "admin.report_permission.update",
+                  "commandEndpoint": f"{weg}/actions/anlegen", "method": "POST", "requiresConfirmation": False,
+                  "inputFields": REPORT_BERECHTIGUNG_FELDER}, _EXPORT],
+        row_actions=[{"key": "aendern", "label": "Ändern", "dangerLevel": "moderate",
+                      "permission": "admin.report_permission.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/aendern", "method": "POST",
+                      "requiresConfirmation": False, "inputFields": REPORT_BERECHTIGUNG_FELDER},
+                     {"key": "entfernen", "label": "Entfernen", "dangerLevel": "moderate",
+                      "permission": "admin.report_permission.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/entfernen", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True}],
+        purpose="Festlegen, welche Rolle welche Auswertung sehen und exportieren darf.",
+        prompts=["Darf der Controller die BWA exportieren?", "Gib der Rolle Vertrieb Leserecht auf die Umsatzstatistik."],
+        no_workflow="Berechtigungsliste; wirkt beim Aufruf der Auswertung.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -205,4 +234,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "crm/vertreterprovisionen": build_crm_vertreterprovisionen,
     "crm/vertreterprovisionen-staffeln": build_crm_vertreterprovisionen_staffeln,
     "admin/nummernkreise": build_admin_nummernkreise,
+    "admin/report-berechtigungen": build_admin_report_berechtigungen,
 }

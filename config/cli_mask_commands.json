@@ -16,6 +16,9 @@
   "mask:admin/postfaecher:entfernen",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
+  "mask:admin/report-berechtigungen:aendern",
+  "mask:admin/report-berechtigungen:anlegen",
+  "mask:admin/report-berechtigungen:entfernen",
   "mask:admin/webhooks-liste:history",
   "mask:admin/webhooks-liste:register",
   "mask:admin/webhooks-liste:unregister",
@@ -358,7 +361,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 968,
+  "kein_endpunkt": 969,
   "pfadparameter": 6
  }
 }

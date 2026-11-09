@@ -445,6 +445,8 @@ api_router.include_router(
     tags=["admin", "settings", "mobile", "routing", "connectors"]
 )
 
+from app.api.v1.endpoints import admin_reporting_kommandos  # noqa: E402
+api_router.include_router(admin_reporting_kommandos.router)
 api_router.include_router(
     admin_reporting.router,
     prefix="/admin",
