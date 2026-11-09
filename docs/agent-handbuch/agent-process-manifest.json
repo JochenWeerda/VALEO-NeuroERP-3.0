@@ -147,7 +147,7 @@
       ],
       "mask_ids": [
         "crm/customer-360",
-        "sales/sales-order",
+        "beleg-liste/sales-order",
         "sales/delivery-note",
         "finance/ar-open-item",
         "finance/payment-run",
@@ -24946,7 +24946,9 @@
       "mask_id": "beleg-liste/sales-order",
       "title": "Aufträge",
       "domain": "sales",
-      "process_keys": [],
+      "process_keys": [
+        "order-to-cash"
+      ],
       "rollout_route": "/mask-rollout/beleg-liste__sales-order/:entityId",
       "agent_contract_url": "/api/v1/masks/beleg-liste/sales-order/agent-contract",
       "screen_definition_url": "/api/v1/masks/beleg-liste/sales-order/screen-definition",
@@ -25320,9 +25322,7 @@
       "mask_id": "sales/sales-order",
       "title": "Verkaufsauftrag",
       "domain": "sales",
-      "process_keys": [
-        "order-to-cash"
-      ],
+      "process_keys": [],
       "rollout_route": "/mask-rollout/sales__sales-order/:entityId",
       "agent_contract_url": "/api/v1/masks/sales/sales-order/agent-contract",
       "screen_definition_url": "/api/v1/masks/sales/sales-order/screen-definition",
