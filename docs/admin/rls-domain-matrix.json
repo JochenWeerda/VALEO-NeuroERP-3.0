@@ -605,10 +605,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 1298,
@@ -1092,6 +1092,7 @@
     "app/services/docflow_source_proposals.py",
     "app/services/finance_dunning_service.py",
     "app/services/gdpr_request_processor.py",
+    "app/services/gutschrift_docflow.py",
     "app/services/kunden_merge.py",
     "app/services/mcp_execution_service.py",
     "app/services/pdf_template_service.py",
@@ -1186,11 +1187,11 @@
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 6,
@@ -1346,10 +1347,10 @@
     "app/api/v1/endpoints/compat.py:1836",
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -1454,10 +1455,10 @@
     "app/api/v1/endpoints/compat.py:1836",
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 97,
@@ -1520,7 +1521,6 @@
     "app/api/v1/endpoints/finance_actions.py",
     "app/api/v1/endpoints/financial_reports.py",
     "app/api/v1/endpoints/journal_entries.py",
-    "app/api/v1/endpoints/sales_credit_notes.py",
     "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
     "app/api/v1/schemas/__init__.py",
     "app/api/v1/schemas/banken_schemas.py",
@@ -1568,8 +1568,8 @@
    "identitaet": {
     "dienst": 2,
     "kopfzeile": 2,
-    "nutzlast": 3,
-    "token": 12
+    "nutzlast": 2,
+    "token": 11
    },
    "standardmandant_stellen": [],
    "null_stellen": [
@@ -1585,7 +1585,6 @@
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
     "app/api/v1/endpoints/financial_reports.py:325",
-    "app/api/v1/endpoints/sales_credit_notes.py:563",
     "app/finance/steuerschluessel.py:281"
    ],
    "daten": {
@@ -1646,7 +1645,6 @@
     "app/api/v1/endpoints/payment_runs.py",
     "app/api/v1/endpoints/purchase_invoice_verification.py",
     "app/api/v1/endpoints/rohware_sammelabrechnung.py",
-    "app/api/v1/endpoints/sales_credit_notes.py",
     "app/api/v1/endpoints/sales_delivery_notes.py",
     "app/api/v1/endpoints/strecke.py",
     "app/api/v1/endpoints/zinsabrechnung.py",
@@ -1664,8 +1662,8 @@
    ],
    "identitaet": {
     "kopfzeile": 2,
-    "nutzlast": 2,
-    "token": 22
+    "nutzlast": 1,
+    "token": 21
    },
    "standardmandant_stellen": [],
    "null_stellen": [
@@ -1674,12 +1672,11 @@
     "app/api/v1/endpoints/compat.py:1843",
     "app/api/v1/endpoints/compat.py:1866",
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
     "app/api/v1/endpoints/finance_invoices.py:114",
-    "app/api/v1/endpoints/sales_credit_notes.py:563",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 25,
@@ -1841,10 +1838,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 3,
@@ -1884,10 +1881,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -1927,10 +1924,10 @@
    "identitaet": {},
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -1979,10 +1976,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -2027,10 +2024,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -2080,10 +2077,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 3,
@@ -2164,10 +2161,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 4,
@@ -2225,10 +2222,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 50,
@@ -2621,10 +2618,10 @@
    "standardmandant_stellen": [],
    "null_stellen": [
     "app/api/v1/endpoints/logistics_freight.py:7",
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 0,
@@ -2923,10 +2920,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3159"
+    "app/services/mcp_execution_service.py:3163"
    ],
    "daten": {
     "zeilen": 1,

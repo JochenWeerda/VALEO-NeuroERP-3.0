@@ -558,8 +558,11 @@ api_router.include_router(
 
 api_router.include_router(
     sales_credit_notes.router,
-    tags=["sales", "credit-notes", "returns"]
+    tags=["sales", "returns"]
 )
+# Gutschrift-Buchungsvorschlaege (Agent schlaegt vor, Mensch gibt frei); die Gutschrift selbst liegt in DocFlow.
+from app.api.v1.endpoints import gutschrift_vorschlaege  # noqa: E402
+api_router.include_router(gutschrift_vorschlaege.router)
 
 api_router.include_router(
     sales_reports.router,

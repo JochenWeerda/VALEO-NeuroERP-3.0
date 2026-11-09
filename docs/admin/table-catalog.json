@@ -13705,6 +13705,7 @@
             "app/services/docflow_creation_context.py",
             "app/services/finance_dunning_service.py",
             "app/services/gdpr_request_processor.py",
+            "app/services/gutschrift_docflow.py",
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
             "app/services/portal_intelligence_service.py",
@@ -15754,10 +15755,12 @@
           "read_by": [
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_freigabe.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/gutschrift_docflow.py"
           ],
           "written_by": [
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/gutschrift_docflow.py"
           ]
         },
         "document_headers": {
@@ -15914,7 +15917,9 @@
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/gutschrift_docflow.py",
             "app/services/kontrollkorb.py",
+            "app/services/mcp_execution_service.py",
             "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py"
           ],
@@ -21087,7 +21092,6 @@
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/journal_entries.py",
-            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
             "app/core/connectors/workflow.py",
             "app/core/screen_definitions_capture.py",
@@ -22591,7 +22595,6 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/open_items.py",
-            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py",
@@ -22722,7 +22725,6 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/open_items.py",
-            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/core/connectors/workflow.py",
             "app/domains/inventory/api/storage_fees.py"
           ]
@@ -23119,7 +23121,6 @@
             "app/api/v1/endpoints/payment_runs.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/api/v1/endpoints/rohware_sammelabrechnung.py",
-            "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/strecke.py",
             "app/api/v1/endpoints/zinsabrechnung.py",
@@ -48472,12 +48473,6 @@
           "placement": "prefix",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/sales_credit_notes.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_credit_notes.py"
           ]
         },
         "sales_credit_notes": {
@@ -48571,14 +48566,10 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/sales_credit_notes.py",
-            "app/core/screen_definitions_capture.py",
             "app/services/finance_freigabe.py",
+            "app/services/gutschrift_docflow.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_credit_notes.py"
           ]
         },
         "sales_delivery_notes": {

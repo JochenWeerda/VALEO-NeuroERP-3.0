@@ -2069,6 +2069,10 @@
       "path": "sales/credit-notes"
     },
     {
+      "module": "@/pages/verkauf/gutschrift-buchungsvorschlaege",
+      "path": "verkauf/gutschrift-buchungsvorschlaege"
+    },
+    {
       "module": "@/pages/verkauf/lieferschein-erfassung",
       "path": "sales/delivery-editor"
     },

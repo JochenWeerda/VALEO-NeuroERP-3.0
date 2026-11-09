@@ -693,7 +693,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
 | `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
-| `sales/gutschrift` | Gutschrift | sales | mittel | — | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
@@ -747,6 +746,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `verkauf/betriebs-auftraege` | Betriebs auftraege | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/betriebs-auftraege/agent-contract` |
 | `verkauf/betriebsauftrag` | Betriebsauftrag drucken | sales | niedrig | — | `GET /api/v1/masks/verkauf/betriebsauftrag/agent-contract` |
 | `verkauf/dauerauftraege` | Neuen Dauerauftrag anlegen | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/dauerauftraege/agent-contract` |
+| `verkauf/gutschrift-buchungsvorschlaege` | Gutschrift-Buchungsvorschläge | sales | niedrig | — | `GET /api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/agent-contract` |
 | `verkauf/kommissions-auftraege` | Kommissions auftraege | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kommissions-auftraege/agent-contract` |
 | `verkauf/kunde` | Kunde | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunde/agent-contract` |
 | `verkauf/kunde-neu` | Kunde neu | verkauf | niedrig | — | `GET /api/v1/masks/verkauf/kunde-neu/agent-contract` |
@@ -25522,53 +25522,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/gutschrift` — Gutschrift
-
-**Zweck:** Gutschrift an den Kunden (Rechnungskorrektur) erfassen und buchen: Positionen mit Steuerschluessel, Erloes netto, Umsatzsteuer getrennt, Forderung brutto; ohne eindeutige Steuerangabe wird nicht gebucht, sondern der Pruefgrund genannt.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/gutschrift/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/gutschrift/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/gutschrift/readiness` |
-| Rollout-Route | `/mask-rollout/sales__gutschrift/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `gutschriften` → `/api/v1/sales/credit-notes`
-- `steuerschluessel` → `/api/v1/finance/tax-keys`
-- `steuer` → `/api/v1/sales/credit-notes/steuer-vorschau`
-- `vorschlaege` → `/api/v1/sales/credit-notes/buchungsvorschlaege`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Lege eine Gutschrift ueber 1.000 EUR netto mit Steuerschluessel 3 zur Rechnung RE-1001 an.
-- Warum wurde Gutschrift {entity_id} nicht gebucht?
-- Welche Gutschriften sind noch Entwurf?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `position` | Position übernehmen | safe | nein | `Stellt die Positionseingabe in die Positionsliste der Maske; gespeichert wird erst mit Speichern.` |
-| `speichern` | Als Entwurf speichern | safe | nein | `/api/v1/sales/credit-notes/actions/speichern` |
-| `buchen` | Buchen | moderate | ja | `/api/v1/sales/credit-notes/{entity_id}/actions/buchen` |
-| `vorschlag_freigeben` | Vorschlag freigeben | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben` |
-| `vorschlag_ablehnen` | Vorschlag ablehnen | moderate | ja | `/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen` |
-| `neu` | Neue Gutschrift | safe | nein | `Leert die Eingabe fuer eine neue Gutschrift.` |
-
----
-
 ### `sales/invoice` — Ausgangsrechnung
 
 **Zweck:** Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.
@@ -25788,6 +25741,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Welche Auftraege haben ein Lieferdatum?
+
+---
+
+### `verkauf/gutschrift-buchungsvorschlaege` — Gutschrift-Buchungsvorschläge
+
+**Zweck:** Buchungsvorschlaege der Agenten zu Gutschriften pruefen und freigeben oder ablehnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/agent-contract` |
+| Readiness | `GET /api/v1/masks/verkauf/gutschrift-buchungsvorschlaege/readiness` |
+| Rollout-Route | `/mask-rollout/verkauf__gutschrift-buchungsvorschlaege/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/sales/credit-notes/buchungsvorschlaege`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Gutschrift-Buchungen warten auf Freigabe?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

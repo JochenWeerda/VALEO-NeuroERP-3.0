@@ -57,7 +57,6 @@ EXPORTE: dict[str, str] = {
     "personalBewerbungEinwilligungScreen": "personal/bewerbung-einwilligung",
     "personalEinwilligungserklaerungenScreen": "personal/einwilligungserklaerungen",
     "adminPostfaecherScreen": "admin/postfaecher",
-    "salesGutschriftScreen": "sales/gutschrift",
     "financeSteuerschluesselScreen": "finance/steuerschluessel",
 }
 

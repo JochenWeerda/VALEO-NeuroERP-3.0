@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 804,
+    "actions": 798,
     "screens_with_actions": 406,
     "domains": 50
   },
@@ -16451,223 +16451,6 @@
       }
     },
     {
-      "id": "mask:sales/gutschrift:buchen",
-      "label": "Buchen",
-      "description": "Buchen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Buchen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "buchen",
-        "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
-        "navigationRoute": null,
-        "command": "sales.gutschriftBuchen",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:entfernen",
-      "label": "Entfernen",
-      "description": "Entfernen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Entfernen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "entfernen",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftPositionEntfernen",
-        "method": null,
-        "permission": "sales.credit_note.position.delete",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:laden",
-      "label": "Öffnen",
-      "description": "Öffnen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Öffnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "laden",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftLaden",
-        "method": null,
-        "permission": "sales.credit_note.read",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:neu",
-      "label": "Neue Gutschrift",
-      "description": "Neue Gutschrift (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Neue Gutschrift"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftNeu",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:position",
-      "label": "Position übernehmen",
-      "description": "Position übernehmen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Position übernehmen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "position",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftPosition",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:pruefen",
-      "label": "Prüfen",
-      "description": "Prüfen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Prüfen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "pruefen",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagPruefen",
-        "method": null,
-        "permission": "sales.credit_note.review",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:speichern",
-      "label": "Als Entwurf speichern",
-      "description": "Als Entwurf speichern (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Als Entwurf speichern"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "speichern",
-        "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
-        "navigationRoute": null,
-        "command": "sales.gutschriftSpeichern",
-        "method": "POST",
-        "permission": "sales.gutschrift.write",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:vorschlag_ablehnen",
-      "label": "Vorschlag ablehnen",
-      "description": "Vorschlag ablehnen (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Vorschlag ablehnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "vorschlag_ablehnen",
-        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagAblehnen",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/gutschrift:vorschlag_freigeben",
-      "label": "Vorschlag freigeben",
-      "description": "Vorschlag freigeben (sales/gutschrift)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/gutschrift",
-      "intent_phrases": [
-        "Vorschlag freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/gutschrift",
-        "actionKey": "vorschlag_freigeben",
-        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagFreigeben",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
       "id": "mask:sales/kalkulationen/neu:export",
       "label": "CSV-Export",
       "description": "CSV-Export (sales/kalkulationen/neu)",
@@ -17244,6 +17027,82 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:verkauf/gutschrift-buchungsvorschlaege:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (verkauf/gutschrift-buchungsvorschlaege)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "verkauf/gutschrift-buchungsvorschlaege",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "verkauf/gutschrift-buchungsvorschlaege",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_ablehnen",
+      "label": "Ablehnen",
+      "description": "Ablehnen (verkauf/gutschrift-buchungsvorschlaege)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "verkauf/gutschrift-buchungsvorschlaege",
+      "intent_phrases": [
+        "Ablehnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "verkauf/gutschrift-buchungsvorschlaege",
+        "actionKey": "vorschlag_ablehnen",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.gutschrift.freigeben",
+        "forbiddenForAgents": true,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_freigeben",
+      "label": "Freigeben",
+      "description": "Freigeben (verkauf/gutschrift-buchungsvorschlaege)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "verkauf/gutschrift-buchungsvorschlaege",
+      "intent_phrases": [
+        "Freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "verkauf/gutschrift-buchungsvorschlaege",
+        "actionKey": "vorschlag_freigeben",
+        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.gutschrift.freigeben",
+        "forbiddenForAgents": true,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "high"
       }
     },
     {

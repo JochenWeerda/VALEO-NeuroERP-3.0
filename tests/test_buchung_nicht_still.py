@@ -19,7 +19,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.api.v1.endpoints import inventory_counts, inventory_operations, sales_credit_notes
+from app.api.v1.endpoints import inventory_counts, inventory_operations
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
 from testgrenze import ersetze_mandant, ersetze_nutzer
@@ -57,11 +57,8 @@ def haus(monkeypatch):
         db.commit()
 
     # Die Kundensperre ist hier nicht Gegenstand.
-    monkeypatch.setattr(sales_credit_notes, "assert_customer_allowed_for_invoice", lambda *a, **k: None)
-    monkeypatch.setattr(sales_credit_notes, "log_fibu_audit", lambda *a, **k: None)
     app = FastAPI()
     register_domain_exception_handlers(app)
-    app.include_router(sales_credit_notes.router)
     app.include_router(inventory_operations.router, prefix="/lager")
     app.include_router(inventory_counts.router, prefix="/inventur")
     ersetze_mandant(app, mandant)

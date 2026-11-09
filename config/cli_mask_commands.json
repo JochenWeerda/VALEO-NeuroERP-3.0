@@ -342,14 +342,12 @@
   "mask:qualitaet/reklamation:abschliessen",
   "mask:qualitaet/reklamation:bearbeiten",
   "mask:sales/delivery-note:drucken",
-  "mask:sales/gutschrift:buchen",
-  "mask:sales/gutschrift:speichern",
-  "mask:sales/gutschrift:vorschlag_ablehnen",
-  "mask:sales/gutschrift:vorschlag_freigeben",
   "mask:sales/sales-order:bearbeiten",
   "mask:schnittstelle/mde-inbox:process_pending",
   "mask:stammdaten/hausbank:edit",
   "mask:stammdaten/mengeneinheit:edit",
+  "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_ablehnen",
+  "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_freigeben",
   "mask:waage/liste:calibrate",
   "mask:waage/liste:dismissImport",
   "mask:waage/liste:import",
@@ -367,7 +365,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 977,
+  "kein_endpunkt": 973,
   "pfadparameter": 6
  }
 }

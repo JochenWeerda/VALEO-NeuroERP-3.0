@@ -251,6 +251,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `grundfutter_analysen` | Grundfutter-Analysen API |
 | `gs1_barcode` | GS1 Barcode Parse Service |
 | `gs1_parser` | GS1 barcode parser endpoint (l3c-gs1) |
+| `gutschrift_vorschlaege` | Buchungsvorschlaege fuer Verkaufsgutschriften: ein Agent schlaegt vor, ein Mensch gibt frei (09.11.2026). |
 | `harvest_acceptance` | Harvest Acceptance (Ernte-Annahme) API endpoints. |
 | `harvest_rules` | Transport adapter for versioned harvest domain commands, never direct CRUD. |
 | `hausbankenstamm` | Hausbankenstamm — Eigene Bankverbindungen des Mandanten. |
@@ -414,7 +415,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `saatzucht` | Saatzucht-Modul — certified seed / seed breeding management stub. |
 | `sales_blanket_orders` | Rahmenaufträge / Abrufe (Blanket Orders) — thin-router, sqlalchemy.text(). |
 | `sales_credit` | Kreditlimit-Prüfung & Billing-Status im O2C-Kontext (DOM-SALES-004.3) — read-only. |
-| `sales_credit_notes` | Sales Credit Notes (Gutschriften) and Returns (Retouren) endpoints. |
+| `sales_credit_notes` | Retouren (SALES-DLV-02/03/04). Gutschriften liegen seit BELEG-052 in DocFlow. |
 | `sales_delivery_notes` | Sales Delivery Notes (Lieferscheine) CRUD endpoints. |
 | `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |

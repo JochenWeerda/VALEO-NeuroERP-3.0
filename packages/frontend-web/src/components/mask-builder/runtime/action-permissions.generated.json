@@ -1816,30 +1816,6 @@
         ]
       ]
     },
-    "sales/gutschrift": {
-      "sales.gutschrift.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "sales.gutschrift.post": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "sales/sales-order": {
       "sales.order.update": [
         [
@@ -1878,6 +1854,19 @@
           "EINKAUF_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "verkauf/gutschrift-buchungsvorschlaege": {
+      "verkauf.gutschrift.freigeben": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

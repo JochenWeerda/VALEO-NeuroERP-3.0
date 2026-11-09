@@ -177,6 +177,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |
+| `gutschrift_docflow` | Verkaufsgutschrift in DocFlow (BELEG-052, 09.11.2026: DocFlow einziger Belegspeicher). |
 | `harvest_acceptance_service` | Service layer for Harvest Acceptance (Ernte-Annahme) CRUD operations. |
 | `hr_row_delete_commands` | Versioned, transaction-bound deletion for HR rows; no transport registration. |
 | `hrm_abwesenheit_service` | — |

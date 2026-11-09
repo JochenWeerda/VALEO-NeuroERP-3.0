@@ -2148,8 +2148,8 @@ def _schulung_speichern(db: Session, request: ToolExecutionRequest, actor: str, 
 
 def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
     """Mask-parity write: Gutschrift als Entwurf im Authentifizierungs-Mandanten. Gebucht wird hier nie."""
-    from app.api.v1.endpoints.sales_credit_notes import CreditNoteCreate, _lege_an, _zeilen
     from app.finance.steuerschluessel import CENT, Steuerklaerung, steuergruppen
+    from app.services.gutschrift_docflow import lege_entwurf_an
 
     try:
         opened = GutschriftSpeichernInput.model_validate(request.parameters)
@@ -2168,18 +2168,14 @@ def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str
             if replayed is not None:
                 return replayed
         if db.execute(
-            text("SELECT 1 FROM domain_sales.sales_credit_notes WHERE tenant_id = :tid AND credit_note_number = :nr"),
+            text("SELECT 1 FROM domain_docflow.document_headers WHERE tenant_id = :tid AND doc_type = 'sales_credit_memo' "
+                 "AND source_system = 'gutschrift' AND source_ref = :nr AND deleted_at IS NULL"),
             {"tid": tenant, "nr": opened.credit_note_number},
         ).first():
             raise HTTPException(409, f"Credit note number {opened.credit_note_number} already exists")
-        eingabe = CreditNoteCreate.model_validate({
-            "credit_note_number": opened.credit_note_number, "customer_id": opened.customer_id,
-            "customer_name": opened.customer_name, "invoice_reference": opened.invoice_reference,
-            "reason": opened.grund, "status": "draft",
-            "lines": [zeile.model_dump() for zeile in opened.lines],
-        })
-        # Dieselbe Stelle wie die Buchung: Netto, Steuer, Brutto — oder der Grund, warum nicht.
-        zeilen = _zeilen(eingabe.lines)
+        # Dieselbe Stelle wie die Buchung: Netto, Steuer, Brutto - oder der Grund, warum nicht.
+        zeilen = [(nr, zeile.tax_code, None, (zeile.quantity * zeile.unit_price).quantize(CENT))
+                  for nr, zeile in enumerate(opened.lines, 1)]
         netto = sum((z[3] for z in zeilen), Decimal("0")).quantize(CENT)
         steuer: Decimal | None = None
         pruefgrund: str | None = None
@@ -2198,8 +2194,11 @@ def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str
         if request.mode != "execute":
             db.rollback()
             return {"success": True, "mode": request.mode, "proposedChanges": {**parameters, **betraege}}
-        angelegt = _lege_an(db, tenant, eingabe)
-        entity_id = str(angelegt["id"])
+        # Gutschrift als DocFlow-Entwurf (BELEG-052; vorher domain_sales.sales_credit_notes).
+        entity_id = lege_entwurf_an(
+            db, tenant, nummer=opened.credit_note_number, kunde=opened.customer_id,
+            rechnung=opened.invoice_reference, zeilen=[z.model_dump() for z in opened.lines], akteur=actor,
+            idempotenz=f"mcp-gutschrift-{request.idempotency_key}"[:120])
         audit_id = _write_audit(
             db, tenant_id=tenant, action_key=request.tool_name,
             entity_type="sales_credit_note", entity_id=entity_id,
@@ -2226,8 +2225,9 @@ def _gutschrift_speichern(db: Session, request: ToolExecutionRequest, actor: str
 
 
 _GUTSCHRIFT_VORSCHLAG_ART = "sales_credit_note_buchung"
-_GUTSCHRIFT_ROUTE = "/sales/credit-notes"
-_GUTSCHRIFT_SCREEN_ID = "sales/gutschrift"
+# Freigabe durch einen Menschen: Studio-Liste der Buchungsvorschlaege (BELEG-052; vorher Maske sales/gutschrift).
+_GUTSCHRIFT_ROUTE = "/verkauf/gutschrift-buchungsvorschlaege"
+_GUTSCHRIFT_SCREEN_ID = "verkauf/gutschrift-buchungsvorschlaege"
 
 
 def _gutschrift_plan_vorschau(plan: dict[str, Any]) -> dict[str, Any]:
@@ -2248,7 +2248,7 @@ def _gutschrift_plan_vorschau(plan: dict[str, Any]) -> dict[str, Any]:
 
 def _gutschrift_propose(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
     """Schlaegt die Buchung einer Gutschrift vor. Bucht nie; ein Mensch prueft und gibt frei."""
-    from app.api.v1.endpoints.sales_credit_notes import _buchungsplan
+    from app.services.gutschrift_docflow import vorschau as _buchungsvorschau
 
     try:
         opened = GutschriftProposeInput.model_validate(request.parameters)
@@ -2270,7 +2270,7 @@ def _gutschrift_propose(db: Session, request: ToolExecutionRequest, actor: str, 
                 return replayed
         # Dieselbe Pruefung wie die Buchung: Laesst sich die Gutschrift nicht buchen (fehlender
         # Steuerschluessel, Widerspruch, fehlendes Konto), gibt es keinen Vorschlag, sondern den Grund.
-        vorschau = _gutschrift_plan_vorschau(_buchungsplan(db, tenant, opened.credit_note_id))
+        vorschau = _gutschrift_plan_vorschau(_buchungsvorschau(db, tenant, opened.credit_note_id, actor))
         if request.mode != "propose":
             db.rollback()
             return {"success": True, "mode": request.mode, "approved": False, **vorschau}
@@ -2338,8 +2338,9 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
     """Bucht eine Gutschrift — nur aus einem Vorschlag, den ein Mensch freigegeben hat."""
     from sqlalchemy.exc import IntegrityError
 
-    from app.api.v1.endpoints.sales_credit_notes import _buche, _buchungsplan
     from app.core.exceptions import kontosperre_meldung
+    from app.services.gutschrift_docflow import buche as _buche_gutschrift
+    from app.services.gutschrift_docflow import vorschau as _buchungsvorschau
 
     try:
         payload = GutschriftBuchenInput.model_validate(request.parameters)
@@ -2379,8 +2380,7 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
         credit_note_id = snapshot.get("credit_note_id") if isinstance(snapshot, dict) else None
         if not isinstance(credit_note_id, str) or not credit_note_id.strip():
             raise HTTPException(409, "Proposal snapshot lacks credit_note_id")
-        plan = _buchungsplan(db, tenant, credit_note_id)
-        vorschau = _gutschrift_plan_vorschau(plan)
+        vorschau = _gutschrift_plan_vorschau(_buchungsvorschau(db, tenant, credit_note_id, actor))
         # Gebucht wird, was freigegeben wurde — nicht, was die Gutschrift inzwischen geworden ist.
         if round(float(snapshot.get("brutto") or 0), 2) != round(vorschau["brutto"], 2):
             raise HTTPException(409, "Credit note changed after approval; a new proposal is required")
@@ -2389,7 +2389,11 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
             return {"success": True, "mode": request.mode, "approved": True,
                     "proposal_id": payload.proposal_id, **vorschau}
         try:
-            meldung = _buche(db, plan, tenant)
+            gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
+                                        idempotenz=f"mcp-gutschrift-buchen-{payload.proposal_id}"[:120])
+            meldung = (f"Gutschrift {vorschau['credit_note_number']} gebucht: netto {vorschau['netto']:.2f}, "
+                       f"Umsatzsteuer {vorschau['steuer']:.2f}, brutto {vorschau['brutto']:.2f} "
+                       f"(Buchung {gebucht.get('journal_entry_id') or gebucht.get('posting_id') or ''}).")
         except IntegrityError as fehler:
             sperre = kontosperre_meldung(fehler)
             if sperre:
