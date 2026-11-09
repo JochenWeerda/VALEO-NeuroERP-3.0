@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T19:40:57Z'
+generated_at: '2026-11-09T19:48:22Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -832,7 +832,6 @@ domains:
     - portal_interessent_service
     - portal_lohndienst_service
     - portal_preisspiegel_service
-    - sales_ab_lifecycle_service
     - sales_credit_service
     - sales_invoice_mask
     - sales_invoice_service
@@ -910,7 +909,6 @@ domains:
     - sales_invoices
     - sales_match
     - sales_order_commands
-    - sales_orders
     - sales_reports
     - sales_shipping_ext
     - sales_storno
@@ -2395,10 +2393,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 346
-  backend_services_mapped: 346
-  backend_endpoints_total: 482
-  backend_endpoints_mapped: 482
+  backend_services_total: 345
+  backend_services_mapped: 345
+  backend_endpoints_total: 481
+  backend_endpoints_mapped: 481
 unmapped:
   frontend_routes: []
   backend_services: []

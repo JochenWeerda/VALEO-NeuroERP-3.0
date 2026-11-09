@@ -14754,15 +14754,11 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
             "app/services/procurement_service.py",
             "app/services/sales_match_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_orders.py"
           ]
         },
         "sales_orders": {
@@ -14922,9 +14918,7 @@
             "app/api/v1/endpoints/crm_kim.py",
             "app/api/v1/endpoints/pick_lists.py",
             "app/api/v1/endpoints/sales_order_commands.py",
-            "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
-            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/services/beleg_anlage.py",
             "app/services/customer_reference.py",
             "app/services/docflow_service.py",
@@ -14943,9 +14937,7 @@
           "written_by": [
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/pick_lists.py",
-            "app/api/v1/endpoints/sales_delivery_notes.py",
-            "app/api/v1/endpoints/sales_order_commands.py",
-            "app/api/v1/endpoints/sales_orders.py"
+            "app/api/v1/endpoints/sales_delivery_notes.py"
           ]
         },
         "supplier_tax_profiles": {
@@ -48148,8 +48140,7 @@
             "sales/delivery-note"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py",
-            "app/api/v1/endpoints/sales_orders.py"
+            "app/api/v1/endpoints/sales_delivery_notes.py"
           ]
         },
         "delivery_notes": {
@@ -48325,7 +48316,6 @@
             "app/api/v1/endpoints/mask_actions.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
             "app/api/v1/endpoints/sales_invoices.py",
-            "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/services/beleg_anlage.py",
@@ -48350,7 +48340,6 @@
             "app/api/v1/endpoints/logistics_tours.py",
             "app/api/v1/endpoints/sales_credit_notes.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
-            "app/api/v1/endpoints/sales_orders.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_storno_service.py",
             "app/services/warehouse_service.py"
@@ -48405,9 +48394,6 @@
           "placement": "prefix",
           "primary_key": [
             "id"
-          ],
-          "written_by": [
-            "app/services/sales_ab_lifecycle_service.py"
           ]
         },
         "sales_credit_note_lines": {
