@@ -11119,6 +11119,109 @@
       ]
     },
     {
+      "mask_id": "crm/vertreterprovisionen",
+      "title": "Vertreterprovisionen",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__vertreterprovisionen/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/vertreterprovisionen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/vertreterprovisionen/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/vertreterprovisionen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Provisionsgruppe anlegen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "crm.vertreter.update",
+          "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_staffeln",
+          "label": "Staffelzeilen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Staffelzeilen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
+        "crm.lead.qualify"
+      ]
+    },
+    {
+      "mask_id": "crm/vertreterprovisionen-staffeln",
+      "title": "Provisionsstaffeln",
+      "domain": "crm",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/crm__vertreterprovisionen-staffeln/:entityId",
+      "agent_contract_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/agent-contract",
+      "screen_definition_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/screen-definition",
+      "readiness_url": "/api/v1/masks/crm/vertreterprovisionen-staffeln/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "ansicht_vertreterprovisionen",
+          "label": "Provisionsgruppen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Provisionsgruppen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "crm.customer.search",
+        "crm.customer.summary360",
+        "crm.customer.open",
+        "crm.contact.log",
+        "crm.activity.create",
+        "crm.activity.update",
+        "crm.activity.delete",
+        "crm.lead.qualify"
+      ]
+    },
+    {
       "mask_id": "crm/wettbewerber",
       "title": "Wettbewerber",
       "domain": "crm",
@@ -27144,5 +27247,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 141
+  "event_count": 144
 }

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.cluster_spalten import datum, janein, status, text, zahl
+from app.core.cluster_spalten import betrag, datum, janein, status, text, zahl
 from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 
 _EXPORT = stamm_list_export_action()
@@ -108,6 +108,60 @@ def build_workflows_trigger() -> dict[str, Any]:
     )
 
 
+_PROVISION = "/api/v1/crm/vertreter/provisionen"
+
+
+def _provision_ansicht(ziel: str, label: str) -> dict[str, Any]:
+    return {"key": f"ansicht_{ziel.rsplit('/', 1)[-1]}", "label": label, "kind": "secondary", "dangerLevel": "safe",
+            "zone": "header", "navigationRoute": ziel, "localEffect": "navigation",
+            "stubReason": f"Wechselt zu {label}."}
+
+
+def build_crm_vertreterprovisionen() -> dict[str, Any]:
+    from app.api.v1.endpoints.vertreterprovisionen_kommandos import GRUPPE_FELDER, STAFFEL_FELDER
+
+    return build_stamm_list_screen(
+        screen_id="crm/vertreterprovisionen", domain="crm", bundle="crm", title="Vertreterprovisionen",
+        subtitle="Provisionsgruppen je Richtung: fester Satz oder Staffel",
+        endpoint=f"{_PROVISION}/gruppen", row_route=None,
+        columns=[text("gruppe_nr", "Gruppe", "primary"), text("bezeichnung", "Bezeichnung", "primary"),
+                 text("richtung", "Richtung"), text("provisionstyp", "Provisionstyp"),
+                 zahl("provisionssatz", "Satz %"), datum("created_at", "Angelegt", "tertiary")],
+        actions=[{"key": "anlegen", "label": "Provisionsgruppe anlegen", "kind": "primary", "zone": "header",
+                  "dangerLevel": "low", "permission": "crm.vertreter.update",
+                  "commandEndpoint": f"{_PROVISION}/gruppen/actions/anlegen", "method": "POST",
+                  "requiresConfirmation": False, "inputFields": GRUPPE_FELDER},
+                 _provision_ansicht("/crm/vertreterprovisionen/staffeln", "Staffelzeilen"), _EXPORT],
+        row_actions=[{"key": "staffelzeile_anlegen", "label": "Staffelzeile anlegen", "dangerLevel": "moderate",
+                      "permission": "crm.vertreter.update",
+                      "commandEndpoint": f"{_PROVISION}/gruppen/{{entity_id}}/actions/staffelzeile_anlegen",
+                      "method": "POST", "requiresConfirmation": False, "inputFields": STAFFEL_FELDER,
+                      "visibleWhen": {"field": "provisionstyp", "values": ["staffel_optpreis", "staffel_preis_zuab"]}},
+                     {"key": "deaktivieren", "label": "Stilllegen", "dangerLevel": "moderate",
+                      "permission": "crm.vertreter.update",
+                      "commandEndpoint": f"{_PROVISION}/gruppen/{{entity_id}}/actions/deaktivieren", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True}],
+        purpose="Provisionsgruppen pflegen: wie ein Vertreter am Umsatz beteiligt wird.",
+        prompts=["Lege die Provisionsgruppe P1 mit 2,5 % an.", "Welche Gruppen rechnen mit Staffel?"],
+        no_workflow="Stammdatenliste; die Provisionsabrechnung liest Gruppe und Staffel.",
+    )
+
+
+def build_crm_vertreterprovisionen_staffeln() -> dict[str, Any]:
+    return build_stamm_list_screen(
+        screen_id="crm/vertreterprovisionen-staffeln", domain="crm", bundle="crm", title="Provisionsstaffeln",
+        subtitle="Staffelzeilen je Provisionsgruppe und Vertreterklasse",
+        endpoint=f"{_PROVISION}/staffelzeilen", row_route=None,
+        columns=[text("gruppe_nr", "Gruppe", "primary"), text("gruppe_bezeichnung", "Bezeichnung"),
+                 text("vertreterklasse", "Vertreterklasse", "primary"), zahl("zeile_nr", "Zeile"),
+                 betrag("ab_wert", "Ab Wert", summe=False), zahl("provisionssatz", "Satz %", "primary")],
+        actions=[_provision_ansicht("/crm/vertreterprovisionen", "Provisionsgruppen"), _EXPORT], row_actions=[],
+        purpose="Pruefen, ab welchem Wert welcher Provisionssatz gilt.",
+        prompts=["Welcher Satz gilt in Gruppe P2 ab 10.000 EUR?"],
+        no_workflow="Nachschlageliste; Zeilen legt die Provisionsgruppe an.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -115,4 +169,6 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "disposition/regeln": build_disposition_positionsregeln,
     "agribusiness/farmers": build_agribusiness_landwirte,
     "workflows/trigger": build_workflows_trigger,
+    "crm/vertreterprovisionen": build_crm_vertreterprovisionen,
+    "crm/vertreterprovisionen-staffeln": build_crm_vertreterprovisionen_staffeln,
 }

@@ -921,6 +921,10 @@
       "path": "crm/vertreterprovisionen"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen-staffeln",
+      "path": "crm/vertreterprovisionen/staffeln"
+    },
+    {
       "module": "@/pages/dashboard/customizable",
       "path": "dashboard/customizable"
     },

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 775,
-    "screens_with_actions": 397,
+    "actions": 782,
+    "screens_with_actions": 399,
     "domains": 50
   },
   "actions": [
@@ -7388,6 +7388,164 @@
         "command": null,
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen-staffeln:ansicht_vertreterprovisionen",
+      "label": "Provisionsgruppen",
+      "description": "Provisionsgruppen (crm/vertreterprovisionen-staffeln)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen-staffeln",
+      "intent_phrases": [
+        "Provisionsgruppen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen-staffeln",
+        "actionKey": "ansicht_vertreterprovisionen",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/vertreterprovisionen",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen-staffeln:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/vertreterprovisionen-staffeln)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen-staffeln",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen-staffeln",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:anlegen",
+      "label": "Provisionsgruppe anlegen",
+      "description": "Provisionsgruppe anlegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Provisionsgruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:ansicht_staffeln",
+      "label": "Staffelzeilen",
+      "description": "Staffelzeilen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Staffelzeilen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "ansicht_staffeln",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/vertreterprovisionen/staffeln",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:deaktivieren",
+      "label": "Stilllegen",
+      "description": "Stilllegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Stilllegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "deaktivieren",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/deaktivieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:staffelzeile_anlegen",
+      "label": "Staffelzeile anlegen",
+      "description": "Staffelzeile anlegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Staffelzeile anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "staffelzeile_anlegen",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/staffelzeile_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
       }
     },
     {

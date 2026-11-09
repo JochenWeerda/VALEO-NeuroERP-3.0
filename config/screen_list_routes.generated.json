@@ -221,6 +221,8 @@
     "crm/lieferant": "/crm/lieferanten",
     "crm/segment": "/crm/segment",
     "crm/vertreter": "/crm/vertreterstamm",
+    "crm/vertreterprovisionen": "/crm/vertreterprovisionen",
+    "crm/vertreterprovisionen-staffeln": "/crm/vertreterprovisionen/staffeln",
     "crm/wettbewerber": "/crm/wettbewerber",
     "dashboard/customizable": "/dashboard/customizable",
     "dashboard/customizable-dashboard": "/dashboard/customizable-dashboard",

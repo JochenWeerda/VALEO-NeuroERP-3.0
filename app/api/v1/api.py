@@ -2282,6 +2282,8 @@ api_router.include_router(periodische_buchungen.router)
 # Fachliche Vertiefung Wave 12
 api_router.include_router(zu_abschlaggruppen.router)
 api_router.include_router(vertreterprovisionen.router)
+from app.api.v1.endpoints import vertreterprovisionen_kommandos  # noqa: E402
+api_router.include_router(vertreterprovisionen_kommandos.router)
 
 # Fachliche Vertiefung Wave 13
 api_router.include_router(fibu_stammdaten.router)

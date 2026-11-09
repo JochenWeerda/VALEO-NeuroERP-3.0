@@ -915,6 +915,17 @@
         ]
       ]
     },
+    "crm/vertreterprovisionen": {
+      "crm.vertreter.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/wiedervorlagen": {
       "crm.kontakt.erledigen": [
         [

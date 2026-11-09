@@ -20688,3 +20688,8 @@ Restseiten-Cluster 2 (09.11.2026): disposition/regeln (Positionsregeln, /positio
 workflows/trigger (09.11.2026): Trigger-Regeln des Prozesskerns typisiert (TriggerRegelOut statt extra=allow) und
 als Studio-Liste; Stand 799 Studio / 34 screen_definition.
 Umleitungen (09.11.2026): agrar/ernte/neu -> Erntekampagne-Erfassung, agrar/feldbuch/schlag/neu -> Schlagkartei (beide unverlinkt, screenId unbekannt).
+Vertreterprovisionen (09.11.2026): handgebaute Seite (472 Zeilen) abgeloest. Studio-Listen crm/vertreterprovisionen
+(Gruppen; Anlegen, Staffelzeile anlegen, Stilllegen mit Grund als Kommandowege fuer Maske/CLI/MCP) und
+crm/vertreterprovisionen-staffeln (flacher Leseweg staffelzeilen). Staffeln/Zeilen tragen tenant_id ausdruecklich.
+Ausserdem: Partnerstamm-Pflege war per Ersetzen ohne Anzahl zwoelfmal in screen_definitions.py (ohne Wirkung),
+bereinigt und per Vertragstest an die Kundenakte gebunden.

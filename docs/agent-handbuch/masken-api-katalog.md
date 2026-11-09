@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (774 Masken).
+> Generiert aus `app/core/screen_definitions.py` (776 Masken).
 
 ## Übersicht
 
@@ -365,6 +365,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/segment` | Segment | crm | hoch | — | `GET /api/v1/masks/crm/segment/agent-contract` |
 | `crm/segmente-liste` | Segmente | crm | niedrig | — | `GET /api/v1/masks/crm/segmente-liste/agent-contract` |
 | `crm/vertreter` | Vertreter | crm | niedrig | — | `GET /api/v1/masks/crm/vertreter/agent-contract` |
+| `crm/vertreterprovisionen` | Vertreterprovisionen | crm | niedrig | — | `GET /api/v1/masks/crm/vertreterprovisionen/agent-contract` |
+| `crm/vertreterprovisionen-staffeln` | Provisionsstaffeln | crm | niedrig | — | `GET /api/v1/masks/crm/vertreterprovisionen-staffeln/agent-contract` |
 | `crm/wettbewerber` | Wettbewerber | crm | niedrig | — | `GET /api/v1/masks/crm/wettbewerber/agent-contract` |
 | `crm/wiedervorlagen` | Wiedervorlagen | crm | niedrig | — | `GET /api/v1/masks/crm/wiedervorlagen/agent-contract` |
 | `crm/zielgruppen` | Zielgruppen | crm | niedrig | — | `GET /api/v1/masks/crm/zielgruppen/agent-contract` |
@@ -11147,6 +11149,88 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `crm/vertreterprovisionen` — Vertreterprovisionen
+
+**Zweck:** Provisionsgruppen pflegen: wie ein Vertreter am Umsatz beteiligt wird.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/vertreterprovisionen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/vertreterprovisionen/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/vertreterprovisionen/readiness` |
+| Rollout-Route | `/mask-rollout/crm__vertreterprovisionen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/vertreter/provisionen/gruppen`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege die Provisionsgruppe P1 mit 2,5 % an.
+- Welche Gruppen rechnen mit Staffel?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Provisionsgruppe anlegen | safe | nein | `/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen` |
+| `ansicht_staffeln` | Staffelzeilen | safe | nein | `Wechselt zu Staffelzeilen.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `crm/vertreterprovisionen-staffeln` — Provisionsstaffeln
+
+**Zweck:** Pruefen, ab welchem Wert welcher Provisionssatz gilt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/crm/vertreterprovisionen-staffeln/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/crm/vertreterprovisionen-staffeln/agent-contract` |
+| Readiness | `GET /api/v1/masks/crm/vertreterprovisionen-staffeln/readiness` |
+| Rollout-Route | `/mask-rollout/crm__vertreterprovisionen-staffeln/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/crm/vertreter/provisionen/staffelzeilen`
+
+**MCP-Tools (Domäne):**
+
+- `crm.customer.search` — scope `crm:read`, Risiko niedrig
+- `crm.customer.summary360` — scope `crm:read`, Risiko niedrig
+- `crm.customer.open` — scope `crm:read`, Risiko niedrig
+- `crm.contact.log` — scope `crm:write`, Risiko mittel
+- `crm.activity.create` — scope `crm:write`, Risiko niedrig
+- `crm.activity.update` — scope `crm:write`, Risiko mittel
+- `crm.activity.delete` — scope `crm:write`, Risiko mittel
+- `crm.lead.qualify` — scope `crm:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welcher Satz gilt in Gruppe P2 ab 10.000 EUR?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `ansicht_vertreterprovisionen` | Provisionsgruppen | safe | nein | `Wechselt zu Provisionsgruppen.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

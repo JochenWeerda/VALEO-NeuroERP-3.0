@@ -466,6 +466,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `versicherungen` | Versicherungen — vollständiges CRUD. |
 | `vertraege` | Verträge API - Rahmenverträge (SQLAlchemy) |
 | `vertreterprovisionen` | Vertreterprovisionsgruppen und -staffeln — Provisionsabrechnung Außendienst. |
+| `vertreterprovisionen_kommandos` | Vertreterprovisionen als Fachaktion fuer Maske, CLI und MCP (Studio-Listen, 09.11.2026). |
 | `vertreterstamm` | Vertreterstamm — Außendienstmitarbeiter und Vertretergruppen. |
 | `waage` | — |
 | `waage_mobile` | WGE-MOB-001: Mobile-Sync für Waagenbelege. |

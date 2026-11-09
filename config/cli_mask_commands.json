@@ -229,6 +229,9 @@
   "mask:crm/segment:edit",
   "mask:crm/segment:remove_member",
   "mask:crm/segment:rules",
+  "mask:crm/vertreterprovisionen:anlegen",
+  "mask:crm/vertreterprovisionen:deaktivieren",
+  "mask:crm/vertreterprovisionen:staffelzeile_anlegen",
   "mask:crm/wiedervorlagen:erledigen",
   "mask:dms/inbox:create_beleg",
   "mask:dms/inbox:discard",
@@ -352,7 +355,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 963,
+  "kein_endpunkt": 967,
   "pfadparameter": 6
  }
 }

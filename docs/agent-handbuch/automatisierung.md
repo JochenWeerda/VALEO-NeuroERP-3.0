@@ -137,6 +137,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `crm.opportunity.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.partner_klaerfall.neuer_partner` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
 | `crm.partner_klaerfall.zugeordnet` | outbox | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` |
+| `crm.vertreterprovision.gruppe_angelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
+| `crm.vertreterprovision.gruppe_stillgelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
+| `crm.vertreterprovision.staffelzeile_angelegt` | outbox | `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` |
 | `crm_case.created` | outbox | `app/services/crm_compat_service.py` |
 
 ### Einkauf

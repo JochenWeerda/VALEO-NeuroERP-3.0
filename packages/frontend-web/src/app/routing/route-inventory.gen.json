@@ -2331,6 +2331,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen-staffeln",
+      "path": "crm/vertreterprovisionen/staffeln",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/vertreterstamm",
       "path": "crm/vertreterstamm",
       "source": "auto"

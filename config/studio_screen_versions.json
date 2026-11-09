@@ -3675,6 +3675,28 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "crm/vertreterprovisionen": {
+      "definition_hash": "4c3b82ac349901d894e33d763474fab1bdf453923ccc4315a0bfda4271697936",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "crm/vertreterprovisionen-staffeln": {
+      "definition_hash": "21b8fe94d439e664e012da6e5b9115b67675854978f2056c742c2fcff27937e8",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "crm/wettbewerber": {
       "definition_hash": "7ca9f1c9f1e045ea4c3989dc6d7462d9eb36e6aefd62c709b772de4acbd5375b",
       "gates_passed": [

@@ -160880,6 +160880,60 @@
         "title": "StaffelrabattOut",
         "type": "object"
       },
+      "StaffelzeileOut": {
+        "properties": {
+          "ab_wert": {
+            "title": "Ab Wert",
+            "type": "string"
+          },
+          "gruppe_bezeichnung": {
+            "title": "Gruppe Bezeichnung",
+            "type": "string"
+          },
+          "gruppe_id": {
+            "title": "Gruppe Id",
+            "type": "string"
+          },
+          "gruppe_nr": {
+            "title": "Gruppe Nr",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "provisionssatz": {
+            "title": "Provisionssatz",
+            "type": "string"
+          },
+          "vertreterklasse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vertreterklasse"
+          },
+          "zeile_nr": {
+            "title": "Zeile Nr",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "gruppe_id",
+          "gruppe_nr",
+          "gruppe_bezeichnung",
+          "zeile_nr",
+          "ab_wert",
+          "provisionssatz"
+        ],
+        "title": "StaffelzeileOut",
+        "type": "object"
+      },
       "StalenessOut": {
         "properties": {
           "days_since_confirmation": {
@@ -275351,6 +275405,172 @@
         ]
       }
     },
+    "/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen": {
+      "post": {
+        "operationId": "gruppe_anlegen_api_v1_crm_vertreter_provisionen_gruppen_actions_anlegen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Provisionsgruppe anlegen",
+        "tags": [
+          "CRM - Vertreterprovisionen",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/deaktivieren": {
+      "post": {
+        "operationId": "gruppe_deaktivieren_api_v1_crm_vertreter_provisionen_gruppen__entity_id__actions_deaktivieren_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Provisionsgruppe stilllegen",
+        "tags": [
+          "CRM - Vertreterprovisionen",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/staffelzeile_anlegen": {
+      "post": {
+        "operationId": "staffelzeile_anlegen_api_v1_crm_vertreter_provisionen_gruppen__entity_id__actions_staffelzeile_anlegen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Staffelzeile einer Provisionsgruppe anlegen",
+        "tags": [
+          "CRM - Vertreterprovisionen",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/crm/vertreter/provisionen/gruppen/{gruppe_nr}": {
       "delete": {
         "operationId": "delete_provisionsgruppe_api_v1_crm_vertreter_provisionen_gruppen__gruppe_nr__delete",
@@ -275524,6 +275744,37 @@
         "summary": "Provisionsstaffel anlegen",
         "tags": [
           "CRM - Vertreterprovisionen"
+        ]
+      }
+    },
+    "/api/v1/crm/vertreter/provisionen/staffelzeilen": {
+      "get": {
+        "operationId": "staffelzeilen_api_v1_crm_vertreter_provisionen_staffelzeilen_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StaffelzeileOut"
+                  },
+                  "title": "Response Staffelzeilen Api V1 Crm Vertreter Provisionen Staffelzeilen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Staffelzeilen aller Provisionsgruppen",
+        "tags": [
+          "CRM - Vertreterprovisionen",
+          "mask-actions"
         ]
       }
     },
