@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 700 Tabellen, 9294 Spalten.**
+**31 Schemas, 700 Tabellen, 9295 Spalten.**
 
 ## Schemas
 
@@ -30,7 +30,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_controlling` | `finance` | 9 | 88 |
 | `domain_crm` | `crm` | 48 | 858 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
-| `domain_docflow` | `dms-compliance` | 27 | 348 |
+| `domain_docflow` | `dms-compliance` | 27 | 349 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 21 | 393 |
 | `domain_erp` | `finance` | 46 | 601 |
@@ -957,7 +957,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `document_command_log` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, command, actor, payload, logged_at |
 | `document_followups` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, art, betreff, text, faellig_am, status, erledigt_at, erledigt_von, created_at, created_by |
 | `document_header_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, created_at |
-| `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by |
+| `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by, bausteine |
 | `document_items` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit, unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, metadata, created_at, updated_at, tax_code, expense_account |
 | `document_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, from_item_id, to_item_id, quantity_linked, created_at |
 | `document_postings` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at |

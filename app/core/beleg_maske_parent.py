@@ -138,7 +138,21 @@ def beleg_kopffelder(variante: Belegvariante) -> list[dict[str, Any]]:
             feld("buchungsstand", "Buchung"),
             feld("buchungsgrund", "Hinweis zur Buchung"),
         ]
+    for eingabe in beleg_kopfbaustein_felder(variante):
+        felder.append({**eingabe, "readOnly": True})
     felder.append(feld("aktionshinweis", "Hinweise zu Aktionen", "textarea"))
+    return felder
+
+
+def beleg_kopfbaustein_felder(variante: Belegvariante) -> list[dict[str, Any]]:
+    """Felder der Kopfbausteine der Belegart (BELEG-052): was die alten Belegseiten pflegten, pflegt die Variante."""
+    from app.core.belegvertrag import BAUSTEIN_FELDER, BAUSTEINE, KOPFBAUSTEINE, TRENNER
+
+    felder: list[dict[str, Any]] = []
+    for name in KOPFBAUSTEINE.get(variante.belegart, ()):
+        for feld_key, label, typ in BAUSTEIN_FELDER[name]:
+            felder.append({"key": f"{name}{TRENNER}{feld_key}", "label": label, "type": typ,
+                           "helpText": f"{name.capitalize()}: {BAUSTEINE[name]}"})
     return felder
 
 
@@ -301,6 +315,7 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
                 {"key": "document_date", "label": "Belegdatum", "type": "date", "required": True},
                 {"key": "currency", "label": "Waehrung", "type": "text", "required": True},
                 {"key": "source_ref", "label": "Externe Referenz", "type": "text"},
+                *beleg_kopfbaustein_felder(variante),
                 {
                     "key": "items",
                     "label": "Positionen",

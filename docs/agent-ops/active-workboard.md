@@ -20745,3 +20745,9 @@ Pruefmeldung, gleiche Feldfehler, nichts geschrieben. Dazu: gleiche Rechteentsch
 kennen denselben Weg, MCP-Vorpruefung strenger nie weicher. Befund behoben: generate_mcp_mask_action_map nahm nur
 Aktionen mit Mutations-Schluesselwort auf - 127 Schreibaktionen (konfigurieren, stilllegen, entfernen ...) fehlten in
 der Karte, obwohl mask.action.execute sie ausfuehrt (87 generisch, 40 Menschen vorbehalten).
+BELEG-052 Voraussetzung Kopfbausteine (09.11.2026): DocFlow kannte Lieferung, Zahlung, Texte, Kontakt und Referenzen
+nicht (nur die Eigenspeicher, z. B. sales_orders.delivery_date/payment_terms); die Belegmaske konnte sie nicht pflegen.
+Jetzt: document_headers.bausteine (Migration docflow_kopfbausteine_20261109), Felder je Baustein und Kopfbausteine je
+Belegart im Belegvertrag (BAUSTEIN_FELDER/KOPFBAUSTEINE), Pruefung beim Anlegen/Aendern (Unbekanntes 422), flache
+Maskenform <baustein>__<feld> in Kopf und "Beleg bearbeiten"/Neuanlage; Belegfamilie 1.6.0. Naechster Schritt:
+Schreibwege des Auftragsspeichers entfernen, Altbestand nach DocFlow migrieren, sales_orders als Sicht auf DocFlow.

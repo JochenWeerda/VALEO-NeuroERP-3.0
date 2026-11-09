@@ -15894,6 +15894,11 @@
               "name": "exported_by",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "bausteine",
+              "nullable": false,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],

@@ -72,6 +72,7 @@ def lies_beleg(svc: DocflowService, doc_id: str, darf: Optional[Darf] = None,
         buchungsdatum=_datum(header.get("posting_date")),
         waehrung=str(header.get("currency") or "EUR"),
         version=int(header.get("version") or 1),
+        bausteine=dict(header.get("bausteine") or {}),
         partner=_partner(svc, variante, partner_nr),
         positionen=[
             Belegposition(
