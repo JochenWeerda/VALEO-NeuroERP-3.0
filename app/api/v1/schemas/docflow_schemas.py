@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import date, datetime
 from typing import Any, Optional
-from pydantic import BaseModel, Field, ConfigDict as _ConfigDict
+from pydantic import BaseModel, Field, ConfigDict as _ConfigDict, model_validator
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.docflow_screen_context import DocflowScreenContextIn, DocflowScreenContextOut
 
@@ -140,6 +140,21 @@ class PosComplianceInput(BaseModel):
     original_header_id: Optional[str] = Field(default=None, max_length=36)
 
 
+def _bausteine_aus_flach(daten: Any) -> Any:
+    """Flache Maskenfelder ``<baustein>__<feld>`` (Belegmaske, CLI, MCP) in ``bausteine`` zusammenfassen."""
+    if not isinstance(daten, dict):
+        return daten
+    from app.core.belegvertrag import kopfbausteine_aus_flach
+
+    rest, flach = kopfbausteine_aus_flach(daten)
+    if not flach:
+        return daten
+    bausteine = {**(rest.get("bausteine") or {})}
+    for name, felder in flach.items():
+        bausteine[name] = {**(bausteine.get(name) or {}), **felder}
+    return {**rest, "bausteine": bausteine}
+
+
 class DocflowCreateRequest(BaseModel):
     screen_context: Optional[DocflowScreenContextIn] = None
     doc_type: str = Field(..., min_length=3, max_length=40)
@@ -156,6 +171,13 @@ class DocflowCreateRequest(BaseModel):
     items: list[DocflowLineInput] = Field(default_factory=list)
     pos_compliance: Optional[PosComplianceInput] = None
     idempotency_key: Optional[str] = Field(default=None, min_length=8, max_length=120)
+    # Kopfbausteine des Belegvertrags (Lieferung, Zahlung, Texte, Kontakt, Referenzen); geprueft je Belegart.
+    bausteine: Optional[dict[str, dict[str, Any]]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flach(cls, daten: Any) -> Any:
+        return _bausteine_aus_flach(daten)
 
 
 class DocflowUpdateRequest(BaseModel):
@@ -172,6 +194,13 @@ class DocflowUpdateRequest(BaseModel):
     updated_by: Optional[str] = Field(default=None, max_length=100)
     items: Optional[list[DocflowLineInput]] = None
     pos_compliance: Optional[PosComplianceInput] = None
+    # Kopfbausteine; je genannter Baustein wird ersetzt, ungenannte bleiben (geprueft je Belegart).
+    bausteine: Optional[dict[str, dict[str, Any]]] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _flach(cls, daten: Any) -> Any:
+        return _bausteine_aus_flach(daten)
 
 
 class DocflowApprovalRequest(BaseModel):

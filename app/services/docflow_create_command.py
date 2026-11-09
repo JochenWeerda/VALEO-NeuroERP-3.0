@@ -1,5 +1,7 @@
 """Atomic, actor/content-bound DocFlow creation using existing replay storage."""
 from __future__ import annotations
+
+import json as _json
 import json
 from typing import Any
 from uuid import NAMESPACE_URL, uuid5, uuid4
@@ -69,9 +71,11 @@ def _apply_create(self: Any, payload: Any, context=None) -> str:
         text("""
             INSERT INTO domain_docflow.document_headers
             (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
-             currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at)
+             currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at,
+             bausteine)
             VALUES (:id, :tenant_id, :doc_type, :doc_number, :status, :source_system, :source_ref, :customer_id, :supplier_id,
-             :currency, :total_net, :total_tax, :total_gross, :document_date, :posting_date, 1, :created_by, :updated_by, NOW(), NOW())
+             :currency, :total_net, :total_tax, :total_gross, :document_date, :posting_date, 1, :created_by, :updated_by, NOW(), NOW(),
+             CAST(:bausteine AS jsonb))
         """),
         {
             "id": doc_id, "tenant_id": self.tenant_id, "doc_type": payload.doc_type,
@@ -80,6 +84,7 @@ def _apply_create(self: Any, payload: Any, context=None) -> str:
             "source_ref": payload.source_ref, "customer_id": payload.customer_id,
             "supplier_id": payload.supplier_id, "currency": payload.currency,
             "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
+            "bausteine": _json.dumps(_kopfbausteine(payload.doc_type, getattr(payload, "bausteine", None)), default=str),
             "document_date": payload.document_date or now,
             "posting_date": payload.posting_date,
             "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
@@ -96,3 +101,15 @@ def _apply_create(self: Any, payload: Any, context=None) -> str:
     self.best_effort_audit("docflow_create", "docflow_document", doc_id,
                            {"doc_type": payload.doc_type, "doc_number": payload.doc_number, "status": payload.status})
     return doc_id
+
+
+
+def _kopfbausteine(belegart: str, werte: Any) -> dict:
+    """Kopfbausteine der Belegart (Belegvertrag); Unbekanntes ist ein Pruefgrund, kein stilles Verwerfen."""
+    from app.core.belegvertrag import pruefe_kopfbausteine
+    from app.core.exceptions import ValidationFailedError
+
+    try:
+        return pruefe_kopfbausteine(belegart, werte)
+    except ValueError as fehler:
+        raise ValidationFailedError(str(fehler)) from fehler

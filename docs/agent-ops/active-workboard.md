@@ -20761,3 +20761,9 @@ Vorschlaege; Vertrauensstufe und Durchsetzung aus einer Quelle (a2_gruende); Abl
 Tests: test_agent_autonomie 24/24, Regression Freigabe/DocFlow/MCP 5478 gruen.
 Rettungsbranch rettung/hauptbaum-reste-20261109: LKW-Dispositionszuweisung vollstaendig (Code, Tests, Abnahmenotiz,
 Bestandsaufnahme RETTUNG-LKW-DISPOSITION.md); inhaltsgleich mit codex/wip-rescue-20261023, keine neuere Fassung.
+BELEG-052 Voraussetzung Kopfbausteine (09.11.2026): DocFlow kannte Lieferung, Zahlung, Texte, Kontakt und Referenzen
+nicht (nur die Eigenspeicher, z. B. sales_orders.delivery_date/payment_terms); die Belegmaske konnte sie nicht pflegen.
+Jetzt: document_headers.bausteine (Migration docflow_kopfbausteine_20261109), Felder je Baustein und Kopfbausteine je
+Belegart im Belegvertrag (BAUSTEIN_FELDER/KOPFBAUSTEINE), Pruefung beim Anlegen/Aendern (Unbekanntes 422), flache
+Maskenform <baustein>__<feld> in Kopf und "Beleg bearbeiten"/Neuanlage; Belegfamilie 1.6.0. Naechster Schritt:
+Schreibwege des Auftragsspeichers entfernen, Altbestand nach DocFlow migrieren, sales_orders als Sicht auf DocFlow.
