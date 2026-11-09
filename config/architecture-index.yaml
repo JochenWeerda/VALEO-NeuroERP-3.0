@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T10:07:06Z'
+generated_at: '2026-11-09T12:36:00Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -939,6 +939,7 @@ domains:
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-081-whatsapp-browser-notification-persistence.md
     - docs/adr/adr-085-studio-generated-master-data.md
+    - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     - docs/adr/adr-crm-activity-canonical-20261029.md
     status: pilot
@@ -1518,6 +1519,7 @@ domains:
     - docs/adr/adr-076-cash-close-retirement.md
     - docs/adr/adr-078-canonical-lead-postgresql-pdf.md
     - docs/adr/adr-079-ebilanz-xbrl-drafts.md
+    - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     status: active
   hr:
@@ -2031,6 +2033,8 @@ domains:
     backend_services:
     - action_execution_mutations
     - admin_core_service
+    - agent_autonomie
+    - agent_pruefagenten
     - ai_data_classification_service
     - ai_engineering_metrics_service
     - article_image_enrichment
@@ -2129,6 +2133,7 @@ domains:
     - admin_reporting_kommandos
     - admin_rollen_kommandos
     - admin_suite
+    - agent_autonomie
     - agent_context_api
     - agent_tool_contracts
     - agents
@@ -2385,14 +2390,15 @@ domains:
     - docs/adr/adr-051-feeding-supply-and-procurement-handoff.md
     - docs/adr/adr-054-schemafeste-feeding-events.md
     - docs/adr/adr-062-foreign-goods-operator-projection.md
+    - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 344
-  backend_services_mapped: 344
-  backend_endpoints_total: 481
-  backend_endpoints_mapped: 481
+  backend_services_total: 346
+  backend_services_mapped: 346
+  backend_endpoints_total: 482
+  backend_endpoints_mapped: 482
 unmapped:
   frontend_routes: []
   backend_services: []

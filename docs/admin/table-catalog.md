@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 700 Tabellen, 9294 Spalten.**
+**31 Schemas, 704 Tabellen, 9336 Spalten.**
 
 ## Schemas
 
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 13 | 175 |
-| `domain_shared` | `platform` | 159 | 1911 |
+| `domain_shared` | `platform` | 163 | 1953 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -230,13 +230,13 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docflow.approval_log` | `app/services/freigabe_engine.py` | `app/services/freigabe_engine.py` | — |
 | `domain_docflow.approvals` | `app/services/freigabe_engine.py` | `app/services/freigabe_engine.py` | — |
 | `domain_docflow.command_idempotency_keys` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
-| `domain_docflow.control_findings` | `app/api/v1/endpoints/kontrolle.py`, `app/services/finance_freigabe.py`, `app/services/freigabe_engine.py`, `app/services/kontrollkorb.py` | `app/services/freigabe_engine.py` | — |
+| `domain_docflow.control_findings` | `app/api/v1/endpoints/kontrolle.py`, `app/services/finance_freigabe.py`, `app/services/freigabe_engine.py`, `app/services/kontrollkorb.py` | `app/services/agent_autonomie.py`, `app/services/freigabe_engine.py` | — |
 | `domain_docflow.create_request_idempotency` | `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_artifacts` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_return_service.py`, `app/services/settlement_document_archive_service.py` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/gobd_artifact.py`, `app/services/docflow_artifact_service.py`, `app/services/settlement_document_archive_service.py` | — |
 | `domain_docflow.document_command_log` | `app/services/docflow_screen_provenance.py`, `app/services/docflow_service.py` | `app/services/docflow_freigabe.py`, `app/services/docflow_service.py` | — |
 | `domain_docflow.document_followups` | `app/services/docflow_followup_service.py` | `app/services/docflow_followup_service.py` | — |
-| `domain_docflow.document_header_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | — |
-| `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/beleg_liste.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/gutschrift_docflow.py`, `app/services/kontrollkorb.py`, `app/services/mcp_execution_service.py`, `app/services/sales_offer_import.py`, `app/services/settlement_document_archive_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/settlement_document_archive_service.py` | — |
+| `domain_docflow.document_header_links` | `app/services/agent_pruefagenten.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | — |
+| `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/agent_pruefagenten.py`, `app/services/beleg_liste.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/gutschrift_docflow.py`, `app/services/kontrollkorb.py`, `app/services/mcp_execution_service.py`, `app/services/sales_offer_import.py`, `app/services/settlement_document_archive_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/settlement_document_archive_service.py` | — |
 | `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | — |
 | `domain_docflow.document_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_postings` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
@@ -603,6 +603,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.admin_scan_profiles` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
 | `domain_shared.admin_station_devices` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
 | `domain_shared.admin_stations` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
+| `domain_shared.agent_autonomy_decisions` | `app/api/v1/endpoints/agent_autonomie.py`, `app/services/agent_autonomie.py` | `app/services/agent_autonomie.py` | — |
+| `domain_shared.agent_delegations` | `app/api/v1/endpoints/agent_autonomie.py`, `app/services/agent_autonomie.py` | `app/services/agent_autonomie.py` | — |
+| `domain_shared.agent_policy_approvals` | `app/services/agent_autonomie.py` | `app/services/agent_autonomie.py` | — |
+| `domain_shared.agent_quality_events` | `app/services/agent_autonomie.py` | `app/services/agent_autonomie.py` | — |
 | `domain_shared.agrar_sorten` | `app/api/v1/endpoints/agrar_varieties.py`, `app/infrastructure/models/futtermittel_models.py` | — | — |
 | `domain_shared.amendment_templates` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_shared.api_keys` | `app/services/admin_core_service.py` | `app/services/admin_core_service.py` | — |
@@ -1450,6 +1454,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `admin_scan_profiles` | `platform` | native | `id` | id, tenant_id, profile_code, name, source_type, target_action, is_active, barcode_formats, parse_rules, validation_rules, error_mode, created_at, updated_at |
 | `admin_station_devices` | `platform` | native | `id` | id, tenant_id, station_id, device_id, device_role, priority, is_fallback, settings, created_at, updated_at |
 | `admin_stations` | `platform` | native | `id` | id, tenant_id, station_code, name, station_type, location_name, is_active, settings, created_at, updated_at |
+| `agent_autonomy_decisions` | `platform` | native | `id` | id, tenant_id, agent_id, capability, subject_id, policy_version, policy_hash, outcome, risk, reasons, decided_at |
+| `agent_delegations` | `platform` | native | `id` | id, tenant_id, agent_id, capability, owner, max_brutto, valid_until, created_at, revoked_at, revoked_by, revoke_reason |
+| `agent_policy_approvals` | `platform` | native | `id` | id, tenant_id, policy_id, version, content_hash, approved_by, approved_at, note, revoked_at, revoked_by, revoke_reason |
+| `agent_quality_events` | `platform` | native | `id` | id, tenant_id, agent_id, capability, kind, subject_id, detail, recorded_by, recorded_at |
 | `agrar_sorten` | `platform` | legacy | `id` | id, tenant_id, variety_number, name, description, crop_type, zuechter, zulassungsjahr, reifezahl, qualitaetsgruppe, aktiv, created_at, updated_at |
 | `amendment_templates` | `platform` | native | `id` | id, code, name, description, body_markdown, sections_schema, is_active, created_at |
 | `api_keys` | `platform` | native | `id` | id, tenant_id, name, key_prefix, key_hash, scopes, ip_allowlist, rate_limit_per_minute, expires_at, last_used_at, status, created_by, revoked_at, created_at, updated_at |

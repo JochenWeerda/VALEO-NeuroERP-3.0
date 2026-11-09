@@ -22,6 +22,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `accounting_export_profiles` | Canonical tax-advisor export profiles. |
 | `action_execution_mutations` | Nachgelagerte Schreibpfade fuer ActionExecutionService (Wave-17/18). |
 | `admin_core_service` | Service layer for the core admin domain. |
+| `agent_autonomie` | Agent Trust & Autonomy Engine (ADR-086 "Risk-based Autonomous ERP", Entwurf mit gesonderter Freigabe). |
+| `agent_pruefagenten` | Unabhaengige Pruefagenten (ADR-086): zusaetzliche fachliche Kontrolle vor einer autonomen Ausfuehrung. |
 | `agrar_contract_service` | Service layer for Agrar contract management and allocation logic. |
 | `agrar_drying_rule_service` | Service layer for Agrar Drying Rule Sets, Lookup Rows, and Factor Ranges. |
 | `agrar_partie_aggregate_service` | DOM-AGRAR-004.2 — Partie-Aggregations-Service (Ernteannahmen → Partie). |

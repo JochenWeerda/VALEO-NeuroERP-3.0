@@ -15413,6 +15413,7 @@
             "app/services/kontrollkorb.py"
           ],
           "written_by": [
+            "app/services/agent_autonomie.py",
             "app/services/freigabe_engine.py"
           ]
         },
@@ -15753,6 +15754,7 @@
             "id"
           ],
           "read_by": [
+            "app/services/agent_pruefagenten.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
@@ -15908,6 +15910,7 @@
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/core/dms_ocr_contracts.py",
             "app/core/gobd_artifact.py",
+            "app/services/agent_pruefagenten.py",
             "app/services/beleg_liste.py",
             "app/services/docflow_artifact_service.py",
             "app/services/docflow_belegadapter.py",
@@ -50204,6 +50207,286 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/admin_mobile.py"
+          ]
+        },
+        "agent_autonomy_decisions": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "agent_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "capability",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "policy_version",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "policy_hash",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "outcome",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "risk",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "reasons",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "decided_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/agent_autonomie.py",
+            "app/services/agent_autonomie.py"
+          ],
+          "written_by": [
+            "app/services/agent_autonomie.py"
+          ]
+        },
+        "agent_delegations": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "agent_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "capability",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "owner",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "max_brutto",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "valid_until",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "revoked_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "revoked_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "revoke_reason",
+              "nullable": true,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/agent_autonomie.py",
+            "app/services/agent_autonomie.py"
+          ],
+          "written_by": [
+            "app/services/agent_autonomie.py"
+          ]
+        },
+        "agent_policy_approvals": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "policy_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "content_hash",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "approved_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "approved_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "note",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "revoked_at",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "revoked_by",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "revoke_reason",
+              "nullable": true,
+              "type": "text"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/agent_autonomie.py"
+          ],
+          "written_by": [
+            "app/services/agent_autonomie.py"
+          ]
+        },
+        "agent_quality_events": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "agent_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "capability",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kind",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "subject_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "detail",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "recorded_by",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "recorded_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/agent_autonomie.py"
+          ],
+          "written_by": [
+            "app/services/agent_autonomie.py"
           ]
         },
         "agrar_sorten": {
