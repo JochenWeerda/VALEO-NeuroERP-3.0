@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 740,
-    "screens_with_actions": 387,
+    "actions": 769,
+    "screens_with_actions": 391,
     "domains": 50
   },
   "actions": [
@@ -4044,6 +4044,648 @@
       }
     },
     {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:zu_bestellung",
+      "label": "Zu Bestellung",
+      "description": "Zu Bestellung (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Zu Bestellung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "zu_bestellung",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/{entity_id}/actions/zu_bestellung",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellung.create",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:charge/liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (charge/liste)",
@@ -7481,27 +8123,6 @@
         "method": "POST",
         "permission": "einkauf.auftragsbestaetigung.review",
         "requiresConfirmation": true,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellvorschlaege-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/bestellvorschlaege-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellvorschlaege-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellvorschlaege-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
         "dangerLevel": "safe"
       }
     },

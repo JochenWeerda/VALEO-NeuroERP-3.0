@@ -632,6 +632,51 @@
         ]
       ]
     },
+    "bestellvorschlag/bedarf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/gespeichert": {
+      "einkauf.bestellung.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/lager": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/rohware": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/verkauf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/aktivitaet": {
       "crm.activity.update": [
         [

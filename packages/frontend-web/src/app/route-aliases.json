@@ -3483,6 +3483,10 @@
     {
       "module": "@/pages/belege/liste",
       "path": "belege/:belegart"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-ansicht",
+      "path": "einkauf/bestellvorschlaege/ansicht/:variante"
     }
   ]
 }

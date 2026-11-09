@@ -70,8 +70,6 @@
     "document.tsx": "document",
     "einkauf/anfrage-erfassung.tsx": "einkauf/anfrage-erfassung",
     "einkauf/audit-drilldown.tsx": "einkauf/audit-drilldown",
-    "einkauf/bestellvorschlag-rohware.tsx": "einkauf/bestellvorschlag-rohware",
-    "einkauf/bestellvorschlag-verkauf.tsx": "einkauf/bestellvorschlag-verkauf",
     "einkauf/edi-portal.tsx": "einkauf/edi-portal",
     "einkauf/lieferantenbewertung.tsx": "einkauf/lieferantenbewertung",
     "einkauf/lieferschein-frachtauftrag.tsx": "einkauf/lieferschein-frachtauftrag",

@@ -37,10 +37,18 @@ def lege_beleg_an(db: Session, tenant_id: str, belegart: str, *, partner_id: Opt
     from app.api.v1.schemas.docflow_schemas import DocflowCreateRequest, DocflowLineInput
     from app.services.docflow_service import DocflowService
 
+    from hashlib import sha256
+    from uuid import uuid4
+
     variante = BELEGARTEN[belegart]
+    # Die Entwurfsnummer ist ein Platzhalter (die Freigabe vergibt die Belegnummer), muss aber je Mandant und
+    # Belegart eindeutig sein: Anhang statt eines zeitbasierten ID-Praefixes (uuid7 kollidierte). Mit
+    # Wiederholungsschluessel folgt der Anhang aus dem Schluessel, damit die Wiederholung denselben Inhalt traegt.
+    anhang = sha256(idempotenz.encode()).hexdigest()[:6] if idempotenz else uuid4().hex[:6]
+    entwurf = f"{entwurf_nr or f'{quelle.upper()}-{referenz}'}"[:72] + f"-{anhang}"
     partner = {"supplier_id": partner_id} if variante.partnerrolle == "lieferant" else {"customer_id": partner_id}
     anfrage = DocflowCreateRequest(
-        doc_type=belegart, doc_number=entwurf_nr or f"{quelle.upper()}-{referenz}"[:80], status="draft",
+        doc_type=belegart, doc_number=entwurf, status="draft",
         source_system=quelle[:40], source_ref=referenz[:80], currency="EUR",
         document_date=belegdatum or datetime.now(timezone.utc), idempotency_key=idempotenz, **partner,
         items=[DocflowLineInput(article_number=p.artikel_nr, description=p.bezeichnung, quantity=p.menge,

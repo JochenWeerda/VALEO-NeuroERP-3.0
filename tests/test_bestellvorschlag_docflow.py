@@ -90,3 +90,21 @@ def test_vorschlag_wird_docflow_bestellentwurf_in_dt(client, umgebung):
     assert (float(position["quantity"]), position["unit"], float(position["unit_price"])) == (50.0, "dt", 21.5)
     assert float(bestellung["netto_summe"]) == pytest.approx(1075.0)  # 50 dt x 21,50 EUR
     assert alt == 0
+
+
+def test_berechnung_speichern_und_zu_bestellung_als_kommando(client, umgebung):
+    """Familie bestellvorschlag: Speichern rechnet auf dem Server, "Zu Bestellung" legt den DocFlow-Entwurf an."""
+    kopf = {"X-Tenant-Id": umgebung["mandant"], "Authorization": "Bearer dev-token"}
+    leer = client.post("/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern", headers=kopf,
+                       json={"_mode": "dryRun"}).json()
+    assert leer["success"] is False and "Kein Bedarf" in leer["error"]  # leerer Mandant: nichts zu bestellen
+    angelegt = client.post("/api/v1/einkauf/bestellvorschlaege", headers=kopf, json={
+        "vorschlag_typ": "lager", "positionen": [{
+            "article_id": str(uuid.uuid4()), "artikel_nr": "GERSTE", "einheit": "dt", "vorschlag_menge": 10,
+            "lieferant_id": umgebung["lieferant"], "letzter_preis": 18.0, "preis_einheit": "100kg"}]}).json()
+    erst = client.post(f"/api/v1/einkauf/bestellvorschlaege/{angelegt['id']}/actions/zu_bestellung",
+                       headers=kopf, json={}).json()
+    assert erst["success"] is True, erst
+    zweit = client.post(f"/api/v1/einkauf/bestellvorschlaege/{angelegt['id']}/actions/zu_bestellung",
+                        headers=kopf, json={}).json()
+    assert zweit["success"] is False and "bereits bestellt" in zweit["error"]

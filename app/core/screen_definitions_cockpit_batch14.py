@@ -1383,68 +1383,6 @@ def build_einkauf_bestellung_freigabe_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_einkauf_bestellvorschlag_lager_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="einkauf/bestellvorschlag-lager",
-        domain="einkauf",
-        title="Bestellvorschlag Lager",
-        subtitle="Lagergetriebene Vorschlaege",
-        business_purpose="Bestellvorschlag Lager als Read-Model-Cockpit.",
-        example_prompts=["Zeige Bestellvorschlag Lager.", "Was ist der aktuelle Stand?"],
-        test_id="einkauf-bestellvorschlag-lager",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/bestellvorschlaege/lager")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/bestellvorschlag-lager")],
-        table_profile="financial",
-        actions=[cockpit_refresh_action(permission="procurement.read")],
-        context_rail="combined",
-    )
-
-
-def build_einkauf_bestellvorschlag_kontrakt_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="einkauf/bestellvorschlag-kontrakt",
-        domain="einkauf",
-        title="Bestellvorschlag Kontrakt",
-        subtitle="Kontrakt-Vorschlaege",
-        business_purpose="Bestellvorschlag Kontrakt als Read-Model-Cockpit.",
-        example_prompts=["Zeige Bestellvorschlag Kontrakt.", "Was ist der aktuelle Stand?"],
-        test_id="einkauf-bestellvorschlag-kontrakt",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/bestellvorschlaege/rohware")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/bestellvorschlag-kontrakt")],
-        table_profile="financial",
-        actions=[cockpit_refresh_action(permission="procurement.read")],
-        context_rail="combined",
-    )
-
-
-def build_einkauf_bestellvorschlag_verbrauch_screen_definition() -> dict[str, Any]:
-    return build_cockpit_overview_screen(
-        screen_id="einkauf/bestellvorschlag-verbrauch",
-        domain="einkauf",
-        title="Bestellvorschlag Verbrauch",
-        subtitle="Verbrauchsvorschlaege",
-        business_purpose="Bestellvorschlag Verbrauch als Read-Model-Cockpit.",
-        example_prompts=["Zeige Bestellvorschlag Verbrauch.", "Was ist der aktuelle Stand?"],
-        test_id="einkauf-bestellvorschlag-verbrauch",
-        summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
-        ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/bestellvorschlaege/bedarf")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/bestellvorschlag-verbrauch")],
-        table_profile="financial",
-        actions=[cockpit_refresh_action(permission="procurement.read")],
-        context_rail="combined",
-    )
-
 
 
 def build_einkauf_kontrakt_anlage_screen_definition() -> dict[str, Any]:
@@ -1643,9 +1581,6 @@ BATCH14_BUILDERS: dict[str, Any] = {
     "einkauf/anlieferavis-erfassen": build_einkauf_anlieferavis_erfassen_screen_definition,
     "einkauf/auftragsbestaetigung-erfassen": build_einkauf_auftragsbestaetigung_erfassen_screen_definition,
     "einkauf/bestellung-freigabe": build_einkauf_bestellung_freigabe_screen_definition,
-    "einkauf/bestellvorschlag-lager": build_einkauf_bestellvorschlag_lager_screen_definition,
-    "einkauf/bestellvorschlag-kontrakt": build_einkauf_bestellvorschlag_kontrakt_screen_definition,
-    "einkauf/bestellvorschlag-verbrauch": build_einkauf_bestellvorschlag_verbrauch_screen_definition,
     "einkauf/kontrakt-anlage": build_einkauf_kontrakt_anlage_screen_definition,
     "einkauf/lieferanten-angebote": build_einkauf_lieferanten_angebote_screen_definition,
     "einkauf/lieferanten-dokumente": build_einkauf_lieferanten_dokumente_screen_definition,

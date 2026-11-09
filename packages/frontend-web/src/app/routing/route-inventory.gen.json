@@ -2751,6 +2751,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/einkauf/bestellvorschlag-ansicht",
+      "path": "einkauf/bestellvorschlaege/ansicht/:variante",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/einkauf/bestellvorschlag-kontrakt",
       "path": "einkauf/bestellvorschlag-kontrakt",
       "source": "alias"

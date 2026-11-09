@@ -4203,50 +4203,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "einkauf/bestellvorschlaege-liste": {
-      "definition_hash": "f8973523a5361b74d5fc9b2702448c67ba04226da1695dd1813ff08d501f8095",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-kontrakt": {
-      "definition_hash": "cf9b7f963c64a96f3d2e218742259beb2b16cdedaecfa7a0060fbfed021154c8",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-lager": {
-      "definition_hash": "dd4b862fd34958713217c5904c6debe577fad3db4854d1196156b0f2e8182d90",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
-    "einkauf/bestellvorschlag-verbrauch": {
-      "definition_hash": "fcba50a9b2b520fffd0c5b7549b53f3502db5a40062dfda49dd72c04cb13a3ae",
-      "gates_passed": [
-        "A",
-        "B",
-        "C",
-        "E"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "einkauf/dienstleistungen-haltung-liste": {
       "definition_hash": "618048e680ca9a0f0d7769e15b90a41df72f7cdfeaada321127387174778a650",
       "gates_passed": [

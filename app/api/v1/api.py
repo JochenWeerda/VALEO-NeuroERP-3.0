@@ -1752,6 +1752,11 @@ api_router.include_router(
     tags=["einkauf", "bestellvorschlag", "kontrakte", "lager-konten"]
 )
 
+# Bestellvorschlag als Fachaktion (berechnen und speichern, zu Bestellung in DocFlow) - Familie bestellvorschlag
+from app.api.v1.endpoints import einkauf_bestellvorschlag_kommandos  # noqa: E402
+
+api_router.include_router(einkauf_bestellvorschlag_kommandos.router)
+
 api_router.include_router(
     purchase_invoice_verification.router,
     tags=["einkauf", "3-wege-match"]

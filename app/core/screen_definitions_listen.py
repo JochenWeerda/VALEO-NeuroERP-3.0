@@ -1667,22 +1667,6 @@ def build_transporte_fahrer_liste() -> dict[str, Any]:
         no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
     )
 
-def build_einkauf_bestellvorschlaege_liste() -> dict[str, Any]:
-    return _liste(
-        screen_id="einkauf/bestellvorschlaege-liste", domain="einkauf", title="Bestellvorschlaege", subtitle="Bedarf aus Lager und Verkauf",
-        endpoint="/api/v1/einkauf/bestellvorschlaege", row_route=None, bundle="einkauf",
-        columns=[
-            {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
-            {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
-            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
-            {"key": "datum", "label": "Datum", "renderKind": "date", "sortable": True, "priority": "secondary"},
-        ],
-        actions=[_EXPORT],
-        row_actions=[],
-        purpose="Bestellvorschlaege: Eintraege finden und Details oeffnen.",
-        prompts=["Welche offenen Bestellvorschlaege?", "Zeige aktuelle Bestellvorschlaege."],
-        no_workflow="Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
-    )
 
 def build_einkauf_frachtauftraege_liste() -> dict[str, Any]:
     return _liste(
@@ -3073,7 +3057,6 @@ LISTEN_SCREEN_BUILDERS = {
     "compliance/qs-checkliste-liste": build_compliance_qs_checkliste_liste,
     "crm/aktivitaeten-liste": build_crm_aktivitaeten_liste,
     "crm/leads-liste": build_crm_leads_liste,
-    "einkauf/bestellvorschlaege-liste": build_einkauf_bestellvorschlaege_liste,
     "einkauf/frachtauftraege-liste": build_einkauf_frachtauftraege_liste,
     "fibu/buchungsjournal-liste": build_fibu_buchungsjournal_liste,
     "fibu/kontenplan-liste": build_fibu_kontenplan_liste,

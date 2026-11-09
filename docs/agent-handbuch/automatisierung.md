@@ -227,6 +227,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
 | `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
+| `einkauf.bestellvorschlag.bestellt` | outbox | `app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py` |
 | `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.wareneingang.gebucht` | outbox | `app/api/v1/endpoints/mask_actions.py` |
@@ -247,8 +248,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.terminart.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| … | | 31 weitere |
+| … | | 32 weitere |
 
 ### System
 

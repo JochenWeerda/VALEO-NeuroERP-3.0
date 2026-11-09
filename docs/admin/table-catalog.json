@@ -18559,6 +18559,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/workers/low_stock_agent.py"
           ],

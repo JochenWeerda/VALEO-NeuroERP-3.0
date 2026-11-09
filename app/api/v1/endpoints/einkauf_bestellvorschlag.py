@@ -47,8 +47,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response
-from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import text
+from pydantic import BaseModel, ConfigDict, ConfigDict as _ConfigDict, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -57,13 +56,12 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.auth.deps import get_current_user
+from app.api.v1.schemas.bestellvorschlag_schemas import GespeicherterVorschlagOut, VorschlagsZeileOut
 from app.services.mask_action_runtime_service import MaskActionResult
 from app.services.procurement_service import BESTELLUNG_UPDATE_KEYS, ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.einkauf_bestellvorschlag_schemas import EinkaufBestellvorschlagOut
 from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
-from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -429,7 +427,7 @@ async def vorschlag_bedarf(
 
 
 @router.get("/einkauf/bestellvorschlaege/lager", summary="Lager vorschlag",
-    response_model=list[BestellvorschlagOut]
+    response_model=list[VorschlagsZeileOut]
 )
 async def vorschlag_lager(
     niederlassung_id: Optional[str] = Query(None),
@@ -444,7 +442,7 @@ async def vorschlag_lager(
 
 
 @router.get("/einkauf/bestellvorschlaege/verkauf", summary="Verkauf vorschlag",
-    response_model=list[BestellvorschlagOut]
+    response_model=list[VorschlagsZeileOut]
 )
 async def vorschlag_verkauf(
     niederlassung_id: Optional[str] = Query(None),
@@ -458,7 +456,7 @@ async def vorschlag_verkauf(
 
 
 @router.get("/einkauf/bestellvorschlaege/rohware", summary="Rohware vorschlag",
-    response_model=list[BestellvorschlagOut]
+    response_model=list[VorschlagsZeileOut]
 )
 async def vorschlag_rohware(
     stichtag: Optional[date] = Query(None),
@@ -478,7 +476,7 @@ async def vorschlag_rohware(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 @router.get("/einkauf/bestellvorschlaege", summary="Bestellvorschlaege auflisten",
-    response_model=list[BestellvorschlagOut]
+    response_model=list[GespeicherterVorschlagOut]
 )
 async def list_bestellvorschlaege(
     vorschlag_typ: Optional[str] = Query(None),
@@ -551,9 +549,7 @@ async def vorschlag_freigeben(
     nutzer: Any = Depends(get_current_user),
 ) -> dict[str, Any]:
     from app.core.akteur import gepruefter_akteur
-
-    try:
-        # Bestellentwuerfe entstehen in DocFlow (BELEG-052); der Bearbeiter kommt aus dem Token.
+    try:  # Bestellentwuerfe in DocFlow (BELEG-052), Bearbeiter aus dem Token
         return _svc(db, tenant_id).freigebe_vorschlag(vorschlag_id, freigegeben_von=gepruefter_akteur(nutzer))
     except EntityNotFoundError:
         raise HTTPException(404, "Vorschlag nicht gefunden")

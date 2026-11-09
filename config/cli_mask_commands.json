@@ -168,6 +168,11 @@
   "mask:beleg/sales-order:umwandeln:sales_delivery",
   "mask:beleg/sales-order:umwandeln:sales_invoice",
   "mask:beleg/sales-order:versenden",
+  "mask:bestellvorschlag/bedarf:speichern",
+  "mask:bestellvorschlag/gespeichert:zu_bestellung",
+  "mask:bestellvorschlag/lager:speichern",
+  "mask:bestellvorschlag/rohware:speichern",
+  "mask:bestellvorschlag/verkauf:speichern",
   "mask:crm/aktivitaet:delete",
   "mask:crm/aktivitaet:update",
   "mask:crm/campaign-template:delete",
@@ -347,7 +352,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 936,
+  "kein_endpunkt": 957,
   "pfadparameter": 6
  }
 }

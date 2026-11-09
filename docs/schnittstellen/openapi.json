@@ -79631,6 +79631,103 @@
         "title": "GeschaeftsjahreOut",
         "type": "object"
       },
+      "GespeicherterVorschlagOut": {
+        "additionalProperties": true,
+        "description": "Ein gespeicherter Bestellvorschlag (Kopf).",
+        "properties": {
+          "bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bezeichnung"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "erstellt_von": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erstellt Von"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "niederlassung_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Niederlassung Id"
+          },
+          "positionen_anz": {
+            "default": 0,
+            "title": "Positionen Anz",
+            "type": "integer"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          },
+          "vorschlag_typ": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vorschlag Typ"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GespeicherterVorschlagOut",
+        "type": "object"
+      },
       "GiftIn": {
         "properties": {
           "contactId": {
@@ -176633,6 +176730,183 @@
           "positionen"
         ],
         "title": "VorschlagSaveRequest",
+        "type": "object"
+      },
+      "VorschlagsZeileOut": {
+        "additionalProperties": true,
+        "description": "Eine Zeile der Vorschlagsrechnung (Lager, Verkauf, Rohware); dieselbe Grundform fuer alle drei Wege.",
+        "properties": {
+          "article_id": {
+            "title": "Article Id",
+            "type": "string"
+          },
+          "artikel_bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Bezeichnung"
+          },
+          "artikel_gruppe": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Gruppe"
+          },
+          "artikel_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Nr"
+          },
+          "bedarf": {
+            "default": 0.0,
+            "title": "Bedarf",
+            "type": "number"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "ist_bestand": {
+            "default": 0.0,
+            "title": "Ist Bestand",
+            "type": "number"
+          },
+          "letzter_kauf_datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzter Kauf Datum"
+          },
+          "letzter_preis": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Letzter Preis"
+          },
+          "lieferant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Id"
+          },
+          "lieferant_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferant Name"
+          },
+          "maximalbestand": {
+            "default": 0.0,
+            "title": "Maximalbestand",
+            "type": "number"
+          },
+          "meldebestand": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Meldebestand"
+          },
+          "mindestbestand": {
+            "default": 0.0,
+            "title": "Mindestbestand",
+            "type": "number"
+          },
+          "offene_auftraege": {
+            "default": 0.0,
+            "title": "Offene Auftraege",
+            "type": "number"
+          },
+          "preis_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preis Einheit"
+          },
+          "reichweite_tage": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reichweite Tage"
+          },
+          "vorschlag_menge": {
+            "default": 0.0,
+            "title": "Vorschlag Menge",
+            "type": "number"
+          },
+          "wiederbeschaffungs_tage": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiederbeschaffungs Tage"
+          }
+        },
+        "required": [
+          "article_id"
+        ],
+        "title": "VorschlagsZeileOut",
         "type": "object"
       },
       "WaageCalibrationUpdate": {
@@ -284137,7 +284411,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                    "$ref": "#/components/schemas/GespeicherterVorschlagOut"
                   },
                   "title": "Response List Bestellvorschlaege Api V1 Einkauf Bestellvorschlaege Get",
                   "type": "array"
@@ -284408,6 +284682,202 @@
         ]
       }
     },
+    "/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern": {
+      "post": {
+        "operationId": "bestellvorschlag_bedarf_speichern_api_v1_einkauf_bestellvorschlaege_berechnung_bedarf_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellvorschlag Bedarf berechnen und speichern",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern": {
+      "post": {
+        "operationId": "bestellvorschlag_lager_speichern_api_v1_einkauf_bestellvorschlaege_berechnung_lager_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellvorschlag Lager berechnen und speichern",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern": {
+      "post": {
+        "operationId": "bestellvorschlag_rohware_speichern_api_v1_einkauf_bestellvorschlaege_berechnung_rohware_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellvorschlag Rohware berechnen und speichern",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern": {
+      "post": {
+        "operationId": "bestellvorschlag_verkauf_speichern_api_v1_einkauf_bestellvorschlaege_berechnung_verkauf_actions_speichern_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestellvorschlag Verkauf berechnen und speichern",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/einkauf/bestellvorschlaege/lager": {
       "get": {
         "operationId": "vorschlag_lager_api_v1_einkauf_bestellvorschlaege_lager_get",
@@ -284493,7 +284963,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                    "$ref": "#/components/schemas/VorschlagsZeileOut"
                   },
                   "title": "Response Vorschlag Lager Api V1 Einkauf Bestellvorschlaege Lager Get",
                   "type": "array"
@@ -284573,7 +285043,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                    "$ref": "#/components/schemas/VorschlagsZeileOut"
                   },
                   "title": "Response Vorschlag Rohware Api V1 Einkauf Bestellvorschlaege Rohware Get",
                   "type": "array"
@@ -284686,7 +285156,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/BestellvorschlagOut"
+                    "$ref": "#/components/schemas/VorschlagsZeileOut"
                   },
                   "title": "Response Vorschlag Verkauf Api V1 Einkauf Bestellvorschlaege Verkauf Get",
                   "type": "array"
@@ -284719,6 +285189,66 @@
           "lager-konten",
           "einkauf",
           "bestellvorschlag"
+        ]
+      }
+    },
+    "/api/v1/einkauf/bestellvorschlaege/{entity_id}/actions/zu_bestellung": {
+      "post": {
+        "operationId": "zu_bestellung_api_v1_einkauf_bestellvorschlaege__entity_id__actions_zu_bestellung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Aus dem Bestellvorschlag je Lieferant einen Bestellentwurf (DocFlow) anlegen",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "mask-actions"
         ]
       }
     },

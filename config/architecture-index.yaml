@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-08T23:20:29Z'
+generated_at: '2026-11-09T02:11:45Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2289,6 +2289,7 @@ domains:
     - /einkauf/bestellungen/:id
     - /einkauf/bestellungen/neu
     - /einkauf/bestellvorschlaege
+    - /einkauf/bestellvorschlaege/ansicht/:variante
     - /einkauf/bestellvorschlag-kontrakt
     - /einkauf/bestellvorschlag-lager
     - /einkauf/bestellvorschlag-rohware
@@ -2360,6 +2361,7 @@ domains:
     - einkauf_avis_kommandos
     - einkauf_bestellung_kommandos
     - einkauf_bestellvorschlag
+    - einkauf_bestellvorschlag_kommandos
     - einkauf_kpis
     - einkauf_lieferschein
     - procurement_match
@@ -2375,12 +2377,12 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1141
-  frontend_routes_mapped: 1141
+  frontend_routes_total: 1142
+  frontend_routes_mapped: 1142
   backend_services_total: 343
   backend_services_mapped: 343
-  backend_endpoints_total: 474
-  backend_endpoints_mapped: 474
+  backend_endpoints_total: 475
+  backend_endpoints_mapped: 475
 unmapped:
   frontend_routes: []
   backend_services: []

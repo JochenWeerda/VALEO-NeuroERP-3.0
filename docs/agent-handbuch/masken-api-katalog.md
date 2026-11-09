@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (767 Masken).
+> Generiert aus `app/core/screen_definitions.py` (768 Masken).
 
 ## Übersicht
 
@@ -235,6 +235,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `beleg-liste/sales-order` | Aufträge | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
 | `belege/belegfolge` | Belegfolge | documents | niedrig | — | `GET /api/v1/masks/belege/belegfolge/agent-contract` |
 | `benachrichtigungen/liste` | Benachrichtigungen | platform | niedrig | — | `GET /api/v1/masks/benachrichtigungen/liste/agent-contract` |
+| `bestellvorschlag/bedarf` | Bestellvorschlag Bedarf | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/bedarf/agent-contract` |
+| `bestellvorschlag/gespeichert` | Gespeicherte Bestellvorschläge | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/gespeichert/agent-contract` |
+| `bestellvorschlag/lager` | Bestellvorschlag Lager | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/lager/agent-contract` |
+| `bestellvorschlag/rohware` | Bestellvorschlag Rohware | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/rohware/agent-contract` |
+| `bestellvorschlag/verkauf` | Bestellvorschlag Verkauf | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/verkauf/agent-contract` |
 | `betrieb/gefahrstoff-betriebsanweisung` | Gefahrstoff-Betriebsanweisung | operations | niedrig | — | `GET /api/v1/masks/betrieb/gefahrstoff-betriebsanweisung/agent-contract` |
 | `betrieb/gefahrstoff-kataster` | Gefahrstoff-Kataster | operations | niedrig | — | `GET /api/v1/masks/betrieb/gefahrstoff-kataster/agent-contract` |
 | `betrieb/maschinen-stamm` | Maschinen-Stamm | operations | niedrig | — | `GET /api/v1/masks/betrieb/maschinen-stamm/agent-contract` |
@@ -408,10 +413,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/auftragsbestaetigung-erfassen` | Auftragsbestaetigung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigung-erfassen/agent-contract` |
 | `einkauf/auftragsbestaetigungen` | Auftragsbestaetigungen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/auftragsbestaetigungen/agent-contract` |
 | `einkauf/bestellung-freigabe` | Bestellfreigabe | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellung-freigabe/agent-contract` |
-| `einkauf/bestellvorschlaege-liste` | Bestellvorschlaege | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlaege-liste/agent-contract` |
-| `einkauf/bestellvorschlag-kontrakt` | Bestellvorschlag Kontrakt | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlag-kontrakt/agent-contract` |
-| `einkauf/bestellvorschlag-lager` | Bestellvorschlag Lager | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlag-lager/agent-contract` |
-| `einkauf/bestellvorschlag-verbrauch` | Bestellvorschlag Verbrauch | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/bestellvorschlag-verbrauch/agent-contract` |
 | `einkauf/dienstleistungen-haltung-liste` | Dienstleistungen Haltung | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/dienstleistungen-haltung-liste/agent-contract` |
 | `einkauf/einkauf-vorgang-liste` | Einkaufsvorgaenge | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/einkauf-vorgang-liste/agent-contract` |
 | `einkauf/frachtauftraege-liste` | Frachtauftraege | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/frachtauftraege-liste/agent-contract` |
@@ -11916,6 +11917,220 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `bestellvorschlag/bedarf` — Bestellvorschlag Bedarf
+
+**Zweck:** Bestellvorschlag Bedarf: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/bestellvorschlag/bedarf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/bestellvorschlag/bedarf/agent-contract` |
+| Readiness | `GET /api/v1/masks/bestellvorschlag/bedarf/readiness` |
+| Rollout-Route | `/mask-rollout/bestellvorschlag__bedarf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/bestellvorschlaege/bedarf`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel liegen unter Meldebestand?
+- Speichere den Bestellvorschlag Lager.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Als Vorschlag speichern | safe | nein | `/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_lager` | Bestellvorschlag Lager | safe | nein | `Wechselt zur Variante Bestellvorschlag Lager.` |
+| `ansicht_verkauf` | Bestellvorschlag Verkauf | safe | nein | `Wechselt zur Variante Bestellvorschlag Verkauf.` |
+| `ansicht_rohware` | Bestellvorschlag Rohware | safe | nein | `Wechselt zur Variante Bestellvorschlag Rohware.` |
+| `ansicht_gespeichert` | Gespeicherte Bestellvorschläge | safe | nein | `Wechselt zur Variante Gespeicherte Bestellvorschläge.` |
+
+---
+
+### `bestellvorschlag/gespeichert` — Gespeicherte Bestellvorschläge
+
+**Zweck:** Gespeicherte Bestellvorschläge: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/bestellvorschlag/gespeichert/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/bestellvorschlag/gespeichert/agent-contract` |
+| Readiness | `GET /api/v1/masks/bestellvorschlag/gespeichert/readiness` |
+| Rollout-Route | `/mask-rollout/bestellvorschlag__gespeichert/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/bestellvorschlaege`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel liegen unter Meldebestand?
+- Speichere den Bestellvorschlag Lager.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_lager` | Bestellvorschlag Lager | safe | nein | `Wechselt zur Variante Bestellvorschlag Lager.` |
+| `ansicht_verkauf` | Bestellvorschlag Verkauf | safe | nein | `Wechselt zur Variante Bestellvorschlag Verkauf.` |
+| `ansicht_rohware` | Bestellvorschlag Rohware | safe | nein | `Wechselt zur Variante Bestellvorschlag Rohware.` |
+| `ansicht_bedarf` | Bestellvorschlag Bedarf | safe | nein | `Wechselt zur Variante Bestellvorschlag Bedarf.` |
+
+---
+
+### `bestellvorschlag/lager` — Bestellvorschlag Lager
+
+**Zweck:** Bestellvorschlag Lager: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/bestellvorschlag/lager/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/bestellvorschlag/lager/agent-contract` |
+| Readiness | `GET /api/v1/masks/bestellvorschlag/lager/readiness` |
+| Rollout-Route | `/mask-rollout/bestellvorschlag__lager/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/bestellvorschlaege/lager`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel liegen unter Meldebestand?
+- Speichere den Bestellvorschlag Lager.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Als Vorschlag speichern | safe | nein | `/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_verkauf` | Bestellvorschlag Verkauf | safe | nein | `Wechselt zur Variante Bestellvorschlag Verkauf.` |
+| `ansicht_rohware` | Bestellvorschlag Rohware | safe | nein | `Wechselt zur Variante Bestellvorschlag Rohware.` |
+| `ansicht_bedarf` | Bestellvorschlag Bedarf | safe | nein | `Wechselt zur Variante Bestellvorschlag Bedarf.` |
+| `ansicht_gespeichert` | Gespeicherte Bestellvorschläge | safe | nein | `Wechselt zur Variante Gespeicherte Bestellvorschläge.` |
+
+---
+
+### `bestellvorschlag/rohware` — Bestellvorschlag Rohware
+
+**Zweck:** Bestellvorschlag Rohware: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/bestellvorschlag/rohware/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/bestellvorschlag/rohware/agent-contract` |
+| Readiness | `GET /api/v1/masks/bestellvorschlag/rohware/readiness` |
+| Rollout-Route | `/mask-rollout/bestellvorschlag__rohware/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/bestellvorschlaege/rohware`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel liegen unter Meldebestand?
+- Speichere den Bestellvorschlag Lager.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Als Vorschlag speichern | safe | nein | `/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_lager` | Bestellvorschlag Lager | safe | nein | `Wechselt zur Variante Bestellvorschlag Lager.` |
+| `ansicht_verkauf` | Bestellvorschlag Verkauf | safe | nein | `Wechselt zur Variante Bestellvorschlag Verkauf.` |
+| `ansicht_bedarf` | Bestellvorschlag Bedarf | safe | nein | `Wechselt zur Variante Bestellvorschlag Bedarf.` |
+| `ansicht_gespeichert` | Gespeicherte Bestellvorschläge | safe | nein | `Wechselt zur Variante Gespeicherte Bestellvorschläge.` |
+
+---
+
+### `bestellvorschlag/verkauf` — Bestellvorschlag Verkauf
+
+**Zweck:** Bestellvorschlag Verkauf: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/bestellvorschlag/verkauf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/bestellvorschlag/verkauf/agent-contract` |
+| Readiness | `GET /api/v1/masks/bestellvorschlag/verkauf/readiness` |
+| Rollout-Route | `/mask-rollout/bestellvorschlag__verkauf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/einkauf/bestellvorschlaege/verkauf`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel liegen unter Meldebestand?
+- Speichere den Bestellvorschlag Lager.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `speichern` | Als Vorschlag speichern | safe | nein | `/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+| `ansicht_lager` | Bestellvorschlag Lager | safe | nein | `Wechselt zur Variante Bestellvorschlag Lager.` |
+| `ansicht_rohware` | Bestellvorschlag Rohware | safe | nein | `Wechselt zur Variante Bestellvorschlag Rohware.` |
+| `ansicht_bedarf` | Bestellvorschlag Bedarf | safe | nein | `Wechselt zur Variante Bestellvorschlag Bedarf.` |
+| `ansicht_gespeichert` | Gespeicherte Bestellvorschläge | safe | nein | `Wechselt zur Variante Gespeicherte Bestellvorschläge.` |
+
+---
+
 ### `dashboard/einkauf` — Einkaufs-Dashboard
 
 **Zweck:** Einkaufslage mit KPIs und Sprung in Bestell- und Avis-Masken.
@@ -12524,158 +12739,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Bestellfreigabe.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `einkauf/bestellvorschlaege-liste` — Bestellvorschlaege
-
-**Zweck:** Bestellvorschlaege: Eintraege finden und Details oeffnen.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/bestellvorschlaege-liste/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/bestellvorschlaege-liste/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/bestellvorschlaege-liste/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__bestellvorschlaege-liste/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `list` → `/api/v1/einkauf/bestellvorschlaege`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Welche offenen Bestellvorschlaege?
-- Zeige aktuelle Bestellvorschlaege.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `einkauf/bestellvorschlag-kontrakt` — Bestellvorschlag Kontrakt
-
-**Zweck:** Bestellvorschlag Kontrakt als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/bestellvorschlag-kontrakt/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/bestellvorschlag-kontrakt/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/bestellvorschlag-kontrakt/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__bestellvorschlag-kontrakt/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/bestellvorschlaege/rohware`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Bestellvorschlag Kontrakt.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `einkauf/bestellvorschlag-lager` — Bestellvorschlag Lager
-
-**Zweck:** Bestellvorschlag Lager als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/bestellvorschlag-lager/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/bestellvorschlag-lager/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/bestellvorschlag-lager/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__bestellvorschlag-lager/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/bestellvorschlaege/lager`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Bestellvorschlag Lager.
-- Was ist der aktuelle Stand?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `refresh` | Aktualisieren | safe | nein | `—` |
-
----
-
-### `einkauf/bestellvorschlag-verbrauch` — Bestellvorschlag Verbrauch
-
-**Zweck:** Bestellvorschlag Verbrauch als Read-Model-Cockpit.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/einkauf/bestellvorschlag-verbrauch/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/einkauf/bestellvorschlag-verbrauch/agent-contract` |
-| Readiness | `GET /api/v1/masks/einkauf/bestellvorschlag-verbrauch/readiness` |
-| Rollout-Route | `/mask-rollout/einkauf__bestellvorschlag-verbrauch/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Data Sources:**
-
-- `entity` → `/api/v1/einkauf/bestellvorschlaege/bedarf`
-
-**MCP-Tools (Domäne):**
-
-- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
-- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
-- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
-- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
-- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
-
-**Beispiel-Prompts:**
-
-- Zeige Bestellvorschlag Verbrauch.
 - Was ist der aktuelle Stand?
 
 **Actions:**

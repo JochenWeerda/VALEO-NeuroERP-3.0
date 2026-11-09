@@ -171,6 +171,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellung_kommandos` | Zeilenaktionen der Bestell-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
+| `einkauf_bestellvorschlag_kommandos` | Bestellvorschlag als Fachaktion fuer Maske, CLI und MCP (Familie ``bestellvorschlag``, 09.11.2026). |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
 | `erechnung_import` | E-Rechnung Import — ZUGFeRD / XRechnung stub. |

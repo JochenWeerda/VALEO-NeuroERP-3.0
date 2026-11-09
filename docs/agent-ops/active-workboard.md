@@ -20661,3 +20661,8 @@ Chef-Anweisungen selbst (kunden_stamm_pflege: Anlegen am Kunden, Aendern/Entfern
 der handgebaute Kundenstamm verkauf/kunden-stamm (2.506 Zeilen) leitet auf die Kundenakte weiter. Behoben: die sechs
 ORM-Modelle der Partner-Untertabellen hatten kein tenant_id, obwohl Tabelle und Dienst es verlangen - jedes Anlegen
 und Lesen ueber BusinessPartnerService scheiterte. Offen: Rechnungsdaten (billing-config) in der Kundenakte.
+Bestellvorschlag (09.11.2026): Familie bestellvorschlag (Lager, Verkauf, Rohware, Bedarf, Gespeichert) ersetzt zwei
+Seiten ohne Maske, drei Cockpit-Platzhalter und die Platzhalterliste; Zeilenformen typisiert. Kommandos: Berechnung
+speichern (Server rechnet neu), Zu Bestellung (je Lieferant DocFlow-Entwurf, Menge in Preiseinheit dt, keine feste
+Steuer 7 %). Behoben: Entwurfsnummern aus uuid7-Praefix kollidierten (beleg_anlage mit Anhang aus dem
+Wiederholungsschluessel). Studio-versioniert 762/872, handgebaut 4.

@@ -11958,6 +11958,435 @@
       ]
     },
     {
+      "mask_id": "bestellvorschlag/bedarf",
+      "title": "Bestellvorschlag Bedarf",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__bedarf/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/bedarf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/bedarf/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/bedarf/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/gespeichert",
+      "title": "Gespeicherte Bestellvorschläge",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__gespeichert/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/gespeichert/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/gespeichert/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/gespeichert/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/lager",
+      "title": "Bestellvorschlag Lager",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__lager/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/lager/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/lager/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/lager/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/rohware",
+      "title": "Bestellvorschlag Rohware",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__rohware/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/rohware/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/rohware/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/rohware/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_verkauf",
+          "label": "Bestellvorschlag Verkauf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
+      "mask_id": "bestellvorschlag/verkauf",
+      "title": "Bestellvorschlag Verkauf",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/bestellvorschlag__verkauf/:entityId",
+      "agent_contract_url": "/api/v1/masks/bestellvorschlag/verkauf/agent-contract",
+      "screen_definition_url": "/api/v1/masks/bestellvorschlag/verkauf/screen-definition",
+      "readiness_url": "/api/v1/masks/bestellvorschlag/verkauf/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "speichern",
+          "label": "Als Vorschlag speichern",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "einkauf.bestellvorschlag.create",
+          "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        },
+        {
+          "key": "ansicht_lager",
+          "label": "Bestellvorschlag Lager",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Lager."
+        },
+        {
+          "key": "ansicht_rohware",
+          "label": "Bestellvorschlag Rohware",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware."
+        },
+        {
+          "key": "ansicht_bedarf",
+          "label": "Bestellvorschlag Bedarf",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf."
+        },
+        {
+          "key": "ansicht_gespeichert",
+          "label": "Gespeicherte Bestellvorschläge",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.speichern",
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.bestellung.versenden",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "dashboard/einkauf",
       "title": "Einkaufs-Dashboard",
       "domain": "einkauf",
@@ -12519,138 +12948,6 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "procurement.approve",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlaege-liste",
-      "title": "Bestellvorschlaege",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlaege-liste/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlaege-liste/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "export",
-          "label": "CSV-Export",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": null,
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-kontrakt",
-      "title": "Bestellvorschlag Kontrakt",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-kontrakt/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-kontrakt/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-lager",
-      "title": "Bestellvorschlag Lager",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-lager/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-lager/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/bestellvorschlag-verbrauch",
-      "title": "Bestellvorschlag Verbrauch",
-      "domain": "einkauf",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/einkauf__bestellvorschlag-verbrauch/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/bestellvorschlag-verbrauch/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "refresh",
-          "label": "Aktualisieren",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "procurement.read",
           "commandEndpoint": null,
           "method": null,
           "stubReason": null
@@ -26663,5 +26960,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 140
+  "event_count": 141
 }
