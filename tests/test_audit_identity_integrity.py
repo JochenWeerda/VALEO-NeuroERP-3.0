@@ -102,14 +102,16 @@ def test_ambiguous_provider_mapping_is_denied(attestation_case):
 
 def test_sql_failure_is_not_converted_to_fallback_or_partial_print(attestation_case, monkeypatch):
     case = attestation_case
-    db, execute = case[1], case[1].execute
-    def fail_lookup(statement, *args, **kwargs):
+    from sqlalchemy.orm import Session as _Session
+    db, execute = case[1], _Session.execute
+    # Klassenweit: Die Maskenaktion schreibt ueber eine eigene Sitzung auf derselben Verbindung.
+    def fail_lookup(self, statement, *args, **kwargs):
         if 'SELECT id FROM domain_shared.users' in str(statement):
-            return execute(text('SELECT * FROM synthetic_missing_actor_table'))
-        return execute(statement, *args, **kwargs)
-    monkeypatch.setattr(db, 'execute', fail_lookup)
+            return execute(self, text('SELECT * FROM synthetic_missing_actor_table'))
+        return execute(self, statement, *args, **kwargs)
+    monkeypatch.setattr(_Session, 'execute', fail_lookup)
     assert print_note(case).status_code in (400, 403, 500, 503)
-    monkeypatch.setattr(db, 'execute', execute)
+    monkeypatch.setattr(_Session, 'execute', execute)
     assert gedruckt(case) == 1
     assert db.execute(text('SELECT COUNT(*) FROM domain_audit.attestations WHERE entity_id=:id'), {'id': case[8]}).scalar_one() == 0
 
