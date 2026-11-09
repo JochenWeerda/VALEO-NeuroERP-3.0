@@ -33,7 +33,6 @@ from app.api.v1.endpoints import (
     sales_blanket_orders,
     credit_management,
     collective_documents,
-    sales_offers,
     docflow,
     warehouses,
     warehouse_wms,
@@ -519,19 +518,9 @@ api_router.include_router(
     tags=["sales", "collective-documents"]
 )
 
-api_router.include_router(
-    sales_offers.router,
-    prefix="/sales/offers",
-    tags=["sales", "offers"]
-)
-
-# Die Angebotsmaske spricht /sales/quotations — der Beleg heisst intern offer.
-api_router.include_router(
-    sales_offers.router,
-    prefix="/sales/quotations",
-    tags=["sales", "quotations"],
-    include_in_schema=False,
-)
+# Angebote: DocFlow einziger Belegspeicher (BELEG-052, 09.11.2026); /sales/offers und /sales/quotations entfallen.
+from app.api.v1.endpoints import beleg_import  # noqa: E402
+api_router.include_router(beleg_import.router)
 
 from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
 from .endpoints import scan as scan_module

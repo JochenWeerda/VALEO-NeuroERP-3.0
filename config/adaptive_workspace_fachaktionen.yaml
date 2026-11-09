@@ -227,7 +227,7 @@ actions:
     event_out: []
     mcp_tool_id: crm.customer.open
     mask_action_id: null
-    command_endpoint: GET /api/v1/sales/offers
+    command_endpoint: GET /api/v1/belege/sales_offer  # DocFlow einziger Belegspeicher (BELEG-052)
     related_endpoints:
       - POST /api/v1/mcp/tools/call  # crm.customer.open, crm.customer.search
     screen_id: beleg-liste/sales-offer
@@ -264,9 +264,9 @@ actions:
         gap: missing_outbox
     mcp_tool_id: null
     mask_action_id: null
-    command_endpoint: POST /api/v1/sales/offers
-    screen_id: sales/angebote/neu
-    route_path: /sales/angebot/neu
+    command_endpoint: POST /api/v1/docflow/  # Belegmaske beleg/sales-offer, creation docflow.create.v1
+    screen_id: beleg/sales-offer
+    route_path: /sales/angebote/neu
     aliases:
       - angebot anlegen
       - neues angebot

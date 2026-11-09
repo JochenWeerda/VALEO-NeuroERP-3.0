@@ -77,6 +77,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `banken` | Bank Accounts API - Bankkonto Management (SQLAlchemy) |
 | `batch` | OData-style $batch endpoint for bundling multiple read requests. |
 | `bedarfsdeckung` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — Lücke je Betrieb × Produktgruppe. |
+| `beleg_import` | CSV-Import von Angeboten in DocFlow (BELEG-052, 09.11.2026; vorher ``/sales/offers/actions/import-csv``). |
 | `beleg_versand` | Beleg versenden: der Beleg als PDF per E-Mail an seinen Partner (BELEG-052 Stufe 2b, 09.11.2026). |
 | `beleg_vordrucke` | Belegformular-Vordruck-Editor (Admin) — Druckvorlagen für Papier/PDF-Ausdrucke. |
 | `belege` | Lesender Belegweg: jeder Beleg in der Form des Belegvertrags (BELEG-011). |
@@ -418,7 +419,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
-| `sales_offers` | Domain sales offers (Angebote) CRUD endpoints. |
 | `sales_order_commands` | Auftrag stornieren als Kommando-Weg (Studio-Katalog ``stornieren``, MASK-COMMANDS-ROLLOUT-20261019). |
 | `sales_orders` | Domain sales orders CRUD endpoints. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |

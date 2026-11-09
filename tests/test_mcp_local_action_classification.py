@@ -184,8 +184,8 @@ def test_actual_writes_and_finance_gaps_remain_visible():
         assert by_id[f"mask:{liste}:neu"]["coverage"] == "local_ui"
     for liste in set(anlagen) - set(listen_anlagen):
         assert by_id[f"mask:{liste}:neu"]["coverage"] not in ("local_ui", "open_high")
-    # 16: dazu sales/credit-notes:neu (localEffect form_reset), seit der Katalog alle Masken vollstaendig sieht.
-    lokal = 16 + len(listen_anlagen)
+    # 15 feste lokale Aktionen; sales/credit-notes:neu (form_reset) entfiel mit den alten Belegmasken (BELEG-052).
+    lokal = 15 + len(listen_anlagen)
     assert data["stats"]["by_coverage"]["local_ui"] == lokal
     assert data["stats"]["mask_actions_considered"] == len(by_id)
     assert data["stats"]["mask_mutations_considered"] == len(by_id) - lokal

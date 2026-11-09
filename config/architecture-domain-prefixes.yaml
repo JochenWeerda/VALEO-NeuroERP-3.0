@@ -390,6 +390,7 @@ domains:
       - kontrolle
       - belege
       - beleg_versand
+      - beleg_import
       - docflow
       - dokumente
       - doc_nachweisraum

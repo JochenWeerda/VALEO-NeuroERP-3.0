@@ -1125,7 +1125,6 @@
     "app/api/v1/endpoints/flow_spines.py",
     "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/portal_shop.py",
-    "app/api/v1/endpoints/sales_offers.py",
     "app/communication/crisis_plan.py",
     "app/core/production_service_implementations.py",
     "app/crm/router.py",
@@ -1153,9 +1152,9 @@
    ],
    "identitaet": {
     "dienst": 14,
-    "nutzlast": 9,
+    "nutzlast": 8,
     "standardmandant": 6,
-    "token": 26
+    "token": 25
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",

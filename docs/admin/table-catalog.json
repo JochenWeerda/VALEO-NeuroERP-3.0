@@ -13686,7 +13686,6 @@
             "app/api/v1/endpoints/kunden_stamm_pflege.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
@@ -13711,6 +13710,7 @@
             "app/services/portal_intelligence_service.py",
             "app/services/portal_lohndienst_service.py",
             "app/services/sales_credit_service.py",
+            "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -14506,12 +14506,6 @@
           "placement": "legacy",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/sales_offers.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_offers.py"
           ]
         },
         "sales_offers": {
@@ -14659,12 +14653,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/mask_frontend_bridges.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_reports.py",
-            "app/services/o2c_chain_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_offers.py"
+            "app/services/o2c_chain_service.py",
+            "app/services/sales_offer_import.py"
           ]
         },
         "sales_order_items": {
@@ -14771,7 +14762,6 @@
             "app/services/sales_match_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_orders.py"
           ]
         },
@@ -14954,7 +14944,6 @@
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/pick_lists.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_order_commands.py",
             "app/api/v1/endpoints/sales_orders.py"
           ]
@@ -15926,6 +15915,7 @@
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
             "app/services/kontrollkorb.py",
+            "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [

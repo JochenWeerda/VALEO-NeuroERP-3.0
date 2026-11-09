@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from sqlalchemy import text
 
-from app.api.v1.endpoints import sales_offers
+from app.api.v1.endpoints import beleg_import
 from test_gdpr_subject_boundary import subject_data, keys, probe  # noqa: F401
 
 pytestmark = [pytest.mark.integration, pytest.mark.needs_live_db]
@@ -39,7 +39,7 @@ def imports(require_db, subject_data, monkeypatch):
                         "(id,tenant_id,customer_number,company_name,is_active) "
                         "VALUES (:id,:tenant,:number,'Synthetic import customer',TRUE)"),
                    {"id": customer, "tenant": tid, "number": "IMP-" + customer[:16]})
-    client.app.include_router(sales_offers.router, prefix="/api/v1/sales/offers")
+    client.app.include_router(beleg_import.router, prefix="/api/v1")
     from app.services import sales_offer_import
     original = sales_offer_import.import_offers
     failures = []
@@ -54,7 +54,7 @@ def imports(require_db, subject_data, monkeypatch):
         content = content.replace("__CUSTOMER__", customers[selected])
         token = provider.token(selected, changes={"roles": roles or ["SALES_BEARBEITEN"],
                                                  "identity_type": "human", "sub": actor})
-        response = client.post("/api/v1/sales/offers/actions/import-csv",
+        response = client.post("/api/v1/belege/sales_offer/actions/import-csv",
                            headers={"Authorization": "Bearer " + token},
                            json={"csv_content": content, "_idempotencyKey": key})
         assert response.status_code != 503, repr(failures[-1]) if failures else response.text
@@ -78,7 +78,8 @@ def test_atomic_import_replay_tenant_and_role_boundaries(imports):
     other = send(content, key, selected=foreign)
     assert other.status_code == 200, other.text
     assert other.json()["offer_ids"] != first["offer_ids"]
-    assert db.execute(text("SELECT count(*) FROM domain_crm.sales_offers WHERE offer_number=:n"), {"n": number}).scalar() == 2
+    assert db.execute(text("SELECT count(*) FROM domain_docflow.document_headers WHERE doc_type='sales_offer' "
+                           "AND source_system='csv_import' AND source_ref=:n"), {"n": number}).scalar() == 2
     assert db.execute(text("SELECT count(*) FROM outbox_events WHERE tenant_id=:t AND event_type=:e"),
                       {"t": tenant, "e": "sales.offer.import_csv.v1"}).scalar() == 1
 
@@ -90,7 +91,7 @@ def test_second_duplicate_rolls_back_first_offer_and_execution_receipt(imports):
     assert send(HEADER + f"{duplicate};Existing;__CUSTOMER__;1;EUR;\n", uuid4().hex).status_code == 200
     response = send(HEADER + f"{prefix}-A;First;__CUSTOMER__;1;EUR;\n{duplicate};Duplicate;__CUSTOMER__;2;EUR;\n", key)
     assert response.status_code == 409, response.text
-    assert db.execute(text("SELECT count(*) FROM domain_crm.sales_offers WHERE tenant_id=:t AND offer_number=:n"),
-                      {"t": tenant, "n": prefix + "-A"}).scalar() == 0
+    assert db.execute(text("SELECT count(*) FROM domain_docflow.document_headers WHERE tenant_id=:t "
+                           "AND source_system='csv_import' AND source_ref=:n"), {"t": tenant, "n": prefix + "-A"}).scalar() == 0
     assert db.execute(text("SELECT count(*) FROM public.mcp_tool_executions WHERE tenant_id=:t AND idempotency_key=:k"),
                       {"t": tenant, "k": key}).scalar() == 0

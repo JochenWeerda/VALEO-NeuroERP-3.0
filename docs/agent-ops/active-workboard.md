@@ -20708,3 +20708,10 @@ der Studio-Maske; /buchen schreibt Kreditoren-OP an der Finanz-Buchungsautoritae
 OFFEN ohne echte Datenquelle: einkauf/lieferantenbewertung (compat liefert feste 80 %/4,0), admin/externe-gates
 (simulierte Demo-Zustaende), agribusiness/field-service-tasks (compat ueber CRM-Faelle mit Demo-Daten).
 BELEG-052 Stufe 3b (09.11.2026): NeuroASSIST-Bestellvorschlag und Kernel-Kommando CreatePurchaseOrder legen DocFlow-Bestellentwuerfe an (vorher EinkaufBestellung bzw. Kopf ohne Positionen in public.einkauf_bestellungen mit lieferant_id als Ganzzahl). Mengenumrechnung in die Preiseinheit gemeinsam (beleg_anlage.position_in_preiseinheit). Behoben: lege_beleg_an setzte das Belegdatum auf die Uhrzeit, jede Wiederholung galt als anderer Inhalt.
+BELEG-052 Stufe 3c (09.11.2026): Angebots-Eigenspeicher abgeloest. Router sales_offers (/sales/offers, /sales/quotations:
+Anlegen, Aendern, Loeschen, Umwandeln, Druck, Buchen) entfernt - Liste, Bearbeitung, Umwandlung, Druck und Versand laufen
+ueber DocFlow und die Belegmaske. CSV-Import neu unter POST /belege/sales_offer/actions/import-csv: je Zeile ein
+DocFlow-Angebotsentwurf mit einer Pauschalposition (Betrag, ohne Steuerschluessel; Freigabe erst nach Vervollstaendigung),
+Duplikat je Angebotsnummer, alles oder nichts (Savepoint). Fachaktionskatalog auf /belege/sales_offer und /docflow/.
+CI-Nachzug: Kundenakte ohne edit-Aktion, Bestellvorschlag-Familie, webshop-Altspeichertest entfernt, RLS-Inventar.
+Offen: Tabellen domain_crm.sales_offers/sales_offer_items per Migration abbauen (mit den uebrigen Altspeichern).

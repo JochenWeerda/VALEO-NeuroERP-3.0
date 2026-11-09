@@ -36,7 +36,8 @@ def test_customer_360_keeps_customer_actions_in_familiar_footer_zones() -> None:
     assert screen["layout"]["stickyHeader"] is True
     assert screen["layout"]["stickyFooter"] is True
     assert _action(screen, "create_activity")["zone"] == "footer"
-    assert _action(screen, "edit")["zone"] == "commit"
+    # Pflege der Untertabellen in der Akte selbst (09.11.2026): Kopfaktionen statt Sprung "edit".
+    assert _action(screen, "anschrift_anlegen")["zone"] == "header"
     _assert_ready(screen)
 
 

@@ -27,6 +27,7 @@
   "session_local": {
    "app/agents/workflows/bestellvorschlag.py": 1,
    "app/agents/workflows/skonto_optimizer.py": 1,
+   "app/api/v1/endpoints/agrar_wetter.py": 1,
    "app/api/v1/endpoints/health.py": 2,
    "app/core/container_config.py": 18,
    "app/core/database.py": 2,
