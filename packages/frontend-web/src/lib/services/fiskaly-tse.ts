@@ -169,6 +169,9 @@ export function useFiskalyTSE() {
         throw new Error('Fiskalisierungsprovider ist nicht konfiguriert')
       }
       const cart = drafts.get(txId) ?? []
+      // Der Satz kommt aus dem Steuerschluessel des Artikels; ohne ihn wird nicht signiert (nie 19 % angenommen).
+      const ohneSatz = cart.find((line) => line.vatRate === undefined)
+      if (ohneSatz) throw new Error(`Position ${ohneSatz.bezeichnung} hat keinen Steuersatz`)
       const response = await apiClient.post<FiscalResult>('/api/v1/pos/fiscalization/transactions/finish', {
         terminal_id: config.settings?.terminal_id ?? config.client_id,
         cash_register_id: config.cash_register_id,
@@ -179,7 +182,7 @@ export function useFiskalyTSE() {
           text: line.bezeichnung,
           quantity: line.menge,
           gross_amount: line.preis * line.menge,
-          vat_rate: line.vatRate ?? 19,
+          vat_rate: line.vatRate,
         })),
         payments: paymentLines?.length ? paymentLines : [{ method: paymentType, amount }],
       })

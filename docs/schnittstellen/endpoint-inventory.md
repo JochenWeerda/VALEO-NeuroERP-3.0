@@ -362,7 +362,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pos_fiscalization` | — |
 | `pos_payments` | — |
 | `pos_payments_promotions` | POS payment split and promotions preview endpoints. |
-| `pos_retoure` | POS Retoure (Return) Endpoint |
+| `pos_retoure` | POS: Retoure und Abgleich offline kassierter Bons. |
 | `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
 | `position_overrides` | Commodity Position Override API (Freigabe anfordern / genehmigen / ablehnen). |
 | `position_rules` | Commodity Position Rules API (No-Speculation Guard Regeln). |

@@ -115,10 +115,10 @@
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866"
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -294,10 +294,10 @@
     "app/seeds/inventory_seed.py:20"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866"
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -1182,10 +1182,10 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866",
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865",
     "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3163"
    ],
@@ -1343,10 +1343,10 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866",
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865",
     "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
@@ -1451,10 +1451,10 @@
     "services/crm-core/app/api/v1/endpoints/leads.py:127"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866",
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865",
     "app/services/mcp_execution_service.py:3163"
    ],
    "gemeinsam_stellen": [
@@ -1573,10 +1573,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866",
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865",
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
     "app/api/v1/endpoints/financial_reports.py:325"
@@ -1667,10 +1667,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866",
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865",
     "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3163"
    ],
@@ -2370,10 +2370,10 @@
     "services/inventory/app/db/models.py:32"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866"
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865"
    ],
    "gemeinsam_stellen": [],
    "daten": {
@@ -2798,10 +2798,10 @@
     "app/infrastructure/models/futtermittel_models.py:92"
    ],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866"
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865"
    ],
    "gemeinsam_stellen": [
     "app/finance/steuerschluessel.py:281"
@@ -3124,10 +3124,10 @@
    },
    "standardmandant_stellen": [],
    "null_stellen": [
-    "app/api/v1/endpoints/compat.py:1829",
-    "app/api/v1/endpoints/compat.py:1836",
-    "app/api/v1/endpoints/compat.py:1843",
-    "app/api/v1/endpoints/compat.py:1866"
+    "app/api/v1/endpoints/compat.py:1828",
+    "app/api/v1/endpoints/compat.py:1835",
+    "app/api/v1/endpoints/compat.py:1842",
+    "app/api/v1/endpoints/compat.py:1865"
    ],
    "gemeinsam_stellen": [],
    "daten": {

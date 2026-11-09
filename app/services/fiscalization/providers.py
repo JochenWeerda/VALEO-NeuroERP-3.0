@@ -4,12 +4,12 @@ import hashlib
 import os
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
-from decimal import Decimal
 from typing import Any
 
 import httpx
 
 from .contracts import (
+    DSFINVK_UST_SAETZE,
     CashPointClosingCommand,
     ExportCommand,
     FinishTransactionCommand,
@@ -156,13 +156,10 @@ class FiskalyProvider(_HttpProvider):
     def _receipt_payload(command: StartTransactionCommand, state: str) -> dict[str, Any]:
         amounts: dict[str, str] = {}
         for line in command.lines:
-            key = {
-                Decimal("19"): "NORMAL",
-                Decimal("7"): "REDUCED_1",
-                Decimal("10.7"): "SPECIAL_RATE_1",
-                Decimal("5.5"): "SPECIAL_RATE_2",
-                Decimal("0"): "NULL",
-            }.get(line.vat_rate, "NORMAL")
+            # Ein unbekannter Satz wurde bis 27.10.2026 still als Normalsatz signiert.
+            key = DSFINVK_UST_SAETZE.get(line.vat_rate)
+            if key is None:
+                raise FiscalProviderError(f"Steuersatz {line.vat_rate} % hat keine DSFinV-K-Zuordnung")
             amounts[key] = str(line.gross_amount + type(line.gross_amount)(amounts.get(key, "0")))
         return {
             "client_id": command.client_id,
