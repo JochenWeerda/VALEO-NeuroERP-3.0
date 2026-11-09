@@ -238,8 +238,8 @@ describe('ActionDispatchProvider', () => {
       order_id: 'ord-1',
       auftrag_nr: 'SO-100',
       status: 'confirmed',
-      route_path: '/sales/order-editor/ord-1',
-      screen_id: 'sales/sales-order',
+      route_path: '/belege/sales_order/ord-1',
+      screen_id: 'beleg/sales-order',
     })
 
     function OpenTrigger(): JSX.Element {
@@ -267,7 +267,7 @@ describe('ActionDispatchProvider', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Open order' }))
     await waitFor(() => {
-      expect(screen.getByTestId('location').textContent).toBe('/sales/order-editor/ord-1')
+      expect(screen.getByTestId('location').textContent).toBe('/belege/sales_order/ord-1')
     })
     expect(callOrderStatusOpen).toHaveBeenCalledWith('SO-100')
   })
@@ -279,7 +279,7 @@ describe('ActionDispatchProvider', () => {
         <button
           type="button"
           onClick={() => {
-            void dispatch('nav-orders', { route_path: '/sales/order-editor/direct-1' })
+            void dispatch('nav-orders', { route_path: '/belege/sales_order/direct-1' })
           }}
         >
           Direct order
@@ -298,7 +298,7 @@ describe('ActionDispatchProvider', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Direct order' }))
     await waitFor(() => {
-      expect(screen.getByTestId('location').textContent).toBe('/sales/order-editor/direct-1')
+      expect(screen.getByTestId('location').textContent).toBe('/belege/sales_order/direct-1')
     })
     expect(callOrderStatusOpen).not.toHaveBeenCalled()
   })
