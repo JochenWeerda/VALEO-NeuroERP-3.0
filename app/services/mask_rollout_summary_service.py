@@ -54,7 +54,6 @@ class MaskRolloutSummaryService:
             "einkauf/purchase-order": self._purchase_order_summary,
             "einkauf/supplier": self._supplier_summary,
             "crm/opportunity": self._opportunity_summary,
-            "sales/delivery-note": self._delivery_note_summary,
             "agrar/harvest-settlement": self._harvest_settlement_summary,
             "finance/payment-run": self._payment_run_summary,
         }
@@ -88,7 +87,6 @@ class MaskRolloutSummaryService:
             "einkauf/purchase-order": self._purchase_order_tabs,
             "einkauf/supplier": self._supplier_tabs,
             "crm/opportunity": self._opportunity_tabs,
-            "sales/delivery-note": self._delivery_note_tabs,
             "agrar/harvest-settlement": self._harvest_settlement_tabs,
             "finance/payment-run": self._payment_run_tabs,
         }
@@ -659,74 +657,6 @@ class MaskRolloutSummaryService:
 
             items = [opportunity_quote_aliases(dict(r)) for r in rows]
             return build_tab_page(tab_key=tab_key, table_key="quotes", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-
-    def _delivery_note_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
-        row = self.db.execute(
-            text(
-                """
-                SELECT id, delivery_number, customer_id, status, delivery_date, order_id
-                FROM domain_sales.delivery_notes
-                WHERE tenant_id = :tenant_id AND id = :ls_id
-                """
-            ),
-            {"tenant_id": self.tenant_id, "ls_id": entity_id},
-        ).mappings().first()
-        if not row:
-            raise HTTPException(status_code=404, detail="Delivery note not found")
-        return build_screen_summary_payload(
-            screen_id=spec.screen_id,
-            entity_id=entity_id,
-            tenant_id=self.tenant_id,
-            title=str(row["delivery_number"] or entity_id),
-            subtitle=str(row["customer_id"] or ""),
-            summary={
-                "status": str(row["status"] or ""),
-                "delivery_date": format_optional_date(row["delivery_date"]),
-                "order_id": str(row["order_id"] or ""),
-            },
-            available_tabs=list(spec.available_tabs),
-            api_prefix=spec.api_prefix,
-            lazy_tab_keys=list(spec.lazy_tabs),
-            initial_payload_budget_kb=spec.budget_kb,
-            entity_key="ls_id",
-        )
-
-    def _delivery_note_tabs(
-        self,
-        spec: MaskRolloutSpec,
-        entity_id: str,
-        tab_key: str,
-        *,
-        page: int,
-        limit: int,
-        q: str | None,
-        sort: str | None = None,
-        sort_dir: str | None = None,
-        filter_plan: dict | None = None,
-    ) -> dict[str, Any]:
-        if tab_key == "positionen":
-            rows = self.db.execute(
-                text(
-                    """
-                    SELECT pos_nr, artikel_id, bezeichnung, menge, einheit
-                    FROM domain_sales.delivery_note_positions p
-                    JOIN domain_sales.delivery_notes n ON n.id = p.delivery_note_id
-                    WHERE n.tenant_id = :tenant_id AND p.delivery_note_id = :ls_id
-                    ORDER BY p.pos_nr
-                    """
-                ),
-                {"tenant_id": self.tenant_id, "ls_id": entity_id},
-            ).mappings().all()
-            from app.api.v1.schemas.mask_entity_contracts import delivery_note_position_aliases
-
-            items = [delivery_note_position_aliases(dict(r)) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="delivery_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        if tab_key == "dokumente":
-            from app.api.v1.schemas.mask_entity_contracts import delivery_note_document_aliases
-
-            items = [delivery_note_document_aliases({"document_type": "Lieferschein", "reference": entity_id})]
-            return build_tab_page(tab_key=tab_key, table_key="documents", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _harvest_settlement_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:

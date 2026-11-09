@@ -516,13 +516,8 @@ api_router.include_router(
 from app.api.v1.endpoints import beleg_import  # noqa: E402
 api_router.include_router(beleg_import.router)
 
-from .endpoints import sales_delivery_notes, branches, pricing, price_lists, sales_credit_notes, sales_reports
+from .endpoints import branches, pricing, price_lists, sales_credit_notes, sales_reports
 from .endpoints import scan as scan_module
-
-api_router.include_router(
-    sales_delivery_notes.router,
-    tags=["sales", "delivery-notes"]
-)
 
 api_router.include_router(
     branches.router,
