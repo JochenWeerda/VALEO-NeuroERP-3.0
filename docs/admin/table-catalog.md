@@ -600,7 +600,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.admin_output_profiles` | `app/api/v1/endpoints/admin_devices.py` | `app/api/v1/endpoints/admin_devices.py` | — |
 | `domain_shared.admin_output_template_versions` | `app/api/v1/endpoints/admin_devices.py` | `app/api/v1/endpoints/admin_devices.py` | — |
 | `domain_shared.admin_output_templates` | `app/api/v1/endpoints/admin_devices.py` | `app/api/v1/endpoints/admin_devices.py` | — |
-| `domain_shared.admin_report_permissions` | `app/api/v1/endpoints/admin_reporting.py` | `app/api/v1/endpoints/admin_reporting.py` | — |
+| `domain_shared.admin_report_permissions` | `app/api/v1/endpoints/admin_reporting.py`, `app/api/v1/endpoints/admin_reporting_kommandos.py` | `app/api/v1/endpoints/admin_reporting.py`, `app/api/v1/endpoints/admin_reporting_kommandos.py` | `admin/berechtigungen-matrix` |
 | `domain_shared.admin_routing_rules` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
 | `domain_shared.admin_scan_profiles` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
 | `domain_shared.admin_station_devices` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
@@ -730,16 +730,16 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.user_screen_overlays` | `app/api/v1/endpoints/ux_overlays.py` | `app/api/v1/endpoints/ux_overlays.py` | — |
 | `domain_shared.users` | `app/api/v1/endpoints/collab_notes.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/personal.py`, `app/core/akteur.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/journal.py`, `app/infrastructure/models/l3c_models.py`, `app/services/admin_core_service.py`, `app/services/einkauf_compat_service.py`, `app/services/finance_transaction_service.py`, `app/services/personal_service.py` | `app/services/admin_core_service.py`, `app/services/personal_service.py` | — |
 | `domain_shared.versandprofile` | `app/api/v1/endpoints/versandprofile.py`, `app/services/versandprofil_commands.py` | `app/api/v1/endpoints/versandprofile.py`, `app/services/versandprofil_commands.py` | — |
-| `domain_shared.vertreter_provisionsgruppen` | `app/api/v1/endpoints/vertreterprovisionen.py` | `app/api/v1/endpoints/vertreterprovisionen.py` | — |
-| `domain_shared.vertreter_provisionsstaffeln` | `app/api/v1/endpoints/vertreterprovisionen.py` | `app/api/v1/endpoints/vertreterprovisionen.py` | — |
-| `domain_shared.vertreter_staffel_zeilen` | `app/api/v1/endpoints/vertreterprovisionen.py` | `app/api/v1/endpoints/vertreterprovisionen.py` | — |
+| `domain_shared.vertreter_provisionsgruppen` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | — |
+| `domain_shared.vertreter_provisionsstaffeln` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | — |
+| `domain_shared.vertreter_staffel_zeilen` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | — |
 | `domain_shared.waage_hofliste` | `app/api/v1/endpoints/hofliste.py` | `app/api/v1/endpoints/hofliste.py` | — |
 | `domain_shared.waage_wiegungsgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
 | `domain_shared.warengruppen` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `artikel/kategorien` |
 | `domain_shared.webhook_deliveries` | `app/api/v1/endpoints/webhook_system.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webhook_registrations` | `app/api/v1/endpoints/webhook_system.py`, `app/infrastructure/models/l3c_models.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
-| `domain_shared.webshop_bestellungen` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
-| `domain_shared.webshop_configs` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
+| `domain_shared.webshop_bestellungen` | `app/api/v1/endpoints/webshop_kommandos.py`, `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
+| `domain_shared.webshop_configs` | `app/api/v1/endpoints/webshop_kommandos.py`, `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.webshop_sync_log` | `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
 | `domain_shared.zahlungsbedingungen` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | `app/api/v1/endpoints/finance_stammdaten_kommandos.py`, `app/api/v1/endpoints/zahlungsbedingungen.py` | — |
 | `domain_shared.zahlungsformulare` | `app/api/v1/endpoints/fibu_stammdaten.py` | `app/api/v1/endpoints/fibu_stammdaten.py` | — |

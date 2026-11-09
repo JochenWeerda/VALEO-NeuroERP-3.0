@@ -49863,10 +49863,15 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/admin_reporting.py"
+            "app/api/v1/endpoints/admin_reporting.py",
+            "app/api/v1/endpoints/admin_reporting_kommandos.py"
+          ],
+          "screens": [
+            "admin/berechtigungen-matrix"
           ],
           "written_by": [
-            "app/api/v1/endpoints/admin_reporting.py"
+            "app/api/v1/endpoints/admin_reporting.py",
+            "app/api/v1/endpoints/admin_reporting_kommandos.py"
           ]
         },
         "admin_routing_rules": {
@@ -60775,10 +60780,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "vertreter_provisionsstaffeln": {
@@ -60826,10 +60833,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "vertreter_staffel_zeilen": {
@@ -60882,10 +60891,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "waage_hofliste": {
@@ -61357,6 +61368,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/webshop_kommandos.py",
             "app/services/webshop_integration_service.py"
           ],
           "written_by": [
@@ -61414,6 +61426,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/webshop_kommandos.py",
             "app/services/webshop_integration_service.py"
           ],
           "written_by": [
