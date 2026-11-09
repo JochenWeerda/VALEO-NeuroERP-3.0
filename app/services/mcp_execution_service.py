@@ -541,15 +541,15 @@ _WEIGHING_ROUTE_PREFIX = "/waage/wiegeschein"
 _STOCK_SCREEN_ID = "lager/article-stock"
 _STOCK_ROUTE_PREFIX = "/lager/artikel"
 _BILLABLE_DELIVERY_STATUSES = ("posted", "printed", "gebucht")
-# Stand des Auftrags in DocFlow (``app/core/belegvertrag.STATUS``) - BELEG-052: DocFlow ist der einzige Belegspeicher.
+# Stand des Auftrags in DocFlow (Pruefbedingung ``chk_docflow_header_status``) - BELEG-052: einziger Belegspeicher.
 _ORDER_NEXT_STEP = {
     "draft": "Auftrag vervollständigen und freigeben",
     "open": "Lieferschein oder Rechnung erstellen",
-    "released": "Lieferschein oder Rechnung erstellen",
+    "completed": "Keine Aktion — Auftrag abgeschlossen",
     "reversed": "Keine Aktion — Auftrag storniert",
     "cancelled": "Keine Aktion — Auftrag storniert",
 }
-_ORDER_TERMINAL_STATUSES = frozenset({"reversed", "cancelled"})
+_ORDER_TERMINAL_STATUSES = frozenset({"completed", "reversed", "cancelled"})
 _OPEN_ITEM_KONTO_TYP = {
     "forderung": "debitoren",
     "verbindlichkeit": "kreditoren",
