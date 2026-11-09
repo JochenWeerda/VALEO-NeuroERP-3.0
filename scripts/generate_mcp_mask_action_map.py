@@ -472,8 +472,14 @@ def _load_json(path: Path) -> Any:
 
 
 def _is_mutation(action: dict[str, Any]) -> bool:
-    key = str(action.get("source", {}).get("actionKey") or "")
-    return bool(MUT_KEY.search(key))
+    """Schreibt die Aktion? Ein Kommandoweg genuegt - nicht erst ein Schluesselwort im Aktionsnamen.
+
+    Bis 09.11.2026 nur ueber ``MUT_KEY``: "konfigurieren", "stilllegen", "entfernen" fehlten in der Karte, obwohl
+    ``mask.action.execute`` sie ausfuehrt (Befund aus tests/test_zugaenge_entscheiden_gleich.py).
+    """
+    src = action.get("source", {}) or {}
+    key = str(src.get("actionKey") or "")
+    return bool(MUT_KEY.search(key)) or bool(src.get("commandEndpoint"))
 
 
 def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:

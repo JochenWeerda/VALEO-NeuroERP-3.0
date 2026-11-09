@@ -20722,3 +20722,11 @@ in der neuen Studio-Liste verkauf/gutschrift-buchungsvorschlaege (gutschrift_vor
 in sales_credit_notes.py (bleibt: Retouren), Maske sales/gutschrift, Frontend-Client lib/api/gutschrift.ts.
 DocFlow prueft den Steuerschluessel schon beim Anlegen. Offen: VerkaufsgutschriftFreigabe (Altvorgaenge) und die
 Tabellen domain_sales.sales_credit_notes/_lines mit dem Tabellenabbau.
+Zugangs-Paritaet (09.11.2026, Nutzerauftrag "teste gegen abweichende Entscheidungen zwischen REST, Studio, CLI und
+MCP"): tests/test_zugaenge_entscheiden_gleich.py - 15 Faelle (Nummernkreise, Report-Rechte, Rollen,
+Vertreterprovisionen, Webshop, Bestellvorschlag; gueltig und abgelehnt) laufen ueber REST, die Maske (Endpunkt und
+Felder aus der ScreenDefinition), CLI und MCP mask.action.execute im Trockenlauf: gleicher Erfolg, gleiche
+Pruefmeldung, gleiche Feldfehler, nichts geschrieben. Dazu: gleiche Rechteentscheidung ohne Rolle, alle drei Register
+kennen denselben Weg, MCP-Vorpruefung strenger nie weicher. Befund behoben: generate_mcp_mask_action_map nahm nur
+Aktionen mit Mutations-Schluesselwort auf - 127 Schreibaktionen (konfigurieren, stilllegen, entfernen ...) fehlten in
+der Karte, obwohl mask.action.execute sie ausfuehrt (87 generisch, 40 Menschen vorbehalten).
