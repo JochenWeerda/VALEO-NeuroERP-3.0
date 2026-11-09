@@ -4783,6 +4783,40 @@
       ]
     },
     {
+      "mask_id": "agribusiness/farmers",
+      "title": "Landwirte",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agribusiness__farmers/:entityId",
+      "agent_contract_url": "/api/v1/masks/agribusiness/farmers/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agribusiness/farmers/screen-definition",
+      "readiness_url": "/api/v1/masks/agribusiness/farmers/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "annahme/erfassung",
       "title": "Erfassung",
       "domain": "agrar",
@@ -5423,6 +5457,40 @@
         "schlag_name",
         "lieferschein_id"
       ],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "disposition/regeln",
+      "title": "Positionsregeln",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/disposition__regeln/:entityId",
+      "agent_contract_url": "/api/v1/masks/disposition/regeln/agent-contract",
+      "screen_definition_url": "/api/v1/masks/disposition/regeln/screen-definition",
+      "readiness_url": "/api/v1/masks/disposition/regeln/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
         "agrar.weighing_ticket.list",

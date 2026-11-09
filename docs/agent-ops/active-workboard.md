@@ -20682,3 +20682,6 @@ je Route ein Grund, Test haelt sie bei hoechstens 6): OIDC-Login/-Callback, Mask
 Studio-Testlauf, Rollout-Pilot. Kaputte Einstiegsseiten (screenId unbekannt) leiten jetzt auf echte Masken:
 finance -> /fibu, hilfe -> /wissen/wissensbasis, document -> /dokumente/ablage, pricing -> /preise/konditionen,
 stock-management -> /lager/bestandsuebersicht. Stand 795 Studio / 38 screen_definition / 25 Altmuster / 3 handgebaut.
+Restseiten-Cluster 2 (09.11.2026): disposition/regeln (Positionsregeln, /positions/rules) und agribusiness/farmers
+(Landwirte, ohne Kontaktdaten in der Liste) als Studio-Listen; nawaro/anbauflaechen zeigt die NawaRo-Kaskade
+(gleicher Leseweg area-sheets).

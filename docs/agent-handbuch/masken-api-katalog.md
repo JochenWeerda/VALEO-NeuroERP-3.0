@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (771 Masken).
+> Generiert aus `app/core/screen_definitions.py` (773 Masken).
 
 ## Übersicht
 
@@ -154,6 +154,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/vertrag-kontingente-liste` | Vertrag-Kontingente | agrar | niedrig | — | `GET /api/v1/masks/agrar/vertrag-kontingente-liste/agent-contract` |
 | `agrar/wetter` | Wetter | agrar | niedrig | — | `GET /api/v1/masks/agrar/wetter/agent-contract` |
 | `agrar/wiegeschein-detail` | Wiegeschein detail | agrar | niedrig | — | `GET /api/v1/masks/agrar/wiegeschein-detail/agent-contract` |
+| `agribusiness/farmers` | Landwirte | agrar | niedrig | — | `GET /api/v1/masks/agribusiness/farmers/agent-contract` |
 | `aktien/dividenden` | Dividenden | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/dividenden/agent-contract` |
 | `aktien/hauptversammlung` | Hauptversammlung | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/hauptversammlung/agent-contract` |
 | `aktien/mitglieder` | Mitglieder | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/mitglieder/agent-contract` |
@@ -376,6 +377,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `disposition/bestell-vorschlag` | Bestellvorschlag | logistics | niedrig | — | `GET /api/v1/masks/disposition/bestell-vorschlag/agent-contract` |
 | `disposition/kontrakt-abruf` | Kontrakt-Abruf | logistics | niedrig | — | `GET /api/v1/masks/disposition/kontrakt-abruf/agent-contract` |
 | `disposition/lager-reichweite` | Lager-Reichweite | logistics | niedrig | — | `GET /api/v1/masks/disposition/lager-reichweite/agent-contract` |
+| `disposition/regeln` | Positionsregeln | agrar | niedrig | — | `GET /api/v1/masks/disposition/regeln/agent-contract` |
 | `disposition/saison-planung` | Saison-Planung | logistics | niedrig | — | `GET /api/v1/masks/disposition/saison-planung/agent-contract` |
 | `disposition/strecken-disposition` | Strecken-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/strecken-disposition/agent-contract` |
 | `disposition/touren-disposition` | Touren-Disposition | logistics | niedrig | — | `GET /api/v1/masks/disposition/touren-disposition/agent-contract` |
@@ -5333,6 +5335,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agribusiness/farmers` — Landwirte
+
+**Zweck:** Landwirte finden und pruefen, wer Zugang zum Portal hat.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agribusiness/farmers/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agribusiness/farmers/agent-contract` |
+| Readiness | `GET /api/v1/masks/agribusiness/farmers/readiness` |
+| Rollout-Route | `/mask-rollout/agribusiness__farmers/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agribusiness/farmers`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Landwirte haben Portalzugang?
+- Welche Landwirte sind inaktiv?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `annahme/erfassung` — Erfassung
 
 **Zweck:** Stamm- und Fachmaske fuer Erfassung (annahme/erfassung).
@@ -5917,6 +5958,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Summiere N, P2O5 und K2O je Schlag.
 
 **Sensible Felder:** `customer_id, schlag_name, lieferschein_id`
+
+---
+
+### `disposition/regeln` — Positionsregeln
+
+**Zweck:** Pruefen, welche Toleranz und welche Ampelschwellen fuer offene Positionen gelten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/disposition/regeln/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/disposition/regeln/agent-contract` |
+| Readiness | `GET /api/v1/masks/disposition/regeln/readiness` |
+| Rollout-Route | `/mask-rollout/disposition__regeln/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/positions/rules`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Artikel brauchen eine Freigabe bei Unterdeckung?
+- Welche Toleranz gilt fuer Weizen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

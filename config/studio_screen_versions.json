@@ -1508,6 +1508,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agribusiness/farmers": {
+      "definition_hash": "ec5b2b94e86f680fea7ef46f6b880532d3ec6c77369083f61dcb74b689bca10d",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "aktien/dividenden": {
       "definition_hash": "7f32fc78a975e55a3aaa751bf1c58a3ce65bb7bc11d74291f412ddd7d261f980",
       "gates_passed": [
@@ -3787,6 +3798,17 @@
     },
     "disposition/lager-reichweite": {
       "definition_hash": "211b3e95ea86072915710aada7eccea13134ffb427e53b106a7afabc030b8e3d",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "disposition/regeln": {
+      "definition_hash": "1525781b28b449093bcf8b04d8141b0efb8f671ba48df0090e0f57d5192775ce",
       "gates_passed": [
         "A",
         "B",

@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 772,
-    "screens_with_actions": 394,
+    "actions": 774,
+    "screens_with_actions": 396,
     "domains": 50
   },
   "actions": [
@@ -2055,6 +2055,27 @@
       "required_data": [],
       "source": {
         "screenId": "agrar/vertrag-kontingente-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agribusiness/farmers:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agribusiness/farmers)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agribusiness/farmers",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agribusiness/farmers",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -7406,6 +7427,27 @@
       "required_data": [],
       "source": {
         "screenId": "crm/wiedervorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:disposition/regeln:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (disposition/regeln)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "disposition/regeln",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "disposition/regeln",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

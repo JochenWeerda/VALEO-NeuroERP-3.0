@@ -63,8 +63,41 @@ def build_wissen_wissensbasis() -> dict[str, Any]:
     )
 
 
+def build_disposition_positionsregeln() -> dict[str, Any]:
+    return _liste(
+        screen_id="disposition/regeln", domain="agrar", bundle="disposition", title="Positionsregeln",
+        subtitle="Spekulationsschutz je Artikel oder Gruppe: Toleranz, Ampelschwellen und Freigabe",
+        endpoint="/api/v1/positions/rules",
+        columns=[text("scope_type", "Bezug", "primary"), text("scope_id", "Artikel/Gruppe", "primary"),
+                 zahl("neg_tolerance_qty", "Negative Toleranz (Artikeleinheit)", "primary"), zahl("max_short_days", "Max. Tage short"),
+                 zahl("yellow_threshold", "Gelb ab", "tertiary"),
+                 zahl("red_threshold", "Rot ab", "tertiary"),
+                 janein("approval_required", "Freigabe nötig"), text("approval_role", "Freigaberolle", "tertiary"),
+                 datum("active_from", "Gültig ab"), datum("active_to", "Gültig bis", "tertiary")],
+        purpose="Pruefen, welche Toleranz und welche Ampelschwellen fuer offene Positionen gelten.",
+        prompts=["Welche Artikel brauchen eine Freigabe bei Unterdeckung?", "Welche Toleranz gilt fuer Weizen?"],
+        no_workflow="Regelliste; die Ampel wertet der Deckungsmonitor aus.",
+    )
+
+
+def build_agribusiness_landwirte() -> dict[str, Any]:
+    return _liste(
+        screen_id="agribusiness/farmers", domain="agrar", bundle="agribusiness", title="Landwirte",
+        subtitle="Landwirte mit Nummer, Art, Stand und Portalzugang",
+        endpoint="/api/v1/agribusiness/farmers",
+        columns=[text("farmerNumber", "Nummer", "primary"), text("lastName", "Name", "primary"),
+                 text("firstName", "Vorname", "primary"), text("farmerType", "Art"), status(),
+                 janein("portalAccessEnabled", "Portalzugang"), datum("updatedAt", "Geändert", "tertiary")],
+        purpose="Landwirte finden und pruefen, wer Zugang zum Portal hat.",
+        prompts=["Welche Landwirte haben Portalzugang?", "Welche Landwirte sind inaktiv?"],
+        no_workflow="Stammdatenliste; Kontaktdaten stehen in der Partnerakte (datensparsam nicht in der Liste).",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
     "wissen/wissensbasis": build_wissen_wissensbasis,
+    "disposition/regeln": build_disposition_positionsregeln,
+    "agribusiness/farmers": build_agribusiness_landwirte,
 }
