@@ -103,7 +103,7 @@ def test_instance_merge_keeps_footer_step_hrefs() -> None:
     )
     steps = next(card for card in merged["footer_cards"] if _is_next_steps(card["title"]))
     hrefs = {item["href"] for item in steps["items"]}
-    assert "/sales/orders/new" in hrefs
+    assert "/verkauf/auftraege/neu" in hrefs
     assert "/verladung" in hrefs
 
 
