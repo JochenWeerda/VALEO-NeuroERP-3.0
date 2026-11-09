@@ -60,6 +60,9 @@ def stand():
             "SELECT 1 FROM information_schema.columns WHERE table_schema = 'domain_docflow' "
             "AND table_name = 'document_headers' AND column_name = 'bausteine'")).scalar():
         _migriere(verbindung, "docflow_kopfbausteine_20261109")
+    if "confirmed" not in (verbindung.execute(sa.text(
+            "SELECT pg_get_constraintdef(oid) FROM pg_constraint WHERE conname = 'chk_docflow_header_status'")).scalar() or ""):
+        _migriere(verbindung, "docflow_auftragsbestaetigung_20261109")
     mandant, kunde = f"au-{uuid.uuid4().hex[:8]}", str(uuid.uuid4())
     verbindung.execute(sa.text("INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:t, :t, true)"),
                        {"t": mandant})
@@ -108,7 +111,8 @@ def test_auftrag_wird_derselbe_docflow_beleg_mit_bausteinen_und_summen(stand):
     _migriere(stand["db"], "docflow_auftraege_uebernahme_20261109")
 
     kopf = _kopf(stand, auftrag)
-    assert (kopf["doc_type"], kopf["doc_number"], kopf["status"]) == ("sales_order", "AU-ALT-1", "open")
+    # Auftragsbestaetigung ist ein eigener Stand (Nutzerentscheidung 09.11.2026), nicht "offen".
+    assert (kopf["doc_type"], kopf["doc_number"], kopf["status"]) == ("sales_order", "AU-ALT-1", "confirmed")
     assert (kopf["customer_id"], kopf["source_system"], kopf["source_ref"]) == (
         stand["kunde"], "domain_crm.sales_orders", auftrag)
     assert kopf["bausteine"] == {
@@ -127,15 +131,18 @@ def test_auftrag_wird_derselbe_docflow_beleg_mit_bausteinen_und_summen(stand):
     historie = stand["db"].execute(sa.text(
         "SELECT to_status, command FROM domain_docflow.document_status_history WHERE header_id = :h"),
         {"h": auftrag}).all()
-    assert [tuple(h) for h in historie] == [("open", "migration:auftraege_20261109")]
+    assert [tuple(h) for h in historie] == [("confirmed", "migration:auftraege_20261109")]
 
 
 def test_stand_wird_zugeordnet_nicht_geraten(stand):
     entwurf = _alt(stand, "AU-ALT-2", "ENTWURF")
     geliefert = _alt(stand, "AU-ALT-3", "geliefert")
     storniert = _alt(stand, "AU-ALT-4", "cancelled")
+    offen = _alt(stand, "AU-ALT-7", "open")
+    in_lieferung = _alt(stand, "AU-ALT-8", "in_delivery")
     _migriere(stand["db"], "docflow_auftraege_uebernahme_20261109")
-    assert [_kopf(stand, b)["status"] for b in (entwurf, geliefert, storniert)] == ["draft", "completed", "cancelled"]
+    assert [_kopf(stand, b)["status"] for b in (entwurf, geliefert, storniert, offen, in_lieferung)] == [
+        "draft", "completed", "cancelled", "open", "confirmed"]
 
 
 def test_unbekannter_stand_haelt_die_migration_an(stand):
@@ -171,3 +178,51 @@ def test_sicht_liefert_den_lesern_die_alten_spalten_und_ursprung_bleibt(stand):
         with stand["db"].begin_nested():
             stand["db"].execute(sa.text("UPDATE domain_crm.sales_orders SET status = 'geliefert' WHERE id = :id"),
                                 {"id": auftrag})
+
+
+def test_ursprungsdaten_sind_schreibgeschuetzt(stand):
+    """GoBD: Die alten Auftraege bleiben unveraendert; Aendern und Loeschen nur ueber den Wartungsschalter."""
+    auftrag = _alt(stand, "AU-ALT-9", "open")
+    _migriere(stand["db"], "docflow_auftraege_uebernahme_20261109")
+    for sql in ("UPDATE domain_crm.sales_orders_vor_docflow SET total_amount = 1 WHERE id = :id",
+                "DELETE FROM domain_crm.sales_orders_vor_docflow WHERE id = :id"):
+        with pytest.raises(sa.exc.DBAPIError, match="unveraenderlich"):
+            with stand["db"].begin_nested():
+                stand["db"].execute(sa.text(sql), {"id": auftrag})
+
+
+def test_offene_menge_rechnet_wie_die_belegmaske(stand):
+    """Bestellvorschlag & Co. lesen die offene Menge der Sicht - sie muss der Belegmaske gleichen."""
+    from app.core.belegvertrag import BELEGARTEN
+    from app.services.docflow_belegadapter import _offene_mengen
+    from app.services.docflow_service import DocflowService
+    from sqlalchemy.orm import Session
+
+    auftrag = _alt(stand, "AU-ALT-10", "open")
+    _position(stand, auftrag, 1, 10, 20)
+    _migriere(stand["db"], "docflow_auftraege_uebernahme_20261109")
+    position = stand["db"].execute(sa.text("SELECT id FROM domain_docflow.document_items WHERE header_id = :h"),
+                                   {"h": auftrag}).scalar()
+    for nummer, menge, stand_ in (("LS-1", 4, "open"), ("LS-2", 3, "cancelled")):
+        lieferschein = str(uuid.uuid4())
+        stand["db"].execute(sa.text(
+            "INSERT INTO domain_docflow.document_headers (id, tenant_id, doc_type, doc_number, status, source_system, "
+            "currency, total_net, total_tax, total_gross, document_date, version, created_at, updated_at) "
+            "VALUES (:id, :t, 'sales_delivery', :nr, :st, 'test', 'EUR', 0, 0, 0, NOW(), 1, NOW(), NOW())"),
+            {"id": lieferschein, "t": stand["mandant"], "nr": nummer, "st": stand_})
+        stand["db"].execute(sa.text(
+            "INSERT INTO domain_docflow.document_links (id, tenant_id, from_header_id, to_header_id, relation_type, "
+            "from_item_id, quantity_linked, created_at) VALUES (:id, :t, :f, :z, 'order_to_delivery', :i, :m, NOW())"),
+            {"id": str(uuid.uuid4()), "t": stand["mandant"], "f": auftrag, "z": lieferschein, "i": position, "m": menge})
+    sicht = stand["db"].execute(sa.text("SELECT offene_menge FROM domain_crm.sales_order_items WHERE id = :i"),
+                                {"i": position}).scalar()
+    svc = DocflowService(Session(bind=stand["db"]), stand["mandant"], "test")
+    maske = _offene_mengen(svc, auftrag, BELEGARTEN["sales_order"], svc.fetch_items(auftrag))[str(position)]
+    assert float(sicht) == float(maske) == 6.0  # 10 bestellt, 4 geliefert; der stornierte Lieferschein gibt frei
+
+
+def test_leser_haben_ihre_indizes(stand):
+    _migriere(stand["db"], "docflow_auftraege_uebernahme_20261109")
+    namen = set(stand["db"].execute(sa.text(
+        "SELECT indexname FROM pg_indexes WHERE schemaname = 'domain_docflow'")).scalars())
+    assert {"ix_docflow_headers_tenant_type_customer", "ix_docflow_links_tenant_to_relation"} <= namen

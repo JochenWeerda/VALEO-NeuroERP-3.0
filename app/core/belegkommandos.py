@@ -63,6 +63,8 @@ BELEGKOMMANDOS: dict[str, Belegkommando] = {
         Belegkommando("docflow.record_print", "Druck vermerken", "POST", "/docflow/{doc_id}/record-print", "R2", "bearbeiten"),
         Belegkommando("docflow.record_export", "Export vermerken", "POST", "/docflow/{doc_id}/record-export", "R2", "bearbeiten"),
         Belegkommando("docflow.release", "Beleg freigeben", "POST", "/docflow/{doc_id}/release", "R2", "ausstellen", idempotent=True),
+        Belegkommando("docflow.confirm", "Auftrag bestätigen", "POST", "/docflow/{doc_id}/confirm", "R2", "ausstellen",
+                      idempotent=True),
         # Freigabe durch eine zweite Person (APPROVAL-001). Anfragen darf, wer die Aktion selbst ausfuehren duerfte;
         # entscheiden prueft die Approval Engine (Recht ``freigeben`` bzw. ``freigeben_erhoeht``, Funktionstrennung).
         Belegkommando("docflow.approval_request", "Freigabe anfragen", "POST", "/docflow/{doc_id}/approvals", "R1",

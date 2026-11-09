@@ -727,6 +727,41 @@ class DocflowService:
         self.db.commit()
         return response
 
+    def confirm(self, doc_id: str, idempotency_key: str, expected_version: Optional[int],
+                confirmed_by: Optional[str] = None) -> dict[str, Any]:
+        """Auftragsbestaetigung: ein freigegebener Auftrag (``open``) wird ``confirmed`` (BELEG-052, 09.11.2026).
+
+        Nur Verkaufsauftraege. Folgebelege und Storno bleiben danach moeglich; Loeschen und Bearbeiten nicht.
+        """
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("confirm", doc_id, idempotency_key, {})
+        if cached:
+            self.db.rollback()
+            return {**cached, "idempotent_hit": True}
+        header = self.fetch_header(doc_id)
+        if not header:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if expected_version and int(header.get("version") or 1) != expected_version:
+            raise ConflictError("Version conflict")
+        if str(header.get("doc_type")) != "sales_order":
+            raise ValidationFailedError("Bestätigt wird nur ein Verkaufsauftrag.")
+        if str(header.get("status")) != "open":
+            raise ValidationFailedError("Bestätigt wird nur ein freigegebener, offener Auftrag.")
+        self._kommando("confirm")
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET status='confirmed', updated_at=NOW(), version=version+1, "
+                 "updated_by=:updated_by WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": self._wer(confirmed_by)},
+        )
+        response = {"command": "confirm", "source_doc_id": doc_id, "target_doc_id": None, "status": "ok",
+                    "payload": {"doc_number": str(header["doc_number"]), "doc_type": "sales_order"}}
+        self.store_idempotent_response("confirm", doc_id, idempotency_key, response, {})
+        self._protokolliere("confirm", doc_id, {"doc_number": str(header["doc_number"])})
+        self.best_effort_audit("docflow_confirm", "docflow_document", doc_id,
+                               {"doc_number": str(header["doc_number"]), "confirmed_by": self._wer(confirmed_by)})
+        self.db.commit()
+        return response
+
     def record_print(self, doc_id: str, printed_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):
             raise EntityNotFoundError("DocflowDocument", doc_id)

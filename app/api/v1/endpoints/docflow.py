@@ -398,6 +398,30 @@ async def release_document(
     return DocflowCommandResult(**result)
 
 
+@router.post("/{doc_id}/confirm", response_model=DocflowCommandResult, summary="Auftrag bestaetigen (Auftragsbestaetigung)", dependencies=SCHREIBEN["BELEGE"])
+async def confirm_document(
+    doc_id: str,
+    payload: DocflowReleaseRequest,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+):
+    _recht(_svc(db, tenant_id), doc_id, nutzer, "ausstellen")
+    try:
+        result = _svc(db, tenant_id, _akteur(nutzer)).confirm(doc_id, payload.idempotency_key, payload.expected_version,
+                                                              payload.released_by)
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except (ConflictError, ValidationFailedError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"confirm failed: {exc}") from exc
+    return DocflowCommandResult(**result)
+
+
 @router.post("/{doc_id}/record-print", response_model=DocflowHeaderOut, summary="Print record", dependencies=SCHREIBEN["BELEGE"])
 async def record_print(
     doc_id: str,

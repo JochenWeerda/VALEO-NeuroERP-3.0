@@ -547,7 +547,8 @@ _BILLABLE_DELIVERY_STATUSES = ("posted", "printed", "gebucht")
 # Stand des Auftrags in DocFlow (Pruefbedingung ``chk_docflow_header_status``) - BELEG-052: einziger Belegspeicher.
 _ORDER_NEXT_STEP = {
     "draft": "Auftrag vervollständigen und freigeben",
-    "open": "Lieferschein oder Rechnung erstellen",
+    "open": "Auftrag bestätigen",
+    "confirmed": "Lieferschein oder Rechnung erstellen",
     "completed": "Keine Aktion — Auftrag abgeschlossen",
     "reversed": "Keine Aktion — Auftrag storniert",
     "cancelled": "Keine Aktion — Auftrag storniert",
@@ -3519,7 +3520,7 @@ def _customer_summary360(db: Session, request: ToolExecutionRequest, actor: str,
                   )
               AND tenant_id::text = :tenant
               AND deleted_at IS NULL
-              AND COALESCE(status, '') NOT IN ('cancelled', 'completed', 'storniert')
+              AND COALESCE(status, '') NOT IN ('cancelled', 'completed', 'reversed')
         """, params, "offene_auftraege", 0) or 0)
 
         op_saldo = float(_scalar_or_default(db, """

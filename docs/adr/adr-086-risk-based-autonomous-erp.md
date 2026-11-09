@@ -1,13 +1,14 @@
 # ADR-086: Risk-based Autonomous ERP - Agent Trust & Autonomy Engine
 
-**Status:** Proposed (vorgeschlagen - fachliche Freigabe ausstehend)
+**Status:** Accepted (fachlich angenommen 2026-11-09 durch den Produktverantwortlichen)
 **Datum:** 2026-11-09
 
 ## Status
 
-Proposed. **Vorgeschlagen - fachliche Freigabe ausstehend.** Version 1.0.0 der Autonomiepolitik
-(`config/agent_autonomy_policy.yaml`). Technisch umgesetzt und getestet, aber **nicht wirksam**: Solange die
-Fassung fuer einen Mandanten nicht fachlich freigegeben ist, bucht kein Agent autonom; es gilt der bisherige Weg
+Accepted. **Fachlich angenommen am 09.11.2026** (Entscheidung des Produktverantwortlichen: agentisches Buchen nach
+dieser Politik ist gewollt). Version 1.0.0 der Autonomiepolitik (`config/agent_autonomy_policy.yaml`).
+Die Annahme der Architekturentscheidung macht die Politik **noch nicht wirksam**: Wirksam wird sie je Mandant erst mit
+der Freigabe genau dieser Fassung im System; bis dahin bucht kein Agent autonom und es gilt der bisherige Weg
 (Agent schlaegt vor, ein Mensch gibt frei). Die Freigabe erteilt je Mandant eine Person mit Freigaberolle
 (`GESCHAEFTSFUEHRUNG` oder `FINANCE_ADMIN`), nicht die Autorin, kein Agent, kein technisches Konto
 (`POST /api/v1/agenten/autonomie/politik/actions/freigeben`). Sie gilt genau fuer den Inhaltsabdruck dieser Fassung.

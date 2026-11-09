@@ -103,6 +103,8 @@ def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     assert "commandEndpoint" not in druck and druck["permission"] == "belege.lesen"
     aktionen = alle
     erwartet = {"bearbeiten", "freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
+    if belegart == "sales_order":
+        erwartet.add("bestaetigen")  # Auftragsbestaetigung (Nutzerentscheidung 09.11.2026)
     for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
         erwartet |= {f"freigabe_{verb}:{fachaktion}" for verb in ("anfordern", "erteilen", "ablehnen")}
     assert set(aktionen) == erwartet | ({"buchen"} if variante.bucht else set())

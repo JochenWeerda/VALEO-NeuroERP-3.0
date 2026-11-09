@@ -1,7 +1,7 @@
 """Verkaufsauftraege nach DocFlow uebernehmen; domain_crm.sales_orders wird Sicht auf DocFlow (BELEG-052).
 
 Revision ID: docflow_auftraege_uebernahme_20261109
-Revises: docflow_kopfbausteine_20261109
+Revises: docflow_auftragsbestaetigung_20261109
 
 DocFlow ist der einzige Belegspeicher (Nutzerentscheidung 08.11.2026). Schreibwege des alten Auftragsspeichers sind
 entfernt (Router ``sales_orders``, Maske ``sales/sales-order``). Hier:
@@ -10,17 +10,21 @@ entfernt (Router ``sales_orders``, Maske ``sales/sales-order``). Hier:
    Kunde, Waehrung, Datum, Positionen). Kopfangaben gehen in die Kopfbausteine: Betreff/Beschreibung/Notizen ->
    ``texte``, Ansprechpartner -> ``kontakt``, Liefertermin/-adresse/Versandart -> ``lieferung``, Zahlungsbedingung ->
    ``zahlung``. Steuer wird nicht angenommen: ohne Schluessel kein Satz (keine Vorgabe 19 %).
-2. Stand: Entwurf -> ``draft``; offen/bestaetigt/in Lieferung -> ``open``; geliefert/abgeschlossen -> ``completed``;
-   storniert -> ``cancelled``. Ein unbekannter Stand bricht die Migration ab - er wird nicht geraten.
-3. Die Tabellen bleiben unveraendert als ``*_vor_docflow`` erhalten (GoBD: Ursprungsdaten); unter dem alten Namen
-   steht eine Sicht auf DocFlow fuer die Leser (``security_invoker``: es gilt die Mandantentrennung von DocFlow).
+2. Stand: Entwurf -> ``draft``; offen -> ``open``; bestaetigt/in Lieferung -> ``confirmed`` (Auftragsbestaetigung,
+   Nutzerentscheidung 09.11.2026); geliefert/abgeschlossen -> ``completed``; storniert -> ``cancelled``. Ein
+   unbekannter Stand bricht die Migration ab - er wird nicht geraten.
+3. Die Tabellen bleiben unveraendert als ``*_vor_docflow`` erhalten (GoBD: Ursprungsdaten) und sind schreibgeschuetzt
+   (Aendern/Loeschen nur ueber den Wartungsschalter ``valeo.docflow_wartung``); unter dem alten Namen steht eine Sicht
+   auf DocFlow fuer die Leser (``security_invoker``: es gilt die Mandantentrennung von DocFlow).
+4. Indizes fuer die Leser: Kunde je Belegart (Kunden-360, Kreditlimit, Berichte) und Rueckverweis der
+   Belegverknuepfungen (Angebot des Auftrags, Belegkette rueckwaerts).
 """
 from __future__ import annotations
 
 from alembic import op
 
 revision = "docflow_auftraege_uebernahme_20261109"
-down_revision = "docflow_kopfbausteine_20261109"
+down_revision = "docflow_auftragsbestaetigung_20261109"
 branch_labels = None
 depends_on = None
 
@@ -29,8 +33,8 @@ KOMMANDO = "migration:auftraege_20261109"  # Kommandospalte der Statushistorie: 
 _STAND = """
     CASE
         WHEN lower(coalesce(s.status, 'open')) IN ('draft', 'entwurf') THEN 'draft'
-        WHEN lower(coalesce(s.status, 'open')) IN ('open', 'offen', 'confirmed', 'bestaetigt', 'approved',
-                                                   'in_delivery', 'in_lieferung') THEN 'open'
+        WHEN lower(coalesce(s.status, 'open')) IN ('open', 'offen') THEN 'open'
+        WHEN lower(s.status) IN ('confirmed', 'bestaetigt', 'approved', 'in_delivery', 'in_lieferung') THEN 'confirmed'
         WHEN lower(s.status) IN ('completed', 'geliefert', 'abgeschlossen', 'delivered') THEN 'completed'
         WHEN lower(s.status) IN ('cancelled', 'storniert', 'canceled') THEN 'cancelled'
     END
@@ -122,8 +126,27 @@ def upgrade() -> None:
         JOIN domain_docflow.document_headers h ON h.id = s.id AND h.created_by = '{KOMMANDO}'
     """)
 
+    op.execute("CREATE INDEX IF NOT EXISTS ix_docflow_headers_tenant_type_customer "
+               "ON domain_docflow.document_headers (tenant_id, doc_type, customer_id)")
+    op.execute("CREATE INDEX IF NOT EXISTS ix_docflow_links_tenant_to_relation "
+               "ON domain_docflow.document_links (tenant_id, to_header_id, relation_type)")
+
     op.execute("ALTER TABLE domain_crm.sales_order_items RENAME TO sales_order_items_vor_docflow")
     op.execute("ALTER TABLE domain_crm.sales_orders RENAME TO sales_orders_vor_docflow")
+    op.execute("""
+        CREATE OR REPLACE FUNCTION domain_crm.ursprungsdaten_unveraenderlich() RETURNS trigger
+        LANGUAGE plpgsql AS $$
+        BEGIN
+            IF current_setting('valeo.docflow_wartung', true) = 'loeschen' THEN
+                RETURN COALESCE(OLD, NEW);
+            END IF;
+            RAISE EXCEPTION 'Ursprungsdaten vor DocFlow sind unveraenderlich (GoBD): %', TG_TABLE_NAME
+                USING ERRCODE = 'check_violation';
+        END $$
+    """)
+    for tabelle in ("sales_orders_vor_docflow", "sales_order_items_vor_docflow"):
+        op.execute(f"CREATE TRIGGER {tabelle}_unveraenderlich BEFORE INSERT OR UPDATE OR DELETE "
+                   f"ON domain_crm.{tabelle} FOR EACH ROW EXECUTE FUNCTION domain_crm.ursprungsdaten_unveraenderlich()")
     op.execute("COMMENT ON TABLE domain_crm.sales_orders_vor_docflow IS "
                "'Ursprungsdaten der Auftraege vor BELEG-052 (unveraendert, GoBD). Fuehrend ist DocFlow.'")
     op.execute("""
@@ -157,7 +180,21 @@ def upgrade() -> None:
         CREATE VIEW domain_crm.sales_order_items WITH (security_invoker = true) AS
         SELECT i.id, i.tenant_id, i.header_id AS order_id, i.line_number, i.article_number, i.description,
                i.quantity, i.unit, i.unit_price, NULL::numeric AS ek_price, i.discount_percent,
-               i.line_total_net AS line_total, i.created_at, i.updated_at
+               i.line_total_net AS line_total, i.created_at, i.updated_at,
+               -- Noch in keinen Folgebeleg gegangen: wie die Belegmaske (docflow_belegadapter._offene_mengen) -
+               -- der groessere der Wege Lieferschein/Rechnung; stornierte Folgebelege geben ihre Menge frei.
+               GREATEST(i.quantity - GREATEST(
+                   COALESCE((SELECT sum(l.quantity_linked) FROM domain_docflow.document_links l
+                             JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+                             WHERE l.tenant_id = i.tenant_id AND l.from_header_id = i.header_id
+                               AND l.from_item_id = i.id AND l.relation_type = 'order_to_delivery'
+                               AND z.deleted_at IS NULL AND z.status NOT IN ('reversed', 'cancelled')), 0),
+                   COALESCE((SELECT sum(l.quantity_linked) FROM domain_docflow.document_links l
+                             JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+                             WHERE l.tenant_id = i.tenant_id AND l.from_header_id = i.header_id
+                               AND l.from_item_id = i.id AND l.relation_type = 'order_to_invoice'
+                               AND z.deleted_at IS NULL AND z.status NOT IN ('reversed', 'cancelled')), 0)), 0)
+                   AS offene_menge
         FROM domain_docflow.document_items i
         JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id
         WHERE h.doc_type = 'sales_order'
@@ -170,6 +207,11 @@ def upgrade() -> None:
 def downgrade() -> None:
     op.execute("DROP VIEW IF EXISTS domain_crm.sales_order_items")
     op.execute("DROP VIEW IF EXISTS domain_crm.sales_orders")
+    for tabelle in ("sales_orders_vor_docflow", "sales_order_items_vor_docflow"):
+        op.execute(f"DROP TRIGGER IF EXISTS {tabelle}_unveraenderlich ON domain_crm.{tabelle}")
+    op.execute("DROP FUNCTION IF EXISTS domain_crm.ursprungsdaten_unveraenderlich()")
+    op.execute("DROP INDEX IF EXISTS domain_docflow.ix_docflow_links_tenant_to_relation")
+    op.execute("DROP INDEX IF EXISTS domain_docflow.ix_docflow_headers_tenant_type_customer")
     op.execute("ALTER TABLE IF EXISTS domain_crm.sales_orders_vor_docflow RENAME TO sales_orders")
     op.execute("ALTER TABLE IF EXISTS domain_crm.sales_order_items_vor_docflow RENAME TO sales_order_items")
     op.execute("COMMENT ON TABLE domain_crm.sales_orders IS NULL")
@@ -192,3 +234,5 @@ def downgrade() -> None:
         WHERE h.created_by = '{KOMMANDO}' AND h.version = 1
           AND NOT EXISTS (SELECT 1 FROM domain_docflow.document_links l WHERE l.from_header_id = h.id)
     """)
+    # Der Wartungsschalter gilt nur fuer dieses Aufraeumen, nicht fuer den Rest der Transaktion.
+    op.execute("SELECT set_config('valeo.docflow_wartung', '', true)")

@@ -340,6 +340,8 @@ def _aktionen_im_zustand(svc: DocflowService, doc_id: str, variante: Belegvarian
     if status == "draft":
         aktionen.append(_aktion("bearbeiten", "Bearbeiten", "docflow.update"))
         aktionen.append(_aktion("freigeben", "Freigeben", "docflow.release"))
+    if variante.belegart == "sales_order" and status == "open":
+        aktionen.append(_aktion("bestaetigen", "Auftrag bestätigen", "docflow.confirm"))
     if variante.bucht and status not in _ENDE | {"posted"}:
         aktionen.append(_aktion(
             "buchen", "Buchen", "docflow.post", grund=buchung.grund if buchung.stand == "pruefen" else None))

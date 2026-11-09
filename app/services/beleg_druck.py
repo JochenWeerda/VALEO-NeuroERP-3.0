@@ -29,6 +29,13 @@ def _menge(wert: Any) -> str:
     return format(zahl, "f").replace(".", ",")
 
 
+def belegtitel(beleg: Beleg) -> str:
+    """Ueberschrift des Drucks: Ein bestaetigter Auftrag geht als Auftragsbestaetigung hinaus."""
+    if beleg.belegart == "sales_order" and beleg.status == "confirmed":
+        return "Auftragsbestätigung"
+    return BELEGARTEN[beleg.belegart].bezeichnung
+
+
 def beleg_pdf(beleg: Beleg) -> bytes:
     from reportlab.lib import colors
     from reportlab.lib.pagesizes import A4
@@ -37,16 +44,17 @@ def beleg_pdf(beleg: Beleg) -> bytes:
     from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
     variante = BELEGARTEN[beleg.belegart]
+    titel = belegtitel(beleg)
     preise = beleg.summen is not None and variante.mit_preisen
     stile = getSampleStyleSheet()
     puffer = BytesIO()
     dokument = SimpleDocTemplate(puffer, pagesize=A4, leftMargin=18 * mm, rightMargin=18 * mm,
                                  topMargin=18 * mm, bottomMargin=18 * mm,
-                                 title=f"{variante.bezeichnung} {beleg.beleg_nr}")
+                                 title=f"{titel} {beleg.beleg_nr}")
     partner = beleg.partner
     rolle = "Lieferant" if variante.partnerrolle == "lieferant" else "Kunde"
     teile: list[Any] = [
-        Paragraph(f"{variante.bezeichnung} {beleg.beleg_nr}", stile["Title"]),
+        Paragraph(f"{titel} {beleg.beleg_nr}", stile["Title"]),
         Paragraph(f"Belegdatum: {beleg.belegdatum.strftime('%d.%m.%Y')} &nbsp;&nbsp; Status: {beleg.status}",
                   stile["Normal"]),
         Paragraph(f"{rolle}: {(partner.name or '') if partner else ''} "
