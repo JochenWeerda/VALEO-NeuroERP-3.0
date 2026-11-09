@@ -137,3 +137,29 @@ def test_bestaetigter_auftrag_druckt_als_auftragsbestaetigung(w):
     assert belegtitel(lies_beleg(_svc(w), beleg)) == "Auftrag"
     _svc(w).confirm(beleg, "ab-druck", 2)
     assert belegtitel(lies_beleg(_svc(w), beleg)) == "Auftragsbestätigung"
+
+
+def test_rest_weg_bestaetigt_und_meldet_konflikt_und_unbekannt(w):
+    """POST /docflow/{id}/confirm - derselbe Weg wie die Maske, mit Recht, Konflikt und unbekanntem Beleg."""
+    import asyncio
+
+    from fastapi import HTTPException
+
+    from app.api.v1.endpoints.docflow import confirm_document
+    from app.api.v1.schemas.docflow_schemas import DocflowReleaseRequest
+
+    nutzer = {"sub": "verkauf-1", "roles": ["SALES_BEARBEITEN"]}
+
+    def bestaetige(beleg: str, schluessel: str, version=None):
+        return asyncio.run(confirm_document(beleg, DocflowReleaseRequest(idempotency_key=schluessel,
+                                                                         expected_version=version),
+                                            tenant_id=w["mandant"], db=w["db"], nutzer=nutzer))
+
+    beleg = _freigegeben(w)
+    assert bestaetige(beleg, "rest-ab-0001", 2).command == "confirm"
+    with pytest.raises(HTTPException) as konflikt:
+        bestaetige(_beleg(w), "rest-ab-0002")  # Entwurf
+    assert konflikt.value.status_code == 409
+    with pytest.raises(HTTPException) as unbekannt:
+        bestaetige(str(uuid.uuid4()), "rest-ab-0003")
+    assert unbekannt.value.status_code in (403, 404)
