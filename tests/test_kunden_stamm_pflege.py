@@ -121,3 +121,22 @@ def test_fremder_mandant_sieht_die_zeile_nicht(client, stamm):
     antwort = _post(client, stamm, f"/crm/customers/{stamm['kunde']}/actions/ansprechpartner_anlegen",
                     mandant=fremd, first_name="X", last_name="Y")
     assert antwort.get("success") is not True
+
+
+def test_pflegeaktionen_nur_in_der_kundenakte():
+    """Die Partnerstamm-Pflege gehoert genau einer Maske. Ein Ersetzen ohne Anzahl haengte sie am 09.11.2026 an
+    zwoelf Builder (Auftrag, Lieferschein ...): dort fehlte danach "edit" und es erschienen Kundenstamm-Aktionen."""
+    from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
+
+    traeger = set()
+    for sid in list(SCREEN_DEFINITION_BUILDERS):
+        definition = get_screen_definition(sid)
+        wege = [a.get("commandEndpoint") or "" for a in definition.get("actions") or []]
+        wege += [r.get("commandEndpoint") or "" for t in definition.get("tabs") or []
+                 for tab in (t.get("tables") or []) for r in (tab.get("rowActions") or [])]
+        if any("/crm/kunden-stamm/" in w or w.endswith("/actions/anschrift_anlegen") for w in wege):
+            traeger.add(sid)
+    from app.core.native_screen_aliases import NATIVE_SCREEN_ALIASES
+
+    akte = {"crm/customer-360"} | {alias for alias, ziel in NATIVE_SCREEN_ALIASES.items() if ziel == "crm/customer-360"}
+    assert traeger == akte
