@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -161,6 +161,7 @@ async def beleg_aktion(
     belegart: str,
     beleg_id: str,
     aktion: str,
+    request: Request,
     body: dict[str, Any] = Body(default_factory=dict),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
@@ -174,6 +175,9 @@ async def beleg_aktion(
     if belegart not in BELEGARTEN:
         raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
     verlange(nutzer, "lesen", belegart)
+    if aktion == "drucken" and isinstance(nutzer, dict):
+        # Der Druckvermerk nennt den Aussteller der Anmeldung - aus dem geprueften Token, nie aus dem Rumpf.
+        nutzer = {**nutzer, "iss": (getattr(request.state, "token_claims", None) or {}).get("iss")}
     if aktion == "stornieren" and not str(body.get("grund") or "").strip() and body.get("_auditReason"):
         # Studio-Katalogaktion ``stornieren``: Ihre Pflichtbegruendung ist der Stornogrund.
         body = {**body, "grund": body["_auditReason"]}
