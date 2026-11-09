@@ -20700,3 +20700,10 @@ Webshop (09.11.2026): admin/webshop (Anbindungen: Anbinden/Entfernen) und admin/
 Wetter/Monitoring/Maschinen (09.11.2026): Wetterwege nehmen ohne lat/lon den Betriebsstandort aus tenants.settings.standort (vorher 422 fuer die Studio-Maske agrar/wetter, die Warnungsseite fest Emden); agrar/wetterwarnung neu als Studio-Liste; monitoring/alerts -> admin/monitoring/alerting, maschinenauslastung -> agrar/maschinen-auslastung-liste umgehaengt; drei handgebaute Seiten entfernt. Offen: Pflege des Standorts in den Mandanten-Einstellungen.
 Terminologie (09.11.2026): admin/terminologie als Studio-Liste auf flachem Leseweg /terminology/begriffe; handgebaute Seite entfernt.
 Rollen (09.11.2026): admin/rollen-verwaltung als Studio-Liste (Anlegen/Aendern/Entfernen ueber AdminCoreService; Systemrollen nur lesbar, Rolle mit Benutzern bleibt; Rechte in der Berechtigungsmatrix); handgebaute Seite entfernt. OAuth-Rueckkehr Postfaecher als technische Seite.
+OFFEN Sammelabrechnung (09.11.2026, Befund): rohware_sammelabrechnung berechnet aus domain_agrar.harvest_acceptances
+(Nebentabelle mit menge_netto_kg/preis_eur_t, _load_harvest_row ohne Mandantenfilter), die echten Annahmen liegen in
+domain_inventory.harvest_acceptances (+ harvest_acceptance_positions). Der Assistent waehlte echte Annahmen und
+scheiterte beim Berechnen. Umbau auf echte Annahmen (Betrag aus total_net_amount_eur, Menge aus Positionen, dt) vor
+der Studio-Maske; /buchen schreibt Kreditoren-OP an der Finanz-Buchungsautoritaet vorbei.
+OFFEN ohne echte Datenquelle: einkauf/lieferantenbewertung (compat liefert feste 80 %/4,0), admin/externe-gates
+(simulierte Demo-Zustaende), agribusiness/field-service-tasks (compat ueber CRM-Faelle mit Demo-Daten).
