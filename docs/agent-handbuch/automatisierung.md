@@ -212,6 +212,8 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
+| `admin.number_range.configured` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
+| `admin.number_range.deactivated` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
 | `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
@@ -249,9 +251,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `fuhrpark.dokument.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
 | `fuhrpark.fahrzeug.deleted` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.fahrzeug.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| `fuhrpark.rechnung.saved` | outbox | `app/api/v1/command_handlers/fuhrpark.py` |
-| … | | 32 weitere |
+| … | | 34 weitere |
 
 ### System
 

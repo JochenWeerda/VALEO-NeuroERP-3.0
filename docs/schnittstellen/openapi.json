@@ -116658,6 +116658,70 @@
         "title": "NumberRangeConfigRequest",
         "type": "object"
       },
+      "NumberRangeOut": {
+        "properties": {
+          "current_value": {
+            "title": "Current Value",
+            "type": "integer"
+          },
+          "digit_count": {
+            "title": "Digit Count",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "next_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Number"
+          },
+          "prefix": {
+            "title": "Prefix",
+            "type": "string"
+          },
+          "range_type": {
+            "title": "Range Type",
+            "type": "string"
+          },
+          "reserved_prefix_digits": {
+            "title": "Reserved Prefix Digits",
+            "type": "integer"
+          },
+          "start_number": {
+            "title": "Start Number",
+            "type": "integer"
+          },
+          "tenant_id": {
+            "title": "Tenant Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "tenant_id",
+          "range_type",
+          "prefix",
+          "start_number",
+          "current_value",
+          "digit_count",
+          "reserved_prefix_digits",
+          "is_active"
+        ],
+        "title": "NumberRangeOut",
+        "type": "object"
+      },
       "NumberRangesOut": {
         "additionalProperties": true,
         "description": "Response schema for number ranges endpoints.",
@@ -204727,7 +204791,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/NumberRangesOut"
+                    "$ref": "#/components/schemas/NumberRangeOut"
                   },
                   "title": "Response List Number Ranges Api V1 Admin Number Ranges  Get",
                   "type": "array"
@@ -204795,6 +204859,175 @@
           "number-ranges",
           "admin",
           "number-ranges"
+        ]
+      }
+    },
+    "/api/v1/admin/number-ranges/actions/konfigurieren": {
+      "post": {
+        "operationId": "konfigurieren_api_v1_admin_number_ranges_actions_konfigurieren_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Nummernkreis konfigurieren",
+        "tags": [
+          "admin",
+          "number-ranges",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/admin/number-ranges/{entity_id}/actions/aendern": {
+      "post": {
+        "operationId": "aendern_api_v1_admin_number_ranges__entity_id__actions_aendern_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Nummernkreis aendern",
+        "tags": [
+          "admin",
+          "number-ranges",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/admin/number-ranges/{entity_id}/actions/stilllegen": {
+      "post": {
+        "operationId": "stilllegen_api_v1_admin_number_ranges__entity_id__actions_stilllegen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Nummernkreis stilllegen",
+        "tags": [
+          "admin",
+          "number-ranges",
+          "mask-actions"
         ]
       }
     },

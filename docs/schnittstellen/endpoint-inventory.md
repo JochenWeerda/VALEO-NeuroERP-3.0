@@ -325,6 +325,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `neuro_verification` | Neuro Verification Engine — REST API (NC-001). |
 | `neuro_voice` | Voice Adapter Layer — REST API (NC-003). |
 | `number_ranges` | Admin API for configurable number ranges (Debitor/Kreditor accounts, partner numbers). |
+| `number_ranges_kommandos` | Nummernkreise als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/nummernkreise``, 09.11.2026). |
 | `nutrient_compositions` | Nutrient Composition (Düngemittel-Zusammensetzung) management endpoints. |
 | `nve` | NVE / SSCC shipping-unit endpoints (l3c-nve) |
 | `o2c_chain` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot→Auftrag→Lieferschein→Rechnung (read-only). |

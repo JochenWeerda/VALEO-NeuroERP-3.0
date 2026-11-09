@@ -1561,6 +1561,8 @@ api_router.include_router(
     tags=["crm", "business-partners"]
 )
 
+from app.api.v1.endpoints import number_ranges_kommandos  # noqa: E402
+api_router.include_router(number_ranges_kommandos.router)
 api_router.include_router(
     number_ranges.router,
     prefix="/admin/number-ranges",

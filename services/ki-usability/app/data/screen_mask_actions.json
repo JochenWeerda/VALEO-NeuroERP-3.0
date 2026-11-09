@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 782,
-    "screens_with_actions": 399,
+    "actions": 786,
+    "screens_with_actions": 400,
     "domains": 50
   },
   "actions": [
@@ -359,6 +359,101 @@
         "command": null,
         "method": "POST",
         "permission": "admin.mobile.connector.retry",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/number-ranges/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:konfigurieren",
+      "label": "Nummernkreis konfigurieren",
+      "description": "Nummernkreis konfigurieren (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Nummernkreis konfigurieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "konfigurieren",
+        "commandEndpoint": "/api/v1/admin/number-ranges/actions/konfigurieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:stilllegen",
+      "label": "Stilllegen",
+      "description": "Stilllegen (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Stilllegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "stilllegen",
+        "commandEndpoint": "/api/v1/admin/number-ranges/{entity_id}/actions/stilllegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
         "dangerLevel": "moderate"
       }
     },

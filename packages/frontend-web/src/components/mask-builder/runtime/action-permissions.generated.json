@@ -34,6 +34,13 @@
         ]
       ]
     },
+    "admin/nummernkreise": {
+      "admin.number_range.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/postfaecher": {
       "admin.postfach.write": [
         [

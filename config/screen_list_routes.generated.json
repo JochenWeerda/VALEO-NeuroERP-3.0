@@ -19,6 +19,7 @@
     "admin/integrationen-quarantaene": "/admin/integrationen-quarantaene",
     "admin/monitoring/alerting": "/admin/monitoring/alerting",
     "admin/monitoring/regeln": "/monitoring/regeln",
+    "admin/nummernkreise": "/admin/nummernkreise",
     "admin/omnichannel-handelskonflikt": "/admin/omnichannel-handelskonflikt",
     "admin/qualitaets-cockpit": "/admin/qualitaets-cockpit",
     "admin/system-einstellungen": "/admin/system-einstellungen",

@@ -10,6 +10,9 @@
   "mask:admin/identity-budgets:root",
   "mask:admin/integrationen-quarantaene:resolve",
   "mask:admin/integrationen-quarantaene:retry",
+  "mask:admin/nummernkreise:aendern",
+  "mask:admin/nummernkreise:konfigurieren",
+  "mask:admin/nummernkreise:stilllegen",
   "mask:admin/postfaecher:entfernen",
   "mask:admin/postfaecher:speichern",
   "mask:admin/postfaecher:testen",
@@ -355,7 +358,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 967,
+  "kein_endpunkt": 968,
   "pfadparameter": 6
  }
 }

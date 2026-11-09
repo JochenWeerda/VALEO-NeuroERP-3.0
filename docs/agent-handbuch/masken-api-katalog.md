@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (776 Masken).
+> Generiert aus `app/core/screen_definitions.py` (777 Masken).
 
 ## Übersicht
 
@@ -46,6 +46,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/monitoring/alerting` | Alerting | admin | niedrig | — | `GET /api/v1/masks/admin/monitoring/alerting/agent-contract` |
 | `admin/monitoring/historie` | Historie | admin | niedrig | — | `GET /api/v1/masks/admin/monitoring/historie/agent-contract` |
 | `admin/monitoring/regeln` | Regeln | admin | niedrig | — | `GET /api/v1/masks/admin/monitoring/regeln/agent-contract` |
+| `admin/nummernkreise` | Nummernkreise | platform | mittel | — | `GET /api/v1/masks/admin/nummernkreise/agent-contract` |
 | `admin/omnichannel-handelskonflikt` | Omnichannel handelskonflikt | admin | niedrig | — | `GET /api/v1/masks/admin/omnichannel-handelskonflikt/agent-contract` |
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `admin/qualitaets-cockpit` | Qualitaets-Cockpit | qualitaet | niedrig | — | `GET /api/v1/masks/admin/qualitaets-cockpit/agent-contract` |
@@ -22291,6 +22292,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `allocate` | Kontingent vergeben | moderate | ja | `/api/v1/identity/budgets/actions/allocate` |
 | `root` | Mandantenbudget bereitstellen | moderate | ja | `/api/v1/identity/budgets/actions/root` |
 | `ledger` | Verbrauchsnebenbuch | safe | nein | `—` |
+
+---
+
+### `admin/nummernkreise` — Nummernkreise
+
+**Zweck:** Nummernkreise einrichten und pruefen, welche Nummer als naechste vergeben wird.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/nummernkreise/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/nummernkreise/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/nummernkreise/readiness` |
+| Rollout-Route | `/mask-rollout/admin__nummernkreise/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin/number-ranges/`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Debitorennummer wird als naechste vergeben?
+- Richte den Kreditoren-Nummernkreis ab 70000 ein.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `konfigurieren` | Nummernkreis konfigurieren | moderate | nein | `/api/v1/admin/number-ranges/actions/konfigurieren` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

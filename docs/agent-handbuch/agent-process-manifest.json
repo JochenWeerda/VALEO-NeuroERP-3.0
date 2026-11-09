@@ -21995,6 +21995,45 @@
       ]
     },
     {
+      "mask_id": "admin/nummernkreise",
+      "title": "Nummernkreise",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__nummernkreise/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/nummernkreise/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/nummernkreise/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/nummernkreise/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "konfigurieren",
+          "label": "Nummernkreis konfigurieren",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.number_range.update",
+          "commandEndpoint": "/api/v1/admin/number-ranges/actions/konfigurieren",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "admin/postfaecher",
       "title": "Postfächer",
       "domain": "platform",
@@ -27247,5 +27286,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 144
+  "event_count": 146
 }

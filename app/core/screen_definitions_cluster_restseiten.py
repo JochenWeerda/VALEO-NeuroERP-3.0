@@ -162,6 +162,37 @@ def build_crm_vertreterprovisionen_staffeln() -> dict[str, Any]:
     )
 
 
+def build_admin_nummernkreise() -> dict[str, Any]:
+    from app.api.v1.endpoints.number_ranges_kommandos import AENDERN_FELDER, KONFIGURIEREN_FELDER
+
+    weg = "/api/v1/admin/number-ranges"
+    return build_stamm_list_screen(
+        screen_id="admin/nummernkreise", domain="platform", bundle="admin", title="Nummernkreise",
+        subtitle="Debitoren-, Kreditoren- und Partnernummern: Format, Stand und naechste Nummer",
+        endpoint=f"{weg}/", row_route=None,
+        columns=[text("range_type", "Nummernkreis", "primary"), text("prefix", "Präfix"),
+                 zahl("start_number", "Start"), zahl("current_value", "Stand", "primary"),
+                 zahl("digit_count", "Stellen"), zahl("reserved_prefix_digits", "Reserviert", "tertiary"),
+                 text("next_number", "Nächste Nummer", "primary"), janein("is_active", "Aktiv")],
+        actions=[{"key": "konfigurieren", "label": "Nummernkreis konfigurieren", "kind": "primary", "zone": "header",
+                  "dangerLevel": "moderate", "permission": "admin.number_range.update",
+                  "commandEndpoint": f"{weg}/actions/konfigurieren", "method": "POST",
+                  "requiresConfirmation": False, "inputFields": KONFIGURIEREN_FELDER}, _EXPORT],
+        row_actions=[{"key": "aendern", "label": "Ändern", "dangerLevel": "moderate",
+                      "permission": "admin.number_range.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/aendern", "method": "POST",
+                      "requiresConfirmation": False, "inputFields": AENDERN_FELDER},
+                     {"key": "stilllegen", "label": "Stilllegen", "dangerLevel": "moderate",
+                      "permission": "admin.number_range.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/stilllegen", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True,
+                      "visibleWhen": {"field": "is_active", "values": [True]}}],
+        purpose="Nummernkreise einrichten und pruefen, welche Nummer als naechste vergeben wird.",
+        prompts=["Welche Debitorennummer wird als naechste vergeben?", "Richte den Kreditoren-Nummernkreis ab 70000 ein."],
+        no_workflow="Konfigurationsliste; vergeben werden die Nummern beim Anlegen der Partner.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -171,4 +202,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "workflows/trigger": build_workflows_trigger,
     "crm/vertreterprovisionen": build_crm_vertreterprovisionen,
     "crm/vertreterprovisionen-staffeln": build_crm_vertreterprovisionen_staffeln,
+    "admin/nummernkreise": build_admin_nummernkreise,
 }

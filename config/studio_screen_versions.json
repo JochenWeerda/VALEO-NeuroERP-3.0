@@ -320,6 +320,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/nummernkreise": {
+      "definition_hash": "78e59c28409853c26c0830ae5e9902c7c6b9edc8e87e5fc6f32222b37a34515e",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/omnichannel-handelskonflikt": {
       "definition_hash": "7e6c0e96a32d6332ade678ec48ba003c8574e825444ac76737f724bbbaace613",
       "gates_passed": [
