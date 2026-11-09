@@ -1,2 +1,0 @@
-export const ENABLE_UNIVERSAL_MASK_SALES_ORDER =
-  import.meta.env.VITE_ENABLE_UNIVERSAL_MASK_SALES_ORDER === 'true'

@@ -46,7 +46,7 @@ const NAV_ACTIONS: Record<string, string> = {
   'nav-wiegeschein': '/waage/wiegeschein-detail',
   'nav-fibu': '/fibu-suite',
   'action-new-order': '/sales/order-editor',
-  'action-new-invoice': '/finance/invoices/new',
+  'action-new-invoice': '/belege/sales_invoice/neu',
   'action-new-customer': '/crm/kunden/neu',
   // Slice-010: Lager / Einkauf / HR
   'nav-lager': '/lager/bestandsuebersicht',

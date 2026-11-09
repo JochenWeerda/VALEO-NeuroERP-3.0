@@ -1,13 +1,6 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-const SCREEN_ID = 'einkauf/bestellvorschlag-lager'
-
+/** Bestellvorschlag Lager: Variante `lager` der Familie bestellvorschlag (config/mask_families/bestellvorschlag.json). */
 export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId={SCREEN_ID}
-      testId="einkauf-bestellvorschlag-lager"
-      permissions={['procurement.read']}
-    />
-  )
+  return <NativeListPage screenId="bestellvorschlag/lager" testId="screen-bestellvorschlag/lager" />
 }

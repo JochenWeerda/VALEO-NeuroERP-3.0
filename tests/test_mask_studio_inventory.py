@@ -88,6 +88,21 @@ def test_reine_weiterleitung_zaehlt_nicht_als_maske(inventar):
         assert not route.get("screen_ids"), route["route"]
 
 
+# Technische Seiten (Anmeldefluss, Studio-Werkzeuge) zaehlen nicht als Maske. Die Liste darf nur schrumpfen,
+# sonst wird sie zum Ausweg fuer eine Fachseite ohne Maske.
+TECHNISCH_HOECHSTENS = 7
+
+
+def test_technische_seiten_sind_begruendet_und_schrumpfen_nur(modul, inventar):
+    technisch = modul.technische_seiten()
+    assert len(technisch) <= TECHNISCH_HOECHSTENS, "neue technische Seite: erst als Studio-Maske pruefen"
+    routen = {r["route"]: r for r in inventar["seiten"]}
+    for route, grund in technisch.items():
+        assert route in routen, f"veralteter Eintrag {route}: Route gibt es nicht mehr"
+        assert len(grund.strip()) >= 30, f"{route}: Grund fehlt oder ist zu knapp"
+        assert routen[route]["stufe"] == "technisch"
+
+
 def test_belegvarianten_liefern_ihre_aktionen(inventar):
     beleg = {a["maske"] for a in inventar["aktionen"] if a["maske"].startswith("beleg/")}
     assert len(beleg) == len(inventar["familien"]["beleg"])

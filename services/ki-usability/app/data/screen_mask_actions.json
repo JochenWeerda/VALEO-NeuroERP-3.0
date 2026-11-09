@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 744,
-    "screens_with_actions": 393,
+    "actions": 804,
+    "screens_with_actions": 406,
     "domains": 50
   },
   "actions": [
@@ -363,6 +363,101 @@
       }
     },
     {
+      "id": "mask:admin/nummernkreise:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/number-ranges/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:konfigurieren",
+      "label": "Nummernkreis konfigurieren",
+      "description": "Nummernkreis konfigurieren (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Nummernkreis konfigurieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "konfigurieren",
+        "commandEndpoint": "/api/v1/admin/number-ranges/actions/konfigurieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/nummernkreise:stilllegen",
+      "label": "Stilllegen",
+      "description": "Stilllegen (admin/nummernkreise)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/nummernkreise",
+      "intent_phrases": [
+        "Stilllegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/nummernkreise",
+        "actionKey": "stilllegen",
+        "commandEndpoint": "/api/v1/admin/number-ranges/{entity_id}/actions/stilllegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.number_range.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:admin/postfaecher:anmelden",
       "label": "Beim Anbieter anmelden",
       "description": "Beim Anbieter anmelden (admin/postfaecher)",
@@ -500,6 +595,238 @@
       }
     },
     {
+      "id": "mask:admin/report-berechtigungen:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/report-permissions/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:anlegen",
+      "label": "Berechtigung anlegen",
+      "description": "Berechtigung anlegen (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Berechtigung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/report-permissions/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/admin/report-permissions/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.report_permission.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/report-berechtigungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/report-berechtigungen)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/report-berechtigungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/report-berechtigungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/rollen/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:anlegen",
+      "label": "Rolle anlegen",
+      "description": "Rolle anlegen (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Rolle anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/rollen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/admin/rollen/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:rechte",
+      "label": "Berechtigungsmatrix",
+      "description": "Berechtigungsmatrix (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Berechtigungsmatrix"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "rechte",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/berechtigungen-matrix",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/terminologie:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/terminologie)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/terminologie",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/terminologie",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:admin/token-consumption:budgets",
       "label": "Kontingente öffnen",
       "description": "Kontingente öffnen (admin/token-consumption)",
@@ -621,6 +948,164 @@
         "forbiddenForAgents": true,
         "requiresConfirmation": true,
         "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:ansicht_webshop",
+      "label": "Webshop-Anbindungen",
+      "description": "Webshop-Anbindungen (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "Webshop-Anbindungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "ansicht_webshop",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/webshop",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:verarbeiten",
+      "label": "Als Auftrag anlegen",
+      "description": "Als Auftrag anlegen (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "Als Auftrag anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "verarbeiten",
+        "commandEndpoint": "/api/v1/webshop/bestellungen/{entity_id}/actions/verarbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.auftrag.create",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:anlegen",
+      "label": "Shop anbinden",
+      "description": "Shop anbinden (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Shop anbinden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/webshop/konfigurationen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.webshop.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:ansicht_bestellungen",
+      "label": "Webshop-Bestellungen",
+      "description": "Webshop-Bestellungen (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Webshop-Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "ansicht_bestellungen",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/webshop/bestellungen",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/webshop/konfigurationen/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.webshop.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
       }
     },
     {
@@ -2055,6 +2540,48 @@
       "required_data": [],
       "source": {
         "screenId": "agrar/vertrag-kontingente-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/wetterwarnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/wetterwarnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/wetterwarnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/wetterwarnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agribusiness/farmers:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agribusiness/farmers)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agribusiness/farmers",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agribusiness/farmers",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -4044,6 +4571,648 @@
       }
     },
     {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/bedarf:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/bedarf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/bedarf",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/bedarf",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/gespeichert:zu_bestellung",
+      "label": "Zu Bestellung",
+      "description": "Zu Bestellung (bestellvorschlag/gespeichert)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/gespeichert",
+      "intent_phrases": [
+        "Zu Bestellung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "bestellvorschlag/gespeichert",
+        "actionKey": "zu_bestellung",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/{entity_id}/actions/zu_bestellung",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellung.create",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/lager:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/lager)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/lager",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/lager",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:ansicht_verkauf",
+      "label": "Bestellvorschlag Verkauf",
+      "description": "Bestellvorschlag Verkauf (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Bestellvorschlag Verkauf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "ansicht_verkauf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/rohware:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/rohware)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/rohware",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/rohware",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_bedarf",
+      "label": "Bestellvorschlag Bedarf",
+      "description": "Bestellvorschlag Bedarf (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Bedarf"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_bedarf",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_gespeichert",
+      "label": "Gespeicherte Bestellvorschläge",
+      "description": "Gespeicherte Bestellvorschläge (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Gespeicherte Bestellvorschläge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_gespeichert",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_lager",
+      "label": "Bestellvorschlag Lager",
+      "description": "Bestellvorschlag Lager (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Lager"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_lager",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:ansicht_rohware",
+      "label": "Bestellvorschlag Rohware",
+      "description": "Bestellvorschlag Rohware (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Bestellvorschlag Rohware"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "ansicht_rohware",
+        "commandEndpoint": null,
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:bestellvorschlag/verkauf:speichern",
+      "label": "Als Vorschlag speichern",
+      "description": "Als Vorschlag speichern (bestellvorschlag/verkauf)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "bestellvorschlag/verkauf",
+      "intent_phrases": [
+        "Als Vorschlag speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "bestellvorschlag/verkauf",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:charge/liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (charge/liste)",
@@ -5040,6 +6209,106 @@
       }
     },
     {
+      "id": "mask:crm/customer-360:aendern",
+      "label": "Ändern",
+      "description": "Ändern (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:anschrift_anlegen",
+      "label": "Anschrift anlegen",
+      "description": "Anschrift anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Anschrift anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "anschrift_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:ansprechpartner_anlegen",
+      "label": "Ansprechpartner anlegen",
+      "description": "Ansprechpartner anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Ansprechpartner anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "ansprechpartner_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:anweisung_anlegen",
+      "label": "Chef-Anweisung anlegen",
+      "description": "Chef-Anweisung anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Chef-Anweisung anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "anweisung_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:crm/customer-360:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (crm/customer-360)",
@@ -5060,6 +6329,31 @@
         "command": null,
         "method": "POST",
         "permission": "crm.customer.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:cpd_anlegen",
+      "label": "CPD-Konto anlegen",
+      "description": "CPD-Konto anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "CPD-Konto anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "cpd_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
         "dangerLevel": "safe"
       }
     },
@@ -5092,24 +6386,78 @@
       }
     },
     {
-      "id": "mask:crm/customer-360:edit",
-      "label": "Erweiterte Pflege",
-      "description": "Erweiterte Pflege (crm/customer-360)",
+      "id": "mask:crm/customer-360:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (crm/customer-360)",
       "category": "mask-action",
       "domain": "crm",
       "mask": "crm/customer-360",
       "intent_phrases": [
-        "Erweiterte Pflege"
+        "Entfernen"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "crm/customer-360",
-        "actionKey": "edit",
-        "commandEndpoint": null,
-        "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
         "command": null,
-        "method": null,
+        "method": "POST",
         "permission": "crm.customer.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:preis_anlegen",
+      "label": "Preisvereinbarung anlegen",
+      "description": "Preisvereinbarung anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Preisvereinbarung anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "preis_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/customer-360:rabatt_anlegen",
+      "label": "Rabatt anlegen",
+      "description": "Rabatt anlegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Rabatt anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "rabatt_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
         "dangerLevel": "safe"
       }
     },
@@ -5595,6 +6943,106 @@
       }
     },
     {
+      "id": "mask:crm/kunden-cockpit:aendern",
+      "label": "Ändern",
+      "description": "Ändern (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:anschrift_anlegen",
+      "label": "Anschrift anlegen",
+      "description": "Anschrift anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Anschrift anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "anschrift_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:ansprechpartner_anlegen",
+      "label": "Ansprechpartner anlegen",
+      "description": "Ansprechpartner anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Ansprechpartner anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "ansprechpartner_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:anweisung_anlegen",
+      "label": "Chef-Anweisung anlegen",
+      "description": "Chef-Anweisung anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Chef-Anweisung anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "anweisung_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:crm/kunden-cockpit:bearbeiten",
       "label": "Bearbeiten",
       "description": "Bearbeiten (crm/kunden-cockpit)",
@@ -5615,6 +7063,31 @@
         "command": null,
         "method": "POST",
         "permission": "crm.customer.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:cpd_anlegen",
+      "label": "CPD-Konto anlegen",
+      "description": "CPD-Konto anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "CPD-Konto anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "cpd_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
         "dangerLevel": "safe"
       }
     },
@@ -5647,24 +7120,78 @@
       }
     },
     {
-      "id": "mask:crm/kunden-cockpit:edit",
-      "label": "Erweiterte Pflege",
-      "description": "Erweiterte Pflege (crm/kunden-cockpit)",
+      "id": "mask:crm/kunden-cockpit:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (crm/kunden-cockpit)",
       "category": "mask-action",
       "domain": "crm",
       "mask": "crm/kunden-cockpit",
       "intent_phrases": [
-        "Erweiterte Pflege"
+        "Entfernen"
       ],
-      "required_data": [],
+      "required_data": [
+        "entity_id"
+      ],
       "source": {
         "screenId": "crm/kunden-cockpit",
-        "actionKey": "edit",
-        "commandEndpoint": null,
-        "navigationRoute": "/verkauf/kunden-stamm/{business_partner_id}?pflege=1",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
         "command": null,
-        "method": null,
+        "method": "POST",
         "permission": "crm.customer.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:preis_anlegen",
+      "label": "Preisvereinbarung anlegen",
+      "description": "Preisvereinbarung anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Preisvereinbarung anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "preis_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:rabatt_anlegen",
+      "label": "Rabatt anlegen",
+      "description": "Rabatt anlegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Rabatt anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "rabatt_anlegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "requiresConfirmation": false,
         "dangerLevel": "safe"
       }
     },
@@ -6370,6 +7897,164 @@
       }
     },
     {
+      "id": "mask:crm/vertreterprovisionen-staffeln:ansicht_vertreterprovisionen",
+      "label": "Provisionsgruppen",
+      "description": "Provisionsgruppen (crm/vertreterprovisionen-staffeln)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen-staffeln",
+      "intent_phrases": [
+        "Provisionsgruppen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen-staffeln",
+        "actionKey": "ansicht_vertreterprovisionen",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/vertreterprovisionen",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen-staffeln:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/vertreterprovisionen-staffeln)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen-staffeln",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen-staffeln",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:anlegen",
+      "label": "Provisionsgruppe anlegen",
+      "description": "Provisionsgruppe anlegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Provisionsgruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:ansicht_staffeln",
+      "label": "Staffelzeilen",
+      "description": "Staffelzeilen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Staffelzeilen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "ansicht_staffeln",
+        "commandEndpoint": null,
+        "navigationRoute": "/crm/vertreterprovisionen/staffeln",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:deaktivieren",
+      "label": "Stilllegen",
+      "description": "Stilllegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Stilllegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "deaktivieren",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/deaktivieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/vertreterprovisionen:staffelzeile_anlegen",
+      "label": "Staffelzeile anlegen",
+      "description": "Staffelzeile anlegen (crm/vertreterprovisionen)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/vertreterprovisionen",
+      "intent_phrases": [
+        "Staffelzeile anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/vertreterprovisionen",
+        "actionKey": "staffelzeile_anlegen",
+        "commandEndpoint": "/api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/staffelzeile_anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.vertreter.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:crm/wiedervorlagen:erledigen",
       "label": "Erledigen",
       "description": "Erledigen (crm/wiedervorlagen)",
@@ -6406,6 +8091,27 @@
       "required_data": [],
       "source": {
         "screenId": "crm/wiedervorlagen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:disposition/regeln:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (disposition/regeln)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "disposition/regeln",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "disposition/regeln",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -7127,27 +8833,6 @@
       }
     },
     {
-      "id": "mask:einkauf/bestellvorschlaege-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/bestellvorschlaege-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellvorschlaege-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellvorschlaege-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
       "id": "mask:einkauf/dienstleistungen-haltung-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/dienstleistungen-haltung-liste)",
@@ -7341,74 +9026,6 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingang/neu:position",
-      "label": "Position übernehmen",
-      "description": "Position übernehmen (einkauf/rechnungseingang/neu)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingang/neu",
-      "intent_phrases": [
-        "Position übernehmen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingang/neu",
-        "actionKey": "position",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "finance.invoicePosition",
-        "method": null,
-        "permission": "finance.ap.invoice.create",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingang/neu:remove",
-      "label": "Entfernen",
-      "description": "Entfernen (einkauf/rechnungseingang/neu)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingang/neu",
-      "intent_phrases": [
-        "Entfernen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingang/neu",
-        "actionKey": "remove",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "finance.invoicePositionEntfernen",
-        "method": null,
-        "permission": "finance.ap.invoice.create",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingang/neu:save",
-      "label": "Als Entwurf speichern",
-      "description": "Als Entwurf speichern (einkauf/rechnungseingang/neu)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingang/neu",
-      "intent_phrases": [
-        "Als Entwurf speichern"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingang/neu",
-        "actionKey": "save",
-        "commandEndpoint": "/api/v1/finance/ap/invoices/",
-        "navigationRoute": null,
-        "command": "finance.invoiceSpeichern",
-        "method": "POST",
-        "permission": "finance.ap.invoice.create",
         "dangerLevel": "safe"
       }
     },
@@ -8944,95 +10561,6 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:finance/invoices-list:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/invoices-list)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/invoices-list",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/invoices-list",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:finance/invoices/new:position",
-      "label": "Position übernehmen",
-      "description": "Position übernehmen (finance/invoices/new)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/invoices/new",
-      "intent_phrases": [
-        "Position übernehmen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/invoices/new",
-        "actionKey": "position",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "finance.invoicePosition",
-        "method": null,
-        "permission": "finance.invoice.create",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:finance/invoices/new:remove",
-      "label": "Entfernen",
-      "description": "Entfernen (finance/invoices/new)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/invoices/new",
-      "intent_phrases": [
-        "Entfernen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "finance/invoices/new",
-        "actionKey": "remove",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "finance.invoicePositionEntfernen",
-        "method": null,
-        "permission": "finance.invoice.create",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:finance/invoices/new:save",
-      "label": "Als Entwurf speichern",
-      "description": "Als Entwurf speichern (finance/invoices/new)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/invoices/new",
-      "intent_phrases": [
-        "Als Entwurf speichern"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/invoices/new",
-        "actionKey": "save",
-        "commandEndpoint": "/api/v1/finance/invoices",
-        "navigationRoute": null,
-        "command": "finance.invoiceSpeichern",
-        "method": "POST",
-        "permission": "finance.invoice.create",
         "dangerLevel": "safe"
       }
     },
@@ -13346,6 +14874,27 @@
       }
     },
     {
+      "id": "mask:nawaro/raps-profil:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (nawaro/raps-profil)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "nawaro/raps-profil",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "nawaro/raps-profil",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:personal/bewerbung-einwilligung:erklaerungen",
       "label": "Einwilligungserklärungen",
       "description": "Einwilligungserklärungen (personal/bewerbung-einwilligung)",
@@ -14836,27 +16385,6 @@
       }
     },
     {
-      "id": "mask:sales/angebote/neu:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/angebote/neu)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote/neu",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote/neu",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
       "id": "mask:sales/auftrag-lieferschein-abgleich:export",
       "label": "CSV-Export",
       "description": "CSV-Export (sales/auftrag-lieferschein-abgleich)",
@@ -14896,220 +16424,6 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:buchen",
-      "label": "Buchen",
-      "description": "Buchen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Buchen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "buchen",
-        "commandEndpoint": "/api/v1/sales/credit-notes/{entity_id}/actions/buchen",
-        "navigationRoute": null,
-        "command": "sales.gutschriftBuchen",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:entfernen",
-      "label": "Entfernen",
-      "description": "Entfernen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Entfernen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "entfernen",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftPositionEntfernen",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:laden",
-      "label": "Öffnen",
-      "description": "Öffnen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Öffnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "laden",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftLaden",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:neu",
-      "label": "Neue Gutschrift",
-      "description": "Neue Gutschrift (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Neue Gutschrift"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftNeu",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:position",
-      "label": "Position übernehmen",
-      "description": "Position übernehmen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Position übernehmen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "position",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftPosition",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:pruefen",
-      "label": "Prüfen",
-      "description": "Prüfen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Prüfen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "pruefen",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagPruefen",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:speichern",
-      "label": "Als Entwurf speichern",
-      "description": "Als Entwurf speichern (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Als Entwurf speichern"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "speichern",
-        "commandEndpoint": "/api/v1/sales/credit-notes/actions/speichern",
-        "navigationRoute": null,
-        "command": "sales.gutschriftSpeichern",
-        "method": "POST",
-        "permission": "sales.gutschrift.write",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:vorschlag_ablehnen",
-      "label": "Vorschlag ablehnen",
-      "description": "Vorschlag ablehnen (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Vorschlag ablehnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "vorschlag_ablehnen",
-        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen",
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagAblehnen",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/credit-notes:vorschlag_freigeben",
-      "label": "Vorschlag freigeben",
-      "description": "Vorschlag freigeben (sales/credit-notes)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/credit-notes",
-      "intent_phrases": [
-        "Vorschlag freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/credit-notes",
-        "actionKey": "vorschlag_freigeben",
-        "commandEndpoint": "/api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben",
-        "navigationRoute": null,
-        "command": "sales.gutschriftVorschlagFreigeben",
-        "method": "POST",
-        "permission": "sales.gutschrift.post",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
       }
     },
     {
@@ -15474,6 +16788,27 @@
       "required_data": [],
       "source": {
         "screenId": "schaeden/meldung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:schichtplan/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (schichtplan/liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "schichtplan/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "schichtplan/liste",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -15924,27 +17259,6 @@
       "required_data": [],
       "source": {
         "screenId": "verkauf/kommissions-auftraege",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:verkauf/lieferschein-erfassung:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (verkauf/lieferschein-erfassung)",
-      "category": "mask-action",
-      "domain": "verkauf",
-      "mask": "verkauf/lieferschein-erfassung",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "verkauf/lieferschein-erfassung",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -16573,6 +17887,27 @@
       }
     },
     {
+      "id": "mask:wissen/wissensbasis:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (wissen/wissensbasis)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "wissen/wissensbasis",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "wissen/wissensbasis",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:workflow/workflow-regeln:export",
       "label": "CSV-Export",
       "description": "CSV-Export (workflow/workflow-regeln)",
@@ -16648,6 +17983,27 @@
       "required_data": [],
       "source": {
         "screenId": "workflows/supervisor",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:workflows/trigger:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (workflows/trigger)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "workflows/trigger",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "workflows/trigger",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

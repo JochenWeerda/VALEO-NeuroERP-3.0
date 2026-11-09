@@ -1,5 +1,6 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
+/** Waagen: Studio-Maske `waage/liste` (vorher eine screenId ohne ScreenDefinition). */
 export default function Page(): JSX.Element {
-  return <NativeListPage screenId="weighing" testId="screen-weighing" />
+  return <UniversalNativeCockpitPage screenId="waage/liste" testId="screen-waage/liste" />
 }

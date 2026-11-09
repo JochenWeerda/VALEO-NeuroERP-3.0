@@ -34,6 +34,13 @@
         ]
       ]
     },
+    "admin/nummernkreise": {
+      "admin.number_range.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/postfaecher": {
       "admin.postfach.write": [
         [
@@ -51,6 +58,20 @@
         ]
       ]
     },
+    "admin/report-berechtigungen": {
+      "admin.report_permission.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/rollen-verwaltung": {
+      "admin.role.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/webhooks-liste": {
       "studio.admin-webhooks.register": [
         [
@@ -59,6 +80,24 @@
       ],
       "studio.admin-webhooks.unregister": [
         [
+          "admin"
+        ]
+      ]
+    },
+    "admin/webshop": {
+      "verkauf.webshop.update": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "admin/webshop-bestellungen": {
+      "verkauf.auftrag.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -632,6 +671,51 @@
         ]
       ]
     },
+    "bestellvorschlag/bedarf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/gespeichert": {
+      "einkauf.bestellung.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/lager": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/rohware": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "bestellvorschlag/verkauf": {
+      "einkauf.bestellvorschlag.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/aktivitaet": {
       "crm.activity.update": [
         [
@@ -870,6 +954,17 @@
         ]
       ]
     },
+    "crm/vertreterprovisionen": {
+      "crm.vertreter.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/wiedervorlagen": {
       "crm.kontakt.erledigen": [
         [
@@ -1078,15 +1173,6 @@
         ]
       ]
     },
-    "einkauf/rechnungseingang/neu": {
-      "finance.ap.invoice.create": [
-        [
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "einkauf/supplier": {
       "einkauf.lieferant.update": [
         [
@@ -1241,19 +1327,6 @@
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "finance/invoices/new": {
-      "finance.invoice.create": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1728,30 +1801,6 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "sales/credit-notes": {
-      "sales.gutschrift.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "sales.gutschrift.post": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

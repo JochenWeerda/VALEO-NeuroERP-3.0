@@ -410,10 +410,10 @@ class ProcurementService:
         self.db.delete(v)
         self.db.commit()
 
-    def freigebe_vorschlag(self, vorschlag_id: str) -> dict:
+    def freigebe_vorschlag(self, vorschlag_id: str, freigegeben_von: str = "system") -> dict:
         try:
             orders = vorschlag_zu_bestellungen(self.db, vorschlag_id=vorschlag_id,
-                                               tenant_id=self.tenant_id, freigegeben_von="system")
+                                               tenant_id=self.tenant_id, freigegeben_von=freigegeben_von)
             self.db.commit()
             return {"bestellungen": orders, "anzahl": len(orders)}
         except ValueError as exc:

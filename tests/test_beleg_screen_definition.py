@@ -93,7 +93,15 @@ def test_beschriftung_folgt_der_variante():
 @pytest.mark.parametrize("belegart", sorted(bv.BELEGARTEN))
 def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     variante = bv.BELEGARTEN[belegart]
-    aktionen = {a["key"]: a for a in sdb.build_beleg_screen_definition(belegart)["actions"]}
+    alle = {a["key"]: a for a in sdb.build_beleg_screen_definition(belegart)["actions"]}
+    # Belegdruck (BELEG-052 Stufe 2b) ist ein Leseweg ohne Kommando: PDF aus dem Belegvertrag.
+    druck = alle.pop("drucken")
+    versand = alle.pop("versenden")
+    assert versand["commandEndpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/actions/versenden"
+    assert versand["permission"] == "belege.ausstellen" and versand["forbiddenForAgents"] is True
+    assert druck["download"]["endpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/druck"
+    assert "commandEndpoint" not in druck and druck["permission"] == "belege.lesen"
+    aktionen = alle
     erwartet = {"bearbeiten", "freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
     for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
         erwartet |= {f"freigabe_{verb}:{fachaktion}" for verb in ("anfordern", "erteilen", "ablehnen")}
@@ -229,6 +237,8 @@ def test_jeder_knopf_haengt_am_zustand_den_der_server_liefert(http, satz):
     """Bis 13.10.2026 waren die Knoepfe der Maske immer aktiv — auch am stornierten Beleg (Befund der Sichtpruefung)."""
     for belegart in bv.BELEGARTEN:
         for aktion in sdb.build_beleg_screen_definition(belegart)["actions"]:
+            if "download" in aktion or aktion["key"] == "versenden":  # Druck, Versand: der Weg prueft den Stand
+                continue
             state_key = aktion["commandBinding"].get("stateAction", aktion["key"])
             assert aktion["enabledWhen"] == sdb.zustandsfeld(state_key) and ":" not in aktion["enabledWhen"]
 

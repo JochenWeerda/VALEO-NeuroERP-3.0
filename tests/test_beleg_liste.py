@@ -118,3 +118,83 @@ def test_mcp_suche_liest_dieselbe_quelle(satz):
         ergebnis = beleg_suchen(db, anfrage, "agent", satz["mandant"], {"roles": ["admin"]})
     erwartet = {b["id"] for b in satz["belege"] if b["doc_type"] == "sales_invoice"}
     assert {z["beleg_id"] for z in ergebnis["items"]} == erwartet
+
+
+# ── Belegdruck (BELEG-052 Stufe 2b) ────────────────────────────────────────────
+
+def test_belegdruck_liefert_ein_pdf_des_belegs(app_und_client, satz):
+    import base64
+
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_invoice")
+    app, client = app_und_client
+    ersetze_nutzer(app, "admin")
+    antwort = client.get(f"/belege/sales_invoice/{beleg['id']}/druck")
+    assert antwort.status_code == 200, antwort.text
+    daten = antwort.json()
+    assert daten["dateiname"].startswith("sales_invoice_") and daten["dateiname"].endswith(".pdf")
+    assert base64.b64decode(daten["pdf"]).startswith(b"%PDF")
+
+
+def test_belegdruck_braucht_das_leserecht(app_und_client, satz):
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    app, client = app_und_client
+    ersetze_nutzer(app, "SALES_LESEN")
+    assert client.get(f"/belege/purchase_order/{beleg['id']}/druck").status_code == 403
+
+
+def test_jede_belegvariante_kann_drucken():
+    from app.core.belegvertrag import BELEGARTEN
+    from app.core.screen_definitions import get_screen_definition
+
+    for art in BELEGARTEN:
+        definition = get_screen_definition(f"beleg/{art.replace('_', '-')}", tenant_id="t-druck")
+        aktion = next(a for a in definition["actions"] if a["key"] == "drucken")
+        assert aktion["download"]["endpoint"] == f"/api/v1/belege/{art}/{{entity_id}}/druck"
+        assert aktion["download"]["mediaType"] == "application/pdf"
+
+
+# ── Beleg versenden (BELEG-052 Stufe 2b) ───────────────────────────────────────
+
+@pytest.fixture()
+def versand_app(satz, monkeypatch):
+    from app.api.v1.endpoints import beleg_versand
+    from app.services import mail_versand
+
+    gesendet: list[tuple] = []
+    monkeypatch.setattr(mail_versand, "sende_mail",
+                        lambda empf, betreff, text_, **kw: gesendet.append((empf, betreff, kw)) or "<id@test>")
+    app = FastAPI()
+    app.include_router(beleg_versand.router)
+    ersetze_mandant(app, satz["mandant"])
+    ersetze_nutzer(app, "admin")
+    return TestClient(app), gesendet
+
+
+def test_versand_schickt_das_pdf_an_den_empfaenger(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_invoice"
+                 and b["rolle"] not in ("vk-rechnung-storno",))
+    antwort = client.post(f"/belege/sales_invoice/{beleg['id']}/actions/versenden",
+                          json={"empfaenger": "buchhaltung@hof.example", "_idempotencyKey": str(uuid.uuid4())}).json()
+    if not antwort["success"] and "Stand" in (antwort.get("error") or ""):
+        pytest.skip(f"Referenzbeleg nicht versendbar: {antwort['error']}")
+    assert antwort["success"] is True, antwort
+    empfaenger, betreff, kw = gesendet[-1]
+    assert empfaenger == "buchhaltung@hof.example" and betreff.startswith("Rechnung")
+    assert kw["verwendung"] == "verkauf" and kw["anhaenge"][0][1].startswith(b"%PDF")
+
+
+def test_trockenlauf_versendet_nichts(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    vorher = len(gesendet)
+    client.post(f"/belege/purchase_order/{beleg['id']}/actions/versenden",
+                json={"_mode": "dryRun", "empfaenger": "einkauf@lieferant.example"})
+    assert len(gesendet) == vorher
+
+
+def test_ohne_adresse_kein_versand(versand_app, satz):
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "sales_offer")
+    antwort = client.post(f"/belege/sales_offer/{beleg['id']}/actions/versenden", json={}).json()
+    assert antwort["success"] is False

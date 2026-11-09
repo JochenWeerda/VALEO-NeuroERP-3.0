@@ -63,7 +63,6 @@ def test_die_belegkette_liest_vorhandene_tabellen(ergebnis: dict) -> None:
     belegkette = {
         "sales_invoices.py",
         "sales_orders.py",
-        "sales_offers.py",
         "collective_documents.py",
         "credit_management.py",
         "liquidity.py",

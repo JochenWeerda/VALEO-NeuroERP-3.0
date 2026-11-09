@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./terminologie-legacy'))
+/** Terminologie: Studio-Liste der Landhandel-Fachbegriffe (Leseweg /terminology/begriffe). */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="admin/terminologie" testId="screen-admin-terminologie" />
+}

@@ -20631,6 +20631,12 @@ sales/invoices (+ Alias verkauf/rechnungen), einkauf/bestellungen, finance/ap-in
 einkauf/rechnungseingaenge-liste; sales/lieferungen/neu legt jetzt ueber die Belegmaske an. Offen: Bestellung versenden,
 Rechnungspruefung (BELEG-043), CSV-Import Angebote (Altimport legt Koepfe ohne Positionen an - Fachfrage);
 Stufe 2 Detail-/Erfassungsseiten umhaengen, Stufe 3 Altspeicher abbauen.
+BELEG-052 Stufe 2 (09.11.2026): 21 alte Beleg-Erfassungs-/Detailseiten (Angebot, Auftrag-Editor, Lieferschein-
+Erfassung VK/EK, Rechnungs-Editor, Rechnungserfassung FiBu, Gutschrift-Editor, Bestellung anlegen/Stamm/Native,
+Eingangsrechnung, Einkaufsgutschrift) oeffnen ueber belegSeite(art) die Belegmaske (DocFlow); 6 tote Altseiten
+(InvoiceCapturePage, OrderEditorLegacyPage, *-legacy) entfernt. Fehlende Fachfunktionen der Altseiten (Bestellung aus
+Auftrag/Anfrage/Kontrakt, Bedarfsvorschlag; Lieferschein: Kontrakt, Kostenstelle, Gebinde, Serien-Nr.,
+Zwischenhaendler, Druck) sind Ausbau der Varianten (Stufe 2b).
 ## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
 
 Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
@@ -20638,3 +20644,74 @@ wurden von keinem Code aufgerufen und sind im Backend gefuehrt (crm_consents.py,
 crm_campaigns.py/crm_segments.py; Nutzerentscheidung 04.11.: crm_campaigns fuehrt). Entfernt statt Ketten repariert; #54
 geschlossen. Ratsche OHNE_EIGENE_VERSIONSTABELLE = {crm-ai}; Migrationsskripte, Sonar-Ausnahmen e4/e15, RLS-Inventar/-Matrix
 nachgezogen.
+BELEG-052 Stufe 2b (09.11.2026): Belegdruck fuer alle 9 Varianten (Aktion drucken, GET /belege/{art}/{id}/druck,
+PDF aus dem Belegvertrag mit Preisrecht; Belegfamilie 1.4.0). Builder: Download-Vertrag mit {entity_id} und PDF
+(base64) auch in der Objektseite. Offen: Bestellung versenden, Rechnungspruefung, Bestellung aus Auftrag/Anfrage/
+Kontrakt, Bedarfsvorschlag, Lieferschein-Zusatzfelder, CSV-Import Angebote (Fachfrage).
+BELEG-052 Stufe 3a (09.11.2026): RFQ-Zuschlag und Webshop-Auftrag legen in DocFlow an (beleg_anlage); 12 alte
+Beleg-ScreenDefinitions ohne Route entfernt (crm/angebot-erstellen, finance/invoices-list, finance/invoices/new,
+einkauf/rechnungseingang/neu, einkauf/gutschrift-belastung, einkauf/lieferschein-erfassen, sales/angebote/neu,
+sales/credit-notes, sales/delivery-editor(-new), verkauf/lieferschein-erfassung, verkauf/rechnungen/neu) samt
+Rechnungserfassung des Dokumentspeichers; tote Frontend-API-Clients entfernt. Offen: sales/invoice, sales/sales-order,
+sales/delivery-note, einkauf/purchase-order, finance/ap-invoice, sales/gutschrift (13-28 Verweise je Maske),
+Schreibwege der Altspeicher (sales_offers, sales_orders, sales_delivery_notes, collective_documents,
+einkauf_lieferschein, einkauf router Rechnungseingang), danach Tabellen-Abbau per Migration.
+Partnerstamm (09.11.2026): crm/customer-360 pflegt Anschriften, Ansprechpartner, CPD-Konten, Rabatte, Preise und
+Chef-Anweisungen selbst (kunden_stamm_pflege: Anlegen am Kunden, Aendern/Entfernen an der Zeile, Entfernen mit Grund);
+der handgebaute Kundenstamm verkauf/kunden-stamm (2.506 Zeilen) leitet auf die Kundenakte weiter. Behoben: die sechs
+ORM-Modelle der Partner-Untertabellen hatten kein tenant_id, obwohl Tabelle und Dienst es verlangen - jedes Anlegen
+und Lesen ueber BusinessPartnerService scheiterte. Offen: Rechnungsdaten (billing-config) in der Kundenakte.
+Bestellvorschlag (09.11.2026): Familie bestellvorschlag (Lager, Verkauf, Rohware, Bedarf, Gespeichert) ersetzt zwei
+Seiten ohne Maske, drei Cockpit-Platzhalter und die Platzhalterliste; Zeilenformen typisiert. Kommandos: Berechnung
+speichern (Server rechnet neu), Zu Bestellung (je Lieferant DocFlow-Entwurf, Menge in Preiseinheit dt, keine feste
+Steuer 7 %). Behoben: Entwurfsnummern aus uuid7-Praefix kollidierten (beleg_anlage mit Anhang aus dem
+Wiederholungsschluessel). Studio-versioniert 762/872, handgebaut 4.
+Seiten ohne Maske (09.11.2026): 15 Seiten auf bestehende Studio-Masken umgehaengt (Lieferantenstamm -> einkauf/supplier,
+Futtermittel-Detailseiten -> futtermittel/einzelfuttermittel, agrar/feeding-business, agrar/feeding-plan,
+futtermittel/analyse, PSM-Stamm -> agrar/psm bzw. agrar/psm-liste, Applikationen, Schlagkartei, Saatgut-Bestellungen,
+Wetter, Duengerrechner, Chargenverfolgung, Verkaufschancen, Kampagne anlegen -> crm/campaign, Anfrage-Erfassung ->
+einkauf/anfrage-erstellen). screen_definition-Routen 78 -> 60, Studio-versioniert 782/872.
+Seiten ohne Maske, Runde 2 (09.11.2026): 11 weitere Seiten auf bestehende Studio-Masken (agrar/saatgut-liste,
+agrar/planung/duengeplanung, agrar/nawaro-vertraege, lager/lagerbewegungen-liste, lager/bestandskorrektur,
+logistik/frachtbriefe, einkauf/frachtauftraege-liste, kontrakte/positionen, etiketten/drucken, crm/campaign-performance,
+waage/liste). screen_definition-Routen 60 -> 50, Studio-versioniert 792/872.
+Restseiten-Cluster (09.11.2026): app/core/screen_definitions_cluster_restseiten.py - Studio-Listen fuer
+nawaro/raps-profil, schichtplan/liste und wissen/wissensbasis auf ihrem typisierten Leseweg (Gates A/B/C/E gruen).
+Technische Seiten + Einstiegs-Umleitungen (09.11.2026): Inventarstufe `technisch` (config/mask_technische_seiten.json,
+je Route ein Grund, Test haelt sie bei hoechstens 6): OIDC-Login/-Callback, Masken-Studio, Studio-Vorschau,
+Studio-Testlauf, Rollout-Pilot. Kaputte Einstiegsseiten (screenId unbekannt) leiten jetzt auf echte Masken:
+finance -> /fibu, hilfe -> /wissen/wissensbasis, document -> /dokumente/ablage, pricing -> /preise/konditionen,
+stock-management -> /lager/bestandsuebersicht. Stand 795 Studio / 38 screen_definition / 25 Altmuster / 3 handgebaut.
+Restseiten-Cluster 2 (09.11.2026): disposition/regeln (Positionsregeln, /positions/rules) und agribusiness/farmers
+(Landwirte, ohne Kontaktdaten in der Liste) als Studio-Listen; nawaro/anbauflaechen zeigt die NawaRo-Kaskade
+(gleicher Leseweg area-sheets).
+workflows/trigger (09.11.2026): Trigger-Regeln des Prozesskerns typisiert (TriggerRegelOut statt extra=allow) und
+als Studio-Liste; Stand 799 Studio / 34 screen_definition.
+Umleitungen (09.11.2026): agrar/ernte/neu -> Erntekampagne-Erfassung, agrar/feldbuch/schlag/neu -> Schlagkartei (beide unverlinkt, screenId unbekannt).
+Vertreterprovisionen (09.11.2026): handgebaute Seite (472 Zeilen) abgeloest. Studio-Listen crm/vertreterprovisionen
+(Gruppen; Anlegen, Staffelzeile anlegen, Stilllegen mit Grund als Kommandowege fuer Maske/CLI/MCP) und
+crm/vertreterprovisionen-staffeln (flacher Leseweg staffelzeilen). Staffeln/Zeilen tragen tenant_id ausdruecklich.
+Ausserdem: Partnerstamm-Pflege war per Ersetzen ohne Anzahl zwoelfmal in screen_definitions.py (ohne Wirkung),
+bereinigt und per Vertragstest an die Kundenakte gebunden.
+Nummernkreise (09.11.2026): admin/nummernkreise als Studio-Liste (Leseweg typisiert NumberRangeOut) mit Konfigurieren/Aendern/Stilllegen als Admin-Kommandowege; handgebaute Seite und Frontend-Client entfernt.
+CI-Fix (09.11.2026): Eingabefelder der Stamm-Kommandos in app/core/eingabefelder_stamm.py (ScreenDefinitions ohne API-Schemapaket importierbar, Doku-Job ohne email-validator).
+Report-Berechtigungen (09.11.2026): admin/report-berechtigungen als Studio-Liste mit Anlegen/Aendern/Entfernen (Admin-Kommandowege, eine Berechtigung je Rolle und Auswertung); handgebaute Seite entfernt.
+Webshop (09.11.2026): admin/webshop (Anbindungen: Anbinden/Entfernen) und admin/webshop-bestellungen (typisierter Leseweg, 'Als Auftrag anlegen' -> DocFlow-Entwurf, Blocker als Ablehnung) als Studio-Listen; handgebaute Seite und die Platzhalterwege /webshop/connectors und /webshop/orders/import (meldete immer 0) entfernt.
+Wetter/Monitoring/Maschinen (09.11.2026): Wetterwege nehmen ohne lat/lon den Betriebsstandort aus tenants.settings.standort (vorher 422 fuer die Studio-Maske agrar/wetter, die Warnungsseite fest Emden); agrar/wetterwarnung neu als Studio-Liste; monitoring/alerts -> admin/monitoring/alerting, maschinenauslastung -> agrar/maschinen-auslastung-liste umgehaengt; drei handgebaute Seiten entfernt. Offen: Pflege des Standorts in den Mandanten-Einstellungen.
+Terminologie (09.11.2026): admin/terminologie als Studio-Liste auf flachem Leseweg /terminology/begriffe; handgebaute Seite entfernt.
+Rollen (09.11.2026): admin/rollen-verwaltung als Studio-Liste (Anlegen/Aendern/Entfernen ueber AdminCoreService; Systemrollen nur lesbar, Rolle mit Benutzern bleibt; Rechte in der Berechtigungsmatrix); handgebaute Seite entfernt. OAuth-Rueckkehr Postfaecher als technische Seite.
+OFFEN Sammelabrechnung (09.11.2026, Befund): rohware_sammelabrechnung berechnet aus domain_agrar.harvest_acceptances
+(Nebentabelle mit menge_netto_kg/preis_eur_t, _load_harvest_row ohne Mandantenfilter), die echten Annahmen liegen in
+domain_inventory.harvest_acceptances (+ harvest_acceptance_positions). Der Assistent waehlte echte Annahmen und
+scheiterte beim Berechnen. Umbau auf echte Annahmen (Betrag aus total_net_amount_eur, Menge aus Positionen, dt) vor
+der Studio-Maske; /buchen schreibt Kreditoren-OP an der Finanz-Buchungsautoritaet vorbei.
+OFFEN ohne echte Datenquelle: einkauf/lieferantenbewertung (compat liefert feste 80 %/4,0), admin/externe-gates
+(simulierte Demo-Zustaende), agribusiness/field-service-tasks (compat ueber CRM-Faelle mit Demo-Daten).
+BELEG-052 Stufe 3b (09.11.2026): NeuroASSIST-Bestellvorschlag und Kernel-Kommando CreatePurchaseOrder legen DocFlow-Bestellentwuerfe an (vorher EinkaufBestellung bzw. Kopf ohne Positionen in public.einkauf_bestellungen mit lieferant_id als Ganzzahl). Mengenumrechnung in die Preiseinheit gemeinsam (beleg_anlage.position_in_preiseinheit). Behoben: lege_beleg_an setzte das Belegdatum auf die Uhrzeit, jede Wiederholung galt als anderer Inhalt.
+BELEG-052 Stufe 3c (09.11.2026): Angebots-Eigenspeicher abgeloest. Router sales_offers (/sales/offers, /sales/quotations:
+Anlegen, Aendern, Loeschen, Umwandeln, Druck, Buchen) entfernt - Liste, Bearbeitung, Umwandlung, Druck und Versand laufen
+ueber DocFlow und die Belegmaske. CSV-Import neu unter POST /belege/sales_offer/actions/import-csv: je Zeile ein
+DocFlow-Angebotsentwurf mit einer Pauschalposition (Betrag, ohne Steuerschluessel; Freigabe erst nach Vervollstaendigung),
+Duplikat je Angebotsnummer, alles oder nichts (Savepoint). Fachaktionskatalog auf /belege/sales_offer und /docflow/.
+CI-Nachzug: Kundenakte ohne edit-Aktion, Bestellvorschlag-Familie, webshop-Altspeichertest entfernt, RLS-Inventar.
+Offen: Tabellen domain_crm.sales_offers/sales_offer_items per Migration abbauen (mit den uebrigen Altspeichern).

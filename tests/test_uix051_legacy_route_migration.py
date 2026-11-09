@@ -71,6 +71,9 @@ class TestUIX051NativeWrapperPages:
             assert f'"{expected_screen_id}"' in delegated
             assert "entityId={entityId}" in delegated
             assert "requestedSectionKey={requestedSectionKey}" in delegated
+        elif rel_path == "sales/sales-order-native.tsx":
+            # BELEG-052 (09.11.2026): Auftraege oeffnen die Belegmaske, Variante sales_order (DocFlow).
+            assert "belegSeite('sales_order')" in content
         else:
             assert "UniversalNativeDetailPage" in content, f"{rel_path}: muss UniversalNativeDetailPage verwenden"
             assert f'screenId="{expected_screen_id}"' in content, (

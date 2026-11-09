@@ -1,7 +1,4 @@
-import { useParams } from '@/app/routing/typed-router'
-import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default function LieferscheinNativePage(): JSX.Element {
-  const { id } = useParams<{ id?: string }>()
-  return <UniversalNativeDetailPage screenId="sales/delivery-note" entityId={id} testId="sales-delivery-note" />
-}
+/** Belegmaske, Variante `sales_delivery` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('sales_delivery')

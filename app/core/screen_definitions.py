@@ -563,7 +563,43 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
         edit["kind"] = "primary"
         definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
+    _partnerstamm_pflege(definition)
     return definition
+
+
+# Tabelle der Kundenakte -> Bereich der Partnerstamm-Pflege (app/api/v1/endpoints/kunden_stamm_pflege.py).
+_PFLEGE_TABELLEN = {"anschriften": "anschrift", "contacts": "ansprechpartner", "cpd": "cpd", "rabatte": "rabatt",
+                    "preise": "preis", "chefanweisungen": "anweisung"}
+
+
+def _partnerstamm_pflege(definition: dict[str, Any]) -> None:
+    """Anlegen, Aendern und Entfernen der Untertabellen in der Maske selbst (09.11.2026).
+
+    Bis dahin sprang "Erweiterte Pflege" in den handgebauten Kundenstamm ``verkauf/kunden-stamm``; der entfaellt.
+    """
+    from app.api.v1.endpoints.kunden_stamm_pflege import BEREICHE, eingabefelder
+
+    definition["actions"] = [a for a in definition["actions"] if a["key"] != "edit"]
+    for tab in definition.get("tabs") or []:
+        for tabelle in tab.get("tables") or []:
+            bereich = BEREICHE.get(_PFLEGE_TABELLEN.get(tabelle["key"], ""))
+            if bereich is None:
+                continue
+            felder = eingabefelder(bereich)
+            definition["actions"].append({
+                "key": f"{bereich.key}_anlegen", "label": f"{bereich.label} anlegen", "kind": "secondary",
+                "dangerLevel": "low", "permission": "crm.customer.update", "zone": "header",
+                "commandEndpoint": f"/api/v1/crm/customers/{{entity_id}}/actions/{bereich.key}_anlegen",
+                "method": "POST", "requiresConfirmation": False, "inputFields": felder})
+            pfad = f"/api/v1/crm/kunden-stamm/{bereich.key}/{{entity_id}}/actions/"
+            tabelle["rowActions"] = [
+                {"key": "aendern", "label": "Ändern", "dangerLevel": "moderate", "permission": "crm.customer.update",
+                 "commandEndpoint": pfad + "aendern", "method": "POST", "requiresConfirmation": False,
+                 "inputFields": felder},
+                {"key": "entfernen", "label": "Entfernen", "dangerLevel": "moderate",
+                 "permission": "crm.customer.update", "commandEndpoint": pfad + "entfernen", "method": "POST",
+                 "requiresConfirmation": True, "auditReasonRequired": True},
+            ]
 
 
 def build_sales_order_screen_definition() -> dict[str, Any]:

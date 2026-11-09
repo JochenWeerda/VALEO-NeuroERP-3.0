@@ -862,8 +862,6 @@ def vorschlag_zu_bestellungen(
     Gruppiert Positionen nach Lieferant → je Lieferant eine Bestellung.
     Gibt eine Liste der erzeugten Bestellungen zurück.
     """
-    from app.infrastructure.models.einkauf_models import EinkaufBestellung, EinkaufBestellungPosition
-
     vorschlag = (
         db.query(EinkaufBestellvorschlag)
         .filter(
@@ -875,16 +873,14 @@ def vorschlag_zu_bestellungen(
     if not vorschlag:
         raise ValueError(f"Vorschlag {vorschlag_id} nicht gefunden")
 
-    # Positionen nach Lieferant gruppieren
+    # Positionen nach Lieferant gruppieren. Je Lieferant ein Bestellentwurf in DocFlow; jeder Entwurf traegt einen
+    # Wiederholungsschluessel - ein erneuter Aufruf nach einem Abbruch legt nur die fehlenden an.
     pos_by_lf: dict[str | None, list[EinkaufBestellvorschlagPosition]] = {}
     for pos in vorschlag.positionen:
         if pos.status == "ignoriert":
             continue
         lf_key = str(pos.lieferant_id) if pos.lieferant_id else "_kein_lieferant"
         pos_by_lf.setdefault(lf_key, []).append(pos)
-
-    from datetime import date as dt
-    import re
 
     created_orders = []
     for lf_key, positions in pos_by_lf.items():
@@ -896,62 +892,31 @@ def vorschlag_zu_bestellungen(
         if lieferant_id is None:
             continue  # Bestellung ohne Lieferant nicht anlegen (NOT NULL)
 
-        # Bestellnummer generieren
-        ts = datetime.now().strftime("%y%m%d%H%M")
-        bestell_nr = f"EK-{ts}-{lf_key[:4].upper() if lf_key != '_kein_lieferant' else 'XXXX'}"
+        # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung mit
+        # fester Mehrwertsteuer 7 % und "Preis je 100 kg" gegen Menge in t). Die Menge steht in der Einheit des
+        # Preises (z. B. dt bei Preis je 100 kg), umgerechnet ueber app/core/agrar_units.py; Steuer nur per Schluessel.
+        from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit
 
-        bestellung = EinkaufBestellung(
-            id=uuid7(),
-            tenant_id=tenant_id,
-            bestellnummer=bestell_nr,
-            lieferant_id=lieferant_id,
-            vorschlag_id=vorschlag.id,
-            niederlassung_id=vorschlag.niederlassung_id,
-            bestelldatum=dt.today(),
-            status="entwurf",
-            erstellt_von=freigegeben_von,
-        )
-        db.add(bestellung)
-        db.flush()
-
+        belegpositionen = []
         netto = Decimal("0")
-        for i, pos in enumerate(positions, start=1):
-            menge = Decimal(str(pos.bestell_menge or pos.vorschlag_menge))
-            preis = Decimal(str(pos.letzter_preis or 0))
-            betrag = menge * preis / 100  # Preis je 100kg → je kg × menge
-
-            bp = EinkaufBestellungPosition(
-                id=uuid7(),
-                bestellung_id=bestellung.id,
-                pos_nr=i,
-                article_id=pos.article_id,
-                artikel_nr=pos.artikel_nr or "",
-                artikel_bezeichnung=pos.artikel_bezeichnung or "",
-                menge=menge,
-                menge_geliefert=Decimal("0"),
-                menge_offen=menge,
-                einheit=pos.einheit or "t",
-                einzelpreis=preis,
-                preis_einheit=pos.preis_einheit or "100kg",
-                netto_betrag=betrag,
-                mwst_satz=Decimal("7"),   # Default Agrar 7%
-                mwst_betrag=betrag * Decimal("0.07"),
-                brutto_betrag=betrag * Decimal("1.07"),
-                status="offen",
-            )
-            db.add(bp)
-            netto += betrag
-            # Vorschlag-Position als bestellt markieren
+        for pos in positions:
+            position = position_in_preiseinheit(
+                artikel_nr=pos.artikel_nr or str(pos.article_id or ""), bezeichnung=pos.artikel_bezeichnung or None,
+                menge=pos.bestell_menge or pos.vorschlag_menge, einheit=pos.einheit,
+                einzelpreis=pos.letzter_preis, preis_einheit=pos.preis_einheit or "100kg")
+            belegpositionen.append(position)
+            netto += Decimal(str(position.menge)) * Decimal(str(position.einzelpreis))
             pos.status = "bestellt"
-
-        bestellung.netto_summe = netto
-        bestellung.mwst_betrag = netto * Decimal("0.07")
-        bestellung.brutto_summe = netto * Decimal("1.07")
         db.flush()
+        beleg_id = lege_beleg_an(
+            db, tenant_id, "purchase_order", partner_id=str(lieferant_id), positionen=belegpositionen,
+            quelle="bestellvorschlag", referenz=f"{vorschlag.id}-{lieferant_id}"[:80],
+            entwurf_nr=f"BV-{str(vorschlag.id)[:8]}", akteur=freigegeben_von,
+            idempotenz=f"bestellvorschlag-{vorschlag.id}-{lieferant_id}"[:120])
 
         created_orders.append({
-            "bestellung_id":   str(bestellung.id),
-            "bestellnummer":   bestellung.bestellnummer,
+            "bestellung_id":   beleg_id,
+            "bestellnummer":   f"BV-{str(vorschlag.id)[:8]}",
             "lieferant_name":  lf.firmenname if lf else "Kein Lieferant",
             "positionen_anz":  len(positions),
             "netto_summe":     float(netto),

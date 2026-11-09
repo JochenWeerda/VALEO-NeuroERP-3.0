@@ -57,7 +57,6 @@ const BATCH11: Array<[string, string]> = [
   ['dokumente/ablage.tsx', 'dokumente/ablage-liste'],
   ['einkauf/anfragen-create.tsx', 'einkauf/anfragen-create-liste'],
   ['einkauf/angebote-vergleich.tsx', 'einkauf/angebote-vergleich-liste'],
-  ['einkauf/bestellvorschlaege.tsx', 'einkauf/bestellvorschlaege-liste'],
   ['einkauf/dienstleistungen-haltung.tsx', 'einkauf/dienstleistungen-haltung-liste'],
   ['einkauf/EinkaufVorgangPage.tsx', 'einkauf/einkauf-vorgang-liste'],
   ['einkauf/kontrakte-service.tsx', 'einkauf/kontrakte-service-liste'],

@@ -27,7 +27,6 @@ def test_import_replay_and_conflict_are_actor_and_payload_bound(monkeypatch):
     from types import SimpleNamespace
     import json
     from app.services import sales_offer_import as service
-    from app.api.v1.endpoints import sales_offers
 
     class Result:
         def __init__(self, row=None): self.row = row
@@ -50,7 +49,7 @@ def test_import_replay_and_conflict_are_actor_and_payload_bound(monkeypatch):
     monkeypatch.setattr(service, "current_identity", lambda: actor)
     monkeypatch.setattr(service, "_write_audit", lambda *a, **kw: "audit")
     calls = []
-    monkeypatch.setattr(sales_offers, "persist_sales_offer", lambda db, tenant, payload: (calls.append(payload.offer_number) or SimpleNamespace(id="one")))
+    monkeypatch.setattr(service, "persist_offer", lambda db, tenant, row, actor: (calls.append(row["offer_number"]) or "one"))
     db = DB()
     content = HEADER + "A;Test;c1;1;EUR;\n"
     assert service.import_offers(db, "t1", content, "key", None)["count"] == 1
@@ -64,7 +63,6 @@ def test_import_replay_and_conflict_are_actor_and_payload_bound(monkeypatch):
 def test_import_rolls_back_on_second_offer_failure(monkeypatch):
     from types import SimpleNamespace
     from app.services import sales_offer_import as service
-    from app.api.v1.endpoints import sales_offers
     class DB:
         rolled_back = False
         def execute(self, *args): return self
@@ -73,10 +71,10 @@ def test_import_rolls_back_on_second_offer_failure(monkeypatch):
         def rollback(self): self.rolled_back = True
     db = DB()
     monkeypatch.setattr(service, "current_identity", lambda: SimpleNamespace(tenant_id="t1", subject="person", claims={"identity_type": "human"}))
-    def persist(db, tenant, payload):
-        if payload.offer_number == "B": raise HTTPException(409, "duplicate")
-        return SimpleNamespace(id="one")
-    monkeypatch.setattr(sales_offers, "persist_sales_offer", persist)
+    def persist(db, tenant, row, actor):
+        if row["offer_number"] == "B": raise HTTPException(409, "duplicate")
+        return "one"
+    monkeypatch.setattr(service, "persist_offer", persist)
     with pytest.raises(HTTPException):
         service.import_offers(db, "t1", HEADER + "A;First;c1;1;EUR;\nB;Second;c1;2;EUR;\n", "key", None)
     assert db.rolled_back

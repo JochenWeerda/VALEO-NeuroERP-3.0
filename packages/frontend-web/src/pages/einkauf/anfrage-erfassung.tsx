@@ -1,7 +1,12 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
+/** Anfrage-Erfassung: dieselbe Studio-Maske wie "Anfrage erstellen" (vorher eine screenId ohne ScreenDefinition). */
 export default function Page(): JSX.Element {
   return (
-    <NativeListPage screenId="einkauf/anfrage-erfassung" testId="screen-einkauf/anfrage-erfassung" />
+    <UniversalNativeCockpitPage
+      screenId="einkauf/anfrage-erstellen"
+      testId="einkauf-anfrage-erfassung"
+      permissions={['procurement.read']}
+    />
   )
 }

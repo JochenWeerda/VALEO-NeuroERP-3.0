@@ -12170,6 +12170,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/ap_invoices.py",
+            "app/api/v1/endpoints/beleg_versand.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
@@ -13669,6 +13670,7 @@
           ],
           "read_by": [
             "app/agrar/feldbuch/portal_zugang.py",
+            "app/api/v1/endpoints/beleg_versand.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/contacts.py",
@@ -13681,9 +13683,9 @@
             "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
+            "app/api/v1/endpoints/kunden_stamm_pflege.py",
             "app/api/v1/endpoints/mask_frontend_bridges.py",
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
@@ -13708,6 +13710,7 @@
             "app/services/portal_intelligence_service.py",
             "app/services/portal_lohndienst_service.py",
             "app/services/sales_credit_service.py",
+            "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -14503,12 +14506,6 @@
           "placement": "legacy",
           "primary_key": [
             "id"
-          ],
-          "read_by": [
-            "app/api/v1/endpoints/sales_offers.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_offers.py"
           ]
         },
         "sales_offers": {
@@ -14656,12 +14653,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/mask_frontend_bridges.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_reports.py",
-            "app/services/o2c_chain_service.py"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/sales_offers.py"
+            "app/services/o2c_chain_service.py",
+            "app/services/sales_offer_import.py"
           ]
         },
         "sales_order_items": {
@@ -14768,7 +14762,6 @@
             "app/services/sales_match_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_orders.py"
           ]
         },
@@ -14932,6 +14925,7 @@
             "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
+            "app/services/beleg_anlage.py",
             "app/services/customer_reference.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
@@ -14940,7 +14934,8 @@
             "app/services/procurement_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
-            "app/services/sales_storno_service.py"
+            "app/services/sales_storno_service.py",
+            "app/services/webshop_integration_service.py"
           ],
           "screens": [
             "sales/delivery-note"
@@ -14949,10 +14944,8 @@
             "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/pick_lists.py",
             "app/api/v1/endpoints/sales_delivery_notes.py",
-            "app/api/v1/endpoints/sales_offers.py",
             "app/api/v1/endpoints/sales_order_commands.py",
-            "app/api/v1/endpoints/sales_orders.py",
-            "app/services/webshop_integration_service.py"
+            "app/api/v1/endpoints/sales_orders.py"
           ]
         },
         "supplier_tax_profiles": {
@@ -15922,6 +15915,7 @@
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
             "app/services/kontrollkorb.py",
+            "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py"
           ],
           "written_by": [
@@ -18065,7 +18059,6 @@
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/services/einkauf_compat_service.py",
-            "app/services/rfq_service.py",
             "app/services/wareneingang_avis_service.py"
           ]
         },
@@ -18459,18 +18452,19 @@
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/infrastructure/models/einkauf_models.py",
+            "app/services/beleg_anlage.py",
             "app/services/bestell_kommunikation_service.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/procurement_match_service.py",
             "app/services/procurement_service.py",
+            "app/services/rfq_service.py",
             "app/services/wareneingang_avis_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/services/einkauf_compat_service.py",
-            "app/services/rfq_service.py",
             "app/services/wareneingang_avis_service.py"
           ]
         },
@@ -18555,6 +18549,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/workers/low_stock_agent.py"
           ],
@@ -19628,6 +19623,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/beleg_versand.py",
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
@@ -48321,6 +48317,7 @@
             "app/api/v1/endpoints/sales_orders.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/sustainability.py",
+            "app/services/beleg_anlage.py",
             "app/services/docflow_service.py",
             "app/services/document_control_projection.py",
             "app/services/logistics_disposition_service.py",
@@ -49856,10 +49853,15 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/admin_reporting.py"
+            "app/api/v1/endpoints/admin_reporting.py",
+            "app/api/v1/endpoints/admin_reporting_kommandos.py"
+          ],
+          "screens": [
+            "admin/berechtigungen-matrix"
           ],
           "written_by": [
-            "app/api/v1/endpoints/admin_reporting.py"
+            "app/api/v1/endpoints/admin_reporting.py",
+            "app/api/v1/endpoints/admin_reporting_kommandos.py"
           ]
         },
         "admin_routing_rules": {
@@ -60413,6 +60415,7 @@
           "read_by": [
             "app/api/v1/endpoints/admin_monitoring.py",
             "app/api/v1/endpoints/admin_suite.py",
+            "app/api/v1/endpoints/agrar_wetter.py",
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/sales_invoice_einvoice.py",
             "app/api/v1/endpoints/vat_return_export.py",
@@ -60768,10 +60771,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "vertreter_provisionsstaffeln": {
@@ -60819,10 +60824,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "vertreter_staffel_zeilen": {
@@ -60875,10 +60882,12 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/vertreterprovisionen.py"
+            "app/api/v1/endpoints/vertreterprovisionen.py",
+            "app/api/v1/endpoints/vertreterprovisionen_kommandos.py"
           ]
         },
         "waage_hofliste": {
@@ -61350,6 +61359,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/webshop_kommandos.py",
             "app/services/webshop_integration_service.py"
           ],
           "written_by": [
@@ -61407,6 +61417,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/webshop_kommandos.py",
             "app/services/webshop_integration_service.py"
           ],
           "written_by": [

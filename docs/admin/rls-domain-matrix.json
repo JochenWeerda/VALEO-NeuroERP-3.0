@@ -1034,6 +1034,7 @@
    ],
    "leser": [
     "app/agrar/feldbuch/portal_zugang.py",
+    "app/api/v1/endpoints/beleg_versand.py",
     "app/api/v1/endpoints/crm_360.py",
     "app/api/v1/endpoints/crm_360_sql.py",
     "app/api/v1/endpoints/crm_360_tabs.py",
@@ -1042,6 +1043,7 @@
     "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
     "app/api/v1/endpoints/debtors.py",
     "app/api/v1/endpoints/finance_invoices.py",
+    "app/api/v1/endpoints/kunden_stamm_pflege.py",
     "app/api/v1/endpoints/portal_kundenzugaenge.py",
     "app/api/v1/endpoints/prospecting.py",
     "app/api/v1/endpoints/rag.py",
@@ -1123,7 +1125,6 @@
     "app/api/v1/endpoints/flow_spines.py",
     "app/api/v1/endpoints/mask_frontend_bridges.py",
     "app/api/v1/endpoints/portal_shop.py",
-    "app/api/v1/endpoints/sales_offers.py",
     "app/communication/crisis_plan.py",
     "app/core/production_service_implementations.py",
     "app/crm/router.py",
@@ -1151,9 +1152,9 @@
    ],
    "identitaet": {
     "dienst": 14,
-    "nutzlast": 9,
+    "nutzlast": 8,
     "standardmandant": 6,
-    "token": 24
+    "token": 25
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",

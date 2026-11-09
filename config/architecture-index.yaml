@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-08
+# Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-08T21:57:20Z'
+generated_at: '2026-11-09T07:13:02Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -688,6 +688,7 @@ domains:
     - /crm/segment/new
     - /crm/segments
     - /crm/vertreterprovisionen
+    - /crm/vertreterprovisionen/staffeln
     - /crm/vertreterstamm
     - /crm/wettbewerber
     - /crm/wiedervorlagen
@@ -883,6 +884,7 @@ domains:
     - debtors
     - dunning
     - kaeufergruppe
+    - kunden_stamm_pflege
     - leads
     - mail_workspace
     - messages
@@ -906,13 +908,13 @@ domains:
     - sales_invoice_einvoice
     - sales_invoices
     - sales_match
-    - sales_offers
     - sales_order_commands
     - sales_orders
     - sales_reports
     - sales_shipping_ext
     - sales_storno
     - vertreterprovisionen
+    - vertreterprovisionen_kommandos
     - vertreterstamm
     - whatsapp_intake
     - whatsapp_notify
@@ -1051,6 +1053,8 @@ domains:
     - archive_service
     - atlas_customs_service
     - audit_hardening
+    - beleg_anlage
+    - beleg_druck
     - beleg_liste
     - compliance_pcn_lifecycle_service
     - compliance_service
@@ -1084,6 +1088,8 @@ domains:
     - atlas_zollausfuhr
     - audit
     - audit_evidence
+    - beleg_import
+    - beleg_versand
     - belege
     - compliance
     - compliance_dsgvo
@@ -1713,6 +1719,7 @@ domains:
     - massebilanz
     - master_data
     - number_ranges
+    - number_ranges_kommandos
     - nve
     - pick_lists
     - position_overrides
@@ -1936,6 +1943,7 @@ domains:
     - /admin/vordruck-editor
     - /admin/webhooks
     - /admin/webshop
+    - /admin/webshop/bestellungen
     - /admin/workflow-editor
     - /admin/zeitachsen-editor
     - /aktien/dividenden
@@ -2115,6 +2123,8 @@ domains:
     - admin_monitoring
     - admin_pos
     - admin_reporting
+    - admin_reporting_kommandos
+    - admin_rollen_kommandos
     - admin_suite
     - agent_context_api
     - agent_tool_contracts
@@ -2217,6 +2227,7 @@ domains:
     - webhook_system
     - webhooks
     - webshop_integration
+    - webshop_kommandos
     - websocket
     - wf_cockpit_persist
     - wf_trigger
@@ -2285,6 +2296,7 @@ domains:
     - /einkauf/bestellungen/:id
     - /einkauf/bestellungen/neu
     - /einkauf/bestellvorschlaege
+    - /einkauf/bestellvorschlaege/ansicht/:variante
     - /einkauf/bestellvorschlag-kontrakt
     - /einkauf/bestellvorschlag-lager
     - /einkauf/bestellvorschlag-rohware
@@ -2356,6 +2368,7 @@ domains:
     - einkauf_avis_kommandos
     - einkauf_bestellung_kommandos
     - einkauf_bestellvorschlag
+    - einkauf_bestellvorschlag_kommandos
     - einkauf_kpis
     - einkauf_lieferschein
     - procurement_match
@@ -2371,12 +2384,12 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1141
-  frontend_routes_mapped: 1141
-  backend_services_total: 341
-  backend_services_mapped: 341
-  backend_endpoints_total: 472
-  backend_endpoints_mapped: 472
+  frontend_routes_total: 1144
+  frontend_routes_mapped: 1144
+  backend_services_total: 343
+  backend_services_mapped: 343
+  backend_endpoints_total: 480
+  backend_endpoints_mapped: 480
 unmapped:
   frontend_routes: []
   backend_services: []

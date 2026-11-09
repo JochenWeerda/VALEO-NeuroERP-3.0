@@ -1,13 +1,4 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-const SCREEN_ID = 'einkauf/lieferschein-erfassen'
-
-export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId={SCREEN_ID}
-      testId="einkauf-lieferschein-erfassen"
-      permissions={['procurement.read']}
-    />
-  )
-}
+/** Belegmaske, Variante `goods_receipt` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('goods_receipt')

@@ -336,6 +336,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/webshop-bestellungen",
+      "path": "admin/webshop/bestellungen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/workflow-editor",
       "path": "admin/workflow-editor",
       "source": "alias"
@@ -2331,6 +2336,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/crm/vertreterprovisionen-staffeln",
+      "path": "crm/vertreterprovisionen/staffeln",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/crm/vertreterstamm",
       "path": "crm/vertreterstamm",
       "source": "auto"
@@ -2749,6 +2759,11 @@
       "module": "@/pages/einkauf/bestellvorschlaege",
       "path": "einkauf/bestellvorschlaege",
       "source": "auto"
+    },
+    {
+      "module": "@/pages/einkauf/bestellvorschlag-ansicht",
+      "path": "einkauf/bestellvorschlaege/ansicht/:variante",
+      "source": "alias"
     },
     {
       "module": "@/pages/einkauf/bestellvorschlag-kontrakt",
@@ -5718,7 +5733,6 @@
     "code",
     "code_challenge",
     "code_challenge_method",
-    "contractId",
     "customerId",
     "customerName",
     "customerNumber",
@@ -5728,7 +5742,6 @@
     "fromOffer",
     "id",
     "inbox",
-    "initialName",
     "instanceId",
     "kunde",
     "kundeName",
@@ -5738,22 +5751,17 @@
     "nonce",
     "page",
     "partnerName",
-    "pflege",
     "qpResult",
     "qualityProtocolId",
     "queueEntryId",
     "rechnung",
     "rechnungId",
     "rechnungsnr",
-    "requisitionId",
-    "returnTo",
-    "rfqId",
     "search",
     "service_request_id",
     "state",
     "subject",
     "vehiclePlate",
-    "vorlage",
     "workflowCase",
     "workflowInstanceId",
     "workflowLabel",

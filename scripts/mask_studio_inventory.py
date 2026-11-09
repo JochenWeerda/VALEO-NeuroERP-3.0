@@ -25,6 +25,9 @@ in CI geprueft sein. Dieses Skript misst den Abstand dazu, ohne etwas zu aendern
     Freies JSX ohne Builder.
 ``weiterleitung``
     Kleine Seite, die nur umleitet; zaehlt nicht als Maske.
+``technisch``
+    Anmeldefluss oder Werkzeug des Studios selbst (``config/mask_technische_seiten.json``, je Route ein Grund,
+    nur schrumpfend); zaehlt nicht als Maske.
 
 Die Stufe wird statisch aus dem Quelltext bestimmt: Die Routendatei und die von ihr importierten Dateien unter
 ``pages/`` und ``features/`` (nicht ``components/``: ein gemeinsamer Baustein macht keine Seite zur Maske).
@@ -65,8 +68,10 @@ FAMILIES = ROOT / "config/document_screen_versions.json"
 STUDIO_VERSIONS = ROOT / "config/studio_screen_versions.json"
 MCP_MAP = ROOT / "config/mcp_mask_action_map.yaml"
 RATCHET = ROOT / "config/mask_studio_ratchet.json"
+TECHNISCH = ROOT / "config/mask_technische_seiten.json"
 
-STUFEN = ("studio_versioniert", "screen_definition", "builder_altmuster", "handgebaut", "weiterleitung")
+STUFEN = ("studio_versioniert", "screen_definition", "builder_altmuster", "handgebaut", "weiterleitung", "technisch")
+KEINE_MASKE = ("weiterleitung", "technisch")
 
 #: MCP-Befunde aus der Aktionskarte. "gesperrt" ist eine bewusste Entscheidung, keine Luecke.
 MCP_ZUGANG = {"mapped", "mapped_read", "mapped_propose_only", "adjacent"}
@@ -246,8 +251,12 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
     sources = _page_sources(entry)
     texts = {p: p.read_text(encoding="utf-8", errors="replace") for p in sources}
     screen_ids = sorted({sid for t in texts.values() for sid in _screen_ids_from_text(t)})
-    from app.core.mask_runtime_evidence import has_visible_runtime
-    builder = any(has_visible_runtime(t) for t in texts.values())
+    from app.core.mask_runtime_evidence import bound_domain_runtime_ids, has_visible_runtime
+    # Fach-Host (IntakeWeighingPage -> UniversalNativeCockpitPage + registrierter Fach-Renderer): derselbe Nachweis
+    # wie Gate E, sonst stuende eine Builder-Maske hier als "handgebaut".
+    fachhost = {sid for t in texts.values() for sid in bound_domain_runtime_ids(t, root=ROOT)}
+    screen_ids = sorted(set(screen_ids) | fachhost)
+    builder = bool(fachhost) or any(has_visible_runtime(t) for t in texts.values())
     altmuster = any(_ALTMUSTER.search(t) for t in texts.values())
     entry_text = texts[entry]
     if "createLegacyMaskPage" in entry_text:
@@ -269,7 +278,13 @@ def classify_page(entry: Path, *, beleg_prefix: str, studio_ids: frozenset[str],
             "dateien": [p.relative_to(ROOT).as_posix() for p in sources]}
 
 
+def technische_seiten() -> dict[str, str]:
+    """Route -> Grund. Anmeldefluss und Studio-Werkzeuge sind keine Fachmasken."""
+    return json.loads(TECHNISCH.read_text(encoding="utf-8"))["seiten"]
+
+
 def pages(*, beleg_prefix: str, studio_ids: frozenset[str]) -> list[dict]:
+    technisch = technische_seiten()
     rows = []
     for alias in json.loads(ROUTES.read_text(encoding="utf-8"))["aliases"]:
         entry = _resolve(alias["module"], ROUTES)
@@ -279,6 +294,8 @@ def pages(*, beleg_prefix: str, studio_ids: frozenset[str]) -> list[dict]:
             row.update(stufe="handgebaut", screen_ids=[], dateien=[], fehler="modul_nicht_gefunden")
         else:
             row.update(classify_page(entry, beleg_prefix=beleg_prefix, studio_ids=studio_ids, route=path))
+            if path in technisch:
+                row.update(stufe="technisch", grund=technisch[path])
         rows.append(row)
     return sorted(rows, key=lambda r: r["route"])
 
@@ -492,7 +509,7 @@ def check(inv: dict) -> int:
 def markdown(inv: dict) -> str:
     seiten = inv["seiten"]
     stufen = Counter(r["stufe"] for r in seiten)
-    masken = [r for r in seiten if r["stufe"] != "weiterleitung"]
+    masken = [r for r in seiten if r["stufe"] not in KEINE_MASKE]
     wirksam = [a for a in inv["aktionen"] if a["art"] == "serverwirksam"]
     by_area: dict[str, Counter] = defaultdict(Counter)
     for row in seiten:
@@ -505,7 +522,7 @@ def markdown(inv: dict) -> str:
         "| Stufe | Routen | Anteil an Masken |", "|---|---:|---:|",
     ]
     for stufe in STUFEN:
-        share = "" if stufe == "weiterleitung" else f"{100 * stufen[stufe] / max(len(masken), 1):.1f} %"
+        share = "" if stufe in KEINE_MASKE else f"{100 * stufen[stufe] / max(len(masken), 1):.1f} %"
         lines.append(f"| {stufe} | {stufen[stufe]} | {share} |")
     lines += ["", f"Gesamt {len(seiten)} Routen, davon {len(masken)} Masken.", "",
               "## Aktionen", "",
@@ -555,8 +572,8 @@ def markdown(inv: dict) -> str:
     lines += [f"| `{r['route']}` | {r['stufe']} |" for r in beleg]
     lines += ["", f"Registrierte ScreenDefinitions ohne eigene Route: {len(inv['masken_ohne_route'])}.", "",
               "## Bereiche (Rollout-Reihenfolge nach Anzahl handgebauter Masken)", "",
-              "| Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung |",
-              "|---|---:|---:|---:|---:|---:|"]
+              "| Bereich | studio_versioniert | screen_definition | builder_altmuster | handgebaut | weiterleitung | technisch |",
+              "|---|---:|---:|---:|---:|---:|---:|"]
     for area, counts in sorted(by_area.items(), key=lambda kv: (-kv[1]["handgebaut"], kv[0])):
         lines.append(f"| {area} | " + " | ".join(str(counts[s]) for s in STUFEN) + " |")
     lines.append("")

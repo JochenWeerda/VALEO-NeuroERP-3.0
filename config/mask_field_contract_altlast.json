@@ -76,7 +76,6 @@
     "verkauf/kunde-neu",
     "verkauf/kunden-stamm",
     "verkauf/kunden-stamm-enhanced",
-    "verkauf/rechnungen/neu",
     "waage/wiegeschein"
   ],
   "nicht_pruefbar": [
@@ -117,8 +116,6 @@
     "lager/charge/kopf -> /api/v1/chargen/{entity_id}",
     "personal/schulung-neu/kopf -> /api/v1/training/courses/{entity_id}",
     "rezepte/rezept/kopf -> /api/v1/futtermittel/rezepte/{entity_id}",
-    "sales/delivery-editor-new/kopf -> /api/v1/sales/blanket-orders/{entity_id}",
-    "sales/delivery-editor/kopf -> /api/v1/sales/blanket-orders/{entity_id}",
     "service/anfrage-detail/kopf -> /api/v1/service/anfragen/{entity_id}",
     "service/anfrage/kopf -> /api/v1/service/anfragen/{entity_id}",
     "service/anfrage/neu/kopf -> /api/v1/service/anfragen/{entity_id}",

@@ -89,7 +89,6 @@
     "crm/lieferant": "partner_number",
     "crm/segment": "name",
     "crm/vertreter": "vertreter_nr",
-    "einkauf/rechnungseingang/neu": null,
     "fibu/abschluss-checklist": "name",
     "fibu/abschluss-checklist-detail": "id",
     "fibu/anlage": "asset_number",
@@ -100,7 +99,6 @@
     "finance/bank-account": "iban",
     "finance/bank-stamm": "id",
     "finance/debitoren/new": "debtor_number",
-    "finance/invoices/new": null,
     "futter/einzel": "artikel_nummer",
     "futter/misch": "produkt_code",
     "futtermittel/einzelfuttermittel/stamm/new": "artikel_nummer",
@@ -118,8 +116,6 @@
     "produktion/rezepturgruppe": "name",
     "produktion/rezepturgruppen": "id",
     "rezepte/rezept": "name",
-    "sales/delivery-editor": "create",
-    "sales/delivery-editor-new": "id",
     "service/anfrage": "titel",
     "service/anfrage-detail": "id",
     "service/anfrage/neu": "id",
@@ -140,7 +136,6 @@
     "verkauf/kunde-neu": "id",
     "verkauf/kunden-stamm": "id",
     "verkauf/kunden-stamm-enhanced": "id",
-    "verkauf/rechnungen/neu": "id",
     "waage/wiegeschein": "ticket_number"
   },
   "roh_bezuege": {

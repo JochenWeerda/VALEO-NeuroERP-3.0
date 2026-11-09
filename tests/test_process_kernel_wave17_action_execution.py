@@ -118,8 +118,13 @@ def test_action_execution_service_calls_db_when_accepted():
     mock_db.commit.assert_called()
 
 
-def test_create_purchase_order_runs_domain_mutation_with_db():
-    """CreatePurchaseOrder: Dispatch ACCEPTED + registrierter Handler → mehrere executes (Audit + Bestellung)."""
+def test_create_purchase_order_runs_domain_mutation_with_db(monkeypatch):
+    """CreatePurchaseOrder: Dispatch ACCEPTED + registrierter Handler -> Bestellentwurf in DocFlow (BELEG-052)."""
+    from app.services import beleg_anlage
+
+    angelegt: list[dict] = []
+    monkeypatch.setattr(beleg_anlage, "lege_beleg_an",
+                        lambda db, tenant, art, **rest: angelegt.append({"tenant": tenant, "art": art, **rest}) or "B1")
     mock_db = MagicMock()
     service = ActionExecutionService()
     result = service.execute(
@@ -145,8 +150,12 @@ def test_create_purchase_order_runs_domain_mutation_with_db():
         db=mock_db,
     )
     assert result.status == ActionExecutionStatus.ACCEPTED
-    assert mock_db.execute.call_count >= 2
+    assert mock_db.execute.call_count >= 1  # Audit
     mock_db.commit.assert_called()
+    [beleg] = angelegt
+    assert (beleg["tenant"], beleg["art"], beleg["partner_id"]) == ("t-procurement", "purchase_order", "1")
+    assert beleg["entwurf_nr"] == "UNIT-AE-PO-1"
+    assert beleg["idempotenz"] == "kernel-create-po-idem-create-po-domain-1"
 
 
 def test_action_execution_service_rejects_unknown_command_name():

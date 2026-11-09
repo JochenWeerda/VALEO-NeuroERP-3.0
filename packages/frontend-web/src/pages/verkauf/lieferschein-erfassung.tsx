@@ -1,7 +1,4 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="verkauf/lieferschein-erfassung" testId="screen-verkauf/lieferschein-erfassung" />
-  )
-}
+/** Belegmaske, Variante `sales_delivery` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('sales_delivery')

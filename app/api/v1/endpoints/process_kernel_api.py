@@ -343,6 +343,7 @@ from ....core.query_fallback_contracts import (
 )
 
 from app.api.v1.schemas.base import BaseSchema
+from app.api.v1.schemas.workflow_trigger_schemas import TriggerRegelOut
 from pydantic import ConfigDict as _ConfigDict
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
@@ -4809,8 +4810,7 @@ def pruefe_einwilligung(payload: dict):
 
 
 @router.get("/trigger/regeln", tags=["process-kernel"], summary="Trigger regeln abrufen",
-    response_model=list[ProcessKernelOut]
-)
+    response_model=list[TriggerRegelOut])
 def get_trigger_regeln():
     return [
         {

@@ -1,7 +1,6 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { Navigate } from '@/app/routing/typed-router'
 
+/** Alte Seite ohne eigene Maske (screenId unbekannt, nicht verlinkt): fuehrt auf die Schlagkartei. */
 export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="agrar/feldbuch/schlag/neu" testId="screen-agrar/feldbuch/schlag/neu" />
-  )
+  return <Navigate to="/agrar/feldbuch/schlagkartei" replace />
 }

@@ -1,6 +1,4 @@
-import { InvoiceCapturePage } from '@/pages/finance/InvoiceCapturePage'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-/** Eingangsrechnung erfassen: dieselbe Studio-Erfassung wie /finance/ap/invoices/new (einkauf/rechnungseingang/neu). */
-export default function EinkaufRechnungEingangErfassungPage(): JSX.Element {
-  return <InvoiceCapturePage purchase />
-}
+/** Belegmaske, Variante `purchase_invoice` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('purchase_invoice')

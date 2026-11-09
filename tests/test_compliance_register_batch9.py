@@ -69,7 +69,7 @@ def test_disposition_und_zertifikate_api_sind_weg():
     assert not [p for p in pfade if p.startswith("/api/v1/zertifikate/tenant") or p == "/api/v1/zertifikate/ablaufend"]
     for seite in ("disposition/liste.tsx", "disposition/engpass-monitor.tsx"):
         text = (ROOT / "packages/frontend-web/src/pages" / seite).read_text(encoding="utf-8")
-        assert 'screenId="einkauf/bestellvorschlaege-liste"' in text, seite
+        assert 'screenId="bestellvorschlag/gespeichert"' in text, seite  # Familie bestellvorschlag (09.11.2026)
 
 
 # --- Teil 2: Pruefstand ----------------------------------------------------------------------------------------

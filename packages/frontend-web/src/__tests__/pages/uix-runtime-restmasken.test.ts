@@ -49,26 +49,5 @@ describe('UIX zentrale Runtime und Restmasken', () => {
     expect(read('../../pages/portal/whatsapp-simulator.tsx')).not.toMatch(/size="sm"/)
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt KIM als Redirect und Auftrag/Rechnung/Lieferschein ohne size=sm', () => {
-    const kim = read('../../pages/crm/kim/index.tsx')
-    expect(kim).toContain('/crm/kunden/')
-    expect(kim).toContain('readQueryParam')
-    expect(kim).not.toMatch(/size="sm"/)
-    expect(kim).not.toMatch(/h-6 px-2/)
-    const files = [
-      '../../pages/sales/OrderEditorLegacyPage.tsx',
-      '../../pages/sales/invoice-editor.tsx',
-      '../../pages/sales/delivery-editor.tsx',
-      '../../pages/sales/delivery-editor-new.tsx',
-      '../../pages/sales/auftragskette.tsx',
-      '../../pages/sales/auftrag-lieferschein-abgleich.tsx',
-    ]
-    for (const file of files) {
-      expect(read(file), file).not.toMatch(/size="sm"/)
-    }
-    expect(read('../../pages/sales/OrderEditorLegacyPage.tsx')).toContain('min-h-touch')
-    expect(read('../../pages/sales/OrderEditorLegacyPage.tsx')).not.toMatch(/h-8 w-8/)
-    expect(read('../../pages/sales/invoice-editor.tsx')).toContain('XRechnung')
-  })
+  // Der fruehere Fall zu Auftrag/Rechnung/Lieferschein-Editor entfiel 09.11.2026: die Seiten oeffnen die Belegmaske.
 })

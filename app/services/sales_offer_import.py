@@ -1,4 +1,10 @@
-"""Atomic, idempotent import of explicitly specified sales offers."""
+"""Atomic, idempotent import of explicitly specified sales offers.
+
+Seit 09.11.2026 (BELEG-052, DocFlow einziger Belegspeicher) entsteht je CSV-Zeile ein Angebotsentwurf in DocFlow
+statt einer Zeile in ``domain_crm.sales_offers``. Die CSV kennt nur Kopfdaten; der Betrag steht als eine
+Pauschalposition (Menge 1, Preis = Betrag, ohne Steuerschluessel) im Entwurf. Vor der Freigabe wird das Angebot in
+der Belegmaske vervollstaendigt - ohne Steuerschluessel bucht nichts. ``valid_until`` fuehrt DocFlow nicht.
+"""
 from __future__ import annotations
 
 import csv
@@ -13,7 +19,6 @@ from decimal import Decimal, InvalidOperation
 from uuid import uuid4
 
 from fastapi import HTTPException
-from pydantic import ValidationError
 from sqlalchemy import text
 from app.core.business_time import business_now
 from app.core.identity_context import current_identity
@@ -69,16 +74,47 @@ def parse_offer_csv(content: str) -> list[dict]:
         raise HTTPException(422, "Malformed CSV") from error
 
 
+QUELLE = "csv_import"
+
+
+def persist_offer(db, tenant: str, row: dict, actor: str) -> str:
+    """Ein Angebotsentwurf in DocFlow; dieselbe Angebotsnummer je Mandant nur einmal (409)."""
+    from app.services.beleg_anlage import Position, lege_beleg_an
+
+    nummer = row["offer_number"]
+    if db.execute(text("SELECT 1 FROM domain_docflow.document_headers WHERE tenant_id = :t AND doc_type = 'sales_offer' "
+                       "AND source_system = :q AND source_ref = :n"), {"t": tenant, "q": QUELLE, "n": nummer}).first():
+        raise HTTPException(409, f"Offer number {nummer} already imported")
+    kunde = db.execute(text("SELECT id::text FROM domain_crm.customers WHERE tenant_id = :t AND (id::text = :k OR "
+                            "customer_number = :k) LIMIT 1"), {"t": tenant, "k": row["customer_id"]}).scalar()
+    if kunde is None:
+        raise HTTPException(422, f"Unknown customer for offer {nummer}")
+    return lege_beleg_an(
+        db, tenant, "sales_offer", partner_id=kunde, quelle=QUELLE, referenz=nummer, entwurf_nr=f"CSV-{nummer}",
+        akteur=actor, positionen=[Position(artikel_nr="PAUSCHAL", bezeichnung=row["subject"][:255], menge=1,
+                                           einheit="Stk", einzelpreis=float(row["total_amount"]))])
+
+
+def _persist_all(db, tenant: str, rows: list[dict], actor: str) -> list[str]:
+    """Alle Entwuerfe in einer Einheit: DocFlow committet je Beleg; im Savepoint gibt das nur den Savepoint frei,
+    erst ``import_offers`` committet. Scheitert die zweite Zeile, ist auch die erste nicht angelegt."""
+    from sqlalchemy.orm import Session
+
+    if not isinstance(db, Session):  # schlanke Test-Adapter
+        return [persist_offer(db, tenant, row, actor) for row in rows]
+    with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as inner:
+        ids = [persist_offer(inner, tenant, row, actor) for row in rows]
+        inner.commit()
+    return ids
+
+
 def import_offers(db, tenant: str, content: str, key: str, reason: str | None):
-    from app.api.v1.endpoints.sales_offers import SalesOfferCreate, persist_sales_offer
     principal = current_identity()
     if principal.tenant_id != tenant or principal.claims.get("identity_type") != "human" or principal.claims.get("act") or principal.claims.get("agent_id") or not principal.subject:
         raise HTTPException(403, "Import requires an authorized human identity")
     rows = parse_offer_csv(content)
-    try:
-        offers_to_create = [SalesOfferCreate(**row) for row in rows]
-    except ValidationError as error:
-        raise HTTPException(422, "Invalid offer fields in CSV") from error
+    if any(row["currency"] != "EUR" for row in rows):
+        raise HTTPException(422, "Only EUR offers can be imported")
     fingerprint = hashlib.sha256(json.dumps([content, reason], ensure_ascii=False).encode()).hexdigest()
     lock = int.from_bytes(hashlib.sha256(json.dumps([tenant, TOOL, key]).encode()).digest()[:8], "big", signed=True)
     try:
@@ -92,12 +128,12 @@ def import_offers(db, tenant: str, content: str, key: str, reason: str | None):
             db.commit()
             return {**result, "replayed": True}
         # Stable lock order avoids deadlocks between overlapping imports.
-        offers = [persist_sales_offer(db, tenant, offer) for offer in sorted(offers_to_create, key=lambda item: item.offer_number)]
+        offer_ids = _persist_all(db, tenant, sorted(rows, key=lambda r: r["offer_number"]), principal.subject)
         batch_id, now = str(uuid4()), business_now()
-        audit_id = _write_audit(db, tenant_id=tenant, action_key=TOOL, entity_type="sales_offer_import", entity_id=batch_id, audit_reason=reason, idempotency_key=key, summary=f"Imported {len(offers)} sales offers", performed_by=principal.subject)
-        event = IntegrationEvent(aggregate_id=batch_id, timestamp=now, event_type=TOOL, tenant_id=tenant, payload={"offer_ids": [offer.id for offer in offers], "actor_id": principal.subject, "audit_id": audit_id})
+        audit_id = _write_audit(db, tenant_id=tenant, action_key=TOOL, entity_type="sales_offer_import", entity_id=batch_id, audit_reason=reason, idempotency_key=key, summary=f"Imported {len(offer_ids)} sales offers", performed_by=principal.subject)
+        event = IntegrationEvent(aggregate_id=batch_id, timestamp=now, event_type=TOOL, tenant_id=tenant, payload={"offer_ids": offer_ids, "actor_id": principal.subject, "audit_id": audit_id})
         db.add(OutboxEvent(id=event.event_id, event_type=event.event_type, aggregate_id=batch_id, tenant_id=tenant, timestamp=now, payload=json.dumps(asdict(event), default=str), published=False))
-        result = {"success": True, "count": len(offers), "offer_ids": [offer.id for offer in offers], "auditEntryId": audit_id}
+        result = {"success": True, "count": len(offer_ids), "offer_ids": offer_ids, "auditEntryId": audit_id}
         db.execute(text("INSERT INTO public.mcp_tool_executions (tenant_id,tool_name,idempotency_key,actor_id,payload_hash,result) VALUES (:tenant,:tool,:key,:actor,:hash,CAST(:result AS jsonb))"), {"tenant": tenant, "tool": TOOL, "key": key, "actor": principal.subject, "hash": fingerprint, "result": json.dumps(result)})
         db.commit()
         return result

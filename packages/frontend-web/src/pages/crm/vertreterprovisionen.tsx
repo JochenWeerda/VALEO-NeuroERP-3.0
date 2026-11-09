@@ -1,7 +1,6 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createStammNativeDetailPage(
-  'crm/vertreterprovisionen',
-  'crm-vertreterprovisionen',
-  () => import('./vertreterprovisionen-legacy'),
-)
+/** Vertreterprovisionen: Studio-Liste der Provisionsgruppen mit Anlegen, Staffelzeile und Stilllegen. */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="crm/vertreterprovisionen" testId="screen-crm-vertreterprovisionen" />
+}

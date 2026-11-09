@@ -1,7 +1,4 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
+import { belegSeite } from '@/pages/belege/beleg-seite'
 
-export default createStammNativeDetailPage(
-  'einkauf/purchase-order',
-  'einkauf-bestellung-stamm',
-  () => import('./bestellung-stamm-legacy'),
-)
+/** Belegmaske, Variante `purchase_order` (DocFlow einziger Belegspeicher, BELEG-052). */
+export default belegSeite('purchase_order')

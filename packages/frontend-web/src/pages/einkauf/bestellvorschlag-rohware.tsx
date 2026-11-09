@@ -1,7 +1,6 @@
 import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
+/** Bestellvorschlag Rohware: Variante `rohware` der Familie bestellvorschlag (config/mask_families/bestellvorschlag.json). */
 export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="einkauf/bestellvorschlag-rohware" testId="screen-einkauf/bestellvorschlag-rohware" />
-  )
+  return <NativeListPage screenId="bestellvorschlag/rohware" testId="screen-bestellvorschlag/rohware" />
 }

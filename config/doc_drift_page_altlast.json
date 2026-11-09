@@ -16,7 +16,6 @@
     "futter/misch/stamm-legacy.tsx",
     "konditionen/konditionssystem-legacy.tsx",
     "rezepte/editor-legacy.tsx",
-    "verkauf/kunden-stamm-legacy.tsx",
     "waage/detail-legacy.tsx"
   ]
 }
