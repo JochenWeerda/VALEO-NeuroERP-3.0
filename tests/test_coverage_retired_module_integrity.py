@@ -129,6 +129,35 @@ def test_invalid_coverage_paths_are_not_retired(repo, path):
     assert integrity.check(root, base)
 
 
+def test_new_alembic_revision_does_not_block_retirement(repo):
+    """Eine Migration im selben Commit nimmt keinen Laufzeitcode auf (BELEG-052: Router entfernt, Spalte neu)."""
+    root, base, source = repo
+    source.unlink()
+    (root / 'alembic/versions').mkdir(parents=True)
+    (root / 'alembic/versions/neue_spalte.py').write_text('def upgrade():\n    pass\n')
+    thresholds(root, {})
+    commit(root)
+    assert integrity.check(root, base) == []
+
+
+def test_new_script_still_blocks_retirement(repo):
+    root, base, source = repo
+    source.unlink()
+    (root / 'scripts/neu.py').write_text('def completely_changed():\n    return 123\n')
+    thresholds(root, {})
+    commit(root)
+    assert integrity.check(root, base)
+
+
+def test_rename_into_alembic_does_not_retire_coverage(repo):
+    root, base, source = repo
+    (root / 'alembic/versions').mkdir(parents=True)
+    source.rename(root / 'alembic/versions/old.py')
+    thresholds(root, {})
+    commit(root)
+    assert integrity.check(root, base)
+
+
 def test_coverage_gate_rejects_live_missing_source_even_with_xml(tmp_path, monkeypatch):
     (tmp_path / 'config').mkdir()
     thresholds(tmp_path, {OLD: .8})
