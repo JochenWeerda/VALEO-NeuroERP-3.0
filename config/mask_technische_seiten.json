@@ -6,6 +6,7 @@
     "admin/screen-studio": "Das Masken-Studio selbst: Werkzeug, das ScreenDefinitions erzeugt, nicht eine von ihnen.",
     "studio/workspace-composition-preview": "Studio-Vorschau fuer Arbeitsraum-Kompositionen (lokal, ohne Server-Schreibweg).",
     "studio/run/:screenId": "Studio-Testlauf: rendert eine beliebige registrierte ScreenDefinition per Parameter.",
-    "mask-rollout/:screenId/:entityId": "Rollout-Pilot: rendert eine registrierte ScreenDefinition hinter dem Rollout-Schalter."
+    "mask-rollout/:screenId/:entityId": "Rollout-Pilot: rendert eine registrierte ScreenDefinition hinter dem Rollout-Schalter.",
+    "admin/postfaecher/anmeldung-rueckruf": "OAuth-Rueckkehr der Postfach-Anmeldung (Google/Microsoft): gibt code und state an das Backend und fuehrt zu den Postfaechern zurueck."
   }
 }

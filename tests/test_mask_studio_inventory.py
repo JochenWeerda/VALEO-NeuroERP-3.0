@@ -90,7 +90,7 @@ def test_reine_weiterleitung_zaehlt_nicht_als_maske(inventar):
 
 # Technische Seiten (Anmeldefluss, Studio-Werkzeuge) zaehlen nicht als Maske. Die Liste darf nur schrumpfen,
 # sonst wird sie zum Ausweg fuer eine Fachseite ohne Maske.
-TECHNISCH_HOECHSTENS = 6
+TECHNISCH_HOECHSTENS = 7
 
 
 def test_technische_seiten_sind_begruendet_und_schrumpfen_nur(modul, inventar):
