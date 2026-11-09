@@ -1,7 +1,9 @@
 """Existing route replacements share the canonical definition, never a second model."""
 from copy import deepcopy
 
-NATIVE_SCREEN_ALIASES = {"verkauf/rechnungen": "sales/invoices", "crm/kunden-cockpit": "crm/customer-360"}
+# verkauf/rechnungen war bis 08.11.2026 ein Alias der alten Rechnungsliste; die Route rendert seitdem direkt die
+# Variante beleg-liste/sales-invoice (DocFlow), ein Alias waere eine zweite Maske.
+NATIVE_SCREEN_ALIASES = {"crm/kunden-cockpit": "crm/customer-360"}
 
 
 def build_native_alias(screen_id: str) -> dict:

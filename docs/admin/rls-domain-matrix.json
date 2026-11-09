@@ -1080,6 +1080,7 @@
     "app/reports/services.py",
     "app/repositories/drying_rule_repository.py",
     "app/security/audit_service.py",
+    "app/services/beleg_liste.py",
     "app/services/crm_compat_service.py",
     "app/services/crm_lead_service.py",
     "app/services/customer_reference.py",
@@ -3262,6 +3263,7 @@
     "app/api/v1/endpoints/foreign_goods_worklist.py",
     "app/api/v1/endpoints/futter_read.py",
     "app/api/v1/endpoints/inventory_auxiliary.py",
+    "app/api/v1/endpoints/kontrakt_vorgang.py",
     "app/api/v1/endpoints/l3_report_catalog.py",
     "app/api/v1/endpoints/legacy_interface_adapters.py",
     "app/api/v1/endpoints/mail_workspace.py",
@@ -3385,7 +3387,7 @@
     "kopfzeile": 1,
     "nutzlast": 9,
     "standardmandant": 3,
-    "token": 68
+    "token": 69
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",

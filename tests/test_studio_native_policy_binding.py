@@ -6,6 +6,22 @@ from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
 from app.core.studio_release import definition_hash
 from app.services.studio_validation import validate_studio_draft
 
+import json
+from pathlib import Path
+
+# Probe einer nativen Maske mit Datei-Import (Wiederholungsschluessel, Agentensperre, Dateigrenze). Bis 08.11.2026
+# war das die Verkaufsangebotsliste; seit DocFlow einziger Belegspeicher ist (BELEG-052), liest die Liste
+# /belege/sales_offer und hat keinen Import mehr. Die Richtlinie gilt fuer jede solche Aktion; geprueft wird sie an
+# der festgehaltenen Fassung.
+PROBE = "test/native-import-probe"
+_PROBE_DEFINITION = json.loads((Path(__file__).parent / "fixtures/native_policy_import_probe.json")
+                               .read_text(encoding="utf-8"))
+
+
+@pytest.fixture(autouse=True)
+def _probe(monkeypatch):
+    monkeypatch.setitem(SCREEN_DEFINITION_BUILDERS, PROBE, lambda: deepcopy(_PROBE_DEFINITION))
+
 
 def draft(screen_id):
     ensure_stamm_screen_registry()
@@ -19,7 +35,7 @@ def violations(value):
     return validate_studio_draft(value, native_screen_ids=set(SCREEN_DEFINITION_BUILDERS))
 
 
-@pytest.mark.parametrize("screen_id", ["sales/angebote-liste", "waage/neu", "crm/customer-360", "finance/datev-export", "lager/article-stock"])
+@pytest.mark.parametrize("screen_id", [PROBE, "waage/neu", "crm/customer-360", "finance/datev-export", "lager/article-stock"])
 def test_current_native_source_preserves_functional_policy_without_global_key_collision(screen_id):
     value = draft(screen_id)
     assert violations(value) == []
@@ -29,7 +45,7 @@ def test_current_native_source_preserves_functional_policy_without_global_key_co
 
 @pytest.mark.parametrize("change", ["endpoint", "permission", "agent", "replay", "file", "source", "adapter"])
 def test_pinned_native_origin_cannot_authorize_a_weakened_or_new_transport(change):
-    value = draft("sales/angebote-liste")
+    value = draft(PROBE)
     action = next(action for action in value["actions"] if action["key"] == "import_csv")
     if change == "endpoint": action["commandEndpoint"] = "/api/v1/other-command"
     elif change == "permission": action.pop("permission")
@@ -42,7 +58,7 @@ def test_pinned_native_origin_cannot_authorize_a_weakened_or_new_transport(chang
 
 
 def test_foreign_read_source_and_extra_action_stay_forbidden():
-    value = draft("sales/angebote-liste")
+    value = draft(PROBE)
     value["dataSources"].append({"key": "foreign", "endpoint": "/api/v1/other-tenant"})
     value["actions"].append({"key": "extra", "dangerLevel": "safe", "localEffect": "print"})
     assert violations(value)
@@ -58,7 +74,7 @@ def test_local_classification_cannot_hide_mutation_without_permission():
 
 @pytest.mark.parametrize("change", ["omit", "foreign", "unversioned"])
 def test_native_domain_command_is_immutable(monkeypatch, change):
-    screen = "sales/angebote-liste"
+    screen = PROBE
     builder = SCREEN_DEFINITION_BUILDERS[screen]
     def with_command():
         definition = builder()

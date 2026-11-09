@@ -1313,74 +1313,6 @@ def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
     }
 
 
-def build_sales_invoices_worklist_screen_definition() -> dict[str, Any]:
-    """Native Worklist fuer die Ausgangsrechnungen (FSX-RECHNUNGSMASKE-MERIDIAN).
-
-    Die Faktura-Liste war bis heute eine handgeschriebene Seite, die auf einen
-    Endpunkt zeigte, den es nicht gab. Jetzt gibt es den Endpunkt — und die
-    Liste ist eine `worklist`: Suchen, sortieren, blaettern und auswaehlen
-    laufen serverseitig, die Spaltennavigation kommt aus dem Floorplan.
-
-    Die Spalte **Positionen** steht bewusst in der Liste: Eine Rechnung mit
-    null Positionen ist ein Befund und soll auffallen, ohne den Beleg zu
-    oeffnen.
-    """
-    return {
-        "schemaVersion": 1,
-        "id": "sales/invoices",
-        "domain": "sales",
-        "mode": "list",
-        "title": "Ausgangsrechnungen",
-        "subtitle": "Faktura / Forderungen",
-        "adapter": {"type": "native", "sourceId": "sales/invoices", "temporary": False},
-        "dataSources": [
-            {"key": "list", "endpoint": "/api/v1/sales/invoices", "pageSize": 50},
-        ],
-        "tabs": [
-            {
-                "key": "rechnungen", "label": "Rechnungen", "lazy": False, "keepAlive": True,
-                "tables": [{"key": "list", "label": "Ausgangsrechnungen", "dataSourceKey": "list",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "rowRouteTemplate": "/belege/sales_invoice/{id}",
-                            "columns": [
-                                {"key": "invoice_number", "label": "Rechnungsnr.", "sortable": True, "filterable": True, "width": 150},
-                                {"key": "customer_id", "label": "Kunde", "sortable": True, "filterable": True, "width": 160},
-                                {"key": "invoice_date", "label": "Rechnungsdatum", "renderKind": "date", "sortable": True, "width": 140},
-                                {"key": "due_date", "label": "Faellig", "renderKind": "date", "sortable": True, "width": 120},
-                                {"key": "line_count", "label": "Positionen", "numeric": True, "width": 100},
-                                {"key": "net_amount", "label": "Netto", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                {"key": "gross_amount", "label": "Brutto", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {
-                "key": "export",
-                "label": "Liste exportieren",
-                "kind": "secondary",
-                "dangerLevel": "safe",
-                "permission": "sales.rechnung.lesen",
-                "zone": "footer",
-            },
-        ],
-        "noWorkflowReason": "Die Worklist sucht und priorisiert Rechnungen; Status und Zahlungsstand haengen am Beleg und an den offenen Posten.",
-        "agentContract": {
-            "businessPurpose": "Ausgangsrechnungen suchen, nach Faelligkeit und Status priorisieren und den Beleg oeffnen.",
-            "examplePrompts": [
-                "Welche Rechnungen sind noch im Entwurf?",
-                "Zeige die Rechnungen des Kunden K-100 aus diesem Monat.",
-                "Gibt es Rechnungen ohne Positionen?",
-            ],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='sales-invoices-worklist']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"floorplan": "worklist", "density": "expertDense", "contextRail": "none",
-                   "tableProfile": "financial", "preferredMode": "desktopDense",
-                   "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 40, "requiresLazyTabs": False, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
-    }
-
 
 def build_sales_invoice_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer sales/invoice (FSX-RECHNUNGSMASKE-MERIDIAN).
@@ -5316,7 +5248,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "lager/article-stock": build_lager_article_stock_screen_definition,
     "sales/delivery-note": build_sales_delivery_note_screen_definition,
     "sales/invoice": build_sales_invoice_screen_definition,
-    "sales/invoices": build_sales_invoices_worklist_screen_definition,
     "strecke/streckengeschaeft": build_strecke_streckengeschaeft_screen_definition,
     "versand/versand-avis": build_versand_avis_screen_definition,
     "strecke/vorlaeufig": build_strecke_vorlaeufig_screen_definition,
@@ -5961,7 +5892,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
     "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/invoice": ["rechnung", "ausgangsrechnung", "faktura", "sammelrechnung", "herkunft der menge"],
-    "sales/invoices": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
+    "beleg-liste/sales-invoice": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
     "strecke/streckengeschaeft": ["streckengeschaeft", "strecke", "drop ship"],
     "versand/versand-avis": ["versand avis", "avis drucken", "versandbenachrichtigung"],
     "strecke/vorlaeufig": ["vorlaeufige streckengeschaefte", "geplante tour", "offene strecke"],
@@ -6045,7 +5976,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "start-dashboard": "/start-dashboard",
     "finance/bookings/new": "/finance/bookings/new",
     "fibu/kostenstellenrechnung": "/fibu/kostenstellenrechnung",
-    "kontrakte/liste": "/kontrakte/LstKontraktUebersicht",
     "transporte/fahrer/neu": "/transporte/fahrer/neu",
     "auswertungen/l3-berichtskatalog": "/auswertungen/l3-berichtskatalog",
     "auswertungen/dms-volltext": "/auswertungen/dms-volltext",
@@ -6102,7 +6032,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "qualitaet/reklamation": "/qualitaet/reklamationen",
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/invoice": "/verkauf/rechnungen",
-    "sales/invoices": "/verkauf/rechnungen",
+    "beleg-liste/sales-invoice": "/belege/sales_invoice",
     "strecke/streckengeschaeft": "/strecke/streckengeschaeft",
     "versand/versand-avis": "/versand/versand-avis",
     "strecke/vorlaeufig": "/strecke/vorlaeufige-streckengeschaefte",

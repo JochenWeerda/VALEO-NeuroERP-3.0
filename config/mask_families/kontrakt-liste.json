@@ -1,0 +1,1646 @@
+{
+  "bases": {
+    "1.0.0": {
+      "definition": {
+        "domain": "agrar",
+        "layout": {
+          "contextRail": "none",
+          "density": "compact",
+          "floorplan": "worklist",
+          "mobileMode": "mobileStack",
+          "preferredMode": "desktopDense",
+          "tableProfile": "inventory",
+          "touchTargetPx": 44
+        },
+        "mode": "list",
+        "noWorkflowReason": "Auswertungsliste der Kontraktfamilie; der Vorgang je Kontrakt laeuft in der Kontrakt-Objektseite.",
+        "performance": {
+          "bundleGroup": "kontrakte",
+          "initialPayloadBudgetKb": 60,
+          "lookupMinChars": 2,
+          "requiresLazyTabs": false,
+          "requiresVirtualTables": true
+        },
+        "schemaVersion": 1
+      },
+      "hash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688"
+    }
+  },
+  "current": {
+    "abrechnung": "1.0.0",
+    "alarme": "1.0.0",
+    "engagement_artikel": "1.0.0",
+    "engagement_partei": "1.0.0",
+    "erfuellung": "1.0.0",
+    "fixierung": "1.0.0",
+    "mahnung": "1.0.0",
+    "uebersicht": "1.0.0"
+  },
+  "family": "kontrakt-liste",
+  "schemaVersion": 1,
+  "variants": {
+    "abrechnung": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "aa68a8a189ded88543df3383b83e05949605f875a9f9a1312aa8d3abf3b23367",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/abrechnung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Kontrakte mit Abrufen finden und ihre Bewegungen an die Abrechnung uebergeben.",
+            "examplePrompts": [
+              "Welche Kontrakte haben noch nicht abgerechnete Abrufe?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/abrechnung']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/erfuellungsstand",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/abrechnung",
+          "subtitle": "Abgerufene Mengen, die an die Abrechnung gehen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "typ",
+                  "label": "Art",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "displayUnit": "dt",
+                  "key": "abgerufen",
+                  "label": "Abgerufen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "offen",
+                  "label": "Offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "filterable": true,
+                  "key": "erfuellung_status",
+                  "label": "Erfüllungsstand",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "secondary",
+                  "renderKind": "date",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Abrechnung",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/abrechnung/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Abrechnung",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "abrechnung"
+          }
+        },
+        "patchHash": "27093420eb0139756b086e10f1102fc9a2f8f6b442568ead2c2107dc5958df1c"
+      }
+    },
+    "alarme": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "84194635bb23a4c317e6a3415e0400f76357b4d42a200af57271a9310f671939",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/alarme",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Kontrakte mit Handlungsbedarf nach Dringlichkeit abarbeiten.",
+            "examplePrompts": [
+              "Welche Kontrakte laufen in den naechsten 30 Tagen aus?",
+              "Wo fehlt die Absicherung?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/alarme']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/alarme",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/alarme",
+          "subtitle": "Ablauf, Mahnung, Absicherung, Marktbewertung, Druck und Restmenge",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "alarm",
+                  "label": "Alarm",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "text",
+                  "label": "Hinweis",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "tage_bis_ablauf",
+                  "label": "Tage bis Ablauf",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "secondary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "rest_quantity",
+                  "label": "Rest",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "unit"
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Kontrakt-Alarme",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/erfuellung/{kontrakt_id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Kontrakt-Alarme",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "alarme"
+          }
+        },
+        "patchHash": "2a9adb3b392149faaa37d6e60265e01f0a4d826f877b89dddec3ee3b43499aed"
+      }
+    },
+    "engagement_artikel": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "9b13710c3e5574a0ac34e51ecfec976214ba0bfb6273a8d4107441a9c8edd2f1",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/engagement-artikel",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Die offene Netto-Position je Artikel pruefen (Long/Short aus Kontrakten).",
+            "examplePrompts": [
+              "Wie hoch ist die Netto-Position bei Raps?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/engagement-artikel']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/engagement/artikel",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/engagement-artikel",
+          "subtitle": "Offene Kontraktmenge je Artikel, Einkauf gegen Verkauf",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "artikel",
+                  "label": "Artikel",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "einkauf_offen",
+                  "label": "Einkauf offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "verkauf_offen",
+                  "label": "Verkauf offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "kontrakte",
+                  "label": "Kontrakte",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Engagement je Artikel",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Engagement je Artikel",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "engagement_artikel"
+          }
+        },
+        "patchHash": "bbf776dec361eca1db4796ac47f09eb8fd2a28bb82cfa9081c885db6fa2b10f4"
+      }
+    },
+    "engagement_partei": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "d79072c728d2d43b1b846d65130ffba5a12650d5ff10e5208aa980c5feb1dc1f",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/engagement-partei",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Pruefen, bei welchen Partnern wie viel kontrahierte Menge offen ist.",
+            "examplePrompts": [
+              "Bei welchem Partner ist am meisten offen?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/engagement-partei']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/engagement/partei",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/engagement-partei",
+          "subtitle": "Offene Kontraktmenge je Geschaeftspartner",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "party_id",
+                  "label": "Partner-Nr.",
+                  "priority": "tertiary",
+                  "sortable": true
+                },
+                {
+                  "key": "offen",
+                  "label": "Offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "kontrakte",
+                  "label": "Kontrakte",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Engagement je Partner",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Engagement je Partner",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "engagement_partei"
+          }
+        },
+        "patchHash": "9092562433aeef522262c6175a16983acdd5d87c139c3d503c838a84484e154e"
+      }
+    },
+    "erfuellung": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "88e2da297f39bec967ea92c899716d88384991437dc089e57971ea4f3816906a",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/erfuellung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Erfuellungsgrad je Kontrakt pruefen und untererfuellte oder ueberfaellige Kontrakte finden.",
+            "examplePrompts": [
+              "Welche Kontrakte sind ueberfaellig und noch offen?",
+              "Wie weit ist Kontrakt K-1001 erfuellt?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/erfuellung']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/erfuellungsstand",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/erfuellung",
+          "subtitle": "Kontrahiert gegen abgerufen, je Kontrakt",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "typ",
+                  "label": "Art",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "menge_kontrakt",
+                  "label": "Kontrahiert",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "aggregate": "sum",
+                  "displayUnit": "dt",
+                  "key": "abgerufen",
+                  "label": "Abgerufen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "aggregate": "sum",
+                  "displayUnit": "dt",
+                  "key": "offen",
+                  "label": "Offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "key": "erfuellung_pct",
+                  "label": "Erfüllung",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "percentage",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "erfuellung_status",
+                  "label": "Erfüllungsstand",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "secondary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "ueberfaellig",
+                  "label": "Überfällig",
+                  "priority": "primary",
+                  "renderKind": "boolean"
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Erfüllungsstand",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/erfuellung/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Erfüllungsstand",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "erfuellung"
+          }
+        },
+        "patchHash": "9d0d430957e420c14ea635f2d0604a0a127762ee1006d968ec1934669c5b1321"
+      }
+    },
+    "fixierung": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "5c1b33a1a3d4af79d0ab1d1be7dde27eacefd5bc8bb4f70084fc6a3a57fc2c17",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/fixierung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Offene Kontrakte waehlen, um Teilmengen gegen die MATIF-Notierung zu fixieren.",
+            "examplePrompts": [
+              "Welche MATIF-Kontrakte sind noch nicht fixiert?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/fixierung']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/uebersicht?include_done=false&preismodell=matif",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/fixierung",
+          "subtitle": "MATIF-bepreiste Kontrakte zum Fixieren",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "contract_type",
+                  "label": "Art",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "artikel",
+                  "label": "Artikel",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "pricing_model",
+                  "label": "Preismodell",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "total_quantity",
+                  "label": "Menge",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "unit"
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "rest_quantity",
+                  "label": "Rest",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "unit"
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "secondary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "key": "alarme",
+                  "label": "Alarme",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Fixierung",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/fixierung/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Fixierung",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "fixierung"
+          }
+        },
+        "patchHash": "c0676031e151d1dc727afca1eeb79eeafa682d29d7f2b4641cc7f7de62236e49"
+      }
+    },
+    "mahnung": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "de14829ef184cbc0dd846142c548d4a53ecbb31b1c39523c447cc0d45f92d6df",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_uebersicht",
+              "kind": "secondary",
+              "label": "Kontrakte",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/uebersicht",
+              "stubReason": "Wechselt zur Variante Kontrakte derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/mahnung",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Ueberfaellige Kontrakte mit offener Menge mahnen; jede Mahnung haelt Stufe und offene Menge fest.",
+            "examplePrompts": [
+              "Welche Kontrakte muessen gemahnt werden?",
+              "Mahne Kontrakt K-1001."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/mahnung']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/mahnkandidaten",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/mahnung",
+          "subtitle": "Ueberfaellige, untererfuellte Kontrakte",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "typ",
+                  "label": "Art",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "displayUnit": "dt",
+                  "key": "offen",
+                  "label": "Offen",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "einheit"
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "secondary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "key": "tage_ueberfaellig",
+                  "label": "Tage überfällig",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "letzte_mahnstufe",
+                  "label": "Letzte Stufe",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                },
+                {
+                  "key": "naechste_mahnstufe",
+                  "label": "Nächste Stufe",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "number",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Kontraktmahnung",
+              "pageSize": 50,
+              "rowActions": [
+                {
+                  "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+                  "dangerLevel": "moderate",
+                  "inputFields": [
+                    {
+                      "key": "text",
+                      "label": "Mahntext",
+                      "type": "textarea"
+                    }
+                  ],
+                  "key": "mahnen",
+                  "kind": "secondary",
+                  "label": "Mahnen",
+                  "method": "POST",
+                  "permission": "kontrakt.update",
+                  "requiresConfirmation": true
+                }
+              ],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/erfuellung/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Kontraktmahnung",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "mahnung"
+          }
+        },
+        "patchHash": "d4533fa076acb1a16b211c91f9e84fab0d244767f97a7086d8f3f72638f81c64"
+      }
+    },
+    "uebersicht": {
+      "1.0.0": {
+        "baseHash": "a1d876229e8c184a62fd4641a50a9a9af39a5aba9bd58f0619f392c8d427f688",
+        "baseVersion": "1.0.0",
+        "definitionHash": "82171353bd18a0cb948d89471c9948e3e1d2bc611a2ab0b0f585f06980d15989",
+        "patch": {
+          "actions": [
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_erfuellung",
+              "kind": "secondary",
+              "label": "Erfüllungsstand",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/erfuellung",
+              "stubReason": "Wechselt zur Variante Erfüllungsstand derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_fixierung",
+              "kind": "secondary",
+              "label": "Fixierung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/fixierung",
+              "stubReason": "Wechselt zur Variante Fixierung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_abrechnung",
+              "kind": "secondary",
+              "label": "Abrechnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/abrechnung",
+              "stubReason": "Wechselt zur Variante Abrechnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_mahnung",
+              "kind": "secondary",
+              "label": "Kontraktmahnung",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/mahnung",
+              "stubReason": "Wechselt zur Variante Kontraktmahnung derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_alarme",
+              "kind": "secondary",
+              "label": "Kontrakt-Alarme",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/alarme",
+              "stubReason": "Wechselt zur Variante Kontrakt-Alarme derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_artikel",
+              "kind": "secondary",
+              "label": "Engagement je Artikel",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-artikel",
+              "stubReason": "Wechselt zur Variante Engagement je Artikel derselben Kontraktliste.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_engagement_partei",
+              "kind": "secondary",
+              "label": "Engagement je Partner",
+              "localEffect": "navigation",
+              "navigationRoute": "/kontrakte/listen/engagement-partei",
+              "stubReason": "Wechselt zur Variante Engagement je Partner derselben Kontraktliste.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "kontrakt-liste/uebersicht",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Alle Kontrakte mit Restmenge, Laufzeit und offenen Alarmen finden und den Vorgang oeffnen.",
+            "examplePrompts": [
+              "Welche Verkaufskontrakte laufen diesen Monat aus?",
+              "Wie viel Restmenge Weizen ist offen?"
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-kontrakt-liste/uebersicht']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/kontrakt-vorgang/uebersicht",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "id": "kontrakt-liste/uebersicht",
+          "subtitle": "Einkaufs- und Verkaufskontrakte mit Restmenge und Alarmen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "contract_no",
+                  "label": "Kontrakt",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "contract_type",
+                  "label": "Art",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Partner",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "artikel",
+                  "label": "Artikel",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "displayUnit": "dt",
+                  "key": "total_quantity",
+                  "label": "Menge",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "unit"
+                },
+                {
+                  "aggregate": "sum",
+                  "displayUnit": "dt",
+                  "key": "rest_quantity",
+                  "label": "Rest",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "quantity",
+                  "sortable": true,
+                  "unitField": "unit"
+                },
+                {
+                  "key": "preis",
+                  "label": "Preis",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "pricing_model",
+                  "label": "Preismodell",
+                  "priority": "tertiary",
+                  "sortable": true
+                },
+                {
+                  "key": "valid_from",
+                  "label": "Gültig ab",
+                  "priority": "tertiary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "key": "valid_to",
+                  "label": "Gültig bis",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "key": "alarme",
+                  "label": "Alarme",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "number",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Kontrakte",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/kontrakte/vorgang/erfuellung/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Kontrakte",
+          "variant": {
+            "family": "kontrakt-liste",
+            "id": "uebersicht"
+          }
+        },
+        "patchHash": "f72c555b4a0c7048cb9a0c0ecddcdfc20f61462e0b43992282b5a2c21d3deeeb"
+      }
+    }
+  }
+}

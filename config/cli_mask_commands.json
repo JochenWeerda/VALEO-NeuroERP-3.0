@@ -220,14 +220,8 @@
   "mask:einkauf/auftragsbestaetigung:pruefen",
   "mask:einkauf/auftragsbestaetigungen:bestaetigen",
   "mask:einkauf/auftragsbestaetigungen:pruefen",
-  "mask:einkauf/bestellungen:freigeben",
-  "mask:einkauf/bestellungen:stornieren",
-  "mask:einkauf/bestellungen:versenden",
   "mask:einkauf/purchase-order:speichern",
   "mask:einkauf/purchase-order:versenden",
-  "mask:einkauf/rechnungseingaenge-liste:freigeben",
-  "mask:einkauf/rechnungseingaenge-liste:pruefen",
-  "mask:einkauf/rechnungseingaenge-liste:verbuchen",
   "mask:einkauf/rechnungseingang/neu:save",
   "mask:einkauf/supplier:bearbeiten",
   "mask:einkauf/supplier:entsperren",
@@ -272,6 +266,14 @@
   "mask:futtermittel/mischfuttermittel:bearbeiten",
   "mask:inbox:create_beleg",
   "mask:inbox:discard",
+  "mask:kontrakt-liste/mahnung:mahnen",
+  "mask:kontrakt/abrechnung:abrechnen",
+  "mask:kontrakt/abrechnung:abrechnung_uebergeben",
+  "mask:kontrakt/abrechnung:stornieren",
+  "mask:kontrakt/erfuellung:mahnen",
+  "mask:kontrakt/fixierung:fixieren",
+  "mask:kontrakt/fixierung:notierung_erfassen",
+  "mask:kontrakt/fixierung:stornieren",
   "mask:lager/inventur-nebenlaeufe:create_control",
   "mask:lager/inventur-nebenlaeufe:create_count_sheet",
   "mask:lager/inventur-nebenlaeufe:create_opening",
@@ -296,7 +298,6 @@
   "mask:produktion/produktionsleitstand:sync",
   "mask:qualitaet/reklamation:abschliessen",
   "mask:qualitaet/reklamation:bearbeiten",
-  "mask:sales/angebote-liste:import_csv",
   "mask:sales/credit-notes:buchen",
   "mask:sales/credit-notes:speichern",
   "mask:sales/credit-notes:vorschlag_ablehnen",
@@ -327,7 +328,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 839,
+  "kein_endpunkt": 947,
   "pfadparameter": 6
  }
 }

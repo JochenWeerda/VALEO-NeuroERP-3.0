@@ -10,10 +10,10 @@ function read(rel: string): string {
 }
 
 describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
-  it('Bestellungen-Liste ist NativeListPage auf Screen einkauf/bestellungen', () => {
+  it('Bestellungen-Liste ist die Bestell-Variante der Belegliste (DocFlow, BELEG-052)', () => {
     const src = read('einkauf/bestellungen-liste.tsx')
     expect(src).toContain('NativeListPage')
-    expect(src).toContain('screenId="einkauf/bestellungen"')
+    expect(src).toContain('screenId="beleg-liste/purchase-order"')
   })
 
   it('Listen-SD row_route zeigt auf native Singular-Detailroute wenn Listen-Modul vorhanden', () => {

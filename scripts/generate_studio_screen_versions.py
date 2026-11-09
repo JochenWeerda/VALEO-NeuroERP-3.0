@@ -29,12 +29,13 @@ from app.services.made_by_studio_gates import evaluate_all  # noqa: E402
 
 
 def _native_definitions() -> dict[str, dict]:
+    from app.core.mask_family_versions import is_family_screen
     from app.core.stamm_object_page_parent import ensure_stamm_screen_registry
     from app.services.made_by_studio_gates import load_registered_definitions
 
     ensure_stamm_screen_registry()
     return {sid: definition for sid, definition in load_registered_definitions().items()
-            if sid and not sid.startswith("beleg/") and definition}
+            if sid and not is_family_screen(sid) and definition}
 
 
 def _release_payload(version: str) -> dict:

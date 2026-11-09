@@ -80,8 +80,8 @@ export const WORKSPACE_FACHAKTIONEN: TypedFachaktion[] = [
     requiredScopes: ['sales:read'],
     businessDomain: 'sales',
     target: {
-      route: '/sales/angebote-liste',
-      screenId: 'sales/angebote-liste',
+      route: '/belege/sales_offer',
+      screenId: 'beleg-liste/sales-offer',
     },
     mcpIntent: 'open-customer-quotes',
     reasonTemplate: 'Kundenangebote lesen — Anlegen ist separate prepare-command',

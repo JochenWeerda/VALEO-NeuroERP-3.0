@@ -11,7 +11,6 @@ PILOT_LIST_SCREENS = (
     "agrar/saatgut-liste",
     "agrar/duenger-liste",
     "einkauf/lieferanten",
-    "einkauf/bestellungen",
     "finance/debitoren-liste",
     "finance/kreditoren-liste",
     "futtermittel/mischfuttermittel-liste",
@@ -30,7 +29,6 @@ ROW_ROUTE_BY_SCREEN = {
     "agrar/saatgut-liste": "/agrar/saatgut/{id}",
     "agrar/duenger-liste": "/agrar/duenger/{id}",
     "einkauf/lieferanten": "/einkauf/lieferanten/{id}",
-    "einkauf/bestellungen": "/einkauf/bestellung/{id}",
     "finance/debitoren-liste": "/finance/debitor/{id}",
     "finance/kreditoren-liste": "/finance/kreditor/{id}",
     "futtermittel/mischfuttermittel-liste": "/futtermittel/mischfuttermittel/{id}",
@@ -100,12 +98,11 @@ def test_all_listen_builders_use_parent_factory() -> None:
 
 
 def test_beleg_listen_zeilen_navigation_gate_c() -> None:
-    """Gate C: kanonische Beleg-Detailrouten fuer Listen-Zeilenklicks."""
-    from app.core.screen_definitions import build_sales_invoices_worklist_screen_definition
+    """Gate C: Belegliste je Belegart oeffnet die Belegmaske derselben Belegart (DocFlow, BELEG-052)."""
+    from app.core.belegvertrag import BELEGARTEN
+    from app.core.screen_definitions import get_screen_definition
 
-    bestellungen = LISTEN_SCREEN_BUILDERS["einkauf/bestellungen"]()
-    assert bestellungen["tables"][0]["rowRouteTemplate"] == "/einkauf/bestellung/{id}"
-
-    rechnungen = build_sales_invoices_worklist_screen_definition()
-    table = rechnungen["tabs"][0]["tables"][0]
-    assert table["rowRouteTemplate"] == "/belege/sales_invoice/{id}"
+    for art in BELEGARTEN:
+        liste = get_screen_definition(f"beleg-liste/{art.replace('_', '-')}")
+        assert liste["tables"][0]["rowRouteTemplate"] == f"/belege/{art}/{{id}}"
+        assert liste["dataSources"][0]["endpoint"] == f"/api/v1/belege/{art}"

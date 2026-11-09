@@ -2209,7 +2209,7 @@
       "path": "sales/kalkulationen/neu"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu"
     },
     {
@@ -3471,6 +3471,18 @@
     {
       "module": "@/pages/fibu/kassenbuch",
       "path": "fibu/kassenbuch"
+    },
+    {
+      "module": "@/pages/kontrakte/vorgang",
+      "path": "kontrakte/vorgang/:variante/:id"
+    },
+    {
+      "module": "@/pages/kontrakte/listen",
+      "path": "kontrakte/listen/:variante"
+    },
+    {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart"
     }
   ]
 }

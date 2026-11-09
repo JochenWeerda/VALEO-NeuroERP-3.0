@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from app.api.v1.endpoints.sales_delivery_notes import _quantity_summary
-from app.core.screen_definitions_listen import build_sales_lieferungen_liste
 
 
 def test_quantities_do_not_mix_units_or_hide_missing_units():
@@ -14,12 +13,13 @@ def test_quantities_do_not_mix_units_or_hide_missing_units():
     assert _quantity_summary([]) == ""
 
 
-def test_delivery_screen_uses_actual_projection_and_safe_order_navigation():
-    screen = build_sales_lieferungen_liste()
+def test_delivery_list_reads_docflow_and_opens_the_document_mask():
+    """Seit BELEG-052 (08.11.2026) ist die Lieferscheinliste die Variante sales_delivery der Belegliste (DocFlow)."""
+    from app.core.screen_definitions import get_screen_definition
+
+    screen = get_screen_definition("beleg-liste/sales-delivery")
     table = screen["tables"][0]
-    assert table["rowRouteTemplate"] == "/sales/delivery-editor?id={id}"
-    assert {c["key"] for c in table["columns"]} >= {"delivery_note_number", "quantity_summary", "sales_order_number", "is_delivered"}
-    order = table["rowActions"][0]
-    assert order["visibleWhen"] == {"field": "has_sales_order", "values": [True]}
-    assert order["navigationRoute"] == "/sales/order-editor?id={sales_order_id}"
+    assert screen["dataSources"][0]["endpoint"] == "/api/v1/belege/sales_delivery"
+    assert table["rowRouteTemplate"] == "/belege/sales_delivery/{id}"
+    assert not {"netto", "brutto"} & {c["key"] for c in table["columns"]}  # Mengenbeleg ohne Betraege
     assert "unterwegs" not in str(screen)

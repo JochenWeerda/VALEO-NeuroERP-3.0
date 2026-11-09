@@ -62,7 +62,7 @@ const BATCH11: Array<[string, string]> = [
   ['einkauf/EinkaufVorgangPage.tsx', 'einkauf/einkauf-vorgang-liste'],
   ['einkauf/kontrakte-service.tsx', 'einkauf/kontrakte-service-liste'],
   ['einkauf/rechnung-abgleich.tsx', 'einkauf/rechnung-abgleich-liste'],
-  ['einkauf/rechnungseingaenge-liste.tsx', 'einkauf/rechnungseingaenge-liste'],
+  ['einkauf/rechnungseingaenge-liste.tsx', 'beleg-liste/purchase-invoice'],
   ['einkauf/retouren.tsx', 'einkauf/retouren-liste'],
   ['etiketten/druck.tsx', 'etiketten/druck-liste'],
   ['export/intrastat-meldung.tsx', 'export/intrastat-meldung-liste'],

@@ -374,6 +374,7 @@ domains:
       - freigabe_
       - kontrollkorb
       - docflow_
+      - beleg_liste
       - doc_nachweisraum_
       - audit_hardening
       - atlas_customs_

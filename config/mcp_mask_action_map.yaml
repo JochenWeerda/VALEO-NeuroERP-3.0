@@ -5,9 +5,9 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 638
-    screens_with_actions: 381
-    domains: 51
+    actions: 744
+    screens_with_actions: 393
+    domains: 50
 mcp_write_tools:
 - crm.contact.log
 - crm.activity.create
@@ -86,15 +86,15 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 178
-  mask_mutations_considered: 120
+  mask_actions_considered: 179
+  mask_mutations_considered: 118
   by_coverage:
     adjacent: 1
-    blocked_human_only: 46
+    blocked_human_only: 42
     blocked_unreleased: 2
-    local_ui: 58
+    local_ui: 61
     mapped: 42
-    mapped_generic: 22
+    mapped_generic: 24
     mapped_propose_only: 1
     mapped_read: 2
     open_high: 4
@@ -432,6 +432,96 @@ mappings:
   coverage: mapped
   notes: MCP-MASK-CE-SANCTIONS-FRACHT-20261009; CE /api/v1/compliance/sanctions/actions/pruefen/personal;
     kein Auto-Freigeben.
+- mask_action_id: mask:beleg-liste/goods-receipt:neu
+  mask: beleg-liste/goods-receipt
+  domain: einkauf
+  action_key: neu
+  label: Wareneingang anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/purchase-credit-memo:neu
+  mask: beleg-liste/purchase-credit-memo
+  domain: einkauf
+  action_key: neu
+  label: Einkaufsgutschrift anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/purchase-invoice:neu
+  mask: beleg-liste/purchase-invoice
+  domain: einkauf
+  action_key: neu
+  label: Eingangsrechnung anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/purchase-order:neu
+  mask: beleg-liste/purchase-order
+  domain: einkauf
+  action_key: neu
+  label: Bestellung anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/sales-credit-memo:neu
+  mask: beleg-liste/sales-credit-memo
+  domain: sales
+  action_key: neu
+  label: Gutschrift anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/sales-delivery:neu
+  mask: beleg-liste/sales-delivery
+  domain: sales
+  action_key: neu
+  label: Lieferschein anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/sales-invoice:neu
+  mask: beleg-liste/sales-invoice
+  domain: sales
+  action_key: neu
+  label: Rechnung anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/sales-offer:neu
+  mask: beleg-liste/sales-offer
+  domain: sales
+  action_key: neu
+  label: Angebot anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:beleg-liste/sales-order:neu
+  mask: beleg-liste/sales-order
+  domain: sales
+  action_key: neu
+  label: Auftrag anlegen
+  command_endpoint: null
+  command: null
+  coverage: local_ui
+  mcp_tool_id: null
+  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:charge/liste:neu
   mask: charge/liste
   domain: lager
@@ -844,49 +934,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:einkauf/bestellungen:freigeben
-  mask: einkauf/bestellungen
-  domain: einkauf
-  action_key: freigeben
-  label: Freigeben
-  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/actions/freigeben
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
-- mask_action_id: mask:einkauf/bestellungen:neu
-  mask: einkauf/bestellungen
-  domain: einkauf
-  action_key: neu
-  label: Neue Bestellung
-  command_endpoint: null
-  command: null
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:einkauf/bestellungen:stornieren
-  mask: einkauf/bestellungen
-  domain: einkauf
-  action_key: stornieren
-  label: Stornieren
-  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/actions/stornieren
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
-- mask_action_id: mask:einkauf/bestellungen:versenden
-  mask: einkauf/bestellungen
-  domain: einkauf
-  action_key: versenden
-  label: Versenden
-  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/actions/versenden
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
 - mask_action_id: mask:einkauf/lieferanten:neu
   mask: einkauf/lieferanten
   domain: einkauf
@@ -918,38 +965,6 @@ mappings:
   mcp_tool_id: einkauf.bestellung.versenden
   coverage: mapped
   notes: MCP-MASK-WRITES-TOP-20261008; Versand ohne Obligo-Journal.
-- mask_action_id: mask:einkauf/rechnungseingaenge-liste:freigeben
-  mask: einkauf/rechnungseingaenge-liste
-  domain: einkauf
-  action_key: freigeben
-  label: Freigeben
-  command_endpoint: /api/v1/einkauf/rechnungseingaenge/{entity_id}/freigeben
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
-- mask_action_id: mask:einkauf/rechnungseingaenge-liste:neu
-  mask: einkauf/rechnungseingaenge-liste
-  domain: einkauf
-  action_key: neu
-  label: Rechnungseingang erfassen
-  command_endpoint: null
-  command: null
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:einkauf/rechnungseingaenge-liste:verbuchen
-  mask: einkauf/rechnungseingaenge-liste
-  domain: einkauf
-  action_key: verbuchen
-  label: Verbuchen
-  command_endpoint: /api/v1/einkauf/rechnungseingaenge/{entity_id}/verbuchen
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
 - mask_action_id: mask:einkauf/rechnungseingang/neu:save
   mask: einkauf/rechnungseingang/neu
   domain: einkauf
@@ -1313,16 +1328,48 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
-- mask_action_id: mask:kontrakte/liste:neu
-  mask: kontrakte/liste
+- mask_action_id: mask:kontrakt-liste/mahnung:mahnen
+  mask: kontrakt-liste/mahnung
   domain: agrar
-  action_key: neu
-  label: Neuer Kontrakt
-  command_endpoint: null
+  action_key: mahnen
+  label: Mahnen
+  command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen
   command: null
-  coverage: local_ui
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:kontrakt/abrechnung:stornieren
+  mask: kontrakt/abrechnung
+  domain: agrar
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/stornieren
+  command: null
   mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:kontrakt/erfuellung:mahnen
+  mask: kontrakt/erfuellung
+  domain: agrar
+  action_key: mahnen
+  label: Mahnen
+  command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:kontrakt/fixierung:stornieren
+  mask: kontrakt/fixierung
+  domain: agrar
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_control
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -1669,37 +1716,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:sales/angebote-liste:import_csv
-  mask: sales/angebote-liste
-  domain: sales
-  action_key: import_csv
-  label: CSV importieren
-  command_endpoint: /api/v1/sales/offers/actions/import-csv
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
-- mask_action_id: mask:sales/angebote-liste:neu
-  mask: sales/angebote-liste
-  domain: sales
-  action_key: neu
-  label: Neues Angebot
-  command_endpoint: null
-  command: null
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:sales/auftraege-liste:neu
-  mask: sales/auftraege-liste
-  domain: sales
-  action_key: neu
-  label: Neuer Auftrag
-  command_endpoint: null
-  command: null
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:sales/credit-notes:buchen
   mask: sales/credit-notes
   domain: sales
@@ -1805,16 +1821,6 @@ mappings:
   coverage: open_high
   notes: Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.
   mcp_tool_id: null
-- mask_action_id: mask:sales/lieferungen-liste:neu
-  mask: sales/lieferungen-liste
-  domain: sales
-  action_key: neu
-  label: Lieferschein erfassen
-  command_endpoint: null
-  command: null
-  coverage: local_ui
-  mcp_tool_id: null
-  notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
 - mask_action_id: mask:schaeden/liste:neu
   mask: schaeden/liste
   domain: finance
@@ -1950,5 +1956,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 46; blocked_no_endpoint 0; local_ui 58; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 42; blocked_no_endpoint 0; local_ui 61; FIN-CLOSE
   blocked_adr_076.'

@@ -9,8 +9,8 @@ import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNa
  * bleibt nur der Einstieg mit Belegart und Belegkennung: Wer an der Maske etwas
  * aendern will, aendert die Definition, nicht diese Datei.
  *
- * Die Definitionen sind nur fuer den Testmandanten der Sichtpruefung
- * veroeffentlicht; jeder andere Mandant bekommt „nicht gefunden".
+ * Seit der Rollout-Freigabe vom 08.11.2026 fuer jeden Mandanten; `/belege/<art>/neu` legt
+ * ueber den creation-Block der Variante an (DocFlow).
  */
 export default function BelegPage(): JSX.Element {
   const { belegart, id } = useParams<{ belegart?: string; id?: string }>()

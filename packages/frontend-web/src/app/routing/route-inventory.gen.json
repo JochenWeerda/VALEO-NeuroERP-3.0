@@ -1386,6 +1386,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/belege/liste",
+      "path": "belege/:belegart",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/belege/beleg",
       "path": "belege/:belegart/:id",
       "source": "alias"
@@ -4061,6 +4066,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/kontrakte/listen",
+      "path": "kontrakte/listen/:variante",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
       "path": "kontrakte/LstKontraktUebersicht",
       "source": "auto"
@@ -4078,6 +4088,11 @@
     {
       "module": "@/pages/kontrakte/KontraktPositionsmonitor",
       "path": "kontrakte/positionen",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/kontrakte/vorgang",
+      "path": "kontrakte/vorgang/:variante/:id",
       "source": "alias"
     },
     {
@@ -4976,7 +4991,7 @@
       "source": "auto"
     },
     {
-      "module": "@/pages/sales/lieferungen-liste",
+      "module": "@/pages/sales/lieferung-neu",
       "path": "sales/lieferungen/neu",
       "source": "alias"
     },
@@ -5703,7 +5718,6 @@
     "code",
     "code_challenge",
     "code_challenge_method",
-    "contact_id",
     "contractId",
     "customerId",
     "customerName",
@@ -5722,8 +5736,6 @@
     "lieferscheinNr",
     "mode",
     "nonce",
-    "op",
-    "opId",
     "page",
     "partnerName",
     "pflege",
@@ -5763,6 +5775,7 @@
     "taskId",
     "type",
     "variant",
+    "variante",
     "workflowId"
   ]
 }

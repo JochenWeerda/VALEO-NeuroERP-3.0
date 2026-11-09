@@ -5,7 +5,7 @@ Heute liefert DocFlow; weitere belegfuehrende Domaenen haengen einen eigenen Ada
 """
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
@@ -22,9 +22,32 @@ from app.services.docflow_belegadapter import lies_beleg
 from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.services.docflow_service import DocflowService
 from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.beleg_liste_schemas import BelegListe
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 router = APIRouter()
+
+
+@router.get("/{belegart}", response_model=BelegListe, summary="Belege einer Belegart (DocFlow, einziger Belegspeicher)")
+def beleg_liste(
+    belegart: str,
+    status: Optional[str] = Query(None, max_length=40),
+    beleg_nr: Optional[str] = Query(None, max_length=60),
+    partner: Optional[str] = Query(None, max_length=80),
+    limit: int = Query(200, ge=1, le=500),
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Die Liste der Belegmaske: dieselben Rechte wie der Einzelbeleg, Betraege nur mit Preisrecht."""
+    if belegart not in BELEGARTEN:
+        raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
+    verlange(nutzer, "lesen", belegart)
+    from app.services.beleg_liste import beleg_zeilen
+
+    items = beleg_zeilen(db, tenant_id, lambda recht, art: darf(nutzer, recht, art), arten=[belegart],
+                         status=status, beleg_nr=beleg_nr, partner=partner, limit=limit)
+    return {"items": items, "total": len(items)}
 
 
 @router.get("/{belegart}/partner-auswahl", response_model=TypedObjectOut, summary="Mandantengebundene Partnerauswahl fuer Belegentwuerfe")

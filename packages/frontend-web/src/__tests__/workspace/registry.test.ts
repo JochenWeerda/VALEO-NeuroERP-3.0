@@ -61,7 +61,7 @@ describe('workspace registry', () => {
     )
     const quotes = getFachaktion('sales.customer-quotes-list')
     expect(quotes?.kind).toBe('open-worklist')
-    expect(quotes?.target.route).toBe('/sales/angebote-liste')
+    expect(quotes?.target.route).toBe('/belege/sales_offer')
     expect(quotes?.requiredScopes).toEqual(['sales:read'])
     expect(quotes?.catalogId).toBe('sales.customer_quote.list')
     expect(getFachaktionByCatalogId('sales.customer_quote.list')?.id).toBe(

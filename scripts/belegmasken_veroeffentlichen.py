@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check code-defined document masks for the approved visual-test tenant.
+"""Check code-defined document masks for a tenant (all tenants since the rollout of 08.11.2026).
 
 Native definitions are deployed with the application. This command does not
 create Studio drafts, invent approvers or bypass Studio release evidence.
@@ -13,15 +13,15 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app.core.screen_definitions import get_screen_definition
-from app.core.screen_definitions_beleg import NATIVE_BELEG_TENANTS, alle_beleg_screen_definitions
+from app.core.screen_definitions_beleg import SICHTPRUEFUNG_MANDANT, alle_beleg_screen_definitions, beleg_freigegeben
 from app.core.screen_governance import governance_errors
 
-TESTMANDANT = "00000000-0000-0000-0000-000000000051"
+TESTMANDANT = SICHTPRUEFUNG_MANDANT
 
 
 def pruefe_native_definitionen(tenant_id: str) -> dict[str, str]:
-    if tenant_id not in NATIVE_BELEG_TENANTS:
-        raise PermissionError("Mandant ist fuer die native Beleg-Sichtpruefung nicht freigegeben.")
+    if not beleg_freigegeben(tenant_id):
+        raise PermissionError("Ohne Mandant gibt es keine Belegmaske.")
     result = {}
     for screen_id in alle_beleg_screen_definitions():
         definition = get_screen_definition(screen_id, tenant_id=tenant_id)
@@ -34,8 +34,8 @@ def pruefe_native_definitionen(tenant_id: str) -> dict[str, str]:
 
 def adressen(tenant_id: str) -> list[str]:
     """Je Beleg des Mandanten die Adresse der Belegmaske — fuer die Sichtpruefung im Browser."""
-    if tenant_id not in NATIVE_BELEG_TENANTS:
-        raise PermissionError("Mandant ist fuer die Sichtpruefung nicht freigegeben.")
+    if not beleg_freigegeben(tenant_id):
+        raise PermissionError("Ohne Mandant gibt es keine Belegmaske.")
     from sqlalchemy import text
 
     from app.core.belegvertrag import BELEGARTEN

@@ -11,5 +11,6 @@ def test_existing_replacements_share_actual_canonical_sources_and_runtime():
         assert alias["dataSources"] == original["dataSources"]
         assert alias["actions"] == original["actions"]
         assert target in _gate_e_runtime_candidates(old)
-    assert all("/api/v1/verkauf/kunden" not in source["endpoint"]
-               for source in build_native_alias("verkauf/rechnungen")["dataSources"])
+    # verkauf/rechnungen ist seit 08.11.2026 kein Alias mehr: Die Route rendert die DocFlow-Variante direkt.
+    assert "verkauf/rechnungen" not in NATIVE_SCREEN_ALIASES
+    assert get_screen_definition("verkauf/rechnungen") is None

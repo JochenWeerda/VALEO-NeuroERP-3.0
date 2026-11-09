@@ -4,7 +4,7 @@ type: architecture
 audience: [architect, agent, entwickler]
 owner: Cursor Composer (Plan)
 status: aktiv
-last_reviewed: 2026-10-22
+last_reviewed: 2026-11-08
 version: 1.0.0
 description: Systemweite Parent/Child-Familien für Ein-/Ausgabemasken; Vererbungsregeln, reale Cluster aus Inventar und ScreenDefinitions, priorisierte Roadmap P0–P3; Belegfamilie als Spezialfall.
 ---
@@ -73,6 +73,28 @@ Parent (abstrakte Schablone / gemeinsame ScreenDefinition-Basis)
 | **DocumentCaseBand** | Legacy-/Übergang Flow-Spine | nicht kanonischer Parent; Paritätslücke dokumentieren |
 
 Nie zusammenführen nur weil beide Chevrons zeichnen.
+
+### 1.3a Versionierte Familien (seit 08.11.2026)
+
+Nutzerentscheidung 08.11.2026: Gleichartige Masken werden nicht als Einzelmasken angelegt, sondern als
+**Varianten einer Familie**, so wie die Belegfolge. Der Mechanismus der Belegfamilie
+(`config/document_screen_versions.json`) ist allgemein in `app/core/mask_family_versions.py`. Je Release gibt es eine
+Basis aus den Wurzel-Eigenschaften, die alle Varianten wortgleich teilen. Jede Variante hat einen Patch aus den
+Wurzel-Eigenschaften, in denen sie abweicht. Alles ist gehasht, eine gebundene Fassung folgt nie einem geänderten
+Alias.
+
+| Familie | Floorplan | Varianten | Registry |
+|---|---|---|---|
+| `beleg` | `transaction` | 9 Belegarten | `config/document_screen_versions.json` |
+| `kontrakt-liste` | `worklist` | Übersicht, Erfüllung, Fixierung, Abrechnung, Mahnung, Alarme, Engagement je Artikel/Partner | `config/mask_families/kontrakt-liste.json` |
+| `kontrakt` | `objectPage` | Erfüllung, Fixierung, Abrechnung (ein Kopf, Reiter/Spalten/Aktionen je Variante) | `config/mask_families/kontrakt.json` |
+
+- Screen-ID einer Variante: `<familie>/<variante>`. Die Seite rendert alle Varianten über `screenId={\`<familie>/${variante}\`}`.
+- Die Varianten tragen `variant: {family, id}`. Ausgeliefert wird die materialisierte Fassung mit Bindung `maskVariant`.
+- Familien stehen nicht im nativen Katalog (`config/studio_screen_versions.json`). Inventar und Studio-Import lesen
+  ihre Registry.
+- Release: `python scripts/generate_mask_family_versions.py --family <f> --release-version <v>`; Gleichlauf und
+  Gates: `tests/test_mask_family_versions.py`.
 
 ### 1.4 Studio-Qualität vs. Runtime
 

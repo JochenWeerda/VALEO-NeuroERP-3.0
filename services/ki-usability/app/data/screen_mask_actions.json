@@ -2,9 +2,9 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 638,
-    "screens_with_actions": 381,
-    "domains": 51
+    "actions": 744,
+    "screens_with_actions": 393,
+    "domains": 50
   },
   "actions": [
     {
@@ -2973,6 +2973,1056 @@
       }
     },
     {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/goods-receipt:neu",
+      "label": "Wareneingang anlegen",
+      "description": "Wareneingang anlegen (beleg-liste/goods-receipt)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/goods-receipt",
+      "intent_phrases": [
+        "Wareneingang anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/goods-receipt",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-credit-memo:neu",
+      "label": "Einkaufsgutschrift anlegen",
+      "description": "Einkaufsgutschrift anlegen (beleg-liste/purchase-credit-memo)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-credit-memo",
+      "intent_phrases": [
+        "Einkaufsgutschrift anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-credit-memo",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:ansicht_purchase_order",
+      "label": "Bestellungen",
+      "description": "Bestellungen (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "ansicht_purchase_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-invoice:neu",
+      "label": "Eingangsrechnung anlegen",
+      "description": "Eingangsrechnung anlegen (beleg-liste/purchase-invoice)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-invoice",
+      "intent_phrases": [
+        "Eingangsrechnung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-invoice",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_goods_receipt",
+      "label": "Wareneingänge",
+      "description": "Wareneingänge (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Wareneingänge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_goods_receipt",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/goods_receipt",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_purchase_credit_memo",
+      "label": "Einkaufsgutschriften",
+      "description": "Einkaufsgutschriften (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Einkaufsgutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_purchase_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:ansicht_purchase_invoice",
+      "label": "Eingangsrechnungen",
+      "description": "Eingangsrechnungen (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Eingangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "ansicht_purchase_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/purchase-order:neu",
+      "label": "Bestellung anlegen",
+      "description": "Bestellung anlegen (beleg-liste/purchase-order)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "beleg-liste/purchase-order",
+      "intent_phrases": [
+        "Bestellung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/purchase-order",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/purchase_order/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-credit-memo:neu",
+      "label": "Gutschrift anlegen",
+      "description": "Gutschrift anlegen (beleg-liste/sales-credit-memo)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-credit-memo",
+      "intent_phrases": [
+        "Gutschrift anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-credit-memo",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-delivery:neu",
+      "label": "Lieferschein anlegen",
+      "description": "Lieferschein anlegen (beleg-liste/sales-delivery)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-delivery",
+      "intent_phrases": [
+        "Lieferschein anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-delivery",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-invoice:neu",
+      "label": "Rechnung anlegen",
+      "description": "Rechnung anlegen (beleg-liste/sales-invoice)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-invoice",
+      "intent_phrases": [
+        "Rechnung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-invoice",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:ansicht_sales_order",
+      "label": "Aufträge",
+      "description": "Aufträge (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Aufträge"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "ansicht_sales_order",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-offer:neu",
+      "label": "Angebot anlegen",
+      "description": "Angebot anlegen (beleg-liste/sales-offer)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-offer",
+      "intent_phrases": [
+        "Angebot anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-offer",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_credit_memo",
+      "label": "Gutschriften",
+      "description": "Gutschriften (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Gutschriften"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_credit_memo",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_credit_memo",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_delivery",
+      "label": "Lieferscheine",
+      "description": "Lieferscheine (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Lieferscheine"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_delivery",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_delivery",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_invoice",
+      "label": "Ausgangsrechnungen",
+      "description": "Ausgangsrechnungen (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Ausgangsrechnungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_invoice",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_invoice",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:ansicht_sales_offer",
+      "label": "Angebote",
+      "description": "Angebote (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Angebote"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "ansicht_sales_offer",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_offer",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:beleg-liste/sales-order:neu",
+      "label": "Auftrag anlegen",
+      "description": "Auftrag anlegen (beleg-liste/sales-order)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "beleg-liste/sales-order",
+      "intent_phrases": [
+        "Auftrag anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "beleg-liste/sales-order",
+        "actionKey": "neu",
+        "commandEndpoint": null,
+        "navigationRoute": "/belege/sales_order/neu",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:benachrichtigungen/liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (benachrichtigungen/liste)",
@@ -3405,27 +4455,6 @@
       "required_data": [],
       "source": {
         "screenId": "compliance/zulassungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:contracts-v2:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (contracts-v2)",
-      "category": "mask-action",
-      "domain": "workspace",
-      "mask": "contracts-v2",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "contracts-v2",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,
@@ -6098,129 +7127,6 @@
       }
     },
     {
-      "id": "mask:einkauf/bestellungen:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:freigeben",
-      "label": "Freigeben",
-      "description": "Freigeben (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "freigeben",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/freigeben",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.approve",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:neu",
-      "label": "Neue Bestellung",
-      "description": "Neue Bestellung (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Neue Bestellung"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/bestellungen/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:stornieren",
-      "label": "Stornieren",
-      "description": "Stornieren (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Stornieren"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "stornieren",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/stornieren",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.cancel",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "high"
-      }
-    },
-    {
-      "id": "mask:einkauf/bestellungen:versenden",
-      "label": "Versenden",
-      "description": "Versenden (einkauf/bestellungen)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/bestellungen",
-      "intent_phrases": [
-        "Versenden"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/bestellungen",
-        "actionKey": "versenden",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/versenden",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.send",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
       "id": "mask:einkauf/bestellvorschlaege-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/bestellvorschlaege-liste)",
@@ -6436,127 +7342,6 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:freigeben",
-      "label": "Freigeben",
-      "description": "Freigeben (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "freigeben",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/freigeben",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.freigeben",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:neu",
-      "label": "Rechnungseingang erfassen",
-      "description": "Rechnungseingang erfassen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Rechnungseingang erfassen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/einkauf/rechnungseingang/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:pruefen",
-      "label": "Pruefen",
-      "description": "Pruefen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Pruefen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "pruefen",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/pruefen",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.pruefen",
-        "requiresConfirmation": true,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/rechnungseingaenge-liste:verbuchen",
-      "label": "Verbuchen",
-      "description": "Verbuchen (einkauf/rechnungseingaenge-liste)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/rechnungseingaenge-liste",
-      "intent_phrases": [
-        "Verbuchen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/rechnungseingaenge-liste",
-        "actionKey": "verbuchen",
-        "commandEndpoint": "/api/v1/einkauf/rechnungseingaenge/{entity_id}/verbuchen",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.rechnungseingang.verbuchen",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "auditReasonRequired": true,
-        "dangerLevel": "high"
       }
     },
     {
@@ -7736,27 +8521,6 @@
         "humanApprovalRequired": true,
         "requiresConfirmation": true,
         "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:finance/ap-invoices-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (finance/ap-invoices-liste)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/ap-invoices-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "finance/ap-invoices-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
       }
     },
     {
@@ -9829,6 +10593,1692 @@
       }
     },
     {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/abrechnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/abrechnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/abrechnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/alarme:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/alarme)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/alarme",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/alarme",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-artikel:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/engagement-artikel)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-artikel",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-artikel",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/engagement-partei:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/engagement-partei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/engagement-partei",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/engagement-partei",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/erfuellung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/erfuellung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/erfuellung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/fixierung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/fixierung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/fixierung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:ansicht_uebersicht",
+      "label": "Kontrakte",
+      "description": "Kontrakte (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Kontrakte"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "ansicht_uebersicht",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/uebersicht",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/mahnung:mahnen",
+      "label": "Mahnen",
+      "description": "Mahnen (kontrakt-liste/mahnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/mahnung",
+      "intent_phrases": [
+        "Mahnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt-liste/mahnung",
+        "actionKey": "mahnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_abrechnung",
+      "label": "Abrechnung",
+      "description": "Abrechnung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Abrechnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/abrechnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_alarme",
+      "label": "Kontrakt-Alarme",
+      "description": "Kontrakt-Alarme (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Kontrakt-Alarme"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_alarme",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/alarme",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_engagement_artikel",
+      "label": "Engagement je Artikel",
+      "description": "Engagement je Artikel (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Engagement je Artikel"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_engagement_artikel",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-artikel",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_engagement_partei",
+      "label": "Engagement je Partner",
+      "description": "Engagement je Partner (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Engagement je Partner"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_engagement_partei",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/engagement-partei",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_erfuellung",
+      "label": "Erfüllungsstand",
+      "description": "Erfüllungsstand (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Erfüllungsstand"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/erfuellung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_fixierung",
+      "label": "Fixierung",
+      "description": "Fixierung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Fixierung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/fixierung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:ansicht_mahnung",
+      "label": "Kontraktmahnung",
+      "description": "Kontraktmahnung (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "Kontraktmahnung"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "ansicht_mahnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/listen/mahnung",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt-liste/uebersicht:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakt-liste/uebersicht)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt-liste/uebersicht",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakt-liste/uebersicht",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:abrechnen",
+      "label": "Abrechnen",
+      "description": "Abrechnen (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Abrechnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "abrechnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/abrechnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:abrechnung_uebergeben",
+      "label": "An Abrechnung übergeben",
+      "description": "An Abrechnung übergeben (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "An Abrechnung übergeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "abrechnung_uebergeben",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:ansicht_erfuellung",
+      "label": "Kontrakterfüllung",
+      "description": "Kontrakterfüllung (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Kontrakterfüllung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:ansicht_fixierung",
+      "label": "Kontraktfixierung",
+      "description": "Kontraktfixierung (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Kontraktfixierung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/abrechnung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (kontrakt/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/abrechnung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/abrechnung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "forbiddenForAgents": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:ansicht_abrechnung",
+      "label": "Kontraktabrechnung",
+      "description": "Kontraktabrechnung (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Kontraktabrechnung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:ansicht_fixierung",
+      "label": "Kontraktfixierung",
+      "description": "Kontraktfixierung (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Kontraktfixierung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "ansicht_fixierung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/fixierung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/erfuellung:mahnen",
+      "label": "Mahnen",
+      "description": "Mahnen (kontrakt/erfuellung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/erfuellung",
+      "intent_phrases": [
+        "Mahnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/erfuellung",
+        "actionKey": "mahnen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:ansicht_abrechnung",
+      "label": "Kontraktabrechnung",
+      "description": "Kontraktabrechnung (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Kontraktabrechnung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "ansicht_abrechnung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/abrechnung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:ansicht_erfuellung",
+      "label": "Kontrakterfüllung",
+      "description": "Kontrakterfüllung (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Kontrakterfüllung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "ansicht_erfuellung",
+        "commandEndpoint": null,
+        "navigationRoute": "/kontrakte/vorgang/erfuellung/{entity_id}",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:fixieren",
+      "label": "Fixieren",
+      "description": "Fixieren (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Fixieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "fixieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:notierung_erfassen",
+      "label": "Notierung erfassen",
+      "description": "Notierung erfassen (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Notierung erfassen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "notierung_erfassen",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakt/fixierung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (kontrakt/fixierung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "kontrakt/fixierung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakt/fixierung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/kontrakt-vorgang/fixierungen/{entity_id}/actions/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakt.update",
+        "forbiddenForAgents": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
       "id": "mask:kontrakte/kontraktklassen-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/kontraktklassen-liste)",
@@ -9866,48 +12316,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:kontrakte/liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (kontrakte/liste)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "kontrakte/liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "kontrakte/liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:kontrakte/liste:neu",
-      "label": "Neuer Kontrakt",
-      "description": "Neuer Kontrakt (kontrakte/liste)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "kontrakte/liste",
-      "intent_phrases": [
-        "Neuer Kontrakt"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "kontrakte/liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/kontrakte/neu",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -12428,72 +14836,6 @@
       }
     },
     {
-      "id": "mask:sales/angebote-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/angebote-liste:import_csv",
-      "label": "CSV importieren",
-      "description": "CSV importieren (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "CSV importieren"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "import_csv",
-        "commandEndpoint": "/api/v1/sales/offers/actions/import-csv",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "sales.offer.import_csv",
-        "forbiddenForAgents": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:sales/angebote-liste:neu",
-      "label": "Neues Angebot",
-      "description": "Neues Angebot (sales/angebote-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/angebote-liste",
-      "intent_phrases": [
-        "Neues Angebot"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/angebote-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/angebot/neu",
-        "command": null,
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
       "id": "mask:sales/angebote/neu:export",
       "label": "CSV-Export",
       "description": "CSV-Export (sales/angebote/neu)",
@@ -12510,48 +14852,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/auftraege-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/auftraege-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/auftraege-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/auftraege-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/auftraege-liste:neu",
-      "label": "Neuer Auftrag",
-      "description": "Neuer Auftrag (sales/auftraege-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/auftraege-liste",
-      "intent_phrases": [
-        "Neuer Auftrag"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/auftraege-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/order-editor",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -13091,71 +15391,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:auftrag_oeffnen",
-      "label": "Auftrag öffnen",
-      "description": "Auftrag öffnen (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "Auftrag öffnen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "auftrag_oeffnen",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/order-editor?id={sales_order_id}",
-        "command": null,
-        "method": null,
-        "dangerLevel": "low"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:export",
-      "label": "CSV-Export",
-      "description": "CSV-Export (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "CSV-Export"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "export",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "list.exportCsv",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/lieferungen-liste:neu",
-      "label": "Lieferschein erfassen",
-      "description": "Lieferschein erfassen (sales/lieferungen-liste)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/lieferungen-liste",
-      "intent_phrases": [
-        "Lieferschein erfassen"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "sales/lieferungen-liste",
-        "actionKey": "neu",
-        "commandEndpoint": null,
-        "navigationRoute": "/sales/delivery-editor",
-        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

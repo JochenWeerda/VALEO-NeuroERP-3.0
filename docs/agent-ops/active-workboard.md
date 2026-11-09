@@ -20603,6 +20603,34 @@ Besitz docs/admin/table-catalog.json und .md, eigene QA. CI-Artefakt13589076577 
 Codex hat das Nutzungslimit erreicht; Claude Code bringt PR #115 (`codex/sonar-contracts-20261106`) nach main. Quality-Gate-Lauf 42464912905 rot: (1) drei Postgres-Testdateien verlangten lokales `PGAPPNAME` — Verbindungsname jetzt per `application_name` in der Verbindung (DDL-Protokoll bleibt). (2) Masken-Ratsche: Standard-Sperre `capability_nicht_freigegeben` (ef1c1219c) zaehlt als gesperrt statt unklassifiziert; Baseline nur geschrumpft. (3) Aktionsrechte, Studio-Katalog und RLS-Matrix neu erzeugt. SBOM-Fehler war GitHub-HTTP-504, laeuft mit dem neuen Push erneut. Dateibesitz: nur die genannten Projektionen/Tests, `scripts/mask_studio_inventory.py`, Workboard.
 Nachtrag: `better-sqlite3` (+ Typen) aus der Wurzel-`package.json` entfernt — kein Code nutzt es, das einzige Skript `scripts/seed-policies.ts` importierte ein nicht existierendes `store-sqlite` (Policies liegen in PostgreSQL `domain_shared.policy_rules`); der Frontend-Docker-Build kompilierte es trotzdem nativ. `expo-sqlite` (Mobile-Offline) bleibt. Zeilen-Loeschen der Personal- und Versandprofilmasken als `hooks/useGuardedRowDelete.tsx` zusammengefuehrt; generiertes `capture-screens.ts` aus der Sonar-Duplikatpruefung genommen (Quelle bleibt gemessen).
 
+Maskenfamilien (08.11.2026, Branch claude/studio-varianten-20261108 auf PR #118; Nutzerauftrag „restliche Masken auf
+Studio-Qualitaet per CLI/MCP, gleichartige Masken als Varianten wie die Belegfolge“): Varianten-Registry
+verallgemeinert (app/core/mask_family_versions.py, config/mask_families/; Beleg delegiert unveraendert). Erste
+Familien: kontrakt-liste (8 Varianten) und kontrakt (3 Objektvarianten), Gates A/B/C/E und Studio-Draft-clean.
+Ersetzt: 4 handgebaute Seiten agrar/kontrakt-engagement|erfuellung|fixierung|settlement (Altmuster 31 -> 27), die
+Platzhalter contracts-v2, kontrakte/KontraktAlarmDashboard, kontrakte/LstKontraktUebersicht und die Doppelmaske
+kontrakte/liste (fragte id/name/datum statt contract_no/partner). Wege /api/v1/kontrakt-vorgang mit Zeilenform,
+Alarme vom Server statt im Browser, Kommandowege mit Bearbeiter aus dem Token (vorher "KIM" aus dem Rumpf).
+Behoben: Mahnkandidaten enthielten stornierte/geloeschte Kontrakte ('storniert' gegen STORNIERT).
+Befund, nicht hier: agrar/vertrag-kontingente-liste und einkauf/kontrakte-service-liste lesen /api/v1/kontrakte mit
+Schluesseln, die der Weg nicht liefert (nummer/partner); /kontrakte antwortet ungetypt (KontraktOut extra=allow),
+der Feldvertrag sieht es nicht. MCP-Map stuft Mutationen nach dem Aktionsnamen ein (MUT_KEY); 114 serverwirksame
+Aktionen mit Kommandoweg fallen so heraus (eigener Auftrag).
+Naechste Familien (Reihenfolge Nutzer): Belegfamilie erweitern, Annahme/Waage, Partnerstamm, Bestellvorschlag,
+Kalender; ~70 Seiten mit screenId ohne ScreenDefinition (config/frontend_seiten_ohne_maske.json).
+
+Beleg-Rollout (08.11.2026, Nutzerfreigabe „rollout ist frei gegeben“, Branch claude/beleg-rollout-20261108 auf #120):
+Belegfamilie beleg/* fuer jeden Mandanten (beleg_freigegeben statt NATIVE_BELEG_TENANTS; ohne Mandant weiter keine
+Maske, immer die versionierte Fassung). Offen nach Paritaetspruefung (BELEG-050): alte Einstiege schreiben in eigene
+Speicher (/einkauf/lieferscheine, /purchase-orders, /sales/delivery-notes, /finance/ap/invoices, /finance/invoices),
+die Belegmaske liest nur DocFlow; vier Listen oeffnen AP-Rechnungs-IDs in /belege/purchase_invoice/{id}, die DocFlow
+nicht kennt. Speicherentscheidung BELEG-052 beim Nutzer.
+BELEG-052 Stufe 1 (08.11.2026): Familie beleg-liste (9 Varianten) liest GET /api/v1/belege/{belegart} (DocFlow; dieselbe
+Quelle wie MCP beleg.suchen). Ersetzt die Listen sales/angebote-liste, sales/auftraege-liste, sales/lieferungen-liste,
+sales/invoices (+ Alias verkauf/rechnungen), einkauf/bestellungen, finance/ap-invoices-liste,
+einkauf/rechnungseingaenge-liste; sales/lieferungen/neu legt jetzt ueber die Belegmaske an. Offen: Bestellung versenden,
+Rechnungspruefung (BELEG-043), CSV-Import Angebote (Altimport legt Koepfe ohne Positionen an - Fachfrage);
+Stufe 2 Detail-/Erfassungsseiten umhaengen, Stufe 3 Altspeicher abbauen.
 ## CRM-DIENSTKOPIEN-ENTFERNEN-20261108 — abgeschlossen, Claude Code
 
 Duplikatpruefung vor dem Merge von #54: services/crm-consent, crm-gdpr und crm-marketing liefen nie (nicht in Compose),
