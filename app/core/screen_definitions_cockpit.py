@@ -737,7 +737,7 @@ def build_workspace_verkauf_screen_definition() -> dict[str, Any]:
         ],
         tiles=[
             cockpit_nav_tile("offene_auftraege", "Offene Auftraege", target_screen_id="beleg-liste/sales-order"),
-            cockpit_nav_tile("lieferscheine", "Lieferscheine", target_screen_id="sales/delivery-note"),
+            cockpit_nav_tile("lieferscheine", "Lieferscheine", target_screen_id="beleg-liste/sales-delivery"),
             cockpit_nav_tile("wiedervorlagen", "Wiedervorlagen", target_screen_id="crm/lead", tone="warning"),
         ],
         data_sources=[cockpit_entity_source("/api/v1/sales/reports/summary")],

@@ -33,6 +33,7 @@ MASK_TO_PROCESSES: dict[str, list[str]] = {
     "crm/customer-360": ["order-to-cash", "service-to-customer"],
     "beleg-liste/sales-order": ["order-to-cash"],
     "sales/delivery-note": ["order-to-cash"],
+    "beleg-liste/sales-delivery": ["order-to-cash"],
     "einkauf/supplier": ["procure-to-pay"],
     "einkauf/purchase-order": ["procure-to-pay"],
     "finance/ap-invoice": ["procure-to-pay"],

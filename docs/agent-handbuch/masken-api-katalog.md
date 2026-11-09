@@ -237,7 +237,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `beleg-liste/purchase-invoice` | Eingangsrechnungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-invoice/agent-contract` |
 | `beleg-liste/purchase-order` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
 | `beleg-liste/sales-credit-memo` | Gutschriften | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-credit-memo/agent-contract` |
-| `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
+| `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
 | `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
 | `beleg-liste/sales-offer` | Angebote | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-offer/agent-contract` |
 | `beleg-liste/sales-order` | Aufträge | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
