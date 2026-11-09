@@ -19,7 +19,6 @@ from app.core.business_time import business_date_after, business_today
 from app.services.sales_posting_service import SalesPostingService
 from app.services.sales_invoice_service import InvoiceCreationError, SalesInvoiceService
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.collective_documents_schemas import CollectiveDocumentsOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
@@ -280,7 +279,14 @@ async def create_collective_delivery(
             raise HTTPException(status_code=503, detail="Datenbankfehler")
         if not row:
             raise HTTPException(status_code=404, detail=f"Auftrag {order_id} nicht gefunden")
-        if str(row.get("status", "")).lower() == "geliefert":
+        # Seit BELEG-052 ist der Auftrag ein DocFlow-Beleg (domain_crm.sales_orders ist Sicht); sein Stand wird
+        # hier nicht mehr umgeschrieben. Schon gesammelt ist, was ein Lieferschein in source_order_ids fuehrt.
+        bereits = db.execute(
+            text("SELECT 1 FROM domain_sales.delivery_notes WHERE tenant_id = :tid "
+                 "AND source_order_ids ? :id LIMIT 1"),
+            {"id": order_id, "tid": tenant_id},
+        ).first()
+        if bereits or str(row.get("status", "")).lower() in ("geliefert", "completed", "cancelled"):
             raise HTTPException(status_code=409, detail=f"Auftrag {order_id} ist bereits geliefert")
         total_amount += Decimal(str(row["total_amount"] or 0))
 
@@ -311,16 +317,6 @@ async def create_collective_delivery(
                 "now": now,
             },
         )
-        # Mark source orders as in delivery — prevents duplicate collective delivery
-        for order_id in payload.order_ids:
-            db.execute(
-                text(
-                    "UPDATE domain_crm.sales_orders "
-                    "SET status = 'geliefert', updated_at = :now "
-                    "WHERE id = :oid AND tenant_id = :tid"
-                ),
-                {"now": now, "oid": order_id, "tid": tenant_id},
-            )
         db.commit()
     except HTTPException:
         raise

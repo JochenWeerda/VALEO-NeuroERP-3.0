@@ -20,6 +20,7 @@ depends_on = None
 def upgrade() -> None:
     op.execute("ALTER TABLE domain_docflow.document_headers ADD COLUMN IF NOT EXISTS bausteine JSONB "
                "NOT NULL DEFAULT '{}'::jsonb")
+    op.execute("ALTER TABLE domain_docflow.document_headers DROP CONSTRAINT IF EXISTS ck_docflow_bausteine_objekt")
     op.execute("ALTER TABLE domain_docflow.document_headers ADD CONSTRAINT ck_docflow_bausteine_objekt "
                "CHECK (jsonb_typeof(bausteine) = 'object')")
 

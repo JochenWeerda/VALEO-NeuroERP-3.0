@@ -334,7 +334,6 @@ _MANDANTEN_TABELLEN = (
     ("domain_inventory.warehouses", "tenant_id"),
     ("domain_inventory.articles", "tenant_id"),
     ("domain_agrar.ernte_kampagnen", "tenant_id"),
-    ("domain_crm.sales_orders", "tenant_id"),
     ("domain_crm.crm_opportunities", "tenant_id"),
     ("domain_crm.business_partners", "tenant_id"),
     ("domain_crm.customers", "tenant_id"),
@@ -398,11 +397,10 @@ def stamm():
             "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
             "VALUES (:id, :t, :nr, 'Raiffeisen Markt Ost eG')"
         ), {"id": ids["kunde"], "t": mandant, "nr": ids["kunden_nr"]})
-        v.execute(text(
-            "INSERT INTO domain_crm.sales_orders "
-            "(id, tenant_id, customer_id, order_number, subject, description, total_amount, currency, status, version) "
-            "VALUES (:id, :t, :kunde, :nr, 'Referenzauftrag', 'Belegreferenz', 0, 'EUR', 'ENTWURF', 1)"
-        ), {"id": ids["auftrag"], "t": mandant, "kunde": ids["kunde"], "nr": ids["auftrag_nummer"]})
+        from docflow_testbelege import lege_auftrag_an
+
+        lege_auftrag_an(v, mandant, ids["kunde"], ids["auftrag_nummer"], kennung=ids["auftrag"], status="draft",
+                        bausteine={"texte": {"betreff": "Referenzauftrag", "kopftext": "Belegreferenz"}})
         v.execute(text(
             "INSERT INTO domain_agrar.ernte_kampagnen (id, kampagne_id, tenant_id, wirtschaftsjahr, ernte_art, bezeichnung) "
             "VALUES (:id, :kid, :t, 2026, 'getreide', 'Getreideernte 2026')"
@@ -420,6 +418,9 @@ def stamm():
         yield {"mandant": mandant, "engine": engine, **ids}
     finally:
         with engine.begin() as v:
+            from docflow_testbelege import entferne_belege
+
+            entferne_belege(v, [ids["auftrag"]])
             for tabelle, spalte in _MANDANTEN_TABELLEN:
                 v.execute(text(f"DELETE FROM {tabelle} WHERE {spalte} = :t"), {"t": mandant})  # nosec B608
 

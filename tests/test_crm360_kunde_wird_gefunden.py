@@ -778,26 +778,16 @@ def test_jahresumsatz_zaehlt_die_geschriebenen_auftragsstatus(client, kunde) -> 
     offen = str(uuid.uuid4())
     engine = create_engine(DB_URL, connect_args={"connect_timeout": 5})
     with engine.begin() as verbindung:
+        from docflow_testbelege import lege_auftrag_an
+
+        # DocFlow kennt "geliefert" nicht mehr als eigenen Stand: ausgeliefert und abgerechnet ist abgeschlossen.
         for auftrag, nummer, status, betrag in (
             (abgeschlossen, f"VA-{uuid.uuid4().hex[:6]}", "completed", 1500),
-            (geliefert, f"VA-{uuid.uuid4().hex[:6]}", "geliefert", 250),
+            (geliefert, f"VA-{uuid.uuid4().hex[:6]}", "completed", 250),
             (offen, f"VA-{uuid.uuid4().hex[:6]}", "open", 999),
         ):
-            verbindung.execute(
-                text(
-                    "INSERT INTO domain_crm.sales_orders "
-                    "(id, tenant_id, customer_id, order_number, subject, description, total_amount, currency, status, version) "
-                    "VALUES (:id, :tid, :cid, :nr, 'Akte', 'Umsatzvertrag', :betrag, 'EUR', :status, 1)"
-                ),
-                {
-                    "id": auftrag,
-                    "tid": kunde["mandant"],
-                    "cid": kunde["id"],
-                    "nr": nummer,
-                    "betrag": betrag,
-                    "status": status,
-                },
-            )
+            lege_auftrag_an(verbindung, kunde["mandant"], kunde["id"], nummer, kennung=auftrag, status=status,
+                            brutto=betrag, bausteine={"texte": {"betreff": "Akte", "kopftext": "Umsatzvertrag"}})
     try:
         sicht = client.get(
             f"/api/v1/crm/customers/{kunde['id']}/360", headers=kopf(kunde["mandant"])
@@ -809,10 +799,9 @@ def test_jahresumsatz_zaehlt_die_geschriebenen_auftragsstatus(client, kunde) -> 
         assert len(nummern) == 3
     finally:
         with engine.begin() as verbindung:
-            verbindung.execute(
-                text("DELETE FROM domain_crm.sales_orders WHERE id IN (:a, :b, :c)"),
-                {"a": abgeschlossen, "b": geliefert, "c": offen},
-            )
+            from docflow_testbelege import entferne_belege
+
+            entferne_belege(verbindung, [abgeschlossen, geliefert, offen])
 
 
 def test_postfach_und_geo_kommen_aus_dem_migrierten_stamm(client, kunde) -> None:

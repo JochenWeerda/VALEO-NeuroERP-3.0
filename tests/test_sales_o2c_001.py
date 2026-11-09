@@ -86,7 +86,7 @@ class TestDeliverDeliveryNoteO2C:
         assert exc.value.status_code == 400
 
     @pytest.mark.asyncio
-    async def test_auftrag_auf_geliefert_wenn_vollstaendig(self):
+    async def test_vollstaendig_geliefert_schreibt_den_auftrag_nicht_um(self):
         from app.api.v1.endpoints.sales_delivery_notes import deliver_delivery_note
 
         db = _mock_db_for_deliver(_make_dn_mapping("shipped"))
@@ -99,9 +99,9 @@ class TestDeliverDeliveryNoteO2C:
             except Exception:
                 pass  # Pydantic response model construction may fail on mock — side effects already recorded
 
+        # BELEG-052: Der Auftrag ist DocFlow-Beleg; der Lieferschein schreibt seinen Stand nicht mehr um.
         update_calls = [str(c.args[0]) for c in db.execute.call_args_list]
-        order_updates = [s for s in update_calls if "sales_orders" in s and "geliefert" in s]
-        assert len(order_updates) > 0, "Auftrag wurde nicht auf geliefert gesetzt"
+        assert not [s for s in update_calls if "UPDATE domain_crm.sales_orders" in s]
 
     @pytest.mark.asyncio
     async def test_auftrag_bleibt_wenn_nur_teilgeliefert(self):

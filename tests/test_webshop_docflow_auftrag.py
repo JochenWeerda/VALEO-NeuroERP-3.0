@@ -73,8 +73,9 @@ def test_bestellung_wird_docflow_auftrag_mit_nettopreis(mandant):
         assert (kopf["doc_type"], kopf["status"], kopf["customer_id"]) == ("sales_order", "draft", mandant["kunde"])
         assert (kopf["source_system"], kopf["source_ref"]) == ("webshop", nr)
         assert float(kopf["total_net"]) == pytest.approx(200.0)  # 2 x 119 brutto bei 19 %
-        alt = db.execute(text("SELECT count(*) FROM domain_crm.sales_orders WHERE tenant_id = :t"),
-                         {"t": mandant["tid"]}).scalar()
+        # Kein zweiter Auftrag daneben (domain_crm.sales_orders ist seit BELEG-052 die Sicht auf DocFlow).
+        alt = db.execute(text("SELECT count(*) FROM domain_crm.sales_orders WHERE tenant_id = :t AND id <> :id"),
+                         {"t": mandant["tid"], "id": ergebnis["auftrag_id"]}).scalar()
         assert alt == 0
         # Wiederholt: derselbe Auftrag, kein zweiter.
         assert dienst.process_order(nr)["auftrag_nr"] == ergebnis["auftrag_nr"]

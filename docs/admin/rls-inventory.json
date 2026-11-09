@@ -1414,7 +1414,7 @@
    "policies": 4
   },
   {
-   "table": "domain_crm.sales_order_items",
+   "table": "domain_crm.sales_order_items_vor_docflow",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,
@@ -1422,7 +1422,7 @@
    "policies": 4
   },
   {
-   "table": "domain_crm.sales_orders",
+   "table": "domain_crm.sales_orders_vor_docflow",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,

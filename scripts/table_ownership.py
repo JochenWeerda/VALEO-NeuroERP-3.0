@@ -82,6 +82,8 @@ TOLERATED_LEGACY_LOCATIONS: dict[tuple[str, str], str] = {
     ("domain_crm", "sales_offer_items"): "Sales-Angebotspositionen liegen historisch im CRM-Schema.",
     ("domain_crm", "sales_orders"): "Sales-Auftraege liegen historisch im CRM-Schema.",
     ("domain_crm", "sales_order_items"): "Sales-Auftragspositionen liegen historisch im CRM-Schema.",
+    ("domain_crm", "sales_orders_vor_docflow"): "Ursprungsdaten der Auftraege vor BELEG-052 (GoBD), fuehrend DocFlow.",
+    ("domain_crm", "sales_order_items_vor_docflow"): "Ursprungsdaten der Auftragspositionen vor BELEG-052 (GoBD).",
     ("domain_finance", "sales_order"): "FIBU-Referenzobjekt sales_order liegt historisch in domain_finance.",
     ("domain_inventory", "agrar_contracts"): "Agrar-Kontrakte liegen historisch im Inventory-Schema.",
     ("domain_inventory", "agrar_contract_allocations"): "Agrar-Kontraktallokationen liegen historisch im Inventory-Schema.",
