@@ -1,8 +1,11 @@
 # ADR-086: Risk-based Autonomous ERP - Agent Trust & Autonomy Engine
 
+**Status:** Proposed (vorgeschlagen - fachliche Freigabe ausstehend)
+**Datum:** 2026-11-09
+
 ## Status
 
-**Vorgeschlagen - fachliche Freigabe ausstehend.** Version 1.0.0 der Autonomiepolitik
+Proposed. **Vorgeschlagen - fachliche Freigabe ausstehend.** Version 1.0.0 der Autonomiepolitik
 (`config/agent_autonomy_policy.yaml`). Technisch umgesetzt und getestet, aber **nicht wirksam**: Solange die
 Fassung fuer einen Mandanten nicht fachlich freigegeben ist, bucht kein Agent autonom; es gilt der bisherige Weg
 (Agent schlaegt vor, ein Mensch gibt frei). Die Freigabe erteilt je Mandant eine Person mit Freigaberolle
@@ -115,7 +118,7 @@ Politik: Hoechstbetrag 1.000 EUR brutto je Gutschrift (wie die Gutschriftgrenze 
 Befund- und Einwandquote 10 %, Testnachweis hoechstens 30 Tage alt. **Die Werte sind Startwerte, keine
 Risikopolitik** - sie werden mit der fachlichen Freigabe bestaetigt oder angepasst.
 
-## Folgen
+## Konsequenzen
 
 * Routinegutschriften bucht ein delegierter Agent ohne Wartezeit; Menschen sehen Ausnahmen statt jeder Buchung.
 * Messbar: Fehler-, Befund- und Einwandquote je Agent, Entscheidungsprotokoll je Vorgang, Pruefkorb-Befunde bei
