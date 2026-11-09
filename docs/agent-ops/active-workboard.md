@@ -20696,3 +20696,4 @@ bereinigt und per Vertragstest an die Kundenakte gebunden.
 Nummernkreise (09.11.2026): admin/nummernkreise als Studio-Liste (Leseweg typisiert NumberRangeOut) mit Konfigurieren/Aendern/Stilllegen als Admin-Kommandowege; handgebaute Seite und Frontend-Client entfernt.
 CI-Fix (09.11.2026): Eingabefelder der Stamm-Kommandos in app/core/eingabefelder_stamm.py (ScreenDefinitions ohne API-Schemapaket importierbar, Doku-Job ohne email-validator).
 Report-Berechtigungen (09.11.2026): admin/report-berechtigungen als Studio-Liste mit Anlegen/Aendern/Entfernen (Admin-Kommandowege, eine Berechtigung je Rolle und Auswertung); handgebaute Seite entfernt.
+Webshop (09.11.2026): admin/webshop (Anbindungen: Anbinden/Entfernen) und admin/webshop-bestellungen (typisierter Leseweg, 'Als Auftrag anlegen' -> DocFlow-Entwurf, Blocker als Ablehnung) als Studio-Listen; handgebaute Seite und die Platzhalterwege /webshop/connectors und /webshop/orders/import (meldete immer 0) entfernt.

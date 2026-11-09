@@ -556,6 +556,7 @@ domains:
       - tapi
       - channel_work
       - webshop_integration
+      - webshop_kommandos
       - edi_api
       - external_agent
       - external_gates

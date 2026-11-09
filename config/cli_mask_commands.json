@@ -22,6 +22,9 @@
   "mask:admin/webhooks-liste:history",
   "mask:admin/webhooks-liste:register",
   "mask:admin/webhooks-liste:unregister",
+  "mask:admin/webshop-bestellungen:verarbeiten",
+  "mask:admin/webshop:anlegen",
+  "mask:admin/webshop:entfernen",
   "mask:agrar/duenger-liste:deaktivieren",
   "mask:agrar/feed-controlling:record_observation",
   "mask:agrar/feed-readiness:create_handoff",
@@ -361,7 +364,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 969,
+  "kein_endpunkt": 973,
   "pfadparameter": 6
  }
 }

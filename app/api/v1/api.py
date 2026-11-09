@@ -2317,6 +2317,8 @@ register_command_mutations()
 register_finance_command_mutations()
 
 # Wave 105 — Integration stubs
+from app.api.v1.endpoints import webshop_kommandos  # noqa: E402
+api_router.include_router(webshop_kommandos.router)  # vor webshop_integration: /bestellungen/liste
 api_router.include_router(webshop_integration.router, tags=["webshop", "integration"])
 api_router.include_router(atlas_zollausfuhr.router, tags=["zoll", "atlas", "customs"])
 api_router.include_router(saatzucht.router, tags=["saatzucht", "agrar", "saatgut"])

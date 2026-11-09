@@ -2293,6 +2293,10 @@
       "path": "admin/webshop"
     },
     {
+      "module": "@/pages/admin/webshop-bestellungen",
+      "path": "admin/webshop/bestellungen"
+    },
+    {
       "module": "@/pages/agrar/erntefenster-konfig",
       "path": "agrar/erntefenster-konfig"
     },

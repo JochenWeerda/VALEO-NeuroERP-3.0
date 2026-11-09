@@ -178600,6 +178600,100 @@
         "title": "WebhookReceiveResponse",
         "type": "object"
       },
+      "WebshopBestellZeileOut": {
+        "properties": {
+          "bestelldatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestelldatum"
+          },
+          "blocker": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Blocker"
+          },
+          "erp_order_number": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erp Order Number"
+          },
+          "externe_bestellnr": {
+            "title": "Externe Bestellnr",
+            "type": "string"
+          },
+          "gesamtbetrag_brutto": {
+            "default": 0,
+            "title": "Gesamtbetrag Brutto",
+            "type": "number"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "imported_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imported At"
+          },
+          "kunde_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kunde Name"
+          },
+          "shop_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Shop System"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "externe_bestellnr",
+          "status"
+        ],
+        "title": "WebshopBestellZeileOut",
+        "type": "object"
+      },
       "WebshopBestellung": {
         "properties": {
           "artikel_positionen": {
@@ -190551,44 +190645,6 @@
           "event_area"
         ],
         "title": "WebhookOut",
-        "type": "object"
-      },
-      "app__api__v1__endpoints__webshop_integration__ConnectorOut": {
-        "properties": {
-          "aktiv": {
-            "title": "Aktiv",
-            "type": "boolean"
-          },
-          "api_key_masked": {
-            "title": "Api Key Masked",
-            "type": "string"
-          },
-          "base_url": {
-            "title": "Base Url",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "name": {
-            "title": "Name",
-            "type": "string"
-          },
-          "platform": {
-            "title": "Platform",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "platform",
-          "base_url",
-          "api_key_masked",
-          "aktiv"
-        ],
-        "title": "ConnectorOut",
         "type": "object"
       },
       "app__api__v1__endpoints__whatsapp_intake__IntakeIn": {
@@ -423670,6 +423726,98 @@
         ]
       }
     },
+    "/api/v1/webshop/bestellungen/liste": {
+      "get": {
+        "operationId": "bestellungen_liste_api_v1_webshop_bestellungen_liste_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/WebshopBestellZeileOut"
+                  },
+                  "title": "Response Bestellungen Liste Api V1 Webshop Bestellungen Liste Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Importierte Webshop-Bestellungen mit Stand und Blockern",
+        "tags": [
+          "webshop",
+          "integration",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/webshop/bestellungen/{entity_id}/actions/verarbeiten": {
+      "post": {
+        "operationId": "bestellung_verarbeiten_api_v1_webshop_bestellungen__entity_id__actions_verarbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Webshop-Bestellung als DocFlow-Auftragsentwurf anlegen",
+        "tags": [
+          "webshop",
+          "integration",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/webshop/bestellungen/{external_order_no}": {
       "get": {
         "description": "Read one imported shop order by external order number.",
@@ -423772,40 +423920,6 @@
         ]
       }
     },
-    "/api/v1/webshop/connectors": {
-      "get": {
-        "description": "Frontend-Alias: maps webshop/connectors → webshop/konfigurationen shape.",
-        "operationId": "list_connectors_api_v1_webshop_connectors_get",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/app__api__v1__endpoints__webshop_integration__ConnectorOut"
-                  },
-                  "title": "Response List Connectors Api V1 Webshop Connectors Get",
-                  "type": "array"
-                }
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Connector-Liste (Frontend-Alias für /konfigurationen)",
-        "tags": [
-          "webshop",
-          "integration",
-          "webshop",
-          "integration"
-        ]
-      }
-    },
     "/api/v1/webshop/konfigurationen": {
       "get": {
         "description": "List shop configurations. API keys are never returned.",
@@ -423888,6 +424002,115 @@
         ]
       }
     },
+    "/api/v1/webshop/konfigurationen/actions/anlegen": {
+      "post": {
+        "operationId": "anbindung_anlegen_api_v1_webshop_konfigurationen_actions_anlegen_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Shop-Anbindung anlegen",
+        "tags": [
+          "webshop",
+          "integration",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/webshop/konfigurationen/{entity_id}/actions/entfernen": {
+      "post": {
+        "operationId": "anbindung_entfernen_api_v1_webshop_konfigurationen__entity_id__actions_entfernen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Shop-Anbindung entfernen",
+        "tags": [
+          "webshop",
+          "integration",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/webshop/konfigurationen/{id}": {
       "delete": {
         "description": "Remove a shop configuration.",
@@ -423958,57 +424181,6 @@
           }
         ],
         "summary": "Orders auflisten",
-        "tags": [
-          "webshop",
-          "integration",
-          "webshop",
-          "integration"
-        ]
-      }
-    },
-    "/api/v1/webshop/orders/import": {
-      "post": {
-        "description": "Frontend-Alias: maps /orders/import → /bestellungen/import.",
-        "operationId": "import_orders_alias_api_v1_webshop_orders_import_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": true,
-                "title": "Body",
-                "type": "object"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Orders importieren (Frontend-Alias)",
         "tags": [
           "webshop",
           "integration",

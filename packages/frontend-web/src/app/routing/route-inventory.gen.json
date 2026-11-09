@@ -336,6 +336,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/webshop-bestellungen",
+      "path": "admin/webshop/bestellungen",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/workflow-editor",
       "path": "admin/workflow-editor",
       "source": "alias"

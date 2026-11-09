@@ -224,6 +224,57 @@ def build_admin_report_berechtigungen() -> dict[str, Any]:
     )
 
 
+def _webshop_ansicht(ziel: str, label: str) -> dict[str, Any]:
+    return {"key": f"ansicht_{ziel.rsplit('/', 1)[-1]}", "label": label, "kind": "secondary", "dangerLevel": "safe",
+            "zone": "header", "navigationRoute": ziel, "localEffect": "navigation", "stubReason": f"Wechselt zu {label}."}
+
+
+def build_admin_webshop() -> dict[str, Any]:
+    from app.core.eingabefelder_stamm import WEBSHOP_ANBINDUNG_FELDER
+
+    weg = "/api/v1/webshop/konfigurationen"
+    return build_stamm_list_screen(
+        screen_id="admin/webshop", domain="sales", bundle="verkauf", title="Webshop-Anbindungen",
+        subtitle="Shops, aus denen Bestellungen kommen; der API-Schluessel wird nur maskiert gespeichert",
+        endpoint=weg, row_route=None,
+        columns=[text("shop_url", "Shop", "primary"), text("shop_system", "System", "primary"),
+                 zahl("sync_interval_minutes", "Intervall (Min.)"), janein("is_active", "Aktiv")],
+        actions=[{"key": "anlegen", "label": "Shop anbinden", "kind": "primary", "zone": "header",
+                  "dangerLevel": "moderate", "permission": "verkauf.webshop.update",
+                  "commandEndpoint": f"{weg}/actions/anlegen", "method": "POST", "requiresConfirmation": False,
+                  "inputFields": WEBSHOP_ANBINDUNG_FELDER},
+                 _webshop_ansicht("/admin/webshop/bestellungen", "Webshop-Bestellungen"), _EXPORT],
+        row_actions=[{"key": "entfernen", "label": "Entfernen", "dangerLevel": "moderate",
+                      "permission": "verkauf.webshop.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/entfernen", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True}],
+        purpose="Webshops anbinden und pruefen, welche Anbindungen aktiv sind.",
+        prompts=["Welche Shops sind angebunden?", "Binde den Shopware-Shop https://shop.example an."],
+        no_workflow="Konfigurationsliste; Bestellungen laufen ueber die Liste Webshop-Bestellungen.",
+    )
+
+
+def build_admin_webshop_bestellungen() -> dict[str, Any]:
+    return build_stamm_list_screen(
+        screen_id="admin/webshop-bestellungen", domain="sales", bundle="verkauf", title="Webshop-Bestellungen",
+        subtitle="Importierte Shop-Bestellungen mit Stand, Blockern und Auftrag",
+        endpoint="/api/v1/webshop/bestellungen/liste", row_route=None,
+        columns=[text("externe_bestellnr", "Shop-Bestellung", "primary"), text("kunde_name", "Kunde", "primary"),
+                 datum("bestelldatum", "Bestellt am", "primary"), betrag("gesamtbetrag_brutto", "Brutto"),
+                 status(), text("blocker", "Blocker"), text("erp_order_number", "Auftrag"),
+                 text("shop_system", "System", "tertiary"), datum("imported_at", "Importiert", "tertiary")],
+        actions=[_webshop_ansicht("/admin/webshop", "Webshop-Anbindungen"), _EXPORT],
+        row_actions=[{"key": "verarbeiten", "label": "Als Auftrag anlegen", "dangerLevel": "moderate",
+                      "permission": "verkauf.auftrag.create",
+                      "commandEndpoint": "/api/v1/webshop/bestellungen/{entity_id}/actions/verarbeiten",
+                      "method": "POST", "requiresConfirmation": True,
+                      "visibleWhen": {"field": "status", "values": ["NEU", "FEHLER"]}}],
+        purpose="Shop-Bestellungen pruefen und als Auftragsentwurf in die Belegmaske uebernehmen.",
+        prompts=["Welche Shop-Bestellungen haben Blocker?", "Lege Shop-Bestellung 10045 als Auftrag an."],
+        no_workflow="Eingangsliste; der Auftrag laeuft danach in der Belegmaske weiter.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -235,4 +286,6 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "crm/vertreterprovisionen-staffeln": build_crm_vertreterprovisionen_staffeln,
     "admin/nummernkreise": build_admin_nummernkreise,
     "admin/report-berechtigungen": build_admin_report_berechtigungen,
+    "admin/webshop": build_admin_webshop,
+    "admin/webshop-bestellungen": build_admin_webshop_bestellungen,
 }

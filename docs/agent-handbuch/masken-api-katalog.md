@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (778 Masken).
+> Generiert aus `app/core/screen_definitions.py` (780 Masken).
 
 ## Übersicht
 
@@ -57,6 +57,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
 | `admin/users` | Users | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
 | `admin/webhooks-liste` | Webhook-Verwaltung | admin | mittel | — | `GET /api/v1/masks/admin/webhooks-liste/agent-contract` |
+| `admin/webshop` | Webshop-Anbindungen | sales | mittel | — | `GET /api/v1/masks/admin/webshop/agent-contract` |
+| `admin/webshop-bestellungen` | Webshop-Bestellungen | sales | niedrig | — | `GET /api/v1/masks/admin/webshop-bestellungen/agent-contract` |
 | `admin/workflow-editor` | Workflow editor | admin | niedrig | — | `GET /api/v1/masks/admin/workflow-editor/agent-contract` |
 | `admin/zeitachsen-editor` | Zeitachsen editor | admin | niedrig | — | `GET /api/v1/masks/admin/zeitachsen-editor/agent-contract` |
 | `agrar/annahme-abrechnung` | Annahme abrechnung | agrar | niedrig | — | `GET /api/v1/masks/agrar/annahme-abrechnung/agent-contract` |
@@ -24915,6 +24917,85 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: sales
+
+### `admin/webshop` — Webshop-Anbindungen
+
+**Zweck:** Webshops anbinden und pruefen, welche Anbindungen aktiv sind.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/webshop/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/webshop/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/webshop/readiness` |
+| Rollout-Route | `/mask-rollout/admin__webshop/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/webshop/konfigurationen`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Shops sind angebunden?
+- Binde den Shopware-Shop https://shop.example an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Shop anbinden | moderate | nein | `/api/v1/webshop/konfigurationen/actions/anlegen` |
+| `ansicht_bestellungen` | Webshop-Bestellungen | safe | nein | `Wechselt zu Webshop-Bestellungen.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin/webshop-bestellungen` — Webshop-Bestellungen
+
+**Zweck:** Shop-Bestellungen pruefen und als Auftragsentwurf in die Belegmaske uebernehmen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/webshop-bestellungen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/webshop-bestellungen/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/webshop-bestellungen/readiness` |
+| Rollout-Route | `/mask-rollout/admin__webshop-bestellungen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/webshop/bestellungen/liste`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Shop-Bestellungen haben Blocker?
+- Lege Shop-Bestellung 10045 als Auftrag an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `ansicht_webshop` | Webshop-Anbindungen | safe | nein | `Wechselt zu Webshop-Anbindungen.` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
 
 ### `beleg-liste/sales-credit-memo` — Gutschriften
 

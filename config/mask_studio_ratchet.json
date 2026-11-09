@@ -18,7 +18,6 @@
   "admin/terminologie",
   "admin/voice-channel",
   "admin/vordruck-editor",
-  "admin/webshop",
   "agrar/annahmen-qualitaet-nachtrag",
   "agrar/ernte-annahme-erfassung",
   "agrar/ernte-annahme-erfassung/:id",

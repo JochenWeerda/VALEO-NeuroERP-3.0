@@ -77,6 +77,24 @@
         ]
       ]
     },
+    "admin/webshop": {
+      "verkauf.webshop.update": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "admin/webshop-bestellungen": {
+      "verkauf.auftrag.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/duenger-liste": {
       "agrar.duenger.deactivate": [
         [

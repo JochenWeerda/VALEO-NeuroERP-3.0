@@ -50,3 +50,13 @@ REPORT_BERECHTIGUNG_FELDER: list[dict[str, Any]] = [
     {"key": "can_export", "label": "Exportieren", "type": "boolean"},
     {"key": "allowed_scopes", "label": "Bereiche (Komma-getrennt)", "type": "text"},
 ]
+
+SHOPSYSTEME = [("SHOPWARE6", "Shopware 6"), ("WOOCOMMERCE", "WooCommerce"), ("SHOPIFY", "Shopify"),
+               ("MAGENTO", "Magento"), ("CUSTOM", "Eigenes System")]
+WEBSHOP_ANBINDUNG_FELDER: list[dict[str, Any]] = [
+    {"key": "shop_url", "label": "Shop-Adresse", "type": "text", "required": True},
+    {"key": "shop_system", "label": "Shopsystem", "type": "select", "required": True,
+     "options": _auswahl(SHOPSYSTEME)},
+    {"key": "api_key", "label": "API-Schlüssel", "type": "password", "required": True},
+    {"key": "sync_interval_minutes", "label": "Abrufintervall (Minuten)", "type": "number"},
+]

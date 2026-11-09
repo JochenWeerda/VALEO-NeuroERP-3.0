@@ -13,7 +13,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.webshop_integration_service import WebshopBestellungUnbekannt, WebshopIntegrationService
 
-from app.api.v1.schemas.base import BaseSchema, TypedObjectOut
+from app.api.v1.schemas.base import TypedObjectOut
 from app.api.v1.schemas.webshop_integration_schemas import WebshopIntegrationOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
@@ -68,49 +68,6 @@ class WebshopSyncResult(BaseModel):
 
 def _svc(db: Session, tenant_id: str) -> WebshopIntegrationService:
     return WebshopIntegrationService(db, tenant_id)
-
-
-class ConnectorOut(BaseModel):
-    id: str
-    name: str
-    platform: str
-    base_url: str
-    api_key_masked: str
-    aktiv: bool
-
-
-@router.get("/connectors", response_model=list[ConnectorOut], summary="Connector-Liste (Frontend-Alias für /konfigurationen)")
-def list_connectors(
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Frontend-Alias: maps webshop/connectors → webshop/konfigurationen shape."""
-    try:
-        cfgs = _svc(db, tenant_id).list_configurations()
-    except Exception:  # noqa: BLE001
-        db.rollback()
-        return []
-    return [
-        ConnectorOut(
-            id=c["id"] if isinstance(c, dict) else c.id,
-            name=(c.get("shop_url") if isinstance(c, dict) else c.shop_url) or "",
-            platform=(c.get("shop_system") if isinstance(c, dict) else getattr(c, "shop_system", "CUSTOM")) or "CUSTOM",
-            base_url=(c.get("shop_url") if isinstance(c, dict) else c.shop_url) or "",
-            api_key_masked="***",
-            aktiv=(c.get("is_active") if isinstance(c, dict) else c.is_active) or False,
-        )
-        for c in cfgs
-    ]
-
-
-@router.post("/orders/import", response_model=TypedObjectOut, summary="Orders importieren (Frontend-Alias)", dependencies=SCHREIBEN["VERKAUF"])
-def import_orders_alias(
-    body: dict = None,  # type: ignore[assignment]
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Frontend-Alias: maps /orders/import → /bestellungen/import."""
-    return {"imported_count": 0}
 
 
 @router.get("/konfigurationen", response_model=list[WebshopKonfigurationOut], summary="Konfigurationen auflisten")

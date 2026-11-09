@@ -24336,6 +24336,105 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "admin/webshop",
+      "title": "Webshop-Anbindungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__webshop/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/webshop/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/webshop/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/webshop/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Shop anbinden",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "verkauf.webshop.update",
+          "commandEndpoint": "/api/v1/webshop/konfigurationen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "ansicht_bestellungen",
+          "label": "Webshop-Bestellungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Webshop-Bestellungen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
+      "mask_id": "admin/webshop-bestellungen",
+      "title": "Webshop-Bestellungen",
+      "domain": "sales",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__webshop-bestellungen/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/webshop-bestellungen/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/webshop-bestellungen/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/webshop-bestellungen/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "ansicht_webshop",
+          "label": "Webshop-Anbindungen",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Wechselt zu Webshop-Anbindungen."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "sales.order.status",
+        "sales.gutschrift.speichern",
+        "sales.gutschrift.propose",
+        "sales.gutschrift.buchen",
+        "sales.invoice.propose",
+        "sales.invoice.post"
+      ]
+    },
+    {
       "mask_id": "beleg-liste/sales-credit-memo",
       "title": "Gutschriften",
       "domain": "sales",
@@ -27325,5 +27424,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 149
+  "event_count": 152
 }

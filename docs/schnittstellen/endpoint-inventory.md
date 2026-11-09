@@ -481,6 +481,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `webhook_system` | Outbound Webhook Registration |
 | `webhooks` | Webhook management endpoints (l3c-webhook) |
 | `webshop_integration` | B2B webshop integration endpoints. |
+| `webshop_kommandos` | Webshop-Anbindung als Fachaktion fuer Maske, CLI und MCP (Studio-Listen, 09.11.2026). |
 | `websocket` | WebSocket Endpoints |
 | `weighing_tickets` | Weighing tickets endpoints (l3c-wiegeschein) |
 | `wf_cockpit_persist` | WF-COCKPIT-PERSIST-001 — DB-backed Cockpit API (Dead-Letter + Detail). |

@@ -251,7 +251,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
 | `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| … | | 37 weitere |
+| … | | 40 weitere |
 
 ### System
 

@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T03:53:52Z'
+generated_at: '2026-11-09T04:08:07Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1943,6 +1943,7 @@ domains:
     - /admin/vordruck-editor
     - /admin/webhooks
     - /admin/webshop
+    - /admin/webshop/bestellungen
     - /admin/workflow-editor
     - /admin/zeitachsen-editor
     - /aktien/dividenden
@@ -2225,6 +2226,7 @@ domains:
     - webhook_system
     - webhooks
     - webshop_integration
+    - webshop_kommandos
     - websocket
     - wf_cockpit_persist
     - wf_trigger
@@ -2381,12 +2383,12 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1143
-  frontend_routes_mapped: 1143
+  frontend_routes_total: 1144
+  frontend_routes_mapped: 1144
   backend_services_total: 343
   backend_services_mapped: 343
-  backend_endpoints_total: 478
-  backend_endpoints_mapped: 478
+  backend_endpoints_total: 479
+  backend_endpoints_mapped: 479
 unmapped:
   frontend_routes: []
   backend_services: []

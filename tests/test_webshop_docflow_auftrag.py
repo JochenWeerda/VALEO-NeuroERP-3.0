@@ -88,3 +88,55 @@ def test_ohne_steuerschluessel_kein_auftrag(mandant):
         dienst.import_orders([_bestellung(nr, None)])
         ergebnis = dienst.process_order(nr)
     assert ergebnis["verarbeitet"] is False and "LINE_1_TAX_KEY_MISSING" in ergebnis["blockers"]
+
+
+@pytest.fixture()
+def client(mandant):
+    from fastapi.testclient import TestClient
+
+    from app.auth.deps import get_current_user
+    from app.main import app
+
+    vorher = app.dependency_overrides.get(get_current_user)
+    app.dependency_overrides[get_current_user] = lambda: {"sub": "verkauf-ws", "roles": ["SALES_BEARBEITEN",
+                                                                                         "SALES_LESEN"]}
+    yield TestClient(app, raise_server_exceptions=False)
+    if vorher is None:
+        app.dependency_overrides.pop(get_current_user, None)
+    else:
+        app.dependency_overrides[get_current_user] = vorher
+
+
+def test_studio_listen_anbinden_und_verarbeiten(client, mandant):
+    """admin/webshop + admin/webshop-bestellungen (09.11.2026): Kommandowege statt der handgebauten Seite."""
+    from app.services.webshop_integration_service import WebshopIntegrationService
+
+    kopf = {"X-Tenant-Id": mandant["tid"], "Authorization": "Bearer dev-token"}
+    ohne_https = client.post("/api/v1/webshop/konfigurationen/actions/anlegen", headers=kopf, json={
+        "shop_url": "shop.example", "shop_system": "SHOPWARE6", "api_key": "geheim"}).json()
+    assert ohne_https["success"] is False
+    angebunden = client.post("/api/v1/webshop/konfigurationen/actions/anlegen", headers=kopf, json={
+        "shop_url": "https://shop.example", "shop_system": "SHOPWARE6", "api_key": "geheim-123456"}).json()
+    assert angebunden["success"] is True, angebunden
+    [anbindung] = client.get("/api/v1/webshop/konfigurationen", headers=kopf).json()
+    assert "api_key" not in anbindung  # nur maskiert gespeichert, nie zurueckgegeben
+
+    gut, ohne_steuer = f"WS-{uuid.uuid4().hex[:6]}", f"WS-{uuid.uuid4().hex[:6]}"
+    with SessionLocal() as db:
+        WebshopIntegrationService(db, mandant["tid"]).import_orders([_bestellung(gut, "3"), _bestellung(ohne_steuer, None)])
+    zeilen = {z["externe_bestellnr"]: z for z in client.get("/api/v1/webshop/bestellungen/liste", headers=kopf).json()}
+    assert zeilen[gut]["status"] == "NEU" and zeilen[gut]["erp_order_number"] is None
+    erledigt = client.post(f"/api/v1/webshop/bestellungen/{zeilen[gut]['id']}/actions/verarbeiten",
+                           headers=kopf, json={}).json()
+    assert erledigt["success"] is True, erledigt
+    nochmal = client.post(f"/api/v1/webshop/bestellungen/{gut}/actions/verarbeiten", headers=kopf, json={}).json()
+    assert nochmal["success"] is False and "bereits" in nochmal["error"]
+    blockiert = client.post(f"/api/v1/webshop/bestellungen/{ohne_steuer}/actions/verarbeiten",
+                            headers=kopf, json={}).json()
+    assert blockiert["success"] is False and "TAX_KEY" in blockiert["error"]
+    weg = client.post(f"/api/v1/webshop/konfigurationen/{anbindung['id']}/actions/entfernen", headers=kopf,
+                      json={"_auditReason": "Shop abgeschaltet"}).json()
+    assert weg["success"] is True, weg
+    with SessionLocal() as db:
+        db.execute(text("DELETE FROM domain_shared.webshop_configs WHERE tenant_id = :t"), {"t": mandant["tid"]})
+        db.commit()

@@ -441,6 +441,28 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/webshop": {
+      "definition_hash": "daa900cd64effe6c2578ebce070298f7bfba6a519272ce798764a2c99e3335d0",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/webshop-bestellungen": {
+      "definition_hash": "091ba755ee523a0251531bb9efadbcbab752159d35f3bb1146aba5d8bdeb9ab8",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/workflow-editor": {
       "definition_hash": "5bbb34f0478ff599bdd2c98ce15063daac76d3f618178a2d65db707690c307e5",
       "gates_passed": [

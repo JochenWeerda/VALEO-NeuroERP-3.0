@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 790,
-    "screens_with_actions": 401,
+    "actions": 797,
+    "screens_with_actions": 403,
     "domains": 50
   },
   "actions": [
@@ -811,6 +811,164 @@
         "forbiddenForAgents": true,
         "requiresConfirmation": true,
         "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:ansicht_webshop",
+      "label": "Webshop-Anbindungen",
+      "description": "Webshop-Anbindungen (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "Webshop-Anbindungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "ansicht_webshop",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/webshop",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop-bestellungen:verarbeiten",
+      "label": "Als Auftrag anlegen",
+      "description": "Als Auftrag anlegen (admin/webshop-bestellungen)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop-bestellungen",
+      "intent_phrases": [
+        "Als Auftrag anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/webshop-bestellungen",
+        "actionKey": "verarbeiten",
+        "commandEndpoint": "/api/v1/webshop/bestellungen/{entity_id}/actions/verarbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.auftrag.create",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:anlegen",
+      "label": "Shop anbinden",
+      "description": "Shop anbinden (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Shop anbinden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/webshop/konfigurationen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.webshop.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:ansicht_bestellungen",
+      "label": "Webshop-Bestellungen",
+      "description": "Webshop-Bestellungen (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Webshop-Bestellungen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "ansicht_bestellungen",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/webshop/bestellungen",
+        "command": null,
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/webshop/konfigurationen/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "verkauf.webshop.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/webshop:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/webshop)",
+      "category": "mask-action",
+      "domain": "sales",
+      "mask": "admin/webshop",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/webshop",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
       }
     },
     {
