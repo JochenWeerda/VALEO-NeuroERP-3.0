@@ -33,9 +33,10 @@ from app.core.mask_family_versions import (  # noqa: E402
 def family_builders() -> dict:
     """Familie -> Funktion, die alle Varianten-Definitionen baut (eine Quelle je Familienmodul)."""
     from app.core.screen_definitions_family_beleg_liste import FAMILIEN_BUILDER as BELEG_LISTE
+    from app.core.screen_definitions_family_bestellvorschlag import FAMILIEN_BUILDER as BESTELLVORSCHLAG
     from app.core.screen_definitions_family_kontrakt import FAMILIEN_BUILDER as KONTRAKT
 
-    return {**KONTRAKT, **BELEG_LISTE}
+    return {**KONTRAKT, **BELEG_LISTE, **BESTELLVORSCHLAG}
 
 
 def current_matches(registry: dict, definitions: dict) -> bool:

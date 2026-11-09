@@ -1,7 +1,4 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default function Page(): JSX.Element {
-  return (
-    <NativeListPage screenId="futtermittel/fuetterungsplan/:id" testId="screen-futtermittel/fuetterungsplan/:id" />
-  )
-}
+/** Fuetterungsplan: Studio-Maske `agrar/feeding-plan` (vorher eine screenId ohne ScreenDefinition). */
+export default createStammNativeDetailPage('agrar/feeding-plan', 'futtermittel-fuetterungsplan')

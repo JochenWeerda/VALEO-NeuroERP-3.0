@@ -1,7 +1,4 @@
 import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default createStammNativeDetailPage(
-  'einkauf/lieferanten-stamm',
-  'einkauf-lieferanten-stamm',
-  () => import('./lieferanten-stamm-legacy'),
-)
+/** Lieferantenstamm: Studio-Maske `einkauf/supplier` (vorher eine screenId ohne ScreenDefinition). */
+export default createStammNativeDetailPage('einkauf/supplier', 'einkauf-lieferanten-stamm')

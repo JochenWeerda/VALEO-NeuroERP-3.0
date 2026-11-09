@@ -20666,3 +20666,8 @@ Seiten ohne Maske, drei Cockpit-Platzhalter und die Platzhalterliste; Zeilenform
 speichern (Server rechnet neu), Zu Bestellung (je Lieferant DocFlow-Entwurf, Menge in Preiseinheit dt, keine feste
 Steuer 7 %). Behoben: Entwurfsnummern aus uuid7-Praefix kollidierten (beleg_anlage mit Anhang aus dem
 Wiederholungsschluessel). Studio-versioniert 762/872, handgebaut 4.
+Seiten ohne Maske (09.11.2026): 15 Seiten auf bestehende Studio-Masken umgehaengt (Lieferantenstamm -> einkauf/supplier,
+Futtermittel-Detailseiten -> futtermittel/einzelfuttermittel, agrar/feeding-business, agrar/feeding-plan,
+futtermittel/analyse, PSM-Stamm -> agrar/psm bzw. agrar/psm-liste, Applikationen, Schlagkartei, Saatgut-Bestellungen,
+Wetter, Duengerrechner, Chargenverfolgung, Verkaufschancen, Kampagne anlegen -> crm/campaign, Anfrage-Erfassung ->
+einkauf/anfrage-erstellen). screen_definition-Routen 78 -> 60, Studio-versioniert 782/872.
