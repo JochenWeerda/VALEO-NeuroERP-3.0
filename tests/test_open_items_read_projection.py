@@ -164,17 +164,22 @@ def test_only_open_uses_only_open_amount_when_status_column_is_unavailable():
 
 def test_open_item_projection_exposes_overdue_as_computed_field():
     from app.api.v1.endpoints.open_items import OpenItem
+    # Geschaeftstag (Europe/Berlin) wie der Code; heute ist auf dem Runner UTC und kippte die Erwartung
+    # kurz nach Mitternacht deutscher Zeit (CI 09.11.2026).
+    from app.core.business_time import business_today
 
-    data = _row(faelligkeit=date.today(), offen=Decimal("10"))
+    heute = business_today()
+
+    data = _row(faelligkeit=heute, offen=Decimal("10"))
     item = OpenItem(**data)
     serialized = item.model_dump()
     assert serialized["ueberfaellig"] is False  # due today is not overdue
     assert serialized["op_betrag"] == Decimal("125.50")
     assert serialized["mahn_stufe"] == 2
 
-    overdue = OpenItem(**_row(faelligkeit=date.fromordinal(date.today().toordinal() - 1)))
+    overdue = OpenItem(**_row(faelligkeit=date.fromordinal(heute.toordinal() - 1)))
     assert overdue.ueberfaellig is True
-    settled = OpenItem(**_row(offen=Decimal("0"), faelligkeit=date.fromordinal(date.today().toordinal() - 1)))
+    settled = OpenItem(**_row(offen=Decimal("0"), faelligkeit=date.fromordinal(heute.toordinal() - 1)))
     assert settled.ueberfaellig is False
 
 
