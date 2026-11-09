@@ -762,6 +762,27 @@ class DocflowService:
         self.db.commit()
         return response
 
+    def lieferung_abschliessen(self, doc_id: str, pickliste: str) -> None:
+        """Lieferschein ausgeliefert: die Pickliste ist vollstaendig bestaetigt, der Bestand ausgebucht.
+
+        Kein eigener Commit - laeuft in der Transaktion der Pickliste, damit Bestand und Belegstand zusammen gelten.
+        Wiederholt (schon abgeschlossen) ist es ohne Wirkung.
+        """
+        header = self.fetch_header(doc_id)
+        if not header or str(header.get("doc_type")) != "sales_delivery":
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if str(header.get("status")) == "completed":
+            return
+        if str(header.get("status")) != "open":
+            raise ValidationFailedError("Ausgeliefert wird nur ein freigegebener Lieferschein.")
+        self._kommando("deliver", f"Pickliste {pickliste} bestaetigt")
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET status='completed', updated_at=NOW(), version=version+1, "
+                 "updated_by=:wer WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "wer": self._wer("wms")},
+        )
+        self._protokolliere("deliver", doc_id, {"pickliste": pickliste})
+
     def record_print(self, doc_id: str, printed_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):
             raise EntityNotFoundError("DocflowDocument", doc_id)

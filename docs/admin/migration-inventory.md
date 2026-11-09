@@ -502,6 +502,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `whistleblower_eine_tabelle_20260930` | Hinweisgebermeldungen bekommen eine Migration, eine Form und einen Mandanten. |
 | `wiegung_kanonisch_20261005` | Ein Wiegeergebnis, eine Tabelle — und das Netto stimmt. |
 | `wms_material_flow_stock_link_20260619` | WMS-FLOW-001: silo_cells current_stock_kg + BAB-Umlagen-Tabelle |
+| `wms_pickposition_stand_20261110` | WMS-Pickposition fuehrt ihren Stand (BELEG-052 Phase 1). |
 | `wms_warehouse_aisles_20260612` | WMS: Lager-Gang (warehouse_aisles) + optionale Zuordnung auf warehouse_bins. |
 | `zusammenfuehrung_20261005_eudr_uebermittlung_trifft_bank_gl_` | Fuehrt die beiden Koepfe zusammen: EUDR-Uebermittlung und Bank-GL-Bindung. |
 | `zusammenfuehrung_20261005_preis_journal` | Fuehrt die beiden Koepfe zusammen: Preisfindung und Journalnummer. |

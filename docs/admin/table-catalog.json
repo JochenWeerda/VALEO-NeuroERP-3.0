@@ -15882,7 +15882,8 @@
             "app/services/kontrollkorb.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_offer_import.py",
-            "app/services/settlement_document_archive_service.py"
+            "app/services/settlement_document_archive_service.py",
+            "app/services/warehouse_service.py"
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
@@ -16027,7 +16028,8 @@
             "app/core/dms_ocr_contracts.py",
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/warehouse_service.py"
           ],
           "written_by": [
             "app/services/docflow_service.py",
@@ -34444,6 +34446,11 @@
               "name": "sort_order",
               "nullable": true,
               "type": "integer"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [

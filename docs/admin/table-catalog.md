@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 704 Tabellen, 9337 Spalten.**
+**31 Schemas, 704 Tabellen, 9338 Spalten.**
 
 ## Schemas
 
@@ -39,7 +39,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_hr` | `hr` | 30 | 361 |
 | `domain_hrm` | `hr` | 3 | 32 |
 | `domain_integration` | `platform` | 4 | 46 |
-| `domain_inventory` | `inventory` | 79 | 1136 |
+| `domain_inventory` | `inventory` | 79 | 1137 |
 | `domain_log` | `platform` | 4 | 60 |
 | `domain_logistics` | `logistics` | 8 | 92 |
 | `domain_meldewesen` | `finance` | 2 | 21 |
@@ -234,8 +234,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docflow.document_command_log` | `app/services/docflow_screen_provenance.py`, `app/services/docflow_service.py` | `app/services/docflow_freigabe.py`, `app/services/docflow_service.py` | — |
 | `domain_docflow.document_followups` | `app/services/docflow_followup_service.py` | `app/services/docflow_followup_service.py` | — |
 | `domain_docflow.document_header_links` | `app/services/agent_pruefagenten.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | `app/services/docflow_service.py`, `app/services/gutschrift_docflow.py` | — |
-| `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/agent_pruefagenten.py`, `app/services/beleg_liste.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/gutschrift_docflow.py`, `app/services/kontrollkorb.py`, `app/services/mcp_execution_service.py`, `app/services/sales_offer_import.py`, `app/services/settlement_document_archive_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/settlement_document_archive_service.py` | — |
-| `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | — |
+| `domain_docflow.document_headers` | `app/api/v1/endpoints/admin_pos.py`, `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/core/gobd_artifact.py`, `app/services/agent_pruefagenten.py`, `app/services/beleg_liste.py`, `app/services/docflow_artifact_service.py`, `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_followup_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_return_service.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/gutschrift_docflow.py`, `app/services/kontrollkorb.py`, `app/services/mcp_execution_service.py`, `app/services/sales_offer_import.py`, `app/services/settlement_document_archive_service.py`, `app/services/warehouse_service.py` | `app/core/gobd_artifact.py`, `app/services/docflow_create_command.py`, `app/services/docflow_gobd_service.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/settlement_document_archive_service.py` | — |
+| `domain_docflow.document_items` | `app/api/v1/endpoints/gobd_archiv.py`, `app/core/dms_ocr_contracts.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py`, `app/services/warehouse_service.py` | `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | — |
 | `domain_docflow.document_links` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_freigabe.py`, `app/services/docflow_service.py`, `app/services/docflow_update_command.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_postings` | `app/services/docflow_belegadapter.py`, `app/services/docflow_evidence_service.py`, `app/services/docflow_service.py` | `app/services/docflow_service.py` | — |
 | `domain_docflow.document_return_audit` | `app/services/docflow_return_service.py` | `app/services/docflow_return_service.py` | — |
@@ -1204,7 +1204,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `nawaro_raps_balances` | `inventory` | native | `id` | id, profile_id, booking_period, input_seed_tons, output_oil_tons, output_meal_tons, output_other_tons, allocation_oil_pct, allocation_meal_pct, heap_location, logistics_note, tenant_id, created_at |
 | `nawaro_raps_certificates` | `inventory` | native | `id` | id, profile_id, scheme, certificate_number, chain_stage, valid_from, valid_until, issuer, status, tenant_id, created_at |
 | `nawaro_raps_profiles` | `inventory` | native | `id` | id, article_id, article_number, article_name, harvest_year, usage_food_pct, usage_feed_pct, usage_energy_pct, usage_material_pct, thg_gco2eq_mj, yield_dt_per_ha, notes, tenant_id, created_at, updated_at |
-| `pick_list_lines` | `inventory` | native | `id` | id, pick_list_id, article_id, required_qty, picked_qty, bin_location_id, batch_number, tenant_id, created_at, bin_id, best_before_date, quantity_required, quantity_picked, unit, sort_order |
+| `pick_list_lines` | `inventory` | native | `id` | id, pick_list_id, article_id, required_qty, picked_qty, bin_location_id, batch_number, tenant_id, created_at, bin_id, best_before_date, quantity_required, quantity_picked, unit, sort_order, status |
 | `pick_lists` | `inventory` | native | `id` | id, pick_list_number, status, tour_id, order_id, notes, tenant_id, created_at, updated_at, warehouse_id, source_doc_ref, source_doc_type, strategy, created_by, completed_at |
 | `preparation_list_lines` | `inventory` | native | `id` | id, list_id, article_id, required_qty, picked_qty, bin_location_id, tenant_id, created_at |
 | `preparation_lists` | `inventory` | native | `id` | id, list_number, status, notes, warehouse_id, tenant_id, created_at, updated_at |
