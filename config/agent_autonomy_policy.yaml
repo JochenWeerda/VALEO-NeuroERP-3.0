@@ -1,0 +1,41 @@
+# Autonomiepolitik fuer KI-Agenten (ADR-086 "Risk-based Autonomous ERP").
+#
+# Dieser Inhalt wird mit seinem Abdruck (SHA-256 des kanonischen Inhalts) fachlich freigegeben, je Mandant
+# (POST /api/v1/agenten/autonomie/politik/actions/freigeben). Ohne gueltige Freigabe gilt KEINE Autonomie: Agenten
+# schlagen vor, Menschen geben frei - wie bisher. Jede Aenderung an dieser Datei aendert den Abdruck und hebt die
+# Freigabe auf; die neue Fassung braucht eine neue Freigabe. FIN-CONTROL-001 und APPROVAL-001 bleiben unveraendert:
+# Die Politik setzt NUR auf der zentralen Risiko-Engine auf und kann keine ihrer Entscheidungen lockern.
+policy_id: risk-based-autonomy
+version: 1.0.0
+status: vorgeschlagen        # vorgeschlagen | abgeloest  (freigegeben wird je Mandant in der Datenbank, nie hier)
+adr: docs/adr/adr-086-risk-based-autonomous-erp.md
+author: claude-code           # wer die Fassung verfasst hat, gibt sie nicht frei
+
+# Rollen, die eine Fassung fachlich freigeben duerfen (Person, kein technisches Konto, nicht der Autor).
+freigaberollen: [GESCHAEFTSFUEHRUNG, FINANCE_ADMIN]
+
+# Unverrueckbar - gelten fuer jede Faehigkeit und lassen sich hier nicht abschalten:
+grundsaetze:
+  - Menschen und Agenten werden nach denselben fachlichen Risiken bewertet (zentrale Risiko-Engine, FIN-CONTROL-001).
+  - Verlangt die Risiko-Engine eine unabhaengige Freigabe (R3/R4, kritischer Befund), bucht kein Agent autonom.
+  - Ein Agent gibt nie frei - weder eigene noch fremde Vorschlaege; ein technisches Konto entscheidet nie.
+  - Pruefagenten koennen nur Einwaende erheben, nie freigeben; ein Einwand fuehrt zur menschlichen Freigabe.
+  - Jede Autonomieentscheidung, jede Buchung und jeder Qualitaetsmesspunkt wird unveraenderlich protokolliert.
+
+faehigkeiten:
+  sales.gutschrift.buchen:
+    bezeichnung: Verkaufsgutschrift buchen
+    belegart: sales_credit_memo
+    aktion: post
+    # Wer delegiert, muss das Recht selbst haben (keine Rechteausweitung durch Delegation).
+    delegierbar_durch: [FINANCE_BEARBEITEN, FINANCE_ADMIN, SALES_ADMIN]
+    hoechstbetrag_brutto: 1000.00   # Obergrenze je Beleg; eine Delegation darf nur darunter liegen
+    pruefagenten: [plausibilitaet]  # optional; jeder registrierte Pruefagent darf nur Einwaende erheben
+    qualitaet:
+      fenster_tage: 90
+      mindestanzahl_fuer_quote: 20  # darunter zaehlen nur absolute Fehler (Startphase)
+      max_fehler_absolut_startphase: 1
+      max_fehlerquote: 0.02          # korrigierte / ausgefuehrte Buchungen
+      max_befundquote: 0.10          # Befunde der Kontroll-Engine / ausgefuehrte Buchungen
+      max_einwandquote: 0.10         # Einwaende der Pruefagenten / Versuche
+      testnachweis_max_alter_tage: 30

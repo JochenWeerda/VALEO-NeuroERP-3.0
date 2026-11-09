@@ -20730,3 +20730,11 @@ Pruefmeldung, gleiche Feldfehler, nichts geschrieben. Dazu: gleiche Rechteentsch
 kennen denselben Weg, MCP-Vorpruefung strenger nie weicher. Befund behoben: generate_mcp_mask_action_map nahm nur
 Aktionen mit Mutations-Schluesselwort auf - 127 Schreibaktionen (konfigurieren, stilllegen, entfernen ...) fehlten in
 der Karte, obwohl mask.action.execute sie ausfuehrt (87 generisch, 40 Menschen vorbehalten).
+ADR-086 Agent Trust & Autonomy Engine (09.11.2026, VORGESCHLAGEN - fachliche Freigabe ausstehend): Risikobasierte
+Agentenautonomie auf der unveraenderten Risiko-Engine (FIN-CONTROL-001/APPROVAL-001). Politik versioniert in
+config/agent_autonomy_policy.yaml, wirksam nur mit fachlicher Freigabe je Mandant genau dieser Fassung
+(GESCHAEFTSFUEHRUNG/FINANCE_ADMIN, nicht Autorin, kein Agent). Delegation nur des eigenen Rechts, Qualitaetsmodell
+(Fehler-/Befund-/Einwandquote, Testnachweis) mit automatischem Entzug und Pruefkorb-Befund, Vertrauensstufe A0-A2,
+Pruefagenten (nur Einwaende, fail-closed), lernende Governance (Vorschlaege, nie selbst wirksam), unveraenderliches
+Entscheidungsprotokoll. Erste Faehigkeit sales.gutschrift.buchen (credit_note_id = autonom, proposal_id = wie bisher).
+Migration agent_autonomie_20261109 (frisch geprueft auf valeo_probe_claude). Offen: Studio-Masken dafuer.

@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-08
+last_reviewed: 2026-11-09
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -83,6 +83,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `admin_mobile_repair_20260626` | ALEMBIC-MERGE-001: Admin-Mobile + Charge-Lineage Repair-Migration. |
 | `admin_mobile_routing_connectors_20260215` | admin stations, routing, mobile scan and connectors |
 | `admin_report_permissions_20260215` | admin self-service report permissions |
+| `agent_autonomie_20261109` | Risikobasierte Agentenautonomie: Politikfreigabe, Delegation, Qualitaetsmodell, Autonomieentscheidung (ADR-086). |
 | `agent_proposals_persist_20260626` | OPERATOR-AGENT-002: Tabelle agent_proposals fuer persistente Agent-Proposals. |
 | `agrar_contracts_initial_20260213` | add agrar contracts and allocations |
 | `agrar_drying_rules_20260217` | add drying rule sets (lookup/factor/normalization) and audit snapshot on agrar_settlements |

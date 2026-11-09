@@ -300,7 +300,10 @@ class GutschriftProposeInput(BaseModel):
 
 class GutschriftBuchenInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    proposal_id: str = Field(min_length=1, max_length=36)
+    # Genau eines: proposal_id (Buchung aus menschlich freigegebenem Vorschlag) oder credit_note_id (autonome
+    # Buchung nach der Autonomiepolitik ADR-086; ohne ihre Voraussetzungen 409 mit den Gruenden).
+    proposal_id: str | None = Field(default=None, min_length=1, max_length=36)
+    credit_note_id: str | None = Field(default=None, min_length=1, max_length=64)
 
 
 class PostfachSpeichernInput(BaseModel):
@@ -2346,6 +2349,10 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
         payload = GutschriftBuchenInput.model_validate(request.parameters)
     except ValidationError as exc:
         raise HTTPException(422, "Invalid sales.gutschrift.buchen parameters") from exc
+    if (payload.proposal_id is None) == (payload.credit_note_id is None):
+        raise HTTPException(422, "sales.gutschrift.buchen braucht genau eines: proposal_id oder credit_note_id")
+    if payload.credit_note_id is not None:
+        return _gutschrift_autonom_buchen(db, request, actor, tenant, payload.credit_note_id)
     if request.mode == "propose":
         raise HTTPException(422, "sales.gutschrift.buchen does not accept propose; use sales.gutschrift.propose")
     parameters = payload.model_dump(mode="json")
@@ -2425,6 +2432,99 @@ def _gutschrift_buchen(db: Session, request: ToolExecutionRequest, actor: str, t
             "approved_by": proposal["reviewed_by"], "message": meldung,
             **vorschau,
         }
+        _store_execution(
+            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
+            actor=actor, fingerprint=fingerprint, result=result,
+        )
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
+
+
+def _gutschrift_autonom_buchen(db: Session, request: ToolExecutionRequest, actor: str, tenant: str,
+                               credit_note_id: str) -> dict:
+    """Autonome Buchung einer Gutschrift nach ADR-086 - nur, wenn alle Voraussetzungen erfuellt sind.
+
+    Voraussetzungen (``agent_autonomie.entscheide``): fachlich freigegebene Politik, Delegation an den Agenten,
+    Qualitaetsmodell im Rahmen, bestandene Fachpruefung, die Risiko-Engine verlangt keine unabhaengige Freigabe,
+    kein Einwand eines Pruefagenten. Sonst 409 mit den Gruenden; dann gilt der Vorschlagsweg (propose + Freigabe).
+    Jede Entscheidung und jede Buchung ist protokolliert; ein Agent gibt dabei nie etwas frei.
+    """
+    from app.services import agent_autonomie, agent_pruefagenten
+    from app.services.docflow_freigabe import DocflowFreigabe
+    from app.services.gutschrift_docflow import buche as _buche_gutschrift
+    from app.services.gutschrift_docflow import vorschau as _buchungsvorschau
+
+    faehigkeit = "sales.gutschrift.buchen"
+    parameters = {"credit_note_id": credit_note_id}
+    if request.mode == "propose":
+        raise HTTPException(422, "sales.gutschrift.buchen does not accept propose; use sales.gutschrift.propose")
+    if request.mode == "execute" and not (request.idempotency_key or "").strip():
+        raise HTTPException(422, "execute requires an idempotency_key")
+    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True).encode()).hexdigest()
+    try:
+        if request.mode == "execute":
+            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
+            replayed = _replay_or_none(
+                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
+            )
+            if replayed is not None:
+                return replayed
+        politik = agent_autonomie.lade_politik()
+        try:
+            vorschau = _gutschrift_plan_vorschau(_buchungsvorschau(db, tenant, credit_note_id, actor))
+            fachpruefung = None
+        except HTTPException as fehler:
+            if fehler.status_code != 409:
+                raise
+            vorschau, fachpruefung = {"brutto": 0.0, "credit_note_number": credit_note_id}, str(fehler.detail)
+        brutto = Decimal(str(vorschau["brutto"]))
+        risiko = None
+        if fachpruefung is None:
+            engine = DocflowFreigabe(db, tenant)
+            risiko = engine.anforderung(engine.vorgang(credit_note_id, "post"), "post")
+        regel = politik.faehigkeit(faehigkeit) or {}
+        einwaende = [] if fachpruefung else agent_pruefagenten.pruefe(
+            db, list(regel.get("pruefagenten") or []), agent_pruefagenten.Pruefkontext(
+                tenant=tenant, faehigkeit=faehigkeit, agent_id=actor, vorgang=credit_note_id, brutto=brutto,
+                daten=vorschau))
+        if einwaende:
+            agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="einwand",
+                                    durch="pruefagenten", vorgang=credit_note_id, detail={"einwaende": einwaende})
+        entscheidung = agent_autonomie.entscheide(
+            db, tenant, agent_id=actor, faehigkeit=faehigkeit, vorgang=credit_note_id, brutto=brutto,
+            fachpruefung=fachpruefung, risiko=risiko, einwaende=einwaende, politik=politik)
+        if not entscheidung.autonom:
+            if fachpruefung:
+                agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="abgelehnt",
+                                        durch="fachpruefung", vorgang=credit_note_id, detail={"grund": fachpruefung})
+            db.commit()  # Entscheidung und Messpunkte bleiben, auch wenn nicht gebucht wird
+            raise HTTPException(409, {"message": "Keine autonome Buchung; Vorschlag mit menschlicher Freigabe noetig",
+                                      "outcome": entscheidung.ergebnis, "gruende": entscheidung.gruende})
+        if request.mode != "execute":
+            db.rollback()
+            return {"success": True, "mode": request.mode, "autonom": True, "risk": entscheidung.risiko,
+                    "policy_version": entscheidung.politik_version, **vorschau}
+        gebucht = _buche_gutschrift(db, tenant, credit_note_id, akteur=actor,
+                                    idempotenz=f"mcp-gutschrift-autonom-{request.idempotency_key}"[:120])
+        agent_autonomie.erfasse(db, tenant, agent_id=actor, faehigkeit=faehigkeit, art="ausgefuehrt",
+                                durch="autonomie", vorgang=credit_note_id,
+                                detail={"brutto": vorschau["brutto"], "risk": entscheidung.risiko})
+        audit_id = _write_audit(
+            db, tenant_id=tenant, action_key=request.tool_name, entity_type="sales_credit_note",
+            entity_id=credit_note_id, idempotency_key=request.idempotency_key,
+            audit_reason=f"Autonome Agentenbuchung nach Autonomiepolitik {entscheidung.politik_version} "
+                         f"(Risiko {entscheidung.risiko})",
+            summary=f"Gutschrift {vorschau['credit_note_number']} autonom gebucht by {actor}",
+        )
+        result = {"success": True, "mode": "execute", "replayed": False, "autonom": True, "posted": True,
+                  "risk": entscheidung.risiko, "policy_version": entscheidung.politik_version,
+                  "auditEntryId": audit_id, "journal_entry_id": gebucht.get("journal_entry_id"), **vorschau}
         _store_execution(
             db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
             actor=actor, fingerprint=fingerprint, result=result,
