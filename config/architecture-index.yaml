@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T04:26:04Z'
+generated_at: '2026-11-09T04:35:12Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2124,6 +2124,7 @@ domains:
     - admin_pos
     - admin_reporting
     - admin_reporting_kommandos
+    - admin_rollen_kommandos
     - admin_suite
     - agent_context_api
     - agent_tool_contracts
@@ -2387,8 +2388,8 @@ mapping_stats:
   frontend_routes_mapped: 1144
   backend_services_total: 343
   backend_services_mapped: 343
-  backend_endpoints_total: 479
-  backend_endpoints_mapped: 479
+  backend_endpoints_total: 480
+  backend_endpoints_mapped: 480
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder/NativeListPage'
 
-export default createLegacyMaskPage(() => import('./rollen-verwaltung-legacy'))
+/** Rollen: Studio-Liste mit Anlegen, Aendern und Entfernen; auch der alte Einstieg /admin/rolle/neu landet hier. */
+export default function Page(): JSX.Element {
+  return <NativeListPage screenId="admin/rollen-verwaltung" testId="screen-admin-rollen-verwaltung" />
+}

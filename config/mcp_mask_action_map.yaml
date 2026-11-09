@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 799
-    screens_with_actions: 405
+    actions: 804
+    screens_with_actions: 406
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -86,15 +86,15 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 192
-  mask_mutations_considered: 132
+  mask_actions_considered: 193
+  mask_mutations_considered: 133
   by_coverage:
     adjacent: 1
     blocked_human_only: 40
     blocked_unreleased: 2
     local_ui: 60
     mapped: 42
-    mapped_generic: 41
+    mapped_generic: 42
     mapped_propose_only: 1
     mapped_read: 1
     open_high: 4
@@ -128,6 +128,16 @@ mappings:
   action_key: anlegen
   label: Berechtigung anlegen
   command_endpoint: /api/v1/admin/report-permissions/actions/anlegen
+  command: null
+  mcp_tool_id: mask.action.execute
+  coverage: mapped_generic
+  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:admin/rollen-verwaltung:anlegen
+  mask: admin/rollen-verwaltung
+  domain: platform
+  action_key: anlegen
+  label: Rolle anlegen
+  command_endpoint: /api/v1/admin/rollen/actions/anlegen
   command: null
   mcp_tool_id: mask.action.execute
   coverage: mapped_generic

@@ -218,6 +218,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `admin.report_permission.created` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
 | `admin.report_permission.deleted` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
 | `admin.report_permission.updated` | outbox | `app/api/v1/endpoints/admin_reporting_kommandos.py` |
+| `admin.role.created` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
+| `admin.role.deleted` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
+| `admin.role.updated` | outbox | `app/api/v1/endpoints/admin_rollen_kommandos.py` |
 | `article.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `beleg.aktion.ausgefuehrt` | outbox | `app/api/v1/endpoints/belege.py` |
 | `cash_closing.posted` | outbox | `app/api/v1/endpoints/compat.py` |
@@ -248,10 +251,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
-| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| … | | 40 weitere |
+| … | | 43 weitere |
 
 ### System
 

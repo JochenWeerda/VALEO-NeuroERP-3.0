@@ -31,6 +31,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `admin_pos` | Admin POS/TSE settings and DSFinV-K exports. |
 | `admin_reporting` | Admin CRUD for self-service report permissions. |
 | `admin_reporting_kommandos` | Report-Berechtigungen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/report-berechtigungen``). |
+| `admin_rollen_kommandos` | Rollen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/rollen-verwaltung``, 09.11.2026). |
 | `admin_suite` | Read-only Admin Suite production-readiness aggregation. |
 | `agent_context_api` | — |
 | `agent_tool_contracts` | External agent tool contracts. |

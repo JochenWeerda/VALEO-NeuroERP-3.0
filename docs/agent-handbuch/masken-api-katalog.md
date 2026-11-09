@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (782 Masken).
+> Generiert aus `app/core/screen_definitions.py` (783 Masken).
 
 ## Übersicht
 
@@ -51,6 +51,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
 | `admin/qualitaets-cockpit` | Qualitaets-Cockpit | qualitaet | niedrig | — | `GET /api/v1/masks/admin/qualitaets-cockpit/agent-contract` |
 | `admin/report-berechtigungen` | Report-Berechtigungen | platform | mittel | — | `GET /api/v1/masks/admin/report-berechtigungen/agent-contract` |
+| `admin/rollen-verwaltung` | Rollen | platform | mittel | — | `GET /api/v1/masks/admin/rollen-verwaltung/agent-contract` |
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
 | `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
@@ -22441,6 +22442,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `anlegen` | Berechtigung anlegen | moderate | nein | `/api/v1/admin/report-permissions/actions/anlegen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin/rollen-verwaltung` — Rollen
+
+**Zweck:** Rollen anlegen und pflegen; Rechte je Rolle in der Berechtigungsmatrix.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/rollen-verwaltung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/rollen-verwaltung/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/rollen-verwaltung/readiness` |
+| Rollout-Route | `/mask-rollout/admin__rollen-verwaltung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin/rollen`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Rollen haben keine Benutzer?
+- Lege die Rolle Disposition an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Rolle anlegen | moderate | nein | `/api/v1/admin/rollen/actions/anlegen` |
+| `rechte` | Berechtigungsmatrix | safe | nein | `Rechte je Rolle pflegt die Berechtigungsmatrix.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---

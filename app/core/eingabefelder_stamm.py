@@ -60,3 +60,12 @@ WEBSHOP_ANBINDUNG_FELDER: list[dict[str, Any]] = [
     {"key": "api_key", "label": "API-Schlüssel", "type": "password", "required": True},
     {"key": "sync_interval_minutes", "label": "Abrufintervall (Minuten)", "type": "number"},
 ]
+
+ROLLE_AENDERN_FELDER: list[dict[str, Any]] = [
+    {"key": "name", "label": "Name", "type": "text", "required": True},
+    {"key": "beschreibung", "label": "Beschreibung", "type": "text"},
+]
+ROLLE_ANLEGEN_FELDER: list[dict[str, Any]] = [
+    *ROLLE_AENDERN_FELDER,
+    {"key": "rechte_liste", "label": "Rechte (Komma-getrennt)", "type": "text"},
+]

@@ -23,6 +23,7 @@
     "admin/omnichannel-handelskonflikt": "/admin/omnichannel-handelskonflikt",
     "admin/qualitaets-cockpit": "/admin/qualitaets-cockpit",
     "admin/report-berechtigungen": "/admin/report-berechtigungen",
+    "admin/rollen-verwaltung": "/admin/rolle/neu",
     "admin/system-einstellungen": "/admin/system-einstellungen",
     "admin/tankstelle-evb": "/admin/tankstelle-evb",
     "admin/tenants": "/admin/tenants",

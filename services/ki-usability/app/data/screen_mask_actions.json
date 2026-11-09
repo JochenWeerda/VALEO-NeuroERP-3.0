@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 799,
-    "screens_with_actions": 405,
+    "actions": 804,
+    "screens_with_actions": 406,
     "domains": 50
   },
   "actions": [
@@ -685,6 +685,122 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:aendern",
+      "label": "Ändern",
+      "description": "Ändern (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Ändern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "aendern",
+        "commandEndpoint": "/api/v1/admin/rollen/{entity_id}/actions/aendern",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:anlegen",
+      "label": "Rolle anlegen",
+      "description": "Rolle anlegen (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Rolle anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/rollen/actions/anlegen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": false,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:entfernen",
+      "label": "Entfernen",
+      "description": "Entfernen (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Entfernen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "entfernen",
+        "commandEndpoint": "/api/v1/admin/rollen/{entity_id}/actions/entfernen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.role.update",
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/rollen-verwaltung:rechte",
+      "label": "Berechtigungsmatrix",
+      "description": "Berechtigungsmatrix (admin/rollen-verwaltung)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/rollen-verwaltung",
+      "intent_phrases": [
+        "Berechtigungsmatrix"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/rollen-verwaltung",
+        "actionKey": "rechte",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/berechtigungen-matrix",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

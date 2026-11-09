@@ -375,6 +375,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/rollen-verwaltung": {
+      "definition_hash": "13bb56ebbf468f2fe4b0141b26657e003759cca5c229e040cd5a6b3020639806",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/system-einstellungen": {
       "definition_hash": "9b56abeac6c15eedeb11193b5b5b4d96265d536adedd14bf9431707c04a4a482",
       "gates_passed": [

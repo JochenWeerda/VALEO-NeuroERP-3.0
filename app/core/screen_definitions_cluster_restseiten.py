@@ -304,6 +304,37 @@ def build_admin_terminologie() -> dict[str, Any]:
     )
 
 
+def build_admin_rollen() -> dict[str, Any]:
+    from app.core.eingabefelder_stamm import ROLLE_AENDERN_FELDER, ROLLE_ANLEGEN_FELDER
+
+    weg = "/api/v1/admin/rollen"
+    return build_stamm_list_screen(
+        screen_id="admin/rollen-verwaltung", domain="platform", bundle="admin", title="Rollen",
+        subtitle="Rollen mit Beschreibung, Benutzern und Rechten; Systemrollen sind nur lesbar",
+        endpoint=weg, row_route=None,
+        columns=[text("name", "Rolle", "primary"), text("beschreibung", "Beschreibung", "primary"),
+                 zahl("benutzer", "Benutzer"), zahl("rechte", "Rechte"), text("id", "Schlüssel", "tertiary")],
+        actions=[{"key": "anlegen", "label": "Rolle anlegen", "kind": "primary", "zone": "header",
+                  "dangerLevel": "moderate", "permission": "admin.role.update",
+                  "commandEndpoint": f"{weg}/actions/anlegen", "method": "POST", "requiresConfirmation": False,
+                  "inputFields": ROLLE_ANLEGEN_FELDER},
+                 {"key": "rechte", "label": "Berechtigungsmatrix", "kind": "secondary", "dangerLevel": "safe",
+                  "zone": "header", "navigationRoute": "/admin/berechtigungen-matrix", "localEffect": "navigation",
+                  "stubReason": "Rechte je Rolle pflegt die Berechtigungsmatrix."}, _EXPORT],
+        row_actions=[{"key": "aendern", "label": "Ändern", "dangerLevel": "moderate", "permission": "admin.role.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/aendern", "method": "POST",
+                      "requiresConfirmation": False, "inputFields": ROLLE_AENDERN_FELDER},
+                     {"key": "entfernen", "label": "Entfernen", "dangerLevel": "moderate",
+                      "permission": "admin.role.update",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/entfernen", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True,
+                      "visibleWhen": {"field": "benutzer", "values": [0]}}],
+        purpose="Rollen anlegen und pflegen; Rechte je Rolle in der Berechtigungsmatrix.",
+        prompts=["Welche Rollen haben keine Benutzer?", "Lege die Rolle Disposition an."],
+        no_workflow="Stammdatenliste der Rollen; Zuordnung zu Benutzern in der Benutzerverwaltung.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -319,4 +350,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "admin/webshop-bestellungen": build_admin_webshop_bestellungen,
     "agrar/wetterwarnung": build_agrar_wetterwarnung,
     "admin/terminologie": build_admin_terminologie,
+    "admin/rollen-verwaltung": build_admin_rollen,
 }

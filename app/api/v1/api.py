@@ -415,6 +415,8 @@ api_router.include_router(
     tags=["admin", "monitoring"]
 )
 
+from app.api.v1.endpoints import admin_rollen_kommandos  # noqa: E402
+api_router.include_router(admin_rollen_kommandos.router)
 api_router.include_router(
     admin_core.router,
     prefix="/admin",

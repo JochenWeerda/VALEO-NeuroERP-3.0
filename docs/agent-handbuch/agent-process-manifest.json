@@ -22170,6 +22170,56 @@
       ]
     },
     {
+      "mask_id": "admin/rollen-verwaltung",
+      "title": "Rollen",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__rollen-verwaltung/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/rollen-verwaltung/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/rollen-verwaltung/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/rollen-verwaltung/readiness",
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "anlegen",
+          "label": "Rolle anlegen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin.role.update",
+          "commandEndpoint": "/api/v1/admin/rollen/actions/anlegen",
+          "method": "POST",
+          "stubReason": null
+        },
+        {
+          "key": "rechte",
+          "label": "Berechtigungsmatrix",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Rechte je Rolle pflegt die Berechtigungsmatrix."
+        },
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "admin/terminologie",
       "title": "Terminologie",
       "domain": "platform",
@@ -27486,5 +27536,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 152
+  "event_count": 155
 }
