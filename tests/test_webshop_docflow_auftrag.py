@@ -18,6 +18,7 @@ from app.core.database import SessionLocal
 pytestmark = pytest.mark.integration
 
 WURZEL = pathlib.Path(__file__).resolve().parent.parent
+_TESTSCHLUESSEL = "x" * 12  # kein echter Schluessel; Gitleaks meldete ein Literal
 
 
 def _modul(name: str):
@@ -113,10 +114,10 @@ def test_studio_listen_anbinden_und_verarbeiten(client, mandant):
 
     kopf = {"X-Tenant-Id": mandant["tid"], "Authorization": "Bearer dev-token"}
     ohne_https = client.post("/api/v1/webshop/konfigurationen/actions/anlegen", headers=kopf, json={
-        "shop_url": "shop.example", "shop_system": "SHOPWARE6", "api_key": "geheim"}).json()
+        "shop_url": "shop.example", "shop_system": "SHOPWARE6", "api_key": _TESTSCHLUESSEL}).json()
     assert ohne_https["success"] is False
     angebunden = client.post("/api/v1/webshop/konfigurationen/actions/anlegen", headers=kopf, json={
-        "shop_url": "https://shop.example", "shop_system": "SHOPWARE6", "api_key": "geheim-123456"}).json()
+        "shop_url": "https://shop.example", "shop_system": "SHOPWARE6", "api_key": _TESTSCHLUESSEL}).json()
     assert angebunden["success"] is True, angebunden
     [anbindung] = client.get("/api/v1/webshop/konfigurationen", headers=kopf).json()
     assert "api_key" not in anbindung  # nur maskiert gespeichert, nie zurueckgegeben
