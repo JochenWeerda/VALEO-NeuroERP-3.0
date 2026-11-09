@@ -588,9 +588,9 @@ actions:
     event_out: []
     mcp_tool_id: null
     mask_action_id: null
-    command_endpoint: GET /api/v1/sales/credit-notes
-    screen_id: sales/gutschrift
-    route_path: /sales/credit-notes
+    command_endpoint: GET /api/v1/belege/sales_credit_memo  # DocFlow (BELEG-052)
+    screen_id: beleg-liste/sales-credit-memo
+    route_path: /belege/sales_credit_memo
     follow_up_writes: []
     aliases:
       - sales.credit_note.list
@@ -600,7 +600,7 @@ actions:
       - ausgehende gutschrift
     notes: >
       Frontend catalogId sales.credit_note.list. Uebersicht outgoing unter
-      /sales/credit-notes. Kein Einzelbeleg, kein Prefill. Inbox-Label
+      /belege/sales_credit_memo (DocFlow). Kein Einzelbeleg, kein Prefill. Inbox-Label
       „Zur Übersicht“ bei proposal.direction=outgoing.
 
   - action_id: einkauf.gutschrift.list

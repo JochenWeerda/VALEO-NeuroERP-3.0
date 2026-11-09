@@ -4,7 +4,6 @@ Alle neuen Endpoints aus dem dritten Gap-Fix-Durchlauf.
 """
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -71,22 +70,10 @@ def test_list_charges_returns_200():
 # SALES CREDIT NOTES — DELETE
 # ===========================================================================
 
-def test_delete_nonexistent_credit_note_returns_404():
-    resp = _client.delete("/api/v1/sales/credit-notes/does-not-exist", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
 def test_delete_nonexistent_return_returns_404():
     resp = _client.delete("/api/v1/sales/returns/does-not-exist", headers=_HEADERS)
     skip_if_db_unavailable(resp)
     assert resp.status_code == 404
-
-
-def test_list_credit_notes_returns_200():
-    resp = _client.get("/api/v1/sales/credit-notes", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 200
 
 
 def test_list_returns_returns_200():

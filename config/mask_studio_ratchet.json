@@ -337,8 +337,6 @@
   "mask:personal/bewerbung-einwilligung:widerrufen",
   "mask:personal/bewerbung-einwilligung:zurueck",
   "mask:personal/bewerbungen:erklaerungen",
-  "mask:sales/gutschrift:entfernen",
-  "mask:sales/gutschrift:position",
   "mask:stammdaten/individuelle-artikelnummer:edit",
   "mask:transporte/fahrer:dokumente",
   "mask:transporte/fahrer:export",

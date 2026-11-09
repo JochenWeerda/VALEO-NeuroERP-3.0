@@ -444,6 +444,7 @@
     "system/live-monitor": "/system/live-monitor",
     "tankstelle/zapfungen": "/tankstelle",
     "verkauf/betriebs-auftraege": "/verkauf/betriebs-auftraege",
+    "verkauf/gutschrift-buchungsvorschlaege": "/verkauf/gutschrift-buchungsvorschlaege",
     "verkauf/kommissions-auftraege": "/verkauf/kommissions-auftraege",
     "verkauf/kunde": "/verkauf/kunde",
     "verkauf/kunde-neu": "/verkauf/kunde-neu",

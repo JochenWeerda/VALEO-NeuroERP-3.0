@@ -20715,3 +20715,10 @@ DocFlow-Angebotsentwurf mit einer Pauschalposition (Betrag, ohne Steuerschluesse
 Duplikat je Angebotsnummer, alles oder nichts (Savepoint). Fachaktionskatalog auf /belege/sales_offer und /docflow/.
 CI-Nachzug: Kundenakte ohne edit-Aktion, Bestellvorschlag-Familie, webshop-Altspeichertest entfernt, RLS-Inventar.
 Offen: Tabellen domain_crm.sales_offers/sales_offer_items per Migration abbauen (mit den uebrigen Altspeichern).
+BELEG-052 Stufe 3d (09.11.2026): Verkaufsgutschrift nur noch in DocFlow. app/services/gutschrift_docflow.py
+(Entwurf mit Steuerschluessel je Position, Buchungsvorschau aus den DocFlow-Steuergruppen, Buchung ueber post_document
+im Savepoint). MCP sales.gutschrift.speichern/propose/buchen arbeiten auf der DocFlow-Gutschrift; menschliche Freigabe
+in der neuen Studio-Liste verkauf/gutschrift-buchungsvorschlaege (gutschrift_vorschlaege.py). Entfernt: Gutschrift-Wege
+in sales_credit_notes.py (bleibt: Retouren), Maske sales/gutschrift, Frontend-Client lib/api/gutschrift.ts.
+DocFlow prueft den Steuerschluessel schon beim Anlegen. Offen: VerkaufsgutschriftFreigabe (Altvorgaenge) und die
+Tabellen domain_sales.sales_credit_notes/_lines mit dem Tabellenabbau.

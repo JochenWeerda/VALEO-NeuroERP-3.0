@@ -5,7 +5,7 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 804
+    actions: 798
     screens_with_actions: 406
     domains: 50
 mcp_write_tools:
@@ -64,7 +64,16 @@ mcp_native_writes:
 - mcp_tool_id: sales.gutschrift.propose
   mask_action_id: null
   coverage: mcp_native
-  notes: Buchungsvorschlag zur Gutschrift; gebucht wird ueber mask:sales/gutschrift:buchen nach Freigabe.
+  notes: Buchungsvorschlag zur DocFlow-Gutschrift; gebucht wird ueber sales.gutschrift.buchen nach Freigabe.
+- mcp_tool_id: sales.gutschrift.speichern
+  mask_action_id: null
+  coverage: mcp_native
+  notes: Gutschrift als DocFlow-Entwurf (BELEG-052); die Belegmaske beleg/sales-credit-memo bearbeitet
+    ihn.
+- mcp_tool_id: sales.gutschrift.buchen
+  mask_action_id: null
+  coverage: mcp_native
+  notes: Bucht die DocFlow-Gutschrift nur aus einem von einem Menschen freigegebenen Vorschlag.
 - mcp_tool_id: sales.invoice.propose
   mask_action_id: null
   coverage: mcp_native
@@ -86,14 +95,14 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 193
-  mask_mutations_considered: 133
+  mask_actions_considered: 190
+  mask_mutations_considered: 131
   by_coverage:
     adjacent: 1
     blocked_human_only: 40
     blocked_unreleased: 2
-    local_ui: 60
-    mapped: 42
+    local_ui: 59
+    mapped: 40
     mapped_generic: 42
     mapped_propose_only: 1
     mapped_read: 1
@@ -1906,59 +1915,6 @@ mappings:
   mcp_tool_id: sales.invoice.propose
   coverage: adjacent
   notes: Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.
-- mask_action_id: mask:sales/gutschrift:buchen
-  mask: sales/gutschrift
-  domain: sales
-  action_key: buchen
-  label: Buchen
-  command_endpoint: /api/v1/sales/credit-notes/{entity_id}/actions/buchen
-  command: sales.gutschriftBuchen
-  mcp_tool_id: sales.gutschrift.buchen
-  coverage: mapped
-  notes: GUTSCHRIFT-AGENT-FREIGABE-20261012; Buchung nur nach approved Proposal (sales.gutschrift.propose,
-    Freigabe durch einen Menschen in der Maske); Token-Mandant.
-- mask_action_id: mask:sales/gutschrift:neu
-  mask: sales/gutschrift
-  domain: sales
-  action_key: neu
-  label: Neue Gutschrift
-  command_endpoint: null
-  command: sales.gutschriftNeu
-  coverage: local_ui
-  local_effect: form_reset
-  notes: 'SD stubReason: leert die Eingabe fuer eine neue Gutschrift; keine HTTP-Mutation.'
-  mcp_tool_id: null
-- mask_action_id: mask:sales/gutschrift:speichern
-  mask: sales/gutschrift
-  domain: sales
-  action_key: speichern
-  label: Als Entwurf speichern
-  command_endpoint: /api/v1/sales/credit-notes/actions/speichern
-  command: sales.gutschriftSpeichern
-  mcp_tool_id: sales.gutschrift.speichern
-  coverage: mapped
-  notes: GUTSCHRIFT-MASKE-SD-20261012; CE /api/v1/sales/credit-notes/actions/speichern; Token-Mandant;
-    Entwurf, keine Buchung.
-- mask_action_id: mask:sales/gutschrift:vorschlag_ablehnen
-  mask: sales/gutschrift
-  domain: sales
-  action_key: vorschlag_ablehnen
-  label: Vorschlag ablehnen
-  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen
-  command: sales.gutschriftVorschlagAblehnen
-  coverage: open_high
-  notes: Menschliche Ablehnung eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.
-  mcp_tool_id: null
-- mask_action_id: mask:sales/gutschrift:vorschlag_freigeben
-  mask: sales/gutschrift
-  domain: sales
-  action_key: vorschlag_freigeben
-  label: Vorschlag freigeben
-  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben
-  command: sales.gutschriftVorschlagFreigeben
-  coverage: open_high
-  notes: Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.
-  mcp_tool_id: null
 - mask_action_id: mask:schaeden/liste:neu
   mask: schaeden/liste
   domain: finance
@@ -2000,6 +1956,26 @@ mappings:
   local_effect: navigation
   notes: Oeffnet /transporte/fahrer/neu; legt keinen Fahrer an. Der separate Speichervorgang braucht seinen
     Fachvertrag.
+  mcp_tool_id: null
+- mask_action_id: mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_ablehnen
+  mask: verkauf/gutschrift-buchungsvorschlaege
+  domain: sales
+  action_key: vorschlag_ablehnen
+  label: Ablehnen
+  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/ablehnen
+  command: null
+  coverage: open_high
+  notes: Menschliche Ablehnung eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.
+  mcp_tool_id: null
+- mask_action_id: mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_freigeben
+  mask: verkauf/gutschrift-buchungsvorschlaege
+  domain: sales
+  action_key: vorschlag_freigeben
+  label: Freigeben
+  command_endpoint: /api/v1/sales/credit-notes/buchungsvorschlaege/{entity_id}/actions/freigeben
+  command: null
+  coverage: open_high
+  notes: Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.
   mcp_tool_id: null
 - mask_action_id: mask:waage/liste:dismissImport
   mask: waage/liste
@@ -2094,5 +2070,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 40; blocked_no_endpoint 0; local_ui 60; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 40; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

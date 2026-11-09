@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-09
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-09T07:13:02Z'
+generated_at: '2026-11-09T08:56:16Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -768,6 +768,7 @@ domains:
     - /verkauf/auftraege/neu
     - /verkauf/betriebs-auftraege
     - /verkauf/dauerauftraege
+    - /verkauf/gutschrift-buchungsvorschlaege
     - /verkauf/kommissions-auftraege
     - /verkauf/kunde-neu
     - /verkauf/kunde/:id
@@ -1080,6 +1081,7 @@ domains:
     - document_control_service
     - eudr_register_service
     - freigabe_engine
+    - gutschrift_docflow
     - kontrollkorb
     - pii_detector
     - schaden_service
@@ -1114,6 +1116,7 @@ domains:
     - gdpr_art30_ropa
     - gdpr_art33_breach
     - gdpr_requests
+    - gutschrift_vorschlaege
     - kontrolle
     - labor
     - policies
@@ -2384,12 +2387,12 @@ domains:
     - docs/adr/adr-062-foreign-goods-operator-projection.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1144
-  frontend_routes_mapped: 1144
-  backend_services_total: 343
-  backend_services_mapped: 343
-  backend_endpoints_total: 480
-  backend_endpoints_mapped: 480
+  frontend_routes_total: 1145
+  frontend_routes_mapped: 1145
+  backend_services_total: 344
+  backend_services_mapped: 344
+  backend_endpoints_total: 481
+  backend_endpoints_mapped: 481
 unmapped:
   frontend_routes: []
   backend_services: []

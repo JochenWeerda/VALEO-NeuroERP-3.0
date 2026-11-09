@@ -242,22 +242,6 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
             "Token-Mandant."
         ),
     },
-    "mask:sales/gutschrift:buchen": {
-        "mcp_tool_id": "sales.gutschrift.buchen",
-        "coverage": "mapped",
-        "notes": (
-            "GUTSCHRIFT-AGENT-FREIGABE-20261012; Buchung nur nach approved Proposal "
-            "(sales.gutschrift.propose, Freigabe durch einen Menschen in der Maske); Token-Mandant."
-        ),
-    },
-    "mask:sales/gutschrift:speichern": {
-        "mcp_tool_id": "sales.gutschrift.speichern",
-        "coverage": "mapped",
-        "notes": (
-            "GUTSCHRIFT-MASKE-SD-20261012; CE /api/v1/sales/credit-notes/actions/speichern; "
-            "Token-Mandant; Entwurf, keine Buchung."
-        ),
-    },
     "mask:admin/postfaecher:speichern": {
         "mcp_tool_id": "admin.postfach.speichern",
         "coverage": "mapped",
@@ -387,11 +371,6 @@ LOCAL_UI_RULES: dict[str, dict[str, str]] = {
         "local_effect": "form_reset",
         "notes": "SD stubReason: leert die Eingabe fuer einen neuen Steuerschluessel; keine HTTP-Mutation.",
     },
-    "mask:sales/gutschrift:neu": {
-        "coverage": "local_ui",
-        "local_effect": "form_reset",
-        "notes": "SD stubReason: leert die Eingabe fuer eine neue Gutschrift; keine HTTP-Mutation.",
-    },
     "mask:admin/postfaecher:neu": {
         "coverage": "local_ui",
         "local_effect": "form_reset",
@@ -414,11 +393,11 @@ BLOCKED_RULES: dict[str, dict[str, str]] = {
             "nie in Kraft setzen. Bewusst ohne MCP-Werkzeug; forbiddenForAgents."
         ),
     },
-    "mask:sales/gutschrift:vorschlag_freigeben": {
+    "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_freigeben": {
         "coverage": "open_high",
         "notes": "Menschliche Freigabe (Vier Augen) eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.",
     },
-    "mask:sales/gutschrift:vorschlag_ablehnen": {
+    "mask:verkauf/gutschrift-buchungsvorschlaege:vorschlag_ablehnen": {
         "coverage": "open_high",
         "notes": "Menschliche Ablehnung eines Agentenvorschlags; bewusst ohne MCP-Werkzeug; forbiddenForAgents.",
     },
@@ -440,7 +419,19 @@ MCP_NATIVE_WRITES = (
         "mcp_tool_id": "sales.gutschrift.propose",
         "mask_action_id": None,
         "coverage": "mcp_native",
-        "notes": "Buchungsvorschlag zur Gutschrift; gebucht wird ueber mask:sales/gutschrift:buchen nach Freigabe.",
+        "notes": "Buchungsvorschlag zur DocFlow-Gutschrift; gebucht wird ueber sales.gutschrift.buchen nach Freigabe.",
+    },
+    {
+        "mcp_tool_id": "sales.gutschrift.speichern",
+        "mask_action_id": None,
+        "coverage": "mcp_native",
+        "notes": "Gutschrift als DocFlow-Entwurf (BELEG-052); die Belegmaske beleg/sales-credit-memo bearbeitet ihn.",
+    },
+    {
+        "mcp_tool_id": "sales.gutschrift.buchen",
+        "mask_action_id": None,
+        "coverage": "mcp_native",
+        "notes": "Bucht die DocFlow-Gutschrift nur aus einem von einem Menschen freigegebenen Vorschlag.",
     },
     {
         "mcp_tool_id": "sales.invoice.propose",

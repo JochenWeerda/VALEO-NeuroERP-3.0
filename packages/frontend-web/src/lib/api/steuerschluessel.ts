@@ -5,7 +5,6 @@
  * (Pruefung, Audit, Idempotenz). Der Schluessel entscheidet: vorhanden = Aenderung, sonst Anlage.
  */
 import { apiClient } from '@/lib/api-client'
-import type { KommandoErgebnis } from '@/lib/api/gutschrift'
 
 const WEG = '/api/v1/finance/tax-keys'
 
@@ -77,6 +76,18 @@ export async function ladeKontenvorschlaege(steuersatz: string): Promise<Kontenv
 /** Alle Schluessel des Mandanten, auch inaktive. */
 export async function listeSteuerschluessel(): Promise<Steuerschluessel[]> {
   return (await apiClient.get<Steuerschluessel[]>(WEG, { params: { active_only: false } })).data
+}
+
+/** Ergebnis eines Kommandowegs (MaskActionResult). */
+export type KommandoErgebnis = {
+  actionKey: string
+  mode: string
+  success: boolean
+  summary?: string | null
+  error?: string | null
+  validationErrors?: Array<{ field: string; message: string; severity: string }> | null
+  affectedIds?: string[] | null
+  auditEntryId?: string | null
 }
 
 export async function speichereSteuerschluessel(daten: SteuerschluesselEingabe, auftrag: string): Promise<KommandoErgebnis> {

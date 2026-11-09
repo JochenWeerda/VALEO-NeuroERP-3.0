@@ -7160,16 +7160,6 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "sales/gutschrift": {
-      "definition_hash": "56cc7d02dc2eb8e75e9183edda024e82cdd424d687cfec65e1113819a797622e",
-      "gates_passed": [
-        "A",
-        "B",
-        "C"
-      ],
-      "studio_draft_clean": true,
-      "version": "1.0.0"
-    },
     "sales/invoice": {
       "definition_hash": "942fb0aba4e7dacb86cd3ccf2364fdfef2cc4cdbbff4a3d1b7c81caaaa0187c8",
       "gates_passed": [
@@ -7743,6 +7733,17 @@
     },
     "verkauf/dauerauftraege": {
       "definition_hash": "df5f5d5380009c374e7cb37a8c4e35c1cb1423b75a5a52221e9226511b169c15",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "verkauf/gutschrift-buchungsvorschlaege": {
+      "definition_hash": "d042719e0e970bd4bdfebe5fb7eb10d701c70be1811bfb5761c3afc1ebc2d9d3",
       "gates_passed": [
         "A",
         "B",

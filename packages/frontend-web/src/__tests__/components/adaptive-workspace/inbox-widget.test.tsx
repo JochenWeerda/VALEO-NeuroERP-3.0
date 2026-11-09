@@ -396,7 +396,7 @@ describe('InboxWidget', () => {
     expect(screen.getByTestId('inbox-primary-open-INBOX-scale')).toHaveTextContent('Zur Übersicht')
     expect(screen.getByRole('link', { name: 'Zur Übersicht INBOX-credit' })).toHaveAttribute(
       'href',
-      '/sales/credit-notes?inbox=INBOX-credit',
+      '/belege/sales_credit_memo?inbox=INBOX-credit',
     )
     expect(screen.getByRole('link', { name: 'Zur Übersicht INBOX-scale' })).toHaveAttribute(
       'href',

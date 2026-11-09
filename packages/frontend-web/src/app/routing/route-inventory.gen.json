@@ -5346,6 +5346,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/verkauf/gutschrift-buchungsvorschlaege",
+      "path": "verkauf/gutschrift-buchungsvorschlaege",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/verkauf/kommissions-auftraege",
       "path": "verkauf/kommissions-auftraege",
       "source": "auto"

@@ -185,8 +185,8 @@ export const WORKSPACE_FACHAKTIONEN: TypedFachaktion[] = [
     requiredScopes: ['sales:read'],
     businessDomain: 'sales',
     target: {
-      route: '/sales/credit-notes',
-      screenId: 'sales/gutschrift',
+      route: '/belege/sales_credit_memo',
+      screenId: 'beleg-liste/sales-credit-memo',
     },
     mcpIntent: 'open-credit-notes',
     reasonTemplate: 'Verkaufs-Gutschriften-Uebersicht (outgoing), kein Einzelbeleg',

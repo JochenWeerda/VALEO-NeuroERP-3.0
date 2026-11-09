@@ -4900,7 +4900,7 @@ Importiert eine HMAC-signierte Abfragedefinition (Maske auswertungen/abfrage-cen
 
 ### `sales.gutschrift.buchen` — Gutschrift aus freigegebenem Vorschlag buchen
 
-Bucht eine Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP-Minderung der bezogenen Rechnung) nur aus einem agent_proposals-Datensatz (sales_credit_note_buchung), den ein Mensch freigegeben hat. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved; hat sich die Gutschrift seit der Freigabe geaendert, HTTP 409 und neuer Vorschlag noetig. Kein Freigabe-Boolean im Aufruf. Scope sales:write. Kein tenant_id-Parameter.
+Bucht eine DocFlow-Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP-Minderung der bezogenen Rechnung) nur aus einem agent_proposals-Datensatz (sales_credit_note_buchung), den ein Mensch freigegeben hat. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved; hat sich die Gutschrift seit der Freigabe geaendert, HTTP 409 und neuer Vorschlag noetig. Kein Freigabe-Boolean im Aufruf. Scope sales:write. Kein tenant_id-Parameter.
 
 - **Scope:** `sales:write`
 - **Idempotent:** ja
@@ -4962,7 +4962,7 @@ Bucht eine Gutschrift (Erloes netto, Umsatzsteuer getrennt, Forderung brutto, OP
 
 ### `sales.gutschrift.propose` — Buchung einer Gutschrift vorschlagen
 
-Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Authentifizierungs-Mandanten an. parameters.credit_note_id. Default dryRun liest, was gebucht wuerde (Erloes netto, Umsatzsteuer, Forderung brutto, Buchungszeilen) oder den Pruefgrund (HTTP 409), wenn sich die Gutschrift nicht buchen laesst. propose (mit idempotency_key) speichert agent_proposals (sales_credit_note_buchung) mit approval_status pending und bucht nicht. execute ist nicht angebunden. Ein Mensch prueft und gibt in der Maske sales/gutschrift frei; danach sales.gutschrift.buchen. Ein Freigabe-Boolean im Aufruf wird abgewiesen. Scope sales:write. Kein tenant_id-Parameter.
+Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Authentifizierungs-Mandanten an. parameters.credit_note_id. Default dryRun liest, was gebucht wuerde (Erloes netto, Umsatzsteuer, Forderung brutto, Buchungszeilen) oder den Pruefgrund (HTTP 409), wenn sich die Gutschrift nicht buchen laesst. propose (mit idempotency_key) speichert agent_proposals (sales_credit_note_buchung) mit approval_status pending und bucht nicht. execute ist nicht angebunden. Ein Mensch prueft und gibt in der Liste verkauf/gutschrift-buchungsvorschlaege frei; danach sales.gutschrift.buchen. Ein Freigabe-Boolean im Aufruf wird abgewiesen. Scope sales:write. Kein tenant_id-Parameter.
 
 - **Scope:** `sales:write`
 - **Idempotent:** nein
@@ -5031,7 +5031,7 @@ Legt einen ausstehenden Buchungsvorschlag fuer eine Gutschrift (Entwurf) im Auth
 
 ### `sales.gutschrift.speichern` — Gutschrift als Entwurf speichern
 
-Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als Entwurf im Authentifizierungs-Mandanten an (Maske sales/gutschrift:speichern; CE /api/v1/sales/credit-notes/actions/speichern). parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Buchen geht nur ueber sales.gutschrift.propose, menschliche Freigabe und sales.gutschrift.buchen. Scope sales:write. Kein tenant_id-Parameter.
+Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als DocFlow-Entwurf (Belegart sales_credit_memo, BELEG-052) im Authentifizierungs-Mandanten an; die Belegmaske beleg/sales-credit-memo bearbeitet ihn. parameters.credit_note_number, customer_id, grund, lines[] mit description, quantity, unit_price und tax_code (Steuerschluessel des Mandanten aus finance/tax-keys; kein Prozentsatz, kein Vorgabewert), optional invoice_reference, reason. Default dryRun liefert Netto/Umsatzsteuer/Brutto oder den Pruefgrund. execute erfordert idempotency_key. Gebucht wird NICHT: Buchen geht nur ueber sales.gutschrift.propose, menschliche Freigabe und sales.gutschrift.buchen. Scope sales:write. Kein tenant_id-Parameter.
 
 - **Scope:** `sales:write`
 - **Idempotent:** ja

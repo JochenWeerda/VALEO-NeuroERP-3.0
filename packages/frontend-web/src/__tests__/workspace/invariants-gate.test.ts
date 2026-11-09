@@ -224,7 +224,7 @@ describe('Workspace-Invarianten', () => {
   it('hat richtungsgetrennte Gutschrift-Uebersichten und Wiegeschein-/Lieferschein-Liste ohne Beleg-ID', () => {
     const sales = getFachaktion('sales.credit-notes-list')
     expect(sales?.catalogId).toBe('sales.credit_note.list')
-    expect(sales?.target.route).toBe('/sales/credit-notes')
+    expect(sales?.target.route).toBe('/belege/sales_credit_memo')
     expect(sales?.target.route).not.toMatch(/:[a-z]+/i)
 
     const purchase = getFachaktion('einkauf.gutschriften-list')
@@ -253,7 +253,7 @@ describe('Workspace-Invarianten', () => {
       actions: Array<{ action_id: string; route_path?: string | null }>
     }
     const expected: Array<[string, string, string]> = [
-      ['sales.credit-notes-list', 'sales.credit_note.list', '/sales/credit-notes'],
+      ['sales.credit-notes-list', 'sales.credit_note.list', '/belege/sales_credit_memo'],
       ['einkauf.gutschriften-list', 'einkauf.gutschrift.list', '/einkauf/gutschriften-belastungen'],
       ['weighing.tickets-list', 'weighing.tickets.list', '/weighing'],
       ['einkauf.lieferschein-list', 'einkauf.lieferschein.list', '/einkauf/lieferschein-erfassung'],

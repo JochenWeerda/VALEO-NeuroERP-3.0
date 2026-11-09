@@ -335,6 +335,37 @@ def build_admin_rollen() -> dict[str, Any]:
     )
 
 
+def build_verkauf_gutschrift_vorschlaege() -> dict[str, Any]:
+    weg = "/api/v1/sales/credit-notes/buchungsvorschlaege"
+    return build_stamm_list_screen(
+        screen_id="verkauf/gutschrift-buchungsvorschlaege", domain="sales", bundle="verkauf",
+        title="Gutschrift-Buchungsvorschläge",
+        subtitle="Ein Agent schlägt die Buchung einer Gutschrift vor; ein Mensch prüft und gibt frei",
+        endpoint=weg, row_route="/belege/sales_credit_memo/{credit_note_id}",
+        columns=[text("credit_note_number", "Gutschrift", "primary"), betrag("netto", "Netto", summe=False),
+                 betrag("steuer", "Umsatzsteuer", summe=False, prioritaet="secondary"),
+                 betrag("brutto", "Brutto", summe=False), status("approval_status", "Stand"),
+                 text("vorgeschlagen_von", "Vorgeschlagen von", "secondary"),
+                 datum("vorgeschlagen_am", "Vorgeschlagen am"), text("geprueft_von", "Geprüft von", "tertiary"),
+                 text("ablehnungsgrund", "Ablehnungsgrund", "tertiary"), janein("gebucht", "Gebucht")],
+        actions=[_EXPORT],
+        row_actions=[{"key": "vorschlag_freigeben", "label": "Freigeben", "dangerLevel": "high",
+                      "permission": "verkauf.gutschrift.freigeben",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/freigeben", "method": "POST",
+                      "requiresConfirmation": True, "forbiddenForAgents": True, "humanApprovalRequired": True,
+                      "visibleWhen": {"field": "approval_status", "values": ["pending"]}},
+                     {"key": "vorschlag_ablehnen", "label": "Ablehnen", "dangerLevel": "moderate",
+                      "permission": "verkauf.gutschrift.freigeben",
+                      "commandEndpoint": f"{weg}/{{entity_id}}/actions/ablehnen", "method": "POST",
+                      "requiresConfirmation": True, "auditReasonRequired": True, "forbiddenForAgents": True,
+                      "humanApprovalRequired": True,
+                      "visibleWhen": {"field": "approval_status", "values": ["pending"]}}],
+        purpose="Buchungsvorschlaege der Agenten zu Gutschriften pruefen und freigeben oder ablehnen.",
+        prompts=["Welche Gutschrift-Buchungen warten auf Freigabe?"],
+        no_workflow="Freigabeliste; gebucht wird danach durch das Werkzeug sales.gutschrift.buchen.",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -351,4 +382,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "agrar/wetterwarnung": build_agrar_wetterwarnung,
     "admin/terminologie": build_admin_terminologie,
     "admin/rollen-verwaltung": build_admin_rollen,
+    "verkauf/gutschrift-buchungsvorschlaege": build_verkauf_gutschrift_vorschlaege,
 }
