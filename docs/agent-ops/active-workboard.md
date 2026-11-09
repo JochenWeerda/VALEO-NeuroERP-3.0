@@ -20671,3 +20671,7 @@ Futtermittel-Detailseiten -> futtermittel/einzelfuttermittel, agrar/feeding-busi
 futtermittel/analyse, PSM-Stamm -> agrar/psm bzw. agrar/psm-liste, Applikationen, Schlagkartei, Saatgut-Bestellungen,
 Wetter, Duengerrechner, Chargenverfolgung, Verkaufschancen, Kampagne anlegen -> crm/campaign, Anfrage-Erfassung ->
 einkauf/anfrage-erstellen). screen_definition-Routen 78 -> 60, Studio-versioniert 782/872.
+Seiten ohne Maske, Runde 2 (09.11.2026): 11 weitere Seiten auf bestehende Studio-Masken (agrar/saatgut-liste,
+agrar/planung/duengeplanung, agrar/nawaro-vertraege, lager/lagerbewegungen-liste, lager/bestandskorrektur,
+logistik/frachtbriefe, einkauf/frachtauftraege-liste, kontrakte/positionen, etiketten/drucken, crm/campaign-performance,
+waage/liste). screen_definition-Routen 60 -> 50, Studio-versioniert 792/872.
