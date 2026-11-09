@@ -733,6 +733,9 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
                 "settings": {"terminal_id": "terminal-1"},
             }
 
+        def require_config(self, *required):
+            return self.get_config()
+
         def daily_summary(self, business_date):
             return {
                 "incomplete_count": 0,

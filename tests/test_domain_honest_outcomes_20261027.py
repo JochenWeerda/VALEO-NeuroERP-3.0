@@ -22,7 +22,6 @@ def endpoint_body(module_name, function_name):
 
 
 compliance = SimpleNamespace(get_ustva_status=endpoint_body('compliance', 'get_ustva_status'))
-pos_retoure = SimpleNamespace(pos_checkout=endpoint_body('pos_retoure', 'pos_checkout'))
 
 class Result:
     def __init__(self, row=None, scalar=None): self.row, self.value = row, scalar
@@ -36,13 +35,26 @@ class Database:
         if self.fail: raise RuntimeError('database unavailable')
         return Result(row=(100, 19, 4)) if len(self.calls) == 1 else Result(scalar=0)
 
-def test_checkout_never_claims_a_booking():
-    db = Database()
+def test_checkout_never_claims_a_booking(monkeypatch):
+    # Bis 27.10.2026 meldete /pos/checkout "completed", ohne zu speichern. Ohne Kasse des Mandanten kein Erfolg.
+    from app.api.v1.endpoints import pos_retoure as kasse
+
+    from app.services.fiscalization.service import FiscalizationService
+
+    class OhneKasse:
+        def __init__(self, db, tenant_id): self.db, self.tenant_id = db, tenant_id
+        def get_config(self): return {"configured": False}
+        require_config = FiscalizationService.require_config
+
+    monkeypatch.setattr(kasse, "FiscalizationService", OhneKasse)
+    daten = kasse.CheckoutRequest(
+        offline_id="offline-00000001", gesamt="10",
+        cart=[{"bezeichnung": "Ware", "preis": "10", "menge": 1, "vat_rate": 19}],
+        zahlungen=[{"art": "bar", "betrag": "10"}],
+    )
     with pytest.raises(HTTPException) as error:
-        asyncio.run(pos_retoure.pos_checkout({'offline_id': 'offline-1', 'gesamt': 42}, db))
-    assert error.value.status_code == 501
-    assert 'nicht angebunden' in error.value.detail
-    assert not db.calls
+        asyncio.run(kasse.pos_checkout(daten, tenant_id="t-1", db=Database()))
+    assert error.value.status_code == 503
 
 class _Anmeldung:
     """Antwort der Anmeldungsabfrage: keine Anmeldung im Zeitraum."""

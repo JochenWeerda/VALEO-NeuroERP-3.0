@@ -17,7 +17,7 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 from app.services.fiscalization.contracts import ExportCommand
 from app.services.fiscalization.providers import FiscalProviderError
-from app.services.fiscalization.service import FiscalizationService
+from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
 from app.api.v1.schemas.base import TypedObjectOut
 
 
@@ -32,9 +32,10 @@ async def dsfinvk_export(
     db: Session = Depends(get_db),
 ):
     service = FiscalizationService(db, tenant_id)
-    config = service.get_config()
-    if not config.get("cash_register_id"):
-        raise HTTPException(status_code=409, detail="Fiskalisierungsprovider ist nicht konfiguriert")
+    try:
+        config = service.require_config("cash_register_id")
+    except FiscalNotConfiguredError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     target_to = period_to or date.today()
     target_from = period_from or target_to
     try:

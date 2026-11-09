@@ -121,13 +121,14 @@ async def submit_tagesabschluss(
     """Einfachen Kassen-Tagesabschluss buchen."""
     from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
     from app.services.fiscalization.providers import FiscalProviderError
-    from app.services.fiscalization.service import FiscalizationService
+    from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
 
     fiscal = FiscalizationService(db, tenant_id)
-    config = fiscal.get_config()
-    if not config.get("configured"):
+    try:
+        config = fiscal.require_config()
+    except FiscalNotConfiguredError as exc:
         from fastapi import HTTPException
-        raise HTTPException(status_code=409, detail="Fiskalisierungsprovider ist nicht konfiguriert")
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     summary = fiscal.daily_summary(date.fromisoformat(payload.datum))
     if int(summary["incomplete_count"]) > 0:
         from fastapi import HTTPException

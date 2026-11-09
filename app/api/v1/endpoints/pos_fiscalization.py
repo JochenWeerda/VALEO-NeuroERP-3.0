@@ -24,7 +24,7 @@ from app.services.fiscalization.contracts import (
     StartTransactionCommand,
 )
 from app.services.fiscalization.providers import FiscalProviderError
-from app.services.fiscalization.service import FiscalizationService
+from app.services.fiscalization.service import FiscalizationService, FiscalTaxRateError
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -84,6 +84,8 @@ async def start_transaction(
 ):
     try:
         return _service(db, tenant_id).start(payload)
+    except FiscalTaxRateError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except (FiscalProviderError, RuntimeError, ValueError) as exc:
         raise _provider_error(exc) from exc
 
@@ -96,6 +98,8 @@ async def finish_transaction(
 ):
     try:
         return _service(db, tenant_id).finish(payload)
+    except FiscalTaxRateError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
     except (FiscalProviderError, RuntimeError, ValueError) as exc:
         raise _provider_error(exc) from exc
 

@@ -10,6 +10,7 @@ import asyncio
 import importlib
 
 import pytest
+from uuid import uuid4
 import sqlalchemy as sa
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
@@ -303,21 +304,38 @@ def test_fachkette_pos_retoure_bucht_nur_im_eigenen_mandanten(db):
     own, foreign = rows["full", ARTICLES, A]["article_number"], rows["full", ARTICLES, B]["article_number"]
 
     def request(artikelnr):
-        return retoure.RetourRequest(kassierer="Kasse 1", gesamt=1.0, positionen=[
-            retoure.RetourPosition(artikelnr=artikelnr, bezeichnung="Ware", einzelpreis=1.0, menge=1)])
+        return retoure.RetourRequest(vorgang_id=f"rls-{uuid4()}", kassierer="Kasse 1", gesamt="1.00", positionen=[
+            retoure.RetourPosition(artikelnr=artikelnr, bezeichnung="Ware", einzelpreis="1.00", menge=1)])
 
-    session = _session(conn)
+    savepoint = conn.begin_nested()
     try:
-        with tenant_scope(A, "test"):
-            antwort = asyncio.run(retoure.create_retoure(request(own), db=session, tenant_id=A))
-            assert support.keys(conn, MOVEMENTS, "tenant_id", "source_document_id = :r",
-                                {"r": antwort.retoure_id}) == {A}
-            # Artikel des fremden Mandanten: kein Erfolg ohne Buchung
-            with pytest.raises(HTTPException) as exc:
-                asyncio.run(retoure.create_retoure(request(foreign), db=session, tenant_id=A))
-            assert exc.value.status_code == 422
+        # Signiert wird nur mit Steuerschluessel aus dem Stamm und einer Kasse des Mandanten (Simulation).
+        conn.execute(sa.text("RESET ROLE"))
+        for tenant in (A, B):
+            conn.execute(sa.text(
+                "INSERT INTO domain_erp.tax_keys(id, tenant_id, code, bezeichnung, steuersatz, gueltig_von) "
+                "VALUES (:id, :t, 'R7', 'RLS-Pruefung', 7, DATE '2020-01-01')"), {"id": str(uuid4()), "t": tenant})
+            conn.execute(sa.text(f"UPDATE {ARTICLES} SET steuerschluessel_verkauf = 'R7' WHERE id = :a"),
+                         {"a": rows[ARTICLES, tenant]})
+        conn.execute(sa.text(
+            "INSERT INTO domain_docflow.pos_fiscal_provider_configs "
+            "(tenant_id, provider, dsfinvk_provider, cash_register_id, client_id, simulation_allowed) "
+            "VALUES (:t, 'simulation', 'simulation', 'KASSE-RLS', 'CLIENT-RLS', true)"), {"t": A})
+        support.as_app(conn)
+        session = _session(conn)
+        try:
+            with tenant_scope(A, "test"):
+                antwort = asyncio.run(retoure.create_retoure(request(own), db=session, tenant_id=A))
+                assert support.keys(conn, MOVEMENTS, "tenant_id", "source_document_id = :r",
+                                    {"r": antwort.retoure_id}) == {A}
+                # Artikel des fremden Mandanten: kein Erfolg ohne Buchung
+                with pytest.raises(HTTPException) as exc:
+                    asyncio.run(retoure.create_retoure(request(foreign), db=session, tenant_id=A))
+                assert exc.value.status_code == 422
+        finally:
+            session.close()
     finally:
-        session.close()
+        savepoint.rollback()
 
 
 def test_fachkette_bvl_umsaetze_nur_eigener_mandant(db):
@@ -389,8 +407,8 @@ def test_pos_retoure_meldet_keinen_schein_erfolg():
         def rollback(self):
             pass
 
-    request = retoure.RetourRequest(kassierer="Kasse 1", gesamt=1.0, positionen=[
-        retoure.RetourPosition(artikelnr="4711", bezeichnung="Ware", einzelpreis=1.0, menge=1)])
-    with pytest.raises(HTTPException) as exc:
+    request = retoure.RetourRequest(vorgang_id="rls-kaputt-0001", kassierer="Kasse 1", gesamt="1.00", positionen=[
+        retoure.RetourPosition(artikelnr="4711", bezeichnung="Ware", einzelpreis="1.00", menge=1)])
+    # Bis 27.10.2026 meldete der Weg hier "erfolgreich gebucht"; jetzt kommt der Fehler bis zum Aufrufer durch.
+    with pytest.raises(RuntimeError):
         asyncio.run(retoure.create_retoure(request, db=Kaputt(), tenant_id=A))
-    assert exc.value.status_code == 500
