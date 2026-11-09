@@ -266,7 +266,7 @@ actions:
     mask_action_id: null
     command_endpoint: POST /api/v1/docflow/  # Belegmaske beleg/sales-offer, creation docflow.create.v1
     screen_id: beleg/sales-offer
-    route_path: /sales/angebote/neu
+    route_path: /sales/angebot/neu
     aliases:
       - angebot anlegen
       - neues angebot

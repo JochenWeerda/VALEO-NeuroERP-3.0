@@ -98,7 +98,7 @@ export const WORKSPACE_FACHAKTIONEN: TypedFachaktion[] = [
     businessDomain: 'sales',
     target: {
       route: '/sales/angebot/neu',
-      screenId: 'sales/angebote/neu',
+      screenId: 'beleg/sales-offer',
       actionKey: 'anlegen',
     },
     mcpIntent: 'prepare-sales-offer',
