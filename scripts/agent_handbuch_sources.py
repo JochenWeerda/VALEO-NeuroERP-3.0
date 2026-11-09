@@ -31,7 +31,7 @@ WORKFLOW_PREFIX_TO_PROCESS: dict[str, str] = {
 # mask_id → Flow-Spine process_keys
 MASK_TO_PROCESSES: dict[str, list[str]] = {
     "crm/customer-360": ["order-to-cash", "service-to-customer"],
-    "sales/sales-order": ["order-to-cash"],
+    "beleg-liste/sales-order": ["order-to-cash"],
     "sales/delivery-note": ["order-to-cash"],
     "einkauf/supplier": ["procure-to-pay"],
     "einkauf/purchase-order": ["procure-to-pay"],

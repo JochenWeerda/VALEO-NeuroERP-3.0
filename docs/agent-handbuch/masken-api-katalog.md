@@ -240,7 +240,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
 | `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
 | `beleg-liste/sales-offer` | Angebote | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-offer/agent-contract` |
-| `beleg-liste/sales-order` | Aufträge | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
+| `beleg-liste/sales-order` | Aufträge | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
 | `belege/belegfolge` | Belegfolge | documents | niedrig | — | `GET /api/v1/masks/belege/belegfolge/agent-contract` |
 | `benachrichtigungen/liste` | Benachrichtigungen | platform | niedrig | — | `GET /api/v1/masks/benachrichtigungen/liste/agent-contract` |
 | `bestellvorschlag/bedarf` | Bestellvorschlag Bedarf | einkauf | niedrig | — | `GET /api/v1/masks/bestellvorschlag/bedarf/agent-contract` |
@@ -697,7 +697,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
 | `sales/lieferung-storno` | Lieferung storno | sales | niedrig | — | `GET /api/v1/masks/sales/lieferung-storno/agent-contract` |
-| `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
+| `sales/sales-order` | Verkaufsauftrag | sales | niedrig | — | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schaeden/liste` | Schadenmeldungen | finance | niedrig | — | `GET /api/v1/masks/schaeden/liste/agent-contract` |
 | `schaeden/meldung` | Schadensmeldungen | qualitaet | niedrig | — | `GET /api/v1/masks/schaeden/meldung/agent-contract` |
 | `schichtplan/liste` | Schichtplan | personal | niedrig | — | `GET /api/v1/masks/schichtplan/liste/agent-contract` |

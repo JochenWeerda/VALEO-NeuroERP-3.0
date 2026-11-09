@@ -290,7 +290,7 @@ def build_dashboard_verkauf_screen_definition() -> dict[str, Any]:
             {"key": "avg_order", "label": "Durchschn. Auftrag", "tone": "neutral"},
         ],
         tiles=[
-            cockpit_nav_tile("auftraege", "Auftraege", target_screen_id="sales/sales-order"),
+            cockpit_nav_tile("auftraege", "Auftraege", target_screen_id="beleg-liste/sales-order"),
             cockpit_nav_tile("rechnungen", "Rechnungen", target_route="/belege/sales_invoice"),
             cockpit_nav_tile("workspace", "Verkauf-Cockpit", target_screen_id="workspace/verkauf"),
         ],
@@ -736,7 +736,7 @@ def build_workspace_verkauf_screen_definition() -> dict[str, Any]:
             {"key": "kreditlimit", "label": "Kreditlimit", "tone": "danger"},
         ],
         tiles=[
-            cockpit_nav_tile("offene_auftraege", "Offene Auftraege", target_screen_id="sales/sales-order"),
+            cockpit_nav_tile("offene_auftraege", "Offene Auftraege", target_screen_id="beleg-liste/sales-order"),
             cockpit_nav_tile("lieferscheine", "Lieferscheine", target_screen_id="sales/delivery-note"),
             cockpit_nav_tile("wiedervorlagen", "Wiedervorlagen", target_screen_id="crm/lead", tone="warning"),
         ],

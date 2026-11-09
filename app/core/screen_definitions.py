@@ -3360,7 +3360,7 @@ def build_workspace_verkauf_screen_definition() -> dict[str, Any]:
             {"key": "kreditlimit", "label": "Kreditlimit-Warnungen", "tone": "danger"},
         ],
         tiles=[
-            {"key": "offene_auftraege", "label": "Offene Auftraege", "targetScreenId": "sales/sales-order", "targetFilters": {"status": "offen"}, "tone": "neutral"},
+            {"key": "offene_auftraege", "label": "Offene Auftraege", "targetScreenId": "beleg-liste/sales-order", "targetFilters": {"status": "open"}, "tone": "neutral"},
             {"key": "lieferscheine", "label": "Offene Lieferscheine", "targetScreenId": "sales/delivery-note", "targetFilters": {}, "tone": "neutral"},
             {"key": "wiedervorlagen", "label": "Angebots-Wiedervorlagen", "targetScreenId": "crm/lead", "targetFilters": {}, "tone": "warning"},
         ],
@@ -6066,6 +6066,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/invoice": "/verkauf/rechnungen",
     "beleg-liste/sales-invoice": "/belege/sales_invoice",
+    "beleg-liste/sales-order": "/verkauf/auftraege",
     "strecke/streckengeschaeft": "/strecke/streckengeschaeft",
     "versand/versand-avis": "/versand/versand-avis",
     "strecke/vorlaeufig": "/strecke/vorlaeufige-streckengeschaefte",
