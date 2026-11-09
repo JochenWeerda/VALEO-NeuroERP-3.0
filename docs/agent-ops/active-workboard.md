@@ -20677,3 +20677,8 @@ logistik/frachtbriefe, einkauf/frachtauftraege-liste, kontrakte/positionen, etik
 waage/liste). screen_definition-Routen 60 -> 50, Studio-versioniert 792/872.
 Restseiten-Cluster (09.11.2026): app/core/screen_definitions_cluster_restseiten.py - Studio-Listen fuer
 nawaro/raps-profil, schichtplan/liste und wissen/wissensbasis auf ihrem typisierten Leseweg (Gates A/B/C/E gruen).
+Technische Seiten + Einstiegs-Umleitungen (09.11.2026): Inventarstufe `technisch` (config/mask_technische_seiten.json,
+je Route ein Grund, Test haelt sie bei hoechstens 6): OIDC-Login/-Callback, Masken-Studio, Studio-Vorschau,
+Studio-Testlauf, Rollout-Pilot. Kaputte Einstiegsseiten (screenId unbekannt) leiten jetzt auf echte Masken:
+finance -> /fibu, hilfe -> /wissen/wissensbasis, document -> /dokumente/ablage, pricing -> /preise/konditionen,
+stock-management -> /lager/bestandsuebersicht. Stand 795 Studio / 38 screen_definition / 25 Altmuster / 3 handgebaut.

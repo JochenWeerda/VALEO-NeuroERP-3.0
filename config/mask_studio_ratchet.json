@@ -3,8 +3,7 @@
  "handgebaut_routen": [
   "admin/control-center",
   "annahme/abrechnung",
-  "lager/materialfluss",
-  "studio/workspace-composition-preview"
+  "lager/materialfluss"
  ],
  "altmuster_routen": [
   "admin/control-center/agent-ops",
@@ -16,7 +15,6 @@
   "admin/report-berechtigungen",
   "admin/rolle/neu",
   "admin/rollen-verwaltung",
-  "admin/screen-studio",
   "admin/setup",
   "admin/setup/dms-integration",
   "admin/terminologie",

@@ -1,0 +1,11 @@
+{
+  "_hinweis": "Technische Seiten: keine Fachmaske, sondern Anmeldefluss oder Werkzeug des Studios selbst. Sie zaehlen nicht als Maske (wie Weiterleitungen). Nur schrumpfen; jeder Eintrag braucht einen Grund. Pruefung: tests/test_mask_studio_inventory.py.",
+  "seiten": {
+    "auth/Login": "OIDC-Anmeldung: startet den Redirect zum Identitaetsanbieter, bevor es Mandant, Rollen und ScreenDefinitions gibt.",
+    "auth/Callback": "OIDC-Rueckkehr: tauscht den Autorisierungscode gegen das Token, bevor eine Maske geladen werden kann.",
+    "admin/screen-studio": "Das Masken-Studio selbst: Werkzeug, das ScreenDefinitions erzeugt, nicht eine von ihnen.",
+    "studio/workspace-composition-preview": "Studio-Vorschau fuer Arbeitsraum-Kompositionen (lokal, ohne Server-Schreibweg).",
+    "studio/run/:screenId": "Studio-Testlauf: rendert eine beliebige registrierte ScreenDefinition per Parameter.",
+    "mask-rollout/:screenId/:entityId": "Rollout-Pilot: rendert eine registrierte ScreenDefinition hinter dem Rollout-Schalter."
+  }
+}

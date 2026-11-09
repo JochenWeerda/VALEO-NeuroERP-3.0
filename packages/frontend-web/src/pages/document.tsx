@@ -1,10 +1,6 @@
-import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { Navigate } from '@/app/routing/typed-router'
 
+/** Alte Einstiegsseite ohne eigene Maske (screenId unbekannt): fuehrt auf die Dokumentenablage. */
 export default function Page(): JSX.Element {
-  return (
-    <UniversalNativeCockpitPage
-      screenId="document"
-      testId="screen-document"
-    />
-  )
+  return <Navigate to="/dokumente/ablage" replace />
 }
