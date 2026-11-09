@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 769,
-    "screens_with_actions": 391,
+    "actions": 772,
+    "screens_with_actions": 394,
     "domains": 50
   },
   "actions": [
@@ -14168,6 +14168,27 @@
       }
     },
     {
+      "id": "mask:nawaro/raps-profil:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (nawaro/raps-profil)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "nawaro/raps-profil",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "nawaro/raps-profil",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:personal/bewerbung-einwilligung:erklaerungen",
       "label": "Einwilligungserklärungen",
       "description": "Einwilligungserklärungen (personal/bewerbung-einwilligung)",
@@ -16070,6 +16091,27 @@
       }
     },
     {
+      "id": "mask:schichtplan/liste:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (schichtplan/liste)",
+      "category": "mask-action",
+      "domain": "personal",
+      "mask": "schichtplan/liste",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "schichtplan/liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:schnittstelle/mde-inbox:process_pending",
       "label": "Ausstehende verarbeiten",
       "description": "Ausstehende verarbeiten (schnittstelle/mde-inbox)",
@@ -17130,6 +17172,27 @@
       "required_data": [],
       "source": {
         "screenId": "wartung/anlagen-liste",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:wissen/wissensbasis:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (wissen/wissensbasis)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "wissen/wissensbasis",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "wissen/wissensbasis",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

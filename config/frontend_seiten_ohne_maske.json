@@ -68,7 +68,6 @@
     "nachhaltigkeit/esg-report.tsx": "nachhaltigkeit/esg-report",
     "nawaro/anbauflaechen.tsx": "nawaro/anbauflaechen",
     "nawaro/mitteilung-drucken.tsx": "nawaro/mitteilung-drucken",
-    "nawaro/raps-profil.tsx": "nawaro/raps-profil",
     "policy-manager.tsx": "policies",
     "portal/index.tsx": "portal/portal",
     "pricing.tsx": "pricing",
@@ -78,9 +77,7 @@
     "reports/charts/ProductAnalyticsCharts.tsx": "reports/charts/ProductAnalyticsCharts",
     "reports/charts/SalesPerformanceCharts.tsx": "reports/charts/SalesPerformanceCharts",
     "reports/charts/TrendAnalyticsCharts.tsx": "reports/charts/TrendAnalyticsCharts",
-    "schichtplan/liste.tsx": "schichtplan/liste",
     "stock-management.tsx": "stock-management",
-    "wissen/wissensbasis.tsx": "wissen/wissensbasis",
     "workflow/mask-benchmark/MaskBenchmarkRoute.tsx": "dev/mask-benchmark/:domain/:variant/:id",
     "workflows/trigger.tsx": "workflows/trigger"
   }

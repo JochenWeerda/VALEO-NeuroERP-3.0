@@ -6215,6 +6215,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "nawaro/raps-profil": {
+      "definition_hash": "00c02d8b5b0c90627850e8c03f6efe4802a1015fd2636bf8fefb690505e6f192",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "personal/bewerbung-einwilligung": {
       "definition_hash": "5fd0921423f341592353d0f13a1c2e617d12bf9d6d8dc07f455aee222cbb2297",
       "gates_passed": [
@@ -7115,6 +7126,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "schichtplan/liste": {
+      "definition_hash": "295bdf340948419845f7050753d4bc596b1a3efdeb5bf5fc3278820e4da50da4",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "schnittstelle/legacy-adapter-monitor": {
       "definition_hash": "4e80ca42f33a8925380196f1ea477b056f27197db80a067e4b8d57e5247cc9c2",
       "gates_passed": [
@@ -7862,6 +7884,17 @@
     },
     "wartung/anlagen-liste": {
       "definition_hash": "d4b864b8164ae7cf8669280a941772e1db4013f006de17111355c43e17f1a748",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "wissen/wissensbasis": {
+      "definition_hash": "67d892bac69ff004ba2049e203c35c25ba9cc054f85a73fa48b4d537d3bb7404",
       "gates_passed": [
         "A",
         "B",

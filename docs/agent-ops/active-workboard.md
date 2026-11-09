@@ -20675,3 +20675,5 @@ Seiten ohne Maske, Runde 2 (09.11.2026): 11 weitere Seiten auf bestehende Studio
 agrar/planung/duengeplanung, agrar/nawaro-vertraege, lager/lagerbewegungen-liste, lager/bestandskorrektur,
 logistik/frachtbriefe, einkauf/frachtauftraege-liste, kontrakte/positionen, etiketten/drucken, crm/campaign-performance,
 waage/liste). screen_definition-Routen 60 -> 50, Studio-versioniert 792/872.
+Restseiten-Cluster (09.11.2026): app/core/screen_definitions_cluster_restseiten.py - Studio-Listen fuer
+nawaro/raps-profil, schichtplan/liste und wissen/wissensbasis auf ihrem typisierten Leseweg (Gates A/B/C/E gruen).

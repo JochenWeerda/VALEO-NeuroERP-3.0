@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (768 Masken).
+> Generiert aus `app/core/screen_definitions.py` (771 Masken).
 
 ## Übersicht
 
@@ -607,6 +607,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `management/executive-dashboard` | Executive Dashboard | management | niedrig | — | `GET /api/v1/masks/management/executive-dashboard/agent-contract` |
 | `mobile/scanner` | Scanner | mobile | niedrig | — | `GET /api/v1/masks/mobile/scanner/agent-contract` |
 | `nachhaltigkeit/eudr-compliance` | Eudr compliance | nachhaltigkeit | niedrig | — | `GET /api/v1/masks/nachhaltigkeit/eudr-compliance/agent-contract` |
+| `nawaro/raps-profil` | Raps-Profile | agrar | niedrig | — | `GET /api/v1/masks/nawaro/raps-profil/agent-contract` |
 | `personal/bewerbung-einwilligung` | Einwilligung zur Aufbewahrung | hr | mittel | — | `GET /api/v1/masks/personal/bewerbung-einwilligung/agent-contract` |
 | `personal/bewerbungen` | Bewerbungen | hr | niedrig | — | `GET /api/v1/masks/personal/bewerbungen/agent-contract` |
 | `personal/einwilligungserklaerungen` | Einwilligungserklärungen | hr | niedrig | — | `GET /api/v1/masks/personal/einwilligungserklaerungen/agent-contract` |
@@ -689,6 +690,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/sales-order` | Verkaufsauftrag | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schaeden/liste` | Schadenmeldungen | finance | niedrig | — | `GET /api/v1/masks/schaeden/liste/agent-contract` |
 | `schaeden/meldung` | Schadensmeldungen | qualitaet | niedrig | — | `GET /api/v1/masks/schaeden/meldung/agent-contract` |
+| `schichtplan/liste` | Schichtplan | personal | niedrig | — | `GET /api/v1/masks/schichtplan/liste/agent-contract` |
 | `schnittstelle/legacy-adapter-monitor` | Standard-/Unimet-Adapter | integration | niedrig | — | `GET /api/v1/masks/schnittstelle/legacy-adapter-monitor/agent-contract` |
 | `schnittstelle/mde-inbox` | MDE-Eingangskorb | platform | mittel | — | `GET /api/v1/masks/schnittstelle/mde-inbox/agent-contract` |
 | `service/abschluss` | Abschluss | service | niedrig | — | `GET /api/v1/masks/service/abschluss/agent-contract` |
@@ -758,6 +760,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `waage/wiegungen` | Wiegungen | agrar | niedrig | — | `GET /api/v1/masks/waage/wiegungen/agent-contract` |
 | `waage/wiegungen-liste` | Wiegungen | agrar | niedrig | — | `GET /api/v1/masks/waage/wiegungen-liste/agent-contract` |
 | `wartung/anlagen-liste` | Wartung | lager | niedrig | — | `GET /api/v1/masks/wartung/anlagen-liste/agent-contract` |
+| `wissen/wissensbasis` | Wissensbasis | platform | niedrig | — | `GET /api/v1/masks/wissen/wissensbasis/agent-contract` |
 | `workflow/flow-spine-complaint-to-resolution` | complaint-to-resolution | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-complaint-to-resolution/agent-contract` |
 | `workflow/flow-spine-compliance-to-report` | compliance-to-report | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-compliance-to-report/agent-contract` |
 | `workflow/flow-spine-contract-to-settlement` | contract-to-settlement | workflow | niedrig | — | `GET /api/v1/masks/workflow/flow-spine-contract-to-settlement/agent-contract` |
@@ -6520,6 +6523,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Welche offenen Kontraktklassen?
 - Zeige aktuelle Kontraktklassen.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `nawaro/raps-profil` — Raps-Profile
+
+**Zweck:** Rapsprofile pruefen: Ertrag, Verwendung und Treibhausgaswert je Erntejahr.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/nawaro/raps-profil/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/nawaro/raps-profil/agent-contract` |
+| Readiness | `GET /api/v1/masks/nawaro/raps-profil/readiness` |
+| Rollout-Route | `/mask-rollout/nawaro__raps-profil/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/nawaro/raps-profiles`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welcher THG-Wert gilt fuer Raps der Ernte 2026?
+- Wie hoch ist der Energieanteil im Rapsprofil?
 
 **Actions:**
 
@@ -22023,6 +22065,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `schichtplan/liste` — Schichtplan
+
+**Zweck:** Pruefen, welche Schichten anstehen und wo Besetzung fehlt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/schichtplan/liste/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/schichtplan/liste/agent-contract` |
+| Readiness | `GET /api/v1/masks/schichtplan/liste/readiness` |
+| Rollout-Route | `/mask-rollout/schichtplan__liste/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/personal/shifts`
+
+**Beispiel-Prompts:**
+
+- Welche Schichten sind diese Woche geplant?
+- Welche Schichten sind abgesagt?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ## Domäne: platform
 
 ### `admin/identity-budgets` — Nutzer- und Agentenkontingente
@@ -22482,6 +22553,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `process_pending` | Ausstehende verarbeiten | moderate | nein | `/api/v1/mobile/sync-process` |
+
+---
+
+### `wissen/wissensbasis` — Wissensbasis
+
+**Zweck:** Wissensartikel finden und pruefen, welche fuer Agenten freigegeben sind.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/wissen/wissensbasis/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/wissen/wissensbasis/agent-contract` |
+| Readiness | `GET /api/v1/masks/wissen/wissensbasis/readiness` |
+| Rollout-Route | `/mask-rollout/wissen__wissensbasis/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/knowledge/`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Welche Artikel sind fuer Agenten freigegeben?
+- Gibt es eine Anleitung zur Ernteannahme?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

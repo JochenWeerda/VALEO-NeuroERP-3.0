@@ -6614,6 +6614,40 @@
       ]
     },
     {
+      "mask_id": "nawaro/raps-profil",
+      "title": "Raps-Profile",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/nawaro__raps-profil/:entityId",
+      "agent_contract_url": "/api/v1/masks/nawaro/raps-profil/agent-contract",
+      "screen_definition_url": "/api/v1/masks/nawaro/raps-profil/screen-definition",
+      "readiness_url": "/api/v1/masks/nawaro/raps-profil/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
       "mask_id": "portal/feldbuch-auswertungen",
       "title": "Feldbuch-Auswertungen",
       "domain": "agrar",
@@ -21710,6 +21744,32 @@
       "mcp_tool_ids": []
     },
     {
+      "mask_id": "schichtplan/liste",
+      "title": "Schichtplan",
+      "domain": "personal",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/schichtplan__liste/:entityId",
+      "agent_contract_url": "/api/v1/masks/schichtplan/liste/agent-contract",
+      "screen_definition_url": "/api/v1/masks/schichtplan/liste/screen-definition",
+      "readiness_url": "/api/v1/masks/schichtplan/liste/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
       "mask_id": "admin/identity-budgets",
       "title": "Nutzer- und Agentenkontingente",
       "domain": "platform",
@@ -22147,6 +22207,34 @@
         "error_message",
         "idempotency_key"
       ],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
+      "mask_id": "wissen/wissensbasis",
+      "title": "Wissensbasis",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/wissen__wissensbasis/:entityId",
+      "agent_contract_url": "/api/v1/masks/wissen/wissensbasis/agent-contract",
+      "screen_definition_url": "/api/v1/masks/wissen/wissensbasis/screen-definition",
+      "readiness_url": "/api/v1/masks/wissen/wissensbasis/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
       "mcp_tool_ids": [
         "admin.postfach.speichern"
       ]
