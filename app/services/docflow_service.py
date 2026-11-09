@@ -809,6 +809,8 @@ class DocflowService:
         grund = (grund or "").strip()
         if bisher > 0 and len(grund) < 3:
             raise ValidationFailedError("Ein Nachdruck braucht eine Begründung.")
+        # Jeder Druck braucht eine eindeutige lokale Nutzerzuordnung - auch der erste (kein Systemakteur, kein Raten).
+        lokal = bekannter_nutzer(self.db, subjekt, tenant_id=self.tenant_id)
         if grund:
             self.db.execute(text("""
                 INSERT INTO domain_audit.attestations
@@ -819,12 +821,12 @@ class DocflowService:
                 "aktion": "print", "grund": grund,  # ck_attestations_action kennt print; Nachdruck steht in changes
                 "changes": json.dumps({"actor": {"subject": subjekt, "issuer": aussteller, "tenant_id": self.tenant_id},
                                        "druck": bisher + 1, "nachdruck": bisher > 0}),
-                "von": bekannter_nutzer(self.db, subjekt, tenant_id=self.tenant_id),
+                "von": lokal,
             })
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET printed_at=NOW(), printed_by=:von, "
                  "print_count=COALESCE(print_count,0)+1 WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "von": subjekt},
+            {"id": doc_id, "tenant_id": self.tenant_id, "von": lokal},
         )
         self._protokolliere("record_print", doc_id, {"druck": bisher + 1, "nachdruck": bisher > 0})
         return bisher + 1

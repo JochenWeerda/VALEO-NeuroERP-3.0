@@ -69,7 +69,7 @@ def test_erstdruck_ohne_nachdruck_nur_mit_begruendung(w):
     assert "Nachdruck 2" in _drucke(w, grund="Kunde hat das Original verloren")
     kopf = w["db"].execute(sa.text("SELECT print_count, printed_by FROM domain_docflow.document_headers WHERE id = :id"),
                            {"id": w["beleg"]}).one()
-    assert (kopf[0], kopf[1]) == (2, w["nutzer"]["sub"])
+    assert (kopf[0], kopf[1]) == (2, f"u-{w['nutzer']['sub']}")  # lokaler Nutzer, nicht die Token-Kennung
     vermerk = w["db"].execute(sa.text(
         "SELECT action, reason, created_by, changes->'actor'->>'issuer', changes->>'nachdruck' FROM domain_audit.attestations "
         "WHERE entity_id = :id"), {"id": w["beleg"]}).all()
