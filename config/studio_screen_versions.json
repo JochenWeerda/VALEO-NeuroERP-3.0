@@ -6377,7 +6377,7 @@
         "C",
         "E"
       ],
-      "studio_draft_clean": false,
+      "studio_draft_clean": true,
       "version": "1.0.0"
     },
     "platform/analytics": {

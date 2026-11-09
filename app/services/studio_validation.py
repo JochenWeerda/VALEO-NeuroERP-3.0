@@ -227,6 +227,12 @@ def validate_studio_draft(
     write_endpoints = {action.get("commandEndpoint") for action in catalog_actions.values()}
     write_endpoints.update((action.get("inputFlow") or {}).get("submitEndpoint")
                            for action in catalog_actions.values())
+    if native_template is not None:
+        # Die festgelegten Schreibwege der nativen Vorlage selbst (z. B. Kalender: Neu projizieren, ICS-Token);
+        # genau diese Werte, keine eigenen.
+        write_endpoints.update(node[key] for node in _nodes(native_template)
+                               for key in ("reprojectEndpoint", "icsTokenEndpoint", "submitEndpoint")
+                               if isinstance(node.get(key), str))
     for node in _nodes(definition):
         for field in ("endpoint", "summaryEndpoint", "countEndpoint"):
             endpoint = node.get(field)
