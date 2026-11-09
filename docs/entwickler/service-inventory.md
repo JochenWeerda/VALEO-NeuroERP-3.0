@@ -294,7 +294,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `recent_documents_service` | Tenant- and user-scoped recent document projection. |
 | `report_print_service` | Report and print contracts for traceability, weighing tickets and labels. |
 | `rfq_service` | RFQ-Service (Anfrage → Angebot → Zuschlag → Bestellung). |
-| `sales_ab_lifecycle_service` | DOM-SALES-004.2 — Auftragsbestätigung Lifecycle Service (Statusmaschine). |
 | `sales_credit_service` | Kreditlimit-Prüfung & Rechnungs-/Billing-Status im O2C-Kontext (DOM-SALES-004.3). |
 | `sales_invoice_mask` | Die Rechnungsmaske als Daten — Kopf, Positionen und Herkunft fuer den Builder. |
 | `sales_invoice_service` | Aus Lieferscheinpositionen wird eine Rechnung mit eigenen Positionen. |

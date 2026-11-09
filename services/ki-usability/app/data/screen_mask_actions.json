@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 798,
-    "screens_with_actions": 406,
+    "actions": 797,
+    "screens_with_actions": 405,
     "domains": 50
   },
   "actions": [
@@ -16489,30 +16489,6 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/sales-order:bearbeiten",
-      "label": "Bearbeiten",
-      "description": "Bearbeiten (sales/sales-order)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/sales-order",
-      "intent_phrases": [
-        "Bearbeiten"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/sales-order",
-        "actionKey": "bearbeiten",
-        "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "sales.order.update",
         "dangerLevel": "safe"
       }
     },

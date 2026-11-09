@@ -68,29 +68,17 @@ def _table(screen: dict, tab_key: str, table_key: str) -> dict:
 
 
 def test_document_chain_uses_one_page_layout() -> None:
-    """Auftrag, Lieferschein, Rechnung und Bestellung lesen sich gleich (Gewohnheits-Prinzip)."""
-    for screen_id in ("sales/sales-order", "sales/delivery-note", "sales/invoice", "einkauf/purchase-order"):
+    """Lieferschein, Rechnung und Bestellung lesen sich gleich (Gewohnheits-Prinzip); der Auftrag ist Belegmaske."""
+    for screen_id in ("sales/delivery-note", "sales/invoice", "einkauf/purchase-order"):
         screen = get_screen_definition(screen_id)
         assert screen is not None, screen_id
         assert screen["layout"]["sectionNavigation"] == "anchors", screen_id
         _assert_ready(screen)
 
 
-def test_sales_order_head_is_not_an_empty_section() -> None:
-    screen = get_screen_definition("sales/sales-order")
-    assert screen is not None
-    kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
-    assert kopf["dataSourceKey"] == "entity"
-    keys = {f["key"] for f in kopf["fields"]}
-    assert {"order_number", "customer_name", "delivery_date", "total_amount"} <= keys
-    assert "customer_id" not in keys, "interner Partnerschluessel gehoert nicht in den Kopf"
-    status = next(f for f in kopf["fields"] if f["key"] == "status")
-    assert {o["value"] for o in status["options"]} == {"open", "confirmed", "in_delivery", "completed", "cancelled"}
-
-
 def test_sales_chain_heads_name_the_customer_the_same_way() -> None:
     """Auftrag, Lieferschein und Rechnung: Kunde und Kunden-Nr. statt Referenzschluessel."""
-    for screen_id in ("sales/sales-order", "sales/delivery-note", "sales/invoice"):
+    for screen_id in ("sales/delivery-note", "sales/invoice"):
         screen = get_screen_definition(screen_id)
         assert screen is not None, screen_id
         kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
@@ -136,7 +124,6 @@ def test_readiness_rejects_row_detail_that_is_not_an_object() -> None:
 def test_documents_are_named_by_their_number() -> None:
     """Der h1 eines Belegs ist seine Nummer, nicht der Maskentyp."""
     expected = {
-        "sales/sales-order": "order_number",
         "sales/delivery-note": "delivery_note_number",
         "sales/invoice": "invoice_number",
         "einkauf/purchase-order": "bestellnummer",

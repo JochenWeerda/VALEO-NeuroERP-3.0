@@ -377,21 +377,6 @@ def _pruefe_preise(beleg: Beleg) -> list[str]:
 _KUNDE = {"customer_name": "partner.name", "customer_number": "partner.nummer"}
 
 ABBILDUNG: dict[str, dict[str, dict[str, str]]] = {
-    "sales/sales-order": {
-        "kopf": {
-            "order_number": "beleg_nr", **_KUNDE, "status": "status", "currency": "waehrung",
-            "total_amount": "summen.brutto", "subject": "baustein:texte", "notes": "baustein:texte",
-            "delivery_date": "baustein:lieferung", "shipping_method": "baustein:lieferung",
-            "delivery_address": "baustein:lieferung", "contact_person": "baustein:kontakt",
-            "payment_terms": "baustein:zahlung",
-        },
-        "positionen": {
-            "line_number": "positionen[].pos_nr", "article_number": "positionen[].artikel_nr",
-            "description": "positionen[].bezeichnung", "quantity": "positionen[].menge",
-            "discount_percent": "positionen[].rabatt_prozent", "unit_price": "positionen[].einzelpreis",
-            "line_total": "positionen[].netto",
-        },
-    },
     "sales/delivery-note": {
         "kopf": {
             "delivery_note_number": "beleg_nr", **_KUNDE, "status": "status", "delivery_date": "belegdatum",

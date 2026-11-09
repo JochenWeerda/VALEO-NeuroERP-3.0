@@ -148,62 +148,6 @@
       }
     },
     {
-      "screen_id": "sales/sales-order",
-      "missing_actions": [
-        "bearbeiten"
-      ],
-      "creation_changed": false,
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "kind": "secondary",
-          "dangerLevel": "safe",
-          "permission": "sales.order.update",
-          "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
-          "method": "POST",
-          "inputFields": [
-            {
-              "key": "subject",
-              "label": "Betreff",
-              "type": "text"
-            },
-            {
-              "key": "delivery_date",
-              "label": "Liefertermin",
-              "type": "date"
-            },
-            {
-              "key": "contact_person",
-              "label": "Ansprechpartner",
-              "type": "text"
-            },
-            {
-              "key": "shipping_method",
-              "label": "Versandart",
-              "type": "text"
-            },
-            {
-              "key": "payment_terms",
-              "label": "Zahlungsbedingung",
-              "type": "text"
-            },
-            {
-              "key": "delivery_address",
-              "label": "Lieferanschrift",
-              "type": "textarea"
-            },
-            {
-              "key": "notes",
-              "label": "Notizen",
-              "type": "textarea"
-            }
-          ]
-        }
-      ],
-      "creation": null
-    },
-    {
       "screen_id": "agrar/kontrakte",
       "missing_actions": [
         "bearbeiten"

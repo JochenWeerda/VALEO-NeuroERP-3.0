@@ -369,7 +369,7 @@ WORKSPACES["order-to-cash"] = _workspace(
     ["Innendienst", "Disposition", "Fakturierung"],
     [("Lieferantenvertrag_2024.pdf", "/dokumente/ablage"), ("SLA_TechLogistics.docx", "/dokumente/ablage")],
     [
-        ("Auftrag erfassen", "/sales/orders/new", "/api/v1/sales/orders"),
+        ("Auftrag erfassen", "/verkauf/auftraege/neu", "/api/v1/belege/sales_order"),
         ("Lieferscheine", "/sales/lieferungen", "/api/v1/sales-shipping/delivery-notes"),
         ("Rechnungsausgang", "/sales/rechnungen", "/api/v1/finance/invoices"),
     ],

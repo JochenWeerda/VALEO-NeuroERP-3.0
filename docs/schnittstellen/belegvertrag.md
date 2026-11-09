@@ -54,31 +54,6 @@ Fachliche Sonderteile, die eine Variante einhängt; sie gehören nicht zum Grund
 
 Je Beleg-ScreenDefinition: Feld im Reiter `kopf` und Spalte der Tabelle `positionen`.
 
-### `sales/sales-order`
-
-| Bereich | Bisher | Im Vertrag |
-|---|---|---|
-| kopf | `order_number` | `beleg_nr` |
-| kopf | `customer_name` | `partner.name` |
-| kopf | `customer_number` | `partner.nummer` |
-| kopf | `status` | `status` |
-| kopf | `currency` | `waehrung` |
-| kopf | `total_amount` | `summen.brutto` |
-| kopf | `subject` | `baustein:texte` |
-| kopf | `notes` | `baustein:texte` |
-| kopf | `delivery_date` | `baustein:lieferung` |
-| kopf | `shipping_method` | `baustein:lieferung` |
-| kopf | `delivery_address` | `baustein:lieferung` |
-| kopf | `contact_person` | `baustein:kontakt` |
-| kopf | `payment_terms` | `baustein:zahlung` |
-| positionen | `line_number` | `positionen[].pos_nr` |
-| positionen | `article_number` | `positionen[].artikel_nr` |
-| positionen | `description` | `positionen[].bezeichnung` |
-| positionen | `quantity` | `positionen[].menge` |
-| positionen | `discount_percent` | `positionen[].rabatt_prozent` |
-| positionen | `unit_price` | `positionen[].einzelpreis` |
-| positionen | `line_total` | `positionen[].netto` |
-
 ### `sales/delivery-note`
 
 | Bereich | Bisher | Im Vertrag |

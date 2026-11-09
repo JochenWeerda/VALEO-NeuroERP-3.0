@@ -1816,15 +1816,6 @@
         ]
       ]
     },
-    "sales/sales-order": {
-      "sales.order.update": [
-        [
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "schnittstelle/mde-inbox": {
       "mobile.sync.process": [
         [

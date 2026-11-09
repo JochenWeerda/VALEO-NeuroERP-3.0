@@ -5246,7 +5246,7 @@ Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. H
 
 ### `sales.order.status` — Auftragsstatus pruefen
 
-Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Masken-Route (/sales/order-editor/{id}, Screen sales/sales-order) eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich.
+Gibt Lifecycle-Status, offene Positionen, naechsten Schritt und kanonische Masken-Route (/belege/sales_order/{id}, Screen beleg/sales-order; Quelle DocFlow) eines Auftrags im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=sales.order.status, parameters.auftrag_nr (Auftragsnummer oder UUID). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit sales:read und tenant_id erforderlich.
 
 - **Scope:** `sales:read`
 - **Idempotent:** ja

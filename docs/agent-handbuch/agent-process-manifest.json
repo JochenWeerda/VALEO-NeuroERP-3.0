@@ -25319,42 +25319,6 @@
       ]
     },
     {
-      "mask_id": "sales/sales-order",
-      "title": "Verkaufsauftrag",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__sales-order/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/sales-order/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/sales-order/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/sales-order/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.order.update",
-          "commandEndpoint": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [
-        "einzelpreis",
-        "betrag"
-      ],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "verkauf/betriebsauftrag",
       "title": "Betriebsauftrag drucken",
       "domain": "sales",
@@ -27481,5 +27445,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 153
+  "event_count": 151
 }

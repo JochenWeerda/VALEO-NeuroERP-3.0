@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (783 Masken).
+> Generiert aus `app/core/screen_definitions.py` (782 Masken).
 
 ## Übersicht
 
@@ -697,7 +697,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
 | `sales/lieferung-storno` | Lieferung storno | sales | niedrig | — | `GET /api/v1/masks/sales/lieferung-storno/agent-contract` |
-| `sales/sales-order` | Verkaufsauftrag | sales | niedrig | — | `GET /api/v1/masks/sales/sales-order/agent-contract` |
 | `schaeden/liste` | Schadenmeldungen | finance | niedrig | — | `GET /api/v1/masks/schaeden/liste/agent-contract` |
 | `schaeden/meldung` | Schadensmeldungen | qualitaet | niedrig | — | `GET /api/v1/masks/schaeden/meldung/agent-contract` |
 | `schichtplan/liste` | Schichtplan | personal | niedrig | — | `GET /api/v1/masks/schichtplan/liste/agent-contract` |
@@ -25667,52 +25666,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `sales/sales-order` — Verkaufsauftrag
-
-**Zweck:** Verkaufsauftrag-Cockpit: Kopfdaten, Positionen, Lieferscheine und Dokumente fuer Auftragsabwicklung und Kundenkommunikation.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/sales-order/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/sales-order/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/sales-order/readiness` |
-| Rollout-Route | `/mask-rollout/sales__sales-order/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/sales/orders/{order_id}/screen-summary`
-
-**Data Sources:**
-
-- `entity` → `/api/v1/sales/orders/{entity_id}`
-- `positionen` → `/api/v1/sales/orders/{entity_id}/tabs/positionen`
-- `lieferung` → `/api/v1/sales/orders/{entity_id}/tabs/lieferung`
-- `dokumente` → `/api/v1/sales/orders/{entity_id}/tabs/dokumente`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Was ist der Status von Auftrag {entity_id} und welche Positionen sind noch offen?
-- Welche Lieferscheine wurden fuer Auftrag {entity_id} erstellt?
-- Zeige alle Dokumente von Auftrag {entity_id}.
-
-**Sensible Felder:** `einzelpreis, betrag`
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/sales/orders/{entity_id}/actions/bearbeiten` |
-
----
-
 ### `verkauf/betriebsauftrag` — Betriebsauftrag drucken
 
 **Zweck:** Betriebsauftraege zum Drucken aus den Verkaufsauftraegen heraussuchen.
@@ -25727,7 +25680,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/sales/orders/`
+- `list` → `/api/v1/belege/sales_order`
 
 **MCP-Tools (Domäne):**
 

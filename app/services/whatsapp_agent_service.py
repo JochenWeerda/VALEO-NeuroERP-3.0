@@ -207,7 +207,7 @@ def _create_order_in_erp(
     phone: str,
 ) -> dict:
     """
-    Legt den Auftrag im ERP an. In Produktion: POST /api/v1/sales/orders.
+    Legt den Auftrag im ERP an. In Produktion: DocFlow-Auftrag (Belegmaske sales_order).
     Im Simulator: In-Memory-Log.
     """
     order_id = f"WA-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}-{uuid.uuid4().hex[:6].upper()}"
