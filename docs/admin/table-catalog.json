@@ -14758,7 +14758,6 @@
             "app/api/v1/endpoints/sales_reports.py",
             "app/services/docflow_service.py",
             "app/services/ist_aggregation_service.py",
-            "app/services/mcp_execution_service.py",
             "app/services/procurement_service.py",
             "app/services/sales_match_service.py"
           ],

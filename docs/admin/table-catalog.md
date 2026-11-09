@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 704 Tabellen, 9336 Spalten.**
+**31 Schemas, 704 Tabellen, 9337 Spalten.**
 
 ## Schemas
 
@@ -30,7 +30,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_controlling` | `finance` | 9 | 88 |
 | `domain_crm` | `crm` | 48 | 858 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
-| `domain_docflow` | `dms-compliance` | 27 | 348 |
+| `domain_docflow` | `dms-compliance` | 27 | 349 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 21 | 393 |
 | `domain_erp` | `finance` | 46 | 601 |
@@ -224,7 +224,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.opportunity` | `app/services/crm_opportunity_reference.py` | — | — |
 | `domain_crm.partner_klaerfaelle` | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` | `app/api/v1/endpoints/crm_partner_klaerfaelle.py` | — |
 | `domain_crm.sales_offers` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/o2c_chain_service.py`, `app/services/sales_offer_import.py` | — | — |
-| `domain_crm.sales_order_items` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/mcp_execution_service.py`, `app/services/procurement_service.py`, `app/services/sales_match_service.py` | `app/api/v1/endpoints/sales_orders.py` | — |
+| `domain_crm.sales_order_items` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/procurement_service.py`, `app/services/sales_match_service.py` | `app/api/v1/endpoints/sales_orders.py` | — |
 | `domain_crm.sales_orders` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/credit_management.py`, `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/crm_kim.py`, `app/api/v1/endpoints/pick_lists.py`, `app/api/v1/endpoints/sales_order_commands.py`, `app/api/v1/endpoints/sales_orders.py`, `app/api/v1/endpoints/sales_reports.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/services/beleg_anlage.py`, `app/services/customer_reference.py`, `app/services/docflow_service.py`, `app/services/ist_aggregation_service.py`, `app/services/mcp_execution_service.py`, `app/services/o2c_chain_service.py`, `app/services/procurement_service.py`, `app/services/sales_credit_service.py`, `app/services/sales_match_service.py`, `app/services/sales_storno_service.py`, `app/services/webshop_integration_service.py` | `app/api/v1/endpoints/collective_documents.py`, `app/api/v1/endpoints/pick_lists.py`, `app/api/v1/endpoints/sales_delivery_notes.py`, `app/api/v1/endpoints/sales_order_commands.py`, `app/api/v1/endpoints/sales_orders.py` | `sales/delivery-note` |
 | `domain_crm.supplier_tax_profiles` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_docflow.approval_log` | `app/services/freigabe_engine.py` | `app/services/freigabe_engine.py` | — |
@@ -961,7 +961,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `document_command_log` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, command, actor, payload, logged_at |
 | `document_followups` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, art, betreff, text, faellig_am, status, erledigt_at, erledigt_von, created_at, created_by |
 | `document_header_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, created_at |
-| `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by |
+| `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by, bausteine |
 | `document_items` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit, unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, metadata, created_at, updated_at, tax_code, expense_account |
 | `document_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, from_item_id, to_item_id, quantity_linked, created_at |
 | `document_postings` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at |
