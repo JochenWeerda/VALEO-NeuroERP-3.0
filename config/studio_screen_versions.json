@@ -408,6 +408,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/terminologie": {
+      "definition_hash": "3dcf246b3f9b843e2e7a4dc9f3298d44a3df4d0b755ddc8ec9ca56f61c1cfd4c",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/token-consumption": {
       "definition_hash": "9e4d8cd2c0b45579190d8650f3351e7d05b7fdd6c765acd540ad77619080f8fd",
       "gates_passed": [

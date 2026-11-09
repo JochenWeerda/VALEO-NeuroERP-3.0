@@ -22183,6 +22183,50 @@
         "title": "Befundpruefung",
         "type": "object"
       },
+      "BegriffOut": {
+        "description": "Eine Zeile der Studio-Liste ``admin/terminologie`` (Listen flach, Synonyme als Text).",
+        "properties": {
+          "avoid_de": {
+            "title": "Avoid De",
+            "type": "string"
+          },
+          "canonical_de": {
+            "title": "Canonical De",
+            "type": "string"
+          },
+          "canonical_en": {
+            "title": "Canonical En",
+            "type": "string"
+          },
+          "description_de": {
+            "title": "Description De",
+            "type": "string"
+          },
+          "domain": {
+            "title": "Domain",
+            "type": "string"
+          },
+          "synonyms_de": {
+            "title": "Synonyms De",
+            "type": "string"
+          },
+          "term_key": {
+            "title": "Term Key",
+            "type": "string"
+          }
+        },
+        "required": [
+          "term_key",
+          "domain",
+          "canonical_de",
+          "canonical_en",
+          "description_de",
+          "synonyms_de",
+          "avoid_de"
+        ],
+        "title": "BegriffOut",
+        "type": "object"
+      },
       "Beleg": {
         "additionalProperties": false,
         "properties": {
@@ -413534,6 +413578,81 @@
         "tags": [
           "tenants",
           "tenants"
+        ]
+      }
+    },
+    "/api/v1/terminology/begriffe": {
+      "get": {
+        "operationId": "list_begriffe_api_v1_terminology_begriffe_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Domain"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BegriffOut"
+                  },
+                  "title": "Response List Begriffe Api V1 Terminology Begriffe Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Fachbegriffe flach (Studio-Liste Terminologie)",
+        "tags": [
+          "terminology",
+          "i18n"
         ]
       }
     },

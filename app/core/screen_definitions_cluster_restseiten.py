@@ -290,6 +290,20 @@ def build_agrar_wetterwarnung() -> dict[str, Any]:
     )
 
 
+def build_admin_terminologie() -> dict[str, Any]:
+    return _liste(
+        screen_id="admin/terminologie", domain="platform", bundle="admin", title="Terminologie",
+        subtitle="Landhandel-Fachbegriffe deutsch/englisch mit Synonymen und zu meidenden Woertern",
+        endpoint="/api/v1/terminology/begriffe",
+        columns=[text("canonical_de", "Begriff", "primary"), text("canonical_en", "Englisch", "primary"),
+                 text("domain", "Bereich"), text("description_de", "Bedeutung"), text("synonyms_de", "Synonyme"),
+                 text("avoid_de", "Vermeiden", "tertiary"), text("term_key", "Schlüssel", "tertiary")],
+        purpose="Nachschlagen, wie ein Fachbegriff im System heisst und welche Woerter zu meiden sind.",
+        prompts=["Wie heisst Settlement auf Deutsch?", "Welche Begriffe gehoeren zur Finanzbuchhaltung?"],
+        no_workflow="Nachschlageliste; gepflegt im Code (app/core/terminology_registry.py).",
+    )
+
+
 CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "nawaro/raps-profil": build_nawaro_raps_profile,
     "schichtplan/liste": build_schichtplan_liste,
@@ -304,4 +318,5 @@ CLUSTER_RESTSEITEN_SCREEN_BUILDERS: dict[str, Any] = {
     "admin/webshop": build_admin_webshop,
     "admin/webshop-bestellungen": build_admin_webshop_bestellungen,
     "agrar/wetterwarnung": build_agrar_wetterwarnung,
+    "admin/terminologie": build_admin_terminologie,
 }

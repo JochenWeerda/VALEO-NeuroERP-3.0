@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (781 Masken).
+> Generiert aus `app/core/screen_definitions.py` (782 Masken).
 
 ## Übersicht
 
@@ -54,6 +54,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
 | `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
+| `admin/terminologie` | Terminologie | platform | niedrig | — | `GET /api/v1/masks/admin/terminologie/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
 | `admin/users` | Users | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
 | `admin/webhooks-liste` | Webhook-Verwaltung | admin | mittel | — | `GET /api/v1/masks/admin/webhooks-liste/agent-contract` |
@@ -22440,6 +22441,39 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `anlegen` | Berechtigung anlegen | moderate | nein | `/api/v1/admin/report-permissions/actions/anlegen` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin/terminologie` — Terminologie
+
+**Zweck:** Nachschlagen, wie ein Fachbegriff im System heisst und welche Woerter zu meiden sind.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/terminologie/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/terminologie/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/terminologie/readiness` |
+| Rollout-Route | `/mask-rollout/admin__terminologie/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/terminology/begriffe`
+
+**MCP-Tools (Domäne):**
+
+- `admin.postfach.speichern` — scope `admin:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Wie heisst Settlement auf Deutsch?
+- Welche Begriffe gehoeren zur Finanzbuchhaltung?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---

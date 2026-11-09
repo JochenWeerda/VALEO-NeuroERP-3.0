@@ -26,6 +26,7 @@
     "admin/system-einstellungen": "/admin/system-einstellungen",
     "admin/tankstelle-evb": "/admin/tankstelle-evb",
     "admin/tenants": "/admin/tenants",
+    "admin/terminologie": "/admin/terminologie",
     "admin/users": "/admin/users",
     "admin/webshop": "/admin/webshop",
     "admin/webshop-bestellungen": "/admin/webshop/bestellungen",

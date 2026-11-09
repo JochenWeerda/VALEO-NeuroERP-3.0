@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 798,
-    "screens_with_actions": 404,
+    "actions": 799,
+    "screens_with_actions": 405,
     "domains": 50
   },
   "actions": [
@@ -681,6 +681,27 @@
       "required_data": [],
       "source": {
         "screenId": "admin/report-berechtigungen",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/terminologie:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/terminologie)",
+      "category": "mask-action",
+      "domain": "platform",
+      "mask": "admin/terminologie",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/terminologie",
         "actionKey": "export",
         "commandEndpoint": null,
         "navigationRoute": null,

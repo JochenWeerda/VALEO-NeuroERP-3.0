@@ -22170,6 +22170,34 @@
       ]
     },
     {
+      "mask_id": "admin/terminologie",
+      "title": "Terminologie",
+      "domain": "platform",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__terminologie/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/terminologie/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/terminologie/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/terminologie/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "export",
+          "label": "CSV-Export",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": null,
+          "commandEndpoint": null,
+          "method": null,
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "admin.postfach.speichern"
+      ]
+    },
+    {
       "mask_id": "admin/token-consumption",
       "title": "Technisches Verbrauchsnebenbuch",
       "domain": "platform",
