@@ -5017,7 +5017,7 @@
    },
    "dataSources": [
     {
-     "endpoint": "/api/v1/sales/orders/",
+     "endpoint": "/api/v1/belege/sales_order",
      "key": "list",
      "pageSize": 50
     }
@@ -5072,19 +5072,19 @@
      "columns": [
       {
        "filterable": true,
-       "key": "order_number",
+       "key": "beleg_nr",
        "label": "Auftrag-Nr.",
        "sortable": true,
        "width": 140
       },
       {
-       "key": "subject",
-       "label": "Betreff",
+       "key": "partner_name",
+       "label": "Kunde",
        "width": 200
       },
       {
-       "key": "delivery_date",
-       "label": "gepl. Lieferdatum",
+       "key": "belegdatum",
+       "label": "Belegdatum",
        "renderKind": "date",
        "sortable": true,
        "width": 150
@@ -5097,7 +5097,7 @@
        "width": 120
       },
       {
-       "key": "total_amount",
+       "key": "brutto",
        "label": "Betrag",
        "numeric": true,
        "renderKind": "currency",

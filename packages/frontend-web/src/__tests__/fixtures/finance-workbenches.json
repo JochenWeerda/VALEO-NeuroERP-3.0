@@ -232,7 +232,7 @@
           {
             "key": "auftrag",
             "label": "Auftrag",
-            "screenId": "sales/sales-order",
+            "screenId": "beleg-liste/sales-order",
             "routePath": "/verkauf/auftraege"
           },
           {
@@ -627,7 +627,7 @@
           {
             "key": "auftrag",
             "label": "Auftrag",
-            "screenId": "sales/sales-order",
+            "screenId": "beleg-liste/sales-order",
             "routePath": "/verkauf/auftraege"
           },
           {

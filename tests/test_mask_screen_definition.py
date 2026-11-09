@@ -16,13 +16,12 @@ def test_get_crm_customer_360_screen_definition() -> None:
     assert definition["performance"]["lookupMinChars"] >= 2
 
 
-def test_get_sales_order_screen_definition() -> None:
-    definition = get_screen_definition("sales/sales-order")
-
-    assert definition is not None
-    assert definition["id"] == "sales/sales-order"
-    assert definition["adapter"]["temporary"] is False
-    assert definition["performance"]["requiresLazyTabs"] is True
+def test_auftrag_hat_nur_noch_die_belegliste() -> None:
+    """BELEG-052: sales/sales-order (domain_crm.sales_orders) ist entfernt; Auftraege fuehrt die Belegliste."""
+    assert get_screen_definition("sales/sales-order") is None
+    liste = get_screen_definition("beleg-liste/sales-order")
+    assert liste is not None
+    assert all(q["endpoint"].startswith("/api/v1/belege/sales_order") for q in liste["dataSources"])
 
 
 def test_get_agrar_kontrakt_screen_definition() -> None:

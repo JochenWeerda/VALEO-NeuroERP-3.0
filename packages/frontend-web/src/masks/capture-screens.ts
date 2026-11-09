@@ -483,7 +483,7 @@ export const betriebsauftragScreen = {
   "dataSources": [
     {
       "key": "list",
-      "endpoint": "/api/v1/sales/orders/",
+      "endpoint": "/api/v1/belege/sales_order",
       "pageSize": 50
     }
   ],
@@ -520,20 +520,20 @@ export const betriebsauftragScreen = {
       "rowHeight": 36,
       "columns": [
         {
-          "key": "order_number",
+          "key": "beleg_nr",
           "label": "Auftrag-Nr.",
           "sortable": true,
           "filterable": true,
           "width": 140
         },
         {
-          "key": "subject",
-          "label": "Betreff",
+          "key": "partner_name",
+          "label": "Kunde",
           "width": 200
         },
         {
-          "key": "delivery_date",
-          "label": "gepl. Lieferdatum",
+          "key": "belegdatum",
+          "label": "Belegdatum",
           "renderKind": "date",
           "sortable": true,
           "width": 150
@@ -546,7 +546,7 @@ export const betriebsauftragScreen = {
           "width": 120
         },
         {
-          "key": "total_amount",
+          "key": "brutto",
           "label": "Betrag",
           "numeric": true,
           "renderKind": "currency",

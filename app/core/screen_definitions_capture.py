@@ -296,7 +296,8 @@ def build_verkauf_betriebsauftrag_screen_definition() -> dict[str, Any]:
         "subtitle": "Verkaufsaufträge",
         "adapter": {"type": "native", "sourceId": "verkauf/betriebsauftrag", "temporary": False},
         "dataSources": [
-            {"key": "list", "endpoint": "/api/v1/sales/orders/", "pageSize": 50},
+            # BELEG-052: Auftraege stehen nur noch in DocFlow; die Belegliste ist ihr Leseweg.
+            {"key": "list", "endpoint": "/api/v1/belege/sales_order", "pageSize": 50},
         ],
         "fields": [
             {"key": "auftrag_nr_von", "label": "Auftrag-Nr. von", "type": "text"},
@@ -314,11 +315,11 @@ def build_verkauf_betriebsauftrag_screen_definition() -> dict[str, Any]:
                 "virtualized": True,
                 "rowHeight": 36,
                 "columns": [
-                    {"key": "order_number", "label": "Auftrag-Nr.", "sortable": True, "filterable": True, "width": 140},
-                    {"key": "subject", "label": "Betreff", "width": 200},
-                    {"key": "delivery_date", "label": "gepl. Lieferdatum", "renderKind": "date", "sortable": True, "width": 150},
+                    {"key": "beleg_nr", "label": "Auftrag-Nr.", "sortable": True, "filterable": True, "width": 140},
+                    {"key": "partner_name", "label": "Kunde", "width": 200},
+                    {"key": "belegdatum", "label": "Belegdatum", "renderKind": "date", "sortable": True, "width": 150},
                     {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "width": 120},
-                    {"key": "total_amount", "label": "Betrag", "numeric": True, "renderKind": "currency", "width": 120},
+                    {"key": "brutto", "label": "Betrag", "numeric": True, "renderKind": "currency", "width": 120},
                 ],
             },
         ],

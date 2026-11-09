@@ -601,151 +601,6 @@ def _partnerstamm_pflege(definition: dict[str, Any]) -> None:
             ]
 
 
-def build_sales_order_screen_definition() -> dict[str, Any]:
-    definition = {
-        "schemaVersion": 1,
-        "id": "sales/sales-order",
-        "domain": "sales",
-        "mode": "detail",
-        "title": "Verkaufsauftrag",
-        "subtitle": "Verkauf / Auftrag",
-        "identityField": "order_number",
-        "adapter": {
-            "type": "native",
-            "sourceId": "sales/sales-order",
-            "temporary": False,
-        },
-        "summaryEndpoint": "/api/v1/sales/orders/{order_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity",    "endpoint": "/api/v1/sales/orders/{entity_id}"},
-            {"key": "positionen","endpoint": "/api/v1/sales/orders/{entity_id}/tabs/positionen", "pageSize": 50},
-            {"key": "lieferung", "endpoint": "/api/v1/sales/orders/{entity_id}/tabs/lieferung",  "pageSize": 25},
-            {"key": "dokumente", "endpoint": "/api/v1/sales/orders/{entity_id}/tabs/dokumente",  "pageSize": 25},
-        ],
-        "tabs": [
-            {
-                # Schluessel wie im Auftrags-Endpunkt (`SalesOrder`). Vorher war
-                # das Register leer; auf der durchgehenden Belegseite stuende
-                # sonst ein leerer Abschnitt ganz oben.
-                "key": "kopf", "label": "Kopfdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "order_number", "label": "Auftrags-Nr.", "type": "text", "readOnly": True},
-                    # Name statt Partner-ID: die ID ist ein interner Schluessel.
-                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
-                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
-                    {"key": "subject", "label": "Betreff", "type": "text", "readOnly": True},
-                    {"key": "status", "label": "Status", "type": "select", "readOnly": True,
-                     "options": [
-                         {"value": "open", "label": "Offen"},
-                         {"value": "confirmed", "label": "Bestaetigt"},
-                         {"value": "in_delivery", "label": "In Lieferung"},
-                         {"value": "completed", "label": "Abgeschlossen"},
-                         {"value": "cancelled", "label": "Storniert"},
-                     ]},
-                    {"key": "delivery_date", "label": "Liefertermin", "type": "date", "readOnly": True},
-                    {"key": "contact_person", "label": "Ansprechpartner", "type": "text", "readOnly": True},
-                    {"key": "shipping_method", "label": "Versandart", "type": "text", "readOnly": True},
-                    {"key": "payment_terms", "label": "Zahlungsbedingung", "type": "text", "readOnly": True},
-                    {"key": "total_amount", "label": "Auftragswert", "type": "currency", "readOnly": True},
-                    {"key": "currency", "label": "Waehrung", "type": "text", "readOnly": True},
-                    {"key": "delivery_address", "label": "Lieferadresse", "type": "textarea", "readOnly": True},
-                    {"key": "notes", "label": "Notiz", "type": "textarea", "readOnly": True},
-                ],
-            },
-            {
-                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": True,
-                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "line_number", "label": "Pos.", "width": 50},
-                                {"key": "article_number", "label": "Artikel-Nr.", "width": 120},
-                                {"key": "description", "label": "Bezeichnung", "width": 220, "filterable": True},
-                                {"key": "quantity", "label": "Menge", "numeric": True},
-                                {"key": "discount_percent", "label": "Rabatt %", "numeric": True, "width": 90},
-                                {"key": "unit_price", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
-                                {"key": "line_total", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
-                            ]}],
-            },
-            {
-                "key": "lieferung", "label": "Lieferung", "lazy": True, "keepAlive": True,
-                "tables": [{"key": "lieferung", "label": "Lieferscheine", "dataSourceKey": "lieferung",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "delivery_note_number", "label": "LS-Nr.", "width": 130, "sortable": True},
-                                {"key": "delivery_date", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "status", "label": "Status", "renderKind": "status", "width": 100, "filterable": True},
-                                # Eine Menge fuehrt der Lieferscheinkopf nicht — sie haengt
-                                # an den Positionen. Die Spalte blieb leer und sah aus wie
-                                # "nichts geliefert". Was der Kopf weiss: ob zugestellt ist
-                                # und unter welcher Rechnung er berechnet wurde.
-                                {"key": "is_delivered", "label": "Zugestellt", "renderKind": "boolean", "width": 100},
-                                {"key": "invoice_number", "label": "Rechnungsnr.", "width": 130},
-                            ]}],
-            },
-            {
-                "key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": True,
-                "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "beleg_datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "beleg_nr", "label": "Beleg", "width": 140, "filterable": True},
-                                {"key": "status", "label": "Status", "renderKind": "status", "width": 110, "filterable": True},
-                                {"key": "invoice_number", "label": "Rechnungsnr.", "width": 140},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "sales.order.update"},
-        ],
-        "noWorkflowReason": "Verkaufsauftrag-Status wird durch Liefer- und Rechnungsfortschritt automatisch gesetzt — kein deklarativer Prozess-Workflow.",
-        "agentContract": {
-            "businessPurpose": "Verkaufsauftrag-Cockpit: Kopfdaten, Positionen, Lieferscheine und Dokumente fuer Auftragsabwicklung und Kundenkommunikation.",
-            "examplePrompts": [
-                "Was ist der Status von Auftrag {entity_id} und welche Positionen sind noch offen?",
-                "Welche Lieferscheine wurden fuer Auftrag {entity_id} erstellt?",
-                "Zeige alle Dokumente von Auftrag {entity_id}.",
-            ],
-            "sensitiveFields": ["einzelpreis", "betrag"],
-            "testSelectors": {"screenRoot": "[data-testid='sales-sales-order']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-            "floorplan": "objectPage",
-            "columnNavigation": "single",
-            "sectionNavigation": "anchors",
-        },
-        "performance": {
-            "initialPayloadBudgetKb": 56,
-            "requiresLazyTabs": True,
-            "requiresVirtualTables": True,
-            "lookupMinChars": 2,
-            "bundleGroup": "sales",
-        },
-    }
-    # Preserve the existing domain transports and policies inside the new parent shell.
-    definition["actions"] = [{'key': 'bearbeiten',
-      'label': 'Bearbeiten',
-      'kind': 'secondary',
-      'dangerLevel': 'safe',
-      'permission': 'sales.order.update',
-      'commandEndpoint': '/api/v1/sales/orders/{entity_id}/actions/bearbeiten',
-      'method': 'POST',
-      'inputFields': [{'key': 'subject', 'label': 'Betreff', 'type': 'text'},
-                      {'key': 'delivery_date', 'label': 'Liefertermin', 'type': 'date'},
-                      {'key': 'contact_person', 'label': 'Ansprechpartner', 'type': 'text'},
-                      {'key': 'shipping_method', 'label': 'Versandart', 'type': 'text'},
-                      {'key': 'payment_terms', 'label': 'Zahlungsbedingung', 'type': 'text'},
-                      {'key': 'delivery_address', 'label': 'Lieferanschrift', 'type': 'textarea'},
-                      {'key': 'notes', 'label': 'Notizen', 'type': 'textarea'}]}]
-    if not any(action.get("kind") == "primary" for action in definition["actions"]):
-        edit = next(action for action in definition["actions"] if action["key"] == "bearbeiten")
-        edit["kind"] = "primary"
-        definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
-    return definition
-
-
 def build_agrar_kontrakt_screen_definition() -> dict[str, Any]:
     definition = {
         "schemaVersion": 1,
@@ -5276,7 +5131,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "agrar/feed-controlling": build_agrar_feed_controlling_screen_definition,
     "agrar/feeding-actuals": build_agrar_feeding_actuals_screen_definition,
     "agrar/ration": build_agrar_ration_detail_screen_definition,
-    "sales/sales-order": build_sales_order_screen_definition,
     "agrar/kontrakte": build_agrar_kontrakt_screen_definition,
     "einkauf/supplier": build_supplier_screen_definition,
     "crm/opportunity": build_crm_opportunity_screen_definition,
@@ -5957,7 +5811,6 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "logistik/versandprofile": ["versandprofil", "lieferavis", "versandart"],
     "logistik/frachtbrief": ["frachtbrief", "frachtbriefe", "transportbeleg"],
     "logistik/verladung": ["verladung", "beladung", "lkw beladung"],
-    "sales/sales-order": ["verkaufsauftrag", "auftrag", "kundenauftrag"],
     "workspace/einkauf": ["einkauf cockpit", "einkauf startseite", "beschaffung workspace"],
     "workspace/verkauf": ["verkauf cockpit", "vertrieb startseite", "sales workspace"],
     "workspace/lager": ["lager cockpit", "annahme startseite", "lager workspace"],
@@ -6099,7 +5952,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "logistik/tour-fracht-arbeitsraum": "/logistik/tour-fracht-arbeitsraum",
     "logistik/frachttabellen": "/logistik/frachttabellen",
     "logistik/versandprofile": "/logistik/versandprofile",
-    "sales/sales-order": "/verkauf/auftraege",
     "workspace/einkauf": "/workspace/einkauf",
     "workspace/verkauf": "/workspace/verkauf",
     "workspace/lager": "/workspace/lager",

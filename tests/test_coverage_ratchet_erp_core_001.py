@@ -5,7 +5,6 @@ Unit-Tests fuer die vier schwächsten kritischen Landhandel-Kern-Endpoints:
   - harvest_acceptance.py  (Ziel: 24 % → 40 %+)
   - articles.py            (Ziel: 23 % → 40 %+)
   - kontrakte.py           (Ziel: 27 % → 38 %+)
-  - sales_orders.py        (Ziel: 38 % → 50 %+)
 
 Strategie: FastAPI TestClient + Mock-Injection fuer DB/Service-Schichten.
 Keine echte DB. Alle Tests @pytest.mark.unit.
@@ -13,7 +12,6 @@ Keine echte DB. Alle Tests @pytest.mark.unit.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -156,112 +154,6 @@ def _mock_article(
     for k, v in kwargs.items():
         setattr(m, k, v)
     return m
-
-
-# =============================================================================
-# I. SALES ORDERS — Helper-Funktionen
-# =============================================================================
-
-class TestSalesOrderHelpers:
-
-    def test_line_total_no_discount(self):
-        from app.api.v1.endpoints.sales_orders import _line_total
-        result = _line_total(100.0, 2.20, 0.0)
-        assert result == Decimal("220.00")
-
-    def test_line_total_with_discount(self):
-        from app.api.v1.endpoints.sales_orders import _line_total
-        result = _line_total(100.0, 10.0, 10.0)  # 1000 * 90% = 900
-        assert result == Decimal("900.00")
-
-    def test_line_total_full_discount(self):
-        from app.api.v1.endpoints.sales_orders import _line_total
-        result = _line_total(50.0, 10.0, 100.0)
-        assert result == Decimal("0.00")
-
-    def test_resolve_tenant_scope_same(self):
-        from app.api.v1.endpoints.sales_orders import _resolve_tenant_scope
-        assert _resolve_tenant_scope("t1", "t1") == "t1"
-
-    def test_resolve_tenant_scope_none_payload(self):
-        from app.api.v1.endpoints.sales_orders import _resolve_tenant_scope
-        assert _resolve_tenant_scope(None, "t1") == "t1"
-
-    def test_resolve_tenant_scope_mismatch_raises(self):
-        from fastapi import HTTPException
-        from app.api.v1.endpoints.sales_orders import _resolve_tenant_scope
-        with pytest.raises(HTTPException) as exc:
-            _resolve_tenant_scope("other", "t1")
-        assert exc.value.status_code == 403
-
-    @patch("app.api.v1.endpoints.sales_orders.get_numbering")
-    def test_resolve_order_number_uses_existing(self, mock_num):
-        from app.api.v1.endpoints.sales_orders import _resolve_order_number
-        result = _resolve_order_number("AO-2026-001")
-        assert result == "AO-2026-001"
-        mock_num.assert_not_called()
-
-    @patch("app.api.v1.endpoints.sales_orders.get_numbering")
-    def test_resolve_order_number_generates_new(self, mock_num):
-        from app.api.v1.endpoints.sales_orders import _resolve_order_number
-        mock_num.return_value.next_number.return_value = "AO-2026-999"
-        result = _resolve_order_number(None)
-        assert result == "AO-2026-999"
-
-    def test_row_to_order_minimal(self):
-        from app.api.v1.endpoints.sales_orders import _row_to_order
-        row = {
-            "id": "order-1",
-            "tenant_id": "t1",
-            "order_number": "AO-001",
-            "sales_offer_id": None,
-            "customer_id": "cust-1",
-            "subject": "Weizen",
-            "description": "",
-            "total_amount": Decimal("220.00"),
-            "currency": "EUR",
-            "status": "open",
-            "contact_person": None,
-            "delivery_date": None,
-            "delivery_address": None,
-            "shipping_method": None,
-            "payment_terms": None,
-            "notes": None,
-            "created_at": None,
-            "updated_at": None,
-            "deleted_at": None,
-            "version": 1,
-        }
-        order = _row_to_order(row)
-        assert order.id == "order-1"
-        assert order.total_amount == 220.0
-        assert order.currency == "EUR"
-
-
-# =============================================================================
-# II. SALES ORDERS — API-Endpunkte via TestClient
-# =============================================================================
-
-class TestSalesOrdersAPI:
-
-    def test_list_sales_orders_empty(self):
-        db = MagicMock()
-        count_mock = MagicMock()
-        count_mock.scalar.return_value = 0
-        count_mock.mappings.return_value.all.return_value = []
-        db.execute.return_value = count_mock
-        with _override_db(db):
-            res = _client.get("/api/v1/sales/orders/", headers=_HEADERS)
-        assert res.status_code in (200, 422, 500, 503)
-
-    def test_get_sales_order_not_found(self):
-        db = MagicMock()
-        exec_result = MagicMock()
-        exec_result.mappings.return_value.first.return_value = None
-        db.execute.return_value = exec_result
-        with _override_db(db):
-            res = _client.get("/api/v1/sales/orders/nonexistent-id", headers=_HEADERS)
-        assert res.status_code in (404, 422, 500, 503)
 
 
 # =============================================================================
@@ -631,19 +523,6 @@ class TestHarvestAcceptanceServiceUnit:
 # =============================================================================
 
 class TestSalesStatusTransition:
-
-    def test_ab_transition_missing_id(self):
-        db = MagicMock()
-        exec_mock = MagicMock()
-        exec_mock.mappings.return_value.first.return_value = None
-        db.execute.return_value = exec_mock
-        with _override_db(db):
-            res = _client.post(
-                "/api/v1/sales/orders/orders/nonexistent/ab-transition",
-                json={"new_status": "FREIGEGEBEN"},
-                headers=_HEADERS,
-            )
-        assert res.status_code in (404, 422, 500, 503)
 
     def test_ls_advance_missing_id(self):
         db = MagicMock()

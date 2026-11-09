@@ -67,7 +67,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/kontrakte.py": 0.27,          #  28.5% measured  (+5pp)
     "api/v1/endpoints/harvest_acceptance.py": 0.28,  #  COV-RATCHET-002: +4pp (Agrar-Kern)
     "api/v1/endpoints/articles.py": 0.23,           #  23.7% measured  (+5pp)
-    "api/v1/endpoints/sales_orders.py": 0.38,       #  39.8% measured  (+6pp)
     "api/v1/endpoints/ap_invoices.py": 0.42,        #  43.6% measured  (+7pp)
 
     # ── Agrar-Differenziator ──────────────────────────────────────────────────

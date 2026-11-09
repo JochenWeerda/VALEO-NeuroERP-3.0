@@ -276,7 +276,6 @@ def test_auftragsbestaetigung_pruefen_und_bestaetigen(client, engine):
 # --------------------------------------------------------------------------- Deklaration
 
 ERWARTET = {
-    "sales/sales-order": "/api/v1/sales/orders/{entity_id}/actions/bearbeiten",
     "agrar/kontrakte": "/api/v1/kontrakte/{entity_id}/actions/bearbeiten",
     "crm/opportunity": "/api/v1/crm/opportunities/{entity_id}/actions/bearbeiten",
     "crm/lead": "/api/v1/crm/leads/{entity_id}/actions/bearbeiten",
