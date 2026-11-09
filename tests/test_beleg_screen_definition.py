@@ -100,7 +100,10 @@ def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     assert versand["commandEndpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/actions/versenden"
     assert versand["permission"] == "belege.ausstellen" and versand["forbiddenForAgents"] is True
     assert druck["download"]["endpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/druck"
-    assert "commandEndpoint" not in druck and druck["permission"] == "belege.lesen"
+    # Druckvermerk (GoBD): erst das Kommando (zaehlt, Nachdruck mit Begruendung), dann das PDF.
+    assert druck["commandEndpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/actions/drucken"
+    assert druck["permission"] == "belege.bearbeiten" and druck["kommando"] == "docflow.record_print"
+    assert druck["enabledWhen"] == sdb.zustandsfeld("drucken")
     aktionen = alle
     erwartet = {"bearbeiten", "freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
     if belegart == "sales_order":

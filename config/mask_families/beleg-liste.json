@@ -14,18 +14,33 @@
         "schemaVersion": 1
       },
       "hash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429"
+    },
+    "1.1.0": {
+      "definition": {
+        "mode": "list",
+        "noWorkflowReason": "Belegliste; Freigeben, Umwandeln, Buchen und Stornieren laufen in der Belegmaske je Beleg.",
+        "performance": {
+          "bundleGroup": "belege",
+          "initialPayloadBudgetKb": 60,
+          "lookupMinChars": 2,
+          "requiresLazyTabs": false,
+          "requiresVirtualTables": true
+        },
+        "schemaVersion": 1
+      },
+      "hash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429"
     }
   },
   "current": {
-    "goods_receipt": "1.0.0",
-    "purchase_credit_memo": "1.0.0",
-    "purchase_invoice": "1.0.0",
-    "purchase_order": "1.0.0",
-    "sales_credit_memo": "1.0.0",
-    "sales_delivery": "1.0.0",
-    "sales_invoice": "1.0.0",
-    "sales_offer": "1.0.0",
-    "sales_order": "1.0.0"
+    "goods_receipt": "1.1.0",
+    "purchase_credit_memo": "1.1.0",
+    "purchase_invoice": "1.1.0",
+    "purchase_order": "1.1.0",
+    "sales_credit_memo": "1.1.0",
+    "sales_delivery": "1.1.0",
+    "sales_invoice": "1.1.0",
+    "sales_offer": "1.1.0",
+    "sales_order": "1.1.0"
   },
   "family": "beleg-liste",
   "schemaVersion": 1,
@@ -346,6 +361,330 @@
           }
         },
         "patchHash": "0770a43f25b1d43651f352a4f250cba8d3d86e75b0414b2a97d235208d19f2af"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "387b701e3903994f4c2c4d7bed354f74e90d6c5770f754fb28b11edb805e1f31",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Wareneingang anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/goods_receipt/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_order",
+              "kind": "secondary",
+              "label": "Bestellungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_order",
+              "stubReason": "Wechselt zur Belegliste Bestellungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_invoice",
+              "kind": "secondary",
+              "label": "Eingangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_invoice",
+              "stubReason": "Wechselt zur Belegliste Eingangsrechnungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_credit_memo",
+              "kind": "secondary",
+              "label": "Einkaufsgutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/goods-receipt",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Wareneingänge finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Wareneingänge sind noch im Entwurf?",
+              "Zeige die Wareneingänge von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/goods-receipt']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/goods_receipt",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg-liste/goods-receipt",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "inventory",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Wareneingänge"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Wareneingänge_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Wareneingänge in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Wareneingänge in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "purchasing",
+                  "label": "Einkauf"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "warehouse",
+                  "label": "Lager"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Wareneingänge aus DocFlow mit Stand",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Wareneingänge",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/goods_receipt/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Wareneingänge",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "goods_receipt"
+          }
+        },
+        "patchHash": "641bc61633c71dd4124408c0bb08bda7687e9fee86c2e0d80be4981d11eb871b"
       }
     },
     "purchase_credit_memo": {
@@ -717,6 +1056,383 @@
           }
         },
         "patchHash": "80cde883330926a923a2c4516938f9dfb4f2c6e9927b888df76c3e8c2a218d0f"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "fd5298ad9a3d2f404f7eaf2fb5642f405bdd9d8f94ab14ccc8644bbb8a04c481",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Einkaufsgutschrift anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_credit_memo/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_order",
+              "kind": "secondary",
+              "label": "Bestellungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_order",
+              "stubReason": "Wechselt zur Belegliste Bestellungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_goods_receipt",
+              "kind": "secondary",
+              "label": "Wareneingänge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/goods_receipt",
+              "stubReason": "Wechselt zur Belegliste Wareneingänge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_invoice",
+              "kind": "secondary",
+              "label": "Eingangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_invoice",
+              "stubReason": "Wechselt zur Belegliste Eingangsrechnungen.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/purchase-credit-memo",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Einkaufsgutschriften finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Einkaufsgutschriften sind noch im Entwurf?",
+              "Zeige die Einkaufsgutschriften von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/purchase-credit-memo']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_credit_memo",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg-liste/purchase-credit-memo",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Einkaufsgutschriften"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Einkaufsgutschriften_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Einkaufsgutschriften in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Einkaufsgutschriften in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "purchasing",
+                  "label": "Einkauf"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "warehouse",
+                  "label": "Lager"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Einkaufsgutschriften aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum",
+                  "priority": "tertiary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Einkaufsgutschriften",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/purchase_credit_memo/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Einkaufsgutschriften",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "purchase_credit_memo"
+          }
+        },
+        "patchHash": "12aa098941b91ea3c5c493e986481c9119608398a628a570351e5f0179cc8795"
       }
     },
     "purchase_invoice": {
@@ -1088,6 +1804,383 @@
           }
         },
         "patchHash": "99edea4c1ecde3365991a7e89653c9277b4a027768cc9d7fa019ee0618138cf0"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "8fb42394d6c685c9c96de2c9510d0d43e75b4adcd27e0de1cfffa8b9ea9a407b",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Eingangsrechnung anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_invoice/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_order",
+              "kind": "secondary",
+              "label": "Bestellungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_order",
+              "stubReason": "Wechselt zur Belegliste Bestellungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_goods_receipt",
+              "kind": "secondary",
+              "label": "Wareneingänge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/goods_receipt",
+              "stubReason": "Wechselt zur Belegliste Wareneingänge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_credit_memo",
+              "kind": "secondary",
+              "label": "Einkaufsgutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/purchase-invoice",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Eingangsrechnungen finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Eingangsrechnungen sind noch im Entwurf?",
+              "Zeige die Eingangsrechnungen von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/purchase-invoice']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_invoice",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg-liste/purchase-invoice",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Eingangsrechnungen"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Eingangsrechnungen_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Eingangsrechnungen in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Eingangsrechnungen in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "purchasing",
+                  "label": "Einkauf"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "warehouse",
+                  "label": "Lager"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Eingangsrechnungen aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum",
+                  "priority": "tertiary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Eingangsrechnungen",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/purchase_invoice/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Eingangsrechnungen",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "purchase_invoice"
+          }
+        },
+        "patchHash": "420d940fa9df60038dd08039f6212e46afd45f217f28b50a9d8d3b9f39398f2f"
       }
     },
     "purchase_order": {
@@ -1448,6 +2541,372 @@
           }
         },
         "patchHash": "059b9548909a413186819f599715409d59726d1bf0b06e68e3f99c7846968e59"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "b6dee9ed2a26aefef0841d205746e91667da4191b57939095c278c263234fabc",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Bestellung anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_order/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_goods_receipt",
+              "kind": "secondary",
+              "label": "Wareneingänge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/goods_receipt",
+              "stubReason": "Wechselt zur Belegliste Wareneingänge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_invoice",
+              "kind": "secondary",
+              "label": "Eingangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_invoice",
+              "stubReason": "Wechselt zur Belegliste Eingangsrechnungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_purchase_credit_memo",
+              "kind": "secondary",
+              "label": "Einkaufsgutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/purchase_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Einkaufsgutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/purchase-order",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Bestellungen finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Bestellungen sind noch im Entwurf?",
+              "Zeige die Bestellungen von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/purchase-order']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/purchase_order",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "einkauf",
+          "id": "beleg-liste/purchase-order",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Bestellungen"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Lieferant"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Bestellungen_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Bestellungen in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Bestellungen in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "purchasing",
+                  "label": "Einkauf"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "warehouse",
+                  "label": "Lager"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Bestellungen aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Lieferant",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Lieferant-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Bestellungen",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/purchase_order/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Bestellungen",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "purchase_order"
+          }
+        },
+        "patchHash": "fbf55d51380c344865402b6aabab581513e129b3fc8ed5166ac4a156c3ed3180"
       }
     },
     "sales_credit_memo": {
@@ -1836,6 +3295,400 @@
           }
         },
         "patchHash": "63d48ef3f21b2a17376174d8d649c7f0400f0a73eb437565ca4270012a0a7b45"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "d4ac4820e6ecdc216d7112725da609e80355eef3357c76a47a072f6755a6bce3",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Gutschrift anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_credit_memo/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_offer",
+              "kind": "secondary",
+              "label": "Angebote",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_offer",
+              "stubReason": "Wechselt zur Belegliste Angebote.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_order",
+              "kind": "secondary",
+              "label": "Aufträge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_order",
+              "stubReason": "Wechselt zur Belegliste Aufträge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_delivery",
+              "kind": "secondary",
+              "label": "Lieferscheine",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_delivery",
+              "stubReason": "Wechselt zur Belegliste Lieferscheine.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_invoice",
+              "kind": "secondary",
+              "label": "Ausgangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_invoice",
+              "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/sales-credit-memo",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Gutschriften finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Gutschriften sind noch im Entwurf?",
+              "Zeige die Gutschriften von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/sales-credit-memo']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_credit_memo",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg-liste/sales-credit-memo",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Gutschriften"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Gutschriften_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Gutschriften in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Gutschriften in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "sales",
+                  "label": "Vertrieb"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "inside-sales",
+                  "label": "Innendienst"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "order-desk",
+                  "label": "Auftragsabwicklung"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Gutschriften aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum",
+                  "priority": "tertiary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Gutschriften",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/sales_credit_memo/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Gutschriften",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "sales_credit_memo"
+          }
+        },
+        "patchHash": "0faa4d28b12d01b9962ac35d77ed6d937c7ad0af0fc960bda782c69cf4cf49ea"
       }
     },
     "sales_delivery": {
@@ -2171,6 +4024,347 @@
           }
         },
         "patchHash": "e3cb3733d70f13a523a9cd8f429eb8dc240c4df0b243a4ea74a77c11df67deb1"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "6285c2151776fe5910fb6c677a3ae51c127bb16c5ba2e9f6e46dea7a107de436",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Lieferschein anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_delivery/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_offer",
+              "kind": "secondary",
+              "label": "Angebote",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_offer",
+              "stubReason": "Wechselt zur Belegliste Angebote.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_order",
+              "kind": "secondary",
+              "label": "Aufträge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_order",
+              "stubReason": "Wechselt zur Belegliste Aufträge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_invoice",
+              "kind": "secondary",
+              "label": "Ausgangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_invoice",
+              "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_credit_memo",
+              "kind": "secondary",
+              "label": "Gutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Gutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/sales-delivery",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Lieferscheine finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Lieferscheine sind noch im Entwurf?",
+              "Zeige die Lieferscheine von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/sales-delivery']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_delivery",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg-liste/sales-delivery",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "inventory",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Lieferscheine"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Lieferscheine_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Lieferscheine in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Lieferscheine in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "sales",
+                  "label": "Vertrieb"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "inside-sales",
+                  "label": "Innendienst"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "order-desk",
+                  "label": "Auftragsabwicklung"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Lieferscheine aus DocFlow mit Stand",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Lieferscheine",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/sales_delivery/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Lieferscheine",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "sales_delivery"
+          }
+        },
+        "patchHash": "610c750b54626ba77d0b27f3a176bce6fc0f3b5d59f855be8f2a9b4d441d3c61"
       }
     },
     "sales_invoice": {
@@ -2559,6 +4753,400 @@
           }
         },
         "patchHash": "1c08eee999278ab503bdb8ba45dcedb4d187cd41e247d2f24f224f869bcdcbe1"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "c01de2e5ae6a970e030fcb19e13d5606aaff570d48473c8d297bfe28fdbcd9ef",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Rechnung anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_invoice/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_offer",
+              "kind": "secondary",
+              "label": "Angebote",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_offer",
+              "stubReason": "Wechselt zur Belegliste Angebote.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_order",
+              "kind": "secondary",
+              "label": "Aufträge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_order",
+              "stubReason": "Wechselt zur Belegliste Aufträge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_delivery",
+              "kind": "secondary",
+              "label": "Lieferscheine",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_delivery",
+              "stubReason": "Wechselt zur Belegliste Lieferscheine.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_credit_memo",
+              "kind": "secondary",
+              "label": "Gutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Gutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/sales-invoice",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Ausgangsrechnungen finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Ausgangsrechnungen sind noch im Entwurf?",
+              "Zeige die Ausgangsrechnungen von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/sales-invoice']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_invoice",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg-liste/sales-invoice",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Ausgangsrechnungen"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Ausgangsrechnungen_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Ausgangsrechnungen in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Ausgangsrechnungen in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "sales",
+                  "label": "Vertrieb"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "inside-sales",
+                  "label": "Innendienst"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "order-desk",
+                  "label": "Auftragsabwicklung"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Ausgangsrechnungen aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "key": "buchungsdatum",
+                  "label": "Buchungsdatum",
+                  "priority": "tertiary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Ausgangsrechnungen",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/sales_invoice/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Ausgangsrechnungen",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "sales_invoice"
+          }
+        },
+        "patchHash": "f680c260bdd04faa1cf4b470c5382d7c061a52143a3fd8e253fb120352de6ed4"
       }
     },
     "sales_offer": {
@@ -2936,6 +5524,389 @@
           }
         },
         "patchHash": "0b60670843dbf75770f2dfbda8525aed0531548b2513e16fe7475482dd6821b3"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "87ac9b1437ef85872060e3705389c7c1de64c2f88b3e5c4b50e0ef7c2641098e",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Angebot anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_offer/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_order",
+              "kind": "secondary",
+              "label": "Aufträge",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_order",
+              "stubReason": "Wechselt zur Belegliste Aufträge.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_delivery",
+              "kind": "secondary",
+              "label": "Lieferscheine",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_delivery",
+              "stubReason": "Wechselt zur Belegliste Lieferscheine.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_invoice",
+              "kind": "secondary",
+              "label": "Ausgangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_invoice",
+              "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_credit_memo",
+              "kind": "secondary",
+              "label": "Gutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Gutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/sales-offer",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Angebote finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Angebote sind noch im Entwurf?",
+              "Zeige die Angebote von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/sales-offer']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_offer",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg-liste/sales-offer",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Angebote"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Angebote_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Angebote in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Angebote in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "sales",
+                  "label": "Vertrieb"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "inside-sales",
+                  "label": "Innendienst"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "order-desk",
+                  "label": "Auftragsabwicklung"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Angebote aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Angebote",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/sales_offer/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Angebote",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "sales_offer"
+          }
+        },
+        "patchHash": "ec061625aa4a5f33c89a1b772bb993fdd9612bd4bfddfc0df81710e3b40c7134"
       }
     },
     "sales_order": {
@@ -3313,6 +6284,389 @@
           }
         },
         "patchHash": "872cc4c7ec9201ec62041456871bad6c5feb8799c2e5baf2e316078267c13378"
+      },
+      "1.1.0": {
+        "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
+        "baseVersion": "1.1.0",
+        "definitionHash": "392d6c30149ee7827603ba0b9ffc661fd1db7e662c7bf2d210fee0d85cbca3af",
+        "patch": {
+          "actions": [
+            {
+              "dangerLevel": "safe",
+              "key": "neu",
+              "kind": "primary",
+              "label": "Auftrag anlegen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_order/neu",
+              "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg.",
+              "zone": "header"
+            },
+            {
+              "command": "list.exportCsv",
+              "dangerLevel": "safe",
+              "key": "export",
+              "kind": "secondary",
+              "label": "CSV-Export",
+              "localEffect": "download",
+              "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "print",
+              "label": "Drucken",
+              "localEffect": "print",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_offer",
+              "kind": "secondary",
+              "label": "Angebote",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_offer",
+              "stubReason": "Wechselt zur Belegliste Angebote.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_delivery",
+              "kind": "secondary",
+              "label": "Lieferscheine",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_delivery",
+              "stubReason": "Wechselt zur Belegliste Lieferscheine.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_invoice",
+              "kind": "secondary",
+              "label": "Ausgangsrechnungen",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_invoice",
+              "stubReason": "Wechselt zur Belegliste Ausgangsrechnungen.",
+              "zone": "header"
+            },
+            {
+              "dangerLevel": "safe",
+              "key": "ansicht_sales_credit_memo",
+              "kind": "secondary",
+              "label": "Gutschriften",
+              "localEffect": "navigation",
+              "navigationRoute": "/belege/sales_credit_memo",
+              "stubReason": "Wechselt zur Belegliste Gutschriften.",
+              "zone": "header"
+            }
+          ],
+          "adapter": {
+            "sourceId": "beleg-liste/sales-order",
+            "temporary": false,
+            "type": "native"
+          },
+          "agentContract": {
+            "businessPurpose": "Aufträge finden, ihren Stand pruefen und den Beleg oeffnen.",
+            "examplePrompts": [
+              "Welche Aufträge sind noch im Entwurf?",
+              "Zeige die Aufträge von heute."
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+              "screenRoot": "[data-testid='screen-beleg-liste/sales-order']"
+            }
+          },
+          "dataSources": [
+            {
+              "endpoint": "/api/v1/belege/sales_order",
+              "key": "list",
+              "pageSize": 500
+            }
+          ],
+          "domain": "sales",
+          "id": "beleg-liste/sales-order",
+          "layout": {
+            "contextRail": "none",
+            "density": "compact",
+            "floorplan": "worklist",
+            "mobileMode": "mobileStack",
+            "preferredMode": "desktopDense",
+            "tableProfile": "financial",
+            "touchTargetPx": 44
+          },
+          "listExperience": {
+            "aggregates": [
+              {
+                "conditions": [],
+                "key": "total",
+                "label": "Aufträge"
+              },
+              {
+                "conditions": [
+                  {
+                    "field": "status",
+                    "op": "eq",
+                    "value": "draft"
+                  }
+                ],
+                "key": "draft",
+                "label": "Entwürfe"
+              }
+            ],
+            "export": {
+              "columns": [
+                {
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr."
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum"
+                },
+                {
+                  "key": "partner_name",
+                  "label": "Kunde"
+                },
+                {
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr."
+                },
+                {
+                  "key": "status",
+                  "label": "Status"
+                },
+                {
+                  "key": "netto",
+                  "label": "Netto"
+                },
+                {
+                  "key": "steuer",
+                  "label": "Steuer"
+                },
+                {
+                  "key": "brutto",
+                  "label": "Brutto"
+                },
+                {
+                  "key": "referenz",
+                  "label": "Referenz"
+                }
+              ],
+              "delimiter": ";",
+              "filenamePrefix": "Aufträge_"
+            },
+            "insightLines": [
+              {
+                "key": "stand",
+                "label": "Stand",
+                "variants": [
+                  {
+                    "text": "{total} Aufträge in der aktuellen Sicht, davon {draft} Entwürfe."
+                  }
+                ]
+              },
+              {
+                "key": "leitung",
+                "label": "Leitung",
+                "variants": [
+                  {
+                    "text": "{total} Aufträge in der aktuellen Sicht."
+                  }
+                ]
+              }
+            ],
+            "presets": [
+              {
+                "field": "status",
+                "key": "status",
+                "kind": "choice",
+                "label": "Belegstatus",
+                "options": [
+                  {
+                    "label": "Alle Status",
+                    "value": "all"
+                  },
+                  {
+                    "label": "Entwurf",
+                    "value": "draft"
+                  },
+                  {
+                    "label": "Offen",
+                    "value": "open"
+                  },
+                  {
+                    "label": "Bestätigt",
+                    "value": "confirmed"
+                  },
+                  {
+                    "label": "Freigegeben",
+                    "value": "released"
+                  },
+                  {
+                    "label": "Abgeschlossen",
+                    "value": "completed"
+                  },
+                  {
+                    "label": "Gebucht",
+                    "value": "posted"
+                  },
+                  {
+                    "label": "Storniert (Gegenbuchung)",
+                    "value": "reversed"
+                  },
+                  {
+                    "label": "Storniert",
+                    "value": "cancelled"
+                  }
+                ]
+              }
+            ],
+            "roleFocus": {
+              "defaultKey": "all",
+              "options": [
+                {
+                  "key": "all",
+                  "label": "Alle Rollen"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "sales",
+                  "label": "Vertrieb"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "inside-sales",
+                  "label": "Innendienst"
+                },
+                {
+                  "insightLineKeys": [
+                    "stand"
+                  ],
+                  "key": "order-desk",
+                  "label": "Auftragsabwicklung"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "finance",
+                  "label": "Finance"
+                },
+                {
+                  "insightLineKeys": [
+                    "leitung"
+                  ],
+                  "key": "management",
+                  "label": "Leitung"
+                }
+              ]
+            },
+            "searchFields": [
+              "beleg_nr",
+              "partner_name",
+              "partner_nummer",
+              "referenz"
+            ]
+          },
+          "subtitle": "Aufträge aus DocFlow mit Stand und Beträgen",
+          "tables": [
+            {
+              "columns": [
+                {
+                  "filterable": true,
+                  "key": "beleg_nr",
+                  "label": "Beleg-Nr.",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "key": "belegdatum",
+                  "label": "Belegdatum",
+                  "priority": "primary",
+                  "renderKind": "date",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_name",
+                  "label": "Kunde",
+                  "priority": "primary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "partner_nummer",
+                  "label": "Kunde-Nr.",
+                  "priority": "secondary",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "status",
+                  "label": "Status",
+                  "priority": "primary",
+                  "renderKind": "status",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "netto",
+                  "label": "Netto",
+                  "numeric": true,
+                  "priority": "secondary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "steuer",
+                  "label": "Steuer",
+                  "numeric": true,
+                  "priority": "tertiary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "aggregate": "sum",
+                  "currencyField": "waehrung",
+                  "key": "brutto",
+                  "label": "Brutto",
+                  "numeric": true,
+                  "priority": "primary",
+                  "renderKind": "currency",
+                  "sortable": true
+                },
+                {
+                  "filterable": true,
+                  "key": "referenz",
+                  "label": "Referenz",
+                  "priority": "tertiary",
+                  "sortable": true
+                }
+              ],
+              "dataSourceKey": "list",
+              "key": "list",
+              "label": "Aufträge",
+              "pageSize": 50,
+              "rowActions": [],
+              "rowHeight": 40,
+              "rowRouteTemplate": "/belege/sales_order/{id}",
+              "serverPagination": false,
+              "virtualized": true
+            }
+          ],
+          "title": "Aufträge",
+          "variant": {
+            "family": "beleg-liste",
+            "id": "sales_order"
+          }
+        },
+        "patchHash": "49769c2238af220713a99a1c2a71c8ecd114e68100af4aef79b3e18d140405cb"
       }
     }
   }

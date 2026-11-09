@@ -794,6 +794,41 @@ class DocflowService:
         self.best_effort_audit("docflow_record_print", "docflow_document", doc_id, {"printed_by": self._wer(printed_by)})
         self.db.commit()
 
+    def druck_vermerken(self, doc_id: str, *, subjekt: str, aussteller: Optional[str], grund: Optional[str]) -> int:
+        """Vermerkt einen Druck (GoBD): zaehlt, und ein Nachdruck braucht eine Begruendung, die mit der gepruefteten
+        Identitaet in ``domain_audit.attestations`` steht. Kein eigener Commit (Transaktion der Maskenaktion).
+
+        Gibt die Nummer dieses Drucks zurueck (1 = Erstdruck).
+        """
+        from app.core.akteur import bekannter_nutzer
+
+        header = self.fetch_header(doc_id)
+        if not header:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        bisher = int(header.get("print_count") or 0)
+        grund = (grund or "").strip()
+        if bisher > 0 and len(grund) < 3:
+            raise ValidationFailedError("Ein Nachdruck braucht eine Begründung.")
+        if grund:
+            self.db.execute(text("""
+                INSERT INTO domain_audit.attestations
+                    (id, tenant_id, entity_type, entity_id, action, reason, changes, created_by, created_at)
+                VALUES (:id, :t, :typ, :eid, :aktion, :grund, CAST(:changes AS jsonb), :von, NOW())
+            """), {
+                "id": str(uuid4()), "t": self.tenant_id, "typ": f"beleg_{header['doc_type']}", "eid": doc_id,
+                "aktion": "print", "grund": grund,  # ck_attestations_action kennt print; Nachdruck steht in changes
+                "changes": json.dumps({"actor": {"subject": subjekt, "issuer": aussteller, "tenant_id": self.tenant_id},
+                                       "druck": bisher + 1, "nachdruck": bisher > 0}),
+                "von": bekannter_nutzer(self.db, subjekt, tenant_id=self.tenant_id),
+            })
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET printed_at=NOW(), printed_by=:von, "
+                 "print_count=COALESCE(print_count,0)+1 WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "von": subjekt},
+        )
+        self._protokolliere("record_print", doc_id, {"druck": bisher + 1, "nachdruck": bisher > 0})
+        return bisher + 1
+
     def record_export(self, doc_id: str, exported_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):
             raise EntityNotFoundError("DocflowDocument", doc_id)
