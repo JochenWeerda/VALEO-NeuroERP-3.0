@@ -102,7 +102,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `chart_of_accounts` | Chart of Accounts management endpoints |
 | `closing_checklists` | Closing Checklists API |
 | `collab_notes` | Collab Rail notes API (UIX-062). |
-| `collective_documents` | Sammellieferschein / Sammelrechnung — thin-router, sqlalchemy.text(). |
 | `command_catalog` | Command Catalog API — Wave 5 Paket A. |
 | `commodity_positions` | Commodity Position Matrix API: Matrix, Drilldown, KPI, Coverage Monitor, Refresh. |
 | `compat` | Compatibility endpoints for frontend path alignment and missing modules. |
@@ -224,7 +223,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `finance_datev` | DATEV-Export (DOM-FIN-004.5). |
 | `finance_dunning` | Mahnlauf & Mahnstufen-Eskalation (DOM-FIN-004.2). |
 | `finance_followup` | Finance Follow-up API — Wave 4 AP5 |
-| `finance_invoices` | Finance Invoices API Endpoints |
 | `finance_op` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004) — read-only. |
 | `finance_period` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_read_models` | Finance Read-Models — Wave 2 AP2 |
@@ -418,8 +416,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_blanket_orders` | Rahmenaufträge / Abrufe (Blanket Orders) — thin-router, sqlalchemy.text(). |
 | `sales_credit` | Kreditlimit-Prüfung & Billing-Status im O2C-Kontext (DOM-SALES-004.3) — read-only. |
 | `sales_credit_notes` | Retouren (SALES-DLV-02/03/04). Gutschriften liegen seit BELEG-052 in DocFlow. |
-| `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
-| `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |
 | `sales_order_commands` | Lieferschein-Status und Preisabweichung (DOM-SALES-004) unter ``/sales/orders``; Bearbeiter aus dem Token. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
@@ -495,7 +491,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `workflow_runtime` | Workflow Runtime API — Wave 4 AP1 |
 | `workflow_simulation` | — |
 | `workflow_template_marketplace` | — |
-| `xrechnung` | INT-XRECHNUNG-001: XRechnung / ZUGFeRD E-Rechnung Export. |
 | `zahlungsbedingungen` | Zahlungsbedingungen [ZABD] — Zahlungsziel, Skonto, Zahlungsart. |
 | `zertifikate` | Zertifikate (Bio, QS, GlobalG.A.P. ...) im Mandanten. |
 | `zinsabrechnung` | Zinsabrechnung — Zinsen auf Rohware-Einlagerungskontrakte. |

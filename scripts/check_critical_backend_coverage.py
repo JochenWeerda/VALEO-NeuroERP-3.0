@@ -95,7 +95,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/sanctions_compliance.py": 0.66,  #  69% measured — Sanktionsliste
     "api/v1/endpoints/webhook_system.py": 0.61,     #  64% measured — Webhook-System
     "api/v1/endpoints/erechnung_import.py": 0.78,   #  81% measured — E-Rechnung Import
-    "api/v1/endpoints/sales_invoice_einvoice.py": 0.70,  # SPEC-P0-05-BELEGE-70: ≥70% (lokal 96%)
     "api/v1/endpoints/waagen_vorlagen.py": 0.50,    #  53% measured — Waagenvorlagen
     "api/v1/endpoints/rohware_sammelabrechnung.py": 0.70,  # SPEC-P0-05-BELEGE-70: ≥70% (lokal 90%)
 

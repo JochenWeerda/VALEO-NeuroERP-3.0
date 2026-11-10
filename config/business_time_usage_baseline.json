@@ -137,9 +137,6 @@
     "app/api/v1/endpoints/warehouse_transfers.py": {
       "date.today": 1
     },
-    "app/api/v1/endpoints/xrechnung.py": {
-      "date.today": 2
-    },
     "app/api/v1/endpoints/zu_abschlaggruppen.py": {
       "date.today": 1
     },

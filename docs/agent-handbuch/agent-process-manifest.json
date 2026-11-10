@@ -149,7 +149,6 @@
         "crm/customer-360",
         "beleg-liste/sales-order",
         "beleg-liste/sales-invoice",
-        "sales/delivery-note",
         "beleg-liste/sales-delivery",
         "finance/ar-open-item",
         "finance/payment-run",
@@ -25182,62 +25181,6 @@
       ]
     },
     {
-      "mask_id": "sales/delivery-note",
-      "title": "Lieferschein",
-      "domain": "sales",
-      "process_keys": [
-        "order-to-cash"
-      ],
-      "rollout_route": "/mask-rollout/sales__delivery-note/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-note/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-note/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-note/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "drucken",
-          "label": "Lieferschein drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.lieferschein.drucken",
-          "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
-      "mask_id": "sales/invoice",
-      "title": "Ausgangsrechnung",
-      "domain": "sales",
-      "process_keys": [],
-      "rollout_route": "/mask-rollout/sales__invoice/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/invoice/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/invoice/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/invoice/readiness",
-      "risk_summary": "low",
-      "actions": [],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/kalkulationen/neu",
       "title": "Kalkulation",
       "domain": "sales",
@@ -27451,5 +27394,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 151
+  "event_count": 150
 }

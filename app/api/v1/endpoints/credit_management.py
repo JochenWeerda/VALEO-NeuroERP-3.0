@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
-from typing import Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -14,7 +13,7 @@ from sqlalchemy.orm import Session
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema, IDResponse
+from app.api.v1.schemas.base import IDResponse
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -104,13 +103,15 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
     # Gezaehlt wird der **Bruttobetrag**, denn gefordert wird brutto, und nur
     # was heraus ist: Ein Entwurf ist keine Forderung, ein bezahlter oder
     # stornierter Beleg auch nicht.
+    # Seit BELEG-052 (10.11.2026): die Forderung steht als offener Posten bei Finance (Buchungsautoritaet) - der alte
+    # Rechnungsspeicher domain_sales.sales_invoices war leer, DocFlow-Rechnungen zaehlten nicht mit.
     open_invoices = db.execute(
         text(
             """
-            SELECT COALESCE(SUM(gross_amount), 0)
-            FROM domain_sales.sales_invoices
-            WHERE customer_id = :cid AND tenant_id = :tid
-              AND status NOT IN ('entwurf', 'bezahlt', 'storniert')
+            SELECT COALESCE(SUM(open_amount), 0)
+            FROM domain_erp.offene_posten
+            WHERE kunde_id = :cid AND tenant_id = :tid AND konto_typ = 'debitoren'
+              AND COALESCE(open_amount, 0) > 0
             """
         ),
         {"cid": customer_id, "tid": tenant_id},

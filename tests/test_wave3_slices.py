@@ -5,7 +5,6 @@ Marker: unit
 """
 import pytest
 from unittest.mock import MagicMock, patch
-from decimal import Decimal
 
 
 # ── WF-TRIGGER-001 ────────────────────────────────────────────────────────────
@@ -81,7 +80,6 @@ class TestStmdDupEndpoints:
         assert exc_info.value.status_code == 422
 
     def test_business_partner_table_selection(self):
-        from fastapi import HTTPException
         from app.api.v1.endpoints.stmd_duplikat import zusammenfuehren
         db = MagicMock()
         db.execute.return_value.rowcount = 1
@@ -98,71 +96,6 @@ class TestStmdDupEndpoints:
 
 # ── INT-XRECHNUNG-001 ─────────────────────────────────────────────────────────
 
-class TestXrechnungBuilder:
-    def _make_inv(self):
-        return {
-            "invoice_number": "RE-2026-0001",
-            "invoice_date": "2026-06-18",
-            "due_date": "2026-07-18",
-            "customer_id": "C001",
-            "customer_name": "Testbauer GmbH",
-            "net_amount": 1000.0,
-            "tax_amount": 190.0,
-            "total_amount": 1190.0,
-            "currency": "EUR",
-            "seller_name": "VALEO Landhandel GmbH",
-            "seller_vat_id": "DE123456789",
-        }
-
-    def _make_lines(self):
-        return [{
-            "description": "Weizen A-Qualität",
-            "quantity": 10.0,
-            "unit": "TNE",
-            "unit_price": 100.0,
-            "line_total": 1000.0,
-        }]
-
-    def test_build_produces_valid_xml(self):
-        from app.api.v1.endpoints.xrechnung import _build_xrechnung_xml
-        xml = _build_xrechnung_xml(self._make_inv(), self._make_lines())
-        assert '<?xml version="1.0"' in xml
-        assert "Invoice" in xml
-        assert "RE-2026-0001" in xml
-
-    def test_build_contains_seller_name(self):
-        from app.api.v1.endpoints.xrechnung import _build_xrechnung_xml
-        xml = _build_xrechnung_xml(self._make_inv(), self._make_lines())
-        assert "VALEO Landhandel GmbH" in xml
-
-    def test_build_contains_buyer_name(self):
-        from app.api.v1.endpoints.xrechnung import _build_xrechnung_xml
-        xml = _build_xrechnung_xml(self._make_inv(), self._make_lines())
-        assert "Testbauer GmbH" in xml
-
-    def test_build_contains_amount(self):
-        from app.api.v1.endpoints.xrechnung import _build_xrechnung_xml
-        xml = _build_xrechnung_xml(self._make_inv(), self._make_lines())
-        assert "1000.00" in xml
-
-    def test_validate_detects_missing_vat_placeholder(self):
-        from app.api.v1.endpoints.xrechnung import _build_xrechnung_xml
-        inv = self._make_inv()
-        inv["seller_vat_id"] = "DE000000000"
-        xml = _build_xrechnung_xml(inv, self._make_lines())
-        # Warnung-Logik ist im validate-Endpoint, hier nur XML-Check
-        assert xml  # Builds ohne Fehler auch mit Platzhalter
-
-    def test_batch_route_exists(self):
-        from app.api.v1.endpoints.xrechnung import router
-        paths = {r.path for r in router.routes}
-        assert any("batch" in p for p in paths)
-
-
-# Bank shadow-model contracts retired: test_bank_legacy_retirement.py
-
-
-# ── WGE-MOB-001 ──────────────────────────────────────────────────────────────
 
 class TestWaageMobile:
     def test_router_prefix(self):

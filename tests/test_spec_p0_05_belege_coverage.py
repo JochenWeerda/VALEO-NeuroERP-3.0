@@ -13,8 +13,6 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import financial_reports as fr
-from app.api.v1.endpoints import sales_invoice_einvoice as ei
-from app.api.v1.endpoints.sales_invoice_einvoice import EInvoiceExportRequest
 from app.main import app
 
 pytestmark = pytest.mark.unit
@@ -85,32 +83,6 @@ def test_financial_report_empty_builders_and_row_flattening():
     assert any(r[0] == "1000" for r in rows)
     assert any(r[0] == "1600" for r in rows)
 
-
-def test_einvoice_input_mapping_from_sales_invoice_dict():
-    invoice = {
-        "number": "RE-100",
-        "date": "2026-03-01",
-        "dueDate": "2026-03-31",
-        "paymentTerms": "net14",
-        "customerId": "C1",
-        "subtotalNet": 100,
-        "totalTax": 19,
-        "totalGross": 119,
-        "lines": [{"article": "Weizen", "qty": 2, "price": 50, "vatRate": 19}],
-    }
-    supplier = {"name": "VALEO", "country_code": "DE", "vat_id": ""}
-    customer = {"name": "Kunde", "country_code": "DE"}
-    overrides = EInvoiceExportRequest(buyer_reference="LEITWEG-1")
-
-    mapped = ei._invoice_to_einvoice_input(invoice, supplier, customer, overrides)
-    assert mapped["invoice_number"] == "RE-100"
-    assert mapped["buyer_reference"] == "LEITWEG-1"
-    assert len(mapped["lines"]) == 1
-    assert mapped["lines"][0]["quantity"] == 2.0
-    assert mapped["total_gross"] == 119.0
-
-
-# ── HTTP-Vertraege gegen laufende App + Postgres ──────────────────────────────
 
 
 @pytest.mark.parametrize("path", ["/balance-sheet", "/profit-loss", "/bwa"])
@@ -275,15 +247,3 @@ def test_sammelabrechnung_delete_draft(require_db):
     assert missing.status_code == 404, missing.text
 
 
-def test_einvoice_unknown_invoice_is_404(require_db):
-    missing = f"INV-MISSING-{uuid.uuid4().hex[:8]}"
-    for method, path in (
-        ("POST", f"{EI_BASE}/{missing}/einvoice/xrechnung"),
-        ("POST", f"{EI_BASE}/{missing}/einvoice/zugferd"),
-        ("GET", f"{EI_BASE}/{missing}/einvoice/xrechnung"),
-    ):
-        if method == "POST":
-            resp = client.post(path, json={}, headers=HEADERS)
-        else:
-            resp = client.get(path, headers=HEADERS)
-        assert resp.status_code == 404, f"{method} {path}: {resp.status_code} {resp.text}"

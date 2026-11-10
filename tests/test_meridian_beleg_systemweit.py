@@ -175,7 +175,6 @@ _IDENTITAET = {
     # Die Einwilligung haengt an einer Person; ihr Name ist die Identitaet der Maske.
     "personal/bewerbung-einwilligung": "applicant_name",
     "qualitaet/reklamation": "reklamation_nr",
-    "sales/invoice": "invoice_number",
 }
 
 

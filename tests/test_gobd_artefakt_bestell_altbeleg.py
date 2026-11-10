@@ -214,6 +214,7 @@ class TestBestellAltbelege:
 def test_kein_aufrufer_verschluckt_den_archivfehler():
     from pathlib import Path
 
-    quelle = Path("app/api/v1/endpoints/sales_invoice_einvoice.py").read_text(encoding="utf-8-sig")
-    assert "GoBD-Archivierung ist best-effort" not in quelle
+    # Der alte E-Rechnungsweg ist entfernt (BELEG-052); die E-Rechnung des Belegs archiviert vor der Auslieferung.
+    quelle = Path("app/services/beleg_erechnung.py").read_text(encoding="utf-8-sig")
+    assert "best-effort" not in quelle
     assert "db.commit()" not in Path("app/core/gobd_artifact.py").read_text(encoding="utf-8-sig")

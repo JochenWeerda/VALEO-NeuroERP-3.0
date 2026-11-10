@@ -13,17 +13,6 @@ from app.core.screen_definitions import get_screen_definition, get_screen_list_r
 pytestmark = pytest.mark.unit
 
 
-def test_invoice_gets_verkauf_chain_and_catalog_routes():
-    sd = get_screen_definition("sales/invoice")
-    assert sd is not None
-    assert sd["processChain"] == {"chainId": "k2_verkauf", "stepKey": "rechnung"}
-    verkauf = sd["processChains"]["k2_verkauf"]
-    lieferschein = next(step for step in verkauf["steps"] if step["key"] == "lieferschein")
-    # BELEG-052: Lieferscheine fuehrt die Belegliste (DocFlow)
-    assert lieferschein["routePath"] == get_screen_list_route("beleg-liste/sales-delivery") == "/sales/lieferungen"
-    auftrag = next(step for step in verkauf["steps"] if step["key"] == "auftrag")
-    assert auftrag["routePath"] == "/verkauf/auftraege"
-
 
 def test_purchase_order_gets_einkauf_chain():
     sd = get_screen_definition("einkauf/purchase-order")
@@ -32,7 +21,7 @@ def test_purchase_order_gets_einkauf_chain():
 
 
 def test_explicit_process_chain_is_not_overwritten():
-    definition = {"id": "sales/invoice", "domain": "sales", "mode": "detail"}
+    definition = {"id": "einkauf/purchase-order", "domain": "einkauf", "mode": "detail"}
     definition["processChain"] = {"chainId": "custom", "stepKey": "x"}
     attach_process_chain(definition, get_screen_list_route)
     assert definition["processChain"] == {"chainId": "custom", "stepKey": "x"}
@@ -132,7 +121,7 @@ def test_readiness_accepts_no_process_chain_reason():
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
     assert gate["severity"] == "mandatory"
     assert gate["passed"] is True
-    sd = get_screen_definition("sales/invoice")
+    sd = get_screen_definition("einkauf/purchase-order")
     assert sd is not None
     report = _check_readiness(sd)
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
