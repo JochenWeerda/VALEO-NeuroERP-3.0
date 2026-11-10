@@ -402,6 +402,15 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
             {"key": "nachricht", "label": "Nachricht", "type": "textarea"},
         ],
     })
+    if variante.belegart in ("sales_invoice", "sales_credit_memo"):
+        # E-Rechnung (XRechnung, GoBD-Archiv): erst erzeugen und archivieren, dann das archivierte Original laden.
+        liste.append({
+            "key": "erechnung", "label": "E-Rechnung (XRechnung)", "kind": "secondary", "dangerLevel": "moderate",
+            "permission": "belege.ausstellen", "localEffect": "download",
+            "commandEndpoint": f"/api/v1/belege/{variante.belegart}/{{entity_id}}/actions/erechnung", "method": "POST",
+            "download": {"endpoint": f"/api/v1/belege/{variante.belegart}/{{entity_id}}/erechnung", "contentField": "xml",
+                         "filenameField": "dateiname", "mediaType": "application/xml", "contentEncoding": "base64"},
+        })
     # Belegdruck (BELEG-052 Stufe 2b): PDF aus dem Belegvertrag, ein Leseweg ohne Schreibwirkung.
     liste.append({
         "key": "drucken", "label": "Drucken", "kind": "secondary", "dangerLevel": "safe",

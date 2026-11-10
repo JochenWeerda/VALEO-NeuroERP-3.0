@@ -244784,6 +244784,74 @@
         ]
       }
     },
+    "/api/v1/belege/{belegart}/{entity_id}/actions/erechnung": {
+      "post": {
+        "operationId": "beleg_erechnung_erzeugen_api_v1_belege__belegart___entity_id__actions_erechnung_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Body",
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "E-Rechnung (XRechnung) erzeugen und archivieren",
+        "tags": [
+          "belege",
+          "mask-actions"
+        ]
+      }
+    },
     "/api/v1/belege/{belegart}/{entity_id}/actions/versenden": {
       "post": {
         "operationId": "beleg_versenden_api_v1_belege__belegart___entity_id__actions_versenden_post",
@@ -244846,6 +244914,63 @@
           }
         ],
         "summary": "Beleg als PDF per E-Mail an den Partner senden",
+        "tags": [
+          "belege",
+          "mask-actions"
+        ]
+      }
+    },
+    "/api/v1/belege/{belegart}/{entity_id}/erechnung": {
+      "get": {
+        "operationId": "beleg_erechnung_lesen_api_v1_belege__belegart___entity_id__erechnung_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "belegart",
+            "required": true,
+            "schema": {
+              "title": "Belegart",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "entity_id",
+            "required": true,
+            "schema": {
+              "title": "Entity Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TypedObjectOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Archivierte E-Rechnung (XRechnung) lesen",
         "tags": [
           "belege",
           "mask-actions"

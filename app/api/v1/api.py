@@ -1071,6 +1071,11 @@ from app.api.v1.endpoints import beleg_versand  # noqa: E402
 
 api_router.include_router(beleg_versand.router)
 
+# E-Rechnung des Belegs (XRechnung aus DocFlow, GoBD-Archiv; BELEG-052 Phase 2)
+from app.api.v1.endpoints import beleg_erechnung  # noqa: E402
+
+api_router.include_router(beleg_erechnung.router)
+
 from app.api.v1.endpoints import docflow_evidence  # noqa: E402
 
 api_router.include_router(
