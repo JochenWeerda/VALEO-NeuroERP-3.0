@@ -18,14 +18,14 @@ interface JournalEntry {
   amount: number | string
 }
 
-interface PurchaseOrder {
+/** Zeile der Belegliste (DocFlow, BELEG-052): Bestellungen stehen nur noch in DocFlow. */
+interface BelegZeile {
   id: string
-  purchaseOrderNumber?: string
-  supplierName?: string
-  supplier_id?: string
-  totalAmount?: number
-  total?: number
-  status?: string
+  beleg_nr: string
+  partner_name?: string | null
+  partner_nummer?: string | null
+  brutto?: number | null
+  status: string
 }
 
 interface OpenItem {
@@ -312,16 +312,13 @@ export function useProcurementDashboard() {
   return useQuery({
     queryKey: dashboardKeys.procurement(),
     queryFn: async () => {
-      const [statsRes, posRes, openItemsRes] = await Promise.allSettled([
-        apiClient.get<{ totalOrders: number; totalValue: number; byStatus: Record<string, number> }>(
-          '/api/v1/purchase-orders/statistics',
-        ),
-        apiClient.get<{ data: PurchaseOrder[]; total: number }>('/api/v1/purchase-orders?status=open&pageSize=5'),
+      const [posRes, openItemsRes] = await Promise.allSettled([
+        apiClient.get<{ items: BelegZeile[]; total: number }>('/api/v1/belege/purchase_order', { params: { limit: 500 } }),
         apiClient.get<{ items: OpenItem[] }>('/api/v1/finance/open-items'),
       ])
 
-      const stats = statsRes.status === 'fulfilled' ? statsRes.value.data : null
-      const posData = posRes.status === 'fulfilled' ? posRes.value.data : null
+      const bestellungenAlle = posRes.status === 'fulfilled' ? posRes.value.data.items || [] : []
+      const offeneBestellungen = bestellungenAlle.filter((po) => po.status === 'open' || po.status === 'confirmed')
       const openItems = openItemsRes.status === 'fulfilled' ? openItemsRes.value.data.items || [] : []
 
       const today = new Date()
@@ -332,18 +329,18 @@ export function useProcurementDashboard() {
         (item) => item.due_date && new Date(item.due_date) < today && item.status === 'open',
       ).length
 
-      const bestellungen = (posData?.data || []).slice(0, 5).map((po) => ({
-        nummer: po.purchaseOrderNumber || po.id,
-        lieferant: po.supplierName || po.supplier_id || '',
-        betrag: Number(po.totalAmount || po.total || 0),
-        status: (po.status === 'approved' || po.status === 'open' ? 'offen'
-          : po.status === 'partially_delivered' ? 'teilgeliefert'
-          : 'komplett') as 'offen' | 'teilgeliefert' | 'komplett',
+      const bestellungen = offeneBestellungen.slice(0, 5).map((po) => ({
+        nummer: po.beleg_nr || po.id,
+        lieferant: po.partner_name || po.partner_nummer || '',
+        betrag: Number(po.brutto || 0),
+        status: 'offen' as 'offen' | 'teilgeliefert' | 'komplett',
       }))
 
       return {
-        bestellungenOffen: stats?.byStatus?.['open'] ?? stats?.byStatus?.['approved'] ?? 0,
-        einkaufsvolumen: stats?.totalValue ?? 0,
+        bestellungenOffen: offeneBestellungen.length,
+        einkaufsvolumen: bestellungenAlle
+          .filter((po) => po.status !== 'cancelled' && po.status !== 'reversed' && po.status !== 'draft')
+          .reduce((sum, po) => sum + Number(po.brutto || 0), 0),
         lieferantenAktiv: 0,
         offenePosten,
         ueberfaellig,

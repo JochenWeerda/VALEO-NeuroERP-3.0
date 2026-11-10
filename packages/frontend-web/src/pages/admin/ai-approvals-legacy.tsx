@@ -12,6 +12,16 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { ErrorState } from '@/components/ErrorState'
 import { apiClient } from '@/lib/api-client'
 
+type BelegZeile = {
+  id: string
+  beleg_nr: string
+  partner_name?: string | null
+  partner_nummer?: string | null
+  brutto?: number | null
+  waehrung?: string | null
+  status: string
+}
+
 type APInvoice = {
   id: string
   number?: string
@@ -29,8 +39,14 @@ export default function AiApprovalsPage(): JSX.Element {
   const { data: pendingItems = [], isLoading, isError, error, refetch } = useQuery({
     queryKey: ['admin', 'ai-approvals', 'ap-invoices-pending'],
     queryFn: async () => {
-      const res = await apiClient.get<APInvoice[]>('/api/v1/finance/ap/invoices/?status=ZUR_FREIGABE&limit=50')
-      return Array.isArray(res?.data) ? res.data : []
+      // Eingangsrechnungen stehen nur noch in DocFlow (BELEG-052): offene, noch nicht gebuchte Eingangsrechnungen.
+      const res = await apiClient.get<{ items: BelegZeile[] }>('/api/v1/belege/purchase_invoice', {
+        params: { status: 'open', limit: 50 },
+      })
+      return (res?.data?.items ?? []).map((zeile): APInvoice => ({
+        id: zeile.id, number: zeile.beleg_nr, customerId: zeile.partner_name ?? zeile.partner_nummer ?? undefined,
+        amount: zeile.brutto ?? undefined, currency: zeile.waehrung ?? 'EUR', status: zeile.status,
+      }))
     },
     staleTime: 60_000,
   })
@@ -114,7 +130,7 @@ export default function AiApprovalsPage(): JSX.Element {
         </CardHeader>
         <CardContent className="space-y-2">
           <ul className="text-sm text-muted-foreground space-y-1">
-            <li>• AP-Rechnungen: <code>/api/v1/finance/ap/invoices/?status=ZUR_FREIGABE</code></li>
+            <li>• Eingangsrechnungen: <code>/api/v1/belege/purchase_invoice?status=open</code></li>
             <li>• Freigabe-Regeln: <code>/api/v1/finance/ap/approval-workflow/rules</code></li>
             <li>• Freigabe-Aktion: <code>POST /api/v1/finance/ap/approval-workflow/approve</code></li>
           </ul>
