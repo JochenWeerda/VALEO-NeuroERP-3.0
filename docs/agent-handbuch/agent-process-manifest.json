@@ -252,8 +252,6 @@
       ],
       "mask_ids": [
         "einkauf/supplier",
-        "einkauf/purchase-order",
-        "finance/ap-invoice",
         "finance/payment-run"
       ]
     },
@@ -11925,10 +11923,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12013,10 +12009,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12101,10 +12095,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12189,10 +12181,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12277,10 +12267,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12354,10 +12342,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12442,10 +12428,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12530,10 +12514,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12618,10 +12600,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12651,10 +12631,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12684,10 +12662,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12717,10 +12693,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12761,10 +12735,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12794,10 +12766,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12830,10 +12800,8 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12863,10 +12831,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12907,10 +12873,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12940,10 +12904,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -12973,10 +12935,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13006,10 +12966,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13039,10 +12997,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13085,10 +13041,8 @@
         "einzelpreis"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13118,10 +13072,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13162,10 +13114,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13195,10 +13145,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13228,10 +13176,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13261,10 +13207,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13294,10 +13238,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13327,10 +13269,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13360,10 +13300,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13404,10 +13342,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13437,10 +13373,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13470,10 +13404,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13503,10 +13435,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13536,10 +13466,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13569,72 +13497,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
-        "einkauf.angebot.bestellen",
-        "einkauf.anlieferavis.wareneingang"
-      ]
-    },
-    {
-      "mask_id": "einkauf/purchase-order",
-      "title": "Bestellung",
-      "domain": "einkauf",
-      "process_keys": [
-        "procure-to-pay"
-      ],
-      "rollout_route": "/mask-rollout/einkauf__purchase-order/:entityId",
-      "agent_contract_url": "/api/v1/masks/einkauf/purchase-order/agent-contract",
-      "screen_definition_url": "/api/v1/masks/einkauf/purchase-order/screen-definition",
-      "readiness_url": "/api/v1/masks/einkauf/purchase-order/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "einkauf.bestellung.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        },
-        {
-          "key": "speichern",
-          "label": "Speichern",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "einkauf.bestellung.update",
-          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern",
-          "method": "POST",
-          "stubReason": null
-        },
-        {
-          "key": "versenden",
-          "label": "Versenden",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": true,
-          "permission": "einkauf.bestellung.send",
-          "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [
-        "zahlungsbedingung",
-        "skonto1_prozent",
-        "skonto2_prozent",
-        "betrag"
-      ],
-      "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
-        "einkauf.bestellung.list",
-        "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13664,10 +13528,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13697,10 +13559,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13730,10 +13590,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13763,10 +13621,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13834,10 +13690,8 @@
         "lieferzeit_tage"
       ],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13867,10 +13721,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13911,10 +13763,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -13944,10 +13794,8 @@
       ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
-        "einkauf.bestellung.speichern",
         "einkauf.bestellung.list",
         "einkauf.bestellung.status",
-        "einkauf.bestellung.versenden",
         "einkauf.angebot.bestellen",
         "einkauf.anlieferavis.wareneingang"
       ]
@@ -15388,42 +15236,6 @@
         }
       ],
       "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "finance.ap_invoice.propose",
-        "fibu.open_items.list",
-        "fibu.dunning.status"
-      ]
-    },
-    {
-      "mask_id": "finance/ap-invoice",
-      "title": "Eingangsrechnung",
-      "domain": "finance",
-      "process_keys": [
-        "procure-to-pay"
-      ],
-      "rollout_route": "/mask-rollout/finance__ap-invoice/:entityId",
-      "agent_contract_url": "/api/v1/masks/finance/ap-invoice/agent-contract",
-      "screen_definition_url": "/api/v1/masks/finance/ap-invoice/screen-definition",
-      "readiness_url": "/api/v1/masks/finance/ap-invoice/readiness",
-      "risk_summary": "medium",
-      "actions": [
-        {
-          "key": "freigeben",
-          "label": "Freigeben",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": true,
-          "requiresConfirmation": true,
-          "permission": "finance.ap.freigabe",
-          "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [
-        "brutto",
-        "mwst",
-        "faellig_am"
-      ],
       "mcp_tool_ids": [
         "finance.ap_invoice.propose",
         "fibu.open_items.list",
@@ -27007,15 +26819,6 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
-      "tool_id": "einkauf.bestellung.speichern",
-      "domain": "einkauf",
-      "scope": "einkauf:write",
-      "idempotent": true,
-      "risk_class": "medium",
-      "human_approval_required": false,
-      "endpoint": "POST /api/v1/mcp/tools/call"
-    },
-    {
       "tool_id": "hr.bewerbung.speichern",
       "domain": "hr",
       "scope": "hr:write",
@@ -27232,15 +27035,6 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     },
     {
-      "tool_id": "einkauf.bestellung.versenden",
-      "domain": "einkauf",
-      "scope": "einkauf:write",
-      "idempotent": true,
-      "risk_class": "medium",
-      "human_approval_required": false,
-      "endpoint": "POST /api/v1/mcp/tools/call"
-    },
-    {
       "tool_id": "einkauf.angebot.bestellen",
       "domain": "einkauf",
       "scope": "einkauf:write",
@@ -27394,5 +27188,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 150
+  "event_count": 142
 }

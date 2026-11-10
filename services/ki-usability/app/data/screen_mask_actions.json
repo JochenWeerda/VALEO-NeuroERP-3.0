@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 796,
-    "screens_with_actions": 404,
+    "actions": 793,
+    "screens_with_actions": 402,
     "domains": 50
   },
   "actions": [
@@ -8959,56 +8959,6 @@
       }
     },
     {
-      "id": "mask:einkauf/purchase-order:speichern",
-      "label": "Speichern",
-      "description": "Speichern (einkauf/purchase-order)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/purchase-order",
-      "intent_phrases": [
-        "Speichern"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/purchase-order",
-        "actionKey": "speichern",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.update",
-        "auditReasonRequired": true,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/purchase-order:versenden",
-      "label": "Versenden",
-      "description": "Versenden (einkauf/purchase-order)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/purchase-order",
-      "intent_phrases": [
-        "Versenden"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/purchase-order",
-        "actionKey": "versenden",
-        "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.bestellung.send",
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
-      }
-    },
-    {
       "id": "mask:einkauf/rechnung-abgleich-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (einkauf/rechnung-abgleich-liste)",
@@ -10111,33 +10061,6 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:finance/ap-invoice:freigeben",
-      "label": "Freigeben",
-      "description": "Freigeben (finance/ap-invoice)",
-      "category": "mask-action",
-      "domain": "finance",
-      "mask": "finance/ap-invoice",
-      "intent_phrases": [
-        "Freigeben"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "finance/ap-invoice",
-        "actionKey": "freigeben",
-        "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "finance.ap.freigabe",
-        "forbiddenForAgents": true,
-        "humanApprovalRequired": true,
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
       }
     },
     {

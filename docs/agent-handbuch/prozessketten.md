@@ -200,9 +200,7 @@ _Skontofenster gefaehrdet, wenn Wareneingang weiter rutscht._
 
 ### Registrierte Masken (ScreenDefinition)
 
-- `einkauf/purchase-order` — Bestellung · Contract: `GET /api/v1/masks/einkauf/purchase-order/agent-contract` · Rollout: `/mask-rollout/einkauf__purchase-order/:entityId`
 - `einkauf/supplier` — Lieferant · Contract: `GET /api/v1/masks/einkauf/supplier/agent-contract` · Rollout: `/mask-rollout/einkauf__supplier/:entityId`
-- `finance/ap-invoice` — Eingangsrechnung · Contract: `GET /api/v1/masks/finance/ap-invoice/agent-contract` · Rollout: `/mask-rollout/finance__ap-invoice/:entityId`
 - `finance/payment-run` — Zahlungslauf · Contract: `GET /api/v1/masks/finance/payment-run/agent-contract` · Rollout: `/mask-rollout/finance__payment-run/:entityId`
 
 ---

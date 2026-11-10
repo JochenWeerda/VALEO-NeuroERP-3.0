@@ -56,9 +56,7 @@ Vollständige Referenz: [mcp-tools.md](../schnittstellen/mcp-tools.md)
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
-| `einkauf.bestellung.speichern` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
-| `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein | `POST /api/v1/mcp/tools/call` |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja | `POST /api/v1/mcp/tools/call` |
@@ -150,10 +148,6 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `procurement.edi.message.ack` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.edi.message.created` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.return.created` | outbox | `app/services/einkauf_compat_service.py` |
-| `purchase_order.approved` | outbox | `app/services/purchase_order_service.py` |
-| `purchase_order.cancelled` | outbox | `app/services/purchase_order_service.py` |
-| `purchase_order.communication.sent` | outbox | `app/api/v1/endpoints/compat.py` |
-| `purchase_order.created` | outbox | `app/api/v1/endpoints/compat.py` |
 | `service_entry_sheet.created` | outbox | `app/services/einkauf_compat_service.py` |
 
 ### Finanzbuchhaltung
@@ -234,10 +228,6 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `einkauf.auftragsbestaetigung.confirmed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.auftragsbestaetigung.reviewed` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.bestellung.created_from_angebot` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| `einkauf.bestellung.freigegeben` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
-| `einkauf.bestellung.storniert` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
-| `einkauf.bestellung.updated` | outbox | `app/api/v1/command_handlers/procurement.py` |
-| `einkauf.bestellung.versendet` | outbox | `app/api/v1/endpoints/einkauf_bestellung_kommandos.py` |
 | `einkauf.bestellvorschlag.bestellt` | outbox | `app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py` |
 | `einkauf.lieferant.entsperrt` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `einkauf.lieferant.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
@@ -251,7 +241,11 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.debitor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.kreditor.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `finance.payment_run.approved` | outbox | `app/api/v1/endpoints/mask_actions.py` |
-| … | | 38 weitere |
+| `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
+| `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
+| … | | 34 weitere |
 
 ### System
 

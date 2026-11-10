@@ -35,8 +35,6 @@ MASK_TO_PROCESSES: dict[str, list[str]] = {
     "beleg-liste/sales-invoice": ["order-to-cash"],
     "beleg-liste/sales-delivery": ["order-to-cash"],
     "einkauf/supplier": ["procure-to-pay"],
-    "einkauf/purchase-order": ["procure-to-pay"],
-    "finance/ap-invoice": ["procure-to-pay"],
     "finance/ar-open-item": ["order-to-cash"],
     "finance/payment-run": ["procure-to-pay", "order-to-cash", "finance-to-close"],
     "lager/article-stock": ["inventory-to-settlement"],

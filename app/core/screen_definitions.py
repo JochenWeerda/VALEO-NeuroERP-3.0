@@ -1108,322 +1108,6 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
-    """Fuehrende native Bestellmaske (L3-Kopf/Position plus drei Bestellfaelle)."""
-    return {
-        "schemaVersion": 1,
-        "id": "einkauf/purchase-order",
-        "domain": "einkauf",
-        "mode": "detail",
-        "title": "Bestellung",
-        "subtitle": "Einkauf / Bestellvorgang",
-        "identityField": "bestellnummer",
-        "adapter": {"type": "native", "sourceId": "einkauf/purchase-order", "temporary": False},
-        "summaryEndpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/einkauf/bestellungen/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen", "pageSize": 50},
-            {"key": "kommunikation", "endpoint": "/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation", "pageSize": 25},
-        ],
-        "tabs": [
-            {
-                "key": "kopf", "label": "Bestell-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "bestellnummer", "label": "Bestell-Nr.", "type": "text", "readOnly": True},
-                    {"key": "bestellfall", "label": "Bestellfall", "type": "select", "required": True,
-                     "helpText": "Bestand und Abverkauf, Direktlieferung aus dem Verkauf oder Einfuehrung eines neuen Artikels.",
-                     "options": [
-                         {"value": "bestand_abgleich", "label": "Bestand / Abverkauf"},
-                         {"value": "direktlieferung", "label": "Direktlieferung aus Verkauf"},
-                         {"value": "innovation", "label": "Neuer Artikel / Innovation"},
-                     ]},
-                    {"key": "status", "label": "Status", "type": "text", "readOnly": True},
-                    {"key": "kreditor_konto", "label": "Kreditor-Kto.", "type": "text"},
-                    {"key": "lieferant_nr", "label": "Lieferanten-Nr.", "type": "text"},
-                    {"key": "lieferant_name", "label": "Lieferant", "type": "text", "readOnly": True},
-                    {"key": "ansprechpartner", "label": "Ansprechpartner Lieferant", "type": "text"},
-                    {"key": "niederlassung_name", "label": "Niederlassung", "type": "text", "readOnly": True},
-                    {"key": "kostenstelle", "label": "Kostenstelle", "type": "text"},
-                    {"key": "kommission", "label": "Kommission", "type": "text"},
-                    {"key": "bestelldatum", "label": "Bestelldatum", "type": "date"},
-                    {"key": "lieferdatum_wunsch", "label": "Liefertermin", "type": "date"},
-                    {"key": "lieferdatum_zugesagt", "label": "Lieferdatum zugesagt", "type": "date"},
-                    {"key": "ladetermin_ab", "label": "Ladetermin ab", "type": "date",
-                     "helpText": "Getrennt vom Liefertermin — Disposition haengt am Ladetermin."},
-                    {"key": "ladetermin", "label": "Ladetermin", "type": "date"},
-                    {"key": "lade_datum", "label": "Ladedatum", "type": "date"},
-                    {"key": "incoterms", "label": "Incoterms", "type": "select", "options": [
-                        {"value": "EXW", "label": "EXW"}, {"value": "FCA", "label": "FCA"},
-                        {"value": "CPT", "label": "CPT"}, {"value": "CIP", "label": "CIP"},
-                        {"value": "DAP", "label": "DAP"}, {"value": "DPU", "label": "DPU"},
-                        {"value": "DDP", "label": "DDP"}, {"value": "FAS", "label": "FAS"},
-                        {"value": "FOB", "label": "FOB"}, {"value": "CFR", "label": "CFR"},
-                        {"value": "CIF", "label": "CIF"},
-                    ]},
-                    {"key": "versand_art", "label": "Versandart", "type": "select", "options": [
-                        {"value": "email", "label": "E-Mail"}, {"value": "fax", "label": "Fax"},
-                        {"value": "edi", "label": "EDI"}, {"value": "post", "label": "Post"},
-                        {"value": "telefon", "label": "Telefon"},
-                    ]},
-                    {"key": "lieferadresse", "label": "Lieferadresse", "type": "textarea"},
-                    {"key": "unsere_referenz", "label": "Unsere Referenz", "type": "text"},
-                    {"key": "ihre_referenz", "label": "Ihre Referenz", "type": "text"},
-                    {"key": "erstellt_von", "label": "Bediener", "type": "text", "readOnly": True},
-                    {"key": "netto_summe", "label": "Netto", "type": "currency", "readOnly": True},
-                    {"key": "brutto_summe", "label": "Brutto", "type": "currency", "readOnly": True},
-                    {"key": "waehrung", "label": "Waehrung", "type": "text"},
-                ],
-            },
-            {
-                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
-                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 110, "filterable": True},
-                                {"key": "lieferanten_artnr", "label": "Lief.-Artikel", "width": 120, "filterable": True},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
-                                {"key": "gebinde_menge", "label": "Gebinde", "numeric": True, "renderKind": "number", "width": 90},
-                                {"key": "gebinde_einheit", "label": "Geb.-Einh.", "width": 80},
-                                {"key": "menge", "label": "Bestellmenge", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "menge_geliefert", "label": "Angeliefert", "numeric": True, "renderKind": "number", "width": 100},
-                                {"key": "menge_offen", "label": "Rest", "numeric": True, "renderKind": "number", "width": 80},
-                                {"key": "einheit", "label": "Einheit", "width": 70},
-                                {"key": "einzelpreis", "label": "Einh.-Pr.", "numeric": True, "renderKind": "currency", "width": 100},
-                                {"key": "preis_einheit", "label": "Preis-Einh.", "width": 90},
-                                {"key": "betrag", "label": "Bestellwert", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                {"key": "gewicht_kg", "label": "Gewicht kg", "numeric": True, "renderKind": "number", "width": 100},
-                                {"key": "kontrakt_nr", "label": "Kontrakt", "width": 110, "filterable": True},
-                                {"key": "lager", "label": "Lager", "width": 90, "filterable": True},
-                                {"key": "lagerhalle", "label": "Lagerhalle", "width": 90},
-                                {"key": "lagerfach", "label": "Lagerfach", "width": 90},
-                                {"key": "mindestmenge", "label": "Min.", "numeric": True, "renderKind": "number", "width": 70},
-                                {"key": "maximalmenge", "label": "Max.", "numeric": True, "renderKind": "number", "width": 70},
-                            ],
-                            # 20 Spalten passen selten auf einen Blick; das Band zeigt
-                            # die gewaehlte Position vollstaendig unter dem Raster.
-                            "rowDetail": {}}],
-            },
-            {
-                "key": "kette", "label": "Anfrage / Angebot / Auftrag", "lazy": False, "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "anfrage_nr", "label": "Anfrage-Nr.", "type": "text"},
-                    {"key": "angebot_nr", "label": "Lieferantenangebot", "type": "text"},
-                    {"key": "auftrag_nr", "label": "Verkaufsauftrag", "type": "text",
-                     "helpText": "Bestellung aus dem Verkauf erzeugen."},
-                    {"key": "kontrakt_nummer", "label": "Kontrakt", "type": "text", "readOnly": True},
-                    {"key": "verkaufsbeleg_nummer", "label": "Verkaufsbeleg", "type": "text", "readOnly": True},
-                    {"key": "kunden_name", "label": "Kunde (Direktlieferung)", "type": "text", "readOnly": True},
-                    {"key": "direktlieferung", "label": "Direktlieferung an Kunden", "type": "boolean"},
-                    {"key": "ueberschlag_lager", "label": "Ueberschlag am Lager", "type": "boolean",
-                     "helpText": "Ware beruehrt das Lager, ohne eingelagert zu werden."},
-                ],
-            },
-            {
-                # Die Bezuege bleiben aenderbar; Kopf und Belegkette zeigen sie
-                # mit Namen und Nummer.
-                "key": "zuordnung", "label": "Zuordnung", "lazy": False, "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "niederlassung_id", "label": "Niederlassungs-ID", "type": "text"},
-                    {"key": "kontrakt_id", "label": "Kontrakt-ID", "type": "text"},
-                    {"key": "verkaufsbeleg_id", "label": "Verkaufsbeleg-ID", "type": "text"},
-                    {"key": "kunden_id", "label": "Kunden-ID", "type": "text"},
-                ],
-            },
-            {
-                "key": "zahlung", "label": "Zahlungsbedingungen", "lazy": False, "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "zahlungsbedingung", "label": "Zahlungsbedingung", "type": "text"},
-                    {"key": "zahlungsziel_tage", "label": "Nettotage", "type": "number"},
-                    {"key": "skonto1_tage", "label": "Skonto 1 Tage", "type": "number"},
-                    {"key": "skonto1_prozent", "label": "Skonto 1 %", "type": "percentage"},
-                    {"key": "skonto2_tage", "label": "Skonto 2 Tage", "type": "number"},
-                    {"key": "skonto2_prozent", "label": "Skonto 2 %", "type": "percentage"},
-                    {"key": "netto_tage", "label": "Netto-Tage (Staffel)", "type": "number"},
-                    {"key": "skonto_prozent", "label": "Skonto % (pauschal)", "type": "percentage"},
-                    {"key": "skonto_frist_tage", "label": "Skontofrist Tage", "type": "number"},
-                    {"key": "fremdwaehrung", "label": "Fremdwaehrung", "type": "text"},
-                    {"key": "umrechnungsfaktor", "label": "Umrechnungsfaktor", "type": "number"},
-                ],
-            },
-            {
-                "key": "fall", "label": "Bedarf und Fall", "lazy": False, "keepAlive": True,
-                "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "abverkauf_horizont", "label": "Abverkauf", "type": "select",
-                     "helpText": "Aktueller Abverkauf mit Bedarfsabschaetzung.",
-                     "options": [
-                         {"value": "taeglich", "label": "Taeglich"},
-                         {"value": "woechentlich", "label": "Woechentlich"},
-                         {"value": "monatlich", "label": "Monatlich"},
-                         {"value": "saisonal", "label": "Saisonal"},
-                     ]},
-                    {"key": "bedarfsmenge", "label": "Bedarfsmenge", "type": "number"},
-                    {"key": "artikelgruppe", "label": "Artikelgruppe", "type": "text"},
-                    {"key": "mindestbestellmenge", "label": "Mindestbestellmenge", "type": "number",
-                     "helpText": "Je Artikel oder Artikelgruppe — Lagerplatz und Fracht."},
-                    {"key": "maximalbestellmenge", "label": "Maximalbestellmenge", "type": "number"},
-                    {"key": "lagerplatz_opt", "label": "Lagerplatz optimieren", "type": "boolean"},
-                    {"key": "fracht_opt", "label": "Frachtkosten optimieren", "type": "boolean"},
-                    {"key": "lagerkosten_satz", "label": "Lagerkosten / Einheit", "type": "currency"},
-                    {"key": "palettenstellplatz_kosten", "label": "Palettenstellplatz", "type": "currency"},
-                    {"key": "opportunitaetskostensatz", "label": "Opportunitaetskosten Lager", "type": "currency"},
-                    {"key": "neuer_artikel", "label": "Neuer Artikel / Innovation", "type": "boolean"},
-                    {"key": "innovationshinweis", "label": "Innovationshinweis Vertrieb", "type": "textarea"},
-                    {"key": "freitext_kopf", "label": "Freitext Kopf", "type": "textarea"},
-                    {"key": "freitext_fuss", "label": "Freitext Fuss", "type": "textarea"},
-                    {"key": "notiz", "label": "Notiz", "type": "textarea"},
-                ],
-            },
-            {
-                "key": "kommunikation", "label": "Kommunikation", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "kommunikation", "label": "Nachrichten", "dataSourceKey": "kommunikation",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Kanal", "width": 100, "filterable": True},
-                                {"key": "empfaenger", "label": "Empfaenger", "width": 220},
-                                {"key": "status", "label": "Status", "width": 140},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe",
-             "permission": "einkauf.bestellung.update", "keyboardShortcut": "F2"},
-            {"key": "speichern", "label": "Speichern", "kind": "secondary", "dangerLevel": "safe",
-             "permission": "einkauf.bestellung.update", "zone": "commit", "keyboardShortcut": "Ctrl+S",
-             "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern",
-             "method": "POST",
-             "auditReasonRequired": True},
-            {"key": "versenden", "label": "Versenden", "kind": "secondary", "dangerLevel": "moderate",
-             "permission": "einkauf.bestellung.send", "requiresConfirmation": True,
-             "commandEndpoint": "/api/v1/einkauf/bestellungen/{entity_id}/versenden", "method": "POST"},
-        ],
-        "workflow": {
-            "processKey": "procure-to-pay",
-            "documentType": "purchase_order",
-            "phases": [
-                {"key": "entwurf", "label": "Entwurf"},
-                {"key": "versandt", "label": "Versendet"},
-                {"key": "teilgeliefert", "label": "Teilgeliefert"},
-                {"key": "geliefert", "label": "Geliefert"},
-                {"key": "abgeschlossen", "label": "Abgeschlossen"},
-            ],
-        },
-        "agentContract": {
-            "businessPurpose": "Fuehrende Einkaufsbestellung: Bestellfall, L3-Kopf, Positionen mit Kontrakt und Ladetermin, Skontostaffel, Bedarf und Direktlieferung.",
-            "examplePrompts": [
-                "Welcher Bestellfall gilt fuer Bestellung {entity_id}?",
-                "Wann ist Ladetermin und Liefertermin von Bestellung {entity_id}?",
-                "Welche Positionen haben noch offene Restmenge?",
-                "Ist Bestellung {entity_id} eine Direktlieferung mit Ueberschlag am Lager?",
-            ],
-            "sensitiveFields": ["zahlungsbedingung", "skonto1_prozent", "skonto2_prozent", "betrag"],
-            "testSelectors": {"screenRoot": "[data-testid='einkauf-purchase-order']", "primaryAction": "[data-testid='action-edit']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {
-            "preferredMode": "desktopDense",
-            "mobileMode": "mobileStack",
-            "touchTargetPx": 44,
-            "floorplan": "objectPage",
-            "density": "compact",
-            "contextRail": "workflow",
-            "tableProfile": "inventory",
-            "summaryPlacement": "header",
-            "stickyHeader": True,
-            "columnNavigation": "single",
-            "sectionNavigation": "anchors",
-        },
-        "interaction": {"enterMovesFocus": True},
-        "performance": {"initialPayloadBudgetKb": 56, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "einkauf"},
-    }
-
-
-def build_finance_ap_invoice_screen_definition() -> dict[str, Any]:
-    """Native ScreenDefinition fuer finance/ap-invoice (UIX-041)."""
-    definition = {
-        "schemaVersion": 1,
-        "id": "finance/ap-invoice",
-        "domain": "finance",
-        "mode": "detail",
-        "title": "Eingangsrechnung",
-        "subtitle": "Finance / Accounts Payable",
-        "adapter": {"type": "native", "sourceId": "finance/ap-invoice", "temporary": False},
-        "summaryEndpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/finance/ap/invoices/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen", "pageSize": 50},
-            {"key": "freigabe", "endpoint": "/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe", "pageSize": 25},
-        ],
-        "tabs": [
-            {
-                "key": "kopf", "label": "Rechnungs-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "beleg_nr", "label": "Beleg-Nr.", "type": "text", "readOnly": True},
-                    {"key": "kreditor", "label": "Kreditor", "type": "text"},
-                    {"key": "datum", "label": "Rechnungsdatum", "type": "date"},
-                    {"key": "faellig_am", "label": "Faellig am", "type": "date"},
-                    {"key": "brutto", "label": "Brutto", "type": "currency"},
-                    {"key": "mwst", "label": "MwSt.", "type": "currency"},
-                    {"key": "status", "label": "Status", "type": "text"},
-                ],
-            },
-            {
-                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
-                                {"key": "menge", "label": "Menge", "numeric": True, "renderKind": "number"},
-                                {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
-                            ]}],
-            },
-            {
-                "key": "freigabe", "label": "Freigabe", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "freigabe", "label": "Freigabe-Stand", "dataSourceKey": "freigabe",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "feld", "label": "Feld", "width": 180, "filterable": True},
-                                {"key": "wert", "label": "Stand", "width": 240},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {"key": "freigeben", "label": "Freigeben", "kind": "primary", "dangerLevel": "moderate", "permission": "finance.ap.freigabe", "requiresConfirmation": True, "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben", "method": "POST"},
-        ],
-        "noWorkflowReason": "Freigabe-Workflow ist tabellenbasiert — explizite Workflow-Deklaration nach vollstaendiger AP-Parity.",
-        "agentContract": {
-            "businessPurpose": "Eingangsrechnung: Kopfdaten, Positionen und Freigabe-Historie fuer AP-Buchhalter und Audit.",
-            "examplePrompts": [
-                "Was ist der Freigabe-Status von Eingangsrechnung {entity_id}?",
-                "Wann ist Eingangsrechnung {entity_id} faellig und wie hoch ist der Bruttobetrag?",
-            ],
-            "sensitiveFields": ["brutto", "mwst", "faellig_am"],
-            "testSelectors": {"screenRoot": "[data-testid='finance-ap-invoice']", "primaryAction": "[data-testid='action-freigeben']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
-        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "finance"},
-    }
-    # Preserve the existing domain transports and policies inside the new parent shell.
-    definition["actions"] = [{'key': 'freigeben',
-      'label': 'Freigeben',
-      'kind': 'primary',
-      'dangerLevel': 'moderate',
-      'permission': 'finance.ap.freigabe',
-      'enabledWhen': 'approval_can_decide',
-      'humanApprovalRequired': True,
-      'forbiddenForAgents': True,
-      'requiresConfirmation': True,
-      'commandEndpoint': '/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben',
-      'method': 'POST'}]
-    definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-freigeben']"
-    return definition
-
-
 def build_finance_ar_open_item_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer finance/ar-open-item (UIX-041)."""
     definition = {
@@ -2982,7 +2666,7 @@ def build_workspace_einkauf_screen_definition() -> dict[str, Any]:
             {"key": "preisabweichung", "label": "Preisabweichungen", "tone": "warning"},
         ],
         tiles=[
-            {"key": "rechnungspruefung", "label": "Rechnungspruefung-Abweichungen", "targetScreenId": "finance/ap-invoice", "targetFilters": {"status": "abweichung"}, "tone": "warning"},
+            {"key": "rechnungspruefung", "label": "Rechnungspruefung-Abweichungen", "targetScreenId": "beleg-liste/purchase-invoice", "targetFilters": {"status": "open"}, "tone": "warning"},
             {"key": "offene_avis", "label": "Offene Avis", "targetScreenId": "einkauf/anlieferavis", "targetFilters": {}, "tone": "neutral"},
             {"key": "rfq", "label": "RFQ / Anfragen", "targetScreenId": "einkauf/anfrage", "targetFilters": {}, "tone": "neutral"},
         ],
@@ -3044,7 +2728,7 @@ def build_workspace_fibu_screen_definition() -> dict[str, Any]:
         tiles=[
             {"key": "zahlungslauf", "label": "Zahlungslauf-Vorschlag", "targetScreenId": "finance/payment-run", "targetFilters": {}, "tone": "warning"},
             {"key": "op_debitoren", "label": "Offene Posten Debitoren", "targetScreenId": "finance/ar-open-item", "targetFilters": {"overdue": "1"}, "tone": "neutral"},
-            {"key": "eingangsrechnungen", "label": "Eingangsrechnungen", "targetScreenId": "finance/ap-invoice", "targetFilters": {}, "tone": "neutral"},
+            {"key": "eingangsrechnungen", "label": "Eingangsrechnungen", "targetScreenId": "beleg-liste/purchase-invoice", "targetFilters": {}, "tone": "neutral"},
         ],
     )
 
@@ -4956,8 +4640,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "logistik/tour-fracht-arbeitsraum": build_logistik_tour_fracht_arbeitsraum_screen_definition,
     "logistik/frachttabellen": build_logistik_frachttabellen_screen_definition,
     "logistik/versandprofile": build_logistik_versandprofile_screen_definition,
-    "einkauf/purchase-order": build_einkauf_purchase_order_screen_definition,
-    "finance/ap-invoice": build_finance_ap_invoice_screen_definition,
     "finance/ar-open-item": build_finance_ar_open_item_screen_definition,
     "lager/stock-movement": build_lager_stock_movement_screen_definition,
     "agrar/harvest-settlement": build_agrar_harvest_settlement_screen_definition,
@@ -5056,29 +4738,6 @@ _ROLLOUT_TAB_COLUMNS: dict[str, dict[str, list[dict[str, Any]]]] = {
             _txt("beleg_nr", "Beleg-Nr.", width=120),
         ],
     },
-    "finance/ap-invoice": {
-        "positionen": [
-            _txt("pos_nr", "Pos.", width=50),
-            _txt("bezeichnung", "Bezeichnung", width=200),
-            _num("menge", "Menge"),
-            _txt("einheit", "Einheit", width=70),
-            _num("einzelpreis", "Einzelpreis", render_kind="currency"),
-            _num("betrag", "Betrag", render_kind="currency"),
-            _txt("konto", "Konto", width=100),
-        ],
-        "zahlungen": [
-            _date("datum", "Datum"),
-            _num("betrag", "Betrag", render_kind="currency"),
-            _txt("zahlungsart", "Zahlungsart", width=120),
-            _txt("bank_ref", "Bank-Referenz", width=160),
-        ],
-        "belege": [
-            _txt("beleg_art", "Beleg-Art", width=100),
-            _txt("beleg_nr", "Beleg-Nr.", width=120),
-            _date("datum", "Datum"),
-            _num("betrag", "Betrag", render_kind="currency"),
-        ],
-    },
     "finance/ar-open-item": {
         "details": [
             _txt("beleg_art", "Beleg-Art", width=100),
@@ -5093,31 +4752,6 @@ _ROLLOUT_TAB_COLUMNS: dict[str, dict[str, list[dict[str, Any]]]] = {
             _num("betrag", "Betrag", render_kind="currency"),
             _txt("zahlungsart", "Zahlungsart", width=120),
             _txt("eingang_bank", "Eingang Bank", width=160),
-        ],
-    },
-    "einkauf/purchase-order": {
-        "positionen": [
-            _txt("pos_nr", "Pos.", width=50),
-            _txt("artikel_nr", "Artikel-Nr.", width=120),
-            _txt("bezeichnung", "Bezeichnung", width=200),
-            _num("menge", "Menge"),
-            _txt("einheit", "Einheit", width=70),
-            _num("einzelpreis", "Einzelpreis", render_kind="currency"),
-            _num("betrag", "Betrag", render_kind="currency"),
-            _date("lieferdatum", "Lieferdatum"),
-        ],
-        "lieferungen": [
-            _date("datum", "Datum"),
-            _txt("lieferschein_nr", "LS-Nr.", width=130),
-            _num("menge", "Menge"),
-            _txt("einheit", "Einheit", width=70),
-            _txt("lagerort", "Lagerort"),
-        ],
-        "belege": [
-            _txt("beleg_art", "Beleg-Art", width=100),
-            _txt("beleg_nr", "Beleg-Nr.", width=130),
-            _date("datum", "Datum"),
-            _num("betrag", "Betrag", render_kind="currency"),
         ],
     },
     "einkauf/supplier": {
@@ -5529,9 +5163,7 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "einkauf/angebot": ["lieferantenangebot", "einkaufsangebot"],
     "einkauf/anlieferavis": ["avis", "anlieferavis", "anlieferung"],
     "einkauf/auftragsbestaetigung": ["auftragsbestaetigung", "ab", "bestellbestaetigung"],
-    "einkauf/purchase-order": ["bestellung", "einkaufsauftrag", "po"],
     "einkauf/supplier": ["lieferant", "kreditor-stamm", "lieferantenstamm"],
-    "finance/ap-invoice": ["eingangsrechnung", "kreditorenrechnung", "rechnungseingang"],
     "finance/ar-open-item": ["offene posten", "op", "debitoren-op", "forderungen"],
     "finance/bankkonto": ["bankkonto", "bank", "kontoauszug"],
     "finance/debitor": ["debitor", "debitorenstamm", "kundenkonto"],
@@ -5667,9 +5299,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "einkauf/angebot": "/einkauf/angebote",
     "einkauf/anlieferavis": "/einkauf/anlieferavis",
     "einkauf/auftragsbestaetigung": "/einkauf/auftragsbestaetigungen",
-    "einkauf/purchase-order": "/einkauf/bestellungen",
     "einkauf/supplier": "/einkauf/lieferanten",
-    "finance/ap-invoice": "/einkauf/rechnungseingang",
     "finance/ar-open-item": "/finance/op-debitoren",
     "finance/bankkonto": "/finance/bankkonten",
     "finance/debitor": "/finance/debitoren-liste",

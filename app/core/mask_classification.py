@@ -123,7 +123,6 @@ def build_mask_registry() -> MaskRegistry:
             requires_virtual_tables=True,
             lookup_min_chars=2,
             initial_payload_budget_kb=56,
-            summary_endpoint="/api/v1/mask-rollouts/finance/ap-invoice/{invoice_id}/screen-summary",
             notes="Rollout Pilot Wave 44; Legacy fuer Neuanlage.",
         ),
         MaskClassification(
@@ -342,7 +341,6 @@ def build_mask_registry() -> MaskRegistry:
             requires_virtual_tables=True,
             lookup_min_chars=2,
             initial_payload_budget_kb=56,
-            summary_endpoint="/api/v1/mask-rollouts/einkauf/purchase-order/{bestellung_id}/screen-summary",
             notes="Rollout Pilot Wave 46.",
         ),
         MaskClassification(

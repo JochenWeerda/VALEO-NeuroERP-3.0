@@ -259,14 +259,14 @@ def build_dashboard_einkauf_screen_definition() -> dict[str, Any]:
         business_purpose="Einkaufslage mit KPIs und Sprung in Bestell- und Avis-Masken.",
         example_prompts=["Wie viele offene Bestellungen gibt es?", "Zeige ueberfaellige Lieferungen."],
         test_id="dashboard-einkauf",
-        data_sources=[cockpit_entity_source("/api/v1/purchase-orders/statistics")],
+        data_sources=[cockpit_entity_source("/api/v1/belege/purchase_order/kennzahlen")],
         summary=[
-            {"key": "open_orders", "label": "Offene Bestellungen", "tone": "warning"},
-            {"key": "volume", "label": "Einkaufsvolumen", "tone": "neutral"},
-            {"key": "suppliers", "label": "Aktive Lieferanten", "tone": "neutral"},
+            {"key": "offen", "label": "Offene Bestellungen", "tone": "warning"},
+            {"key": "volumen", "label": "Einkaufsvolumen", "tone": "neutral"},
+            {"key": "partner", "label": "Aktive Lieferanten", "tone": "neutral"},
         ],
         tiles=[
-            cockpit_nav_tile("bestellungen", "Bestellungen", target_screen_id="einkauf/purchase-order"),
+            cockpit_nav_tile("bestellungen", "Bestellungen", target_screen_id="beleg-liste/purchase-order"),
             cockpit_nav_tile("avis", "Anlieferavis", target_screen_id="einkauf/anlieferavis"),
             cockpit_nav_tile("workspace", "Einkauf-Cockpit", target_screen_id="workspace/einkauf"),
         ],
@@ -705,17 +705,17 @@ def build_workspace_einkauf_screen_definition() -> dict[str, Any]:
         business_purpose="Rollen-Startseite Einkauf — offene Bestellungen, Avis und Preisabweichungen.",
         example_prompts=["Was steht heute im Einkauf an?", "Zeige offene Bestellungen."],
         test_id="workspace-einkauf",
+        # Kennzahlen aus DocFlow; Avis und Preisabweichungen haben keine Quelle in diesem Weg - nicht vorgetaeuscht.
         summary=[
-            {"key": "offene_bestellungen", "label": "Offene Bestellungen", "tone": "neutral"},
-            {"key": "avis_heute", "label": "Avis heute", "tone": "neutral"},
-            {"key": "preisabweichung", "label": "Preisabweichungen", "tone": "warning"},
+            {"key": "offen", "label": "Offene Bestellungen", "tone": "neutral"},
+            {"key": "volumen", "label": "Einkaufsvolumen", "tone": "neutral"},
         ],
         tiles=[
-            cockpit_nav_tile("rechnungspruefung", "Rechnungspruefung", target_screen_id="finance/ap-invoice", tone="warning"),
+            cockpit_nav_tile("rechnungspruefung", "Rechnungspruefung", target_screen_id="beleg-liste/purchase-invoice", tone="warning"),
             cockpit_nav_tile("offene_avis", "Offene Avis", target_screen_id="einkauf/anlieferavis"),
             cockpit_nav_tile("rfq", "RFQ / Anfragen", target_screen_id="einkauf/anfrage"),
         ],
-        data_sources=[cockpit_entity_source("/api/v1/purchase-orders/statistics")],
+        data_sources=[cockpit_entity_source("/api/v1/belege/purchase_order/kennzahlen")],
         actions=[cockpit_refresh_action(permission="procurement.read")],
         context_rail="copilot",
     )

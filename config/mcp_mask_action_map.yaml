@@ -5,8 +5,8 @@ sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 796
-    screens_with_actions: 404
+    actions: 793
+    screens_with_actions: 402
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -25,7 +25,6 @@ mcp_write_tools:
 - reporting.bonus.calculate
 - reporting.query.import_signed
 - logistik.tour.anlegen
-- einkauf.bestellung.speichern
 - hr.bewerbung.speichern
 - hr.einwilligung.anlegen
 - hr.onboarding.speichern
@@ -44,7 +43,6 @@ mcp_write_tools:
 - agrar.feed_analysis.transition
 - qualitaet.reklamation.abschliessen
 - lager.inventur.propose_opening
-- einkauf.bestellung.versenden
 - einkauf.angebot.bestellen
 - einkauf.anlieferavis.wareneingang
 - lager.stock_movement.stornieren
@@ -95,13 +93,13 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 315
-  mask_mutations_considered: 256
+  mask_actions_considered: 312
+  mask_mutations_considered: 253
   by_coverage:
-    blocked_human_only: 80
+    blocked_human_only: 79
     blocked_unreleased: 2
     local_ui: 59
-    mapped: 40
+    mapped: 38
     mapped_generic: 128
     mapped_propose_only: 1
     mapped_read: 1
@@ -2164,27 +2162,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:einkauf/purchase-order:speichern
-  mask: einkauf/purchase-order
-  domain: einkauf
-  action_key: speichern
-  label: Speichern
-  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/actions/speichern
-  command: null
-  mcp_tool_id: einkauf.bestellung.speichern
-  coverage: mapped
-  notes: MCP-MASK-CE-BATCH2-20261009; CE /api/v1/einkauf/bestellungen/{entity_id}/actions/speichern; Kopf-Felder
-    ohne Status/Summen; Token-Mandant.
-- mask_action_id: mask:einkauf/purchase-order:versenden
-  mask: einkauf/purchase-order
-  domain: einkauf
-  action_key: versenden
-  label: Versenden
-  command_endpoint: /api/v1/einkauf/bestellungen/{entity_id}/versenden
-  command: null
-  mcp_tool_id: einkauf.bestellung.versenden
-  coverage: mapped
-  notes: MCP-MASK-WRITES-TOP-20261008; Versand ohne Obligo-Journal.
 - mask_action_id: mask:einkauf/supplier:bearbeiten
   mask: einkauf/supplier
   domain: einkauf
@@ -2288,17 +2265,6 @@ mappings:
   mcp_tool_id: mask.action.execute
   coverage: mapped_generic
   notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
-- mask_action_id: mask:finance/ap-invoice:freigeben
-  mask: finance/ap-invoice
-  domain: finance
-  action_key: freigeben
-  label: Freigeben
-  command_endpoint: /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
-  command: null
-  mcp_tool_id: null
-  coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
 - mask_action_id: mask:finance/ar-open-item:mahnen
   mask: finance/ar-open-item
   domain: finance
@@ -3359,5 +3325,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 80; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 79; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

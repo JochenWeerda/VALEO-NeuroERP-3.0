@@ -138,3 +138,22 @@ def test_eingangsrechnung_fuer_freigabevorschlag_aus_docflow(w):
     with pytest.raises(HTTPException) as fehler:
         _load_ap_invoice(w["db"], "ER-5", "anderer-mandant")
     assert fehler.value.status_code == 404
+
+
+def test_kennzahlen_der_bestellungen_fuer_die_cockpits(w):
+    """GET /belege/purchase_order/kennzahlen - ersetzt die alte Statistik, deren Schluessel nie zu den Kacheln passten."""
+    from fastapi import HTTPException
+
+    from app.api.v1.endpoints.belege import beleg_kennzahlen
+
+    _beleg(w, "purchase_order", "B-1", "open", lieferant="L-7")
+    _beleg(w, "purchase_order", "B-2", "completed", lieferant="L-8")
+    _beleg(w, "purchase_order", "B-3", "reversed", lieferant="L-9")
+    _beleg(w, "purchase_order", "B-4", "draft", lieferant="L-9")
+    zahlen = beleg_kennzahlen("purchase_order", tenant_id=w["t"], db=w["db"], nutzer={"sub": "x", "roles": ["admin"]})
+    assert zahlen == {"offen": 1, "volumen": 214.0, "partner": 2}
+    ohne_preise = beleg_kennzahlen("goods_receipt", tenant_id=w["t"], db=w["db"], nutzer={"sub": "x", "roles": ["admin"]})
+    assert ohne_preise["volumen"] is None  # Wareneingang traegt keine Preise
+    with pytest.raises(HTTPException) as fehler:
+        beleg_kennzahlen("gibt_es_nicht", tenant_id=w["t"], db=w["db"], nutzer={"sub": "x", "roles": ["admin"]})
+    assert fehler.value.status_code == 404

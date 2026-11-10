@@ -16,14 +16,13 @@ from app.core.mask_screen_summary_common import (
     build_tab_page,
     format_optional_date,
 )
-from app.documents.router_helpers import eigener_beleg, get_repository
 from app.infrastructure.models import StockMovement as StockMovementModel
 
 
 # Nur diese Masken lesen Tabellen mit UUID-typisiertem Schluessel
 # (domain_einkauf.bestellungen, domain_einkauf.lieferanten). Dort bricht eine
 # Nicht-UUID den Vergleich in PostgreSQL ab; alle anderen fuehren Text-IDs.
-_UUID_KEYED_SCREENS = frozenset({"einkauf/purchase-order", "einkauf/supplier"})
+_UUID_KEYED_SCREENS = frozenset({"einkauf/supplier"})
 
 
 def _require_rollout_spec(screen_id: str, entity_id: str) -> MaskRolloutSpec:
@@ -49,9 +48,7 @@ class MaskRolloutSummaryService:
         loaders = {
             "lager/stock-movement": self._stock_movement_summary,
             "lager/article-stock": self._article_stock_summary,
-            "finance/ap-invoice": self._ap_invoice_summary,
             "finance/ar-open-item": self._ar_open_item_summary,
-            "einkauf/purchase-order": self._purchase_order_summary,
             "einkauf/supplier": self._supplier_summary,
             "crm/opportunity": self._opportunity_summary,
             "agrar/harvest-settlement": self._harvest_settlement_summary,
@@ -82,9 +79,7 @@ class MaskRolloutSummaryService:
         tab_loaders = {
             "lager/stock-movement": self._stock_movement_tabs,
             "lager/article-stock": self._article_stock_tabs,
-            "finance/ap-invoice": self._ap_invoice_tabs,
             "finance/ar-open-item": self._ar_open_item_tabs,
-            "einkauf/purchase-order": self._purchase_order_tabs,
             "einkauf/supplier": self._supplier_tabs,
             "crm/opportunity": self._opportunity_tabs,
             "agrar/harvest-settlement": self._harvest_settlement_tabs,
@@ -271,73 +266,6 @@ class MaskRolloutSummaryService:
 
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
-    def _ap_invoice_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
-        repo = get_repository(self.db)
-        invoice = eigener_beleg("ap_invoice", entity_id, self.tenant_id, repo)
-        if not invoice:
-            raise HTTPException(status_code=404, detail="AP Invoice not found")
-        return build_screen_summary_payload(
-            screen_id=spec.screen_id,
-            entity_id=entity_id,
-            tenant_id=self.tenant_id,
-            title=str(invoice.get("number") or entity_id),
-            subtitle=str(invoice.get("customerId") or ""),
-            summary={
-                "status": str(invoice.get("semantic_status") or invoice.get("status") or ""),
-                "date": str(invoice.get("date") or ""),
-                "due_date": str(invoice.get("dueDate") or ""),
-                "total_gross": float(invoice.get("totalGross") or 0),
-                "line_count": len(invoice.get("lines") or []),
-            },
-            available_tabs=list(spec.available_tabs),
-            api_prefix=spec.api_prefix,
-            lazy_tab_keys=list(spec.lazy_tabs),
-            initial_payload_budget_kb=spec.budget_kb,
-            entity_key="invoice_id",
-            actions=[{"key": "edit", "label": "Bearbeiten", "permission": "finance.ap.update"}],
-        )
-
-    def _ap_invoice_tabs(
-        self,
-        spec: MaskRolloutSpec,
-        entity_id: str,
-        tab_key: str,
-        *,
-        page: int,
-        limit: int,
-        q: str | None,
-        sort: str | None = None,
-        sort_dir: str | None = None,
-        filter_plan: dict | None = None,
-    ) -> dict[str, Any]:
-        repo = get_repository(self.db)
-        invoice = eigener_beleg("ap_invoice", entity_id, self.tenant_id, repo)
-        if not invoice:
-            raise HTTPException(status_code=404, detail="AP Invoice not found")
-        if tab_key == "positionen":
-            lines = invoice.get("lines") or []
-            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_position_aliases
-
-            items = [
-                ap_invoice_position_aliases(
-                    {
-                        "position": idx + 1,
-                        "description": line.get("description") or line.get("itemDescription") or "",
-                        "quantity": float(line.get("quantity") or 0),
-                        "unit_price": float(line.get("unitPrice") or 0),
-                        "total": float(line.get("total") or line.get("lineTotal") or 0),
-                    }
-                )
-                for idx, line in enumerate(lines)
-            ]
-            return build_tab_page(tab_key=tab_key, table_key="invoice_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        if tab_key == "freigabe":
-            from app.api.v1.schemas.mask_entity_contracts import ap_invoice_freigabe_zeilen
-
-            items = ap_invoice_freigabe_zeilen(invoice)
-            return build_tab_page(tab_key=tab_key, table_key="approval", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-
     def _resolve_op_schema(self) -> str:
         row = self.db.execute(
             text(
@@ -407,96 +335,6 @@ class MaskRolloutSummaryService:
             "zahlungsart": row["payment_type"], "waehrung": row["waehrung"],
         }) for row in rows]
         return build_tab_page(tab_key=tab_key, table_key="settlements", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-
-    def _purchase_order_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
-        row = self.db.execute(
-            text(
-                """
-                SELECT b.id, b.bestellnummer, b.lieferant_id, l.firmenname AS lieferant_name,
-                       b.status, b.bestelldatum, b.brutto_summe, b.netto_summe, b.waehrung,
-                       b.bestellfall
-                FROM domain_einkauf.bestellungen b
-                LEFT JOIN domain_einkauf.lieferanten l ON l.id = b.lieferant_id
-                WHERE b.tenant_id = :tenant_id AND b.id = :bestellung_id
-                """
-            ),
-            {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
-        ).mappings().first()
-        if not row:
-            raise HTTPException(status_code=404, detail="Purchase order not found")
-        return build_screen_summary_payload(
-            screen_id=spec.screen_id,
-            entity_id=entity_id,
-            tenant_id=self.tenant_id,
-            title=str(row["bestellnummer"] or entity_id),
-            subtitle=str(row["lieferant_name"] or row["lieferant_id"] or ""),
-            summary={
-                "status": str(row["status"] or ""),
-                "bestellfall": str(row["bestellfall"] or ""),
-                "bestelldatum": format_optional_date(row["bestelldatum"]),
-                "gesamtbetrag": float(row["brutto_summe"] or row["netto_summe"] or 0),
-                "waehrung": str(row["waehrung"] or "EUR"),
-            },
-            available_tabs=list(spec.available_tabs),
-            api_prefix=spec.api_prefix,
-            lazy_tab_keys=list(spec.lazy_tabs),
-            initial_payload_budget_kb=spec.budget_kb,
-            entity_key="bestellung_id",
-            actions=[{"key": "edit", "label": "Bearbeiten", "permission": "einkauf.bestellung.update"}],
-        )
-
-    def _purchase_order_tabs(
-        self,
-        spec: MaskRolloutSpec,
-        entity_id: str,
-        tab_key: str,
-        *,
-        page: int,
-        limit: int,
-        q: str | None,
-        sort: str | None = None,
-        sort_dir: str | None = None,
-        filter_plan: dict | None = None,
-    ) -> dict[str, Any]:
-        if tab_key == "positionen":
-            rows = self.db.execute(
-                text(
-                    """
-                    SELECT p.pos_nr, p.artikel_nr, p.artikel_bezeichnung AS bezeichnung,
-                           p.lieferanten_artnr, p.menge, p.menge_geliefert, p.menge_offen,
-                           p.einheit, p.einzelpreis, p.preis_einheit, p.netto_betrag AS betrag,
-                           p.gebinde_menge, p.gebinde_einheit, p.gewicht_kg, p.kontrakt_nr,
-                           p.lagerort AS lager, p.lagerhalle, p.lagerfach,
-                           p.mindestmenge, p.maximalmenge
-                    FROM domain_einkauf.bestellung_positionen p
-                    JOIN domain_einkauf.bestellungen b ON b.id = p.bestellung_id
-                    WHERE b.tenant_id = :tenant_id AND p.bestellung_id = :bestellung_id
-                    ORDER BY p.pos_nr
-                    """
-                ),
-                {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
-            ).mappings().all()
-            from app.api.v1.schemas.mask_entity_contracts import purchase_order_position_aliases
-
-            items = [purchase_order_position_aliases(dict(r)) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="po_lines", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        if tab_key == "kommunikation":
-            rows = self.db.execute(
-                text(
-                    """
-                    SELECT kanal, empfaenger, versendet_am, status
-                    FROM domain_einkauf.bestellung_kommunikation
-                    WHERE tenant_id = :tenant_id AND bestellung_id = :bestellung_id
-                    ORDER BY versendet_am DESC NULLS LAST
-                    """
-                ),
-                {"tenant_id": self.tenant_id, "bestellung_id": entity_id},
-            ).mappings().all()
-            from app.api.v1.schemas.mask_entity_contracts import purchase_order_comm_aliases
-
-            items = [purchase_order_comm_aliases(dict(r)) for r in rows]
-            return build_tab_page(tab_key=tab_key, table_key="po_comms", items=items, page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
-        return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
     def _supplier_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         row = self.db.execute(

@@ -44,7 +44,6 @@ from app.services.calendar_projection_service import CalendarProjectionService
 from app.services.mask_action_runtime_service import _write_audit
 from app.services.mcp_tool_registry_service import mcp_tool_registry_service
 from app.services.mobile_sync_service import MobileSyncService
-from app.services.procurement_service import ProcurementService
 from app.services.production_control_service import ProductionControlService
 from app.services.rations_lifecycle_service import (
     RationLifecycleConflict,
@@ -101,13 +100,6 @@ class LeadQualifyInput(BaseModel):
 class BestellungStatusInput(BaseModel):
     model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
     bestellung_id: str = Field(min_length=1, max_length=64)
-
-
-class BestellungVersendenInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    bestellung_id: str = Field(min_length=1, max_length=64)
-    versand_art: Literal["email", "fax", "edi", "post", "manuell"] = "email"
-    empfaenger: str | None = Field(default=None, max_length=200)
 
 
 class AngebotBestellenInput(BaseModel):
@@ -234,20 +226,6 @@ class TourAnlegenInput(BaseModel):
     driver_id: str | None = Field(default=None, max_length=64)
     notes: str | None = Field(default=None, max_length=2000)
     delivery_note_ref: str | None = Field(default=None, max_length=80)
-    reason: str = Field(min_length=3, max_length=500)
-
-
-class BestellungSpeichernInput(BaseModel):
-    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
-    bestellung_id: str = Field(min_length=1, max_length=64)
-    lieferdatum_wunsch: date | None = None
-    lieferdatum_zugesagt: date | None = None
-    ladetermin: date | None = None
-    ladetermin_ab: date | None = None
-    versand_art: Literal["email", "fax", "edi", "post", "telefon", "manuell"] | None = None
-    unsere_referenz: str | None = Field(default=None, max_length=120)
-    ihre_referenz: str | None = Field(default=None, max_length=120)
-    notiz: str | None = Field(default=None, max_length=4000)
     reason: str = Field(min_length=3, max_length=500)
 
 
@@ -749,8 +727,6 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _query_import_signed(db, request, actor, tenant)
     if request.tool_name == "logistik.tour.anlegen":
         return _tour_anlegen(db, request, actor, tenant)
-    if request.tool_name == "einkauf.bestellung.speichern":
-        return _bestellung_speichern(db, request, actor, tenant)
     if request.tool_name == "hr.bewerbung.speichern":
         return _bewerbung_speichern(db, request, actor, tenant)
     if request.tool_name == "hr.einwilligung.anlegen":
@@ -801,8 +777,6 @@ def execute_mcp_tool(db: Session, request: ToolExecutionRequest, user: dict, ten
         return _bestellung_list(db, request, actor, tenant)
     if request.tool_name == "einkauf.bestellung.status":
         return _bestellung_status(db, request, actor, tenant)
-    if request.tool_name == "einkauf.bestellung.versenden":
-        return _bestellung_versenden(db, request, actor, tenant)
     if request.tool_name == "einkauf.angebot.bestellen":
         return _angebot_bestellen(db, request, actor, tenant)
     if request.tool_name == "einkauf.anlieferavis.wareneingang":
@@ -1781,92 +1755,6 @@ def _tour_anlegen(db: Session, request: ToolExecutionRequest, actor: str, tenant
     except HTTPException:
         db.rollback()
         raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
-
-
-def _bestellung_speichern(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
-    """Mask-parity write: update PO header fields in authenticated tenant."""
-    try:
-        opened = BestellungSpeichernInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid einkauf.bestellung.speichern parameters") from exc
-    parameters = opened.model_dump(mode="json", exclude_none=True)
-    patch = {
-        k: v for k, v in parameters.items()
-        if k not in ("bestellung_id", "reason") and v is not None
-    }
-    if not patch:
-        raise HTTPException(422, "At least one purchase-order header field is required")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        resolved = db.execute(text("""
-            SELECT id::text AS id, bestellnummer, status
-            FROM domain_einkauf.bestellungen
-            WHERE tenant_id::text = :tenant
-              AND (id::text = :bid OR bestellnummer = :bid)
-            FOR SHARE
-            LIMIT 1
-        """), {"tenant": tenant, "bid": opened.bestellung_id}).mappings().first()
-        if not resolved:
-            raise HTTPException(404, "Purchase order not found in the authenticated tenant")
-        bestellung_id = str(resolved["id"])
-        if request.mode != "execute":
-            db.rollback()
-            return {
-                "success": True,
-                "mode": request.mode,
-                "proposedChanges": {
-                    **parameters,
-                    "bestellung_id": bestellung_id,
-                    "bestellnummer": resolved.get("bestellnummer"),
-                    "status": resolved.get("status"),
-                    "patch": patch,
-                },
-            }
-        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            updated = ProcurementService(child, tenant).update_bestellung(bestellung_id, patch)
-        audit_id = _write_audit(
-            db,
-            tenant_id=tenant,
-            action_key=request.tool_name,
-            entity_type="einkauf_bestellung",
-            entity_id=bestellung_id,
-            audit_reason=opened.reason,
-            idempotency_key=request.idempotency_key,
-            summary=f"Bestellung {resolved.get('bestellnummer') or bestellung_id} gespeichert by {actor}",
-        )
-        result = {
-            "success": True,
-            "mode": "execute",
-            "replayed": False,
-            "bestellung_id": bestellung_id,
-            "bestellnummer": resolved.get("bestellnummer"),
-            "status": updated.get("status"),
-            "auditEntryId": audit_id,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except EntityNotFoundError as exc:
-        db.rollback()
-        raise HTTPException(404, "Purchase order not found in the authenticated tenant") from exc
     except Exception as exc:
         db.rollback()
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
@@ -4016,89 +3904,6 @@ def _qualify_lead(db: Session, request: ToolExecutionRequest, actor: str, tenant
     except HTTPException:
         db.rollback()
         raise
-    except Exception as exc:
-        db.rollback()
-        raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
-
-
-def _bestellung_versenden(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
-    """Send purchase order via ProcurementService (email/fax/edi/manual) — no obligo journal."""
-    try:
-        opened = BestellungVersendenInput.model_validate(request.parameters)
-    except ValidationError as exc:
-        raise HTTPException(422, "Invalid purchase order send parameters") from exc
-    parameters = opened.model_dump(mode="json")
-    if request.mode == "execute" and not (request.idempotency_key or "").strip():
-        raise HTTPException(422, "execute requires an idempotency_key")
-    fingerprint = hashlib.sha256(json.dumps(parameters, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
-    try:
-        if request.mode == "execute":
-            _advisory_lock(db, tenant, request.tool_name, request.idempotency_key)  # type: ignore[arg-type]
-            replayed = _replay_or_none(
-                db, tenant, request.tool_name, request.idempotency_key, actor, fingerprint  # type: ignore[arg-type]
-            )
-            if replayed is not None:
-                return replayed
-        resolved = db.execute(text("""
-            SELECT id::text AS id, bestellnummer, status
-            FROM domain_einkauf.bestellungen
-            WHERE tenant_id::text = :tenant
-              AND (id::text = :bid OR bestellnummer = :bid)
-            FOR SHARE
-            LIMIT 1
-        """), {"tenant": tenant, "bid": opened.bestellung_id}).mappings().first()
-        if not resolved:
-            raise HTTPException(404, "Purchase order not found in the authenticated tenant")
-        bestellung_id = str(resolved["id"])
-        if request.mode != "execute":
-            return {
-                "success": True,
-                "mode": request.mode,
-                "proposedChanges": {
-                    **parameters,
-                    "bestellung_id": bestellung_id,
-                    "bestellnummer": resolved.get("bestellnummer"),
-                    "status": resolved.get("status"),
-                },
-            }
-        # ProcurementService commits; confine to SAVEPOINT so audit/replay stay atomic.
-        with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-            sent = ProcurementService(child, tenant).versende_bestellung_svc(
-                bestellung_id, opened.versand_art, opened.empfaenger, nutzer={"sub": actor},
-            )
-        versand = sent.get("versand") if isinstance(sent, dict) else None
-        versand_status = (
-            str(versand.get("status")) if isinstance(versand, dict) and versand.get("status") is not None
-            else "gesendet"
-        )
-        audit_id = _write_audit(
-            db, tenant_id=tenant, action_key=request.tool_name,
-            entity_type="einkauf_bestellung", entity_id=bestellung_id,
-            audit_reason="MCP purchase order send", idempotency_key=request.idempotency_key,
-            summary=f"Bestellung {sent.get('bestellnummer') or bestellung_id} versandt ({opened.versand_art}) by {actor}",
-        )
-        result = {
-            "success": True,
-            "mode": "execute",
-            "replayed": False,
-            "bestellung_id": bestellung_id,
-            "bestellnummer": sent.get("bestellnummer"),
-            "versand_status": versand_status,
-            "versand_art": opened.versand_art,
-            "auditEntryId": audit_id,
-        }
-        _store_execution(
-            db, tenant=tenant, tool=request.tool_name, key=request.idempotency_key,  # type: ignore[arg-type]
-            actor=actor, fingerprint=fingerprint, result=result,
-        )
-        db.commit()
-        return result
-    except HTTPException:
-        db.rollback()
-        raise
-    except EntityNotFoundError as exc:
-        db.rollback()
-        raise HTTPException(404, "Purchase order not found in the authenticated tenant") from exc
     except Exception as exc:
         db.rollback()
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc

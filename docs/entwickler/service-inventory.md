@@ -287,7 +287,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `procurement_service` | Service layer for Einkauf/Procurement domain. |
 | `production_control_service` | Tenant-scoped production control projection over canonical ERP sources. |
 | `prompt_pack_registry` | Prompt Pack Registry -- NC-G5 |
-| `purchase_order_service` | Service layer for purchase-order compat routes. |
 | `qs_charge_service` | QS-CHARGE-001: Qualitätsprotokoll → Preisabschlag-Kalkulation. |
 | `query_center_service` | Safe query center over explicitly approved reporting read models. |
 | `rations_controlling_service` | Idempotent daily feeding-control observations and variance read model. |

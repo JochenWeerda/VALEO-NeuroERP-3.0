@@ -20,11 +20,10 @@ from sqlalchemy import text
 
 from app.api.v1.endpoints import compat, portal_kundenwege
 from app.core.database import SessionLocal
-from app.core.exceptions import EntityNotFoundError, register_domain_exception_handlers
+from app.core.exceptions import register_domain_exception_handlers
 from app.documents import router_helpers
 from app.documents.repository import DocumentRepository
 from app.services.compat_helpers import list_docs
-from app.services.purchase_order_service import PurchaseOrderService
 from app.auth.portal_kunde import INTERNE_RECHTE, PortalKunde, portal_kunde
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
@@ -155,15 +154,3 @@ def test_die_verkaufsbruecke_liefert_nur_den_eigenen_mandanten(haus):
     gefunden = _nummern(antwort.json()["data"])
     assert eigen in gefunden
     assert fremd not in gefunden and alt not in gefunden
-
-
-# ── Bestellungen ──────────────────────────────────────────────────────────────
-
-
-def test_ohne_eigene_bestellungen_kommen_keine_fremden(haus):
-    fremd = haus["ablegen"]("purchase_order", haus["anderer"])
-    with SessionLocal() as db:
-        dienst = PurchaseOrderService(db, haus["mandant"])
-        assert dienst.list_purchase_orders(page_size=5000)["data"] == []
-        with pytest.raises(EntityNotFoundError):
-            dienst.get_purchase_order(fremd)

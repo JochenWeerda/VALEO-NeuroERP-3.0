@@ -278,8 +278,6 @@
   "mask:einkauf/auftragsbestaetigung:pruefen",
   "mask:einkauf/auftragsbestaetigungen:bestaetigen",
   "mask:einkauf/auftragsbestaetigungen:pruefen",
-  "mask:einkauf/purchase-order:speichern",
-  "mask:einkauf/purchase-order:versenden",
   "mask:einkauf/supplier:bearbeiten",
   "mask:einkauf/supplier:entsperren",
   "mask:einkauf/supplier:sperren",
@@ -289,7 +287,6 @@
   "mask:einkauf/zahlungsbedingungen:bearbeiten",
   "mask:einkauf/zahlungsbedingungen:deaktivieren",
   "mask:einkauf/zahlungsbedingungen:neu",
-  "mask:finance/ap-invoice:freigeben",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bank-abgleich:import",
   "mask:finance/bankkonto:bearbeiten",
@@ -376,7 +373,7 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 964,
+  "kein_endpunkt": 963,
   "pfadparameter": 6
  }
 }

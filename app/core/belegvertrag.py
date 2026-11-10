@@ -381,44 +381,6 @@ def _pruefe_preise(beleg: Beleg) -> list[str]:
 _KUNDE = {"customer_name": "partner.name", "customer_number": "partner.nummer"}
 
 ABBILDUNG: dict[str, dict[str, dict[str, str]]] = {
-    "einkauf/purchase-order": {
-        "kopf": {
-            "bestellnummer": "beleg_nr", "status": "status", "lieferant_nr": "partner.nummer",
-            "lieferant_name": "partner.name", "bestelldatum": "belegdatum", "waehrung": "waehrung",
-            "netto_summe": "summen.netto", "brutto_summe": "summen.brutto",
-            "bestellfall": "baustein:bestellfall", "kreditor_konto": "baustein:kontierung",
-            "ansprechpartner": "baustein:kontakt", "niederlassung_name": "baustein:organisation",
-            "kostenstelle": "baustein:organisation", "kommission": "baustein:organisation",
-            "erstellt_von": "baustein:organisation", "lieferdatum_wunsch": "baustein:lieferung",
-            "lieferdatum_zugesagt": "baustein:lieferung", "ladetermin_ab": "baustein:lieferung",
-            "ladetermin": "baustein:lieferung", "lade_datum": "baustein:lieferung",
-            "incoterms": "baustein:lieferung", "versand_art": "baustein:lieferung",
-            "lieferadresse": "baustein:lieferung", "unsere_referenz": "baustein:referenzen",
-            "ihre_referenz": "baustein:referenzen",
-        },
-        "positionen": {
-            "pos_nr": "positionen[].pos_nr", "artikel_nr": "positionen[].artikel_nr",
-            "bezeichnung": "positionen[].bezeichnung", "menge": "positionen[].menge",
-            "menge_geliefert": "positionen[].menge_uebernommen", "menge_offen": "positionen[].menge_offen",
-            "einheit": "positionen[].einheit", "einzelpreis": "positionen[].einzelpreis",
-            "betrag": "positionen[].netto", "lieferanten_artnr": "baustein:einkauf",
-            "gebinde_menge": "baustein:gebinde", "gebinde_einheit": "baustein:gebinde",
-            "preis_einheit": "baustein:gebinde", "gewicht_kg": "baustein:gebinde",
-            "kontrakt_nr": "positionen[].kontrakt", "lager": "baustein:lager", "lagerhalle": "baustein:lager",
-            "lagerfach": "baustein:lager", "mindestmenge": "baustein:bestellfall",
-            "maximalmenge": "baustein:bestellfall",
-        },
-    },
-    "finance/ap-invoice": {
-        "kopf": {
-            "beleg_nr": "beleg_nr", "kreditor": "partner.name", "datum": "belegdatum", "status": "status",
-            "brutto": "summen.brutto", "mwst": "summen.steuer", "faellig_am": "baustein:zahlung",
-        },
-        "positionen": {
-            "pos_nr": "positionen[].pos_nr", "bezeichnung": "positionen[].bezeichnung",
-            "menge": "positionen[].menge", "betrag": "positionen[].netto",
-        },
-    },
 }
 
 _LISTEN: dict[str, type[BaseModel]] = {

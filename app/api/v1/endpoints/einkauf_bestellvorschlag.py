@@ -45,20 +45,18 @@ from __future__ import annotations
 from datetime import date
 from typing import Any, Optional
 
-from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
 from pydantic import BaseModel, ConfigDict, ConfigDict as _ConfigDict, Field
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.api.v1.command_handlers import procurement as command_handlers
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import ConflictError, EntityNotFoundError
 from app.auth.deps import get_current_user
 from app.api.v1.schemas.bestellvorschlag_schemas import GespeicherterVorschlagOut, VorschlagsZeileOut
-from app.services.mask_action_runtime_service import MaskActionResult
-from app.services.procurement_service import BESTELLUNG_UPDATE_KEYS, ProcurementService
+from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
@@ -165,7 +163,6 @@ class VorschlagSaveRequest(BaseModel):
 
 
 # Canonical input schema is shared with the command implementation.
-BestellungCreate = command_handlers.BestellungCreate
 
 
 class LagerKontenzuordnungCreate(BaseModel):
@@ -318,40 +315,6 @@ class BestellungAusAuftragOut(BaseSchema):
         default_factory=list,
         description="Positionen, die der Bestand bereits deckt — sie entstehen nicht.",
     )
-
-
-@router.post(
-    "/einkauf/bestellungen/aus-auftrag",
-    status_code=201,
-    summary="Bestellung aus Verkaufsauftrag",
-    response_model=BestellungAusAuftragOut, dependencies=SCHREIBEN["EINKAUF"])
-async def bestellung_aus_auftrag(
-    payload: BestellungAusAuftragIn,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    """Aus einem Verkaufsauftrag eine Bestellung machen.
-
-    Ohne Ueberschlag geht die Ware vom Lieferanten direkt zum Kunden: bestellt
-    wird die volle Auftragsmenge, Lieferadresse ist die des Kunden. Mit
-    Ueberschlag laeuft sie ueber den eigenen Hof, der Bestand deckt einen Teil,
-    und bestellt wird nur die Fehlmenge.
-
-    Der Auftrag bleibt am Beleg stehen. Ohne diesen Rueckverweis weiss spaeter
-    niemand mehr, fuer wen die Ware kam — und bei einer Direktlieferung steht
-    sie nie im eigenen Lager, wo man nachsehen koennte.
-    """
-    try:
-        return _svc(db, tenant_id).bestellung_aus_auftrag(
-            payload.auftrag_id,
-            ueberschlag_lager=payload.ueberschlag_lager,
-            lieferant_id=payload.lieferant_id,
-            lieferdatum=payload.lieferdatum,
-        )
-    except EntityNotFoundError as exc:
-        raise _not_found(exc, "Verkaufsauftrag") from exc
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 class BedarfsVorschlagOut(BaseSchema):
@@ -752,27 +715,6 @@ async def list_bestellungen(
     return _svc(db, tenant_id).list_bestellungen(lieferant_id, status, von, bis)
 
 
-@router.post("/einkauf/bestellungen/import", summary="Bestellungen importieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def import_bestellungen(
-    file: UploadFile = File(...),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    # Bis 20.10.2026 las der Weg die Datei, meldete "Bestellungen werden angelegt" und legte nichts an.
-    raise HTTPException(501, "Der Bestellimport ist nicht angebunden; Bestellungen bitte einzeln anlegen.")
-
-
-@router.post("/einkauf/bestellungen", status_code=201, summary="Bestellung anlegen",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def create_bestellung(
-    data: BestellungCreate,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    return _svc(db, tenant_id).create_bestellung(data.model_dump())
-
-
 @router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
     response_model=EinkaufBestellungOut
 )
@@ -787,57 +729,6 @@ async def get_bestellung(
         raise HTTPException(404, "Bestellung nicht gefunden")
 
 
-@router.put("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung aktualisieren",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def update_bestellung(
-    bestellung_id: str,
-    data: dict[str, Any],
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    try:
-        return _svc(db, tenant_id).update_bestellung(bestellung_id, data)
-    except EntityNotFoundError:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-
-
-_PO_SAVE_ALLOWED = frozenset(BESTELLUNG_UPDATE_KEYS) - {
-    "status",
-    "netto_summe",
-    "mwst_betrag",
-    "brutto_summe",
-    "erstellt_von",
-}
-
-
-@router.post(
-    "/einkauf/bestellungen/{bestellung_id}/actions/speichern",
-    response_model=MaskActionResult,
-    summary="Bestellung speichern als Masken-CommandEndpoint", dependencies=SCHREIBEN["EINKAUF"])
-def action_bestellung_speichern(
-    bestellung_id: str,
-    request: Request,
-    body: dict[str, Any] = Body(default_factory=dict),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> MaskActionResult:
-    """CE fuer einkauf/purchase-order:speichern — dryRun ohne UPDATE; Token-Mandant."""
-    return command_handlers.action_bestellung_speichern(bestellung_id, request, body, db, tenant_id, ProcurementService=ProcurementService, _PO_SAVE_ALLOWED=_PO_SAVE_ALLOWED)
-
-
-@router.post("/einkauf/bestellungen/{bestellung_id}/versenden", summary="Versenden bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def bestellung_versenden(
-    bestellung_id: str,
-    versand_art: str = Query("email"),
-    empfaenger: Optional[str] = Query(None),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id), nutzer: dict = Depends(get_current_user),
-) -> dict[str, Any]:
-    try:  # Nicht versendet -> VersandNichtMoeglich (422/502/503), kein "versandt"
-        return _svc(db, tenant_id).versende_bestellung_svc(bestellung_id, versand_art, empfaenger, nutzer=nutzer)
-    except EntityNotFoundError:
-        raise HTTPException(404, "Bestellung nicht gefunden")
 
 
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -975,36 +866,4 @@ async def update_fremdwaren_einlagerung(
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 # Bestellungen Workflow
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-@router.post("/einkauf/bestellungen/{bestellung_id}/freigeben", summary="Freigeben bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def bestellung_freigeben(
-    bestellung_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    try:
-        return _svc(db, tenant_id).freigebe_bestellung(bestellung_id)
-    except EntityNotFoundError:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-    except ValidationFailedError as exc:
-        raise HTTPException(400, exc.detail)
-
-
-@router.post("/einkauf/bestellungen/{bestellung_id}/stornieren", summary="Stornieren bestellung",
-    response_model=BestellvorschlagOut, dependencies=SCHREIBEN["EINKAUF"])
-async def bestellung_stornieren(
-    bestellung_id: str,
-    grund: Optional[str] = Query(
-        None, description="Warum storniert wird — bleibt am Beleg stehen"
-    ),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    try:
-        return _svc(db, tenant_id).storniere_bestellung(bestellung_id, grund)
-    except EntityNotFoundError:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-    except ValidationFailedError as exc:
-        raise HTTPException(400, exc.detail)
 
