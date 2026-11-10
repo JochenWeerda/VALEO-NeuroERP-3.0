@@ -133,3 +133,22 @@ def test_picklistennummer_laeuft_je_mandant(lager):
         "SELECT pick_list_number FROM domain_inventory.pick_lists WHERE id IN (:a, :b) ORDER BY pick_list_number"),
         {"a": eins["id"], "b": zwei["id"]}).scalars().all()
     assert nummern == [1, 2]
+
+
+def test_abschluss_ist_wiederholbar_und_nur_fuer_freigegebene_lieferscheine(lager):
+    from app.core.exceptions import EntityNotFoundError, ValidationFailedError
+    from app.services.docflow_service import DocflowService
+
+    svc = DocflowService(lager["db"], lager["t"], "wms")
+    svc.lieferung_abschliessen(lager["ls"], "PL-1")
+    svc.lieferung_abschliessen(lager["ls"], "PL-1")  # schon abgeschlossen: ohne Wirkung
+    historie = lager["db"].execute(sa.text(
+        "SELECT count(*) FROM domain_docflow.document_status_history WHERE header_id = :id AND to_status = 'completed'"),
+        {"id": lager["ls"]}).scalar()
+    assert historie == 1
+    lager["db"].execute(sa.text("UPDATE domain_docflow.document_headers SET status = 'draft' WHERE id = :id"),
+                        {"id": lager["ls"]})
+    with pytest.raises(ValidationFailedError, match="freigegebener"):
+        svc.lieferung_abschliessen(lager["ls"], "PL-2")
+    with pytest.raises(EntityNotFoundError):
+        svc.lieferung_abschliessen(str(uuid.uuid4()), "PL-3")
