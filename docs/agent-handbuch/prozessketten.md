@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-09
+last_reviewed: 2026-11-10
 version: 3.0.0
 description: End-to-End-Prozessräume mit Knoten, Masken-Deep-Links und Instanz-Lifecycle-API.
 ---
@@ -115,6 +115,7 @@ _Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, 
 
 ### Registrierte Masken (ScreenDefinition)
 
+- `beleg-liste/sales-delivery` — Lieferscheine · Contract: `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` · Rollout: `/mask-rollout/beleg-liste__sales-delivery/:entityId`
 - `beleg-liste/sales-order` — Aufträge · Contract: `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` · Rollout: `/mask-rollout/beleg-liste__sales-order/:entityId`
 - `crm/customer-360` — Kundenakte · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
 - `crm/opportunity` — Opportunity · Contract: `GET /api/v1/masks/crm/opportunity/agent-contract` · Rollout: `/mask-rollout/crm__opportunity/:entityId`

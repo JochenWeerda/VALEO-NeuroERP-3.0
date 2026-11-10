@@ -137,7 +137,7 @@ class TestConfirmPickListShipsDeliveryNote:
         line_row = _row(
             id="LINE-1", bin_id="BIN-1", article_id="ART-1",
             batch_number=None, best_before_date=None,
-            quantity_required=Decimal("10"), unit="t",
+            quantity_required=Decimal("10"), quantity_picked=Decimal("0"), unit="t",
         )
 
         call_count = [0]

@@ -403,7 +403,12 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
     # Belegdruck (BELEG-052 Stufe 2b): PDF aus dem Belegvertrag, ein Leseweg ohne Schreibwirkung.
     liste.append({
         "key": "drucken", "label": "Drucken", "kind": "secondary", "dangerLevel": "safe",
-        "permission": "belege.lesen", "localEffect": "download",
+        "permission": "belege.bearbeiten", "localEffect": "download",
+        # Druckvermerk (GoBD): zuerst das Kommando (zaehlt, Nachdruck mit Begruendung), dann das PDF.
+        "commandEndpoint": _pfad(variante.belegart, "/actions/drucken"), "method": "POST",
+        "enabledWhen": zustandsfeld("drucken"),
+        "kommando": "docflow.record_print",
+        "inputFields": [{"key": "grund", "label": "Begründung (Pflicht beim Nachdruck)", "type": "text"}],
         "download": {"endpoint": _pfad(variante.belegart, "/druck"), "contentField": "pdf",
                      "filenameField": "dateiname", "mediaType": "application/pdf", "contentEncoding": "base64"},
     })

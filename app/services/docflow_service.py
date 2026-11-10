@@ -379,7 +379,7 @@ class DocflowService:
              "p": json.dumps(response_payload), "h": self._anfrage_hash(inhalt)},
         )
 
-    def _protokolliere(self, command: str, doc_id: str, payload: dict[str, Any]) -> None:
+    def _protokolliere(self, command: str, doc_id: str, payload: dict[str, Any], *, akteur: Optional[str] = None) -> None:
         """Haelt das Kommando verbindlich fest — in dieser Transaktion. Scheitert der Eintrag, scheitert das Kommando.
 
         ``best_effort_audit`` spiegelt zusaetzlich ins zentrale Audit-Log, wo es eines gibt; verlassen kann sich
@@ -390,7 +390,7 @@ class DocflowService:
                 "INSERT INTO domain_docflow.document_command_log (tenant_id, header_id, command, actor, payload) "
                 "VALUES (:t, :h, :c, :a, CAST(:p AS jsonb))"
             ),
-            {"t": self.tenant_id, "h": doc_id, "c": command, "a": self.akteur, "p": json.dumps(payload, default=str)},
+            {"t": self.tenant_id, "h": doc_id, "c": command, "a": akteur or self.akteur, "p": json.dumps(payload, default=str)},
         )
 
     def fetch_command_log(self, doc_id: str) -> list[dict[str, Any]]:
@@ -762,6 +762,27 @@ class DocflowService:
         self.db.commit()
         return response
 
+    def lieferung_abschliessen(self, doc_id: str, pickliste: str) -> None:
+        """Lieferschein ausgeliefert: die Pickliste ist vollstaendig bestaetigt, der Bestand ausgebucht.
+
+        Kein eigener Commit - laeuft in der Transaktion der Pickliste, damit Bestand und Belegstand zusammen gelten.
+        Wiederholt (schon abgeschlossen) ist es ohne Wirkung.
+        """
+        header = self.fetch_header(doc_id)
+        if not header or str(header.get("doc_type")) != "sales_delivery":
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if str(header.get("status")) == "completed":
+            return
+        if str(header.get("status")) != "open":
+            raise ValidationFailedError("Ausgeliefert wird nur ein freigegebener Lieferschein.")
+        self._kommando("deliver", f"Pickliste {pickliste} bestaetigt")
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET status='completed', updated_at=NOW(), version=version+1, "
+                 "updated_by=:wer WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "wer": self._wer("wms")},
+        )
+        self._protokolliere("deliver", doc_id, {"pickliste": pickliste})
+
     def record_print(self, doc_id: str, printed_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):
             raise EntityNotFoundError("DocflowDocument", doc_id)
@@ -772,6 +793,43 @@ class DocflowService:
         self._protokolliere("record_print", doc_id, {})
         self.best_effort_audit("docflow_record_print", "docflow_document", doc_id, {"printed_by": self._wer(printed_by)})
         self.db.commit()
+
+    def druck_vermerken(self, doc_id: str, *, subjekt: str, aussteller: Optional[str], grund: Optional[str]) -> int:
+        """Vermerkt einen Druck (GoBD): zaehlt, und ein Nachdruck braucht eine Begruendung, die mit der gepruefteten
+        Identitaet in ``domain_audit.attestations`` steht. Kein eigener Commit (Transaktion der Maskenaktion).
+
+        Gibt die Nummer dieses Drucks zurueck (1 = Erstdruck).
+        """
+        from app.core.akteur import bekannter_nutzer
+
+        header = self.fetch_header(doc_id)
+        if not header:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        bisher = int(header.get("print_count") or 0)
+        grund = (grund or "").strip()
+        if bisher > 0 and len(grund) < 3:
+            raise ValidationFailedError("Ein Nachdruck braucht eine Begründung.")
+        # Jeder Druck braucht eine eindeutige lokale Nutzerzuordnung - auch der erste (kein Systemakteur, kein Raten).
+        lokal = bekannter_nutzer(self.db, subjekt, tenant_id=self.tenant_id)
+        if grund:
+            self.db.execute(text("""
+                INSERT INTO domain_audit.attestations
+                    (id, tenant_id, entity_type, entity_id, action, reason, changes, created_by, created_at)
+                VALUES (:id, :t, :typ, :eid, :aktion, :grund, CAST(:changes AS jsonb), :von, NOW())
+            """), {
+                "id": str(uuid4()), "t": self.tenant_id, "typ": f"beleg_{header['doc_type']}", "eid": doc_id,
+                "aktion": "print", "grund": grund,  # ck_attestations_action kennt print; Nachdruck steht in changes
+                "changes": json.dumps({"actor": {"subject": subjekt, "issuer": aussteller, "tenant_id": self.tenant_id},
+                                       "druck": bisher + 1, "nachdruck": bisher > 0}),
+                "von": lokal,
+            })
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET printed_at=NOW(), printed_by=:von, "
+                 "print_count=COALESCE(print_count,0)+1 WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "von": lokal},
+        )
+        self._protokolliere("record_print", doc_id, {"druck": bisher + 1, "nachdruck": bisher > 0}, akteur=lokal)
+        return bisher + 1
 
     def record_export(self, doc_id: str, exported_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):

@@ -428,11 +428,18 @@ class WarehouseService:
         items: [{article_id, quantity_required, unit}]
         """
         pl_id = str(uuid4())
+        # Nummer je Mandant fortlaufend; die Sperre gilt bis zum Ende der Transaktion (zwei Anlagen nacheinander).
+        self.db.execute(text("SELECT pg_advisory_xact_lock(hashtext('pick_list_number:' || :tid))"),
+                        {"tid": self.tenant_id})
+        nummer = self.db.execute(text(
+            "SELECT COALESCE(MAX(pick_list_number), 0) + 1 FROM domain_inventory.pick_lists WHERE tenant_id = :tid"),
+            {"tid": self.tenant_id}).scalar()
         self.db.execute(text("""
             INSERT INTO domain_inventory.pick_lists
-              (id, tenant_id, warehouse_id, source_doc_ref, source_doc_type, status, strategy, created_by)
-            VALUES (:id, :tid, :wid, :src_ref, :src_type, 'OPEN', :strategy, :created_by)
-        """), {"id": pl_id, "tid": self.tenant_id, "wid": warehouse_id,
+              (id, pick_list_number, tenant_id, warehouse_id, source_doc_ref, source_doc_type, status, strategy,
+               created_by)
+            VALUES (:id, :nummer, :tid, :wid, :src_ref, :src_type, 'OPEN', :strategy, :created_by)
+        """), {"id": pl_id, "nummer": nummer, "tid": self.tenant_id, "wid": warehouse_id or None,
                "src_ref": source_doc_ref, "src_type": source_doc_type,
                "strategy": strategy, "created_by": created_by})
 
@@ -446,10 +453,10 @@ class WarehouseService:
                 line_id = str(uuid4())
                 self.db.execute(text("""
                     INSERT INTO domain_inventory.pick_list_lines
-                      (id, pick_list_id, article_id, bin_id, batch_number, best_before_date,
-                       quantity_required, quantity_picked, unit, status, sort_order)
-                    VALUES (:id, :plid, :aid, :bid, :batch, :bbd, :qty, 0, :unit, 'OPEN', :sort)
-                """), {"id": line_id, "plid": pl_id, "aid": item["article_id"],
+                      (id, pick_list_id, tenant_id, article_id, bin_id, batch_number, best_before_date,
+                       required_qty, quantity_required, quantity_picked, unit, status, sort_order)
+                    VALUES (:id, :plid, :tid, :aid, :bid, :batch, :bbd, :qty, :qty, 0, :unit, 'OPEN', :sort)
+                """), {"id": line_id, "plid": pl_id, "tid": self.tenant_id, "aid": item["article_id"],
                        "bid": sug.get("bin_id"), "batch": sug.get("batch_number"),
                        "bbd": sug.get("best_before_date"), "qty": sug["pick_kg"],
                        "unit": item.get("unit", "kg"), "sort": i})
@@ -479,15 +486,21 @@ class WarehouseService:
             if not line or not line.bin_id:
                 continue
             qty = Decimal(str(pl_line["quantity_picked"]))
+            # Ausgebucht wird nur, was ueber die schon gepickte Menge hinausgeht: Eine wiederholte oder nachgereichte
+            # Bestaetigung bucht den Bestand nicht ein zweites Mal (bis 09.11.2026 je Aufruf die volle Menge).
+            zusaetzlich = qty - Decimal(str(line.quantity_picked or 0))
+            if zusaetzlich <= 0:
+                continue
             self.book_stock_movement(
                 bin_id=line.bin_id,
                 article_id=line.article_id,
                 batch_number=line.batch_number,
                 best_before_date=line.best_before_date,
-                quantity_kg=-qty,  # negativ = Auslagerung
+                quantity_kg=-zusaetzlich,  # negativ = Auslagerung
                 unit_cost=None,
                 movement_type="pick_out",
                 reference=pick_list_id,
+                commit=False,
             )
             new_status = "DONE" if qty >= Decimal(str(line.quantity_required)) else "PARTIAL"
             self.db.execute(text("""
@@ -513,7 +526,13 @@ class WarehouseService:
                 SELECT source_doc_ref, source_doc_type FROM domain_inventory.pick_lists
                 WHERE id = :plid
             """), {"plid": pick_list_id}).fetchone()
-            if pl_meta and pl_meta.source_doc_type == "DELIVERY_NOTE" and pl_meta.source_doc_ref:
+            if pl_meta and pl_meta.source_doc_type == "DELIVERY_NOTE" and pl_meta.source_doc_ref \
+                    and self._docflow_lieferschein(pl_meta.source_doc_ref):
+                # BELEG-052: Der Lieferschein ist DocFlow-Beleg; ausgeliefert setzt sein Kommando, nicht ein UPDATE.
+                from app.services.docflow_service import DocflowService
+
+                DocflowService(self.db, self.tenant_id).lieferung_abschliessen(pl_meta.source_doc_ref, pick_list_id)
+            elif pl_meta and pl_meta.source_doc_type == "DELIVERY_NOTE" and pl_meta.source_doc_ref:
                 self.db.execute(text("""
                     UPDATE domain_sales.delivery_notes
                     SET status = 'shipped', updated_at = NOW()
@@ -537,17 +556,24 @@ class WarehouseService:
         - Positionen mit artikel_id werden als Pick-Positionen übernommen
         - FEFO-Vorschlag je Position aus bin_stock
         """
-        dn = self.db.execute(text("""
-            SELECT id, status, delivery_note_number
-            FROM domain_sales.delivery_notes
-            WHERE id = :id AND tenant_id = :tid
-        """), {"id": ls_id, "tid": self.tenant_id}).fetchone()
-        if not dn:
-            raise ValueError(f"Lieferschein {ls_id} nicht gefunden")
-        if dn.status not in ("posted", "printed"):
-            raise ValueError(
-                f"Lieferschein muss gebucht oder gedruckt sein (Status: {dn.status})"
-            )
+        docflow = self._docflow_lieferschein(ls_id)
+        if docflow:
+            if docflow.status != "open":
+                raise ValueError(f"Lieferschein muss freigegeben sein (Status: {docflow.status})")
+            dn_nummer = docflow.doc_number
+        else:
+            dn = self.db.execute(text("""
+                SELECT id, status, delivery_note_number
+                FROM domain_sales.delivery_notes
+                WHERE id = :id AND tenant_id = :tid
+            """), {"id": ls_id, "tid": self.tenant_id}).fetchone()
+            if not dn:
+                raise ValueError(f"Lieferschein {ls_id} nicht gefunden")
+            if dn.status not in ("posted", "printed"):
+                raise ValueError(
+                    f"Lieferschein muss gebucht oder gedruckt sein (Status: {dn.status})"
+                )
+            dn_nummer = dn.delivery_note_number
 
         # Check no open pick list exists for this delivery note
         existing = self.db.execute(text("""
@@ -560,25 +586,29 @@ class WarehouseService:
                 f"Für diesen Lieferschein existiert bereits eine offene Pick-Liste ({existing.id})"
             )
 
-        positions = self.db.execute(text("""
-            SELECT artikel_id, menge, einheit
-            FROM domain_sales.delivery_note_positions
-            WHERE delivery_note_id = :id
-              AND artikel_id IS NOT NULL AND menge > 0
-            ORDER BY pos_nr
-        """), {"id": ls_id}).fetchall()
+        if docflow:
+            # Positionen des Belegs; der Artikel ueber seine Nummer im Mandanten (DocFlow fuehrt die Nummer).
+            positions = self.db.execute(text("""
+                SELECT a.id::text AS artikel_id, i.quantity AS menge, i.unit AS einheit
+                FROM domain_docflow.document_items i
+                JOIN domain_inventory.articles a
+                  ON a.article_number = i.article_number AND a.tenant_id::text = i.tenant_id
+                WHERE i.header_id = :id AND i.tenant_id = :tid AND i.quantity > 0
+                ORDER BY i.line_number
+            """), {"id": ls_id, "tid": self.tenant_id}).fetchall()
+        else:
+            positions = self.db.execute(text("""
+                SELECT artikel_id, menge, einheit
+                FROM domain_sales.delivery_note_positions
+                WHERE delivery_note_id = :id
+                  AND artikel_id IS NOT NULL AND menge > 0
+                ORDER BY pos_nr
+            """), {"id": ls_id}).fetchall()
 
         if not positions:
             raise ValueError("Lieferschein hat keine Positionen mit Artikel-Referenz")
 
-        items = [
-            {
-                "article_id": p.artikel_id,
-                "quantity_required": float(p.menge),
-                "unit": p.einheit or "Stk",
-            }
-            for p in positions
-        ]
+        items = [self._pick_menge(p.artikel_id, Decimal(str(p.menge)), p.einheit) for p in positions]
 
         result = self.create_pick_list(
             warehouse_id=warehouse_id or "",
@@ -589,8 +619,25 @@ class WarehouseService:
             created_by=created_by,
         )
         result["delivery_note_id"] = ls_id
-        result["delivery_note_number"] = dn.delivery_note_number
+        result["delivery_note_number"] = dn_nummer
         return result
+
+    @staticmethod
+    def _pick_menge(artikel_id: str, menge: Decimal, einheit: str | None) -> dict:
+        """Gewichte in kg (Lagerplatzbestand ``quantity_kg``); Stueck und Unbekanntes bleiben, wie sie sind."""
+        from app.core.agrar_units import globaler_faktor
+
+        faktor = globaler_faktor(einheit, "kg") if einheit else None
+        if faktor is not None:
+            return {"article_id": artikel_id, "quantity_required": float(menge * faktor), "unit": "kg"}
+        return {"article_id": artikel_id, "quantity_required": float(menge), "unit": einheit or "Stk"}
+
+    def _docflow_lieferschein(self, ls_id: str):
+        """Der Lieferschein als DocFlow-Beleg - oder None, solange er nur im Altspeicher steht (BELEG-052)."""
+        return self.db.execute(text("""
+            SELECT id, status, doc_number FROM domain_docflow.document_headers
+            WHERE id = :id AND tenant_id = :tid AND doc_type = 'sales_delivery' AND deleted_at IS NULL
+        """), {"id": ls_id, "tid": self.tenant_id}).fetchone()
 
     # ── MHD-Ampel ──────────────────────────────────────────────
 

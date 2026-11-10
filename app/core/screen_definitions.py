@@ -3216,7 +3216,7 @@ def build_workspace_verkauf_screen_definition() -> dict[str, Any]:
         ],
         tiles=[
             {"key": "offene_auftraege", "label": "Offene Auftraege", "targetScreenId": "beleg-liste/sales-order", "targetFilters": {"status": "open"}, "tone": "neutral"},
-            {"key": "lieferscheine", "label": "Offene Lieferscheine", "targetScreenId": "sales/delivery-note", "targetFilters": {}, "tone": "neutral"},
+            {"key": "lieferscheine", "label": "Offene Lieferscheine", "targetScreenId": "beleg-liste/sales-delivery", "targetFilters": {}, "tone": "neutral"},
             {"key": "wiedervorlagen", "label": "Angebots-Wiedervorlagen", "targetScreenId": "crm/lead", "targetFilters": {}, "tone": "warning"},
         ],
     )
@@ -5920,6 +5920,7 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "sales/invoice": "/verkauf/rechnungen",
     "beleg-liste/sales-invoice": "/belege/sales_invoice",
     "beleg-liste/sales-order": "/verkauf/auftraege",
+    "beleg-liste/sales-delivery": "/sales/lieferungen",
     "strecke/streckengeschaeft": "/strecke/streckengeschaeft",
     "versand/versand-avis": "/versand/versand-avis",
     "strecke/vorlaeufig": "/strecke/vorlaeufige-streckengeschaefte",

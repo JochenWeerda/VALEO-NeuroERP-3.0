@@ -7442,11 +7442,15 @@
           "primary_key": [
             "id"
           ],
+          "read_by": [
+            "app/services/docflow_service.py"
+          ],
           "screens": [
             "sales/delivery-note"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py"
+            "app/api/v1/endpoints/sales_delivery_notes.py",
+            "app/services/docflow_service.py"
           ]
         }
       }
@@ -15882,7 +15886,8 @@
             "app/services/kontrollkorb.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_offer_import.py",
-            "app/services/settlement_document_archive_service.py"
+            "app/services/settlement_document_archive_service.py",
+            "app/services/warehouse_service.py"
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
@@ -16027,7 +16032,8 @@
             "app/core/dms_ocr_contracts.py",
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/warehouse_service.py"
           ],
           "written_by": [
             "app/services/docflow_service.py",
@@ -34444,6 +34450,11 @@
               "name": "sort_order",
               "nullable": true,
               "type": "integer"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [

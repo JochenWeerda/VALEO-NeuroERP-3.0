@@ -8291,7 +8291,7 @@
       "version": "1.0.0"
     },
     "workspace/verkauf": {
-      "definition_hash": "2a1eaf45d429ebfb43ddd55efa5ebd76c70b2bb4696a1f3e3ff695274b26dc2a",
+      "definition_hash": "e3af05a8d3b8ece2e6591626714e09db88d72a94d123bbb50a0b6c90848c68c0",
       "gates_passed": [
         "A",
         "B",
