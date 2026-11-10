@@ -669,9 +669,9 @@ class DocflowService:
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, expense_account, created_at, updated_at)
+                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, expense_account, contract_ref, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, :expense_account, NOW(), NOW())
+                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, :expense_account, :contract_ref, NOW(), NOW())
                 """),
                 {
                     "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": header_id,
@@ -681,9 +681,68 @@ class DocflowService:
                     "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
                     "charge": getattr(line, "charge", None),
                     "expense_account": (getattr(line, "expense_account", None) or "").strip() or None,
+                    "contract_ref": self._kontrakt_der_position(idx, getattr(line, "contract_ref", None)),
                 },
             )
         return total_net, total_tax, total_gross
+
+    def _kontrakt_der_position(self, idx: int, nummer: Optional[str]) -> Optional[str]:
+        """Ein Kontraktbezug muss ein offener Kontrakt des Mandanten sein - sonst Pruefgrund, nicht stilles Verwerfen."""
+        nummer = (nummer or "").strip()
+        if not nummer:
+            return None
+        stand = self.db.execute(text(
+            "SELECT status FROM domain_ops.kon_contract WHERE tenant_id = :t AND contract_no = :nr"),
+            {"t": self.tenant_id, "nr": nummer}).scalar()
+        if stand is None:
+            raise ValidationFailedError(f"Position {idx}: Kontrakt {nummer} ist im Mandanten nicht bekannt.")
+        if stand != "OFFEN":
+            raise ValidationFailedError(f"Position {idx}: Kontrakt {nummer} ist nicht offen ({stand}).")
+        return nummer
+
+    def _kontrakt_abrufe_buchen(self, header: dict[str, Any], akteur: Optional[str]) -> None:
+        """Lieferschein freigegeben: je Position mit Kontrakt ein Abruf (``kon_contract_movement``) in derselben
+        Transaktion. Menge in der Kontrakteinheit (agrar_units); ueber die Restmenge nur mit erlaubter Mehrlieferung."""
+        from app.core.agrar_units import globaler_faktor
+
+        for item in self.fetch_items(str(header["id"])):
+            nummer = item.get("contract_ref")
+            if not nummer:
+                continue
+            kontrakt = self.db.execute(text(
+                "SELECT contract_id, unit, total_quantity, allow_overdelivery, status FROM domain_ops.kon_contract "
+                "WHERE tenant_id = :t AND contract_no = :nr FOR UPDATE"), {"t": self.tenant_id, "nr": nummer}).mappings().first()
+            if not kontrakt or kontrakt["status"] != "OFFEN":
+                raise ValidationFailedError(f"Position {item['line_number']}: Kontrakt {nummer} ist nicht offen.")
+            faktor = Decimal("1") if (item.get("unit") or kontrakt["unit"]) == kontrakt["unit"] else \
+                globaler_faktor(item.get("unit") or "", kontrakt["unit"] or "")
+            if faktor is None:
+                raise ValidationFailedError(
+                    f"Position {item['line_number']}: {item.get('unit')} laesst sich nicht in die Kontrakteinheit "
+                    f"{kontrakt['unit']} umrechnen.")
+            menge = Decimal(str(item["quantity"])) * faktor
+            schon = Decimal(str(self.db.execute(text(
+                "SELECT COALESCE(SUM(quantity), 0) FROM domain_ops.kon_contract_movement "
+                "WHERE tenant_id = :t AND contract_id = :k AND NOT COALESCE(is_archived, false) "
+                "AND NOT COALESCE(is_storniert, false)"),
+                {"t": self.tenant_id, "k": kontrakt["contract_id"]}).scalar() or 0))
+            rest = Decimal(str(kontrakt["total_quantity"] or 0)) - schon
+            if menge > rest and not kontrakt["allow_overdelivery"]:
+                raise ValidationFailedError(
+                    f"Position {item['line_number']}: Abruf {menge} {kontrakt['unit']} ueber der Restmenge "
+                    f"{rest} {kontrakt['unit']} von Kontrakt {nummer}.")
+            from app.services.kontrakt_movement_sync import _find_matching_line
+
+            linie = _find_matching_line(self.db, self.tenant_id, kontrakt["contract_id"], item.get("article_number"))
+            self.db.execute(text("""
+                INSERT INTO domain_ops.kon_contract_movement
+                    (movement_id, contract_id, line_id, delivery_note_no, movement_date, quantity, unit_price,
+                     is_invoiced, is_archived, is_storniert, tenant_id, created_by)
+                VALUES (:id, :k, :linie, :ls, NOW(), :menge, :preis, false, false, false, :t, :von)
+            """), {"id": str(uuid4()), "k": kontrakt["contract_id"], "linie": linie.line_id if linie else None,
+                   "ls": str(header["doc_number"]), "menge": menge,
+                   "preis": Decimal(str(item.get("unit_price") or 0)) / (faktor or 1), "t": self.tenant_id,
+                   "von": akteur})
 
     # ── commands ──────────────────────────────────────────────────────────────
 
@@ -719,6 +778,8 @@ class DocflowService:
             text("UPDATE domain_docflow.document_headers SET doc_number=:doc_number, status='open', updated_at=NOW(), version=version+1, updated_by=:updated_by WHERE id=:id AND tenant_id=:tenant_id"),
             {"id": doc_id, "tenant_id": self.tenant_id, "doc_number": new_number, "updated_by": self._wer(released_by)},
         )
+        if str(header.get("doc_type")) == "sales_delivery":
+            self._kontrakt_abrufe_buchen({**header, "doc_number": new_number}, self._wer(released_by))
         response = {"command": "release", "source_doc_id": doc_id, "target_doc_id": None, "status": "ok",
                     "payload": {"doc_number": new_number, "doc_type": str(header.get("doc_type") or "")}}
         self.store_idempotent_response("release", doc_id, idempotency_key, response, {})
@@ -966,9 +1027,9 @@ class DocflowService:
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity,
-                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, expense_account, metadata, created_at, updated_at)
+                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, expense_account, batch_id, charge, contract_ref, metadata, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description, :quantity,
-                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :expense_account, CAST(:metadata AS jsonb), NOW(), NOW())
+                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :expense_account, :batch_id, :charge, :contract_ref, CAST(:metadata AS jsonb), NOW(), NOW())
                 """),
                 {
                     "id": target_item_id, "tenant_id": self.tenant_id, "header_id": target_id,
@@ -976,6 +1037,8 @@ class DocflowService:
                     "article_number": src.get("article_number") or "", "description": src.get("description"),
                     "quantity": qty, "unit": src.get("unit"), "unit_price": price, "discount_percent": discount,
                     "tax_code": src.get("tax_code"), "expense_account": src.get("expense_account"),
+                    # Rueckverfolgbarkeit: Charge, Batch und Kontrakt gehen in den Folgebeleg mit.
+                    "batch_id": src.get("batch_id"), "charge": src.get("charge"), "contract_ref": src.get("contract_ref"),
                     "tax_rate": tax_rate, "line_total_net": line_net,
                     "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "metadata": json.dumps({"converted_from": str(src["id"])}),
@@ -1187,6 +1250,12 @@ class DocflowService:
                 "Eine gebuchte Gutschrift wird hier noch nicht storniert: Die Gegenbuchung dafür fehlt."
             )
         self._kommando("reverse", payload.reason)
+        if doc_type == "sales_delivery":
+            # Der Lieferschein ist storniert: seine Kontrakt-Abrufe auch (gekennzeichnet, nicht geloescht - GoBD).
+            self.db.execute(text(
+                "UPDATE domain_ops.kon_contract_movement SET is_storniert = true, storno_grund = :g "
+                "WHERE tenant_id = :t AND delivery_note_no = :nr AND NOT COALESCE(is_storniert, false)"),
+                {"g": payload.reason, "t": self.tenant_id, "nr": str(header["doc_number"])})
         posting_id = str(uuid4())
         outbox_event_id = self.upsert_outbox_event("docflow.document.reversed", doc_id, {
             "doc_id": doc_id, "doc_type": header.get("doc_type"), "reason": payload.reason, "idempotency_key": payload.idempotency_key,

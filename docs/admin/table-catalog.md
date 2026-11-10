@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-09
+last_reviewed: 2026-11-10
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 704 Tabellen, 9338 Spalten.**
+**31 Schemas, 704 Tabellen, 9339 Spalten.**
 
 ## Schemas
 
@@ -30,7 +30,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_controlling` | `finance` | 9 | 88 |
 | `domain_crm` | `crm` | 48 | 858 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
-| `domain_docflow` | `dms-compliance` | 27 | 349 |
+| `domain_docflow` | `dms-compliance` | 27 | 350 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 21 | 393 |
 | `domain_erp` | `finance` | 46 | 601 |
@@ -156,7 +156,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_agrar.waagen_quittungen` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
 | `domain_agrar.waagen_vorlagen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | — |
 | `domain_agrar.weighing_tickets` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
-| `domain_audit.attestations` | — | `app/api/v1/endpoints/sales_delivery_notes.py` | `sales/delivery-note` |
+| `domain_audit.attestations` | `app/services/docflow_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/services/docflow_service.py` | `sales/delivery-note` |
 | `domain_compliance.compliance_artikel_sperre_audit` | `app/services/compliance_sperre_audit_service.py` | `app/services/compliance_sperre_audit_service.py` | — |
 | `domain_compliance.compliance_pcn_meldungen` | `app/services/compliance_pcn_lifecycle_service.py` | `app/services/compliance_pcn_lifecycle_service.py` | — |
 | `domain_compliance.compliance_pcn_status_log` | — | `app/services/compliance_pcn_lifecycle_service.py` | — |
@@ -479,10 +479,10 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_ops.edi_nachrichten` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.edi_partner` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.kon_audit_log` | `app/domains/operations/models.py` | — | — |
-| `domain_ops.kon_contract` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/kontrakt_vorgang.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/documents/inbox_service.py`, `app/domains/operations/models.py`, `app/services/calendar_projection_service.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_source_proposals.py`, `app/services/kontrakt_disposition_service.py`, `app/services/preisfindung_service.py`, `app/workspace/agrar_chain.py` | — | `kontrakt/abrechnung`, `kontrakt/erfuellung`, `kontrakt/fixierung` |
+| `domain_ops.kon_contract` | `app/api/v1/endpoints/crm_360_reads.py`, `app/api/v1/endpoints/kontrakt_vorgang.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/schemas/docflow_schemas.py`, `app/documents/inbox_service.py`, `app/domains/operations/models.py`, `app/services/calendar_projection_service.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_service.py`, `app/services/docflow_source_proposals.py`, `app/services/kontrakt_disposition_service.py`, `app/services/preisfindung_service.py`, `app/workspace/agrar_chain.py` | — | `kontrakt/abrechnung`, `kontrakt/erfuellung`, `kontrakt/fixierung` |
 | `domain_ops.kon_contract_fixing` | `app/api/v1/endpoints/kontrakt_vorgang.py`, `app/services/contract_fixing_service.py`, `app/services/contract_settlement_service.py` | `app/services/contract_fixing_service.py`, `app/services/contract_settlement_service.py` | `kontrakt/abrechnung`, `kontrakt/erfuellung`, `kontrakt/fixierung` |
 | `domain_ops.kon_contract_line` | `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fixing_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/docflow_source_proposals.py`, `app/services/kontrakt_disposition_service.py`, `app/services/preisfindung_service.py` | — | — |
-| `domain_ops.kon_contract_movement` | `app/api/v1/endpoints/kontrakt_vorgang.py`, `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_source_proposals.py` | `app/services/contract_settlement_service.py` | `kontrakt/abrechnung`, `kontrakt/erfuellung`, `kontrakt/fixierung` |
+| `domain_ops.kon_contract_movement` | `app/api/v1/endpoints/kontrakt_vorgang.py`, `app/domains/operations/models.py`, `app/services/contract_engagement_service.py`, `app/services/contract_fulfillment_service.py`, `app/services/contract_settlement_service.py`, `app/services/docflow_service.py`, `app/services/docflow_source_proposals.py` | `app/services/contract_settlement_service.py`, `app/services/docflow_service.py` | `kontrakt/abrechnung`, `kontrakt/erfuellung`, `kontrakt/fixierung` |
 | `domain_ops.kon_contract_reminder` | `app/services/contract_engagement_service.py` | `app/services/contract_engagement_service.py` | — |
 | `domain_ops.kon_number_range` | `app/domains/operations/models.py` | — | — |
 | `domain_ops.matif_quote` | `app/services/contract_fixing_service.py` | `app/services/contract_fixing_service.py` | — |
@@ -959,7 +959,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `document_followups` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, art, betreff, text, faellig_am, status, erledigt_at, erledigt_von, created_at, created_by |
 | `document_header_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, created_at |
 | `document_headers` | `dms-compliance` | prefix | `id` | id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id, currency, total_net, total_tax, total_gross, document_date, posting_date, version, created_by, updated_by, created_at, updated_at, deleted_at, printed_at, printed_by, print_count, exported_at, exported_by, bausteine |
-| `document_items` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit, unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, metadata, created_at, updated_at, tax_code, expense_account |
+| `document_items` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit, unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, metadata, created_at, updated_at, tax_code, expense_account, contract_ref |
 | `document_links` | `dms-compliance` | prefix | `id` | id, tenant_id, from_header_id, to_header_id, relation_type, from_item_id, to_item_id, quantity_linked, created_at |
 | `document_postings` | `dms-compliance` | prefix | `id` | id, tenant_id, header_id, posting_type, journal_entry_id, amount, currency, idempotency_key, outbox_event_id, posted_by, posted_at |
 | `document_return_audit` | `dms-compliance` | prefix | `id` | id, tenant_id, case_id, action, old_value, new_value, actor, reason, created_at |

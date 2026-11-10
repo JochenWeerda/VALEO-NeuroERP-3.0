@@ -140,7 +140,7 @@ Je Beleg-ScreenDefinition: Feld im Reiter `kopf` und Spalte der Tabelle `positio
 | positionen | `gebinde_einheit` | `baustein:gebinde` |
 | positionen | `preis_einheit` | `baustein:gebinde` |
 | positionen | `gewicht_kg` | `baustein:gebinde` |
-| positionen | `kontrakt_nr` | `baustein:kontrakt` |
+| positionen | `kontrakt_nr` | `positionen[].kontrakt` |
 | positionen | `lager` | `baustein:lager` |
 | positionen | `lagerhalle` | `baustein:lager` |
 | positionen | `lagerfach` | `baustein:lager` |

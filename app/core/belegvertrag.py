@@ -136,6 +136,7 @@ class Belegposition(_Teil):
     menge: Decimal
     einheit: str | None = None
     charge: str | None = None
+    kontrakt: str | None = None
     # In Folgebelege uebernommene und noch offene Menge (nur Belegarten mit Folgebeleg).
     menge_uebernommen: Decimal | None = None
     menge_offen: Decimal | None = None
@@ -427,7 +428,7 @@ ABBILDUNG: dict[str, dict[str, dict[str, str]]] = {
             "betrag": "positionen[].netto", "lieferanten_artnr": "baustein:einkauf",
             "gebinde_menge": "baustein:gebinde", "gebinde_einheit": "baustein:gebinde",
             "preis_einheit": "baustein:gebinde", "gewicht_kg": "baustein:gebinde",
-            "kontrakt_nr": "baustein:kontrakt", "lager": "baustein:lager", "lagerhalle": "baustein:lager",
+            "kontrakt_nr": "positionen[].kontrakt", "lager": "baustein:lager", "lagerhalle": "baustein:lager",
             "lagerfach": "baustein:lager", "mindestmenge": "baustein:bestellfall",
             "maximalmenge": "baustein:bestellfall",
         },

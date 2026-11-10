@@ -2752,6 +2752,7 @@
     "app/infrastructure/models/futtermittel_models.py",
     "app/infrastructure/models/l3c_models.py",
     "app/services/compliance_service.py",
+    "app/services/docflow_service.py",
     "app/services/esg_footprint_service.py",
     "app/services/eudr_register_service.py",
     "app/services/feed_produktion_lifecycle_service.py",

@@ -22778,6 +22778,17 @@
             ],
             "title": "Einzelpreis"
           },
+          "kontrakt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kontrakt"
+          },
           "menge": {
             "title": "Menge",
             "type": "string"
@@ -54702,6 +54713,18 @@
               }
             ],
             "title": "Charge"
+          },
+          "contract_ref": {
+            "anyOf": [
+              {
+                "maxLength": 50,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contract Ref"
           },
           "description": {
             "anyOf": [

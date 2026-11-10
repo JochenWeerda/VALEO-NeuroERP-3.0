@@ -7442,11 +7442,15 @@
           "primary_key": [
             "id"
           ],
+          "read_by": [
+            "app/services/docflow_service.py"
+          ],
           "screens": [
             "sales/delivery-note"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py"
+            "app/api/v1/endpoints/sales_delivery_notes.py",
+            "app/services/docflow_service.py"
           ]
         }
       }
@@ -16003,6 +16007,11 @@
             },
             {
               "name": "expense_account",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "contract_ref",
               "nullable": true,
               "type": "character varying"
             }
@@ -39259,6 +39268,7 @@
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/kontrakt_vorgang.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
+            "app/api/v1/schemas/docflow_schemas.py",
             "app/documents/inbox_service.py",
             "app/domains/operations/models.py",
             "app/services/calendar_projection_service.py",
@@ -39266,6 +39276,7 @@
             "app/services/contract_fixing_service.py",
             "app/services/contract_fulfillment_service.py",
             "app/services/contract_settlement_service.py",
+            "app/services/docflow_service.py",
             "app/services/docflow_source_proposals.py",
             "app/services/kontrakt_disposition_service.py",
             "app/services/preisfindung_service.py",
@@ -39629,6 +39640,7 @@
             "app/services/contract_engagement_service.py",
             "app/services/contract_fulfillment_service.py",
             "app/services/contract_settlement_service.py",
+            "app/services/docflow_service.py",
             "app/services/docflow_source_proposals.py"
           ],
           "screens": [
@@ -39637,7 +39649,8 @@
             "kontrakt/fixierung"
           ],
           "written_by": [
-            "app/services/contract_settlement_service.py"
+            "app/services/contract_settlement_service.py",
+            "app/services/docflow_service.py"
           ]
         },
         "kon_contract_reminder": {
