@@ -103,6 +103,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `agri_silo_lot_link_20260619` | WM-AGRI-LOT-LINK: silo_cells.legacy_silo_id → domain_inventory.silos |
 | `agri_silo_material_flow_20260612` | Agrar: Siloanlagen, Silozellen, Materialfluss-Knoten/Kanten (domain_inventory). |
 | `agribusiness_farmers_table_20260525` | Agribusiness farmers table |
+| `altrechnungen_schutz_20261110` | Schutz vor dem Entfernen des alten Rechnungswegs: keine echten Altrechnungen ausserhalb DocFlow (BELEG-052 2b). |
 | `approval_engine_20261013` | Freigaben fuer buchungs- und stornorelevante Vorgaenge (APPROVAL-001). |
 | `approval_log_20261013` | Unveraenderliches Freigabeprotokoll fuer alle Bereiche (APPROVAL-001). |
 | `articles_image_url_20260322` | Add image_url to articles |
