@@ -25,7 +25,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 VERTRAGSVERSION = "1.0"
 
-STATUS: tuple[str, ...] = ("draft", "open", "released", "posted", "reversed", "cancelled")
+STATUS: tuple[str, ...] = ("draft", "open", "confirmed", "released", "completed", "posted", "reversed", "cancelled")
 
 # Felder einer Position, die nur mit Preisrecht und nur in Varianten mit Preisen ausgeliefert werden.
 PREISFELDER: tuple[str, ...] = (

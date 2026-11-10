@@ -202,7 +202,7 @@ async def get_customer_screen_summary(
               )
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND deleted_at IS NULL
-          AND status IN ('completed', 'geliefert', 'invoiced')
+          AND status IN ('completed')
           AND created_at >= NOW() - INTERVAL '12 months'
         """,
         {"cid": canonical_id, "tid": tenant_id, "nr": customer.get("kunden_nr")},
@@ -298,7 +298,7 @@ async def get_customer_360(
               )
           AND (:tid IS NULL OR tenant_id::text = :tid)
           AND deleted_at IS NULL
-          AND status IN ('completed', 'geliefert', 'invoiced')
+          AND status IN ('completed')
           AND created_at >= NOW() - INTERVAL '12 months'
         """,
         {"cid": customer_id, "tid": tenant_id, "nr": kunden_nr},

@@ -107,15 +107,14 @@ def _open_sales_quantity(db: Session, article_id: str, tenant_id: str,
     # bleibt in der Signatur, damit die Aufrufer unveraendert bleiben.
 
     sql = text(f"""
-        SELECT COALESCE(SUM(soi.quantity), 0)
+        SELECT COALESCE(SUM(soi.offene_menge), 0)
         FROM domain_crm.sales_order_items soi
         JOIN domain_crm.sales_orders so ON so.id = soi.order_id
         WHERE soi.article_number = :artikel_nr
           AND so.tenant_id::text = :tenant_id
           AND so.deleted_at IS NULL
           AND lower(COALESCE(so.status, '')) NOT IN (
-              'cancelled', 'storniert', 'completed', 'abgeschlossen',
-              'delivered', 'geliefert'
+              'cancelled', 'completed', 'reversed'
           )
           {where_extra}
     """)  # nosec B608  # reviewed-safe: where_extra ist code-kontrolliert, Werte sind Parameter
@@ -569,7 +568,7 @@ def engine_verkauf(
                 a.article_number,
                 a.name AS artikel_bezeichnung,
                 a.warengruppe,
-                SUM(soi.quantity) AS offene_menge,
+                SUM(soi.offene_menge) AS offene_menge,
                 COALESCE(MAX(soi.unit), a.gebinde_einheit) AS einheit
             FROM domain_crm.sales_order_items soi
             JOIN domain_crm.sales_orders so ON so.id = soi.order_id
@@ -579,10 +578,9 @@ def engine_verkauf(
             WHERE so.tenant_id::text = :tenant_id
               AND so.deleted_at IS NULL
               AND lower(COALESCE(so.status, '')) NOT IN (
-                  'cancelled', 'storniert', 'completed', 'abgeschlossen',
-                  'delivered', 'geliefert'
+                  'cancelled', 'completed', 'reversed'
               )
-              AND soi.quantity > 0
+              AND soi.offene_menge > 0
               {where_extra}
             {'AND a.warengruppe = :artikelgruppe' if artikelgruppe else ''}
             GROUP BY a.id, a.article_number, a.name, a.warengruppe, a.gebinde_einheit

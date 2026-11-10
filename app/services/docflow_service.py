@@ -184,81 +184,6 @@ class DocflowService:
 
     # ── bootstrap ─────────────────────────────────────────────────────────────
 
-    def _bootstrap_sales_order(self, doc_id: str) -> Optional[dict[str, Any]]:
-        existing = self.fetch_header(doc_id)
-        if existing:
-            return existing
-        src = self.db.execute(
-            text("""
-                SELECT id, tenant_id, order_number, customer_id, currency, status, created_at, updated_at
-                FROM domain_crm.sales_orders
-                WHERE tenant_id = :tenant_id AND id = :id AND deleted_at IS NULL
-            """),
-            {"tenant_id": self.tenant_id, "id": doc_id},
-        ).mappings().first()
-        if not src:
-            return None
-        src_d = dict(src)
-        src_items = self.db.execute(
-            text("""
-                SELECT id, line_number, article_number, description, quantity, unit_price, discount_percent
-                FROM domain_crm.sales_order_items WHERE order_id = :order_id ORDER BY line_number ASC
-            """),
-            {"order_id": doc_id},
-        ).mappings().all()
-        total_net = total_tax = total_gross = Decimal("0.00")
-        now = datetime.now(timezone.utc)
-        self.db.execute(
-            text("""
-                INSERT INTO domain_docflow.document_headers
-                (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
-                 currency, total_net, total_tax, total_gross, document_date, version, created_at, updated_at)
-                VALUES (:id, :tenant_id, 'sales_order', :doc_number, :status, 'domain_crm.sales_orders', :source_ref,
-                 :customer_id, NULL, :currency, 0, 0, 0, :document_date, 1, :created_at, :updated_at)
-            """),
-            {
-                "id": str(src_d["id"]), "tenant_id": self.tenant_id,
-                "doc_number": src_d["order_number"],
-                "status": "open" if (src_d.get("status") or "open") not in {"posted", "reversed"} else src_d["status"],
-                "source_ref": str(src_d["id"]),
-                "customer_id": str(src_d["customer_id"]) if src_d.get("customer_id") else None,
-                "currency": src_d.get("currency") or "EUR",
-                "document_date": src_d.get("created_at") or now,
-                "created_at": src_d.get("created_at") or now,
-                "updated_at": src_d.get("updated_at") or now,
-            },
-        )
-        for item in src_items:
-            qty = Decimal(str(item.get("quantity") or 0))
-            price = Decimal(str(item.get("unit_price") or 0))
-            discount = Decimal(str(item.get("discount_percent") or 0))
-            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, Decimal("0"))
-            total_net += line_net; total_tax += line_tax; total_gross += line_gross
-            self.db.execute(
-                text("""
-                    INSERT INTO domain_docflow.document_items
-                    (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, created_at, updated_at)
-                    VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description,
-                     :quantity, NULL, :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, NOW(), NOW())
-                """),
-                {
-                    "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": doc_id,
-                    "line_number": int(item.get("line_number") or 0),
-                    "source_line_id": str(item["id"]),
-                    "article_number": item.get("article_number") or "",
-                    "description": item.get("description"),
-                    "quantity": _qty(qty), "unit_price": price, "discount_percent": discount,
-                    "tax_rate": Decimal("0"),
-                    "line_total_net": line_net, "line_total_tax": line_tax, "line_total_gross": line_gross,
-                },
-            )
-        self.db.execute(
-            text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g, updated_at=NOW() WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
-        )
-        return self.fetch_header(doc_id)
-
     def _bootstrap_sales_delivery(self, doc_id: str) -> Optional[dict[str, Any]]:
         existing = self.fetch_header(doc_id)
         if existing:
@@ -347,9 +272,7 @@ class DocflowService:
         existing = self.fetch_header(doc_id)
         if existing:
             return existing
-        bootstrapped = self._bootstrap_sales_order(doc_id)
-        if bootstrapped:
-            return bootstrapped
+        # Auftraege stehen seit docflow_auftraege_uebernahme_20261109 nur in DocFlow; Lieferscheine folgen.
         return self._bootstrap_sales_delivery(doc_id)
 
     # ── number series ─────────────────────────────────────────────────────────
@@ -801,6 +724,41 @@ class DocflowService:
         self.store_idempotent_response("release", doc_id, idempotency_key, response, {})
         self._protokolliere("release", doc_id, {"doc_number": new_number})
         self.best_effort_audit("docflow_release", "docflow_document", doc_id, {"doc_number": new_number, "released_by": self._wer(released_by)})
+        self.db.commit()
+        return response
+
+    def confirm(self, doc_id: str, idempotency_key: str, expected_version: Optional[int],
+                confirmed_by: Optional[str] = None) -> dict[str, Any]:
+        """Auftragsbestaetigung: ein freigegebener Auftrag (``open``) wird ``confirmed`` (BELEG-052, 09.11.2026).
+
+        Nur Verkaufsauftraege. Folgebelege und Storno bleiben danach moeglich; Loeschen und Bearbeiten nicht.
+        """
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("confirm", doc_id, idempotency_key, {})
+        if cached:
+            self.db.rollback()
+            return {**cached, "idempotent_hit": True}
+        header = self.fetch_header(doc_id)
+        if not header:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if expected_version and int(header.get("version") or 1) != expected_version:
+            raise ConflictError("Version conflict")
+        if str(header.get("doc_type")) != "sales_order":
+            raise ValidationFailedError("Bestätigt wird nur ein Verkaufsauftrag.")
+        if str(header.get("status")) != "open":
+            raise ValidationFailedError("Bestätigt wird nur ein freigegebener, offener Auftrag.")
+        self._kommando("confirm")
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET status='confirmed', updated_at=NOW(), version=version+1, "
+                 "updated_by=:updated_by WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "updated_by": self._wer(confirmed_by)},
+        )
+        response = {"command": "confirm", "source_doc_id": doc_id, "target_doc_id": None, "status": "ok",
+                    "payload": {"doc_number": str(header["doc_number"]), "doc_type": "sales_order"}}
+        self.store_idempotent_response("confirm", doc_id, idempotency_key, response, {})
+        self._protokolliere("confirm", doc_id, {"doc_number": str(header["doc_number"])})
+        self.best_effort_audit("docflow_confirm", "docflow_document", doc_id,
+                               {"doc_number": str(header["doc_number"]), "confirmed_by": self._wer(confirmed_by)})
         self.db.commit()
         return response
 

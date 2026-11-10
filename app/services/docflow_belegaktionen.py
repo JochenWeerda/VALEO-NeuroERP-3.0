@@ -81,6 +81,9 @@ def fuehre_aus(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion
     if kern == "freigeben":
         ergebnis = svc.release(beleg_id, schluessel("freigeben"), version, None)
         return f"{bezeichnung} freigegeben: {ergebnis.get('doc_number') or kopf['doc_number']}."
+    if kern == "bestaetigen":
+        svc.confirm(beleg_id, schluessel("bestaetigen"), version)
+        return f"{bezeichnung} {kopf['doc_number']} bestätigt."
     if kern == "buchen":
         svc.post_document(beleg_id, DocflowPostRequest(idempotency_key=schluessel("buchen"), expected_version=version))
         return f"{bezeichnung} {kopf['doc_number']} gebucht."

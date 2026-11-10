@@ -70,7 +70,7 @@ class SalesCreditService:
         return float(self.db.execute(
             text("SELECT COALESCE(SUM(total_amount),0) FROM domain_crm.sales_orders "
                  "WHERE customer_id = :cid AND tenant_id = :t AND deleted_at IS NULL "
-                 "AND status NOT IN ('storniert','abgeschlossen','invoiced') "
+                 "AND status NOT IN ('cancelled','completed','reversed') "
                  "AND (:ex IS NULL OR order_number <> :ex)"),
             {"cid": customer_id, "t": self.tenant_id, "ex": exclude_order},
         ).scalar() or 0.0)
@@ -131,7 +131,7 @@ class SalesCreditService:
                        COALESCE(SUM(o.total_amount),0) AS exposure, count(*) AS auftraege
                 FROM domain_crm.sales_orders o
                 WHERE o.tenant_id = :t AND o.deleted_at IS NULL
-                  AND o.status NOT IN ('storniert','abgeschlossen','invoiced')
+                  AND o.status NOT IN ('cancelled','completed','reversed')
                 GROUP BY o.customer_id ORDER BY exposure DESC LIMIT :lim
                 """
             ),

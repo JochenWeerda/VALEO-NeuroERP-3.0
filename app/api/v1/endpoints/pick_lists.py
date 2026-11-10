@@ -124,25 +124,9 @@ async def book_pick_list_order(
         obj.tour_id = payload.tour_id
     if payload.order_id:
         obj.order_id = payload.order_id
+    # Den Auftragsstand setzt hier niemand mehr: Der Auftrag ist DocFlow-Beleg (BELEG-052), sein Stand folgt aus
+    # den Folgebelegen (domain_crm.sales_orders ist seither eine Sicht).
     db.commit()
-
-    # Belegbruch schließen: Auftrag auf 'in_delivery' setzen
-    linked_order = payload.order_id or obj.order_id
-    if linked_order:
-        try:
-            db.execute(
-                text("""
-                    UPDATE domain_crm.sales_orders
-                    SET status = 'in_delivery', updated_at = NOW()
-                    WHERE id = :oid AND tenant_id = :tid
-                      AND status NOT IN ('in_delivery', 'geliefert', 'completed', 'cancelled')
-                """),
-                {"oid": linked_order, "tid": tenant_id},
-            )
-            db.commit()
-        except Exception:  # noqa: BLE001 — Auftragsstatus ist Folgeinformation, die Picklisten-Buchung steht schon
-            # Ohne Rollback war die Transaktion danach tot und db.refresh scheiterte (bis 27.10.2026).
-            db.rollback()
 
     db.refresh(obj)
     return PickListOut.model_validate(obj)

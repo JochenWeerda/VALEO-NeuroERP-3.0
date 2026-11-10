@@ -328,6 +328,8 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
         ),
         _aktion("freigeben", "Freigeben", BELEGKOMMANDOS["docflow.release"]),
     ]
+    if variante.belegart == "sales_order":
+        liste.append(_aktion("bestaetigen", "Auftrag bestätigen", BELEGKOMMANDOS["docflow.confirm"]))
     if variante.bucht:
         liste.append(_aktion("buchen", "Buchen", BELEGKOMMANDOS["docflow.post"]))
     for folgeart in variante.folgebelege:

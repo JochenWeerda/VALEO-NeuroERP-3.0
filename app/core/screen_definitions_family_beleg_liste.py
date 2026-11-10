@@ -49,8 +49,9 @@ def _spalten(belegart: str) -> list[dict[str, Any]]:
     return spalten
 
 
-_STATUS = [("draft", "Entwurf"), ("open", "Offen"), ("released", "Freigegeben"), ("posted", "Gebucht"),
-           ("reversed", "Storniert (Gegenbuchung)"), ("cancelled", "Storniert")]
+_STATUS = [("draft", "Entwurf"), ("open", "Offen"), ("confirmed", "Bestätigt"), ("released", "Freigegeben"),
+           ("completed", "Abgeschlossen"), ("posted", "Gebucht"), ("reversed", "Storniert (Gegenbuchung)"),
+           ("cancelled", "Storniert")]
 
 _ROLLEN = {
     "verkauf": [("sales", "Vertrieb", ["stand"]), ("inside-sales", "Innendienst", ["stand"]),

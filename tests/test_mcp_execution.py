@@ -545,7 +545,7 @@ def test_customer_summary360_rejects_mandant_and_propose(client):
 
 
 ORDER_STATUS = {"auftrag_nr": "SO-100"}
-ORDER_ROW = {"id": "ord-1", "auftrag_nr": "SO-100", "status": "open"}
+ORDER_ROW = {"id": "ord-1", "auftrag_nr": "SO-100", "status": "confirmed"}
 
 
 def _as_sales_read(client):
@@ -587,7 +587,7 @@ def test_order_status_dry_run_returns_lifecycle_without_writing(client):
     assert body["mode"] == "dryRun"
     assert body["order_id"] == "ord-1"
     assert body["auftrag_nr"] == "SO-100"
-    assert body["status"] == "open"
+    assert body["status"] == "confirmed"
     assert body["offene_positionen"] == 3
     assert body["naechster_schritt"] == "Lieferschein oder Rechnung erstellen"
     assert body["route_path"] == "/belege/sales_order/ord-1"

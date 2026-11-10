@@ -20767,3 +20767,18 @@ Jetzt: document_headers.bausteine (Migration docflow_kopfbausteine_20261109), Fe
 Belegart im Belegvertrag (BAUSTEIN_FELDER/KOPFBAUSTEINE), Pruefung beim Anlegen/Aendern (Unbekanntes 422), flache
 Maskenform <baustein>__<feld> in Kopf und "Beleg bearbeiten"/Neuanlage; Belegfamilie 1.6.0. Naechster Schritt:
 Schreibwege des Auftragsspeichers entfernen, Altbestand nach DocFlow migrieren, sales_orders als Sicht auf DocFlow.
+BELEG-052 Auftrag (09.11.2026): Maske sales/sales-order, Router /sales/orders und AB-Lifecycle entfernt (PR #125);
+MCP sales.order.status, Deep-Link, Cockpit, Prozesskette und Flow-Spine auf Belegmaske/beleg-liste/sales-order.
+Datenweg: Migration docflow_auftraege_uebernahme_20261109 uebernimmt domain_crm.sales_orders/-items nach DocFlow
+(gleiche ID, Kopfangaben als Bausteine, Summen aus Positionen, keine angenommene Steuer, unbekannter Stand bricht ab),
+Ursprungsdaten bleiben als *_vor_docflow (GoBD), unter dem alten Namen Sicht mit security_invoker fuer die ~20 Leser.
+Status-Schreiber in Sammellieferschein, Pickliste und Lieferschein-Ausliefern entfernt (Dublettenschutz Sammel-LS ueber
+source_order_ids); DocFlow _bootstrap_sales_order entfernt. Geprueft frisch (valeo_claude_test) und gewachsen
+(valeo_neuro_erp, zurueckgerollt: 14 Altauftraege, Rueckweg vollstaendig). Naechster Schritt: Lieferscheine.
+BELEG-052 Auftrag Nachzug (09.11.2026, Nutzerentscheidungen): #125 aufgeteilt in #127 (Kopfbausteine/Zugaenge) und
+A2 (Altwege entfernt, ohne neue Module; keine Lockerung der Baseline-Integritaet). Auftragsbestaetigung als eigener
+Stand confirmed (Migration docflow_auftragsbestaetigung_20261109, Aktion "Auftrag bestaetigen" docflow.confirm, Druck
+"Auftragsbestaetigung"); Uebernahme bestaetigt/in Lieferung -> confirmed. Pruefbefunde behoben: Kreditlimit zaehlte
+stornierte Auftraege (alte Statuswoerter), Bestellvorschlag zaehlt offene Menge (Sicht sales_order_items.offene_menge =
+Rechnung der Belegmaske), Indizes Kunde/Rueckverweis, Schreibschutz der Ursprungsdaten, Ratsche gegen neue Leser,
+Schreiber und alte Statuswoerter. ADR-086 Accepted (fachliche Freigabe 09.11.2026).

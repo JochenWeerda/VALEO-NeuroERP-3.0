@@ -1064,7 +1064,9 @@
  "x-status": [
   "draft",
   "open",
+  "confirmed",
   "released",
+  "completed",
   "posted",
   "reversed",
   "cancelled"

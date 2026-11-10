@@ -36,7 +36,6 @@ from app.services.sales_posting_service import SalesPostingService
 
 from app.documents.router_helpers import get_repository, save_to_store
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.sales_delivery_notes_schemas import SalesDeliveryNotesOut
 from app.core.akteur import akteur_aus_request, bekannter_nutzer
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
@@ -688,20 +687,8 @@ async def deliver_delivery_note(
     )
     db.commit()
 
-    # O2C completion: wenn Auftrag vollständig geliefert → Auftrag auf geliefert setzen
-    order_id = row.get("sales_order_id")
-    if order_id:
-        try:
-            from app.services.sales_match_service import SalesMatchService
-            match = SalesMatchService(db, tenant_id).match(order_id)
-            if match.get("vollstaendig_geliefert"):
-                db.execute(
-                    text("UPDATE domain_crm.sales_orders SET status = 'geliefert', updated_at = NOW() WHERE id = :oid AND tenant_id = :tid"),
-                    {"oid": order_id, "tid": tenant_id},
-                )
-                db.commit()
-        except Exception:  # noqa: BLE001 — order status update is non-blocking
-            pass
+    # Der Auftragsstand wird nicht mehr nachgezogen: Der Auftrag ist DocFlow-Beleg (BELEG-052), sein Stand folgt aus
+    # den Folgebelegen; domain_crm.sales_orders ist seither eine Sicht.
 
     row = _get_delivery_note_or_404(db, ls_id, tenant_id)
     positions = _list_positions(db, ls_id)

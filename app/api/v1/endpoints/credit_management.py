@@ -123,7 +123,7 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
             SELECT COALESCE(SUM(total_amount), 0)
             FROM domain_crm.sales_orders
             WHERE customer_id = :cid AND tenant_id = :tid
-              AND status NOT IN ('storniert', 'abgeschlossen', 'invoiced')
+              AND status NOT IN ('cancelled', 'completed', 'reversed')
               AND deleted_at IS NULL
             """
         ),

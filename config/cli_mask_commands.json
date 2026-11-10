@@ -172,6 +172,7 @@
   "mask:beleg/sales-offer:umwandeln:sales_order",
   "mask:beleg/sales-offer:versenden",
   "mask:beleg/sales-order:bearbeiten",
+  "mask:beleg/sales-order:bestaetigen",
   "mask:beleg/sales-order:freigabe_ablehnen:reverse",
   "mask:beleg/sales-order:freigabe_anfordern:reverse",
   "mask:beleg/sales-order:freigabe_erteilen:reverse",
