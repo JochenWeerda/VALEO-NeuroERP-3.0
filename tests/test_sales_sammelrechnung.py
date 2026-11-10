@@ -124,32 +124,13 @@ def kopf(mandant: str, kunde: str) -> dict[str, str]:
     }
 
 
-def lieferschein(client, kopf, menge: str, preis: str = "25.00") -> str:
-    antwort = client.post(
-        "/api/v1/sales/delivery-notes",
-        headers=kopf,
-        json={
-            "customer_id": "K-SAMMEL",
-            "delivery_date": "2026-09-17",
-            "positionen": [
-                {
-                    "pos_nr": 1,
-                    "artikel_id": "ART-WEIZEN",
-                    "artikel_nr": "10001",
-                    "bezeichnung": "Weizen A",
-                    "menge": menge,
-                    "einheit": "dt",
-                    "netto_preis": preis,
-                    "mwst_prozent": "7",
-                }
-            ],
-        },
-    )
-    assert antwort.status_code == 201, antwort.text
-    ls_id = antwort.json()["id"]
-    gebucht = client.post(f"/api/v1/sales/delivery-notes/{ls_id}/post", headers=kopf)
-    assert gebucht.status_code == 200, gebucht.text
-    return ls_id
+def lieferschein(client, kopf, menge: str, preis: str = "25.00", status: str = "posted") -> str:
+    """Altlieferschein (Router entfernt, BELEG-052 1b) - herausgegeben, wie nach dem frueheren /post."""
+    from alt_lieferschein import lege_alt_lieferschein_an
+
+    return lege_alt_lieferschein_an(kopf["X-Tenant-ID"], kunde="K-SAMMEL", lieferdatum="2026-09-17", url=DB_URL,
+                                    status=status, positionen=[{"pos_nr": 1, "artikel_id": "ART-WEIZEN", "artikel_nr": "10001", "bezeichnung": "Weizen A",
+                     "menge": menge, "einheit": "dt", "netto_preis": preis, "mwst_prozent": "7"}])
 
 
 def sammelrechnung(client, kopf, *ls_ids: str):
@@ -187,9 +168,12 @@ def test_quell_lieferscheine_gelten_danach_als_berechnet(client, kopf) -> None:
     ls_id = lieferschein(client, kopf, "100")
     assert sammelrechnung(client, kopf, ls_id).status_code == 201
 
-    gelesen = client.get(f"/api/v1/sales/delivery-notes/{ls_id}", headers=kopf)
-    assert gelesen.status_code == 200
-    assert gelesen.json()["status"] == "BERECHNET"
+    from sqlalchemy import create_engine, text
+
+    with create_engine(DB_URL).connect() as verbindung:
+        stand = verbindung.execute(text("SELECT status FROM domain_sales.delivery_notes WHERE id = :id"),
+                                   {"id": ls_id}).scalar()
+    assert stand == "BERECHNET"
 
 
 def test_zweimal_sammeln_wird_abgewiesen(client, kopf) -> None:
@@ -203,27 +187,7 @@ def test_zweimal_sammeln_wird_abgewiesen(client, kopf) -> None:
 
 
 def test_entwurf_wird_nicht_abgerechnet(client, kopf) -> None:
-    antwort = client.post(
-        "/api/v1/sales/delivery-notes",
-        headers=kopf,
-        json={
-            "customer_id": "K-SAMMEL",
-            "delivery_date": "2026-09-17",
-            "positionen": [
-                {
-                    "pos_nr": 1,
-                    "artikel_id": "ART-WEIZEN",
-                    "artikel_nr": "10001",
-                    "bezeichnung": "Weizen A",
-                    "menge": "10",
-                    "einheit": "dt",
-                    "netto_preis": "25.00",
-                    "mwst_prozent": "7",
-                }
-            ],
-        },
-    )
-    entwurf = antwort.json()["id"]
+    entwurf = lieferschein(client, kopf, "10", status="draft")
 
     abgewiesen = sammelrechnung(client, kopf, entwurf)
     assert abgewiesen.status_code == 422

@@ -151,8 +151,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -470,8 +470,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -745,8 +745,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -1003,8 +1003,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -1281,8 +1281,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -1570,8 +1570,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -1811,8 +1811,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -2052,8 +2052,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -2278,8 +2278,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -2644,8 +2644,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -2894,8 +2894,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -3212,8 +3212,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -3461,8 +3461,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -3711,8 +3711,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -3956,8 +3956,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -4190,8 +4190,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -4437,8 +4437,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -4699,8 +4699,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -4946,8 +4946,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -5193,8 +5193,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -5468,8 +5468,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -5743,8 +5743,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -6034,8 +6034,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -6281,8 +6281,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -6556,8 +6556,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -6817,8 +6817,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -7097,8 +7097,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -7344,8 +7344,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -7609,8 +7609,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -7859,8 +7859,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -8113,8 +8113,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -8360,8 +8360,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -8614,8 +8614,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -8889,8 +8889,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -9326,8 +9326,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -9573,8 +9573,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -9820,8 +9820,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -10066,8 +10066,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -10312,8 +10312,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -10558,8 +10558,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -10801,8 +10801,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -11075,8 +11075,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -11312,8 +11312,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -11559,8 +11559,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -11863,8 +11863,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -12230,8 +12230,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",
@@ -12548,8 +12548,8 @@
           {
             "key": "lieferschein",
             "label": "Lieferschein",
-            "screenId": "sales/delivery-note",
-            "routePath": "/verkauf/lieferschein-erfassung"
+            "screenId": "beleg-liste/sales-delivery",
+            "routePath": "/sales/lieferungen"
           },
           {
             "key": "rechnung",

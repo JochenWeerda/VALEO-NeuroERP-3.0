@@ -26,11 +26,6 @@ router = APIRouter()
 
 
 
-class LSAdvanceIn(_BM):
-    new_status: str
-    quittiert_von: _Opt[str] = None
-
-
 class PreisabweichungIn(_BM):
     artikel_id: str
     angebots_preis: float
@@ -41,22 +36,6 @@ class PreisabweichungIn(_BM):
 class PreisabweichungFreigabeIn(_BM):
     entscheidung: str
     grund: _Opt[str] = None
-
-
-@router.post("/delivery-notes/{ls_id}/advance", response_model=TypedObjectOut, summary="Lieferschein-Status vorwärts", dependencies=SCHREIBEN["VERKAUF"])
-def ls_advance_endpoint(
-    ls_id: str,
-    body: LSAdvanceIn,
-    request: Request,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    from app.services.sales_lieferschein_close_service import advance_lieferschein, LSCloseError
-    try:
-        return advance_lieferschein(db, ls_id, tenant_id, body.new_status,
-                                     gepruefter_akteur_aus_request(request), body.quittiert_von)
-    except LSCloseError as exc:
-        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.post("/orders/{auftrag_id}/preisabweichung", response_model=TypedObjectOut, status_code=201, summary="Preisabweichung prüfen", dependencies=SCHREIBEN["VERKAUF"])

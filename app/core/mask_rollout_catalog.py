@@ -99,17 +99,6 @@ ROLLOUT_WAVES_42_51: tuple[MaskRolloutSpec, ...] = (
         registry_mask_id="crm/opportunity-detail",
     ),
     MaskRolloutSpec(
-        screen_id="sales/delivery-note",
-        domain="sales",
-        label="Lieferschein",
-        api_prefix="/api/v1/sales/delivery-notes",
-        entity_param="ls_id",
-        available_tabs=("kopf", "positionen", "dokumente"),
-        lazy_tabs=("positionen", "dokumente"),
-        budget_kb=52,
-        registry_mask_id="sales/delivery-note",
-    ),
-    MaskRolloutSpec(
         screen_id="agrar/harvest-settlement",
         domain="agrar",
         label="Ernte-Abrechnung",

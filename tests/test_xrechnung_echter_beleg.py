@@ -121,33 +121,18 @@ def kopf(mandant: str, kunde: str) -> dict[str, str]:
 @pytest.fixture()
 def rechnung(client, kopf) -> dict:
     """Eine echte Rechnung ueber 100 dt zu 25,00 mit 7 % Steuer."""
-    ls = client.post(
-        "/api/v1/sales/delivery-notes",
-        headers=kopf,
-        json={
-            "customer_id": "K-XRECHNUNG",
-            "delivery_date": "2026-09-17",
-            "positionen": [
-                {
-                    "pos_nr": 1,
-                    "artikel_id": "ART-WEIZEN",
-                    "artikel_nr": "10001",
-                    "bezeichnung": "Weizen A",
-                    "menge": "100",
-                    "einheit": "dt",
-                    "netto_preis": "25.00",
-                    "mwst_prozent": "7",
-                }
-            ],
-        },
-    )
-    assert ls.status_code == 201, ls.text
+    from alt_lieferschein import lege_alt_lieferschein_an
+
+    ls_id = lege_alt_lieferschein_an(kopf["X-Tenant-ID"], kunde="K-XRECHNUNG", lieferdatum="2026-09-17", url=DB_URL,
+                                     positionen=[{"pos_nr": 1, "artikel_id": "ART-WEIZEN", "artikel_nr": "10001",
+                                                  "bezeichnung": "Weizen A", "menge": "100", "einheit": "dt",
+                                                  "netto_preis": "25.00", "mwst_prozent": "7"}])
     angelegt = client.post(
         "/api/v1/sales/invoices/from-delivery-notes",
         headers=kopf,
         json={
             "customer_id": "K-XRECHNUNG",
-            "delivery_note_ids": [ls.json()["id"]],
+            "delivery_note_ids": [ls_id],
             "invoice_date": "2026-09-17",
         },
     )

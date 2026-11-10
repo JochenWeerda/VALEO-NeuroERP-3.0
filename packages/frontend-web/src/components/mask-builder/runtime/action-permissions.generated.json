@@ -1807,15 +1807,6 @@
         ]
       ]
     },
-    "sales/delivery-note": {
-      "sales.lieferschein.drucken": [
-        [
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "schnittstelle/mde-inbox": {
       "mobile.sync.process": [
         [

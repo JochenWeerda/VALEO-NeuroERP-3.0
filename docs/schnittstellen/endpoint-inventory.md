@@ -418,7 +418,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_blanket_orders` | Rahmenaufträge / Abrufe (Blanket Orders) — thin-router, sqlalchemy.text(). |
 | `sales_credit` | Kreditlimit-Prüfung & Billing-Status im O2C-Kontext (DOM-SALES-004.3) — read-only. |
 | `sales_credit_notes` | Retouren (SALES-DLV-02/03/04). Gutschriften liegen seit BELEG-052 in DocFlow. |
-| `sales_delivery_notes` | Sales Delivery Notes (Lieferscheine) CRUD endpoints. |
 | `sales_invoice_einvoice` | Slice-006: XRechnung/ZUGFeRD Export Endpoints für SalesInvoice. |
 | `sales_invoices` | Die Ausgangsrechnung mit ihren Positionen. |
 | `sales_match` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2) — read-only. |

@@ -85,7 +85,6 @@ def test_rollout_screen_definitions_exist(screen_id: str) -> None:
         "einkauf/bestellung-stamm",
         "einkauf/lieferanten-stamm",
         "crm/opportunity-detail",
-        "sales/delivery-note",
         "agrar/harvest-settlement",
         "finance/zahlungslauf-kreditoren",
     ],

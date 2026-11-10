@@ -14,7 +14,7 @@ chains:
     label: "Verkauf"
     steps:
       - { key: auftrag,     label: "Auftrag",     screenId: "beleg-liste/sales-order" }
-      - { key: lieferschein, label: "Lieferschein", screenId: "sales/delivery-note" }
+      - { key: lieferschein, label: "Lieferschein", screenId: "beleg-liste/sales-delivery" }
       - { key: rechnung,    label: "Rechnung",    screenId: "sales/invoice" }
       - { key: offene_posten, label: "Offene Posten", screenId: "finance/ar-open-item" }
       - { key: zahlung,     label: "Zahlung",     screenId: "finance/payment-run" }

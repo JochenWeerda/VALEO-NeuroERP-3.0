@@ -300,7 +300,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_credit_service` | Kreditlimit-Prüfung & Rechnungs-/Billing-Status im O2C-Kontext (DOM-SALES-004.3). |
 | `sales_invoice_mask` | Die Rechnungsmaske als Daten — Kopf, Positionen und Herkunft fuer den Builder. |
 | `sales_invoice_service` | Aus Lieferscheinpositionen wird eine Rechnung mit eigenen Positionen. |
-| `sales_lieferschein_close_service` | DOM-SALES-004.3 — Lieferschein-Closing-Flow Service. |
 | `sales_match_service` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2). |
 | `sales_offer_import` | Atomic, idempotent import of explicitly specified sales offers. |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
