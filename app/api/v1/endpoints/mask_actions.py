@@ -114,59 +114,6 @@ async def action_payment_run_freigeben(
 
 
 # ---------------------------------------------------------------------------
-# sales/delivery-note → drucken
-# ---------------------------------------------------------------------------
-
-@router.post(
-    "/sales/delivery-notes/{entity_id}/actions/drucken",
-    response_model=MaskActionResult,
-    summary="Lieferschein drucken (SPEC-P1-04)", dependencies=SCHREIBEN["VERKAUF"])
-async def action_delivery_note_drucken(
-    entity_id: str,
-    request: Request,
-    body: dict[str, Any] = Body(default_factory=dict),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> MaskActionResult:
-    async def pruefen(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> list[dict[str, Any]]:
-        status = db_.execute(
-            text("SELECT status FROM domain_sales.delivery_notes WHERE id = :id AND tenant_id = :tid"),
-            {"id": eid, "tid": tid},
-        ).scalar()
-        if status is None:
-            return _fehler("Lieferschein nicht gefunden.")
-        if status in ("posted", "printed", "delivered") and not str(payload.get("attestation") or "").strip():
-            return _fehler(
-                "Attestation reason required for printing posted delivery notes — "
-                "ein Nachdruck braucht eine Begruendung.",
-                "attestation",
-            )
-        return []
-
-    async def drucken(db_: Session, payload: dict[str, Any], eid: str, tid: str) -> str:
-        from app.api.v1.endpoints.sales_delivery_notes import print_delivery_note
-
-        await print_delivery_note(
-            eid, attestation=str(payload.get("attestation") or "").strip() or None,
-            # Die gepruefte Identitaet reist mit: Die Attestierung des Nachdrucks ordnet sie einem lokalen Nutzer zu.
-            tenant_id=tid, db=db_, request=request,
-        )
-        return "Lieferschein gedruckt."
-
-    return await run_delegated_mask_action(
-        db,
-        action_key="drucken",
-        entity_type="delivery_note",
-        entity_id=entity_id,
-        tenant_id=tenant_id,
-        body=body,
-        check_fn=pruefen,
-        delegate_fn=drucken,
-        outbox_event_type="sales.delivery_note.print_requested",
-    )
-
-
-# ---------------------------------------------------------------------------
 # qualitaet/reklamation → abschliessen
 # ---------------------------------------------------------------------------
 

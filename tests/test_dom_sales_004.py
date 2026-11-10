@@ -1,4 +1,4 @@
-"""DOM-SALES-004 Unit Tests — Lieferschein-Close (.3), Preisabweichung (.4)."""
+"""DOM-SALES-004 Unit Tests — Preisabweichung (.4)."""
 from __future__ import annotations
 
 import pytest
@@ -26,41 +26,6 @@ def _mock_db(sql_map: dict):
 
     db.execute.side_effect = side_effect
     return db
-
-
-# ---------------------------------------------------------------------------
-# Lieferschein Close
-# ---------------------------------------------------------------------------
-
-class TestLieferscheinClose:
-    def _ls(self, status="OFFEN"):
-        return {"id": "ls-1", "tenant_id": "t1", "status": status, "delivery_number": "LS-2026-001"}
-
-    def test_kommissionierung(self):
-        from app.services.sales_lieferschein_close_service import advance_lieferschein
-        db = _mock_db({"sales_delivery_notes": self._ls()})
-        result = advance_lieferschein(db, "ls-1", "t1", "KOMMISSIONIERT")
-        assert result["status"] == "KOMMISSIONIERT"
-        assert result["idempotent"] is False
-
-    def test_quittierung(self):
-        from app.services.sales_lieferschein_close_service import advance_lieferschein
-        db = _mock_db({"sales_delivery_notes": self._ls(status="VERSANDT")})
-        result = advance_lieferschein(db, "ls-1", "t1", "QUITTIERT", quittiert_von="Empfänger GmbH")
-        assert result["status"] == "QUITTIERT"
-
-    def test_bereits_quittiert_idempotent(self):
-        from app.services.sales_lieferschein_close_service import advance_lieferschein
-        db = _mock_db({"sales_delivery_notes": self._ls(status="QUITTIERT")})
-        result = advance_lieferschein(db, "ls-1", "t1", "QUITTIERT")
-        assert result["idempotent"] is True
-        db.commit.assert_not_called()
-
-    def test_rückwärts_transition_raises(self):
-        from app.services.sales_lieferschein_close_service import advance_lieferschein, LSCloseError
-        db = _mock_db({"sales_delivery_notes": self._ls(status="VERSANDT")})
-        with pytest.raises(LSCloseError, match="Ungültiger"):
-            advance_lieferschein(db, "ls-1", "t1", "OFFEN")
 
 
 # ---------------------------------------------------------------------------

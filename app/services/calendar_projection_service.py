@@ -471,7 +471,7 @@ DEFAULT_PROJECTORS: list[CalendarProjector] = [
 _EMAIL_OBJECT_ROUTES: dict[str, tuple[str, str]] = {
     "purchase_order": ("einkauf/purchase-order", "/einkauf/bestellungen"),
     "contract": ("agrar/kontrakte", "/kontrakte"),
-    "delivery_note": ("sales/delivery-note", "/verkauf/lieferschein-erfassung"),
+    "delivery_note": ("beleg-liste/sales-delivery", "/sales/lieferungen"),
     "supplier": ("einkauf/supplier", "/einkauf/lieferanten"),
 }
 

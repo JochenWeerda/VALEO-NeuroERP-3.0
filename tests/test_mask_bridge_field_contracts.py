@@ -75,8 +75,6 @@ BRUECKEN_ZEILEN = (
     "crm/opportunity/angebote/angebote",
     "lager/article-stock/bestand/bestand",
     "lager/article-stock/bewegungen/bewegungen",
-    "sales/delivery-note/positionen/positionen",
-    "sales/delivery-note/dokumente/dokumente",
     "finance/ar-open-item/ausgleich/ausgleich",
     "lager/stock-movement/details/details",
     "agrar/harvest-settlement/positionen/positionen",

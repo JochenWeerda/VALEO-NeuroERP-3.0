@@ -516,23 +516,3 @@ class TestHarvestAcceptanceServiceUnit:
         from app.core.exceptions import ValidationFailedError
         err = ValidationFailedError("Feuchte zu hoch")
         assert "Feuchte" in err.detail or "Feuchte" in str(err)
-
-
-# =============================================================================
-# IX. SALES — Status-Übergaenge (ab_transition helper)
-# =============================================================================
-
-class TestSalesStatusTransition:
-
-    def test_ls_advance_missing_id(self):
-        db = MagicMock()
-        exec_mock = MagicMock()
-        exec_mock.mappings.return_value.first.return_value = None
-        db.execute.return_value = exec_mock
-        with _override_db(db):
-            res = _client.post(
-                "/api/v1/sales/orders/delivery-notes/nonexistent/advance",
-                json={},
-                headers=_HEADERS,
-            )
-        assert res.status_code in (404, 422, 500, 503)

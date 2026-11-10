@@ -121,7 +121,6 @@ _Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, 
 - `crm/opportunity` — Opportunity · Contract: `GET /api/v1/masks/crm/opportunity/agent-contract` · Rollout: `/mask-rollout/crm__opportunity/:entityId`
 - `finance/ar-open-item` — Offener Posten · Contract: `GET /api/v1/masks/finance/ar-open-item/agent-contract` · Rollout: `/mask-rollout/finance__ar-open-item/:entityId`
 - `finance/payment-run` — Zahlungslauf · Contract: `GET /api/v1/masks/finance/payment-run/agent-contract` · Rollout: `/mask-rollout/finance__payment-run/:entityId`
-- `sales/delivery-note` — Lieferschein · Contract: `GET /api/v1/masks/sales/delivery-note/agent-contract` · Rollout: `/mask-rollout/sales__delivery-note/:entityId`
 
 ---
 
