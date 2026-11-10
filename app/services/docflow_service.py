@@ -844,6 +844,22 @@ class DocflowService:
         )
         self._protokolliere("deliver", doc_id, {"pickliste": pickliste})
 
+    def _original_archivieren(self, doc_id: str) -> None:
+        """Das Original der gebuchten Ausgangsrechnung/-gutschrift (PDF aus dem Belegvertrag) ins GoBD-Archiv - in der
+        Transaktion der Buchung: Scheitert der Archiveintrag, scheitert die Buchung (vorher fehlte das Original)."""
+        from app.core.gobd_artifact import register_artifact, sha256_hex
+        from app.services.beleg_druck import beleg_pdf
+        from app.services.docflow_belegadapter import lies_beleg
+
+        beleg = lies_beleg(self, doc_id)
+        if beleg is None:
+            raise ValidationFailedError("Beleg fuer das Archiv nicht lesbar.")
+        inhalt = beleg_pdf(beleg)
+        register_artifact(db=self.db, tenant_id=self.tenant_id, doc_number=beleg.beleg_nr, artifact_type="pdf",
+                          content_hash_sha256=sha256_hex(inhalt), storage_key=f"beleg/{beleg.belegart}/{beleg.beleg_nr}",
+                          file_name=f"{beleg.belegart}_{beleg.beleg_nr}.pdf".replace("/", "-"),
+                          created_by=self.akteur, doc_type=beleg.belegart, content=inhalt)
+
     def record_print(self, doc_id: str, printed_by: Optional[str]) -> None:
         if not self.fetch_header(doc_id):
             raise EntityNotFoundError("DocflowDocument", doc_id)
@@ -1203,6 +1219,8 @@ class DocflowService:
             text("UPDATE domain_docflow.document_headers SET status='posted', posting_date=:posting_date, updated_at=NOW(), updated_by=:updated_by, version=version+1 WHERE id=:id AND tenant_id=:tenant_id"),
             {"id": doc_id, "tenant_id": self.tenant_id, "posting_date": payload.posting_date or date.today(), "updated_by": self._wer(payload.posted_by)},
         )
+        if str(header.get("doc_type") or "") in ("sales_invoice", "sales_credit_memo"):
+            self._original_archivieren(doc_id)
         response = {"command": "post", "source_doc_id": doc_id, "posting_id": posting_id, "status": "ok",
                     "payload": {"outbox_event_id": outbox_event_id, "posting_date": str(payload.posting_date or date.today()),
                                 **finance_result}}

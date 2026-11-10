@@ -168,6 +168,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |
+| `docflow_archiv_wartung_20261110` | Archivierte Belegoriginale: Loeschen nur mit dem DocFlow-Wartungsschalter (BELEG-052 Phase 2). |
 | `docflow_auftraege_uebernahme_20261109` | Verkaufsauftraege nach DocFlow uebernehmen; domain_crm.sales_orders wird Sicht auf DocFlow (BELEG-052). |
 | `docflow_auftragsbestaetigung_20261109` | DocFlow-Stand ``confirmed``: Auftragsbestaetigung (BELEG-052, Nutzerentscheidung 09.11.2026). |
 | `docflow_core_20260215` | docflow core tables and command idempotency |

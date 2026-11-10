@@ -210,3 +210,27 @@ def test_umwandeln_nimmt_den_steuerschluessel_mit(haus):
             "JOIN domain_docflow.document_headers h ON h.id = i.header_id "
             "WHERE h.tenant_id = :t AND h.doc_type = 'sales_invoice'"), {"t": haus["mandant"]}).fetchall()
     assert [(z[0], Decimal(str(z[1]))) for z in zeilen] == [("2", Decimal("7"))]
+
+
+def test_gebuchte_rechnung_hat_ihr_original_im_archiv(haus):
+    """GoBD: Beleg, Buchung und archiviertes Original in einem Commit (alter Rechnungsweg: test_rechnung_ein_commit)."""
+    doc_id = _anlegen(haus, [("3", None, 2, 500)]).json()["id"]
+    assert _buchen(haus, doc_id).status_code == 200
+    with SessionLocal() as db:
+        archiv = db.execute(text(
+            "SELECT artifact_type, freigabe_status, content_bytes IS NOT NULL FROM domain_docflow.document_artifacts "
+            "WHERE header_id = :id"), {"id": doc_id}).all()
+    assert [tuple(a) for a in archiv] == [("pdf", "archiviert", True)]
+
+
+def test_ohne_archiveintrag_wird_nicht_gebucht(haus, monkeypatch):
+    from app.core import gobd_artifact
+
+    def scheitert(*args, **kwargs):
+        raise gobd_artifact.GobdArtifactError("Archiv nicht erreichbar")
+
+    monkeypatch.setattr(gobd_artifact, "register_artifact", scheitert)
+    doc_id = _anlegen(haus, [("3", None, 1, 100)]).json()["id"]
+    assert _buchen(haus, doc_id).status_code >= 400
+    assert _status(doc_id) != "posted"
+    assert _buchung(haus["mandant"]) == []
