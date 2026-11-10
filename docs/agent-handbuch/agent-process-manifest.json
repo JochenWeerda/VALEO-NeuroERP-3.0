@@ -95,7 +95,7 @@
             {
               "label": "Rechnung erzeugen",
               "href": "/sales/invoices/new",
-              "api_path": "/api/v1/finance/invoices",
+              "api_path": "/api/v1/belege/sales_invoice",
               "variant": "primary"
             },
             {
@@ -148,6 +148,7 @@
       "mask_ids": [
         "crm/customer-360",
         "beleg-liste/sales-order",
+        "beleg-liste/sales-invoice",
         "sales/delivery-note",
         "beleg-liste/sales-delivery",
         "finance/ar-open-item",
@@ -327,7 +328,7 @@
             {
               "label": "Rechnungen",
               "href": "/sales/rechnungen",
-              "api_path": "/api/v1/finance/invoices",
+              "api_path": "/api/v1/belege/sales_invoice",
               "variant": "primary"
             }
           ]
@@ -24751,7 +24752,9 @@
       "mask_id": "beleg-liste/sales-invoice",
       "title": "Ausgangsrechnungen",
       "domain": "sales",
-      "process_keys": [],
+      "process_keys": [
+        "order-to-cash"
+      ],
       "rollout_route": "/mask-rollout/beleg-liste__sales-invoice/:entityId",
       "agent_contract_url": "/api/v1/masks/beleg-liste/sales-invoice/agent-contract",
       "screen_definition_url": "/api/v1/masks/beleg-liste/sales-invoice/screen-definition",

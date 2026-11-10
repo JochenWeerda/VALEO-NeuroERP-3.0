@@ -151,7 +151,8 @@ def test_replay_key_cannot_be_reused_for_different_actor_or_payload(client, acto
 
 
 INVOICE = {"lieferschein_nr": "LS-1", "rechnungsdatum": "2026-09-29"}
-NOTE = {"id": "ls-1", "status": "posted", "totals": {"netto": 10.5, "mwst": 2.0}, "positionen": 1}
+# BELEG-052: der Lieferschein ist DocFlow-Beleg (freigegeben = open), Summen aus dem Kopf.
+NOTE = {"id": "ls-1", "status": "open", "total_net": 10.5, "total_tax": 2.0, "positionen": 1}
 
 
 def _as_sales(client):
@@ -228,7 +229,7 @@ def test_invoice_propose_stores_pending_proposal_and_does_not_post(client):
     def execute(sql, params=None):
         statements.append(str(sql))
         result = Mock()
-        if "delivery_notes" in str(sql):
+        if "document_headers" in str(sql):
             result.mappings.return_value.first.return_value = NOTE
         else:
             result.mappings.return_value.first.return_value = None

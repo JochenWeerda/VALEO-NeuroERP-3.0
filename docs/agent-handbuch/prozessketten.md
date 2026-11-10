@@ -57,7 +57,7 @@ Jeder **Flow Spine** ist ein agentenfähiger Steuerraum für eine E2E-Kette. Age
 | Auftrag | active | `/verkauf/auftraege/neu` | `/api/v1/belege/sales_order` |
 | Pruefung | ok | `/workflows/approval` | `/api/v1/process/approval-density/overview` |
 | Lieferung | warning | `/sales/lieferungen` | `/api/v1/sales-shipping/delivery-notes` |
-| Rechnung | warning | `/sales/invoices/new` | `/api/v1/finance/invoices` |
+| Rechnung | warning | `/sales/invoices/new` | `/api/v1/belege/sales_invoice` |
 | Zahlung | warning | `/finance/reconciliation` | `/api/v1/finance/reconciliation` |
 | Abschluss | critical | `/finance/abschluss` | `/api/v1/process/settlement/completion/evaluate` |
 
@@ -93,7 +93,7 @@ _Nach dem Auftrag werden Mengen disponiert, Lieferscheine erzeugt und die Auslie
 
 _Die Faktura zieht belastbare Liefermengen aus Lieferschein und Versandstatus._
 
-- **Rechnung erzeugen** → `/sales/invoices/new` (API: `/api/v1/finance/invoices`, Variante: primary)
+- **Rechnung erzeugen** → `/sales/invoices/new` (API: `/api/v1/belege/sales_invoice`, Variante: primary)
 - **Lieferschein pruefen** → `/sales/lieferungen` (API: `/api/v1/sales-shipping/delivery-notes`, Variante: secondary)
 - *Agent-Hinweis:* Rechnungsmenge kommt aus der gelieferten Menge, nicht aus einem separaten Workflow-Feld.
 
@@ -116,6 +116,7 @@ _Korrekturen, Gutschriften und Abschlusspruefungen folgen erst, wenn Lieferung, 
 ### Registrierte Masken (ScreenDefinition)
 
 - `beleg-liste/sales-delivery` — Lieferscheine · Contract: `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` · Rollout: `/mask-rollout/beleg-liste__sales-delivery/:entityId`
+- `beleg-liste/sales-invoice` — Ausgangsrechnungen · Contract: `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` · Rollout: `/mask-rollout/beleg-liste__sales-invoice/:entityId`
 - `beleg-liste/sales-order` — Aufträge · Contract: `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` · Rollout: `/mask-rollout/beleg-liste__sales-order/:entityId`
 - `crm/customer-360` — Kundenakte · Contract: `GET /api/v1/masks/crm/customer-360/agent-contract` · Rollout: `/mask-rollout/crm__customer-360/:entityId`
 - `crm/opportunity` — Opportunity · Contract: `GET /api/v1/masks/crm/opportunity/agent-contract` · Rollout: `/mask-rollout/crm__opportunity/:entityId`
@@ -229,7 +230,7 @@ _Skontofenster gefaehrdet, wenn Wareneingang weiter rutscht._
 | Umlagerung | ok | `/lager/auslagerung` | `/api/v1/warehouses/transfers` |
 | Kommissionierung | active | `/lager/terminal` | `/api/v1/pick-lists` |
 | Versand | warning | `/verladung` | `/api/v1/tours` |
-| Faktura | warning | `/sales/rechnungen` | `/api/v1/finance/invoices` |
+| Faktura | warning | `/sales/rechnungen` | `/api/v1/belege/sales_invoice` |
 | Settlement | critical | `/annahme/abrechnung` | `/api/v1/process/settlement/completion/evaluate` |
 
 ### Alle Knotenaktionen
@@ -266,7 +267,7 @@ _Rampenkonflikt erkannt, Umlenkung oder Zeitslot-Verschiebung empfohlen._
 
 _Faktura wartet auf Versandbestaetigung aus Welle 3._
 
-- **Rechnungen** → `/sales/rechnungen` (API: `/api/v1/finance/invoices`, Variante: primary)
+- **Rechnungen** → `/sales/rechnungen` (API: `/api/v1/belege/sales_invoice`, Variante: primary)
 - *Agent-Hinweis:* Versandbestaetigung zuerst stabilisieren.
 
 #### Knoten: Settlement
