@@ -13701,6 +13701,7 @@
             "app/services/customer_service.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
+            "app/services/document_control_projection.py",
             "app/services/finance_dunning_service.py",
             "app/services/gdpr_request_processor.py",
             "app/services/gutschrift_docflow.py",
@@ -15877,6 +15878,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
+            "app/services/document_control_projection.py",
             "app/services/finance_freigabe.py",
             "app/services/gutschrift_docflow.py",
             "app/services/kontrollkorb.py",
@@ -16136,7 +16138,9 @@
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/document_control_projection.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/docflow_service.py"
@@ -19608,6 +19612,7 @@
             "app/services/customer_reference.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
+            "app/services/document_control_projection.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",

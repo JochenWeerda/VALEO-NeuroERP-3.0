@@ -2587,7 +2587,7 @@ Bucht Wareneingang aus Anlieferavis (Bestellpositionen + Lagerzugang; Maske eink
 
 ### `einkauf.bestellung.list` — Offene Bestellungen auflisten
 
-Listet Bestellungen des Authentifizierungs-Mandanten mit Status, Liefertermin und kanonischer Masken-Route (/einkauf/bestellung/{id}, Screen einkauf/purchase-order). Scope einkauf:read; nur Lesen.
+Listet Bestellungen des Authentifizierungs-Mandanten mit Status, Liefertermin und kanonischer Masken-Route (/belege/purchase_order/{id}, Screen beleg/purchase-order; Quelle DocFlow). Status offen, teilgeliefert (Wareneingang entstanden) oder abgeschlossen. Scope einkauf:read; nur Lesen.
 
 - **Scope:** `einkauf:read`
 - **Idempotent:** ja
@@ -2721,7 +2721,7 @@ Aktualisiert erlaubte Bestell-Kopffelder im Authentifizierungs-Mandanten (Maske 
 
 ### `einkauf.bestellung.status` — Bestellungs-Status
 
-Gibt Status, Lieferant und kanonische Masken-Route (/einkauf/bestellung/{id}, Screen einkauf/purchase-order) einer Bestellung im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=einkauf.bestellung.status, parameters.bestellung_id (UUID oder Bestellnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit einkauf:read und tenant_id erforderlich. Kein Versand, kein Obligo.
+Gibt DocFlow-Status, Phase (offen/teilgeliefert/abgeschlossen), Lieferant und kanonische Masken-Route (/belege/purchase_order/{id}, Screen beleg/purchase-order) einer Bestellung im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=einkauf.bestellung.status, parameters.bestellung_id (UUID oder Belegnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit einkauf:read und tenant_id erforderlich. Kein Versand, kein Obligo.
 
 - **Scope:** `einkauf:read`
 - **Idempotent:** ja
@@ -2981,7 +2981,7 @@ Listet offene Forderungen oder Verbindlichkeiten im Authentifizierungs-Mandanten
 
 ### `finance.ap_invoice.propose` — AP-Freigabe vorschlagen
 
-Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id. Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
+Legt einen ausstehenden Freigabe-Vorschlag fuer eine Eingangsrechnung im Authentifizierungs-Mandanten an. HTTP-Aufruf mit tool_name=finance.ap_invoice.propose, parameters.invoice_id (UUID oder Belegnummer der DocFlow-Eingangsrechnung, Maske beleg/purchase-invoice). Default dryRun liest nur Status/Brutto/route_path. propose speichert agent_proposals (ap_invoice_freigabe) mit approval_status pending und ruft den Freigabe-Endpoint nicht auf. execute ist deaktiviert; die verbindliche Entscheidung trifft eine berechtigte unabhaengige Person in der AP-Maske. Ein freigegebener Vorschlag ist keine Belegfreigabe. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit finance:write und tenant_id erforderlich. Kein Journal/FIN-CLOSE.
 
 - **Scope:** `finance:write`
 - **Idempotent:** nein

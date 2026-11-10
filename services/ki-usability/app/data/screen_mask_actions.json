@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 797,
-    "screens_with_actions": 405,
+    "actions": 796,
+    "screens_with_actions": 404,
     "domains": 50
   },
   "actions": [
@@ -16423,30 +16423,6 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:sales/delivery-note:drucken",
-      "label": "Lieferschein drucken",
-      "description": "Lieferschein drucken (sales/delivery-note)",
-      "category": "mask-action",
-      "domain": "sales",
-      "mask": "sales/delivery-note",
-      "intent_phrases": [
-        "Lieferschein drucken"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "sales/delivery-note",
-        "actionKey": "drucken",
-        "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "sales.lieferschein.drucken",
         "dangerLevel": "safe"
       }
     },

@@ -510,11 +510,35 @@ class ProposalListInput(BaseModel):
     limit: int = Field(default=20, ge=1, le=100)
 
 
-_PO_STATUS_FILTER = {
-    "offen": ("open", "offen", "draft", "freigegeben", "bestellt", "ordered"),
-    "teilgeliefert": ("partial", "teilgeliefert", "partially_delivered", "teilweise"),
-    "abgeschlossen": ("closed", "completed", "abgeschlossen", "geliefert", "posted", "cancelled", "storniert"),
-}
+# DocFlow-Bestellung (BELEG-052): abgeschlossen ist ein Endstand; teilgeliefert ist eine offene Bestellung, aus der
+# schon ein Wareneingang entstand; offen sind die uebrigen.
+_PO_ENDSTAENDE = ("completed", "posted", "cancelled", "reversed")
+_PO_SQL = """
+    SELECT * FROM (
+    SELECT b.id::text AS bestellung_id,
+           COALESCE(b.doc_number, b.id::text) AS bestellnummer,
+           COALESCE(b.status, '') AS status,
+           COALESCE(l.firmenname, b.supplier_id, '') AS lieferant,
+           b.bausteine->'lieferung'->>'liefertermin' AS liefertermin,
+           COALESCE(b.total_gross, b.total_net, 0)::float AS wert_eur,
+           b.document_date AS belegdatum,
+           CASE WHEN b.status = ANY(:endstaende) THEN 'abgeschlossen'
+                WHEN EXISTS (SELECT 1 FROM domain_docflow.document_links k
+                             JOIN domain_docflow.document_headers g ON g.id = k.to_header_id
+                             WHERE k.tenant_id = b.tenant_id AND k.from_header_id = b.id
+                               AND g.doc_type = 'goods_receipt' AND g.deleted_at IS NULL) THEN 'teilgeliefert'
+                ELSE 'offen' END AS phase
+    FROM domain_docflow.document_headers b
+    LEFT JOIN domain_einkauf.lieferanten l
+      ON l.tenant_id::text = b.tenant_id::text
+     AND (l.id::text = b.supplier_id OR l.lieferantennummer = b.supplier_id)
+    WHERE b.tenant_id::text = :tenant AND b.doc_type = 'purchase_order' AND b.deleted_at IS NULL
+      AND (CAST(:bid AS text) IS NULL OR b.id::text = :bid OR b.doc_number = :bid)
+    ) bestellung
+    WHERE CAST(:phase AS text) IS NULL OR phase = :phase
+    ORDER BY belegdatum DESC NULLS LAST, bestellnummer DESC
+    LIMIT :lim
+"""
 
 
 _CUSTOMER_SCREEN_ID = "crm/customer-360"
@@ -525,8 +549,8 @@ _LOT_SCREEN_ID = "charge/stamm"
 _LOT_ROUTE_PREFIX = "/charge/stamm"
 _CELL_SCREEN_ID = "lager/silo-cell"
 _CELL_ROUTE_PREFIX = "/lager/silo-zellen"
-_PO_SCREEN_ID = "einkauf/purchase-order"
-_PO_ROUTE_PREFIX = "/einkauf/bestellung"
+_PO_SCREEN_ID = "beleg/purchase-order"
+_PO_ROUTE_PREFIX = "/belege/purchase_order"
 _DMS_SCREEN_ID = "docflow/nachweisraum"
 _DMS_ROUTE_PREFIX = "/docflow/nachweisraum"
 _GOBD_SCREEN_ID = "docflow/gobd-export"
@@ -2945,23 +2969,10 @@ def _bestellung_list(db: Session, request: ToolExecutionRequest, actor: str, ten
     except ValidationError as exc:
         raise HTTPException(422, "Invalid purchase order list parameters") from exc
     _reject_propose(request.tool_name, request.mode)
-    statuses = list(_PO_STATUS_FILTER.get(opened.status, ())) if opened.status else None
-    params: dict[str, Any] = {"tenant": tenant, "lim": opened.limit, "statuses": statuses}
+    params: dict[str, Any] = {"tenant": tenant, "lim": opened.limit, "phase": opened.status, "bid": None,
+                              "endstaende": list(_PO_ENDSTAENDE)}
     try:
-        rows = _rows_or_empty(db, """
-            SELECT b.id::text AS bestellung_id,
-                   COALESCE(l.firmenname, b.lieferant_id::text, '') AS lieferant,
-                   COALESCE(b.status, '') AS status,
-                   b.lieferdatum_wunsch::text AS liefertermin,
-                   COALESCE(b.brutto_summe, b.netto_summe, 0)::float AS wert_eur
-            FROM domain_einkauf.bestellungen b
-            LEFT JOIN domain_einkauf.lieferanten l
-              ON l.id = b.lieferant_id AND l.tenant_id::text = b.tenant_id::text
-            WHERE b.tenant_id::text = :tenant
-              AND (:statuses IS NULL OR LOWER(COALESCE(b.status, '')) = ANY(:statuses))
-            ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC NULLS LAST
-            LIMIT :lim
-        """, params)
+        rows = _rows_or_empty(db, _PO_SQL, params)
         items = []
         for r in rows:
             bid = str(r.get("bestellung_id") or "")
@@ -2995,18 +3006,8 @@ def _bestellung_status(db: Session, request: ToolExecutionRequest, actor: str, t
     if request.mode == "propose":
         raise HTTPException(422, "einkauf.bestellung.status does not support propose")
     try:
-        row = db.execute(text("""
-            SELECT b.id::text AS bestellung_id,
-                   COALESCE(b.bestellnummer, b.id::text) AS bestellnummer,
-                   COALESCE(b.status, '') AS status,
-                   COALESCE(l.firmenname, b.lieferant_id::text, '') AS lieferant
-            FROM domain_einkauf.bestellungen b
-            LEFT JOIN domain_einkauf.lieferanten l
-              ON l.id = b.lieferant_id AND l.tenant_id::text = b.tenant_id::text
-            WHERE b.tenant_id::text = :tenant
-              AND (b.id::text = :bid OR b.bestellnummer = :bid)
-            LIMIT 1
-        """), {"tenant": tenant, "bid": opened.bestellung_id}).mappings().first()
+        row = db.execute(text(_PO_SQL), {"tenant": tenant, "bid": opened.bestellung_id, "phase": None, "lim": 1,
+                                         "endstaende": list(_PO_ENDSTAENDE)}).mappings().first()
         if not row:
             raise HTTPException(404, "Purchase order not found in the authenticated tenant")
         bestellung_id = str(row["bestellung_id"])
@@ -3016,6 +3017,7 @@ def _bestellung_status(db: Session, request: ToolExecutionRequest, actor: str, t
             "bestellung_id": bestellung_id,
             "bestellnummer": str(row.get("bestellnummer") or opened.bestellung_id),
             "status": str(row.get("status") or ""),
+            "phase": str(row.get("phase") or ""),
             "lieferant": str(row.get("lieferant") or ""),
             "route_path": f"{_PO_ROUTE_PREFIX}/{bestellung_id}",
             "screen_id": _PO_SCREEN_ID,
@@ -3682,23 +3684,25 @@ def _log_contact(db: Session, request: ToolExecutionRequest, actor: str, tenant:
 
 
 
-_AP_INVOICE_ROUTE_PREFIX = "/finance/ap-invoice"
-_AP_INVOICE_SCREEN_ID = "finance/ap-invoice"
+_AP_INVOICE_ROUTE_PREFIX = "/belege/purchase_invoice"
+_AP_INVOICE_SCREEN_ID = "beleg/purchase-invoice"
 _AP_FREIGABE_ACTION_TYPE = "ap_invoice_freigabe"
-_AP_FREIGABE_BLOCKED_STATUSES = frozenset({
-    "FREIGEGEBEN", "VERBUCHT", "BEZAHLT", "ABGELEHNT", "posted", "approved", "paid",
-})
+# DocFlow-Endstaende der Eingangsrechnung: gebucht, storniert, verworfen - dort gibt es nichts mehr freizugeben.
+_AP_FREIGABE_BLOCKED_STATUSES = frozenset({"posted", "reversed", "cancelled"})
 
 
 def _load_ap_invoice(db: Session, invoice_id: str, tenant: str) -> dict[str, Any]:
-    """Tenant-scoped AP invoice from the document store (same path as mask freigeben)."""
-    from app.api.v1.endpoints.ap_approval_workflow import _ensure_invoice_tenant_access
-    from app.documents.router_helpers import get_from_store, get_repository
-
-    return _ensure_invoice_tenant_access(
-        get_from_store("ap_invoice", invoice_id, get_repository(db)),
-        tenant,
-    )
+    """Eingangsrechnung des Authentifizierungs-Mandanten aus DocFlow (BELEG-052; vorher Dokumentenspeicher)."""
+    row = db.execute(text("""
+        SELECT id::text AS id, doc_number AS number, status, total_gross AS "totalGross"
+        FROM domain_docflow.document_headers
+        WHERE tenant_id::text = :tenant AND doc_type = 'purchase_invoice' AND deleted_at IS NULL
+          AND (id::text = :ref OR doc_number = :ref)
+        LIMIT 1
+    """), {"tenant": tenant, "ref": invoice_id}).mappings().first()
+    if not row:
+        raise HTTPException(404, "AP invoice not found in the authenticated tenant")
+    return dict(row)
 
 
 def _ap_invoice_preview(invoice: dict[str, Any], invoice_id: str) -> dict[str, Any]:
@@ -3751,7 +3755,7 @@ def _propose_ap_freigabe(db: Session, request: ToolExecutionRequest, actor: str,
                 db.rollback()
                 return {**result, "replayed": True}
         invoice = _load_ap_invoice(db, opened.invoice_id, tenant)
-        preview = _ap_invoice_preview(invoice, opened.invoice_id)
+        preview = _ap_invoice_preview(invoice, str(invoice.get("id") or opened.invoice_id))
         status_upper = str(preview["status"] or "").upper()
         if status_upper in {s.upper() for s in _AP_FREIGABE_BLOCKED_STATUSES}:
             raise HTTPException(409, f"AP invoice status {preview['status']} cannot be proposed for freigabe")

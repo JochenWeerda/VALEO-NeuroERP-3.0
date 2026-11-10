@@ -1295,8 +1295,8 @@ def test_bestellung_status_dry_run_returns_route(client):
     assert body["mode"] == "dryRun"
     assert body["bestellung_id"] == "po-uuid-1"
     assert body["bestellnummer"] == "BE-100"
-    assert body["route_path"] == "/einkauf/bestellung/po-uuid-1"
-    assert body["screen_id"] == "einkauf/purchase-order"
+    assert body["route_path"] == "/belege/purchase_order/po-uuid-1"
+    assert body["screen_id"] == "beleg/purchase-order"
     db.commit.assert_not_called()
 
 
@@ -1333,8 +1333,8 @@ def test_bestellung_list_happy_and_guards(client):
     })
     assert ok.status_code == 200
     assert ok.json()["items"][0]["bestellung_id"] == "b1"
-    assert ok.json()["items"][0]["route_path"] == "/einkauf/bestellung/b1"
-    assert ok.json()["items"][0]["screen_id"] == "einkauf/purchase-order"
+    assert ok.json()["items"][0]["route_path"] == "/belege/purchase_order/b1"
+    assert ok.json()["items"][0]["screen_id"] == "beleg/purchase-order"
     db.commit.assert_not_called()
     http2, _ = _as_scopes(client, ["crm:read"])
     assert http2.post("/mcp/tools/call", json={
@@ -2169,10 +2169,10 @@ def test_invoice_post_rejects_client_approval_flag(client):
 
 AP_INVOICE = {"invoice_id": "AP-100"}
 AP_INVOICE_ROW = {
-    "number": "AP-100",
-    "status": "ZUR_FREIGABE",
+    "id": "AP-100",
+    "number": "ER-100",
+    "status": "open",
     "totalGross": 120.5,
-    "tenantId": "tenant-a",
 }
 
 
@@ -2229,8 +2229,9 @@ def test_ap_propose_dry_run_reads_invoice_without_writing(client):
     assert body["approved"] is False
     assert body["invoice_id"] == "AP-100"
     assert body["brutto_eur"] == 120.5
-    assert body["route_path"] == "/finance/ap-invoice/AP-100"
-    assert body["screen_id"] == "finance/ap-invoice"
+    assert body["invoice_number"] == "ER-100"
+    assert body["route_path"] == "/belege/purchase_invoice/AP-100"
+    assert body["screen_id"] == "beleg/purchase-invoice"
     assert "entwurf_id" not in body
     db.commit.assert_not_called()
 
