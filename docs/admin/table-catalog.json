@@ -7442,11 +7442,15 @@
           "primary_key": [
             "id"
           ],
+          "read_by": [
+            "app/services/docflow_service.py"
+          ],
           "screens": [
             "sales/delivery-note"
           ],
           "written_by": [
-            "app/api/v1/endpoints/sales_delivery_notes.py"
+            "app/api/v1/endpoints/sales_delivery_notes.py",
+            "app/services/docflow_service.py"
           ]
         }
       }

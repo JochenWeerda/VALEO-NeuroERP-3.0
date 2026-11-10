@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-09
+last_reviewed: 2026-11-10
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -156,7 +156,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_agrar.waagen_quittungen` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
 | `domain_agrar.waagen_vorlagen` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/waagen_vorlagen.py` | — |
 | `domain_agrar.weighing_tickets` | `app/api/v1/endpoints/waage_mobile.py` | `app/api/v1/endpoints/waage_mobile.py` | — |
-| `domain_audit.attestations` | — | `app/api/v1/endpoints/sales_delivery_notes.py` | `sales/delivery-note` |
+| `domain_audit.attestations` | `app/services/docflow_service.py` | `app/api/v1/endpoints/sales_delivery_notes.py`, `app/services/docflow_service.py` | `sales/delivery-note` |
 | `domain_compliance.compliance_artikel_sperre_audit` | `app/services/compliance_sperre_audit_service.py` | `app/services/compliance_sperre_audit_service.py` | — |
 | `domain_compliance.compliance_pcn_meldungen` | `app/services/compliance_pcn_lifecycle_service.py` | `app/services/compliance_pcn_lifecycle_service.py` | — |
 | `domain_compliance.compliance_pcn_status_log` | — | `app/services/compliance_pcn_lifecycle_service.py` | — |
