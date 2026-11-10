@@ -330,12 +330,12 @@ http://localhost:3000
 
 # Keycloak Admin
 http://localhost:8180
-# Login: admin / admin123!
+# Login: admin / <ADMIN_PASSWORT>
 # → Prüfe Realm "valeo-staging" mit 4 Test-Users
 
 # pgAdmin
 http://localhost:5151
-# Login: admin@valeo-staging.local / admin123!
+# Login: admin@valeo-staging.local / <ADMIN_PASSWORT>
 ```
 
 ### 2. Storybook (Component-Library)
@@ -525,7 +525,7 @@ Storybook:  pnpm storybook → http://localhost:6006
 ```powershell
 # Backend-Fenster prüfen
 # Oder manuell starten:
-$env:DATABASE_URL="postgresql://valeo_staging:valeo_staging_2024!@localhost:5532/valeo_neuro_erp_staging"
+$env:DATABASE_URL="postgresql://valeo_staging:<STAGING_PASSWORT>@localhost:5532/valeo_neuro_erp_staging"
 python main.py
 ```
 

@@ -4,54 +4,76 @@
 
 ## Deutsch
 
-**VALEO NeuroERP verbindet Agrar- und Landhandelsprozesse mit einer Plattform für nachvollziehbare digitale Zusammenarbeit.** Das Projekt entwickelt ein ERP für Agrargenossenschaften und Landhandelsunternehmen: vom fachlichen Vorgang über die Oberfläche bis zu kontrollierten Schnittstellen für Automatisierung und KI-Agenten.
+**Das ERP für Agrargenossenschaften und Landhandel, in dem Menschen und KI-Agenten an denselben Belegen arbeiten — nachvollziehbar, mandantensicher und GoBD-fest.**
 
-### Die Produktidee
+VALEO NeuroERP ist von Grund auf für den Agrarhandel gebaut: Kontrakte, Ernte und Abrechnung, Einkauf, Verkauf, Lager, Waage und Logistik bilden den Kern. Finanzbuchhaltung, CRM, Personal und Dokumente sind eingebunden. Darüber liegt eine Plattform, die jede Fachaktion gleichermaßen für die Oberfläche, für Schnittstellen und für Agenten öffnet.
 
-- **Agrar im Mittelpunkt:** Kontrakte, Ernte und Abrechnung, Einkauf, Verkauf, Lager, Wiegen und Logistik gehören zum fachlichen Zielbild; Finanzbuchhaltung, CRM, Personal und Dokumente ergänzen es.
-- **Ein gemeinsamer Prozesskern:** Fachaktionen, Regeln und Nachweise sollen über Oberflächen und agentenfähige Kanäle zusammenwirken. Mandanten- und Berechtigungsgrenzen sind Teil der Verträge.
-- **Studio und wiederverwendbare Oberflächen:** Versionierte Definitionen und eine gemeinsame Masken-Runtime bilden die Grundlage für konsistente Arbeitsoberflächen. Das Ziel ist, fachliche Funktionen für Menschen und geeignete Automatisierungskanäle zugänglich zu machen.
-- **Nachvollziehbare Automatisierung:** MCP und CLI erweitern die Bedienwege. Schreibaktionen benötigen die jeweils vorgesehenen Rollen, Prüfungen und Freigaben; der [MCP-Schreibstandard](docs/architecture/mcp-write-standard.md) beschreibt die Regeln.
+### Was VALEO auszeichnet
 
-### Unser Anspruch
+**1. Ein Beleg, eine Wahrheit.**
+Angebot, Auftrag, Lieferschein, Rechnung und Gutschrift — im Einkauf Bestellung, Wareneingang und Eingangsrechnung — liegen in einem gemeinsamen Belegspeicher (DocFlow). Folgebelege entstehen durch Umwandlung mit Restmengen je Position. Charge, Kontrakt und Herkunft wandern mit. Es gibt keine Abgleichläufe zwischen Modulen, weil es keine Kopien gibt.
 
-VALEO verfolgt den Anspruch einer Premium-Plattform für den Agrarhandel: fachliche Tiefe in Agrarprozessen, durchgängige beleggebundene Agentenaktionen, versionierte Oberflächen und adaptive Arbeitsräume sollen zu einem gemeinsamen Arbeitsumfeld zusammenwachsen. Das ist das Produktziel; die Umsetzung und Freigabe erfolgen schrittweise je Prozess und Kanal.
+**2. GoBD ist eingebaut, nicht angeflanscht.**
+Gebuchte Belege sind unveränderlich. Jeder Statuswechsel steht mit Kommando und Grund in einer Historie, die ein Datenbank-Trigger schreibt und die sich deshalb nicht vergessen lässt. Ein Nachdruck verlangt eine Begründung und trägt den Vermerk „NACHDRUCK“. Stornos buchen gegen, statt zu löschen. Als Nächstes kommen das archivierte Original jeder gebuchten Rechnung (in derselben Transaktion) und die E-Rechnung (XRechnung), die vor der Auslieferung archiviert wird.
 
-### Mehrwert für den Agrarhandel
+**3. Eine Fachaktion, alle Zugänge.**
+„Auftrag bestätigen“, „Beleg freigeben“ oder „Rechnung buchen“ gibt es genau einmal als Fachkommando. Belegmaske, REST, CLI und MCP rufen dasselbe Kommando auf: mit denselben Rollen, derselben Mandantengrenze, demselben Wiederholungsschutz und demselben Protokoll. Was ein Mensch in der Maske darf, darf ein Agent nur mit denselben Rechten.
 
-Unser Ziel ist, die bewährte Transaktionsstärke eines Premium-ERP um einen durchgängigen Arbeits- und Anpassungsraum zu erweitern:
+**4. Agenten mit Verantwortung statt Blackbox.**
+Die Agent Trust & Autonomy Engine (ADR-086) entscheidet risikobasiert: Betragsgrenzen, Funktionstrennung, Freigabe durch eine zweite Person. Wann ein Agent selbst buchen darf, legt eine versionierte Politik fest. Wirksam wird sie je Mandant erst, wenn eine berechtigte Person diese Fassung freigibt — nie ein Agent. Jeder Agentenschritt bleibt am Beleg nachvollziehbar.
 
-- **Vom Kontrakt bis zur Abrechnung:** Waage, Qualitätsbewertung, Lager, Logistik und Finanzwirkung im fachlichen Zusammenhang bearbeiten.
-- **Vom Anliegen zum Arbeitsablauf:** Im Dialog mit einem Agenten passende Masken und Prozessvorschläge entwickeln, versionieren, simulieren und gezielt freigeben.
-- **Eine Fachaktion, mehrere Bedienwege:** Menschen, CLI und MCP sollen dieselben geprüften Domain-Commands mit denselben Mandanten- und Rollenregeln nutzen.
-- **Arbeit nach Relevanz bündeln:** Adaptive Arbeitsräume sollen Belege, Freigaben, operative Ereignisse und nächste Schritte im jeweiligen Kontext zusammenführen.
+**5. Agrarfachlichkeit bis ins Detail.**
+Mengen rechnet VALEO in der Handelsgröße des Landhandels (dt), umgerechnet über eine zentrale Einheitentabelle. Ein Lieferschein bucht den Lagerabgang über die WMS-Pickliste. Die Umsatzsteuer kommt aus einer einzigen Quelle, dem Steuerschlüssel: keine pauschalen 19 %, kein Rechnen am Schlüssel vorbei.
 
-Diese Kombination aus Agrarspezialisierung und kontrollierter Anpassbarkeit ist der angestrebte Mehrwert von VALEO. Konkrete Zeit-, Kosten- und Qualitätsvorteile werden anhand der jeweiligen Prozessabnahme bewertet.
+**6. Mandantentrennung bis in die Datenbank.**
+Row-Level-Security in PostgreSQL, Identität ausschließlich aus dem Token, Mandantenbindung in der Middleware. Ein Portal-Kunde sieht nur seine eigenen Belege, serverseitig erzwungen.
 
-### Plattform und nächste Entwicklungsziele
+**7. Masken aus dem Studio, gleiche Bedienung überall.**
+Belegmasken sind eine versionierte Maskenfamilie: Jede Belegart ist eine Variante desselben Aufbaus mit Kopf, Partner, Positionen, Summen und Aktionsleiste. Wer einen Auftrag bedienen kann, kann auch Lieferschein und Rechnung bedienen. Masken entstehen deklarativ im Studio statt als handgeschriebener Code.
 
-VALEO ist eine aktiv entwickelte Suite mit einem Python/FastAPI-Backend, einer React/TypeScript-Weboberfläche und Fachpaketen. Der [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) dokumentiert gelieferte Prozesswellen. Die Roadmap umfasst unter anderem die fachliche Parität und Freigabe weiterer Studio-Masken, den adaptiven Arbeitsplatz sowie den Ausbau kontrollierter Agentenaktionen. Funktionsumfang und Reife unterscheiden sich je Prozess; externe Betriebs- und Fachfreigaben benötigen eigene Nachweise.
+**8. Qualität mit Ratschen.**
+Über 4.900 Backend-Tests, viele davon gegen echtes PostgreSQL-Schema. Migrationen werden gegen eine frisch aufgebaute Prüfstand-Datenbank geprüft. Ratschen verhindern, dass Altlasten, Godfiles oder ungeschützte Schreibwege wieder wachsen. Generierte Verträge (OpenAPI, Masken-, MCP- und Rechteprojektionen) werden in der CI auf Drift geprüft.
+
+### Aktueller Schwerpunkt: DocFlow als einziger Belegspeicher (BELEG-052)
+
+Verkauf und Einkauf werden schrittweise auf den gemeinsamen Belegspeicher umgestellt. Je Belegart gilt dasselbe Vorgehen:
+
+1. Zugänge umstellen.
+2. Altwege entfernen.
+3. Altbestand übernehmen oder bereinigen.
+
+Bereits in `main`:
+- Auftrag mit eigener Auftragsbestätigung (Stand „bestätigt“).
+- Kopfbausteine (Lieferung, Zahlung, Texte, Kontakt, Referenzen).
+- Lagerabgang über die WMS-Pickliste aus dem Lieferschein.
+- Belegdruck mit Druckvermerk.
+
+Danach folgen die Rechnung (mit E-Rechnung und archiviertem Original), der Einkauf (Wareneingang bucht den Lagerzugang, Anlieferavis und Angebot laufen über DocFlow) und die Studio-Masken der übrigen Bereiche. Details: [Belegmasken-Masterplan](docs/design/belegmaske-varianten-masterplan.md).
 
 | Einblick | Quelle |
 | --- | --- |
+| Belegmaske und BELEG-052 | [Masterplan und Umsetzungsstand](docs/design/belegmaske-varianten-masterplan.md) |
+| Agentenautonomie | [ADR-086](docs/adr/adr-086-risk-based-autonomous-erp.md) · [MCP-Schreibstandard](docs/architecture/mcp-write-standard.md) |
 | Lieferstand und Prozesswellen | [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) |
 | Laufende Arbeit | [Active Workboard](docs/agent-ops/active-workboard.md) |
-| Masken, Studio und Parität | [Universal Mask Runtime Status](docs/architecture/uix/universal-mask-runtime-status.md) · [Reparaturnachweis](docs/quality-assurance/migration-parity-repair-20261022.md) |
-| Entwicklungsplanung und nächste Ausbauschritte | [Entwicklungsübersicht](docs/project-context/open-gaps-and-known-issues.md) |
-| Betriebs- und externe Freigaben | [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) |
+| Masken, Studio und Parität | [Universal Mask Runtime Status](docs/architecture/uix/universal-mask-runtime-status.md) |
+| Betrieb und Freigaben | [Production Readiness Runbook](docs/operations/production-readiness-runbook.md) |
 | Architektur und Agenten | [Architekturindex](config/architecture-index.yaml) · [Agent-Handbuch](docs/agent-handbuch/index.md) |
+
+### Technik
+
+Python 3.11 / FastAPI, SQLAlchemy 2.0, Alembic und PostgreSQL 15 (mehrere Schemas, Row-Level-Security). Frontend: React 18, TypeScript, Vite, Tailwind, Radix UI, TanStack Query. Dazu OIDC (Keycloak, Azure AD, Auth0), Redis, NATS JetStream mit Outbox-Muster, Paperless-ngx als DMS sowie MCP und CLI für Agenten.
 
 ### Lokal entwickeln
 
-Voraussetzungen sind Python 3.11, Node.js mit Corepack und pnpm 9.12.0 sowie eine konfigurierte PostgreSQL-Entwicklungsumgebung. Umgebungsvariablen und Zugangsdaten anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten; Schema und Authentifizierung müssen zur Konfiguration passen.
-
-Im Repository-Stamm mit einer bereits eingerichteten Entwicklungsdatenbank:
+Voraussetzungen: Python 3.11, Node.js mit Corepack und pnpm 9.12.0, eine PostgreSQL-Entwicklungsdatenbank. Umgebungsvariablen anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten. **Zugangsdaten gehören in die lokale `.env`, nie ins Repository.**
 
 ```sh
 python -m venv .venv
 # Windows PowerShell: .\.venv\Scripts\Activate.ps1
 # Linux/macOS: source .venv/bin/activate
 python -m pip install -r requirements.txt
+alembic upgrade head
 python -m uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
@@ -63,32 +85,33 @@ pnpm install --frozen-lockfile
 pnpm --filter @valero-neuroerp/frontend-web dev --host 127.0.0.1 --port 3000
 ```
 
-Frontend: `http://localhost:3000`; API-Dokumentation: `http://localhost:8000/docs`. API-Basis oder Proxy richten sich nach Vite-Modus und Frontend-Umgebung. Alternativ beschreibt [docker-compose.dev.yml](docker-compose.dev.yml) einen Entwicklungsstack; sein [Backend-Einstieg](entrypoint.sh) initialisiert die Datenbank. Vor Verwendung Ressourcen, Datenbankbesitz und Migrationsstand prüfen.
+Danach erreichbar:
+- Frontend: `http://localhost:3000`
+- API-Dokumentation: `http://localhost:8000/docs`
+
+Alternativ beschreibt [docker-compose.dev.yml](docker-compose.dev.yml) einen schlanken Entwicklungsstack.
+
+Die Compose-Dateien für Staging verlangen ihre Passwörter aus der Umgebung und starten ohne sie nicht. Die Werte im lokalen `docker-compose.yml` sind reine Entwicklungsvorgaben für den eigenen Rechner und gehören nie in einen erreichbaren Betrieb.
 
 ### Qualität und Zusammenarbeit
 
-Für Änderungen gelten [AGENTS.md](AGENTS.md), [Startcheckliste](docs/agent-ops/session-start-checklist.md) und Workboard. Prüfungen und deren Ergebnisse gehören zum jeweiligen Lieferstand. Für datenbankabhängige Tests gilt der [gemeinsame Prüfstand](docs/quality-assurance/test-database-resource-policy-20261001.md): `valeo_probe` oder `TEST_DATABASE_URL` wiederverwenden und zunächst `python scripts/pruefstand_db.py --status` ausführen. Der Aufruf ohne Option setzt den Prüfstand zurück.
+Für Änderungen gelten [AGENTS.md](AGENTS.md), [CLAUDE.md](CLAUDE.md), die [Startcheckliste](docs/agent-ops/session-start-checklist.md) und das Workboard. Für datenbankabhängige Tests gilt der [Prüfstand](docs/quality-assurance/pruefstand-datenbank.md): das Schema auf einer frischen Datenbank prüfen, die Daten auf der gewachsenen.
 
 Weitere Einstiege: [Dokumentation](docs/README.md) · [Benutzerhandbuch](docs/benutzerhandbuch/index.md) · [Architektur](docs/architecture/index.md) · [MIT-Lizenz](LICENSE).
 
 ## English
 
-**VALEO NeuroERP brings agricultural and trading processes together with a platform for accountable digital collaboration.** It is an ERP project for agricultural cooperatives and agricultural trading businesses, connecting domain workflows, user interfaces and controlled interfaces for automation and AI agents.
+**The ERP for agricultural cooperatives and agricultural trade where people and AI agents work on the same documents — traceable, tenant-safe and compliant with German bookkeeping law (GoBD).**
 
-### Product direction
+### What sets VALEO apart
 
-The domain vision spans contracts, harvest and settlement, procurement, sales, inventory, weighing and logistics, complemented by accounting, CRM, HR and documents. A shared process kernel, tenant and permission contracts, and versioned Studio screen definitions provide the foundations for consistent workflows. MCP and CLI extend the ways users and agents can interact with selected functions; write actions remain subject to their applicable authorization and approval rules.
+- **One document, one truth.** Quotes, orders, delivery notes, invoices and credit notes — on the purchasing side purchase orders, goods receipts and supplier invoices — live in one document store (DocFlow). Follow-up documents are converted with per-line remaining quantities; batch, contract and origin travel with them.
+- **GoBD built in.** Posted documents are immutable. A database trigger writes status history with command and reason. Reprints require a reason and are marked as such. Reversals post counter-entries instead of deleting. Next up: the archived invoice original and e-invoices (XRechnung) archived before delivery.
+- **One business action, every channel.** Each action exists once as a domain command. Screens, REST, CLI and MCP call that same command, with the same roles, tenant boundary, idempotency and audit log.
+- **Accountable agents.** The Agent Trust & Autonomy Engine (ADR-086) applies risk-based rules: amount limits, segregation of duties, four-eyes approval. A versioned policy defines when an agent may post on its own. It takes effect per tenant only once an authorized person approves it, never an agent.
+- **Deep agricultural domain.** Quantities are kept in the trade unit (dt) through one central unit table. Delivery notes post stock movements through the WMS pick list. VAT comes from a single source, the tax key.
+- **Tenant isolation down to the database.** PostgreSQL row-level security, identity from the token only, server-enforced portal scoping.
+- **Studio-built screens.** Document screens form a versioned family: each document type is a variant of one layout, so whoever can work an order can work every document in the chain.
+- **Quality ratchets.** More than 4,900 backend tests, many against a real PostgreSQL schema. Migrations are verified on a freshly built test database. CI checks generated contracts for drift.
 
-### Our ambition
-
-VALEO aims to become a premium platform for agricultural trade by bringing together domain depth in agriculture, end-to-end document-linked agent actions, versioned interfaces and adaptive workspaces. This is the product direction; implementation and release proceed incrementally by process and channel.
-
-### Value for agricultural trade
-
-Our goal is to extend the transaction strength expected from premium ERP with a connected workspace for execution and adaptation: contract-to-settlement agricultural workflows; conversational design of versioned screens and processes with simulation and approval; the same governed domain commands for people, CLI and MCP; and contextual workspaces connecting documents, approvals, operational events and next actions. This combination of agricultural specialization and controlled adaptability is VALEO's intended value proposition. Time, cost and quality benefits are assessed per accepted workflow.
-
-### Platform and next development goals
-
-VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [development roadmap](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
-
-For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).
+Current focus: making DocFlow the single document store across sales and purchasing (BELEG-052); see the [document screen master plan](docs/design/belegmaske-varianten-masterplan.md). For local setup use the [commands above](#lokal-entwickeln). Keep credentials in your local `.env`, never in the repository. Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).

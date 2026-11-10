@@ -17,12 +17,18 @@ Write-Host ""
 # Repository
 $REPO = "JochenWeerda/VALEO-NeuroERP-3.0"
 
-# Secrets aus der generierten Datei
+# Secrets aus der Umgebung (nie im Repository ablegen): vorher z.B. $env:STAGING_POSTGRES_PASSWORD setzen
 $SECRETS = @{
-    "STAGING_POSTGRES_PASSWORD" = 'LieE0VQnmN9&r5Pd%RcjbvkU'
-    "STAGING_KEYCLOAK_PASSWORD" = 'neZfWPk0utE@rAKBYI8QyMXw'
-    "STAGING_PGADMIN_PASSWORD"  = 'D@I2&lyz#SUjMHT8RgYL4ct1'
-    "STAGING_REDIS_PASSWORD"    = 'DtOAn!VMK1rL$5lBQE60k%y9'
+    "STAGING_POSTGRES_PASSWORD" = $env:STAGING_POSTGRES_PASSWORD
+    "STAGING_KEYCLOAK_PASSWORD" = $env:STAGING_KEYCLOAK_PASSWORD
+    "STAGING_PGADMIN_PASSWORD"  = $env:STAGING_PGADMIN_PASSWORD
+    "STAGING_REDIS_PASSWORD"    = $env:STAGING_REDIS_PASSWORD
+}
+
+$fehlend = @($SECRETS.Keys | Where-Object { [string]::IsNullOrWhiteSpace($SECRETS[$_]) })
+if ($fehlend.Count -gt 0) {
+    Write-Host "Fehlende Umgebungsvariablen: $($fehlend -join ', ')" -ForegroundColor Red
+    exit 1
 }
 
 # Pruefe ob GitHub CLI installiert ist

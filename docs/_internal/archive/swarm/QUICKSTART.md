@@ -6,7 +6,7 @@
 
 Die Datei `.env.swarm` ist bereits erstellt mit Standard-Credentials:
 - User: `admin`
-- Pass: `admin123`
+- Pass: `<ADMIN_PASSWORT>`
 
 Falls du andere Credentials benÃ¶tigst, bearbeite `.env.swarm`:
 
@@ -14,7 +14,7 @@ Falls du andere Credentials benÃ¶tigst, bearbeite `.env.swarm`:
 # .env.swarm bearbeiten
 NEUROERP_URL=http://localhost:3000
 NEUROERP_USER=admin
-NEUROERP_PASS=admin123
+NEUROERP_PASS=<ADMIN_PASSWORT>
 ```
 
 ### Option B: Environment-Variablen direkt setzen
@@ -23,14 +23,14 @@ NEUROERP_PASS=admin123
 ```powershell
 $env:NEUROERP_URL="http://localhost:3000"
 $env:NEUROERP_USER="admin"
-$env:NEUROERP_PASS="admin123"
+$env:NEUROERP_PASS="<ADMIN_PASSWORT>"
 ```
 
 **Linux/Mac:**
 ```bash
 export NEUROERP_URL=http://localhost:3000
 export NEUROERP_USER=admin
-export NEUROERP_PASS=admin123
+export NEUROERP_PASS=<ADMIN_PASSWORT>
 ```
 
 ## Schritt 2: Frontend starten (falls nicht bereits lÃ¤uft)
