@@ -115,6 +115,8 @@ def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     erwartet = {"bearbeiten", "freigeben", "stornieren"} | {f"umwandeln:{f}" for f in variante.folgebelege}
     if belegart == "sales_order":
         erwartet.add("bestaetigen")  # Auftragsbestaetigung (Nutzerentscheidung 09.11.2026)
+    if belegart == "goods_receipt":
+        erwartet.add("einlagern")  # Zugang ins Lager, Wareneingang abgeschlossen (BELEG-052 Phase 3b)
     for fachaktion in (("post", "reverse") if variante.bucht else ("reverse",)):
         erwartet |= {f"freigabe_{verb}:{fachaktion}" for verb in ("anfordern", "erteilen", "ablehnen")}
     assert set(aktionen) == erwartet | ({"buchen"} if variante.bucht else set())

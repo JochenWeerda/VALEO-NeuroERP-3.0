@@ -94,6 +94,7 @@
   "mask:auswertungen/sanktionspruefung-personal:check",
   "mask:beleg/goods-receipt:bearbeiten",
   "mask:beleg/goods-receipt:drucken",
+  "mask:beleg/goods-receipt:einlagern",
   "mask:beleg/goods-receipt:freigabe_ablehnen:reverse",
   "mask:beleg/goods-receipt:freigabe_anfordern:reverse",
   "mask:beleg/goods-receipt:freigabe_erteilen:reverse",

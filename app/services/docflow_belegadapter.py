@@ -347,6 +347,8 @@ def _aktionen_im_zustand(svc: DocflowService, doc_id: str, variante: Belegvarian
         aktionen.append(_aktion("drucken", "Drucken", "docflow.record_print"))
     if variante.belegart == "sales_order" and status == "open":
         aktionen.append(_aktion("bestaetigen", "Auftrag bestätigen", "docflow.confirm"))
+    if variante.belegart == "goods_receipt" and status == "open":
+        aktionen.append(_aktion("einlagern", "Einlagern", "docflow.store"))
     if variante.bucht and status not in _ENDE | {"posted"}:
         aktionen.append(_aktion(
             "buchen", "Buchen", "docflow.post", grund=buchung.grund if buchung.stand == "pruefen" else None))

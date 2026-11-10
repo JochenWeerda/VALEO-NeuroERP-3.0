@@ -56,6 +56,8 @@ def pruefe(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion: st
         return fehler("Der Beleg wurde inzwischen geändert. Bitte neu laden.", "version")
     if aktion == "drucken" and beleg.druck_anzahl > 0 and len(str(eingaben.get("grund") or "").strip()) < 3:
         return fehler("Ein Nachdruck braucht eine Begründung.", "grund")
+    if aktion == "einlagern" and not (str(eingaben.get("lager") or "").strip() or beleg.bausteine.get("lager", {}).get("lager")):
+        return fehler("Zum Einlagern das Ziellager angeben.", "lager")
     if aktion == "stornieren" and len(str(eingaben.get("grund") or "").strip()) < 3:
         return fehler("Ein Storno braucht einen Grund.", "grund")
     return []
@@ -93,6 +95,11 @@ def fuehre_aus(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion
     if kern == "bestaetigen":
         svc.confirm(beleg_id, schluessel("bestaetigen"), version)
         return f"{bezeichnung} {kopf['doc_number']} bestätigt."
+    if kern == "einlagern":
+        # Ohne Eingabe gilt das Lager aus dem Kopf des Wareneingangs.
+        lager = str(eingaben.get("lager") or ((kopf.get("bausteine") or {}).get("lager") or {}).get("lager") or "")
+        ergebnis = svc.einlagern(beleg_id, lager.strip(), schluessel("einlagern"), version)
+        return f"{bezeichnung} {kopf['doc_number']} eingelagert (Lager {ergebnis['payload']['warehouse_id']})."
     if kern == "buchen":
         svc.post_document(beleg_id, DocflowPostRequest(idempotency_key=schluessel("buchen"), expected_version=version))
         return f"{bezeichnung} {kopf['doc_number']} gebucht."

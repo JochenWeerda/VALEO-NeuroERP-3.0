@@ -53332,6 +53332,53 @@
         "title": "DocflowScreenContextOut",
         "type": "object"
       },
+      "DocflowStoreRequest": {
+        "description": "Wareneingang einlagern: Ziellager als Kennung oder Lagercode (BELEG-052 Phase 3b).",
+        "properties": {
+          "expected_version": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
+          },
+          "idempotency_key": {
+            "maxLength": 120,
+            "minLength": 8,
+            "title": "Idempotency Key",
+            "type": "string"
+          },
+          "lager": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Lager",
+            "type": "string"
+          },
+          "released_by": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Released By"
+          }
+        },
+        "required": [
+          "idempotency_key",
+          "lager"
+        ],
+        "title": "DocflowStoreRequest",
+        "type": "object"
+      },
       "DocflowUpdateRequest": {
         "properties": {
           "bausteine": {
@@ -276857,6 +276904,79 @@
           }
         ],
         "summary": "Statushistorie und Kommandoprotokoll des Belegs",
+        "tags": [
+          "docflow"
+        ]
+      }
+    },
+    "/api/v1/docflow/{doc_id}/store": {
+      "post": {
+        "operationId": "store_goods_receipt_api_v1_docflow__doc_id__store_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "doc_id",
+            "required": true,
+            "schema": {
+              "title": "Doc Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DocflowStoreRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocflowCommandResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Wareneingang einlagern",
         "tags": [
           "docflow"
         ]

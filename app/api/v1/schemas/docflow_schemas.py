@@ -82,6 +82,11 @@ class DocflowReleaseRequest(BaseModel):
     released_by: Optional[str] = Field(default=None, max_length=100)
 
 
+class DocflowStoreRequest(DocflowReleaseRequest):
+    """Wareneingang einlagern: Ziellager als Kennung oder Lagercode (BELEG-052 Phase 3b)."""
+    lager: str = Field(..., min_length=1, max_length=100)
+
+
 class DocflowReverseRequest(BaseModel):
     idempotency_key: str = Field(..., min_length=8, max_length=120)
     reason: str = Field(..., min_length=3, max_length=300)

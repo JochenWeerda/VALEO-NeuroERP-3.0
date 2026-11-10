@@ -823,6 +823,45 @@ class DocflowService:
         self.db.commit()
         return response
 
+    def einlagern(self, doc_id: str, lager: str, idempotency_key: str, expected_version: Optional[int],
+                  eingelagert_von: Optional[str] = None, *, commit: bool = True) -> dict[str, Any]:
+        """Wareneingang eingelagert: Zugang je Position ins Lager, Beleg ``completed`` (BELEG-052 Phase 3b).
+
+        Nur ein freigegebener Wareneingang (``open``). Bestand und Belegstand gelten zusammen; ``commit=False`` laesst
+        die Transaktion beim Aufrufer (Wareneingang aus dem Anlieferavis).
+        """
+        from app.services.docflow_lagerzugang import buche_lagerzugang
+
+        self._sperre(doc_id)
+        cached = self.load_idempotent_response("store", doc_id, idempotency_key, {"lager": lager})
+        if cached:
+            if commit:
+                self.db.rollback()
+            return {**cached, "idempotent_hit": True}
+        header = self.fetch_header(doc_id)
+        if not header or str(header.get("doc_type")) != "goods_receipt":
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        if expected_version and int(header.get("version") or 1) != expected_version:
+            raise ConflictError("Version conflict")
+        if str(header.get("status")) != "open":
+            raise ValidationFailedError("Eingelagert wird nur ein freigegebener Wareneingang.")
+        wer = self._wer(eingelagert_von)
+        lager_id = buche_lagerzugang(self.db, self.tenant_id, header, self.fetch_items(doc_id), lager, wer)
+        self._kommando("store", f"Lager {lager}")
+        self.db.execute(
+            text("UPDATE domain_docflow.document_headers SET status='completed', updated_at=NOW(), version=version+1, "
+                 "updated_by=:wer, bausteine = COALESCE(bausteine, '{}'::jsonb) || jsonb_build_object('lager', "
+                 "jsonb_build_object('lager', CAST(:lager AS text))) WHERE id=:id AND tenant_id=:tenant_id"),
+            {"id": doc_id, "tenant_id": self.tenant_id, "wer": wer, "lager": lager},
+        )
+        response = {"command": "store", "source_doc_id": doc_id, "target_doc_id": None, "status": "ok",
+                    "payload": {"doc_number": header.get("doc_number"), "warehouse_id": lager_id}}
+        self.store_idempotent_response("store", doc_id, idempotency_key, response, {"lager": lager})
+        self._protokolliere("store", doc_id, {"lager": lager_id})
+        if commit:
+            self.db.commit()
+        return response
+
     def lieferung_abschliessen(self, doc_id: str, pickliste: str) -> None:
         """Lieferschein ausgeliefert: die Pickliste ist vollstaendig bestaetigt, der Bestand ausgebucht.
 
@@ -1268,6 +1307,9 @@ class DocflowService:
                 "Eine gebuchte Gutschrift wird hier noch nicht storniert: Die Gegenbuchung dafür fehlt."
             )
         self._kommando("reverse", payload.reason)
+        if doc_type == "goods_receipt" and str(header.get("status")) == "completed":
+            from app.services.docflow_lagerzugang import storniere_lagerzugang
+            storniere_lagerzugang(self.db, self.tenant_id, header, payload.reason, self._wer(payload.reversed_by))
         if doc_type == "sales_delivery":
             # Der Lieferschein ist storniert: seine Kontrakt-Abrufe auch (gekennzeichnet, nicht geloescht - GoBD).
             self.db.execute(text(

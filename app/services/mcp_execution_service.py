@@ -4928,6 +4928,7 @@ def _anlieferavis_wareneingang(db: Session, request: ToolExecutionRequest, actor
             "avis_id": opened.avis_id,
             "bestellung_id": ergebnis.get("bestellung_id"),
             "bestellnummer": ergebnis.get("bestellnummer"),
+            "wareneingang_id": ergebnis.get("wareneingang_id"),
             "positionen": ergebnis.get("positionen"),
             "lieferschein_nr": ergebnis.get("lieferschein_nr"),
             "auditEntryId": audit_id,

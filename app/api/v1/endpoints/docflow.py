@@ -26,6 +26,7 @@ from app.api.v1.schemas.docflow_schemas import (
     DocflowConvertRequest,
     DocflowPostRequest,
     DocflowReleaseRequest,
+    DocflowStoreRequest,
     DocflowReverseRequest,
     DocflowRecordPrintRequest,
     DocflowRecordExportRequest,
@@ -419,6 +420,30 @@ async def confirm_document(
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"confirm failed: {exc}") from exc
+    return DocflowCommandResult(**result)
+
+
+@router.post("/{doc_id}/store", response_model=DocflowCommandResult, summary="Wareneingang einlagern", dependencies=SCHREIBEN["BELEGE"])
+async def store_goods_receipt(
+    doc_id: str,
+    payload: DocflowStoreRequest,
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+):
+    _recht(_svc(db, tenant_id), doc_id, nutzer, "bearbeiten")
+    try:
+        result = _svc(db, tenant_id, _akteur(nutzer)).einlagern(doc_id, payload.lager, payload.idempotency_key,
+                                                                payload.expected_version, payload.released_by)
+    except EntityNotFoundError as exc:
+        db.rollback()
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except (ConflictError, ValidationFailedError) as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=exc.detail)
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"store failed: {exc}") from exc
     return DocflowCommandResult(**result)
 
 
