@@ -49,17 +49,22 @@ def engine():
 def aufraeumen(engine):
     from sqlalchemy import text
 
+    from docflow_testbelege import entferne_belege
+
     with engine.begin() as v:
-        v.execute(text(
-            "DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
-            "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h))"
-        ), {"h": [HAUS_A, HAUS_B]})
-        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        haeuser = {"h": [HAUS_A, HAUS_B]}
+        v.execute(text("SELECT set_config('valeo.docflow_wartung', 'loeschen', true)"))
+        belege = [z[0] for z in v.execute(text(
+            "SELECT id FROM domain_docflow.document_headers WHERE tenant_id = ANY(:h)"), haeuser)]
+        for tabelle in ("document_command_log", "command_idempotency_keys", "create_request_idempotency"):
+            v.execute(text(f"DELETE FROM domain_docflow.{tabelle} WHERE tenant_id = ANY(:h)"), haeuser)  # nosec B608
+        entferne_belege(v, belege)
         v.execute(text(
             "DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
             "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"
         ), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
+        v.execute(text("DELETE FROM einkauf_anfragen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         for tabelle in ("domain_crm.crm_action_audit_log", "public.outbox_events"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -120,18 +125,19 @@ def angebot(engine, haus: str, status: str = "offen", positionen: int = 2) -> st
 
 
 def bestellungen(engine, haus: str) -> list[dict]:
-    """Die kanonischen Bestellungen (domain_einkauf) - dort liest die Bestellungs-Maske."""
+    """Die Bestellungen in DocFlow (BELEG-052) - dort liest die Belegmaske Bestellung."""
     from sqlalchemy import text
 
     with engine.connect() as v:
         koepfe = v.execute(text(
-            "SELECT id, lieferant_id, angebot_nr FROM domain_einkauf.bestellungen WHERE tenant_id = :h"
+            "SELECT id, status, supplier_id AS lieferant_id, source_ref AS angebot_nr FROM "
+            "domain_docflow.document_headers WHERE tenant_id = :h AND doc_type = 'purchase_order'"
         ), {"h": haus}).mappings().all()
         ergebnis = []
         for kopf in koepfe:
             posten = v.execute(text(
-                "SELECT artikel_bezeichnung AS description, menge AS quantity, einzelpreis AS \"unitPrice\", "
-                "menge_offen FROM domain_einkauf.bestellung_positionen WHERE bestellung_id = :b ORDER BY pos_nr"
+                "SELECT description, quantity, unit_price AS \"unitPrice\", quantity AS menge_offen "
+                "FROM domain_docflow.document_items WHERE header_id = :b ORDER BY line_number"
             ), {"b": kopf["id"]}).mappings().all()
             ergebnis.append({**dict(kopf), "items": [dict(p) for p in posten]})
     return ergebnis
@@ -169,7 +175,9 @@ class TestUmwandlung:
         (bestellung,) = bestellungen(engine, HAUS_A)
         posten = [(i["description"], float(i["quantity"]), float(i["unitPrice"])) for i in bestellung["items"]]
         assert posten == [("Saatweizen Sorte 1", 10.0, 25.0), ("Saatweizen Sorte 2", 20.0, 25.0)]
-        # Kanonisch: mit Lieferant, Angebotsbezug und offener Menge fuer den Wareneingang.
+        # Kanonisch: DocFlow-Entwurf mit Lieferant, Angebotsbezug und offener Menge fuer den Wareneingang.
+        assert bestellung["status"] == "draft"
+        assert antwort.json()["purchaseOrderId"] == bestellung["id"]
         assert str(bestellung["lieferant_id"]) == LIEFERANT
         assert bestellung["angebot_nr"] == f"AN-{kennung[:6]}"
         assert [float(p["menge_offen"]) for p in bestellung["items"]] == [10.0, 20.0]
@@ -250,3 +258,22 @@ class TestOhneLieferant:
         antwort = client.post(f"{WEG}/{kennung}/convert-to-order", headers=kopf(HAUS_A))
         assert antwort.status_code == 422, antwort.text
         assert bestellungen(engine, HAUS_A) == []
+
+
+def test_eine_anfrage_wird_zum_docflow_bestellentwurf(engine, client):
+    """Anfrage -> Bestellung legt einen DocFlow-Entwurf an (BELEG-052; vorher ein weiterer Bestellspeicher)."""
+    from sqlalchemy import text
+
+    kennung = str(uuid.uuid4())
+    with engine.begin() as v:
+        v.execute(text(
+            "INSERT INTO einkauf_anfragen (id, anfrage_nummer, typ, anforderer, prioritaet, status, artikel, menge, "
+            "einheit, created_at, updated_at, tenant_id) VALUES (:i, :n, 'MATERIAL', 'Lager', 'NORMAL', 'OFFEN', "
+            "'Kalkammonsalpeter', 40, 'dt', NOW(), NOW(), :h)"), {"i": kennung, "n": f"AF-{kennung[:6]}", "h": HAUS_A})
+    antwort = client.post(f"/api/v1/einkauf/anfragen/{kennung}/convert-to-order", headers=kopf(HAUS_A))
+    assert antwort.status_code == 200, antwort.text
+    (bestellung,) = bestellungen(engine, HAUS_A)
+    assert antwort.json()["purchaseOrderId"] == bestellung["id"] and bestellung["status"] == "draft"
+    assert [(i["description"], float(i["quantity"])) for i in bestellung["items"]] == [("Kalkammonsalpeter", 40.0)]
+    with engine.connect() as v:
+        assert v.execute(text("SELECT status FROM einkauf_anfragen WHERE id = :i"), {"i": kennung}).scalar() == "BESTELLT"
