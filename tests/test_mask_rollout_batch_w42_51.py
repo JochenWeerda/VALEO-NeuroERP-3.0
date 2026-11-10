@@ -13,9 +13,10 @@ from app.core.screen_definitions import get_screen_definition
 pytestmark = pytest.mark.unit
 
 
-def test_rollout_catalog_has_ten_candidates() -> None:
-    assert len(ROLLOUT_WAVES_42_51) == 10
-    assert len(all_rollout_screen_ids()) == 10
+def test_rollout_catalog_has_nine_candidates() -> None:
+    # sales/delivery-note ist entfernt (BELEG-052 1b): der Lieferschein ist eine Variante der Belegmaske.
+    assert len(ROLLOUT_WAVES_42_51) == 9
+    assert len(all_rollout_screen_ids()) == 9
 
 
 def test_rollout_catalog_lookup() -> None:
