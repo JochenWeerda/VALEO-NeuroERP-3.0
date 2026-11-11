@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Konstanten
-RAG_API_TOKEN = "valeo_rag_api_token_2025"  # API-Token für den RAG-Server
+RAG_API_TOKEN = os.environ.get("RAG_API_TOKEN", "")  # API-Token für den RAG-Server (aus der Umgebung)
 MONGODB_URI = "mongodb://localhost:27017/"   # MongoDB-URI
 MONGODB_DB = "valeo_neuroerp"               # MongoDB-Datenbankname
 PROJECT_ID = "valeo_neuroerp_project"       # Projekt-ID
@@ -85,7 +85,7 @@ def start_rag_server():
         # Prüfen, ob der Server läuft
         if process.poll() is None:
             logger.info("RAG-Service-Server erfolgreich gestartet")
-            logger.info(f"API-Token: {RAG_API_TOKEN}")
+            logger.info("API-Token gesetzt: %s", bool(RAG_API_TOKEN))
             logger.info(f"Token-Datei: {token_file}")
             return True
         else:
@@ -103,7 +103,7 @@ def start_rag_server():
 def main():
     """Hauptfunktion."""
     print("=== VALEO-NeuroERP RAG-Server Starter ===")
-    print(f"API-Token: {RAG_API_TOKEN}")
+    print(f"API-Token gesetzt: {bool(RAG_API_TOKEN)}")
     print(f"MongoDB-URI: {MONGODB_URI}")
     print(f"MongoDB-DB: {MONGODB_DB}")
     print(f"Projekt-ID: {PROJECT_ID}")
@@ -114,7 +114,7 @@ def main():
     if success:
         print("\nRAG-Service-Server erfolgreich gestartet!")
         print("Der Server läuft jetzt im Hintergrund.")
-        print(f"API-Token für Dashboard: {RAG_API_TOKEN}")
+        print("API-Token für Dashboard: siehe Umgebungsvariable RAG_API_TOKEN")
         print("\nBitte verwenden Sie diesen Token im Dashboard, wenn Sie")
         print("den RAG-Server als Informationsquelle auswählen.")
     else:
