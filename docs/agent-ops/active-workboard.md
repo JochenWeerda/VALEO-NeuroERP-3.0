@@ -20782,3 +20782,9 @@ Stand confirmed (Migration docflow_auftragsbestaetigung_20261109, Aktion "Auftra
 stornierte Auftraege (alte Statuswoerter), Bestellvorschlag zaehlt offene Menge (Sicht sales_order_items.offene_menge =
 Rechnung der Belegmaske), Indizes Kunde/Rueckverweis, Schreibschutz der Ursprungsdaten, Ratsche gegen neue Leser,
 Schreiber und alte Statuswoerter. ADR-086 Accepted (fachliche Freigabe 09.11.2026).
+
+## SONAR-PARTNER-COVERAGE-20261113 — reserviert, Codex Subagent sonar_partner_tests
+Besitz neue gezielte Tests fuer app/services/business_partner_service.py und zugehoerige QA. Echte Validierungs-/Mandanten-/Fehler-/Transaktionspfade nach aktueller Coverage messen, keine funktionalen Mocks statt Fachlogik und keine Schwellenabsenkung. Quellfehler Lead melden; keine neue DB/Container.
+
+## SONAR-RATION-COVERAGE-20261113 — reserviert, Codex Subagent sonar_ration_tests
+Besitz neue gezielte UI-/Fachverhaltenstests fuer ration-optimization-surface.tsx und QA. Bestehende Verbraucher/Gates beachten, keine Implementationsspiegeltests oder Coverageausnahmen. Quellkorrekturen nur bei konkretem Befund abgestimmt; keine Builds parallel, Vitest maximal zwei Worker.
