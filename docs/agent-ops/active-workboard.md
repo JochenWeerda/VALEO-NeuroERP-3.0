@@ -20787,4 +20787,5 @@ Schreiber und alte Statuswoerter. ADR-086 Accepted (fachliche Freigabe 09.11.202
 Besitz neue gezielte Tests fuer app/services/business_partner_service.py und zugehoerige QA. Echte Validierungs-/Mandanten-/Fehler-/Transaktionspfade nach aktueller Coverage messen, keine funktionalen Mocks statt Fachlogik und keine Schwellenabsenkung. Quellfehler Lead melden; keine neue DB/Container.
 
 ## SONAR-RATION-COVERAGE-20261113 — reserviert, Codex Subagent sonar_ration_tests
-Besitz neue gezielte UI-/Fachverhaltenstests fuer ration-optimization-surface.tsx und QA. Bestehende Verbraucher/Gates beachten, keine Implementationsspiegeltests oder Coverageausnahmen. Quellkorrekturen nur bei konkretem Befund abgestimmt; keine Builds parallel, Vitest maximal zwei Worker.
+Besitz neue gezielte UI-/Fachverhaltenstests fuer ration-optimization-surface.tsx und QA. Bestehende Verbraucher/Gates beachten, keine Implementationsspiegeltests oder Coverageausnahmen. Quellkorrektur abgestimmt: ration-optimization-surface.tsx, weil nach Aenderung der Leistung und fehlgeschlagener Neuberechnung das alte Ergebnis weiterhin einreichbar ist. Solverantworten muessen zum aktuellen Eingabestand passen; Tests und QA gehoeren zum Slice. Keine Builds parallel, Vitest maximal zwei Worker.
+
