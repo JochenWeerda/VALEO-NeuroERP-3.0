@@ -20783,9 +20783,12 @@ stornierte Auftraege (alte Statuswoerter), Bestellvorschlag zaehlt offene Menge 
 Rechnung der Belegmaske), Indizes Kunde/Rueckverweis, Schreibschutz der Ursprungsdaten, Ratsche gegen neue Leser,
 Schreiber und alte Statuswoerter. ADR-086 Accepted (fachliche Freigabe 09.11.2026).
 
-## SONAR-PARTNER-COVERAGE-20261113 — reserviert, Codex Subagent sonar_partner_tests
+## SONAR-PARTNER-COVERAGE-20261113 — abgeschlossen, Codex Subagent sonar_partner_tests
 Besitz neue gezielte Tests fuer app/services/business_partner_service.py und zugehoerige QA. Echte Validierungs-/Mandanten-/Fehler-/Transaktionspfade nach aktueller Coverage messen, keine funktionalen Mocks statt Fachlogik und keine Schwellenabsenkung. Quellfehler Lead melden; keine neue DB/Container.
+Abnahme: 16 gezielte Tests bestanden; lokal 209 statt 136 von 806 Service-Anweisungen abgedeckt. Datenbankgrenze simuliert, keine PostgreSQL-Isolationsabnahme. Commit 75e7f4b52; QA: docs/quality-assurance/sonar-partner-coverage-20261113.md. Sonar-Gesamtabnahme weiterhin offen (70,9 Prozent auf Basis b310e13b5; Ziel 80 Prozent).
 
-## SONAR-RATION-COVERAGE-20261113 — reserviert, Codex Subagent sonar_ration_tests
+## SONAR-RATION-COVERAGE-20261113 — abgeschlossen, Codex Subagent sonar_ration_tests
 Besitz neue gezielte UI-/Fachverhaltenstests fuer ration-optimization-surface.tsx und QA. Bestehende Verbraucher/Gates beachten, keine Implementationsspiegeltests oder Coverageausnahmen. Quellkorrektur abgestimmt: ration-optimization-surface.tsx, weil nach Aenderung der Leistung und fehlgeschlagener Neuberechnung das alte Ergebnis weiterhin einreichbar ist. Solverantworten muessen zum aktuellen Eingabestand passen; Tests und QA gehoeren zum Slice. Keine Builds parallel, Vitest maximal zwei Worker.
 
+
+Nachweis SONAR-RATION-COVERAGE-20261113: Solverfehler mit veralteter Einreichung reproduziert und Oberflaeche gegen geaenderte und ueberholte Berechnungen abgesichert; gezielte Vitest-Pruefung 14/14. QA: docs/quality-assurance/rations-recalculation-submission-20261113.md. Serverseitige Snapshot-Verifikation nicht nachgewiesen.
