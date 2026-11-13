@@ -102,6 +102,3 @@ describe('Neuberechnung in der Werkbank', () => {
     expect((screen.getByRole('button', { name: 'Zur Pruefung einreichen' }) as HTMLButtonElement).disabled).toBe(false)
   })
 })
-
-
-
