@@ -4,12 +4,20 @@ type: reference
 audience: [agent, entwickler, architektur, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-10-28
-version: 2.6.0
+last_reviewed: 2026-11-13
+version: 2.7.0
 description: Maschinenlesbarer Projektstand der Human+Agent Mask Runtime (UIX-021…050) — Lieferstand, Gates, Governance. Historische Lieferstaende und aktuelle Abnahmegrenzen getrennt ausgewiesen.
 ---
 
 # Universal Mask Runtime — Plattformstatus
+
+**Testmigration 13.11.2026:** Die [Studio-Teststrategie](../../quality-assurance/studio-teststrategie.md)
+setzt auf gemeinsame Klassenvertraege, exakte Variantenbindung und fachliche
+Kanalparitaet. Die Waagenliste ersetzt drei erwartete Fehlschlaege durch fuenf
+Verhaltenstests; die Runtime46-Ratsche sinkt von 184 auf 181. Allgemeine
+Familienbindungen werden nun wie Belegbindungen im Renderplan weitergetragen
+und beim Cachewechsel beruecksichtigt. Diese gezielten Nachweise belegen keine
+Gesamtmigration oder Browser-/SQL-Gesamtabnahme.
 
 **Einordnung 05.11.2026:** Die Zahlen vom 29.10. und frueher sind historische Messungen ihres jeweiligen Umfangs. Der operative Stand steht im [Workboard](../../agent-ops/active-workboard.md), der aktuelle strukturelle Katalog in [Studio-Screenversionen](../../../config/studio_screen_versions.json). Der PSM-Zweig ist gezielt geprueft und vor Integration; Browser- und Gesamtfreigabe sind damit nicht belegt.
 

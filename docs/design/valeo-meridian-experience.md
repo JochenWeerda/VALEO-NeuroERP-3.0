@@ -4,12 +4,22 @@ type: reference
 audience: [agent, entwickler, design, qa]
 owner: Codex
 status: aktiv
-last_reviewed: 2026-08-19
-version: 1.1.0
+last_reviewed: 2026-11-13
+version: 1.2.0
 description: Meridian als Design-, Layout- und Governance-Vertrag des Single Mask Builder.
 ---
 
 # VALEO Meridian Experience
+
+Stand 2026-11-13: Allgemeine Maskenfamilien tragen ihre exakte Herkunft als
+`maskVariant` durch ScreenDefinition, Compiler, RenderPlan und Renderer.
+Eine reine Variantenversionsaenderung wechselt den Renderplan-Cache; fehlerhafte
+oder doppelte Herkunftsbindungen werden abgelehnt. Die vorhandene Belegbindung
+bleibt `documentVariant`. Herkunftsmetadaten vergeben keine Rechte und ersetzen
+keine Veroeffentlichungsfreigabe. Die [Studio-Teststrategie](../quality-assurance/studio-teststrategie.md)
+prueft gemeinsame Klassen, spezifische Varianten und Fachcommands getrennt;
+ein Ersatz alter Seitentests setzt den Nachweis der Fachfunktion voraus.
+[Varianten-QA](../quality-assurance/studio-test-familienbindung-20261113.md).
 
 Stand 2026-10-12: Kontingente und technisches Verbrauchsnebenbuch sind native
 ScreenDefinitions unter admin/identity-budgets und admin/token-consumption.

@@ -260,7 +260,9 @@ def execute(request: Any, tenant: str, authorization: str | None, *, transport: 
         data = {"detail": response.text[:300]}
     if response.status_code >= 400:
         detail = data.get("detail") if isinstance(data, dict) else data
-        raise HTTPException(response.status_code, detail if isinstance(detail, str) else "Aktion abgelehnt")
+        # Preserve the target's public domain/validation rejection for every adapter.
+        # Structured approval reasons must not disappear merely because MCP is used.
+        raise HTTPException(response.status_code, detail if isinstance(detail, (str, dict, list)) else "Aktion abgelehnt")
     return {"success": not (isinstance(data, dict) and data.get("success") is False), "screen_id": definition["id"],
             "action": action["key"], "mode": request.mode, "result": data}
 

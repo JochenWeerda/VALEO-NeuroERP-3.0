@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKE = "// Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)"
-HOECHSTENS = 184  # Stand 09.11.2026 (Beleg-Editoren durch die Belegmaske ersetzt); nur senken
+HOECHSTENS = 181  # Stand 13.11.2026 (Waagenliste: echte Studio-Verhaltenstests); nur senken
 # E2E-Smoke: Faelle ohne echte Maske (fehlende Maske oder batch15-Platzhalter) laufen als test.fixme.
 HOECHSTENS_SMOKE = 9  # Stand 03.11.2026 (Lagerbestand repariert); nur senken
 
