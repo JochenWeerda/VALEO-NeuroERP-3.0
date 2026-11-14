@@ -59,3 +59,5 @@ Nachlauf: 82 Consumer-/Rechte-/bestehende Improvement-Vertraege bestanden
 (5,34 Sekunden); Docs-Governance gruen. Diese Laeufe werden nicht zu den
 ueberlappenden Agentenzahlen addiert. Der echte GitHub-Produzent-/Consumer-
 Nachweis auf dem neuen Commit ist separat erforderlich.
+
+PR135-Erstlauf: Der separate Strict-DB-Job stellte nur DATABASE_URL bereit; die drei neuen verpflichtenden PostgreSQL-Vertraege lehnten die fehlende explizite TEST_DATABASE_URL korrekt ab. Korrektur: derselbe einzelne Job-Service heisst valeo_probe, beide URLs stimmen ueberein, kanonische Datenrollen werden nach init_db eingerichtet. Der lokale Profilvertrag besteht; echter CI-Nachlauf bleibt erforderlich.

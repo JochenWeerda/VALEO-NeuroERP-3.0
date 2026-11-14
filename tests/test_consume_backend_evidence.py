@@ -253,3 +253,18 @@ def test_bounded_archive_members_and_size():
             consumer.read_evidence(archive())
         finally:
             consumer.MAX_FILES = monkey
+
+
+def test_strict_db_job_reuses_its_single_declared_probe_and_canonical_roles():
+    import yaml
+    root = Path(__file__).resolve().parents[1]
+    workflow = yaml.safe_load((root / ".github/workflows/pytest-postgres-require-db.yml").read_text(encoding="utf-8"))
+    environment = workflow["env"]
+    assert environment["DATABASE_URL"] == environment["TEST_DATABASE_URL"]
+    assert environment["DATABASE_URL"].endswith("/valeo_probe")
+    job = workflow["jobs"]["require-db"]
+    assert list(job["services"]) == ["postgres"]
+    assert job["services"]["postgres"]["env"]["POSTGRES_DB"] == "valeo_probe"
+    setup = next(step["run"] for step in job["steps"] if step.get("name") == "Migrate database (Alembic head)")
+    assert "scripts/init_db.py" in setup and "scripts/provision_db_roles.py" in setup
+    assert environment["PYTEST_REQUIRE_DB_STRICT"] == "1"

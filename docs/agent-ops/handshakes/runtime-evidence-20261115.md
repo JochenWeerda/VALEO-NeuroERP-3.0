@@ -30,3 +30,5 @@ Ein echter GitHub-Nachlauf muss diesen neuen Vertrag erst abnehmen.
 Offen: Browser-/OIDC-Gesamtkette, weitere Matrixaktionen und verbleibende
 Runtime46-Fachfunktionen; keine Gesamtfreigabe. QA: ci-kanonische-backendsuite-
 20261114.md, probe-datenrechte-20261114.md, docflow-teilmengen-sql-20261115.md.
+
+Nachlauf: Strict-DB-Profil aus realem Erstfehler korrigiert (explizite gleiche TEST_DATABASE_URL, ein bestehender valeo_probe-Service, kanonische Rollen). Neue Herstellerbefunde gezielt gepatcht; separater BFF-Audit schliesst verschachtelte Manifestluecke. 42 lokale Sicherheits-/Consumervertraege gruen. Details security-langgraph-zod-20261115.md; GitHub-Nachlauf auf integriertem Folgecommit erforderlich, keine Gesamtfreigabe.
