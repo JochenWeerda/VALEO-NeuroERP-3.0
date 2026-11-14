@@ -1,3 +1,4 @@
+import { docflowConversionQuantities } from './docflow-convert-input'
 import type { ScreenActionDefinition } from '../schema'
 import { actionIsEnabled } from '../governance/screen-context'
 import type { ActionRequest, ActionResult, ActionRuntimeOptions } from './ActionRuntime'
@@ -69,6 +70,9 @@ export function prepareDocflowCommand(action: ScreenActionDefinition, req: Actio
       const target = binding.defaults?.target_doc_type
       if (typeof target !== 'string' || !target) throw new Error('Folgebelegart fehlt.')
       body.target_doc_type = target
+      if (payload.quantities_by_source_item_id !== undefined || action.inputFields?.some(field => field.key === 'quantities_by_source_item_id')) {
+        body.quantities_by_source_item_id = docflowConversionQuantities(payload.quantities_by_source_item_id)
+      }
       body.dry_run = req.mode === 'dryRun'
     }
     if (command === 'reverse') {
@@ -111,8 +115,11 @@ export function docflowCommandResult(action: ScreenActionDefinition, req: Action
     return { ...base, success: false, error: 'DocFlow-Antwort entspricht nicht dem Aufrufvertrag.' }
   }
   const payload = data.payload as Record<string, unknown> | undefined
+  const rows = req.payload?.quantities_by_source_item_id
+  const quantities = Array.isArray(rows) ? rows.filter(row => typeof row.quantity === 'number' && row.quantity > 0)
+    .map(row => ({ description: `${String(row.article_number ?? row.line_number ?? '')}: ${String(row.quantity)} ${String(row.unit ?? '')}`.trim() })) : []
   return { ...base, success: true, summary: req.mode === 'dryRun' ? 'Folgebeleg-Vorschau ohne Speicherung.' : 'Belegaktion abgeschlossen.',
-    proposedChanges: req.mode === 'dryRun' ? [{ description: `${action.label} – Positionen: ${String(payload?.item_count ?? '')}` }] : undefined,
+    proposedChanges: req.mode === 'dryRun' ? [{ description: `${action.label} – Positionen: ${String(payload?.item_count ?? '')}` }, ...quantities] : undefined,
     affectedIds: [data.source_doc_id, data.target_doc_id, data.posting_id].filter((value): value is string => typeof value === 'string' && Boolean(value)) }
 }
 

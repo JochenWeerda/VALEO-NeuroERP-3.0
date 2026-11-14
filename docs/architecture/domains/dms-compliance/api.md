@@ -33,3 +33,19 @@ version: 1.1.0
   `/api/mcp/documents/inbox/{id}/prepare` fuer den fachlichen Maskenwechsel.
 - Terrorschutz: `POST /api/v1/compliance/sanctions/pruefen` mit Scope
   `manual|personal|customers`; `GET .../pruefprotokoll?scope=...` ist tenantgebunden.
+
+## DocFlow-Teilmengen (14.11.2026)
+
+`GET /api/v1/docflow/{doc_id}/conversion-options?target_doc_type=...` liefert
+Positionskennungen, Artikel, Einheiten und Restmengen fuer genau diese Folgeart
+sowie die Belegversion. Der Weg braucht Leserecht am Quellbeleg und
+Bearbeitungsrecht an der Zielart; er gibt keine Preise zurueck und bootstrapped
+keine Altdaten. Der verifizierte Mandant bleibt bindend.
+
+Die Studio-Belegfamilie 1.9.0 sammelt explizite Mengen in der gemeinsamen
+Tabelleneingabe (initial null, keine automatische Volluebernahme). UI und CLI
+uebersetzen die Auswahl auf dasselbe `quantities_by_source_item_id` des
+bestehenden `POST /api/v1/docflow/{doc_id}/convert`; Vorschau und Ausfuehrung
+behalten Version und ausgewaehlte Mengen. Restmenge, Positionszugehoerigkeit,
+Idempotenz und Versionskonflikte entscheidet weiterhin der Domain-Command.
+Schreibende Agentenaktionen bleiben gesperrt. [Abnahmegrenzen](../../../quality-assurance/docflow-teilmengen-eingabe-20261114.md).

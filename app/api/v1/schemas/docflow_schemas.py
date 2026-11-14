@@ -1,7 +1,7 @@
 """Canonical DocFlow request/response models shared by every adapter."""
 from __future__ import annotations
 from datetime import date, datetime
-from typing import Any, Optional
+from typing import Annotated, Any, Optional
 from pydantic import BaseModel, Field, ConfigDict as _ConfigDict, model_validator
 from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.docflow_screen_context import DocflowScreenContextIn, DocflowScreenContextOut
@@ -63,7 +63,7 @@ class DocflowHeaderOut(BaseModel):
 class DocflowConvertRequest(BaseModel):
     target_doc_type: str = Field(..., min_length=3, max_length=40)
     idempotency_key: str = Field(..., min_length=8, max_length=120)
-    quantities_by_source_item_id: dict[str, float] = Field(default_factory=dict)
+    quantities_by_source_item_id: dict[str, Annotated[float, Field(ge=0, allow_inf_nan=False)]] = Field(default_factory=dict)
     expected_version: Optional[int] = Field(default=None, ge=1)
     created_by: Optional[str] = Field(default=None, max_length=100)
     dry_run: bool = False

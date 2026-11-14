@@ -2254,3 +2254,17 @@ Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Na
 ## CRM-ACTIVITY-CANONICAL — Integration und Rollout (29.10.2026)
 
 Konkurrierende aktive Aktivitaets-CRUD-Wege sind durch den versionierten Domaincommand ersetzt; native Liste, Detail und Neuanlage nutzen denselben Vertrag. Die additive Migration ist auf dem gemeinsamen Pruefstand mit Rollback nachgewiesen, noch nicht auf dem laufenden Anwendungsschema angewendet. RLS bleibt eine explizite Service-Ausnahme. Dormantes Daily-Report-Modul, Kontakt-/Farm-Neuanlage und authentifizierte Browser-/Rolloutabnahme bleiben gesonderte Arbeiten. Der gesetzliche DSGVO-Erasureweg bleibt eine dokumentierte Ausnahme; sein Aktivitaetsfilter ist jetzt strikt mandantengebunden. [QA mit Grenzen](../quality-assurance/crm-activity-canonical-20261029.md).
+
+
+### UIX-RUNTIME / Action-Matrix — Nachlauf 14.11.2026
+
+Der Action-Matrix-Bericht trennt deklarierte YAML-Einstufungen von belegten
+Laeufen: 38 Aktionen, 32 deklarierte Gaps; fuer keine Aktion ist dort ein
+konkreter Testlauf mit SHA verknuepft. Die bisherigen GET-/Fehlerakzeptanztests
+sind keine fachliche Abnahme. [Audit](../quality-assurance/action-matrix-audit-20261114.md).
+Studio-Belegfamilie 1.9.0 schliesst die bisher fehlende explizite
+Teilmengenbedienung auf Definitions-/Runtime-/Transportebene. Der gemeinsame
+DocFlow-Command bleibt fuehrend; neue preisfreie Restmengenabfrage, sichere
+Positionswahl und UI-/CLI-Uebersetzung sind gezielt geprueft. Die reale
+SQL-/OIDC-/Browserabnahme der Kette bleibt offen und erhoeht keinen Matrixstatus.
+[Nachweisgrenzen](../quality-assurance/docflow-teilmengen-eingabe-20261114.md).

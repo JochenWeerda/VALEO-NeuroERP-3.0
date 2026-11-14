@@ -54,3 +54,21 @@ Die neuen Unit-/Transporttests simulieren externe Daten-/Identitaetsgrenzen.
 Letzter separat gepruefter Main-Sonarwert 70,9 Prozent, Ziel 80; frischer
 GitHub-Nachlauf bleibt Pflicht. Historische Teilergebnisse nicht summieren
 oder als Gesamtfreigabe umdeuten. Details in den datierten QA-Dateien.
+
+
+## Fortsetzung: Action-Matrix, CI und Teilmengen
+
+PR134 enthaelt die ehrliche Action-Matrix-Einordnung (38 Aktionen,
+32 deklarierte Gaps; keine Laufverknuepfung fuer die sechs anderen).
+Sicherheitsgate e733d8828 ist gruen; Nachlauf repariert MCP-Katalogdrift,
+geraeteabhaengigen Kundenauswahltest und Scanner-Pythonruntime. Scannerbuild
+und Gesamtnachlauf muessen auf dem finalen Commit bestaetigt werden.
+
+Studio-Belegfamilie 1.9.0 ergaenzt echte explizite Teilmengen: preisfreier
+Optionsabruf mit Version und Zielart, gemeinsame Tabelle, Vorschau und
+Ausfuehrung ueber bestehenden Domain-Command. CLI bildet dieselben Werte ab;
+Agentenwrites bleiben gesperrt. Bisherige Versionsinhalte wurden semantisch
+gegen Git bestaetigt. Keine Matrix-Statusanhebung ohne realen Laufnachweis.
+SQL-/OIDC-/Browsernachweis fehlt weiterhin; Statusskript hatte keine
+Datenbank-URL. Details: docflow-teilmengen-eingabe-20261114.md und
+ docflow-konvertierung-dialog-20261114.md unter quality-assurance.

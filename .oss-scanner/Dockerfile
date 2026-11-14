@@ -1,3 +1,4 @@
+FROM python:3.11.18-slim-bookworm AS python-runtime
 FROM node:24-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -13,11 +14,16 @@ RUN apt-get update \
        ca-certificates \
        git \
        libpq-dev \
-       python3 \
-       python3-dev \
-       python3-pip \
-       python3-venv \
+       libbz2-1.0 libffi8 libgdbm6 liblzma5 libncursesw6 libreadline8 libsqlite3-0 libssl3 libuuid1 zlib1g \
     && rm -rf /var/lib/apt/lists/*
+
+# Bookworm's distro Python 3.11.2 cannot install the security-pinned Soup Sieve.
+# Both official images use bookworm; preserve Node 24 and take Python's complete
+# /usr/local runtime (including its shared library and venv support).
+COPY --from=python-runtime /usr/local/ /usr/local/
+RUN ldconfig \
+    && python3 -c "import sys, bz2, ctypes, lzma, sqlite3, ssl, venv; assert sys.version_info >= (3, 11, 5), sys.version" \
+    && node --version
 
 # Scanner contract: Anthropic supplies the repository as the build context and
 # expects the complete checkout at /src. Dependency downloads happen while the

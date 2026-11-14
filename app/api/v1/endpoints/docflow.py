@@ -17,6 +17,7 @@ from app.services.docflow_freigabe import DocflowFreigabe
 from app.services.docflow_service import DocflowService, POS_TYPES
 
 from app.api.v1.schemas.base import TypedObjectOut
+from app.api.v1.schemas.docflow_conversion_options import ConversionOptions
 
 
 from app.api.v1.schemas.docflow_schemas import (
@@ -462,6 +463,29 @@ async def record_export(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"record-export failed: {exc}") from exc
     return _row_to_header_out(svc, doc_id)
+
+
+@router.get("/{doc_id}/conversion-options", response_model=ConversionOptions,
+            summary="Preisfreie Positions- und Restmengenauswahl fuer einen Folgebeleg")
+async def conversion_options(
+    doc_id: str,
+    target_doc_type: str = Query(..., min_length=3, max_length=40),
+    tenant_id: str = Depends(_docflow_tenant),
+    db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> ConversionOptions:
+    """Read only; the conversion command rechecks quantities and version under its lock."""
+    verlange(nutzer, "bearbeiten", target_doc_type)
+    svc = _svc(db, tenant_id, _akteur(nutzer))
+    _recht(svc, doc_id, nutzer, "lesen")
+    try:
+        return ConversionOptions(**svc.conversion_options(doc_id, target_doc_type))
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail) from exc
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail) from exc
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=400, detail=exc.detail) from exc
 
 
 @router.post("/{doc_id}/convert", response_model=DocflowCommandResult, summary="Document umwandeln", dependencies=SCHREIBEN["BELEGE"])

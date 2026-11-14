@@ -40568,6 +40568,102 @@
         "title": "ControllingOut",
         "type": "object"
       },
+      "ConversionItem": {
+        "additionalProperties": false,
+        "properties": {
+          "article_number": {
+            "title": "Article Number",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "line_number": {
+            "title": "Line Number",
+            "type": "integer"
+          },
+          "quantity": {
+            "minimum": 0.0,
+            "title": "Quantity",
+            "type": "number"
+          },
+          "remaining_quantity": {
+            "minimum": 0.0,
+            "title": "Remaining Quantity",
+            "type": "number"
+          },
+          "source_item_id": {
+            "title": "Source Item Id",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "required": [
+          "source_item_id",
+          "line_number",
+          "article_number",
+          "quantity",
+          "remaining_quantity"
+        ],
+        "title": "ConversionItem",
+        "type": "object"
+      },
+      "ConversionOptions": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ConversionItem"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "source_doc_id": {
+            "title": "Source Doc Id",
+            "type": "string"
+          },
+          "source_doc_type": {
+            "title": "Source Doc Type",
+            "type": "string"
+          },
+          "target_doc_type": {
+            "title": "Target Doc Type",
+            "type": "string"
+          },
+          "version": {
+            "minimum": 1.0,
+            "title": "Version",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source_doc_id",
+          "source_doc_type",
+          "target_doc_type",
+          "version",
+          "items"
+        ],
+        "title": "ConversionOptions",
+        "type": "object"
+      },
       "ConvertLeadRequest": {
         "properties": {
           "lead_id": {
@@ -52674,6 +52770,7 @@
           },
           "quantities_by_source_item_id": {
             "additionalProperties": {
+              "minimum": 0.0,
               "type": "number"
             },
             "title": "Quantities By Source Item Id",
@@ -277199,6 +277296,81 @@
           }
         ],
         "summary": "Auftrag bestaetigen (Auftragsbestaetigung)",
+        "tags": [
+          "docflow"
+        ]
+      }
+    },
+    "/api/v1/docflow/{doc_id}/conversion-options": {
+      "get": {
+        "description": "Read only; the conversion command rechecks quantities and version under its lock.",
+        "operationId": "conversion_options_api_v1_docflow__doc_id__conversion_options_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "doc_id",
+            "required": true,
+            "schema": {
+              "title": "Doc Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "target_doc_type",
+            "required": true,
+            "schema": {
+              "maxLength": 40,
+              "minLength": 3,
+              "title": "Target Doc Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "tenant_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tenant Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversionOptions"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Preisfreie Positions- und Restmengenauswahl fuer einen Folgebeleg",
         "tags": [
           "docflow"
         ]

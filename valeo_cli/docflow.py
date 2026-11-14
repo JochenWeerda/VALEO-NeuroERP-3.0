@@ -7,6 +7,8 @@ Versionen und Wiederholungen prueft er beim Aufruf noch einmal.
 """
 from __future__ import annotations
 
+import math
+
 from typing import Any
 from urllib.parse import quote
 
@@ -70,6 +72,37 @@ def _server_action(action: dict, data: dict) -> dict | None:
     return next((candidate for candidate in available if isinstance(candidate, dict) and candidate.get("key") == key), None)
 
 
+def conversion_quantities(value: Any) -> dict[str, float]:
+    """Map the shared Studio table to the canonical API dictionary; never infer a full remainder."""
+    entries = []
+    if isinstance(value, list):
+        if not value or len(value) > 200:
+            raise ValueError("Positionsauswahl fehlt oder ist zu gross.")
+        for row in value:
+            if not isinstance(row, dict):
+                raise ValueError("Ungueltige Positionsauswahl.")
+            key, quantity, remaining = row.get("source_item_id"), row.get("quantity"), row.get("remaining_quantity")
+            if (not isinstance(key, str) or not key or isinstance(quantity, bool) or
+                    not isinstance(quantity, (int, float)) or not math.isfinite(quantity) or quantity < 0 or
+                    isinstance(remaining, bool) or not isinstance(remaining, (int, float)) or
+                    not math.isfinite(remaining) or quantity > remaining):
+                raise ValueError("Uebernahmemenge muss zwischen null und Restmenge liegen.")
+            entries.append((key, quantity))
+    elif isinstance(value, dict):
+        for key, quantity in value.items():
+            if (not isinstance(key, str) or not key or isinstance(quantity, bool) or
+                    not isinstance(quantity, (int, float)) or not math.isfinite(quantity) or quantity < 0):
+                raise ValueError("Uebernahmemengen sind ungueltig.")
+            entries.append((key, quantity))
+    else:
+        raise ValueError("Positionsmengen fehlen.")
+    if len({key for key, _ in entries}) != len(entries):
+        raise ValueError("Doppelte Position in der Auswahl.")
+    if not any(quantity > 0 for _, quantity in entries):
+        raise ValueError("Mindestens eine positive Uebernahmemenge angeben.")
+    return dict(entries)
+
+
 def prepare(action: dict, *, entity_id: str | None, data: dict, payload: dict, mode: str, audit_reason: str | None,
             idempotency_key: str, expected_version: int | None, is_agent: bool) -> tuple[str, str, dict]:
     binding = action.get("commandBinding") or {}
@@ -120,6 +153,9 @@ def prepare(action: dict, *, entity_id: str | None, data: dict, payload: dict, m
             if not isinstance(target, str) or not target:
                 raise ValueError("Folgebelegart fehlt.")
             body["target_doc_type"] = target
+            if "quantities_by_source_item_id" in payload or any(
+                    field.get("key") == "quantities_by_source_item_id" for field in action.get("inputFields", [])):
+                body["quantities_by_source_item_id"] = conversion_quantities(payload.get("quantities_by_source_item_id"))
             body["dry_run"] = mode == "dryRun"
         if command == "reverse":
             reason = audit_reason if audit_reason is not None else payload.get("reason")

@@ -48,6 +48,7 @@ import { useToast } from '@/hooks/use-toast'
 import type { ActionResult } from '@/components/mask-builder/runtime/useActionRuntime'
 import { ActionInputDialog } from '@/components/mask-builder/renderers/ActionInputDialog'
 import { docflowEditInput, isDocflowEdit } from './runtime/docflow-edit-input'
+import { docflowConvertInput, docflowConversionOptionsUrl, isDocflowConvert } from './runtime/docflow-convert-input'
 
 interface UniversalNativeDetailPageProps {
   screenId: string
@@ -212,7 +213,8 @@ function NativeExistingDetailPage({
         setActionError(result.error ?? `Aktion "${actionKey}" fehlgeschlagen.`)
         setValidationErrors([])
       }
-      if (isDocflowEdit(schemaQuery.data?.actions?.find(action => action.key === actionKey))) {
+      if (isDocflowEdit(schemaQuery.data?.actions?.find(action => action.key === actionKey)) ||
+        isDocflowConvert(schemaQuery.data?.actions?.find(action => action.key === actionKey))) {
         setPendingAction(pending)
         setStage('input')
       }
@@ -309,17 +311,18 @@ function NativeExistingDetailPage({
     // Deklarierte Eingaben zuerst (Screen Definition -> ActionInputDialog).
     if (actionDef?.inputFields?.length) {
       pending.payload = prefillDeclaredInputs(actionDef, runtime.entityData, pending.payload)
-      if (isDocflowEdit(actionDef)) {
-        if (!entityId || !permissions.includes('belege.preise')) {
+      if (isDocflowEdit(actionDef) || isDocflowConvert(actionDef)) {
+        if (!entityId || isDocflowEdit(actionDef) && !permissions.includes('belege.preise')) {
           reportUnavailableAction()
           return
         }
         const context = inputContextRef.current
         inputLoadRef.current = true
         try {
-          const response = await apiClient.get<unknown>(`/api/v1/docflow/${encodeURIComponent(entityId)}`)
+          const response = await apiClient.get<unknown>(isDocflowConvert(actionDef)
+            ? docflowConversionOptionsUrl(actionDef, entityId) : `/api/v1/docflow/${encodeURIComponent(entityId)}`)
           if (inputContextRef.current !== context) return
-          pending.payload = docflowEditInput(actionDef, response.data, entityId,
+          pending.payload = (isDocflowConvert(actionDef) ? docflowConvertInput : docflowEditInput)(actionDef, response.data, entityId,
             pending.expectedVersion, schemaQuery.data?.documentVariant?.variantId ?? runtime.entityData.belegart)
         } catch (error) {
           if (inputContextRef.current === context) setActionError(getAxiosErrorMessage(error))
@@ -357,8 +360,9 @@ function NativeExistingDetailPage({
         bindingSnapshot: pending.bindingSnapshot,
       })
       if (!result.success) {
-        setStage(null)
-        setPendingAction(null)
+        const conversion = isDocflowConvert(schemaQuery.data?.actions?.find(action => action.key === pending.actionKey))
+        setStage(conversion ? 'input' : null)
+        setPendingAction(conversion ? pending : null)
         setActionError(result.error ?? 'Die Vorschau ist fehlgeschlagen. Keine Ausfuehrung.')
         setValidationErrors(result.validationErrors ?? [])
         return

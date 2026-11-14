@@ -842,6 +842,29 @@ class DocflowService:
         self.best_effort_audit("docflow_record_export", "docflow_document", doc_id, {"exported_by": self._wer(exported_by)})
         self.db.commit()
 
+    def conversion_options(self, doc_id: str, target_doc_type: str) -> dict[str, Any]:
+        """Lesender Mengenstand fuer eine moegliche Umwandlung; keine Bootstrap-Nebenwirkung."""
+        source = self.fetch_header(doc_id)
+        if not source:
+            raise EntityNotFoundError("DocflowDocument", doc_id)
+        source_type = str(source["doc_type"])
+        relation = TRANSITIONS.get(source_type, {}).get(target_doc_type)
+        if not relation:
+            raise ValidationFailedError(f"Transition not allowed: {source_type} -> {target_doc_type}")
+        self._pruefe_rechnungsweg(doc_id, source_type, relation)
+        schon = self.umgewandelte_mengen(doc_id, relation)
+        items = []
+        for item in self.fetch_items(doc_id):
+            item_id = str(item["id"])
+            quantity = Decimal(str(item.get("quantity") or 0))
+            remaining = max(Decimal("0"), quantity - schon.get(item_id, Decimal("0")))
+            items.append({"source_item_id": item_id, "line_number": item.get("line_number"),
+                          "article_number": item.get("article_number"), "description": item.get("description"),
+                          "unit": item.get("unit"), "quantity": float(quantity),
+                          "remaining_quantity": float(remaining)})
+        return {"source_doc_id": doc_id, "source_doc_type": source_type, "target_doc_type": target_doc_type,
+                "version": int(source.get("version") or 1), "items": items}
+
     def convert(self, doc_id: str, payload: Any) -> dict[str, Any]:
         source = self.bootstrap_doc(doc_id)
         if not source:
@@ -878,6 +901,9 @@ class DocflowService:
         if payload.target_doc_type in POS_TYPES and not source_pos:
             raise ValidationFailedError("POS conversion requires source POS compliance")
         source_items = self.fetch_items(doc_id)
+        unbekannt = set(payload.quantities_by_source_item_id) - {str(item["id"]) for item in source_items}
+        if unbekannt:
+            raise ValidationFailedError("Mengen enthalten unbekannte Positionen des Quellbelegs.")
         selected_items: list[dict[str, Any]] = []
         rest_gesamt = Decimal("0")
         for item in source_items:

@@ -339,6 +339,20 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
                 f"{BELEGARTEN[folgeart].bezeichnung} erstellen",
                 BELEGKOMMANDOS["docflow.convert"],
                 folgebelegart=folgeart,
+                inputFields=[{
+                    "key": "quantities_by_source_item_id", "label": "Zu uebernehmende Positionen",
+                    "type": "table", "required": True,
+                    "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                    "rowFields": [
+                        {"key": "line_number", "label": "Position", "type": "number", "readOnly": True},
+                        {"key": "article_number", "label": "Artikel", "type": "text", "readOnly": True},
+                        {"key": "description", "label": "Bezeichnung", "type": "text", "readOnly": True},
+                        {"key": "unit", "label": "Einheit", "type": "text", "readOnly": True},
+                        {"key": "remaining_quantity", "label": "Restmenge", "type": "number", "readOnly": True},
+                        {"key": "quantity", "label": "Uebernahmemenge", "type": "number", "required": True},
+                    ],
+                    "tableEditing": {"allowAdd": False, "allowDelete": False, "maxRows": 200},
+                }],
                 commandBinding={
                     "adapter": "docflow.v1",
                     "command": "convert",

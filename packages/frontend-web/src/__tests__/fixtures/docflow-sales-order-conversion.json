@@ -1,0 +1,75 @@
+{
+  "key": "umwandeln:sales_delivery",
+  "label": "Lieferschein erstellen",
+  "kind": "primary",
+  "enabledWhen": "aktion_umwandeln_sales_delivery",
+  "dangerLevel": "safe",
+  "requiresConfirmation": false,
+  "permission": "belege.bearbeiten",
+  "commandEndpoint": "/api/v1/docflow/{entity_id}/convert",
+  "method": "POST",
+  "kommando": "docflow.convert",
+  "commandBinding": {
+    "adapter": "docflow.v1",
+    "command": "convert",
+    "preview": true,
+    "defaults": {
+      "target_doc_type": "sales_delivery"
+    }
+  },
+  "forbiddenForAgents": true,
+  "auditReasonRequired": false,
+  "folgebelegart": "sales_delivery",
+  "inputFields": [
+    {
+      "key": "quantities_by_source_item_id",
+      "label": "Zu uebernehmende Positionen",
+      "type": "table",
+      "required": true,
+      "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+      "rowFields": [
+        {
+          "key": "line_number",
+          "label": "Position",
+          "type": "number",
+          "readOnly": true
+        },
+        {
+          "key": "article_number",
+          "label": "Artikel",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "description",
+          "label": "Bezeichnung",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "unit",
+          "label": "Einheit",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "remaining_quantity",
+          "label": "Restmenge",
+          "type": "number",
+          "readOnly": true
+        },
+        {
+          "key": "quantity",
+          "label": "Uebernahmemenge",
+          "type": "number",
+          "required": true
+        }
+      ],
+      "tableEditing": {
+        "allowAdd": false,
+        "allowDelete": false,
+        "maxRows": 200
+      }
+    }
+  ]
+}
