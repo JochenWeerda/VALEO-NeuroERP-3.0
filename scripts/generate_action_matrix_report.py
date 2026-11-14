@@ -3,7 +3,7 @@
 Verwendung:
     python scripts/generate_action_matrix_report.py [--check]
 
---check: Exit 1 wenn Top-50-Routen ohne Matrix-Eintrag gefunden werden.
+--check: Exit 1 bei ungueltiger Matrix, fehlender Top-50-Zuordnung oder Report-Drift.
 """
 from __future__ import annotations
 
@@ -24,14 +24,32 @@ OUTPUT_MD = REPO / "docs/quality-assurance/action-matrix-report.md"
 
 
 def load_matrices() -> list[dict]:
-    matrices = []
-    for f in sorted(MATRIX_DIR.glob("*.yaml")):
+    matrices: list[dict] = []
+    action_ids: set[str] = set()
+    for path in sorted(MATRIX_DIR.glob("*.yaml")):
         try:
-            data = yaml.safe_load(f.read_text(encoding="utf-8"))
-            if data and "chain_id" in data:
-                matrices.append(data)
-        except Exception as e:
-            print(f"Warnung: {f.name} nicht parsebar: {e}", file=sys.stderr)
+            data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeError, yaml.YAMLError) as exc:
+            raise ValueError(f"{path.name}: YAML kann nicht gelesen werden: {exc}") from exc
+        if not isinstance(data, dict) or not isinstance(data.get("chain_id"), str) or not data["chain_id"].strip():
+            raise ValueError(f"{path.name}: chain_id fehlt oder ist ungueltig")
+        if not isinstance(data.get("chain_name"), str) or not data["chain_name"].strip():
+            raise ValueError(f"{path.name}: chain_name fehlt oder ist ungueltig")
+        if not isinstance(data.get("actions"), list) or not data["actions"]:
+            raise ValueError(f"{path.name}: actions fehlt oder ist leer")
+        for action in data["actions"]:
+            if not isinstance(action, dict):
+                raise ValueError(f"{path.name}: Aktion ist kein Objekt")
+            for field in ("action_id", "label", "route_prefix"):
+                if not isinstance(action.get(field), str) or not action[field].strip():
+                    raise ValueError(f"{path.name}: {field} fehlt oder ist ungueltig")
+            action_id = action["action_id"]
+            if action_id in action_ids:
+                raise ValueError(f"{path.name}: doppelte action_id {action_id}")
+            if action.get("status") not in {"green", "partial", "gap"}:
+                raise ValueError(f"{path.name}: ungueltiger Status fuer {action_id}: {action.get('status')!r}")
+            action_ids.add(action_id)
+        matrices.append(data)
     return matrices
 
 
@@ -104,7 +122,7 @@ def build_markdown(report: dict) -> str:
     lines = [
         "---",
         "title: Action-Matrix-Report (SEMANTIC-ACTION-MATRIX-002)",
-        "description: Übersicht aller semantischen Prozessketten und E2E-Coverage-Status.",
+        "description: Deklarierte Prozessketten und Grenzen ihrer E2E-Nachweise.",
         "type: reference",
         "audience: [qa, entwickler]",
         "owner: Claude Code",
@@ -117,15 +135,20 @@ def build_markdown(report: dict) -> str:
         "",
         f"> Generiert via `scripts/generate_action_matrix_report.py` · {ts}",
         "",
+        "Die Einstufungen und Tags stammen ausschliesslich aus YAML. Sie sind keine Pruefung von Testfall,",
+        "fachlicher Wirkung, CI-Ergebnis oder Commit-SHA. Fuer keine Aktion ist hier ein konkreter",
+        "Testlauf mit Commit-SHA verknuepft; ein Tag oder eine Testdatei belegt keinen Erfolg.",
+        "Einzelbefunde und erforderliche Nachweise: [Matrix-Audit](action-matrix-audit-20261114.md).",
+        "",
         "## Übersicht",
         "",
         "| Metrik | Wert |",
         "|---|---|",
         f"| Prozessketten | {report['chains']} |",
         f"| Aktionen gesamt | {report['total_actions']} |",
-        f"| Green (E2E @critical/@smoke grün) | {report['green']} |",
-        f"| Partial (E2E vorhanden, nicht @critical) | {report['partial']} |",
-        f"| Gap (keine E2E) | {report['gap']} |",
+        f"| Deklariert green (kein Laufnachweis) | {report['green']} |",
+        f"| Deklariert partial (kein Laufnachweis) | {report['partial']} |",
+        f"| Deklariert gap | {report['gap']} |",
         "",
     ]
 
@@ -136,7 +159,7 @@ def build_markdown(report: dict) -> str:
             f"> {m.get('description', '')}",
             f"> Priorität: **{m.get('priority', '?').upper()}**",
             "",
-            "| ID | Aktion | Route | Status | E2E-Tag |",
+            "| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |",
             "|---|---|---|---|---|",
         ]
         for a in m.get("actions", []):
@@ -188,7 +211,11 @@ def main() -> int:
     parser.add_argument("--check", action="store_true", help="Exit 1 wenn Top-50-Routen ohne Matrix")
     args = parser.parse_args()
 
-    matrices = load_matrices()
+    try:
+        matrices = load_matrices()
+    except ValueError as exc:
+        print(f"FEHLER: {exc}", file=sys.stderr)
+        return 1
     if not matrices:
         print("Keine Action-Matrix-YAMLs gefunden.", file=sys.stderr)
         return 1

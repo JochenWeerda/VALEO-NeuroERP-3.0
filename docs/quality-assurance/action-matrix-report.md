@@ -1,17 +1,22 @@
 ---
 title: Action-Matrix-Report (SEMANTIC-ACTION-MATRIX-002)
-description: Übersicht aller semantischen Prozessketten und E2E-Coverage-Status.
+description: Deklarierte Prozessketten und Grenzen ihrer E2E-Nachweise.
 type: reference
 audience: [qa, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-14
 version: 3.0.0
 ---
 
 # Action-Matrix-Report
 
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-10 05:13:46 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-14 13:14:24 UTC
+
+Die Einstufungen und Tags stammen ausschliesslich aus YAML. Sie sind keine Pruefung von Testfall,
+fachlicher Wirkung, CI-Ergebnis oder Commit-SHA. Fuer keine Aktion ist hier ein konkreter
+Testlauf mit Commit-SHA verknuepft; ein Tag oder eine Testdatei belegt keinen Erfolg.
+Einzelbefunde und erforderliche Nachweise: [Matrix-Audit](action-matrix-audit-20261114.md).
 
 ## Übersicht
 
@@ -19,16 +24,16 @@ version: 3.0.0
 |---|---|
 | Prozessketten | 8 |
 | Aktionen gesamt | 38 |
-| Green (E2E @critical/@smoke grün) | 2 |
-| Partial (E2E vorhanden, nicht @critical) | 4 |
-| Gap (keine E2E) | 32 |
+| Deklariert green (kein Laufnachweis) | 2 |
+| Deklariert partial (kein Laufnachweis) | 4 |
+| Deklariert gap | 32 |
 
 ## Administration & Betrieb (`admin`)
 
 > Mandanten-Admin, RBAC, Monitoring, Integrationen — Top-50-In-App-Routen
 > Priorität: **MEDIUM**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `admin-001` | Administration (Stammdaten, Setup, Monitoring) | `admin` | GAP | `-` |
 | `admin-002` | Executive Dashboard | `management/executive-dashboard` | GAP | `-` |
@@ -47,7 +52,7 @@ version: 3.0.0
 > Aussaat, Dünger, Bodenproben, Biostimulanzien — Ergänzung zur Ernteannahme-Kette
 > Priorität: **HIGH**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `agrar-001` | Agrar-Stammdaten und Feldarbeit | `agrar` | GAP | `@smoke` |
 
@@ -60,7 +65,7 @@ version: 3.0.0
 > Buchung → OP-Verwaltung → Periodenabschluss → DATEV-Export
 > Priorität: **HIGH**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `fibu-001` | Buchungssatz erfassen | `fibu/buchungen` | GAP | `@smoke` |
 | `fibu-002` | Offene Posten anzeigen / ausziffern | `fibu/offene-posten` | GAP | `@smoke` |
@@ -78,7 +83,7 @@ version: 3.0.0
 > Verkaufsauftrag → Lieferschein → Ausgangsrechnung → Zahlung
 > Priorität: **CRITICAL**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `o2c-001` | Verkaufsauftrag anlegen | `verkauf/auftrag` | GREEN | `@critical` |
 | `o2c-002` | Lieferschein aus Auftrag generieren | `verkauf/lieferschein` | GREEN | `@critical` |
@@ -97,7 +102,7 @@ version: 3.0.0
 > Bestellanforderung → Bestellung → Wareneingang → Eingangsrechnung → Zahlung
 > Priorität: **HIGH**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `p2p-001` | Bestellung anlegen | `einkauf/bestellung` | PARTIAL | `@smoke` |
 | `p2p-002` | Wareneingang buchen | `einkauf/wareneingang` | GAP | `@smoke` |
@@ -113,7 +118,7 @@ version: 3.0.0
 > Kassenvorgang → TSE-Signatur → DSFinV-K → Tagesabschluss
 > Priorität: **MEDIUM**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `pos-001` | Kassenbon erstellen | `pos` | GAP | `@smoke` |
 | `pos-002` | TSE-Signatur prüfen | `pos` | GAP | `@smoke` |
@@ -129,7 +134,7 @@ version: 3.0.0
 > Labor-Probe → Analyse → Freigabe/Sperrung → Reklamation
 > Priorität: **HIGH**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `qs-001` | QS-Probe anlegen | `lager/qs-leitstand` | GAP | `@smoke` |
 | `qs-002` | Laborergebnis erfassen | `lager/qs-leitstand` | GAP | `@smoke` |
@@ -147,7 +152,7 @@ version: 3.0.0
 > Wareneingang → Einlagerung → QS-Prüfung → Auslagerung
 > Priorität: **CRITICAL**
 
-| ID | Aktion | Route | Status | E2E-Tag |
+| ID | Aktion | Route | Deklarierter Status | Deklarierter E2E-Tag |
 |---|---|---|---|---|
 | `wms-001` | Wareneingang erfassen | `lager/einlagerung` | PARTIAL | `@smoke` |
 | `wms-002` | Einlagerung durchführen | `lager/einlagerung` | PARTIAL | `@smoke` |
@@ -159,4 +164,4 @@ version: 3.0.0
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-*Stand: 2026-11-10 05:13:46 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-11-14 13:14:24 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
