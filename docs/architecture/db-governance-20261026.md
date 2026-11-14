@@ -98,3 +98,18 @@ zusaetzlich: `provisionierung` (Einrichtungsskript).
 Grenzen: Ein Superuser kann alles, auch das Protokoll aendern; das ist die bewusste
 Entscheidung fuer die Entwicklungsphase. Rollen gelten clusterweit; Rechte wirken erst in
 den Datenbanken, in denen Schritt 1 lief.
+
+
+## Begrenzter Datenrechte-Abgleich (15.11.2026)
+
+`provision_db_roles.py --data-only --schemas <schema...> --data-roles <rolle...>`
+plant nur Rechte auf vorhandenen Objekten. Schemas und vorhandene technische
+DATA_ROLES muessen explizit angegeben werden; reservierte/fehlende Angaben
+werden abgewiesen. Standard ist der Plan, `--anwenden --rollback` der
+zurueckgerollte Probelauf. Der Modus veraendert weder globale Rollen noch
+Kennwoerter, Mitgliedschaften, Eigentum, Default Privileges oder BYPASSRLS.
+Jedes erforderliche Einzelrecht wird vor Commit ueber den Katalog nachgeprueft;
+Teilrechte fuehren zum Rollback. PGAPPNAME bleibt fuer Agenten nachvollziehbar.
+Eine dauerhafte Anwendung benoetigt die konkrete operative Autorisierung und
+bestehende Grantberechtigung; der neue Modus ist keine Freigabe aller Schemas.
+[Abnahme](../quality-assurance/probe-datenrechte-20261114.md).
