@@ -153,6 +153,7 @@ _IDENTITAET = {
     "crm/customer-360": "firma",
     "agrar/ration": "name",
     "agrar/saatgut": "artikelnummer",
+    "agrar/saatgut/sorte": "name",
     "crm/lead": "company_name",
     "crm/opportunity": "name",
     "einkauf/anfrage": "anfrageNummer",

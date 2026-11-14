@@ -63,6 +63,7 @@
     "agrar/saatgut/abrechnung": "/agrar/saatgut/abrechnung",
     "agrar/saatgut/formular": "/agrar/saatgut/formular",
     "agrar/saatgut/royalties": "/agrar/saatgut/royalties",
+    "agrar/saatgut/sorte": "/agrar/saatgut/sorte",
     "agrar/schlaege/bodenprobe": "/agrar/schlaege/bodenprobe",
     "agrar/schlaege/duengung": "/agrar/schlaege/duengung",
     "agrar/schlaege/ernte": "/agrar/schlaege/ernte",
@@ -474,8 +475,7 @@
     "workflow/workflow-sandbox": "/workflow/workflow-sandbox",
     "workflows/history": "/alerts",
     "workflows/supervisor": "/workflows/supervisor",
-    "workflows/trigger": "/workflows/trigger",
-    "zertifikate/neu": "/zertifikate"
+    "workflows/trigger": "/workflows/trigger"
   },
   "ohne_route": [
     "admin/control-center/ai-approvals",
@@ -533,6 +533,7 @@
     "waage/wiegeschein-detail",
     "waage/wiegungen-liste",
     "workflow/leitstand",
-    "workflow/process-mining"
+    "workflow/process-mining",
+    "zertifikate/neu"
   ]
 }

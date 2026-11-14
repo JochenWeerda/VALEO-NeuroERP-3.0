@@ -40,11 +40,11 @@ prometheus-fastapi-instrumentator==8.0.0
 psutil==6.1.1
 
 # OpenTelemetry (optional, Gap 039 — nur bei ENABLE_TRACING / OTEL_EXPORTER_OTLP_ENDPOINT aktiv)
-opentelemetry-api==1.45.1
-opentelemetry-sdk==1.45.1
-opentelemetry-exporter-otlp-proto-http==1.45.1
-opentelemetry-instrumentation-fastapi==0.66b1
-opentelemetry-instrumentation-sqlalchemy==0.66b1
+opentelemetry-api==1.45.2
+opentelemetry-sdk==1.45.2
+opentelemetry-exporter-otlp-proto-http==1.45.2
+opentelemetry-instrumentation-fastapi==0.66b2
+opentelemetry-instrumentation-sqlalchemy==0.66b2
 
 # Development and testing
 pytest==9.0.3
@@ -74,6 +74,7 @@ reportlab==4.2.5
 factur-x>=2.5,<4
 drafthorse>=2.3.0
 beautifulsoup4==4.12.3
+soupsieve==4.1
 pdfplumber>=0.11.0
 PyYAML==6.0.1
 langchain-core>=0.3.65,<2.0.0

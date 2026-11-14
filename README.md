@@ -43,7 +43,7 @@ VALEO ist eine aktiv entwickelte Suite mit einem Python/FastAPI-Backend, einer R
 
 ### Lokal entwickeln
 
-Voraussetzungen sind Python 3.11, Node.js mit Corepack und pnpm 9.12.0 sowie eine konfigurierte PostgreSQL-Entwicklungsumgebung. Umgebungsvariablen und Zugangsdaten anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten; Schema und Authentifizierung müssen zur Konfiguration passen.
+Voraussetzungen sind Python 3.11 ab 3.11.5, Node.js mit Corepack und pnpm 9.12.0 sowie eine konfigurierte PostgreSQL-Entwicklungsumgebung. Umgebungsvariablen und Zugangsdaten anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten; Schema und Authentifizierung müssen zur Konfiguration passen.
 
 Im Repository-Stamm mit einer bereits eingerichteten Entwicklungsdatenbank:
 
@@ -91,4 +91,4 @@ Our goal is to extend the transaction strength expected from premium ERP with a 
 
 VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [development roadmap](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
 
-For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).
+For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11.5 or later in the 3.11 series, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).

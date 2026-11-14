@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 796,
-    "screens_with_actions": 404,
+    "actions": 797,
+    "screens_with_actions": 405,
     "domains": 50
   },
   "actions": [
@@ -2395,6 +2395,31 @@
         "navigationRoute": null,
         "command": "list.exportCsv",
         "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/saatgut/sorte:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/saatgut/sorte)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/saatgut/sorte",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/saatgut/sorte",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/agrar/varieties/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "agrar.sorte.update",
+        "forbiddenForAgents": true,
         "dangerLevel": "safe"
       }
     },
