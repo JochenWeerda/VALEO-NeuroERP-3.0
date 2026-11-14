@@ -47,9 +47,9 @@ export function ReadViewDialog({ screenId, action, row, identity, allowed, onClo
   }), [screenId, action, endpoint, tableKey])
   const runtime = useUniversalMaskRuntime({ screenId, schema: definition, enabled: authorized, tenantId: currentIdentity, tabEndpoints: { [tableKey]: endpoint }, entityId: String(row.id ?? '') })
   return <Dialog open onOpenChange={open => { if (!open) onClose() }}>
-    <DialogContent aria-describedby="read-view-description" className="max-h-[90vh] overflow-auto sm:max-w-5xl">
+    <DialogContent className="max-h-[90vh] overflow-auto sm:max-w-5xl">
       <DialogHeader><DialogTitle>{action.label}</DialogTitle>
-        <DialogDescription id="read-view-description">Lesende Ansicht zum ausgewählten Eintrag.</DialogDescription>
+        <DialogDescription>Lesende Ansicht zum ausgewählten Eintrag.</DialogDescription>
       </DialogHeader>
       {!authorized ? <p role="alert">Diese Ansicht ist im aktuellen Benutzer- und Mandantenkontext nicht verfügbar.</p>
         : runtime.isTableLoading ? <p role="status">Daten werden geladen…</p>

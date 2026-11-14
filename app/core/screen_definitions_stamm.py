@@ -1100,11 +1100,14 @@ def build_futter_misch_stamm() -> dict[str, Any]:
     )
 
 
+from app.core.screen_definitions_sorte import build_agrar_sorte_stamm
+
 STAMM_SCREEN_BUILDERS = {
     "artikel/stamm": build_artikel_stamm,
     "lager/charge": build_lager_charge_stamm,
     "personal/mitarbeiter": build_personal_mitarbeiter_stamm,
     "agrar/psm": build_agrar_psm_stamm,
+    "agrar/saatgut/sorte": build_agrar_sorte_stamm,
     "crm/aktivitaet": build_crm_aktivitaet_stamm,
     "crm/kontakt": build_crm_kontakt_stamm,
     "crm/betriebsprofil": build_crm_betriebsprofil_stamm,
@@ -1139,6 +1142,7 @@ STAMM_ROUTEN = {
     "lager/charge": "/charge/stamm",
     "personal/mitarbeiter": "/personal/mitarbeiter",
     "agrar/psm": "/agrar/psm/stamm",
+    "agrar/saatgut/sorte": "/agrar/saatgut/sorte",
     "crm/aktivitaet": "/crm/aktivitaet",
     "crm/kontakt": "/crm/kontakt",
     "crm/betriebsprofil": "/crm/betriebsprofil",
@@ -1173,6 +1177,7 @@ STAMM_SYNONYME = {
     "lager/charge": ['charge', 'chargenstamm'],
     "personal/mitarbeiter": ['mitarbeiter', 'personalstamm'],
     "agrar/psm": ['psm', 'pflanzenschutzmittel'],
+    "agrar/saatgut/sorte": ['sorte', 'sortenstamm'],
     "crm/aktivitaet": ['aktivitaet', 'crm-aktivitaet'],
     "crm/kontakt": ['kontakt', 'ansprechpartner'],
     "crm/betriebsprofil": ['betriebsprofil', 'betriebsprofil'],

@@ -1,39 +1,13 @@
+"""Canonical variety schema and HTTP boundaries, without dev tokens or a database.
+
+Authentication and SQL are test boundaries. Domain roles and request validation
+run through the actual FastAPI router. PostgreSQL/RLS remains a separate proof.
 """
-Tests for Agrar Sorten/Varieties API.
-
-Covers Pydantic schema validation (no DB needed) and endpoint structure tests.
-The endpoint is mounted at /api/v1/agrar/varieties.
-"""
-
-from __future__ import annotations
-
 import pytest
 from pydantic import ValidationError
-from fastapi.testclient import TestClient
-
-from app.core.config import settings
-from app.main import app
-from app.api.v1.endpoints.agrar_varieties import (
-    VarietyIn,
-    VarietyOut,
-    _STANDARD_SEED,
-)
-
-client = TestClient(app, raise_server_exceptions=False)
-AUTH = {
-    "Authorization": f"Bearer {settings.API_DEV_TOKEN or 'dev-token'}",
-    "X-Tenant-ID": "test-tenant",
-}
-
-
-def _skip_if_unavailable(resp):
-    if resp.status_code in (500, 503):
-        body = resp.text
-        if any(k in body for k in ("OperationalError", "Connection refused", "UndefinedTable", "does not exist")):
-            pytest.skip("DB or tables not available")
-
-
-# ── Schema Tests ──────────────────────────────────────────────────
+from app.auth.deps import get_current_user
+from app.api.v1.endpoints.agrar_varieties import VarietyIn, VarietyOut
+from test_agrar_variety_read_contract import client_with
 
 
 class TestVarietySchemas:
@@ -99,81 +73,64 @@ class TestVarietySchemas:
         assert v.id == "abc-123"
         assert v.aktiv is True
 
-
-# ── Seed Data Tests ───────────────────────────────────────────────
-
-
-class TestSeedData:
-    """Verify the standard seed data structure."""
-
-    def test_seed_has_five_entries(self):
-        assert len(_STANDARD_SEED) == 5
-
-    def test_seed_entries_have_required_keys(self):
-        for seed in _STANDARD_SEED:
-            assert "variety_number" in seed
-            assert "name" in seed
-            assert "crop_type" in seed
-
-    def test_seed_variety_numbers_unique(self):
-        numbers = [s["variety_number"] for s in _STANDARD_SEED]
-        assert len(numbers) == len(set(numbers))
-
-    def test_seed_crop_types_valid(self):
-        valid_types = {"WHEAT", "MAIZE", "BARLEY", "OATS", "RAPESEED"}
-        for seed in _STANDARD_SEED:
-            assert seed["crop_type"] in valid_types
+@pytest.fixture
+def route_client():
+    client, db, query = client_with([])
+    user = {"sub": "synthetic-variety-reader", "roles": ["AGRAR_LESEN"]}
+    client.app.dependency_overrides[get_current_user] = lambda: user
+    query.first.return_value = None
+    with client:
+        yield client, db, query, user
 
 
-# ── Endpoint Tests ────────────────────────────────────────────────
+def test_list_returns_real_empty_inventory_without_creating_defaults(route_client):
+    client, db, _, _ = route_client
+    result = client.get("/api/v1/agrar/varieties/")
+    assert result.status_code == 200 and result.json() == []
+    db.add.assert_not_called()
+    db.commit.assert_not_called()
 
 
-class TestVarietyEndpoints:
-    """HTTP endpoint tests for /api/v1/agrar/varieties."""
+def test_crop_filter_remains_bound_to_the_requested_tenant(route_client):
+    client, db, query, _ = route_client
+    response = client.get("/api/v1/agrar/varieties/?crop_type=WHEAT&aktiv=false")
+    assert response.status_code == 200
+    predicates = [call.args[0] for call in query.filter.call_args_list]
+    assert len(predicates) == 2
+    assert predicates[0].right.value == "tenant-contract"
+    assert predicates[1].right.value == "WHEAT"
+    db.commit.assert_not_called()
 
-    def test_list_varieties_returns_list(self):
-        resp = client.get("/api/v1/agrar/varieties/", headers=AUTH)
-        _skip_if_unavailable(resp)
-        assert resp.status_code == 200
-        data = resp.json()
-        assert isinstance(data, list)
 
-    def test_list_varieties_auto_seed(self):
-        """First call should auto-seed standard varieties."""
-        resp = client.get("/api/v1/agrar/varieties/", headers=AUTH)
-        _skip_if_unavailable(resp)
-        assert resp.status_code == 200
-        data = resp.json()
-        # Should have at least the 5 seeded varieties
-        assert len(data) >= 5
+@pytest.mark.parametrize("method,path", [("post", "/"), ("put", "/v1"), ("delete", "/v1")])
+def test_read_role_cannot_create_edit_or_deactivate(route_client, method, path):
+    client, db, query, _ = route_client
+    args = {"json": {"variety_number": "V1", "name": "Synthetic"}} if method != "delete" else {}
+    response = getattr(client, method)("/api/v1/agrar/varieties" + path, **args)
+    assert response.status_code == 403
+    db.query.assert_not_called()
+    db.add.assert_not_called()
+    db.commit.assert_not_called()
 
-    def test_list_varieties_filter_by_crop_type(self):
-        resp = client.get("/api/v1/agrar/varieties/?crop_type=WHEAT", headers=AUTH)
-        _skip_if_unavailable(resp)
-        assert resp.status_code == 200
-        data = resp.json()
-        assert isinstance(data, list)
-        for item in data:
-            assert item.get("crop_type") == "WHEAT"
 
-    def test_post_variety_empty_body_422(self):
-        resp = client.post("/api/v1/agrar/varieties/", headers=AUTH, json={})
-        assert resp.status_code == 422
+@pytest.mark.parametrize("method,path", [("get", "/foreign-id"), ("put", "/foreign-id"), ("delete", "/foreign-id")])
+def test_missing_tenant_record_is_never_reported_as_success(route_client, method, path):
+    client, db, query, user = route_client
+    user["roles"] = ["AGRAR_BEARBEITEN"]
+    args = {"json": {"variety_number": "V1", "name": "Synthetic"}} if method == "put" else {}
+    response = getattr(client, method)("/api/v1/agrar/varieties" + path, **args)
+    assert response.status_code == 404
+    predicate = query.filter.call_args.args[0]
+    assert [part.right.value for part in predicate.clauses] == ["foreign-id", "tenant-contract"]
+    db.commit.assert_not_called()
 
-    def test_post_variety_missing_name_422(self):
-        resp = client.post(
-            "/api/v1/agrar/varieties/",
-            headers=AUTH,
-            json={"variety_number": "999"},
-        )
-        assert resp.status_code == 422
 
-    def test_get_variety_nonexistent_404(self):
-        resp = client.get("/api/v1/agrar/varieties/nonexistent-id", headers=AUTH)
-        _skip_if_unavailable(resp)
-        assert resp.status_code == 404
-
-    def test_delete_variety_nonexistent_404(self):
-        resp = client.delete("/api/v1/agrar/varieties/nonexistent-id", headers=AUTH)
-        _skip_if_unavailable(resp)
-        assert resp.status_code == 404
+@pytest.mark.parametrize("payload", [{}, {"variety_number": "V1"}, {"name": "Synthetic"}])
+def test_authorized_create_still_validates_required_fields_before_sql(route_client, payload):
+    client, db, _, user = route_client
+    user["roles"] = ["AGRAR_BEARBEITEN"]
+    response = client.post("/api/v1/agrar/varieties/", json=payload)
+    assert response.status_code == 422
+    db.query.assert_not_called()
+    db.add.assert_not_called()
+    db.commit.assert_not_called()

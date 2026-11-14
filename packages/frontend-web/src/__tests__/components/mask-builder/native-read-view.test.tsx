@@ -19,6 +19,7 @@ it('loads real related rows via GET through the universal runtime', async () => 
   get.mockResolvedValue({ data: [{ fehler: 'HTTP 500' }] })
   render(<QueryClientProvider client={new QueryClient()}>{view()}</QueryClientProvider>)
   expect(await screen.findByText('HTTP 500')).toBeVisible()
+  expect(screen.getByRole('dialog')).toHaveAccessibleDescription('Lesende Ansicht zum ausgewählten Eintrag.')
   expect(get).toHaveBeenCalledTimes(1)
   expect(get.mock.calls[0][0]).toMatch(/^\/api\/v1\/webhooks\/wh-1\/zustellversuche\?/)
   expect(get.mock.calls[0][0]).not.toContain('/masks/')

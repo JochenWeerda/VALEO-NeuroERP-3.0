@@ -60,7 +60,9 @@ Inventur am 13.11.2026 vor dieser Runde: **184 erwartete Fehlschlaege in 49
 Frontend-Testdateien**, dazu neun gesonderte Smoke-Ausnahmen laut bestehender
 Ratsche. Das sind Entwicklungsaltlasten, keine Abnahmebelege. Der erste
 abgegrenzte Ersatz betrifft die drei alten Tests der Waagenliste: ersetzt durch
-fuenf Verhaltenstests; verbleibend **181 in 48 Dateien**, Smoke-Ausnahmen
+fuenf Verhaltenstests. Im Nachlauf vom 14.11. sank die Restliste durch
+Klassen-, Workflow-, Bestellvorschlag-, Betriebslisten- und Sortentests auf
+**131 in 38 Dateien**, Smoke-Ausnahmen
 unveraendert. Das Ergebnis
 und Grenzen stehen in [Waagenlisten-QA](studio-test-waage-20261113.md).
 Die verbleibenden Gruppen werden nach fachlicher Wirkung abgebaut: Finanz- und

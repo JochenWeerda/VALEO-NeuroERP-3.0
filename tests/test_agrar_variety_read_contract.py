@@ -15,7 +15,6 @@ def client_with(rows):
     query = db.query.return_value
     query.filter.return_value = query
     query.order_by.return_value = query
-    query.count.return_value = 1  # Existing tenant inventory; no read-time seeding.
     query.all.return_value = rows
     app = FastAPI()
     app.include_router(router, prefix="/api/v1/agrar/varieties")
@@ -33,7 +32,7 @@ def test_register_returns_canonical_nullable_and_inactive_fields():
     assert response.status_code == 200
     assert response.json() == [vars(row)]
     filters = [call.args[0] for call in query.filter.call_args_list]
-    assert len(filters) == 2  # Seed presence and listing are both tenant-bound.
+    assert len(filters) == 1  # Exactly the requested tenant, no hidden seed query.
     assert all(condition.right.value == "tenant-contract" for condition in filters)
     db.add.assert_not_called()
     db.commit.assert_not_called()
@@ -54,4 +53,14 @@ def test_missing_tenant_variety_is_not_reported_as_success():
     assert response.status_code == 404
     predicate = query.filter.call_args.args[0]
     assert [clause.right.value for clause in predicate.clauses] == ["foreign-variety", "tenant-contract"]
+    db.commit.assert_not_called()
+
+
+def test_empty_tenant_read_never_inserts_or_commits_default_varieties():
+    client, db, query = client_with([])
+    query.count.return_value = 0
+    response = client.get("/api/v1/agrar/varieties/")
+    assert response.status_code == 200
+    assert response.json() == []
+    db.add.assert_not_called()
     db.commit.assert_not_called()

@@ -34,14 +34,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('NativeSelect')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Retouren beschriftet 44 px ohne Rohblau', () => {
-    const src = read('../../pages/einkauf/retouren.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('text-blue-800')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Service-Rueckmeldung ohne Icon-Zurueck', () => {
@@ -53,15 +45,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="icon"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Feldservice mit h1 und 44-px-Aktionen', () => {
-    const src = read('../../pages/agribusiness/field-service-tasks.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('<h1')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   it('stellt Opportunities als Studio-Liste', () => {
     // MASK-STUDIO-ROLLOUT: Spalten, Aktionen und Touch-Verhalten aus der ScreenDefinition crm/opportunities-liste.
@@ -81,54 +64,11 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('>Audit starten<')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Zahlungslauf-Theater nur am Desktop', () => {
-    const src = read('../../pages/finance/zahlungslauf-kreditoren.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ObjectPage')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt UStVA-Theater nur am Desktop', () => {
-    const src = read('../../pages/finance/ustva.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ObjectPage')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Abschluss-Theater nur am Desktop', () => {
-    const src = read('../../pages/finance/abschluss.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ObjectPage')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Rechnungseingaenge-Liste zuerst', () => {
-    const src = read('../../pages/einkauf/rechnungseingaenge-liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('ListReport')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt QS-Ausnahmen Arbeit zuerst ohne Rohrot', () => {
-    const src = read('../../pages/qualitaet/ausnahmen.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).not.toContain('bg-red-50')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Gutschriften Theater nur am Desktop', () => {
-    const src = read('../../pages/einkauf/gutschriften-belastungen.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-  })
 
   it('stellt Lieferantenstamm als Studio-Maske dar', () => {
     // Seit 20.10.2026 ScreenDefinition einkauf/supplier (Anlage, Bearbeiten, Sperren); die handgebaute Seite ist entfernt.
@@ -137,15 +77,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('screenId="einkauf/supplier"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Dashboards ohne Theater auf Touch', () => {
-    const sales = read('../../pages/dashboard/sales-dashboard.tsx')
-    const einkauf = read('../../pages/dashboard/einkauf-dashboard.tsx')
-    expect(sales).toContain('useTouchDevice')
-    expect(sales).toContain('{!isTouch ? (')
-    expect(einkauf).toContain('useTouchDevice')
-    expect(einkauf).not.toContain('bg-red-50')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt EDI-Portal Arbeit zuerst und 44 px', () => {
@@ -183,13 +114,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(roles).toContain('{!isTouch ? (')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Frachttarife ohne 5-px-Win32-Toolbar', () => {
-    const src = read('../../pages/strecke/speditionen-fracht-preise.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('h-5 border border-[#9b9b9b]')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Frachtdruck ohne toten 6-px-Druck auf Touch', () => {
@@ -337,40 +261,9 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="icon"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Field-Service neu mit NativeSelect und 44 px', () => {
-    const src = read('../../pages/agribusiness/field-service-task-neu.tsx')
-    expect(src).toContain('NativeSelect')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain("from '@/components/ui/select'")
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Field-Service edit mit NativeSelect und 44 px', () => {
-    const src = read('../../pages/agribusiness/field-service-task-edit.tsx')
-    expect(src).toContain('NativeSelect')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain("from '@/components/ui/select'")
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt PSM-Beratung ohne Rohblau', () => {
-    const src = read('../../pages/agrar/psm/beratung.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('text-blue-900')
-    expect(src).not.toContain('bg-blue-600')
-    expect(src).not.toContain('bg-gray-200')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt PSM-Wasserschutz mit Status-Tokens', () => {
-    const src = read('../../pages/agrar/psm/wasserschutz.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('bg-status-error/10')
-    expect(src).not.toContain('bg-red-50')
-    expect(src).not.toContain('bg-green-50')
-    expect(src).not.toContain('text-blue-900')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Aktivitaet-Detail ohne Icon-Entfernen', () => {
@@ -381,12 +274,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Kontakt-Detail mit 44-px-Zurueck', () => {
-    const src = read('../../pages/crm/kontakt-detail.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   it('stellt Wiedervorlagen als Studio-Liste dar', () => {
     // Seit 21.10.2026 ScreenDefinition crm/wiedervorlagen (Erledigen mit Ergebnis, Zeile oeffnet die Kundenakte).
@@ -395,26 +282,8 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('screenId="crm/wiedervorlagen"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Saatgut-Stamm mit 44-px-Zurueck', () => {
-    const src = read('../../pages/agrar/saatgut-stamm.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Duenger-Stamm mit 44-px-Zurueck', () => {
-    const src = read('../../pages/agrar/duenger-stamm.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Landwirte-Liste mit 44-px-Zeilenaktionen', () => {
-    const src = read('../../pages/agribusiness/farmers.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Erntefenster mit keyed Backfill', () => {
@@ -424,22 +293,7 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Maschinen-Auslastung Arbeit zuerst am Touch', () => {
-    const src = read('../../pages/agrar/maschinenauslastung.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('bg-orange-50')
-    expect(src).not.toContain('size="sm"')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt CRM-Kundenstamm-Aktionen 44 px', () => {
-    const src = read('../../pages/crm/kunden-stamm.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Dubletten mit 44-px-Zusammenfuehren', () => {
@@ -501,12 +355,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Lead-Generierung mit 44-px-Vorschau', () => {
-    const src = read('../../pages/crm/lead-generierung.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Potential-Analyse Arbeit zuerst am Touch', () => {
@@ -517,14 +365,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Bedarfsdeckung mit keyed Reklass und Tokens', () => {
-    const src = read('../../pages/crm/bedarfsdeckung-cockpit.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain("reklass.variables?.modus === 'ki'")
-    expect(src).toContain("reklass.variables?.modus === 'belege'")
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Durchdringungs-Pipeline mit nativem Select', () => {
@@ -542,12 +382,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Kommissionierung mit 44-px-Bestaetigen', () => {
-    const src = read('../../pages/lager/kommissionierung.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Scanner mit ehrlichem Buchen und 44 px', () => {
@@ -555,39 +389,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('min-h-touch')
     expect(src).toContain('/artikel/liste?q=')
     expect(src).not.toContain('size="sm"')
-  })
-
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Bestellvorschlag Lager ohne SAP-Grau', () => {
-    const src = read('../../pages/einkauf/bestellvorschlag-lager.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? <AgentProcessPanel')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('Suche ist in dieser Maske nicht angebunden')
-    expect(src).toContain('pendingAction')
-    expect(src).not.toContain('bg-gray-700')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('MoreHorizontal')
-  })
-
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Bestellvorschlag Rohware ohne SAP-Grau', () => {
-    const src = read('../../pages/einkauf/bestellvorschlag-rohware.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('pendingAction')
-    expect(src).not.toContain('bg-gray-700')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('MoreHorizontal')
-  })
-
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Bestellvorschlag Verkauf ohne SAP-Grau', () => {
-    const src = read('../../pages/einkauf/bestellvorschlag-verkauf.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('pendingAction')
-    expect(src).not.toContain('bg-gray-700')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('MoreHorizontal')
   })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
@@ -620,14 +421,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Payment-Matching Arbeit zuerst am Touch', () => {
-    const src = read('../../pages/finance/payment-matching.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Perioden mit 44-px-Sperren und keyed pending', () => {
@@ -647,22 +440,7 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt FIBU-Zahlungseingaenge Arbeit zuerst am Touch', () => {
-    const src = read('../../pages/fibu/zahlungseingaenge.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Periodenabschluss mit Tokens und 44 px', () => {
-    const src = read('../../pages/finance/periodenabschluss.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('bg-red-100')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt QS-Leitstand mit 44-px-Freigabe', () => {
@@ -672,12 +450,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt AP-Rechnungen mit 44-px-Zeilenaktionen', () => {
-    const src = read('../../pages/finance/ap-invoices-list.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Frachtauftraege ohne SAP-Grau', () => {
@@ -689,14 +461,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt FIBU-Uebersicht Arbeit zuerst und 44 px', () => {
-    const src = read('../../pages/fibu/buchhaltungsuebersicht.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Anfrage-Erfassung ohne SAP-Gruen und mit beschrifteter Suche', () => {
@@ -722,16 +486,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).toContain('screenId="artikel/stamm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Zeiterfassung Arbeit zuerst und 44 px', () => {
-    const src = read('../../pages/personal/zeiterfassung.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('text-[10px]')
-    expect(src).not.toContain('bg-amber-50')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt POS-Terminal beschriftet 44 px ohne SAP-Grau', () => {
@@ -746,16 +500,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('bg-green-50')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Monatswerte Theater nur am Desktop', () => {
-    const src = read('../../pages/fibu/monatswerte.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-touch')
-    expect(src).toContain('<h1')
-    expect(src).not.toContain('size="sm"')
-    expect(src).not.toContain('bg-amber-50')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Ernte-Annahme Lookups beschriftet', () => {
@@ -824,12 +568,6 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Kassen-Uebernahme 44 px', () => {
-    const src = read('../../pages/pos/uebernahme-kasse.tsx')
-    expect(src).toContain('min-h-touch')
-    expect(src).not.toContain('size="sm"')
-  })
 
   // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
   it.fails('stellt Deckungsmonitor auf Deutsch und 44 px', () => {

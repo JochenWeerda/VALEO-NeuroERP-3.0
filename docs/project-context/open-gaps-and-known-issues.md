@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+**Studio-Testmigration 14.11.2026:** Die Runtime46-Restliste sinkt von 181 auf
+131 Faelle in 38 Dateien; neun Smoke-Ausnahmen bleiben bestehen. Klassen,
+Workflows, Bestellvorschlagsvarianten, Betriebslisten und Sortendetail haben
+neue Verhaltenstests. Sorten-GET schreibt nicht mehr beim Lesen; CLI-Ressourcen
+koennen keine Vorschau als echten PUT ausfuehren. Diese Vertragskorrekturen
+sind gezielt abgenommen, keine Gesamtmigration.
+Offene konkrete Fachparitaet: Leistungsnachweise und Wareneingangsabgleich
+verwenden Anfrage-Platzhalter; fuer Biostimulanzien/Sachkunde ist ein passender
+Detail-/Editvertrag nicht belegt. Gueltige Erwartungen erst nach funktionalem
+Ersatz entfernen. [Handoff und Grenzen](../agent-ops/handshakes/studio-testmigration-20261114.md).
+
 **Einordnung 05.11.2026:** Die Zahlen vom 29.10. und frueher sind historische Messungen ihres jeweiligen Umfangs. Der operative Stand steht im [Workboard](../agent-ops/active-workboard.md), der aktuelle strukturelle Katalog in [Studio-Screenversionen](../../config/studio_screen_versions.json). Der PSM-Zweig ist gezielt geprueft und vor Integration; Browser- und Gesamtfreigabe sind damit nicht belegt.
 
 

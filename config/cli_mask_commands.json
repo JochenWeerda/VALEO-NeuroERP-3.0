@@ -56,6 +56,7 @@
   "mask:agrar/ration:schedule",
   "mask:agrar/ration:submit_review",
   "mask:agrar/rations-lifecycle:create_group",
+  "mask:agrar/saatgut/sorte:edit",
   "mask:agrar/vertraege/formular:bearbeiten",
   "mask:annahme/lkw-registrierung:register",
   "mask:annahme/lkw-registrierung:upload",

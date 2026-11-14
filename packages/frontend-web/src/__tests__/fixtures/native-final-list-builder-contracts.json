@@ -1,0 +1,865 @@
+{
+  "agrar/biostimulanzien-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/biostimulanzien-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Biostimulanzien",
+    "subtitle": "Agrarprodukte mit Zulassung und Bestand",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/biostimulanzien-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/biostimulanzien",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Biostimulanzien",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "artikelnummer",
+            "label": "Artikel-Nr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "name",
+            "label": "Name",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "typ",
+            "label": "Typ",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "hersteller",
+            "label": "Hersteller",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "vk_preis",
+            "label": "VK-Preis",
+            "numeric": true,
+            "renderKind": "currency",
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "lagerbestand",
+            "label": "Bestand",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "ist_aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "tertiary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/biostimulanzien-stamm/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Biostimulanzien und Agrarprodukte mit Zulassung und Verfuegbarkeit finden.",
+      "examplePrompts": [
+        "Welche Biostimulanzien sind aktiv?",
+        "Welche Zulassungen laufen ab?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/biostimulanzien-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "agrar/psm-sachkunde-register-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/psm-sachkunde-register-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "PSM Sachkunde",
+    "subtitle": "Sachkundenachweise Kunden",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/psm-sachkunde-register-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/compliance/sachkunde-register",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "PSM Sachkunde",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "kunde",
+            "label": "Kunde",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "nachweisNr",
+            "label": "Nachweis-Nr.",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "gueltigBis",
+            "label": "Gueltig bis",
+            "sortable": true,
+            "renderKind": "date",
+            "priority": "primary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "filterable": true,
+            "renderKind": "status",
+            "priority": "primary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/psm/sachkunde/{id}/edit"
+      }
+    ],
+    "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    "agentContract": {
+      "businessPurpose": "Sachkundenachweise fuer PSM-Abgabe pruefen.",
+      "examplePrompts": [
+        "Welche Nachweise laufen ab?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/psm-sachkunde-register-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "agrar/saatgut-sortenregister-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/saatgut-sortenregister-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Sortenregister",
+    "subtitle": "Zugelassene Sorten",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/saatgut-sortenregister-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/varieties/",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Sortenregister",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Sorte",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "crop_type",
+            "label": "Kultur",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "zuechter",
+            "label": "Zuechter",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "filterable": true,
+            "renderKind": "boolean",
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/saatgut/sorte/{id}"
+      }
+    ],
+    "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    "agentContract": {
+      "businessPurpose": "Sortenregister durchsuchen.",
+      "examplePrompts": [
+        "Welche Sorten sind aktiv?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/saatgut-sortenregister-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "agrar/feldbuch-schlagkartei-liste": {
+    "schemaVersion": 1,
+    "id": "agrar/feldbuch-schlagkartei-liste",
+    "domain": "agrar",
+    "mode": "list",
+    "title": "Schlagkartei",
+    "subtitle": "Schlaege und Flaechen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "agrar/feldbuch-schlagkartei-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/agrar/schlaege",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Schlagkartei",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "id",
+            "label": "ID",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "datum",
+            "label": "Datum",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/agrar/feldbuch/schlag/{id}"
+      }
+    ],
+    "noWorkflowReason": "Listenmaske ohne eigenen Ablauf; Status steht am Datensatz.",
+    "agentContract": {
+      "businessPurpose": "Schlagkartei: Eintraege finden und Details oeffnen.",
+      "examplePrompts": [
+        "Welche offenen Schlagkartei?",
+        "Zeige aktuelle Schlagkartei."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-agrar/feldbuch-schlagkartei-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    }
+  },
+  "futtermittel/mischfuttermittel-liste": {
+    "schemaVersion": 1,
+    "id": "futtermittel/mischfuttermittel-liste",
+    "domain": "futtermittel",
+    "mode": "list",
+    "title": "Mischfuttermittel",
+    "subtitle": "Mischfutter je Tierart und Leistungsstufe",
+    "adapter": {
+      "type": "native",
+      "sourceId": "futtermittel/mischfuttermittel-liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/futter/mischfuttermittel",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neues Mischfuttermittel",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/futtermittel/mischfuttermittel/stamm/new",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Mischfuttermittel",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "produkt_code",
+            "label": "Produkt-Code",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "tierart",
+            "label": "Tierart",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "leistungsstufe",
+            "label": "Leistungsstufe",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "protein",
+            "label": "Protein %",
+            "numeric": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "energie",
+            "label": "Energie MJ",
+            "numeric": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [
+          {
+            "key": "deaktivieren",
+            "label": "Deaktivieren",
+            "dangerLevel": "high",
+            "permission": "futtermittel.mischfutter.deactivate",
+            "commandEndpoint": "/api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren",
+            "method": "POST",
+            "requiresConfirmation": true,
+            "auditReasonRequired": true,
+            "visibleWhen": {
+              "field": "aktiv",
+              "values": [
+                true
+              ]
+            }
+          }
+        ],
+        "rowRouteTemplate": "/futtermittel/mischfuttermittel/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Mischfuttermittel je Tierart finden, oeffnen und nicht mehr gefuehrte deaktivieren.",
+      "examplePrompts": [
+        "Welche Mischfutter fuehren wir fuer Milchkuehe?",
+        "Zeige Mischfutter mit ueber 18 % Protein."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-futtermittel/mischfuttermittel-liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "standard"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "futtermittel"
+    }
+  },
+  "zertifikate/liste": {
+    "schemaVersion": 1,
+    "id": "zertifikate/liste",
+    "domain": "qualitaet",
+    "mode": "list",
+    "title": "Zertifikate",
+    "subtitle": "Zertifikate mit Standard, Nummer und Gueltigkeit",
+    "adapter": {
+      "type": "native",
+      "sourceId": "zertifikate/liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/zertifikate",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Zertifikate",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "art",
+            "label": "Art",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "standard",
+            "label": "Standard",
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "nummer",
+            "label": "Nummer",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "gueltigBis",
+            "label": "Gueltig bis",
+            "renderKind": "date",
+            "sortable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "audit",
+            "label": "Audit",
+            "priority": "secondary"
+          },
+          {
+            "key": "status",
+            "label": "Status",
+            "renderKind": "status",
+            "filterable": true,
+            "priority": "primary"
+          }
+        ],
+        "rowActions": []
+      }
+    ],
+    "noWorkflowReason": "Nachweisliste ohne eigenen Ablauf.",
+    "agentContract": {
+      "businessPurpose": "Zertifikate und ablaufende Nachweise im Blick behalten.",
+      "examplePrompts": [
+        "Welche Zertifikate laufen dieses Quartal ab?",
+        "Welche QS-Nachweise sind gueltig?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-zertifikate/liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "audit"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "qualitaet"
+    }
+  },
+  "futter/einzel/liste": {
+    "schemaVersion": 1,
+    "id": "futter/einzel/liste",
+    "domain": "futtermittel",
+    "mode": "list",
+    "title": "Einzelfuttermittel",
+    "subtitle": "Einzelfuttermittel mit Naehrstoffen, Zertifikaten und Bestand",
+    "adapter": {
+      "type": "native",
+      "sourceId": "futter/einzel/liste",
+      "temporary": false
+    },
+    "dataSources": [
+      {
+        "key": "list",
+        "endpoint": "/api/v1/futter/einzelfuttermittel",
+        "pageSize": 100
+      }
+    ],
+    "actions": [
+      {
+        "key": "neu",
+        "label": "Neues Einzelfuttermittel",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "navigationRoute": "/futter/einzel/neu",
+        "localEffect": "navigation",
+        "stubReason": "Oeffnet die Anlage; Rechte prueft deren Anlageweg."
+      },
+      {
+        "key": "export",
+        "label": "CSV-Export",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "zone": "header",
+        "command": "list.exportCsv",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
+      }
+    ],
+    "tables": [
+      {
+        "key": "list",
+        "label": "Einzelfuttermittel",
+        "dataSourceKey": "list",
+        "serverPagination": false,
+        "pageSize": 50,
+        "virtualized": true,
+        "rowHeight": 40,
+        "columns": [
+          {
+            "key": "artikel_nummer",
+            "label": "Artikelnr.",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "name",
+            "label": "Bezeichnung",
+            "sortable": true,
+            "filterable": true,
+            "priority": "primary"
+          },
+          {
+            "key": "art",
+            "label": "Art",
+            "sortable": true,
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "lieferant",
+            "label": "Lieferant",
+            "sortable": true,
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "protein",
+            "label": "Rohprotein %",
+            "renderKind": "number",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "energie",
+            "label": "Energie",
+            "renderKind": "number",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "trockensubstanz",
+            "label": "TS %",
+            "renderKind": "number",
+            "numeric": true,
+            "sortable": true,
+            "priority": "tertiary"
+          },
+          {
+            "key": "qs_milch",
+            "label": "QS-Milch",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "gmp_plus",
+            "label": "GMP+",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "bio_zertifiziert",
+            "label": "Bio",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          },
+          {
+            "key": "verfuegbar_t",
+            "label": "Verfügbar",
+            "renderKind": "quantity",
+            "numeric": true,
+            "sortable": true,
+            "priority": "primary",
+            "unit": "t",
+            "displayUnit": "dt",
+            "aggregate": "sum"
+          },
+          {
+            "key": "preis_pro_t",
+            "label": "Preis je dt",
+            "renderKind": "currency",
+            "numeric": true,
+            "sortable": true,
+            "priority": "secondary",
+            "pricePer": "t",
+            "displayPricePer": "dt"
+          },
+          {
+            "key": "aktiv",
+            "label": "Aktiv",
+            "renderKind": "boolean",
+            "filterable": true,
+            "priority": "secondary"
+          }
+        ],
+        "rowActions": [],
+        "rowRouteTemplate": "/futter/einzel/{id}"
+      }
+    ],
+    "noWorkflowReason": "Stammdatenliste ohne eigenen Ablauf; Pflege in der Objektmaske.",
+    "agentContract": {
+      "businessPurpose": "Einzelfuttermittel nach Naehrstoff, Zertifikat und verfuegbarer Menge finden.",
+      "examplePrompts": [
+        "Welche Einzelfuttermittel sind GMP+-zertifiziert?",
+        "Wie viel Sojaschrot ist verfuegbar?"
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-futter/einzel/liste']"
+      }
+    },
+    "layout": {
+      "floorplan": "worklist",
+      "density": "compact",
+      "contextRail": "none",
+      "preferredMode": "desktopDense",
+      "mobileMode": "mobileStack",
+      "touchTargetPx": 44,
+      "tableProfile": "inventory"
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 60,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "futtermittel"
+    }
+  }
+}

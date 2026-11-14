@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-14
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (781 Masken).
+> Generiert aus `app/core/screen_definitions.py` (782 Masken).
 
 ## Übersicht
 
@@ -134,6 +134,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/formular/agent-contract` |
 | `agrar/saatgut/prognose` | Prognose | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/prognose/agent-contract` |
 | `agrar/saatgut/royalties` | Royalties | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/royalties/agent-contract` |
+| `agrar/saatgut/sorte` | Sorte | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
 | `agrar/saatgut/vermehrung` | Vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/vermehrung/agent-contract` |
 | `agrar/saatzucht-partien-liste` | Saatzucht-Partien | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatzucht-partien-liste/agent-contract` |
 | `agrar/schlaege-karte-liste` | Schlagkarte | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-karte-liste/agent-contract` |
@@ -4390,6 +4391,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/saatgut/sorte` — Sorte
+
+**Zweck:** Sortenstammdaten anzeigen und bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/saatgut/sorte/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/saatgut/sorte/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__saatgut__sorte/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/varieties/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kultur hat Sorte {entity_id}?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `/api/v1/agrar/varieties/{entity_id}` |
 
 ---
 

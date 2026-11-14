@@ -25,7 +25,7 @@ from typing import Any, Callable
 
 import httpx
 
-from valeo_cli import auth, docflow, harvest, studio, support
+from valeo_cli import auth, docflow, harvest, resource, studio, support
 
 DEFAULT_API = "http://localhost:8000"
 
@@ -59,7 +59,7 @@ def _detail(response: httpx.Response) -> str:
     return detail if isinstance(detail, str) else json.dumps(detail, ensure_ascii=False)[:600]
 
 
-def _request(http: httpx.Client, token: str, method: str, path: str, body: dict | None = None) -> Any:
+def _request(http: httpx.Client, token: str, method: str, path: str, body: dict | None = None, *, with_status: bool = False) -> Any:
     response = http.request(method, _api_base() + path, json=body,
                             headers={"Authorization": f"Bearer {token}", "Accept": "application/json"})
     if response.status_code == 401:
@@ -72,7 +72,8 @@ def _request(http: httpx.Client, token: str, method: str, path: str, body: dict 
         raise UsageError(f"Nicht gefunden: {_detail(response)}")
     if response.status_code >= 400:
         raise ServerError(f"{response.status_code}: {_detail(response)}")
-    return response.json() if response.content else {}
+    result = response.json() if response.content else None
+    return (result, response.status_code) if with_status else (result if result is not None else {})
 
 
 def _definition(http: httpx.Client, token: str, screen_id: str) -> dict:
@@ -119,7 +120,7 @@ def cmd_aktionen(args, http, token, out) -> int:
     definition = _definition(http, token, args.maske)
     out(f"{definition.get('title', args.maske)} ({definition.get('id', args.maske)})")
     for action in support.iter_actions(definition):
-        checked = support.support(action)
+        checked = support.support(action, screen_id=args.maske)
         flags = [flag for flag, on in (("Bestaetigung", support.needs_confirmation(action)),
                                        ("Begruendung", action.get("auditReasonRequired")),
                                        ("nur Mensch", action.get("forbiddenForAgents") or action.get("humanApprovalRequired")))
@@ -131,7 +132,7 @@ def cmd_aktionen(args, http, token, out) -> int:
 
 def cmd_zeigen(args, http, token, out) -> int:
     action = _action(_definition(http, token, args.maske), args.aktion)
-    checked = support.support(action)
+    checked = support.support(action, screen_id=args.maske)
     read_view = action.get("readView") if isinstance(action.get("readView"), dict) else None
     out(json.dumps({
         "aktion": action["key"], "bezeichnung": action.get("label"),
@@ -173,7 +174,7 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
         result = _request(http, token, "GET", path)
         out(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
-    checked = support.support(action)
+    checked = support.support(action, screen_id=args.maske)
     if not checked.supported:
         out(f"Nicht per CLI ausfuehrbar: {support.reason_text(checked.reason)}")
         return 1
@@ -181,6 +182,8 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
     if blocked:
         out(blocked)
         return 1
+    if action.get('responseAdapter') and (args.modus != 'execute' or _is_agent(token)):
+        raise UsageError('Ressourcenaktionen erlauben nur menschliche Ausfuehrung, keine Vorschau.')
     payload = {**_read_data(args.daten, stdin), **support.coerce_fields(action, _parse_fields(args.feld))}
     if args.modus == "execute":
         missing = support.missing_required(action, payload)
@@ -194,9 +197,30 @@ def cmd_ausfuehren(args, http, token, out, ask: Callable[[str], str], stdin) -> 
                 out("Abgebrochen; nichts ausgefuehrt.")
                 return 1
             args.ja = True  # bestaetigt; der Ernte-Adapter verlangt die Bestaetigung als confirm_execution
-    if (action.get("commandBinding") or {}).get("adapter") == "harvest.control.v1":
+    if action.get('responseAdapter'):
+        versioned = (args.maske, resource.route(action)) in resource.VERSIONED_ROUTES
+        key = (args.idempotenz or str(uuid.uuid4())) if versioned else args.idempotenz
+        method, path, body = resource.prepare(action, args.maske, args.id, payload, args.modus, _is_agent(token),
+                                               version=args.version, audit_reason=args.grund, idempotency_key=key)
+        if versioned:
+            try:
+                response, status = _request(http, token, method, path, body, with_status=True)
+            except (ServerError, httpx.HTTPError):
+                out(f'Ausgang unsicher. Wiederholen mit: --idempotenz {key}')
+                raise
+        else:
+            response, status = _request(http, token, method, path, body, with_status=True)
+        try:
+            result = resource.result(action, args.id, response, status)
+        except ValueError:
+            if versioned:
+                out(f'Ausgang nicht bestaetigt. Wiederholen mit: --idempotenz {key}')
+            raise
+        if versioned:
+            result['idempotenz'] = key
+    elif (action.get("commandBinding") or {}).get("adapter") == "harvest.control.v1":
         return _run_harvest(action, args, http, token, out, payload)
-    if action.get("commandBinding"):
+    elif action.get("commandBinding"):
         # Belegfamilie: Zustand und Version aus derselben Belegquelle wie die Maske, dann der versionierte Adapter.
         if not args.id:
             raise UsageError("Diese Aktion braucht eine Belegkennung (--id).")

@@ -1,0 +1,281 @@
+{
+  "order-to-cash": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-order-to-cash",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "order-to-cash",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-order-to-cash",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "order-to-cash"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-order-to-cash\"]"
+      }
+    }
+  },
+  "procure-to-pay": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-procure-to-pay",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "procure-to-pay",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-procure-to-pay",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "procure-to-pay"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-procure-to-pay\"]"
+      }
+    }
+  },
+  "inventory-to-settlement": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-inventory-to-settlement",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "inventory-to-settlement",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-inventory-to-settlement",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "inventory-to-settlement"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-inventory-to-settlement\"]"
+      }
+    }
+  },
+  "harvest-to-settlement": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-harvest-to-settlement",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "harvest-to-settlement",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-harvest-to-settlement",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "harvest-to-settlement"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-harvest-to-settlement\"]"
+      }
+    }
+  },
+  "contract-to-settlement": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-contract-to-settlement",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "contract-to-settlement",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-contract-to-settlement",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "contract-to-settlement"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-contract-to-settlement\"]"
+      }
+    }
+  },
+  "complaint-to-resolution": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-complaint-to-resolution",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "complaint-to-resolution",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-complaint-to-resolution",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "complaint-to-resolution"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-complaint-to-resolution\"]"
+      }
+    }
+  },
+  "service-to-customer": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-service-to-customer",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "service-to-customer",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-service-to-customer",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "service-to-customer"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-service-to-customer\"]"
+      }
+    }
+  },
+  "finance-to-close": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-finance-to-close",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "finance-to-close",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-finance-to-close",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "finance-to-close"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-finance-to-close\"]"
+      }
+    }
+  },
+  "compliance-to-report": {
+    "schemaVersion": 1,
+    "id": "workflow/flow-spine-compliance-to-report",
+    "domain": "workflow",
+    "mode": "cockpit",
+    "title": "compliance-to-report",
+    "adapter": {
+      "type": "native",
+      "sourceId": "workflow/flow-spine-compliance-to-report",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "cockpit",
+      "density": "expertDense",
+      "contextRail": "workflow"
+    },
+    "flowSpineWorkspace": {
+      "processKey": "compliance-to-report"
+    },
+    "agentContract": {
+      "businessPurpose": "Prozessraum und Vorgänge bedienen.",
+      "examplePrompts": [
+        "Zeige den Prozessraum."
+      ],
+      "sensitiveFields": [],
+      "forbiddenAgentTasks": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid=\"workflow-flow-spine-compliance-to-report\"]"
+      }
+    }
+  }
+}
