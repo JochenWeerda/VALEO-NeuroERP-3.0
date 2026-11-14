@@ -74,3 +74,40 @@ fuer Auswahl, Transport und Dialog bestanden. Alle Befehle aus dem
 Doc-Generator-Meta-Check bestanden, einschliesslich OpenAPI, MCP-Register und
 Architekturindex (1145/1145 Routen); Belegversionen, CLI und Studio-Katalog
 separat synchron. Godfile-Ratsche unveraendert gruen, Docs-Governance gruen.
+
+## Pruefstand-Nachpruefung und CI
+
+Die vorhandene lokale Root-Konfiguration wurde danach ausschliesslich im
+Prozessspeicher verwendet. `pruefstand_db.py --status` bestaetigte den
+bestehenden `valeo_probe`, Revision `psm_register_entfernt_20261104`.
+Eine nachfolgende lesende Verbindung als `valeo_agent` mit
+`application_name=agent:codex` sah keine andere aktive Sitzung. Dieser Rolle
+fehlt jedoch USAGE auf `domain_docflow` und `domain_shared` (public ist
+zugaenglich). Deshalb keine Fachschreibpruefung, kein Reset, keine Migration
+und keine stillschweigende Rollen- oder Eigentumsaenderung. Die fehlende
+Umgebungsvariable beim ersten Versuch ist damit eingegrenzt; das aktuelle
+Hindernis fuer diesen lokalen SQL-Nachweis ist die Schema-Berechtigung.
+
+Auf Commit `09a7616d0` bestand der reale Scanner-Imagebuild
+(Run 43625391754); die Pythonruntime-Korrektur ist damit im Neubau belegt.
+Der uebrige Gesamtnachlauf war zu diesem Zeitpunkt noch nicht abgeschlossen.
+Die finale Frontend-Typpruefung nach allen Quellaenderungen endete mit Exit0.
+
+CI auf unveraendertem Commit 09a7616d0: CI/CD 43625391808 bestanden,
+28368 passed/72 skipped/1 deselected/36 subtests (25:31 Minuten).
+Quality-Gate-Backend: 28367 passed/73 skipped/1 deselected (25:46 Minuten),
+kritische Backend-Coverage bestanden; unterschiedliche Seed-/Strict-Einstellungen
+werden nicht als identische Testumgebung ausgegeben. Die lokale Diagnose zeigt
+die doppelte Vollsuite in beiden Workflows. Eine spaetere Konsolidierung muss
+PYTEST_REQUIRE_DB_STRICT und Inventory-Seed in die kanonische Suite uebernehmen
+und vorhandene SHA-/Inhaltssiegel fuer Coverage erhalten; sie ist hier noch
+nicht implementiert. Sonar verwendet diese Artefakte ohne erneuten Testlauf.
+
+Finale CI-Abnahme fuer Codecommit `09a7616d0`: 72 erfolgreiche Checks,
+keine roten oder laufenden Checks. Quality Gate 43625391909 abgeschlossen
+mit success; Sonar-Job 132550001404 meldete am 14.11.2026 um 19:53 MEZ
+`QUALITY GATE STATUS: PASSED`. Der Docker Build Smoke bestand ebenfalls.
+[Sonar-PR-Abnahme](https://sonarcloud.io/dashboard?id=JochenWeerda_VALEO-NeuroERP-3.0&pullRequest=134).
+Dies ist die Abnahme des genannten PR-/Codeumfangs, keine Behauptung einer
+Gesamtprojektabdeckung von 80 Prozent oder einer Browser-/SQL-Gesamtabnahme.
+Der anschliessende Dokumentationsnachtrag aendert keinen Produktivcode.
