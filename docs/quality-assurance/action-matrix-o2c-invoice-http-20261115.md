@@ -63,3 +63,26 @@ einem neuen Idempotenzschluessel abgewiesen. Das unveraenderte Auftrags-Readback
 wird bereits nach den verworfenen Kommandos geprueft. Enge TypeScript-Pruefung
 und Sammlung der drei Faelle wurden nach diesem Review erneut erfolgreich
 ausgefuehrt; weiterhin kein lokaler HTTP-/Datenbanklauf.
+
+## Naechste fachliche Grenze
+
+Die Umwandlung erzeugt bereits einen offenen Beleg. `release` akzeptiert dagegen
+nur `draft` (docflow_service.py, release); dieser Weg braucht deshalb keinen
+zusaetzlich erfundenen Freigabeschritt. Der aktuelle Auftrag verwendet Steuer 0
+ohne Steuerschluessel und belegt keine steuerlich buchbare Rechnung.
+
+Fuer den getrennten Buchungsnachweis muss zuerst ein gueltiger mandanteneigener
+Steuerschluessel ueber eine vorhandene Quelle bezogen und auf den Auftrag gesetzt
+werden. Seine Uebernahme durch Lieferung und Rechnung ist zu pruefen. Danach kann
+POST /api/v1/docflow/{id}/post mit expected_version und Idempotenzschluessel die
+Finanzwirkung ausloesen; SalesPostingService erzeugt Journal und Debitoren-OP.
+Der OP-Readback benoetigt zusaetzlich die vorhandene Finanzleserolle. Kritische
+Befunde verlangen eine unabhaengige, an den Beleg gebundene Freigabe; fuer normale
+R2-Vorgaenge keine pauschale zusaetzliche Freigabe anlegen.
+
+Der ZUGFeRD-Weg unter sales/invoices liest das gesonderte Document Repository.
+Die DocFlow-Umwandlung allein beweist dessen Anbindung nicht. record-print/export
+sind Metadatenkommandos, keine PDF-Erzeugung. Eine PDF-/Archivabnahme muss deshalb
+den tatsaechlichen kanonischen DocFlow-Druckweg gesondert nachweisen, statt die
+Existenz eines Endpunkts als Wirkung auszugeben. Diese Hinweise sind Codeanalyse,
+keine ausgefuehrten Buchungs- oder PDF-Nachweise.
