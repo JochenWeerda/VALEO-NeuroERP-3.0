@@ -44,3 +44,5 @@ Kein globaler Paketwechsel, keine neue Datenbank, kein Container und keine
 Scan-Ausnahme. CI-/Dependabot-Nachlauf fuer den integrierten Commit steht aus.
 
 Der Security-Workflow prueft das eigenstaendig installierte BFF nun separat: nur Lock-Aufloesung ohne Installationsskripte, anschliessend blockierender Produktionsaudit und eigener JSON-Bericht. Dies schliesst die Inventarluecke des Root-pnpm-Audits; es wird keine Schwachstelle ausgenommen. GitHub-Nachlauf erforderlich.
+
+GitHub-Nachlauf e8a2e92d5: Security Scan43653854317 und Service Security erfolgreich; separater BFF-Produktionsaudit ebenfalls gruen. Quality Gate43653854329 einschliesslich Sonar erfolgreich, 68 PR-Pruefungen gruen. Integration nachmain ueberPR135, Mergee9ae5cab6. Die Verarbeitung der Dependabot-Alerts auf dem Standardzweig ist ein getrennter Nachlauf; die lokale Deepmerge-Gegenprobe bleibt ein Backportnachweis und kein Herstellerfix.
