@@ -8,8 +8,9 @@ owner: Codex
 # ACTION-MATRIX-O2C-HTTP-20261115
 
 Arbeitsbasis: Branch `codex/o2c-real-contract-20261115`, Claim `ACTION-MATRIX-O2C-HTTP-20261115`,
-Produktbasis `e9ae5cab6` (integrierter, auf `e8a2e92d5` gepruefter Stand). Der Nachweis ist vorbereitet, noch nicht fachlich
-abgenommen. Keine Matrix-Statusanhebung und kein erfolgreicher HTTP-Lauf behauptet.
+Produktbasis `e9ae5cab6`; die neue HTTP-Kette ist auf `2e8d53caa` im echten CI-Lauf abgenommen.
+Integration ueber PR 136 nach `main`/`develop`: `2338578d0`. Die im Folgenden
+genannten Fremdtoken-/Browsergrenzen und der unveraenderte Matrixstatus bleiben bestehen.
 
 ## Aenderung und Testidentitaeten
 
@@ -88,10 +89,26 @@ Ausschliesslich statische/Collection-Pruefungen ohne API, OIDC, DB oder Containe
 - npm meldet bestehende unbekannte Konfigurationsschluessel `public-hoist-pattern`
   und `shamefully-hoist`; kein Testfehler.
 
-Lead koordiniert erst den echten Lauf mit maximal zwei Workern und vorhandenen
-Ressourcen. Erst dessen erfolgreiches Ergebnis auf benannter Commit-SHA erlaubt
-entsprechende Evidenzverknuepfung; auch das ist keine automatische Statusanhebung.
+Der echte Lauf 43658389321 auf Quellkopf `2e8d53caa` ist bestanden: zwoelf
+kritische HTTP-Faelle mit zwei Workern in 3,1 Sekunden; darin die beiden oben
+benannten O2C-Testidentitaeten mit 876 ms und 1,3 s. Kein Skip oder tolerierter
+Fehlerstatus ersetzt ihre erfolgreiche Fachwirkung. Dies ist eine konkrete
+Evidenzreferenz, keine automatische Matrix-Statusanhebung.
 
-Dateibesitz unveraendert: O2C-Spec und diese QA; keine Aenderung an Auth, CI,
-Produktquellen, Matrix-YAML, Generator, gemeinsamen Docs oder Datenbank.
+Die Implementierung aenderte keine Auth-/CI-/Produktquellen oder Matrix-YAML.
+Die fachlichen Datensaetze des HTTP-Nachweises entstanden in der vom CI-Job
+bereitgestellten PostgreSQL-Datenbank. Kein Fachtest wurde auf der gewachsenen
+Entwicklungsdatenbank ausgefuehrt.
 
+
+
+## Integrationsabnahme
+
+Alle 67 Checks auf `2e8d53caa` sind gruen, einschliesslich Quality Gate
+43658389344, Sonar und CI/CD 43658389318 mit echter Evidenzuebernahme. Die
+Backend-Vollsuite bestaetigt 28.497 bestandene, 72 uebersprungene und einen
+abgewaehlten Fall in 1.170,61 Sekunden; kritische Coverage bestanden.
+Ueberlappende Zahlen werden nicht addiert. PR 136 wurde am 15.11.2026 um
+08:08:17 UTC mit vorhandenen Adminrechten fuer die vorgeschriebene externe
+Review integriert. Keine Testanforderung oder Branchregel wurde geaendert.
+`develop` wurde ohne Force auf denselben Mergecommit `2338578d0` vorgezogen.

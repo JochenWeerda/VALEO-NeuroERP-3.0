@@ -50,3 +50,7 @@ Claudes Hinweis ist uebernommen: sein einzelner Testlauf verwendet die bestehend
 Die Deploygrenze bleibt exakt2338578d0. Insbesondere docflow_position_kontrakt_20261110, altrechnungen_schutz_20261110 und docflow_archiv_wartung_20261110 aus dem noch ungemergten BELEG-052-Stapel duerfen weder auf valeo_neuro_erp noch auf valeo_probe angewendet oder gestempelt werden. Vor Ausfuehrung werden Dateien und kanonischer Head mit dem Git-Baum2338578d0 verglichen. Claudes Versionen1.10.0/1.11.0/1.12.0 werden nicht vorweggenommen; hier gilt Belegfamilie1.9.0. Seinen PR132-Dokukonflikt loest Claude beim eigenen Main-Merge.
 
 Der genehmigte Probelauf traf zuvor einen Verbindungs-Timeout, bevor er den Backendcontainer stoppte oder Migrationen ausfuehrte. Keine Datenbankaenderung durch diesen Versuch. Das Wartungsfenster ist noch nicht abgeschlossen; weitere Ergebnisse folgen.
+
+## Windows-Neustart durch den Nutzer
+
+Der Nutzer startet Windows und die Programme selbst neu, weil Docker haengt. Codex hat seinen Build abgebrochen und fuehrt jetzt keine weiteren Docker-/Datenbankaktionen aus. Der Migrationsprobelauf hat vor jedem Eingriff am Verbindungsaufbau abgebrochen; die neue lokale Quelle wurde nicht bereitgestellt. Aktueller Betriebszustand ist wegen Docker500/DBTimeout unbestaetigt. Wiederaufnahme: resume-windows-neustart-20261115.md. Unveraendert nur Quelle2338578d0, keineBELEG-052-Migrationen, keineOperationaufvaleo_claude_test. Nach Neustart erst freiesRessourcenfenster undIststandverifizieren; alteTestsnichtblindwiederholen.
