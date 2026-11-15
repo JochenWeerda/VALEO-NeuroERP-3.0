@@ -21009,3 +21009,19 @@ werden. Weitere main-Merges bitte ueber den Integrationslead koordinieren,
 damit Quellen nicht erneut waehrend einer Vollsuite fortgeschrieben werden.
 Branches und einzelne Tests auf bestehenden eigenen Pruefstaenden bleiben frei.
 Keine neuen Testdatenbanken/Container, keine fremden Prozesse abbrechen.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex besitzt fuer den konkreten
+RuntimeSweep500 zusaetzlich app/api/v1/endpoints/crm_lead_gen.py (nur preview-
+Mandantenabhaengigkeit), tests/test_crm_lead_preview_context.py (neu), eigeneQA.
+Ursache: CrmLeadGenService verlangt einen Mandanten, preview uebergibt keinen.
+Abnahme HTTP200 mit serverseitigem Kontext und unveraenderten Filtern, 401/403
+ohne Token/geprueften Kontext, Spoofing allein oeffnet nichts. Externe Daten-
+und Authentifizierungsgrenzen im Unitvertrag simuliert; keine Datenbank, kein
+Docker, keine Aussage ueber echte GAP-Daten oder JWT-Verifikation. PR137-Kopf
+4c7c6374b bleibt waehrend seiner CI unveraendert.
+
+M0-CI-GESAMTBASIS-20261115 LeadPreview lokal abgenommen: sechs rote HTTP-
+Gegenproben vor Fix, danach zehn gruen. Gepruefter Mandantenkontext wird an
+Service uebergeben; kein neuer Fallback. Externe Identitaet/GAP-Daten simuliert,
+keine DB/Docker-Aktion. Echter RuntimeSweep des neuen SHA noch offen; QA
+m0-runtime-lead-preview-20261115.md. PR137 bleibt auf4c7c6374b unveraendert.
