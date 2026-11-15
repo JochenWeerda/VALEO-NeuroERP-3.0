@@ -9,12 +9,16 @@ function getInitialTheme(): Theme {
     return 'light'
   }
 
-  const stored = window.localStorage.getItem(STORAGE_KEY)
-  if (stored === 'light' || stored === 'dark') {
-    return stored
+  try {
+    const stored = window.localStorage.getItem(STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark') {
+      return stored
+    }
+  } catch {
+    // Restricted browser storage must not prevent the application from loading.
   }
 
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 function applyTheme(theme: Theme): void {
@@ -27,12 +31,20 @@ function applyTheme(theme: Theme): void {
   root.classList.toggle('light', theme === 'light')
 }
 
+export function initializeTheme(): void {
+  applyTheme(getInitialTheme())
+}
+
 export function useTheme() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme)
 
   useEffect(() => {
     applyTheme(theme)
-    window.localStorage.setItem(STORAGE_KEY, theme)
+    try {
+      window.localStorage.setItem(STORAGE_KEY, theme)
+    } catch {
+      // The selected theme still applies for the current page when storage is blocked.
+    }
   }, [theme])
 
   const toggleTheme = useCallback(() => {
