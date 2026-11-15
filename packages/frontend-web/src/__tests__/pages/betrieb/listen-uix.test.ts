@@ -5,28 +5,6 @@ import { describe, expect, it } from 'vitest'
 const read = (rel: string) => readFileSync(resolve(__dirname, rel), 'utf8')
 
 describe('Betriebs-Listen UIX', () => {
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Einzelfutter als Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer)', () => {
-    const src = read('../../../pages/futter/einzel/liste.tsx')
-    expect(src).toContain("export { default } from '@/pages/futtermittel/einzelfuttermittel-liste'")
-  })
-
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Mischfutter als Studio-Liste (Suche und 44-px-Zeilen aus dem Renderer)', () => {
-    const src = read('../../../pages/futter/misch/liste.tsx')
-    expect(src).toContain("export { default } from '@/pages/futtermittel/mischfuttermittel-liste'")
-  })
-
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Zertifikate 44 px und blendet KPI auf Touch aus', () => {
-    const src = read('../../../pages/zertifikate/liste.tsx')
-    expect(src).toContain('useTouchDevice')
-    expect(src).toContain('{!isTouch ? (')
-    expect(src).toContain('min-h-11 font-medium text-primary')
-    expect(src).not.toContain('text-blue-600')
-    expect(src).not.toContain('bg-orange-50')
-  })
-
   it('stellt Versicherungen als Studio-Liste (Suche, 44-px-Zeilen und Export aus dem Renderer)', () => {
     const src = read('../../../pages/versicherungen/liste.tsx')
     expect(src).toContain('NativeListPage')

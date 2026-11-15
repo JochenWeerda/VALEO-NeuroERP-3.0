@@ -28,8 +28,8 @@ aiohttp==3.14.4
 
 # AI/ML Core
 langchain-core>=0.3.65,<2.0.0
-langgraph==1.2.4
-langgraph-checkpoint-sqlite==3.1.1
+langgraph==1.2.14
+langgraph-checkpoint-sqlite==3.1.2
 openai==1.91.0
 
 # Tokenization; no vector backend is enabled until its tenant-safe implementation exists.

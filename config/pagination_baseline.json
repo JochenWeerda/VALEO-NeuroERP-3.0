@@ -207,8 +207,6 @@
     "app/api/v1/endpoints/ruestliste.py::list_ruestlisten": 2,
     "app/api/v1/endpoints/sales_blanket_orders.py::get_blanket_order": 1,
     "app/api/v1/endpoints/sales_blanket_orders.py::list_blanket_orders": 1,
-    "app/api/v1/endpoints/sales_delivery_notes.py::_list_positions": 1,
-    "app/api/v1/endpoints/sales_delivery_notes.py::list_delivery_notes": 1,
     "app/api/v1/endpoints/sales_invoices.py::_delivery_note_sources": 1,
     "app/api/v1/endpoints/sales_invoices.py::get_invoice": 1,
     "app/api/v1/endpoints/sales_invoices.py::list_invoices": 1,

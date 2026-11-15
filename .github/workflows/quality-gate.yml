@@ -1,4 +1,5 @@
 name: Quality Gate
+run-name: ${{ github.event_name == 'pull_request' && format('qg:pr:{0}:{1}:{2}', github.event.pull_request.number, github.event.pull_request.head.sha, github.event.pull_request.base.sha) || github.event_name == 'push' && format('qg:push:{0}:{1}', github.ref_name, github.sha) || format('qg:dispatch:{0}:{1}', github.ref_name, github.sha) }}
 
 on:
   push:
@@ -224,6 +225,8 @@ jobs:
       POSTGRES_HOST: localhost
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_probe
       TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_probe
+      PYTEST_REQUIRE_DB_STRICT: "1"
+      API_DEV_TOKEN: dev-token
     services:
       postgres:
         image: postgres:15
@@ -309,6 +312,7 @@ jobs:
           python scripts/init_db.py --nur-migrationen
           pytest -q -p no:cacheprovider --no-cov tests/test_rls_inventory_contract.py::test_tabellen_entsprechen_dem_frischen_schema
           python scripts/init_db.py
+          python -m app.seeds.inventory_seed
           # Getrennte Rollen (valeo_app, valeo_system, ...) wie im Betrieb.
           python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
 
@@ -353,7 +357,9 @@ jobs:
         run: python scripts/check_critical_backend_coverage.py
 
       - name: Seal backend coverage
-        run: python scripts/verify_quality_evidence.py --write coverage.xml
+        run: |
+          python scripts/verify_quality_evidence.py --write coverage.xml
+          python scripts/consume_backend_evidence.py --write-context
 
       - name: Upload full-suite coverage (release evidence)
         uses: actions/upload-artifact@v4
@@ -362,8 +368,10 @@ jobs:
           path: |
             coverage.xml
             coverage.xml.evidence.json
+            backend-context.json
           if-no-files-found: error
           retention-days: 30
+          overwrite: true
 
       - name: Generate release compatibility matrix
         run: python scripts/generate_release_compatibility_matrix.py

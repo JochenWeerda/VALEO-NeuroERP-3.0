@@ -51,3 +51,14 @@ Artefakte und lokale Entwicklungsverzeichnisse aus.
 
 Eine Scanneraufnahme oder Sicherheitsfreigabe wird vor Abschluss dieser Gates
 nicht behauptet.
+
+## CI-Nachlauf 14.11.2026
+
+Der PR-134-Lauf 43599267745 scheiterte bei der Requirements-Installation:
+das Bookworm-Systempython unterschritt die fuer `soupsieve==4.1` geforderte
+Version 3.11.5. Das Scanner-Dockerfile behaelt Node 24 auf Bookworm und
+uebernimmt Python 3.11.18 (wie der CI-Runner) aus dem offiziellen Python-Slim-Bookworm-Image,
+einschliesslich Standardbibliothek, Shared Library und venv-Unterstuetzung.
+Eine fruehe Versionspruefung sperrt zu alte Interpreter. Keine Abhaengigkeit
+oder Sicherheitspruefung wurde entfernt. Der Image-Neubau muss in GitHub CI
+noch nachgewiesen werden; lokal wurde kein Container angelegt.

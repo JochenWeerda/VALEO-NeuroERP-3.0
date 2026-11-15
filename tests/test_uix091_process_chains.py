@@ -13,7 +13,7 @@ pytestmark = pytest.mark.unit
 KNOWN = {
     "agrar/kontrakte", "einkauf/anlieferavis", "qualitaet/reklamation",
     "lager/article-stock", "agrar/harvest-settlement", "beleg-liste/sales-order",
-    "sales/delivery-note", "sales/invoice", "finance/ar-open-item", "finance/payment-run",
+    "beleg-liste/sales-delivery", "sales/invoice", "finance/ar-open-item", "finance/payment-run",
     "einkauf/anfrage", "einkauf/angebot", "einkauf/purchase-order",
     "einkauf/auftragsbestaetigung",
     "finance/ap-invoice", "crm/lead", "crm/opportunity", "crm/customer-360",

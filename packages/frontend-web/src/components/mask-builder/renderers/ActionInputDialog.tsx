@@ -120,10 +120,10 @@ export function ActionInputDialog({
 
   return (
     <Dialog open={open} onOpenChange={(offen) => { if (!offen) onCancel() }}>
-      <DialogContent aria-describedby="action-input-beschreibung" className={felder.some(field => field.type === 'table') ? 'max-h-[90vh] max-w-[95vw] sm:max-w-[95vw] overflow-y-auto' : undefined}>
+      <DialogContent className={felder.some(field => field.type === 'table') ? 'max-h-[90vh] max-w-[95vw] sm:max-w-[95vw] overflow-y-auto' : undefined}>
         <DialogHeader>
           <DialogTitle>{action.label}</DialogTitle>
-          <DialogDescription id="action-input-beschreibung">
+          <DialogDescription>
             Angaben für diese Aktion. Pflichtfelder sind markiert.
           </DialogDescription>
         </DialogHeader>

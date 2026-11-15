@@ -11,6 +11,17 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+**Studio-Testmigration 14.11.2026:** Die Runtime46-Restliste sinkt von 181 auf
+131 Faelle in 38 Dateien; neun Smoke-Ausnahmen bleiben bestehen. Klassen,
+Workflows, Bestellvorschlagsvarianten, Betriebslisten und Sortendetail haben
+neue Verhaltenstests. Sorten-GET schreibt nicht mehr beim Lesen; CLI-Ressourcen
+koennen keine Vorschau als echten PUT ausfuehren. Diese Vertragskorrekturen
+sind gezielt abgenommen, keine Gesamtmigration.
+Offene konkrete Fachparitaet: Leistungsnachweise und Wareneingangsabgleich
+verwenden Anfrage-Platzhalter; fuer Biostimulanzien/Sachkunde ist ein passender
+Detail-/Editvertrag nicht belegt. Gueltige Erwartungen erst nach funktionalem
+Ersatz entfernen. [Handoff und Grenzen](../agent-ops/handshakes/studio-testmigration-20261114.md).
+
 **Einordnung 05.11.2026:** Die Zahlen vom 29.10. und frueher sind historische Messungen ihres jeweiligen Umfangs. Der operative Stand steht im [Workboard](../agent-ops/active-workboard.md), der aktuelle strukturelle Katalog in [Studio-Screenversionen](../../config/studio_screen_versions.json). Der PSM-Zweig ist gezielt geprueft und vor Integration; Browser- und Gesamtfreigabe sind damit nicht belegt.
 
 
@@ -2243,3 +2254,30 @@ Offen bleiben finanzielle Browserabnahme, begrenzter Modellaufruf, Liefer-/CI-Na
 ## CRM-ACTIVITY-CANONICAL — Integration und Rollout (29.10.2026)
 
 Konkurrierende aktive Aktivitaets-CRUD-Wege sind durch den versionierten Domaincommand ersetzt; native Liste, Detail und Neuanlage nutzen denselben Vertrag. Die additive Migration ist auf dem gemeinsamen Pruefstand mit Rollback nachgewiesen, noch nicht auf dem laufenden Anwendungsschema angewendet. RLS bleibt eine explizite Service-Ausnahme. Dormantes Daily-Report-Modul, Kontakt-/Farm-Neuanlage und authentifizierte Browser-/Rolloutabnahme bleiben gesonderte Arbeiten. Der gesetzliche DSGVO-Erasureweg bleibt eine dokumentierte Ausnahme; sein Aktivitaetsfilter ist jetzt strikt mandantengebunden. [QA mit Grenzen](../quality-assurance/crm-activity-canonical-20261029.md).
+
+
+### UIX-RUNTIME / Action-Matrix — Nachlauf 14.11.2026
+
+Der Action-Matrix-Bericht trennt deklarierte YAML-Einstufungen von belegten
+Laeufen: 38 Aktionen, 32 deklarierte Gaps; fuer keine Aktion ist dort ein
+konkreter Testlauf mit SHA verknuepft. Die bisherigen GET-/Fehlerakzeptanztests
+sind keine fachliche Abnahme. [Audit](../quality-assurance/action-matrix-audit-20261114.md).
+Studio-Belegfamilie 1.9.0 schliesst die bisher fehlende explizite
+Teilmengenbedienung auf Definitions-/Runtime-/Transportebene. Der gemeinsame
+DocFlow-Command bleibt fuehrend; neue preisfreie Restmengenabfrage, sichere
+Positionswahl und UI-/CLI-Uebersetzung sind gezielt geprueft. Die reale
+SQL-/OIDC-/Browserabnahme der Kette bleibt offen und erhoeht keinen Matrixstatus.
+[Nachweisgrenzen](../quality-assurance/docflow-teilmengen-eingabe-20261114.md).
+
+
+### DocFlow-Teilmengen / SQL-Nachweis — 15.11.2026
+
+Die isolierte PostgreSQL-Abnahme der Teilumwandlung ist belegt: drei Tests
+mit echter Wirkung, Replay, Konflikten, fremder Position und fremdem
+RLS-Kontext bestanden; Fachzugriffe als valeo_agent, Testdaten/ACLs per
+Transaktion zurueckgerollt. Dauerhafte Agentenrechte wurden nicht erweitert.
+[Nachweis und Grenzen](../quality-assurance/docflow-teilmengen-sql-20261115.md).
+OIDC-/Browserkette und die Aktion-zu-CI-Verknuepfung der Matrix bleiben
+getrennte offene Abnahmen. Die Backend-Vollsuite ist im neuen CI-Entwurf
+kanonisch im Quality Gate konzentriert; der Consumer verlangt dessen ganzen
+Erfolg und SHA-/Inhalts-/Ereignisnachweise. Reale GitHub-Abnahme bleibt Pflicht.

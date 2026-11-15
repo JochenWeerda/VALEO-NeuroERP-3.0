@@ -42,7 +42,6 @@ HAUS_B = f"mak-b-{uuid.uuid4().hex[:6]}"
 PRUEFER = f"pruefer-{uuid.uuid4().hex[:8]}"
 
 ZAHLUNGSLAUF = "/api/v1/finance/payment-runs/{}/actions/freigeben"
-LIEFERSCHEIN = "/api/v1/sales/delivery-notes/{}/actions/drucken"
 REKLAMATION = "/api/v1/reklamationen/{}/actions/abschliessen"
 MAHNEN = "/api/v1/finance/open-items/{}/actions/mahnen"
 AP_FREIGABE = "/api/v1/finance/ap/invoices/{}/actions/freigeben"
@@ -186,21 +185,6 @@ def zahlungslauf(engine, haus: str, status: str = "draft") -> str:
     return kennung
 
 
-def lieferschein(engine, haus: str, status: str = "draft") -> str:
-    from sqlalchemy import text
-
-    kennung = str(uuid.uuid4())
-    with engine.begin() as v:
-        v.execute(
-            text(
-                "INSERT INTO domain_sales.delivery_notes (id, tenant_id, delivery_note_number, delivery_date, status) "
-                "VALUES (:id, :h, :nr, :d, :s)"
-            ),
-            {"id": kennung, "h": haus, "nr": f"LS-{kennung[:8]}", "d": date.today(), "s": status},
-        )
-    return kennung
-
-
 def reklamation(engine, haus: str, status: str = "anerkannt") -> str:
     from sqlalchemy import text
 
@@ -320,38 +304,7 @@ class TestZahlungslauf:
         assert spuren(engine, HAUS_A, "freigeben") == (0, 0)
 
 
-# ── 2. Lieferschein drucken ─────────────────────────────────────────────────
-
-
-class TestLieferschein:
-    def test_druck_markiert_den_lieferschein(self, client, engine):
-        schein = lieferschein(engine, HAUS_A)
-        antwort = client.post(LIEFERSCHEIN.format(schein), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()
-        assert antwort["success"] is True, antwort
-        assert wert(engine, "SELECT status FROM domain_sales.delivery_notes WHERE id = :i", i=schein) == "printed"
-        assert wert(engine, "SELECT is_printed FROM domain_sales.delivery_notes WHERE id = :i", i=schein) is True
-        assert spuren(engine, HAUS_A, "drucken") == (1, 1)
-
-    def test_nachdruck_braucht_eine_begruendung(self, client, engine):
-        schein = lieferschein(engine, HAUS_A, status="posted")
-        ohne = client.post(LIEFERSCHEIN.format(schein), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()
-        assert ohne["success"] is False
-        assert "Attestation" in ohne["error"]
-        assert spuren(engine, HAUS_A, "drucken") == (0, 0)
-        mit = client.post(
-            LIEFERSCHEIN.format(schein), json={"_mode": "execute", "attestation": "Kunde braucht Kopie"},
-            headers=kopf(HAUS_A),
-        ).json()
-        assert mit["success"] is True
-        assert wert(
-            engine, "SELECT COUNT(*) FROM domain_audit.attestations WHERE entity_id = :i", i=schein
-        ) == 1
-
-    def test_fremder_lieferschein_nicht_druckbar(self, client, engine):
-        schein = lieferschein(engine, HAUS_A)
-        antwort = client.post(LIEFERSCHEIN.format(schein), json={"_mode": "execute"}, headers=kopf(HAUS_B)).json()
-        assert antwort["success"] is False
-        assert wert(engine, "SELECT status FROM domain_sales.delivery_notes WHERE id = :i", i=schein) == "draft"
+# ── 2. Lieferschein drucken: seit BELEG-052 Belegdruck mit Druckvermerk (test_belegdruck_druckvermerk) ──
 
 
 # ── 3. Reklamation abschliessen ─────────────────────────────────────────────

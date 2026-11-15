@@ -1,6 +1,6 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-10'
+generated_on: '2026-11-14'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
@@ -98,8 +98,7 @@ stats:
   mask_actions_considered: 316
   mask_mutations_considered: 257
   by_coverage:
-    adjacent: 1
-    blocked_human_only: 80
+    blocked_human_only: 81
     blocked_unreleased: 2
     local_ui: 59
     mapped: 40
@@ -675,6 +674,17 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:agrar/saatgut/sorte:edit
+  mask: agrar/saatgut/sorte
+  domain: agrar
+  action_key: edit
+  label: Bearbeiten
+  command_endpoint: /api/v1/agrar/varieties/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:agrar/vertraege/formular:bearbeiten
   mask: agrar/vertraege/formular
   domain: agrar
@@ -3185,16 +3195,6 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
-- mask_action_id: mask:sales/delivery-note:drucken
-  mask: sales/delivery-note
-  domain: sales
-  action_key: drucken
-  label: Lieferschein drucken
-  command_endpoint: /api/v1/sales/delivery-notes/{entity_id}/actions/drucken
-  command: null
-  mcp_tool_id: sales.invoice.propose
-  coverage: adjacent
-  notes: Druck ≠ Rechnung; Invoice-Propose/Post sind MCP-Writes der Belegkette.
 - mask_action_id: mask:schaeden/liste:neu
   mask: schaeden/liste
   domain: finance
@@ -3370,5 +3370,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 80; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 81; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

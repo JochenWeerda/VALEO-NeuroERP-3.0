@@ -131,28 +131,12 @@ def kopf(mandant: str, kunde: str) -> dict[str, str]:
 
 def lieferschein(client, kopf, menge: str = "100", preis: str = "25.00", mwst: str = "7",
                  kunde: str = "K-100", artikel: str = "ART-WEIZEN") -> str:
-    antwort = client.post(
-        "/api/v1/sales/delivery-notes",
-        headers=kopf,
-        json={
-            "customer_id": kunde,
-            "delivery_date": "2026-09-15",
-            "positionen": [
-                {
-                    "pos_nr": 1,
-                    "artikel_id": artikel,
-                    "artikel_nr": "10001",
-                    "bezeichnung": "Weizen A",
-                    "menge": menge,
-                    "einheit": "dt",
-                    "netto_preis": preis,
-                    "mwst_prozent": mwst,
-                }
-            ],
-        },
-    )
-    assert antwort.status_code == 201, antwort.text
-    return antwort.json()["id"]
+    """Altlieferschein fuer den alten Rechnungsweg (Router entfernt, BELEG-052 1b)."""
+    from alt_lieferschein import lege_alt_lieferschein_an
+
+    return lege_alt_lieferschein_an(kopf["X-Tenant-ID"], kunde=kunde, url=DB_URL, positionen=[{
+        "pos_nr": 1, "artikel_id": artikel, "artikel_nr": "10001", "bezeichnung": "Weizen A", "menge": menge,
+        "einheit": "dt", "netto_preis": preis, "mwst_prozent": mwst}])
 
 
 def rechnung(client, kopf, *ls_ids: str):
@@ -240,10 +224,6 @@ def test_kopf_nennt_den_kunden_statt_der_referenz(client, kopf, mandant) -> None
         assert beleg["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
         assert beleg["customer_number"] == "K-100"
 
-        ls = client.get(f"/api/v1/sales/delivery-notes/{ls_id}", headers=kopf)
-        assert ls.status_code == 200, ls.text
-        assert ls.json()["customer_name"] == "Raiffeisen Warengenossenschaft Nord eG"
-        assert ls.json()["customer_number"] == "K-100"
     finally:
         # Den Namen wieder wegnehmen; loeschen darf der Test den Satz nicht,
         # die Belege zeigen darauf. Den Rest raeumt die mandant-Fixture ab.
@@ -483,29 +463,12 @@ def test_positionen_stehen_in_zahlenfolge_nicht_in_textfolge(client, kopf, manda
                 },
             )
 
-    antwort = client.post(
-        "/api/v1/sales/delivery-notes",
-        headers=kopf,
-        json={
-            "customer_id": "K-100",
-            "delivery_date": "2026-09-15",
-            "positionen": [
-                {
-                    "pos_nr": nr,
-                    "artikel_id": f"ART-{nr}",
-                    "artikel_nr": f"{20000 + nr}",
-                    "bezeichnung": f"Sorte {nr}",
-                    "menge": "10",
-                    "einheit": "dt",
-                    "netto_preis": "20.00",
-                    "mwst_prozent": "7",
-                }
-                for nr in range(1, 12)
-            ],
-        },
-    )
-    assert antwort.status_code == 201, antwort.text
-    angelegt = rechnung(client, kopf, antwort.json()["id"])
+    from alt_lieferschein import lege_alt_lieferschein_an
+
+    ls_id = lege_alt_lieferschein_an(mandant, kunde="K-100", url=DB_URL, positionen=[{
+        "pos_nr": nr, "artikel_id": f"ART-{nr}", "artikel_nr": f"{20000 + nr}", "bezeichnung": f"Sorte {nr}",
+        "menge": "10", "einheit": "dt", "netto_preis": "20.00", "mwst_prozent": "7"} for nr in range(1, 12)])
+    angelegt = rechnung(client, kopf, ls_id)
     assert angelegt.status_code == 201, angelegt.text
 
     seite = client.get(

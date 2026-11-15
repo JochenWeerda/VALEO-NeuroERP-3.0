@@ -9,7 +9,7 @@ import { DerivedColumnLayout, shouldDeriveColumns } from './renderers/DerivedCol
 import { MessagePanelRenderer, type ScreenMessage } from './renderers/MessagePanelRenderer'
 import { LazyTabs } from '@/components/ui/LazyTabs'
 import { cn } from '@/lib/utils'
-import { resolveContextRailSections, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
+import { resolveContextRailSections, validateMaskVariantBinding, type ScreenDefinition, type ScreenFieldDefinition } from './schema'
 import type { RenderPlan } from './render-plan/types'
 import type { ScreenOverlay } from './render-plan/overlay'
 import type { LookupBinding, TableQueryState } from './runtime/types'
@@ -503,6 +503,11 @@ function RenderFromPlan({
       className={classes.root}
       onKeyDown={(event) => handleScreenKeyDown(event, plan, effectivePayload, dispatchAction)}
       data-screen-definition={plan.screenId}
+      data-mask-family={plan.maskVariant?.family}
+      data-mask-base-version={plan.maskVariant?.baseVersion}
+      data-mask-variant-id={plan.maskVariant?.variantId}
+      data-mask-variant-version={plan.maskVariant?.variantVersion}
+      data-mask-materialized-hash={plan.maskVariant?.materializedHash}
       data-document-base-version={plan.documentVariant?.baseVersion}
       data-document-variant-id={plan.documentVariant?.variantId}
       data-document-variant-version={plan.documentVariant?.variantVersion}
@@ -626,6 +631,11 @@ function RenderFromScreen({
     <div
       className={classes.root}
       data-screen-definition={screen.id}
+      data-mask-family={screen.maskVariant?.family}
+      data-mask-base-version={screen.maskVariant?.baseVersion}
+      data-mask-variant-id={screen.maskVariant?.variantId}
+      data-mask-variant-version={screen.maskVariant?.variantVersion}
+      data-mask-materialized-hash={screen.maskVariant?.materializedHash}
       data-document-base-version={screen.documentVariant?.baseVersion}
       data-document-variant-id={screen.documentVariant?.variantId}
       data-document-variant-version={screen.documentVariant?.variantVersion}
@@ -752,6 +762,10 @@ export function UniversalMaskRenderer({
   screenContext,
 }: UniversalMaskRendererProps): JSX.Element {
   const payload = data
+
+  if (!plan && screen && validateMaskVariantBinding(screen).length) {
+    throw new Error('Invalid mask family binding')
+  }
 
   if (region === 'sourceProposals') {
     const definition = plan?.sourceProposals ?? screen?.sourceProposals

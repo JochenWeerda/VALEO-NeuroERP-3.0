@@ -314,10 +314,10 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
         onClose={() => setReadView(null)} />}
       {aktion && auftrag && stufe === 'bestaetigung' && (
         <Dialog open onOpenChange={(offen) => { if (!offen && !sendet) schliessen() }}>
-          <DialogContent aria-describedby="liste-bestaetigung">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>{aktion.label}</DialogTitle>
-              <DialogDescription id="liste-bestaetigung">
+              <DialogDescription>
                 {ernst.has(aktion.dangerLevel ?? '')
                   ? 'Diese Aktion aendert den Vorgang. Bitte bestaetigen Sie die Ausfuehrung.'
                   : 'Aktion fuer den gewaehlten Eintrag ausfuehren?'}

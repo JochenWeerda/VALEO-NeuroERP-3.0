@@ -1,4 +1,4 @@
-// Offline security behavior contracts; no real HTTP or database connection.
+// Security behavior contracts use loopback-only HTTP; no external network or DB.
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { createRequire } = require('node:module');
@@ -9,6 +9,13 @@ const runtime = process.env.SECURITY_NODE_RUNTIME
   ? path.resolve(process.env.SECURITY_NODE_RUNTIME)
   : path.resolve(__dirname, '../node_modules/.pnpm/node_modules');
 const patched = createRequire(path.join(runtime, 'package.json'));
+
+test('incoming HTTP telemetry redacts sensitive query values', () => {
+  const { spawnSync } = require('node:child_process');
+  const result = spawnSync(process.execPath, ['--test', path.join(__dirname, 'test_http_telemetry_redaction.cjs')],
+    { encoding: 'utf8', timeout: 15000 });
+  assert.equal(result.status, 0, `${result.stdout}\n${result.stderr}`);
+});
 
 test('fast-copy bounds nesting and still copies cyclic business records', () => {
   const { default: copy, copyStrict, MaxDepthExceededError } = patched('fast-copy');

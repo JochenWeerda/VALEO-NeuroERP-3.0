@@ -66,7 +66,9 @@ Python 3.11 / FastAPI, SQLAlchemy 2.0, Alembic und PostgreSQL 15 (mehrere Schema
 
 ### Lokal entwickeln
 
-Voraussetzungen: Python 3.11, Node.js mit Corepack und pnpm 9.12.0, eine PostgreSQL-Entwicklungsdatenbank. Umgebungsvariablen anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten. **Zugangsdaten gehören in die lokale `.env`, nie ins Repository.**
+Voraussetzungen sind Python 3.11 ab 3.11.5, Node.js mit Corepack und pnpm 9.12.0 sowie eine konfigurierte PostgreSQL-Entwicklungsumgebung. Umgebungsvariablen und Zugangsdaten anhand von [.env.example](.env.example) und der [Frontend-Vorlage](packages/frontend-web/.env.example) einrichten; Schema und Authentifizierung müssen zur Konfiguration passen. **Zugangsdaten gehören in die lokale `.env`, nie ins Repository.**
+
+Im Repository-Stamm mit einer bereits eingerichteten Entwicklungsdatenbank:
 
 ```sh
 python -m venv .venv
@@ -114,4 +116,18 @@ Weitere Einstiege: [Dokumentation](docs/README.md) · [Benutzerhandbuch](docs/be
 - **Studio-built screens.** Document screens form a versioned family: each document type is a variant of one layout, so whoever can work an order can work every document in the chain.
 - **Quality ratchets.** More than 4,900 backend tests, many against a real PostgreSQL schema. Migrations are verified on a freshly built test database. CI checks generated contracts for drift.
 
-Current focus: making DocFlow the single document store across sales and purchasing (BELEG-052); see the [document screen master plan](docs/design/belegmaske-varianten-masterplan.md). For local setup use the [commands above](#lokal-entwickeln). Keep credentials in your local `.env`, never in the repository. Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).
+Current focus: making DocFlow the single document store across sales and purchasing (BELEG-052); see the [document screen master plan](docs/design/belegmaske-varianten-masterplan.md).
+
+### Our ambition
+
+VALEO aims to become a premium platform for agricultural trade by bringing together domain depth in agriculture, end-to-end document-linked agent actions, versioned interfaces and adaptive workspaces. This is the product direction; implementation and release proceed incrementally by process and channel.
+
+### Value for agricultural trade
+
+Our goal is to extend the transaction strength expected from premium ERP with a connected workspace for execution and adaptation: contract-to-settlement agricultural workflows; conversational design of versioned screens and processes with simulation and approval; the same governed domain commands for people, CLI and MCP; and contextual workspaces connecting documents, approvals, operational events and next actions. This combination of agricultural specialization and controlled adaptability is VALEO's intended value proposition. Time, cost and quality benefits are assessed per accepted workflow.
+
+### Platform and next development goals
+
+VALEO is an actively developed suite with a Python/FastAPI backend, a React/TypeScript frontend and domain packages. The [Process Kernel Status](docs/architecture/process-kernel/STATUS.md) documents delivered process waves. The roadmap includes functional parity and release of further Studio screens, the adaptive workspace and expanded controlled agent actions. Scope and maturity vary by workflow; external operational and domain approvals require separate evidence. See the [runtime status](docs/architecture/uix/universal-mask-runtime-status.md), [development roadmap](docs/project-context/open-gaps-and-known-issues.md), [workboard](docs/agent-ops/active-workboard.md) and [production readiness runbook](docs/operations/production-readiness-runbook.md).
+
+For local setup, use the [commands above](#lokal-entwickeln) with Python 3.11.5 or later in the 3.11 series, Node.js/Corepack, pnpm 9.12.0 and an already configured PostgreSQL development database. Configure the supplied environment templates first; keep credentials in your local `.env`, never in the repository. For database tests, reuse the shared environment and follow the [resource policy](docs/quality-assurance/test-database-resource-policy-20261001.md). Start contributions with [AGENTS.md](AGENTS.md) and the [documentation overview](docs/README.md).

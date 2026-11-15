@@ -4,6 +4,9 @@ This directory prepares VALEO NeuroERP 3.0 for Anthropic's OSS Scanner.
 
 - `Dockerfile` installs the Python and pnpm dependency trees, compiles the
   application and leaves the checkout ready for an offline security analysis.
+  It retains Node 24 and takes Python 3.11.18 from the official Bookworm Python
+  image; the Bookworm distribution Python is too old for the security-pinned
+  Soup Sieve. Both image stages use Bookworm for runtime compatibility.
 - `threat_model.md` defines trust boundaries, high-value components, severity
   rules and safe reporting expectations.
 

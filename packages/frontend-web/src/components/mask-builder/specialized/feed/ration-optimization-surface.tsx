@@ -3730,6 +3730,7 @@ function Workbench({
   onGoWizard,
   onApplySuggestionPatch,
   onFrameworkChange,
+  onDirty,
   previewResult,
   previewIntent,
   previewPending,
@@ -3753,6 +3754,7 @@ function Workbench({
   onGoWizard: () => void
   onApplySuggestionPatch: (patch: RationAdjustmentApplyPatch) => void
   onFrameworkChange: (partial: Partial<Pick<WizardData, 'milkYield' | 'feedingType'>>) => void
+  onDirty: () => void
   previewResult: OptimizationResult | null
   previewIntent: IntentKey | null
   previewPending: boolean
@@ -3964,6 +3966,7 @@ function Workbench({
                 defaultValue={wizardData?.milkYield ?? ''}
                 disabled={!canEditRation}
                 aria-label="Leistungsniveau kg ECM je Kuh und Tag; Enter berechnet neu"
+                onChange={onDirty}
                 onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
                 onBlur={(e) => {
                   const v = e.target.valueAsNumber
@@ -4312,6 +4315,7 @@ function Workbench({
                               : 'Im Demo-Modus nicht editierbar — eigene Ration über „Neue Ration" starten'}
                             // RATION-WB-20: Live-Vorschau beim Tippen; Enter erzwingt den sofortigen Commit.
                             onChange={(e) => {
+                              onDirty()
                               const v = e.target.valueAsNumber
                               if (!Number.isFinite(v) || v < 0) return
                               handleDraftKgFm(item.feed_id, v)
@@ -4344,6 +4348,7 @@ function Workbench({
                           placeholder="–"
                           aria-label={`Untergrenze ${item.name} in kg Frischmasse je Tag`}
                           title="Untergrenze (kg FM/Tag); leer = keine Untergrenze. Enter berechnet neu."
+                onChange={onDirty}
                           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
                           onBlur={(e) => {
                             const raw = e.target.value.trim()
@@ -4368,6 +4373,7 @@ function Workbench({
                           placeholder="–"
                           aria-label={`Obergrenze ${item.name} in kg Frischmasse je Tag`}
                           title="Obergrenze (kg FM/Tag); leer = Solver-Standard. Enter berechnet neu."
+                onChange={onDirty}
                           onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur() }}
                           onBlur={(e) => {
                             const raw = e.target.value.trim()
@@ -5892,12 +5898,22 @@ export default function Rationsoptimierung() {
   const [wizardData, setWizardData] = useState<WizardData | null>(null)
   const [result, setResult] = useState<OptimizationResult | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const calculationRevision = useRef(0)
+  const validCalculation = useRef(false)
+  const [resultCurrent, setResultCurrent] = useState(false)
+  const invalidateCalculation = () => {
+    calculationRevision.current += 1
+    validCalculation.current = false
+    setResultCurrent(false)
+    return calculationRevision.current
+  }
 
   const lifecycleMutation = useMutation({
     onMutate: () => setError(null),
     mutationFn: async () => {
       if (demoMode) throw new Error('Demoergebnisse dürfen nicht eingereicht werden.')
-      if (!result || !wizardData || result.status !== 'optimal') throw new Error('Keine gültige berechnete Ration vorhanden.')
+      if (!validCalculation.current || !result || !wizardData || result.status !== 'optimal') throw new Error('Keine gültige berechnete Ration vorhanden.')
+      const submittedRevision = calculationRevision.current
       const group = await ensureFeedingGroup({
         external_ref: wizardData.group.id,
         name: wizardData.group.name,
@@ -5930,6 +5946,7 @@ export default function Rationsoptimierung() {
         components,
       }
       const readiness = await evaluateFeedReadiness({ mobile })
+      if (submittedRevision !== calculationRevision.current) throw new Error('Die Ration wurde zwischenzeitlich geändert. Bitte erneut berechnen.')
       const ration = await createRationDraft({
         group_id: group.id,
         name: `${wizardData.group.name} · ${new Date().toLocaleDateString('de-DE')}`,
@@ -5947,6 +5964,7 @@ export default function Rationsoptimierung() {
           readiness,
         },
       })
+      if (submittedRevision !== calculationRevision.current) throw new Error('Die Ration wurde zwischenzeitlich geändert. Der Entwurf wurde nicht eingereicht.')
       await transitionRationVersion({
         versionId: ration.latest_version_id,
         expectedStatus: 'draft',
@@ -5965,6 +5983,7 @@ export default function Rationsoptimierung() {
   const [previewIntent, setPreviewIntent] = useState<IntentKey | null>(null)
   const [previewResult, setPreviewResult] = useState<OptimizationResult | null>(null)
   const previewWizardRef = useRef<WizardData | null>(null)
+  const previewRevisionRef = useRef<number | null>(null)
 
   // Demo-Modus
   const [demoMode, setDemoMode] = useState(false)
@@ -5983,7 +6002,11 @@ export default function Rationsoptimierung() {
 
   const optimizeMutation = useMutation({
     mutationFn: (nextWizardData: WizardData | null) => runOptimizeForWizard(nextWizardData, feeds),
-    onSuccess: (data) => {
+    onMutate: () => invalidateCalculation(),
+    onSuccess: (data, _variables, revision) => {
+      if (revision !== calculationRevision.current) return
+      validCalculation.current = true
+      setResultCurrent(true)
       setResult(data)
       setError(null)
       setView('workbench')
@@ -5995,7 +6018,8 @@ export default function Rationsoptimierung() {
         }
       })
     },
-    onError: (err: unknown) => {
+    onError: (err: unknown, _variables, revision) => {
+      if (revision !== calculationRevision.current) return
       setError(getRationsApiErrorMessage(err, 'Optimierung fehlgeschlagen'))
     },
   })
@@ -6005,18 +6029,24 @@ export default function Rationsoptimierung() {
   const editMutation = useMutation({
     mutationFn: (nextWizardData: WizardData | null) =>
       runOptimizeForWizard(nextWizardData, feeds, { computeTechnicalMax: false }),
-    onSuccess: (data) => {
+    onMutate: () => invalidateCalculation(),
+    onSuccess: (data, _variables, revision) => {
+      if (revision !== calculationRevision.current) return
+      validCalculation.current = true
+      setResultCurrent(true)
       setResult(data)
       setError(null)
       setView('workbench')
       setWizardData((prev) => (prev ? { ...prev, wizardBaselineKgDm: rationItemsToBaselineKgDm(data.ration_items ?? []) } : prev))
     },
-    onError: (err: unknown) => {
+    onError: (err: unknown, _variables, revision) => {
+      if (revision !== calculationRevision.current) return
       setError(getRationsApiErrorMessage(err, 'Neuberechnung fehlgeschlagen'))
     },
   })
 
   const openWizardFresh = useCallback(() => {
+    invalidateCalculation()
     setDemoMode(false)
     setDemoOverlay(false)
     setTourStep(null)
@@ -6032,6 +6062,7 @@ export default function Rationsoptimierung() {
   }, [])
 
   const openWizardReoptimize = useCallback((data: WizardData) => {
+    invalidateCalculation()
     setWizardBoot((b) => ({ key: b.key + 1, resumeFrom: data, initialStep: 2 }))
     setView('wizard')
   }, [])
@@ -6126,6 +6157,7 @@ export default function Rationsoptimierung() {
       if (!wizardData || previewMutation.isPending) return
       const overrideWd = intent.apply(wizardData)
       previewWizardRef.current = overrideWd
+      previewRevisionRef.current = calculationRevision.current
       setPreviewIntent(intent.key)
       setPreviewResult(null)
       previewMutation.mutate(overrideWd)
@@ -6134,7 +6166,10 @@ export default function Rationsoptimierung() {
   )
 
   const handleAcceptPreview = useCallback(() => {
-    if (!previewResult || !previewWizardRef.current) return
+    if (!previewResult || !previewWizardRef.current || previewRevisionRef.current !== calculationRevision.current) return
+    calculationRevision.current += 1
+    validCalculation.current = true
+    setResultCurrent(true)
     setResult(previewResult)
     setWizardData(previewWizardRef.current)
     setPreviewResult(null)
@@ -6154,6 +6189,7 @@ export default function Rationsoptimierung() {
   }
 
   function handleReset() {
+    invalidateCalculation()
     setWizardData(null)
     setResult(null)
     setError(null)
@@ -6312,6 +6348,7 @@ export default function Rationsoptimierung() {
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
             onApplySuggestionPatch={handleApplySuggestionPatch}
             onFrameworkChange={handleFrameworkChange}
+            onDirty={invalidateCalculation}
             previewResult={previewResult}
             previewIntent={previewIntent}
             previewPending={previewMutation.isPending}
@@ -6340,7 +6377,7 @@ export default function Rationsoptimierung() {
               lifecycleMutation.mutate()
             }}
             isFinalizing={lifecycleMutation.isPending}
-            canSubmit={!demoMode && result?.status === 'optimal'}
+            canSubmit={!demoMode && resultCurrent && result?.status === 'optimal'}
             submissionError={error}
             isOptimizing={isOptimizing}
             onGoWizard={() => (wizardData ? openWizardReoptimize(wizardData) : openWizardFresh())}
