@@ -886,6 +886,7 @@
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -1288,7 +1289,7 @@
       "version": "1.0.0"
     },
     "agrar/saatgut/sorte": {
-      "definition_hash": "cb75287201498fbfd2e73503b0543ad2e48fb5006e5ad36292ac05160566eaea",
+      "definition_hash": "51e41b4926c13583453c9a0b2478b9e15902b1f4cfbad770749e8f3bed5eb807",
       "gates_passed": [
         "A",
         "B",
@@ -4328,6 +4329,7 @@
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4338,6 +4340,7 @@
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4348,6 +4351,7 @@
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4457,6 +4461,7 @@
       "gates_passed": [
         "A",
         "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -8189,7 +8194,7 @@
       "version": "1.0.0"
     },
     "workspace/einkauf": {
-      "definition_hash": "80796af80dd2bca9ec9f4343271d94c660f6b034b05b86afa7f836a7934f00a0",
+      "definition_hash": "18b5330d6605cecbbee0e6deb9d58bb69889f969d14af4bb3934ea44b4074d4a",
       "gates_passed": [
         "A",
         "B",
