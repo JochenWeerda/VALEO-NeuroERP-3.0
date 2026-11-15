@@ -86,9 +86,18 @@ class SalesCreditService:
 
     def _billing(self, order_id: str) -> list[dict]:
         rows = self.db.execute(
-            text("SELECT delivery_note_number, invoice_number, status, delivery_date "
-                 "FROM domain_sales.delivery_notes WHERE sales_order_id::text = :oid AND tenant_id = :t "
-                 "ORDER BY delivery_date"),
+            # Lieferscheine und ihre Rechnung aus DocFlow (BELEG-052); stornierte zaehlen nicht.
+            text(
+                "SELECT d.doc_number AS delivery_note_number, d.document_date AS delivery_date, d.status, "
+                "(SELECT r.doc_number FROM domain_docflow.document_header_links kr   JOIN "
+                "domain_docflow.document_headers r ON r.id = kr.to_header_id AND r.tenant_id = kr.tenant_id   "
+                "WHERE kr.tenant_id = d.tenant_id AND kr.from_header_id = d.id   AND kr.relation_type = "
+                "'delivery_to_invoice' AND r.deleted_at IS NULL   AND r.status NOT IN ('cancelled', 'reversed') "
+                "ORDER BY kr.created_at LIMIT 1) AS invoice_number FROM domain_docflow.document_header_links k "
+                "JOIN domain_docflow.document_headers d ON d.id = k.to_header_id AND d.tenant_id = k.tenant_id "
+                "WHERE k.tenant_id = :t AND k.from_header_id = :oid AND k.relation_type = 'order_to_delivery' "
+                "AND d.deleted_at IS NULL AND d.status NOT IN ('cancelled', 'reversed') ORDER BY d.document_date"
+            ),
             {"oid": order_id, "t": self.tenant_id},
         ).mappings().all()
         return [{"lieferschein": r["delivery_note_number"], "rechnung": r["invoice_number"],

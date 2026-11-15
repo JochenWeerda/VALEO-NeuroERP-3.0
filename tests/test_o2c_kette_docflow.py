@@ -115,3 +115,34 @@ def test_stornierter_lieferschein_zaehlt_nicht_und_fremder_mandant_sieht_nichts(
     assert O2CChainService(k["db"], "anderer-mandant").trace(auftragsnummer) == {
         "found": False, "detail": "Auftrag nicht auflösbar."}
     assert O2CChainService(k["db"], "anderer-mandant").list_orders() == []
+
+
+def test_positionsabgleich_und_abrechnungsstand_folgen_der_teilumwandlung(k):
+    """Geliefert ist die umgewandelte Menge je Position; die Abrechnungsuebersicht zeigt Lieferschein und Rechnung."""
+    from app.api.v1.schemas.docflow_schemas import DocflowConvertRequest
+    from app.services.sales_credit_service import SalesCreditService
+    from app.services.sales_match_service import SalesMatchService
+
+    auftrag, auftragsnummer = _auftrag(k)
+    position = k["db"].execute(sa.text("SELECT id FROM domain_docflow.document_items WHERE header_id = :id"),
+                               {"id": auftrag}).scalar()
+    abgleich = SalesMatchService(k["db"], k["t"])
+    offen = abgleich.match(auftragsnummer)
+    assert offen["positionen"][0]["status"] == "offen" and offen["summary"]["lieferscheine"] == 0
+
+    teil = _svc(k).convert(auftrag, DocflowConvertRequest(
+        target_doc_type="sales_delivery", idempotency_key=f"conv-{uuid.uuid4().hex}",
+        quantities_by_source_item_id={str(position): 4}))["target_doc_id"]
+    stand = abgleich.match(auftrag)
+    zeile = stand["positionen"][0]
+    assert (zeile["status"], float(zeile["geliefert"]), float(zeile["offen"])) == ("teilgeliefert", 4.0, 6.0)
+    assert zeile["wert_offen"] == 120.0  # 6 dt zu 20 EUR
+    assert [ls["lieferschein"] for ls in stand["lieferscheine"]] == [_nummer(k, teil)]
+    assert next(z for z in abgleich.list_orders() if z["order_number"] == auftragsnummer)["hat_lieferschein"] is True
+
+    kredit = SalesCreditService(k["db"], k["t"])
+    assert kredit._billing(auftrag) == [{"lieferschein": _nummer(k, teil), "rechnung": None,
+                                         "billing_status": "offen", "datum": kredit._billing(auftrag)[0]["datum"]}]
+    rechnung = _wandle(k, teil, "sales_invoice")
+    assert kredit._billing(auftrag)[0]["rechnung"] == _nummer(k, rechnung)
+    assert kredit._billing(auftrag)[0]["billing_status"] == "berechnet"

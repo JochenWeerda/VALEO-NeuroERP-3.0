@@ -58,3 +58,17 @@ def test_der_lieferschein_altspeicher_hat_keinen_schreiber_mehr():
     tabellen = {t for ts in _schreiber().values() for t in ts}
     assert not tabellen & {"domain_sales.delivery_notes", "domain_sales.delivery_note_positions",
                            "domain_sales.sales_delivery_notes"}
+
+
+LESEN_LIEFERSCHEIN = re.compile(r"(FROM|JOIN)\s+domain_sales\.(delivery_notes|delivery_note_positions|sales_delivery_notes)\b",
+                                re.I)
+
+
+def test_der_lieferschein_altspeicher_hat_keinen_leser_mehr():
+    """Seit Schnitt S2 (15.11.2026) lesen alle den DocFlow-Lieferschein; der Altspeicher ist leer und faellt weg."""
+    leser = []
+    for ordner in ("app", "modules"):
+        for pfad in (WURZEL / ordner).rglob("*.py"):
+            if LESEN_LIEFERSCHEIN.search(pfad.read_text(encoding="utf-8", errors="ignore")):
+                leser.append(pfad.relative_to(WURZEL).as_posix())
+    assert leser == [], f"Leser des Lieferschein-Altspeichers - DocFlow lesen: {leser}"
