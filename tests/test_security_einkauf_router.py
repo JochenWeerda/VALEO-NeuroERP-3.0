@@ -1,5 +1,4 @@
 """Tenant regressions exercise the leading purchasing handlers and real service."""
-from datetime import date
 from unittest.mock import MagicMock
 
 import pytest

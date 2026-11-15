@@ -11,7 +11,6 @@ Darunter: Der Bestelldienst rief ``repo.save`` auf, eine Methode, die
 
 from __future__ import annotations
 
-import json
 import os
 import uuid
 

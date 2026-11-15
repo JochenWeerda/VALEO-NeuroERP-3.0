@@ -16,7 +16,6 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 from sqlalchemy import text
 
 from app.core.database import SessionLocal

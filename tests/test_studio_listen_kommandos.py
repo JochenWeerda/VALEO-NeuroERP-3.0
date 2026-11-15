@@ -349,28 +349,6 @@ def bestell_aktion(client, kennung: str, aktion: str, body: dict) -> dict:
     return antwort.json()
 
 
-def test_bestellung_freigeben_nur_aus_dem_entwurf(engine, client):
-    kennung = bestellung(engine, "entwurf")
-    assert bestell_aktion(client, kennung, "freigeben", {})["success"] is True
-    assert bestell_status(engine, kennung) == "freigegeben"
-    assert bestell_aktion(client, kennung, "freigeben", {})["success"] is False
-
-
-def test_bestellung_stornieren_mit_grund_und_nur_einmal(engine, client):
-    kennung = bestellung(engine, "freigegeben")
-    assert bestell_aktion(client, kennung, "stornieren", {})["success"] is False
-    assert bestell_aktion(client, kennung, "stornieren", {"_auditReason": "Lieferant nicht lieferfaehig"})["success"]
-    assert bestell_status(engine, kennung) == "storniert"
-    assert bestell_aktion(client, kennung, "stornieren", {"_auditReason": "Noch einmal"})["success"] is False
-    assert bestell_aktion(client, kennung, "versenden", {})["success"] is False
-
-
-def test_bestellimport_meldet_keine_scheinwirkung(client):
-    antwort = client.post("/api/v1/einkauf/bestellungen/import", headers={"X-Tenant-ID": HAUS_A},
-                          files={"file": ("bestellungen.csv", b"nr;lieferant;1;Muehle", "text/csv")})
-    assert antwort.status_code == 501, antwort.text
-
-
 def test_bestellliste_liest_die_quelle_der_objektmaske():
     """Bestellliste und Belegmaske lesen denselben Speicher (DocFlow, BELEG-052); Freigeben, Umwandeln und
     Stornieren laufen in der Belegmaske je Beleg, nicht als Zeilenkommando auf einen Eigenspeicher."""
