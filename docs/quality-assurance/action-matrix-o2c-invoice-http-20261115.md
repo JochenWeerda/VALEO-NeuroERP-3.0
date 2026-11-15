@@ -1,6 +1,6 @@
 ---
 title: Action-Matrix O2C — Lieferschein zu Rechnungsbeleg per HTTP
-status: in arbeit
+status: HTTP-Teilnachweis abgenommen
 last_reviewed: 2026-11-15
 owner: Codex
 ---
@@ -86,3 +86,16 @@ sind Metadatenkommandos, keine PDF-Erzeugung. Eine PDF-/Archivabnahme muss desha
 den tatsaechlichen kanonischen DocFlow-Druckweg gesondert nachweisen, statt die
 Existenz eines Endpunkts als Wirkung auszugeben. Diese Hinweise sind Codeanalyse,
 keine ausgefuehrten Buchungs- oder PDF-Nachweise.
+
+## Echter CI-Nachweis
+
+Quellkopf 297373340e4f2a7fdde3dcf47ef580b9f6f5b5fc: kritischer Lauf
+43703326630 erfolgreich, 13 Faelle in 2,8 Sekunden. Der neue o2c-003-Fall
+bestand in 593 ms. Quality Gate 43703326532 einschliesslich Sonar-Job
+132787272367 erfolgreich; alle 67 PR137-Checks erfolgreich. Backend:
+28.497 bestanden, 72 uebersprungen, einer abgewaehlt, 1.206,11 Sekunden,
+76,10 Prozent Coverage. Frontend: 374 Dateien bestanden, 2.127 Faelle bestanden,
+131 bestehende erwartete Altfehlschlaege. Zahlen verschiedener Teilabnahmen
+werden nicht addiert. Der spaetere reine Fahrplan-/Workboard-Merge erfordert
+einen eigenen Integrationsnachlauf; diese Werte beziehen sich exakt auf
+den genannten Quellkopf, nicht automatisch auf main oder spaetere Commits.
