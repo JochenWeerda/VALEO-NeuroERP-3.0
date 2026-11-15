@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 796,
-    "screens_with_actions": 404,
+    "actions": 797,
+    "screens_with_actions": 405,
     "domains": 50
   },
   "actions": [
