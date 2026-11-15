@@ -77,7 +77,7 @@ def test_preise_gibt_es_nur_in_varianten_mit_preisen():
         assert ("menge_offen" in spalten) is bool(variante.folgebelege)
         assert ("buchungsstand" in felder) is variante.bucht
     lieferschein = sdb.build_beleg_screen_definition("sales_delivery")
-    assert _spalten(lieferschein, "positionen") == ["pos_nr", "artikel_nr", "bezeichnung", "menge", "einheit", "charge", "menge_offen"]
+    assert _spalten(lieferschein, "positionen") == ["pos_nr", "artikel_nr", "bezeichnung", "menge", "einheit", "charge", "kontrakt", "menge_offen"]
 
 
 def test_beschriftung_folgt_der_variante():

@@ -93,6 +93,7 @@ def beleg_positionsspalten(variante: Belegvariante) -> list[dict[str, Any]]:
         _spalte("menge", "Menge", numeric=True, sortable=True, renderKind="number"),
         _spalte("einheit", "Einheit", width=70),
         _spalte("charge", "Charge", width=120),
+        _spalte("kontrakt", "Kontrakt", width=120),
     ]
     if variante.folgebelege:
         spalten.append(_spalte("menge_offen", "Offen", numeric=True, renderKind="number"))
@@ -295,6 +296,7 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
         {"key": "quantity", "label": "Menge", "type": "number", "required": True},
         {"key": "unit", "label": "Einheit", "type": "text"},
         {"key": "charge", "label": "Charge", "type": "text"},
+        {"key": "contract_ref", "label": "Kontrakt", "type": "text"},
     ]
     if variante.mit_preisen:
         zeilenfelder += [

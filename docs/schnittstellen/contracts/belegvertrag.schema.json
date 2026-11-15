@@ -256,6 +256,18 @@
      "default": null,
      "title": "Einzelpreis"
     },
+    "kontrakt": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Kontrakt"
+    },
     "menge": {
      "anyOf": [
       {
