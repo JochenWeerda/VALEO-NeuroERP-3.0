@@ -18420,6 +18420,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/einkauf_ab_erfassung.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/purchase_invoice_verification.py",
@@ -19594,6 +19595,7 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/beleg_versand.py",
+            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_partner_suche.py",
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
@@ -30945,6 +30947,7 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/dms_images.py",
+            "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/export_service.py",
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
@@ -33302,6 +33305,7 @@
             "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/compliance.py",
             "app/api/v1/endpoints/crm_360.py",
+            "app/api/v1/endpoints/einkauf_lieferschein.py",
             "app/api/v1/endpoints/health.py",
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",

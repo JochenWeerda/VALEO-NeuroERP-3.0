@@ -27222,5 +27222,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 142
+  "event_count": 144
 }
