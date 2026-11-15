@@ -20943,3 +20943,11 @@ LOCAL-RUNTIME-2338578-20261115 Profilkonsolidierung: docker-compose.local-previe
 Ziel: echterChrome-NachweisaufdemneuenDockerfrontendzeigtgespeichertesDarkauf/publicLoginignoriert (html.darkfalse,beideModihell), obwohldieStudio-Loginmaskezentralrendert. Dateibesitz packages/frontend-web/src/main.tsx, hooks/useTheme.ts, neuergezielterBootstraptest, eigeneQA undkurzerZusatzdocs/design/valeo-meridian-experience.md. VorhandeneThemeinitialisierungzentralvorerstenRenderanwenden, keineLogin-Sonderseite/Renderer-/CSS-Fork, keineSchema-/API-/Rollen-/Mandantenaenderung. Abnahme roteGegenprobebisherigerBootstrap, gespeicherteSystempraeferenz/ungültigeroderblockierterStorage, ersteRenderreihenfolge; kleinerVitestlauf1Worker, Typecheck,echterChromeHell/DunkelmitScreenshotundKontrast. Migrations-/Backendquellebleibt2338578d0;keineClaudeMigrationen/neuenDB/Container. WeitereFrontendbauaktionnurseriellimfreienRessourcenfenster. AktuelleOps-ProfileundSQL-Nachweisedavongetrenntdokumentieren.
 
 LOCAL-RUNTIME-2338578-20261115 SQL-/Dienstumstellung abgeschlossen und fuerClaude freigegeben:17erRollbackmit439Tabellenhashesidentisch, danachregulaeresUpgradebiswms_pickposition_stand_20261110nurQuelle2338578d0;659RLS-Tabellen,aktuelleBackend-/Frontendimagesgesund, /health200/DocFlowunauth401, realerBrowser3000/3001login. KeineClaudeMigrationgestempelt/fremdeDBangefasst. Claude darf eigenstaendigeArbeitaufBranchesundbestehendervaleo_claude_testfortsetzen; grosseTests/Buildsweiterabstimmen. CodexnurkleinerTheme-Frontendtest,keineaktuelleSQL-/Buildlast. Handoffcodex-an-claude-runtime-20261115.mdaktualisiert.
+
+### UIX-PUBLIC-THEME-BOOTSTRAP-20261115 – Implementierung geprueft
+
+Codex: gemeinsamer Theme-Start vor React-Render, inklusive Speicherfehler-Fallback.
+Gegenprobe 5/7 rot vor Fix; danach 86 gezielte Tests gruen (8 Bootstrap/Speicher,
+78 bestehende Studio-Kontrastfaelle). QA: theme-bootstrap-20261115.md.
+Offen bleiben Neubau und reale Browserabnahme des korrigierten Frontends.
+Keine SQL-Operationen; Claude bleibt fuer seine bestehenden Branches/DB freigegeben.
