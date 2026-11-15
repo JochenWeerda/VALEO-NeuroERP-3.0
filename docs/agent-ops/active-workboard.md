@@ -21120,3 +21120,11 @@ SELECT-Rechten auf alembic_version. Kein Grant/Reset und keine DDL ausgefuehrt.
 Schemaarbeit und unabhaengige Pruefungen laufen weiter; echte Schemaabnahme erst
 im freigegebenen bestehenden Pruefstand bzw. vorhandener CI-Jobdatenbank.
 PR137 bleibt unveraendert8c6d20b2d; keine erneute CI durch Zwischenstaende.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 Nachweisweg: Lead besitzt zusaetzlich
+.github/workflows/pytest-postgres-require-db.yml nur fuer Export/Upload der
+echten Schema-Inventare nach vorhandener Jobmigration und vor unveraenderten
+strict-DB-Tests. Ein vorhandener PostgreSQL-Job, keine Zusatzdatenbank oder
+weiterer Container. Diese Artefakte liefern den physischen Tabellenkatalog,
+solange der gemeinsame lokale Pruefstand Metadatenrechte nicht bereitstellt.
+Keine Testselektion schwaechen, kein Datenbefund oder Geheimnis im Export.
