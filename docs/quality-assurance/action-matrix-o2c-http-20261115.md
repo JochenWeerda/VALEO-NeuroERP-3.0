@@ -7,8 +7,8 @@ owner: Codex
 
 # ACTION-MATRIX-O2C-HTTP-20261115
 
-Arbeitsbasis: Branch `codex/o2c-real-contract-20261115`, Claim `16d9f5b33`,
-Produktbasis `e8a2e92d5`, Claim-Klarstellung `a1f4867aa`. Der Nachweis ist vorbereitet, noch nicht fachlich
+Arbeitsbasis: Branch `codex/o2c-real-contract-20261115`, Claim `ACTION-MATRIX-O2C-HTTP-20261115`,
+Produktbasis `e9ae5cab6` (integrierter, auf `e8a2e92d5` gepruefter Stand). Der Nachweis ist vorbereitet, noch nicht fachlich
 abgenommen. Keine Matrix-Statusanhebung und kein erfolgreicher HTTP-Lauf behauptet.
 
 ## Aenderung und Testidentitaeten
@@ -94,3 +94,4 @@ entsprechende Evidenzverknuepfung; auch das ist keine automatische Statusanhebun
 
 Dateibesitz unveraendert: O2C-Spec und diese QA; keine Aenderung an Auth, CI,
 Produktquellen, Matrix-YAML, Generator, gemeinsamen Docs oder Datenbank.
+
