@@ -1,6 +1,6 @@
 # Simulierte externe Production-Readiness-Pruefung
 
-Stand: 2026-07-06
+Stand: 2026-11-15
 
 > Eine Simulation ersetzt keine gesetzliche Zertifizierung, Herstellerpruefung oder Unterschrift.
 > Fehlende Live-Evidenz bleibt ein blockierendes externes Gate.
