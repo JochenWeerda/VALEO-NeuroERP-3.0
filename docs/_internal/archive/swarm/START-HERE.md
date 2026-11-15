@@ -21,7 +21,7 @@ Das Script:
 # .env.swarm erstellen/bearbeiten
 $env:NEUROERP_URL="http://localhost:3000"
 $env:NEUROERP_USER="admin"
-$env:NEUROERP_PASS="admin123"
+$env:NEUROERP_PASS="<ADMIN_PASSWORT>"
 ```
 
 ### 2️⃣ Frontend prüfen/starten
