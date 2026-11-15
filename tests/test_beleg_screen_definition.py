@@ -97,6 +97,13 @@ def test_aktionen_kommen_aus_dem_verzeichnis_und_der_variante(belegart):
     # Belegdruck (BELEG-052 Stufe 2b) ist ein Leseweg ohne Kommando: PDF aus dem Belegvertrag.
     druck = alle.pop("drucken")
     versand = alle.pop("versenden")
+    erechnung = alle.pop("erechnung", None)
+    if belegart in ("sales_invoice", "sales_credit_memo"):
+        # E-Rechnung: erst erzeugen und archivieren (Kommando), dann das archivierte Original laden.
+        assert erechnung["commandEndpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/actions/erechnung"
+        assert erechnung["download"]["endpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/erechnung"
+    else:
+        assert erechnung is None
     assert versand["commandEndpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/actions/versenden"
     assert versand["permission"] == "belege.ausstellen" and versand["forbiddenForAgents"] is True
     assert druck["download"]["endpoint"] == f"/api/v1/belege/{belegart}/{{entity_id}}/druck"

@@ -378,6 +378,7 @@ domains:
       - beleg_liste
       - beleg_druck
       - beleg_anlage
+      - beleg_erechnung
       - gutschrift_docflow
       - doc_nachweisraum_
       - audit_hardening
@@ -391,6 +392,7 @@ domains:
       - kontrolle
       - belege
       - beleg_versand
+      - beleg_erechnung
       - beleg_import
       - gutschrift_vorschlaege
       - docflow
