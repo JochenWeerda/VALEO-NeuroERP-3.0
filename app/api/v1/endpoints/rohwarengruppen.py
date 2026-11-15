@@ -321,8 +321,14 @@ def create_schema(
 
 @router.get("/{gruppe_id}/schemata", response_model=list[AbrechnungsschemaOut], summary="Schemata einer Rohwarengruppe auflisten")
 def list_gruppe_schemata(gruppe_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
-    schemas.group_id(db, tenant_id, group_id=gruppe_id)
-    return list_schemata(gruppe_id=gruppe_id, db=db, tenant_id=tenant_id)
+    try:
+        schemas.group_id(db, tenant_id, group_id=gruppe_id)
+        return list_schemata(gruppe_id=gruppe_id, db=db, tenant_id=tenant_id)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(503, "Datenbank nicht verfügbar") from None
 
 
 # ── Qualitätsdefinitionen ─────────────────────────────────────────────────────

@@ -259,3 +259,14 @@ def test_legacy_activation_uses_business_day(monkeypatch):
     schemas.create(db, 'tenant', schema_code='S', name='Probe', group='own', activate=True)
     assert db.execute.call_args.args[1]['valid_from'] == business_day
     assert db.execute.call_args.args[1]['active'] is True
+
+
+@pytest.mark.parametrize('failure', ['probe', 'query'])
+def test_group_detail_database_failure_is_neutral_and_rolls_back(client, failure):
+    http, db, _ = client
+    db.fail = failure
+    response = http.get('/api/v1/rohware/gruppen/ga/schemata', headers=TOKEN)
+    assert response.status_code == 503
+    assert 'private SQL secret' not in response.text
+    assert db.rollbacks == 1
+    assert db.commits == 0
