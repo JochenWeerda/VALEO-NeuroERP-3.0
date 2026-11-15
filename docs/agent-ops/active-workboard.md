@@ -21088,3 +21088,35 @@ Identitaetsattrappen, keine echte RLS-Abnahme. Nutzervorgabe danach erweitert:
 fehlende Tabellen/Routen tatsaechlich ergaenzen, auf vorhandenen kanonischen
 Rohware-Stamm aufbauen und keine zweite unabhaengige Schema-Stammtabelle.
 Getrennte Architektur-/Migrationsclaims folgen vor strukturellen Edits.
+
+## M0-SCHEMA-BUDGET-ROHWARE-20261115 — reserviert, Codex
+
+Nutzerauftrag15.11: fehlende Tabellen und Routen ergaenzen. Strukturentscheidung:
+Budgetplaene/-zeilen in domain_finance als tenantgebundene Tabellen einfuehren;
+Konten referenzieren das fuehrende Journal domain_erp.chart_of_accounts, optionale
+Kostenstellen domain_finance.kostenstellen. Rohware nutzt den vorhandenen
+Stamm domain_shared.rohware_abrechnungsschemata, erweitert um Gueltigkeit,
+Bearbeitungsstatus/Version und zugeordnete Formelpositionen, keinen zweiten
+unabhaengigen Schema-Katalog. Vorhandene Gruppen-/Qualitaets-/Staffelverbraucher
+erhalten; Gruppenzuordnung mandantensicher. Die bestehende Pfadabweichung
+GET /rohware/gruppen/{gruppe_id}/schemata schliessen. Ein eigener Budget-
+Positions-Leseweg nur wenn realer vorhandener Verbraucher ihn benoetigt.
+
+Besitz Budget-Subagent: app/api/v1/endpoints/budget_planning.py, Migration
+alembic/versions/budget_planning_schema_20261115.py (Parent docflow_position_kontrakt_20261110),
+eigene neue Budget-Schema-/PostgreSQL-Vertraege und QA; bereits geschuetzten
+Istwertfehlerpfad erhalten und denselben Fehler in vs-actual schliessen.
+Besitz Rohware-Subagent: vorhandener Rohware-Schemarouter und Gruppenrouter,
+bei Bedarf zentraler Fachservice, Migration rohware_schema_canonical_20261115.py
+(Parent budget_planning_schema_20261115), vorhandene neue Rohware-Vertraege,
+eigene neue SQL-Nachweise und QA. Keine fremden Beleg-/Kontraktdateien editieren.
+Lead: Integration, Architektur-/API-Artefakte, Workboard/Handshake, reale DB-/CI-
+Abnahme und Ressourcenkoordination. Keine lokalen DDL/Grants/Migrationen durch
+Subagenten; kein neuer Pruefstand/Container. RLS und tenantgebundene Fremdschluessel
+ab erster Migration, keine Standardmandanten oder SQL-Fehler als leere Erfolge.
+
+Pruefstandstatus als valeo_agent und read-only Migrationskennung scheitert an
+SELECT-Rechten auf alembic_version. Kein Grant/Reset und keine DDL ausgefuehrt.
+Schemaarbeit und unabhaengige Pruefungen laufen weiter; echte Schemaabnahme erst
+im freigegebenen bestehenden Pruefstand bzw. vorhandener CI-Jobdatenbank.
+PR137 bleibt unveraendert8c6d20b2d; keine erneute CI durch Zwischenstaende.
