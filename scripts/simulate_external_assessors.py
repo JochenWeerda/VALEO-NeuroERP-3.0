@@ -38,7 +38,7 @@ PROFILES = (
             Check(
                 "GOBD-01",
                 "Unveraenderbarkeit und Gegenbuchung",
-                ("app/services/finance_transaction_service.py", "tests/test_crm360_finance_handover.py"),
+                ("app/services/finance_transaction_service.py", "tests/test_finance_transaction_service.py"),
                 required_content=(("app/services/finance_transaction_service.py", "reversal"),),
             ),
             Check(
