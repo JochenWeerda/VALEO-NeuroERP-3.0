@@ -260,6 +260,11 @@ jobs:
           set -e
           node scripts/check_npm_backport_audit.cjs npm-audit-report.json "$audit_exit" npm-backport-decision.json
 
+      - name: Audit independently installed BFF dependencies
+        run: |
+          npm --prefix packages/bff/bff-web install --package-lock-only --ignore-scripts --no-audit
+          npm --prefix packages/bff/bff-web audit --omit=dev --json > bff-npm-audit-report.json
+
       - name: Upload dependency report
         uses: actions/upload-artifact@v4
         if: always()
@@ -269,6 +274,7 @@ jobs:
             pip-audit-report.json
             npm-audit-report.json
             npm-backport-decision.json
+            bff-npm-audit-report.json
   
   dependency-review:
     name: Dependency Review

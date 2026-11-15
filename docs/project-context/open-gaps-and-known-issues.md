@@ -2268,3 +2268,16 @@ DocFlow-Command bleibt fuehrend; neue preisfreie Restmengenabfrage, sichere
 Positionswahl und UI-/CLI-Uebersetzung sind gezielt geprueft. Die reale
 SQL-/OIDC-/Browserabnahme der Kette bleibt offen und erhoeht keinen Matrixstatus.
 [Nachweisgrenzen](../quality-assurance/docflow-teilmengen-eingabe-20261114.md).
+
+
+### DocFlow-Teilmengen / SQL-Nachweis — 15.11.2026
+
+Die isolierte PostgreSQL-Abnahme der Teilumwandlung ist belegt: drei Tests
+mit echter Wirkung, Replay, Konflikten, fremder Position und fremdem
+RLS-Kontext bestanden; Fachzugriffe als valeo_agent, Testdaten/ACLs per
+Transaktion zurueckgerollt. Dauerhafte Agentenrechte wurden nicht erweitert.
+[Nachweis und Grenzen](../quality-assurance/docflow-teilmengen-sql-20261115.md).
+OIDC-/Browserkette und die Aktion-zu-CI-Verknuepfung der Matrix bleiben
+getrennte offene Abnahmen. Die Backend-Vollsuite ist im neuen CI-Entwurf
+kanonisch im Quality Gate konzentriert; der Consumer verlangt dessen ganzen
+Erfolg und SHA-/Inhalts-/Ereignisnachweise. Reale GitHub-Abnahme bleibt Pflicht.
