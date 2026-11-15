@@ -235,8 +235,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `banken/zahlungsvorschlaege` | Zahlungsvorschlaege | finance | niedrig | — | `GET /api/v1/masks/banken/zahlungsvorschlaege/agent-contract` |
 | `beleg-liste/goods-receipt` | Wareneingänge | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/goods-receipt/agent-contract` |
 | `beleg-liste/purchase-credit-memo` | Einkaufsgutschriften | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-credit-memo/agent-contract` |
-| `beleg-liste/purchase-invoice` | Eingangsrechnungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-invoice/agent-contract` |
-| `beleg-liste/purchase-order` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
+| `beleg-liste/purchase-invoice` | Eingangsrechnungen | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/beleg-liste/purchase-invoice/agent-contract` |
+| `beleg-liste/purchase-order` | Bestellungen | einkauf | niedrig | `procure-to-pay` | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
 | `beleg-liste/sales-credit-memo` | Gutschriften | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-credit-memo/agent-contract` |
 | `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
 | `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |

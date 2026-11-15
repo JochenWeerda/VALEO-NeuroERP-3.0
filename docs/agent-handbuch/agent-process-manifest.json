@@ -251,6 +251,8 @@
         }
       ],
       "mask_ids": [
+        "beleg-liste/purchase-order",
+        "beleg-liste/purchase-invoice",
         "einkauf/supplier",
         "finance/payment-run"
       ]
@@ -12053,7 +12055,9 @@
       "mask_id": "beleg-liste/purchase-invoice",
       "title": "Eingangsrechnungen",
       "domain": "einkauf",
-      "process_keys": [],
+      "process_keys": [
+        "procure-to-pay"
+      ],
       "rollout_route": "/mask-rollout/beleg-liste__purchase-invoice/:entityId",
       "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-invoice/agent-contract",
       "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-invoice/screen-definition",
@@ -12139,7 +12143,9 @@
       "mask_id": "beleg-liste/purchase-order",
       "title": "Bestellungen",
       "domain": "einkauf",
-      "process_keys": [],
+      "process_keys": [
+        "procure-to-pay"
+      ],
       "rollout_route": "/mask-rollout/beleg-liste__purchase-order/:entityId",
       "agent_contract_url": "/api/v1/masks/beleg-liste/purchase-order/agent-contract",
       "screen_definition_url": "/api/v1/masks/beleg-liste/purchase-order/screen-definition",
