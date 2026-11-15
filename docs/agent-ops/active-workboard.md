@@ -21019,3 +21019,9 @@ ohne Token/geprueften Kontext, Spoofing allein oeffnet nichts. Externe Daten-
 und Authentifizierungsgrenzen im Unitvertrag simuliert; keine Datenbank, kein
 Docker, keine Aussage ueber echte GAP-Daten oder JWT-Verifikation. PR137-Kopf
 4c7c6374b bleibt waehrend seiner CI unveraendert.
+
+M0-CI-GESAMTBASIS-20261115 LeadPreview lokal abgenommen: sechs rote HTTP-
+Gegenproben vor Fix, danach zehn gruen. Gepruefter Mandantenkontext wird an
+Service uebergeben; kein neuer Fallback. Externe Identitaet/GAP-Daten simuliert,
+keine DB/Docker-Aktion. Echter RuntimeSweep des neuen SHA noch offen; QA
+m0-runtime-lead-preview-20261115.md. PR137 bleibt auf4c7c6374b unveraendert.
