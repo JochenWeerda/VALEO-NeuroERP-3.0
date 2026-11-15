@@ -21075,3 +21075,10 @@ beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaen
 eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
+
+## BELEG-052-LS-SCHREIBER-S1-20261115 — in Arbeit, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: niemand schreibt mehr in den Lieferschein-Altspeicher domain_sales.delivery_notes. Entfernt: alter Lieferschein-Storno (Router sales_storno, sales_storno_service, Frontend-Client lib/api/sales-storno.ts, UAT-Skript sales_o2c_lifecycle_uat.py) - kein Aufrufer in den Masken, DocFlow storniert selbst. Pickliste, Retoure und Zustellnachweis schreiben den Altspeicher nicht mehr fort. Neue Ratsche tests/test_altspeicher_schreiber_ratsche.py (Schreiber in Alt-Belegspeicher: nur noch einkauf_compat_service -> domain_einkauf.bestellungen).
+Dateibesitz: die genannten Module, app/services/warehouse_service.py (alter Zweig), app/api/v1/endpoints/sales_credit_notes.py, logistics_tours.py (Zustellnachweis), zugehoerige Tests und Projektionen. Keine neue .py ausserhalb tests/.
+Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
+Offener Fachrest: Der Zustellnachweis am Tourstopp aendert den Lieferschein-Stand nicht mehr (frueher: Altspeicher auf delivered). Ob der Nachweis den DocFlow-Lieferschein abschliessen soll, gehoert zur Referenzkette Tour/Kommissionierung (M4).
