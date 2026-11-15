@@ -122,6 +122,8 @@ class DocflowLineInput(BaseModel):
     expense_account: Optional[str] = Field(default=None, max_length=20)
     batch_id: Optional[str] = Field(default=None, max_length=64)
     charge: Optional[str] = Field(default=None, max_length=64)
+    # Kontraktnummer (domain_ops.kon_contract.contract_no des Mandanten); der Lieferschein bucht darauf den Abruf.
+    contract_ref: Optional[str] = Field(default=None, max_length=50)
 
 
 class PosComplianceInput(BaseModel):

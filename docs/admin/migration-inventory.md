@@ -176,6 +176,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `docflow_kopfbausteine_20261109` | DocFlow fuehrt die Kopfbausteine des Belegvertrags (BELEG-052). |
 | `docflow_pos_admin_dsfinvk_20260215` | docflow pos admin and dsfinvk export tables |
 | `docflow_pos_tse_compliance_20260215` | docflow pos tse compliance table |
+| `docflow_position_kontrakt_20261110` | DocFlow-Position fuehrt ihren Kontraktbezug (BELEG-052 Phase 1). |
 | `docflow_print_event_20260301` | Docflow: Druck/Export als Ereignis (printed_at, print_count) — GoBD Schritt 3 |
 | `docflow_returns_20260821` | Document return worklist and immutable status audit. |
 | `docflow_steuerschluessel_20261013` | DocFlow-Positionen tragen ihren Steuerschluessel. |
