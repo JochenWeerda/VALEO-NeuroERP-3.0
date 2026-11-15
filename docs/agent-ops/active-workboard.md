@@ -21003,13 +21003,13 @@ Dateibesitz: die genannten entfernten Module, zugehoerige Tests (u. a. test_lese
 Abnahme: gestaffelter Testsatz (158 Dateien) auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 Offen notiert: Freigabe-Subjekt finance_sales_invoice (app/services/finance_freigabe.py, kontrollkorb.py) hat nach dem Entfernen keinen Aufrufer ueber REST mehr - in Phase 5 pruefen und entfernen.
 
-## BELEG-052-EINKAUF-3A-20261110 — zur Abnahme, Claude Code (M1)
+## BELEG-052-EINKAUF-3A-20261110 — abgeschlossen (PR #144 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 2b. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: Einkaufszugaenge auf DocFlow. Frontend (Dashboard, Anlieferavis, KI-Freigaben) auf /belege/purchase_order bzw. purchase_invoice; MCP bestellung.list/status und ap_invoice.propose auf DocFlow; Belegkontrolle-Projektion auf DocFlow; Kommando docflow.store / Aktion Einlagern (Wareneingang bucht den Lagerzugang, Storno bucht zurueck); Anlieferavis-Wareneingang ueber DocFlow-Umwandlung; Belegfamilie 1.12.0.
 Dateibesitz: app/services/docflow_lagerzugang.py, zugehoerige Endpunkte/Kommandos, tests/test_einkauf_lesewege_docflow.py, genannte Frontend-Seiten, Projektionen.
 Abnahme: gestaffelter Testsatz auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 
-## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — in Arbeit, Claude Code (M1)
+## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — zur Abnahme, Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 3a. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: Einkaufs-Altwege entfernt, DocFlow fuehrt die Bestellung. Entfernt: Schreibrouten /purchase-orders (Compat), Eingangslieferschein-Wege, einkauf_bestellung_kommandos, purchase_order_service, command_handlers/procurement, MCP einkauf.bestellung.speichern/versenden, ScreenDefinitions einkauf/purchase-order und finance/ap-invoice. Neu: Angebot/Anfrage legen DocFlow-Entwuerfe an; GET /belege/{art}/kennzahlen speist die Cockpits. Keine neue .py ausserhalb tests/.
 Dateibesitz: die genannten entfernten Module und Masken, app/core/screen_definitions_cockpit.py (Einkauf-Cockpit), config/adaptive_workspace_fachaktionen.yaml (Eingangsrechnung zeigt auf die Belegliste), scripts/agent_handbuch_sources.py, zugehoerige Tests und Projektionen.
