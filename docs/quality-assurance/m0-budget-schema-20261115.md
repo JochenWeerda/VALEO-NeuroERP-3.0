@@ -42,7 +42,7 @@ Nullverbrauch. Eine fehlende Plan-ID ergibt 404.
   Fremdschluessel und eigener Lebenszyklus wurden geprueft.
 - Der erweiterte PostgreSQL-Vertrag prueft jetzt zusaetzlich: positive Aenderung
   vor Genehmigung, danach abgewiesenes Ergaenzen und Aendern, unveraenderter Betrag
-  und unveraenderte Positionszahl. Dieser erweiterte Nachweis ist noch ausstehend.
+  und unveraenderte Positionszahl. Dieser erweiterte Nachweis bestand im StrictDB-Lauf 43755370395 auf 249006062 (692 passed / 3 skipped insgesamt).
 - Keine neue Datenbank oder Dockerinstanz pro Test. Die kanonische Pruefhilfe
   rollt alle eigenen Daten und Transaktionen zurueck.
 

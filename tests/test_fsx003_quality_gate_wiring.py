@@ -35,7 +35,10 @@ def test_fsx_gates_haengt_nicht_hinter_der_backend_kaskade() -> None:
     backend = _job_block("backend")
     assert "fsx-gates" not in backend
     assert "fsx-003-gates" not in backend
-    assert "needs: [secret-scan]" in backend
+    match = re.search(r"(?m)^\s+needs:\s*\[([^]]+)\]", backend)
+    assert match, "Backend needs declaration missing"
+    dependencies = {value.strip() for value in match.group(1).split(',')}
+    assert {'secret-scan', 'improvement-integrity'} <= dependencies
 
 
 def test_fsx_gates_fuehrt_provenance_bindung_und_frontend_aus() -> None:

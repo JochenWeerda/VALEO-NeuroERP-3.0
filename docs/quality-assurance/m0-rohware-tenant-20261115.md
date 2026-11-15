@@ -76,3 +76,13 @@ wurde nach Pruefung auf fehlende Nutzung entfernt.
 Keine lokale/live Migration, kein Browser-Schreibnachweis und keine neue
 MCP-Schreibfreischaltung. Der geplante Downgrade verliert neue Formelpositionen
 und Lebenszyklusdaten, erfordert eine Sicherung und wurde nicht ausgefuehrt.
+
+## Gesamt-CI-Nachlauf
+
+Vollsuite auf 249006062: 28395 bestanden, 71 uebersprungen, einer abgewaehlt;
+ein veralteter reiner Infrastrukturvertrag war rot. Produkt-/DB-Nachweise bleiben
+davon getrennt. Der Vertrag ist staerker an die zweistufige Ernte angepasst und
+mit seinem FSX-Wiring-Vertrag in das fruehe verpflichtende Metagate verlegt;
+135 komplette Metavertraege bestanden lokal. Siehe
+[m0-ci-contract-fast-fail-20261115.md](m0-ci-contract-fast-fail-20261115.md).
+Keine Coverage aus einem roten Lauf wird freigeschaltet. Neue Gesamt-CI folgt.
