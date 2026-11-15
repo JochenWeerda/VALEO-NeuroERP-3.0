@@ -20996,7 +20996,7 @@ Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
 Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
 
-## BELEG-052-RECHNUNG-ALTWEG-2B-20261110 — zur Abnahme, Claude Code (M1)
+## BELEG-052-RECHNUNG-ALTWEG-2B-20261110 — abgeschlossen (PR #142 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von PR #140 (2a). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: alter Rechnungsweg entfernt, DocFlow fuehrt die Ausgangsrechnung. Entfernt: Router sales_invoices, finance_invoices, sales_invoice_einvoice, xrechnung, collective_documents, sales_invoice_service, ScreenDefinition sales/invoice. Kreditpruefung liest offene Posten. Keine neue .py ausserhalb tests/ (Baseline-Integritaet).
 Dateibesitz: die genannten entfernten Module, zugehoerige Tests (u. a. test_lesewege_mandant, test_freigabe_zweitwege, test_finanz_rest_rollen_vertrag ohne den alten Weg), Projektionen.
