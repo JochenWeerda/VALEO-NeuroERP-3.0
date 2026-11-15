@@ -339757,7 +339757,7 @@
     },
     "/api/v1/logistik/sales-delivery-note-by-ref": {
       "get": {
-        "description": "Read-only: Auflösung von ``delivery_note_ref`` gegen ``domain_sales.delivery_notes``.",
+        "description": "Read-only: Auflösung von ``delivery_note_ref`` gegen den DocFlow-Lieferschein.",
         "operationId": "resolve_sales_delivery_note_by_ref_api_v1_logistik_sales_delivery_note_by_ref_get",
         "parameters": [
           {
