@@ -1,6 +1,7 @@
 import {
   resolveContextRailSections,
   validateScreenDefinition,
+  validateMaskVariantBinding,
   type ScreenActionDefinition,
   type ScreenDefinition,
   type ScreenFieldDefinition,
@@ -232,7 +233,7 @@ export function compileTwin(schema: ScreenDefinition): RenderTwinPlan | undefine
 function schemaVolatility(schema: ScreenDefinition): string {
   // Studio edits retain the same screen ID/version until they are saved. All
   // editable field/table/tab/layout contracts must participate in this cache.
-  const structure = JSON.stringify({ title: schema.title, subtitle: schema.subtitle, flowSpineCatalog: schema.flowSpineCatalog, flowSpineWorkspace: schema.flowSpineWorkspace, listExperience: schema.listExperience, actions: schema.actions, documentVariant: schema.documentVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources, specialized: schema.specialized })
+  const structure = JSON.stringify({ title: schema.title, subtitle: schema.subtitle, flowSpineCatalog: schema.flowSpineCatalog, flowSpineWorkspace: schema.flowSpineWorkspace, listExperience: schema.listExperience, actions: schema.actions, documentVariant: schema.documentVariant, maskVariant: schema.maskVariant, fields: schema.fields, tables: schema.tables, tabs: schema.tabs, layout: schema.layout, dataSources: schema.dataSources, specialized: schema.specialized })
   const summary = (schema.summary ?? []).map((item) => `${item.key}:${String(item.value)}`).join(',')
   const options = (schema.fields ?? []).map((field) => (
     // Auch die Beschriftung: Eine Auswahl kann bei gleichen Werten neu beschriftet werden (Vorschlagshinweis).
@@ -249,6 +250,9 @@ export function compileRenderPlan(
   schema: ScreenDefinition,
   context: CompileContext,
 ): RenderPlan {
+  if (validateMaskVariantBinding(schema).length) {
+    throw new Error('Invalid mask family binding')
+  }
   if (!validTextFileDefinitions(schema)) throw new Error('Invalid text file content contract')
   if (schema.listExperience !== undefined && validateScreenDefinition(schema).includes('listExperience is invalid')) {
     throw new Error('Invalid declarative list experience')
@@ -353,6 +357,7 @@ export function compileRenderPlan(
     flowSpineWorkspace: schema.flowSpineWorkspace,
     listExperience: schema.listExperience,
     documentVariant: schema.documentVariant ? { ...schema.documentVariant } : undefined,
+    maskVariant: schema.maskVariant ? { ...schema.maskVariant } : undefined,
     cacheKey,
     screenId: schema.id,
     schemaVersion: context.schemaVersion,

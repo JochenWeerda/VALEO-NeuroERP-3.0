@@ -2399,6 +2399,31 @@
       }
     },
     {
+      "id": "mask:agrar/saatgut/sorte:edit",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (agrar/saatgut/sorte)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/saatgut/sorte",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/saatgut/sorte",
+        "actionKey": "edit",
+        "commandEndpoint": "/api/v1/agrar/varieties/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "agrar.sorte.update",
+        "forbiddenForAgents": true,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:agrar/saatzucht-partien-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/saatzucht-partien-liste)",

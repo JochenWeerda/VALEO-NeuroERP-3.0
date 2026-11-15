@@ -343,6 +343,21 @@
         ]
       ]
     },
+    "agrar/saatgut/sorte": {
+      "agrar.sorte.update": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/vertraege/formular": {
       "agrar.vertraege.formular.update": [
         [

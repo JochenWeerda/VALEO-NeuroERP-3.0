@@ -33,9 +33,12 @@ Aufruf (als Superuser, je Datenbank)
     python scripts/provision_db_roles.py --url "$SUPERUSER_URL" --anwenden       # Rollen + Rechte
     python scripts/provision_db_roles.py --url "$SUPERUSER_URL" --anwenden --eigentum
     python scripts/provision_db_roles.py --url "$URL" --anwenden --eigentum --rollback  # Probelauf
+    python scripts/provision_db_roles.py --url "$URL" --data-only --schemas domain_ops --data-roles valeo_app
 
 ``--eigentum`` uebertraegt Fachschemata und ihre Objekte von ihrem bisherigen Eigentuemer
 auf valeo_owner; ohne diesen Schritt kann valeo_migrator bestehende Tabellen nicht aendern.
+``--data-only`` plant ausschliesslich Datenrechte auf bestehenden Objekten der explizit
+ausgewaehlten Schemas/Rollen; ohne --anwenden wird nichts geaendert.
 """
 from __future__ import annotations
 
@@ -83,6 +86,97 @@ def role_statements() -> list[str]:
     return statements
 
 
+def data_grant_statements(schema: str, roles: list[str] | tuple[str, ...]) -> list[str]:
+    """Existing-object data policy, shared by full provisioning and scoped grants."""
+    if not roles or any(role not in DATA_ROLES for role in roles):
+        raise ValueError("Nur vorhandene DATA_ROLES sind als Datenrollen zulaessig")
+    s = _ident(schema)
+    data = ", ".join(roles)
+    return [
+        f"GRANT USAGE ON SCHEMA {s} TO {data}",
+        f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {s} TO {data}",
+        f"GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA {s} TO {data}",
+        f"GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA {s} TO {data}",
+    ]
+
+
+def validate_data_selection(schemas: list[str] | None, roles: list[str] | None) -> None:
+    if not schemas or not roles:
+        raise ValueError("--data-only benoetigt --schemas und --data-roles")
+    if any(not isinstance(s, str) or not s.strip() or s != s.strip() or
+           s.lower() in SKIPPED_SCHEMAS or s.lower().startswith("pg_") for s in schemas):
+        raise ValueError("Schemaauswahl enthaelt leere oder reservierte Namen")
+    if any(role not in DATA_ROLES for role in roles):
+        raise ValueError("Nur vorhandene DATA_ROLES sind als Datenrollen zulaessig")
+    if len(set(schemas)) != len(schemas) or len(set(roles)) != len(roles):
+        raise ValueError("Doppelte Schemas oder Datenrollen sind nicht zulaessig")
+
+
+def data_only_plan(conn, schemas: list[str], roles: list[str]) -> list[str]:
+    """Check the selected existing catalog objects before preparing any grants."""
+    from sqlalchemy import text
+
+    validate_data_selection(schemas, roles)
+    found_schemas = {row[0] for row in conn.execute(
+        text("SELECT nspname FROM pg_catalog.pg_namespace WHERE nspname = ANY(:schemas)"),
+        {"schemas": schemas})}
+    found_roles = {row[0] for row in conn.execute(
+        text("SELECT rolname FROM pg_catalog.pg_roles WHERE rolname = ANY(:roles)"),
+        {"roles": roles})}
+    if missing := set(schemas) - found_schemas:
+        raise ValueError("Schemas nicht vorhanden: " + ", ".join(sorted(missing)))
+    if missing := set(roles) - found_roles:
+        raise ValueError("Datenrollen nicht vorhanden: " + ", ".join(sorted(missing)))
+    return [statement for schema in schemas for statement in data_grant_statements(schema, roles)]
+
+
+_DATA_MISSING_SQL = """
+WITH selected_roles AS (SELECT unnest(CAST(:roles AS text[])) AS role_name),
+selected_schemas AS (SELECT n.oid, n.nspname FROM pg_catalog.pg_namespace n
+                     WHERE n.nspname = ANY(CAST(:schemas AS text[]))),
+missing AS (
+    SELECT r.role_name, n.nspname AS schema_name, 'SCHEMA' AS object_type,
+           n.nspname AS object_name, 'USAGE' AS privilege
+      FROM selected_roles r CROSS JOIN selected_schemas n
+     WHERE NOT pg_catalog.has_schema_privilege(r.role_name, n.oid, 'USAGE')
+    UNION ALL
+    SELECT r.role_name, n.nspname, 'TABLE', c.relname, p.privilege
+      FROM selected_roles r CROSS JOIN selected_schemas n
+      JOIN pg_catalog.pg_class c ON c.relnamespace = n.oid
+      CROSS JOIN (VALUES ('SELECT'), ('INSERT'), ('UPDATE'), ('DELETE')) AS p(privilege)
+     WHERE c.relkind IN ('r', 'p', 'v', 'm', 'f')
+       AND NOT pg_catalog.has_table_privilege(r.role_name, c.oid, p.privilege)
+    UNION ALL
+    SELECT r.role_name, n.nspname, 'SEQUENCE', c.relname, p.privilege
+      FROM selected_roles r CROSS JOIN selected_schemas n
+      JOIN pg_catalog.pg_class c ON c.relnamespace = n.oid
+      CROSS JOIN (VALUES ('USAGE'), ('SELECT'), ('UPDATE')) AS p(privilege)
+     WHERE c.relkind = 'S'
+       AND NOT pg_catalog.has_sequence_privilege(r.role_name, c.oid, p.privilege)
+    UNION ALL
+    SELECT r.role_name, n.nspname, 'FUNCTION', p.oid::regprocedure::text, 'EXECUTE'
+      FROM selected_roles r CROSS JOIN selected_schemas n
+      JOIN pg_catalog.pg_proc p ON p.pronamespace = n.oid
+     WHERE p.prokind <> 'p' AND NOT pg_catalog.has_function_privilege(r.role_name, p.oid, 'EXECUTE')
+)
+SELECT role_name, schema_name, object_type, object_name, privilege FROM missing
+ORDER BY role_name, schema_name, object_type, object_name, privilege
+"""
+
+
+def verify_data_grants(conn, schemas: list[str], roles: list[str]) -> None:
+    """Fail the transaction if any selected existing object lacks any promised right."""
+    from sqlalchemy import text
+
+    # Re-read existence after grants in the same transaction before the live object scan.
+    data_only_plan(conn, schemas, roles)
+    missing = list(conn.execute(text(_DATA_MISSING_SQL), {"schemas": schemas, "roles": roles}))
+    if missing:
+        details = "; ".join(f"{role}: {schema}.{name} ({kind}) {privilege}"
+                            for role, schema, kind, name, privilege in missing)
+        raise RuntimeError("Datenrechte unvollstaendig: " + details)
+
+
 def grant_statements(database: str, schemas: list[str], creators: list[str], governance: bool) -> list[str]:
     data = ", ".join(DATA_ROLES)
     statements = [
@@ -94,13 +188,8 @@ def grant_statements(database: str, schemas: list[str], creators: list[str], gov
     ]
     for schema in schemas:
         s = _ident(schema)
-        statements += [
-            f"GRANT USAGE, CREATE ON SCHEMA {s} TO {OWNER}",
-            f"GRANT USAGE ON SCHEMA {s} TO {data}",
-            f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA {s} TO {data}",
-            f"GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA {s} TO {data}",
-            f"GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA {s} TO {data}",
-        ]
+        statements.append(f"GRANT USAGE, CREATE ON SCHEMA {s} TO {OWNER}")
+        statements.extend(data_grant_statements(schema, DATA_ROLES))
         for creator in creators:
             c = _ident(creator)
             statements += [
@@ -253,17 +342,54 @@ def main() -> int:
     parser.add_argument("--anwenden", action="store_true", help="ausfuehren statt nur planen")
     parser.add_argument("--eigentum", action="store_true", help="Fachschemata und -objekte an valeo_owner uebertragen")
     parser.add_argument("--waage-only", action="store_true", help="nur gepruefte Waagenrechte fuer valeo_app")
+    parser.add_argument("--data-only", action="store_true", help="nur Datenrechte fuer ausgewaehlte Schemas und Rollen")
+    parser.add_argument("--schemas", nargs="+", help="explizite Schemas fuer --data-only")
+    parser.add_argument("--data-roles", nargs="+", help="explizite Datenrollen fuer --data-only")
     parser.add_argument("--rollback", action="store_true", help="in einer Transaktion ausfuehren und zuruecknehmen")
     args = parser.parse_args()
+    if args.data_only:
+        if args.eigentum or args.waage_only:
+            parser.error("--data-only kann nicht mit --eigentum oder --waage-only kombiniert werden")
+        try:
+            validate_data_selection(args.schemas, args.data_roles)
+        except ValueError as exc:
+            parser.error(str(exc))
+    elif args.schemas is not None or args.data_roles is not None:
+        parser.error("--schemas und --data-roles erfordern --data-only")
     if not args.url:
         raise SystemExit("Keine Datenbank: --url oder DATABASE_URL setzen.")
 
     from sqlalchemy import create_engine, text
 
-    engine = create_engine(args.url, connect_args={"application_name": "provision-db-roles"})
+    application_name = (os.environ.get("PGAPPNAME") or "provision-db-roles") if args.data_only else "provision-db-roles"
+    engine = create_engine(args.url, connect_args={"application_name": application_name})
     try:
         with engine.connect() as conn:
             trans = conn.begin()
+            if args.data_only:
+                try:
+                    grants = data_only_plan(conn, args.schemas, args.data_roles)
+                except ValueError as exc:
+                    trans.rollback()
+                    raise SystemExit(str(exc)) from exc
+                print(f"Datenrechte: {len(grants)} Anweisungen")
+                for statement in grants:
+                    print(statement)
+                    if args.anwenden:
+                        conn.execute(text(statement))
+                if args.anwenden:
+                    try:
+                        verify_data_grants(conn, args.schemas, args.data_roles)
+                    except (ValueError, RuntimeError) as exc:
+                        trans.rollback()
+                        raise SystemExit(str(exc)) from exc
+                if args.anwenden and not args.rollback:
+                    trans.commit()
+                    print("Angewendet und Rechte geprueft.")
+                else:
+                    trans.rollback()
+                    print("Nur Plan oder Probelauf, nichts geaendert.")
+                return 0
             if not conn.execute(text("SELECT rolsuper FROM pg_roles WHERE rolname = current_user")).scalar():
                 trans.rollback()
                 raise SystemExit("Rollen und Eigentum lassen sich nur als Superuser einrichten.")

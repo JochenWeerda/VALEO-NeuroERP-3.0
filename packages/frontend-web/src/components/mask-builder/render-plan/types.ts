@@ -1,6 +1,7 @@
 import type {
   ScreenDefinition,
   DocumentScreenVariantRef,
+  MaskScreenVariantRef,
   ListExperience,
   ScreenDomain,
   ScreenColumnNavigation,
@@ -304,6 +305,7 @@ export interface RenderPlan {
   flowSpineWorkspace?: ScreenDefinition['flowSpineWorkspace']
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
+  maskVariant?: MaskScreenVariantRef
   cacheKey: string
   screenId: string
   schemaVersion: number

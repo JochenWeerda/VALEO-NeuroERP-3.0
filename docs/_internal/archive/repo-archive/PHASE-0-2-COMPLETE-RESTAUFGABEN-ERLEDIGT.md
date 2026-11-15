@@ -443,7 +443,7 @@ chmod +x setup-keycloak.sh
 ./setup-keycloak.sh
 
 # Test-User:
-- admin@valeo-erp.local / admin123 (role: admin)
+- admin@valeo-erp.local / <ADMIN_PASSWORT> (role: admin)
 - user@valeo-erp.local / user123 (role: user)
 - finance@valeo-erp.local / finance123 (role: finance_manager)
 ```

@@ -137,7 +137,7 @@ Ergänze:
 VALEO_TENANT=QA-UAT-01
 VALEO_BASE_URL=http://localhost:3000
 VALEO_USER_ADMIN=admin@example.com
-VALEO_PASS_ADMIN=admin123
+VALEO_PASS_ADMIN=<ADMIN_PASSWORT>
 ```
 
 ### Schritt 2: Playwright installieren

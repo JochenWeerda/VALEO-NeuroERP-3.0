@@ -2,7 +2,7 @@
 Agrar Sorten/Varieties API fuer Ernte-Annahme.
 
 Vollstaendiges CRUD gegen domain_shared.agrar_sorten.
-Beim ersten Aufruf ohne Daten werden Standard-Sorten als Seed angelegt.
+Lesen veraendert keine Daten; neue Sorten entstehen ausschliesslich per autorisiertem POST.
 """
 
 from typing import Optional
@@ -42,25 +42,6 @@ class VarietyOut(VarietyIn):
     model_config = ConfigDict(from_attributes=True)
 
 
-# Standard seed data — inserted once per tenant on first list call
-_STANDARD_SEED = [
-    {"variety_number": "245", "name": "Weizen", "description": "Standard-Weizen", "crop_type": "WHEAT"},
-    {"variety_number": "100", "name": "Mais", "description": "Standard-Mais", "crop_type": "MAIZE"},
-    {"variety_number": "200", "name": "Gerste", "description": "Standard-Gerste", "crop_type": "BARLEY"},
-    {"variety_number": "300", "name": "Hafer", "description": "Standard-Hafer", "crop_type": "OATS"},
-    {"variety_number": "400", "name": "Raps", "description": "Standard-Raps", "crop_type": "RAPESEED"},
-]
-
-
-def _ensure_seed(db: Session, tenant_id: str) -> None:
-    """Insert standard varieties for tenant if table is empty for that tenant."""
-    count = db.query(AgrarSorte).filter(AgrarSorte.tenant_id == tenant_id).count()
-    if count == 0:
-        for seed in _STANDARD_SEED:
-            db.add(AgrarSorte(id=uuid7(), tenant_id=tenant_id, **seed))
-        db.commit()
-
-
 @router.get("/", response_model=list[VarietyOut], summary="Varieties auflisten")
 async def list_varieties(
     crop_type: Optional[str] = Query(None, description="Filtern nach Kulturart"),
@@ -69,7 +50,6 @@ async def list_varieties(
     db: Session = Depends(get_db),
 ):
     """Liste der Sorten fuer Ernte-Annahme."""
-    _ensure_seed(db, tenant_id)
     q = db.query(AgrarSorte).filter(AgrarSorte.tenant_id == tenant_id)
     if aktiv:
         q = q.filter(AgrarSorte.aktiv.is_(True))
