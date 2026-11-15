@@ -20886,7 +20886,7 @@ STUDIO-TEILMENGEN Ergebnis: Belegfamilie append-only1.9.0, alte Inhalte semantis
 
 CI-Abnahme STUDIO-TEILMENGEN/CI-134-NACHLAUF auf09a7616d0: 72 Checks erfolgreich, keine roten/laufenden Checks; QualityGate43625391909 success, Sonar132550001404 QUALITY GATE STATUS PASSED (14.11.19:53MEZ), echte Backend-/Frontendimagebuilds gruen. CI/CD28368pass/72skip, QG28367pass/73skip mit kritischerCoverage gruen; Daten-/Strict-Unterschiede nicht gleichgesetzt. Lokaler Probe ueber vorhandene Rootkonfiguration gefunden, Revisionpsm_register_entfernt_20261104, keine fremdeaktiveSitzung; valeo_agent fehlt SchemaUSAGE fuer domain_docflow/domain_shared, deshalb keine eigene SQL-Schreibabnahme oder Rollenlockerung. NachweisQA nachgezogen; Restmatrix32deklarierteGaps/38Aktionen bleibt offen, globaleAbschlussfreigabe nicht behauptet.
 
-## CI-KANONISCHE-BACKENDSUITE-20261114 — lokal abgenommen, Codex Subagent ci_dependency_audit
+## CI-KANONISCHE-BACKENDSUITE-20261114 — abgeschlossen, Codex Subagent ci_dependency_audit
 Ziel: doppelte Backend-Vollsuite in CI/CD und QualityGate durch eine kanonische QG-Suite mit commit-/event-/laufgebundenem Evidenzbezug ersetzen. Besitz .github/workflows/ci.yml, .github/workflows/quality-gate.yml nur Strict/Seed-Konsolidierung und vorhandener SHA-/Dateihash-Vertrag, neuer enger Evidenzleser und Tests/QA. Vorherige CI-DEDUP-20261106 betraf nur doppelte OpenAPI-Pruefung und bleibt erhalten. Keine Absenkung/Skip/Fallbackgruene: fehlender/falscher/abgebrochener Provider oder ungueltige Evidenz blockieren CI/CD-Build. Keine DB/Container fuer den Consumer. Lead integriert und fuehrt genau einen neuen Abnahmelauf aus.
 
 ## PROBE-DATENRECHTE-20261114 — lokal abgenommen, Codex Subagent test_migration_workflows
@@ -20897,7 +20897,7 @@ Ziel: echte PostgreSQL-Wirkung der Studio-Teilumwandlung nachweisen: Optionsabru
 
 Nachlauf15.11: 82 gezielte No-DB-Consumer-/Rechte-/Improvement-Vertraege gruen, drei echte PG-Teilmengen-/Replay-/RLS-Faelle gruen ohneSkip. Pruefstand unveraenderteRevisionpsm_register_entfernt_20261104; Fach-DML effektivvaleo_agent ohneOwner/Superuser/BYPASSRLS, Eigentuemerverbindung nur fuer uncommittete TestACLs/Katalogkontrolle. AeussereTransaktion+Savepoints lassenalle eigenenZeilen/Schema-/TabellenACLs undRollenflags unveraendert zurueck; Sequenzenkoennen normaleLuecken bekommen, keinReset. PermanenteDatenrechtsausweitung wurdeautomatischabgelehntundnichtausgefuehrt; freigegebeneRollbackalternativeerfolgreich. Data-onlyCLI Planund --anwenden--rollback realPG gruen mitNachbedingungscheck. KanonischeCI/Vollsuite+Strict/Seed+versiegelteEvidenz lokalgeprueft, echterGitHubNachlaufvorIntegrationoffen. Browser/OIDC/weitereMatrixgapsbleibengetrennt; Handoff runtime-evidence-20261115.md.
 
-## SECURITY-LANGGRAPH-ZOD-20261115 — reserviert, Codex Subagent ci_dependency_audit
+## SECURITY-LANGGRAPH-ZOD-20261115 — abgeschlossen, Codex Subagent ci_dependency_audit
 Ziel: neu eingegangene GitHub-Advisories703/705 (LangGraph>=1.2.3<1.2.14),702/704 (checkpoint-sqlite<3.1.2),700 (BFF Zod<4.6.6) gezielt schliessen. Besitz requirements.txt, services/ai/requirements.txt, packages/bff/bff-web/package.json und erforderliche bestehende BFF-Quellen/gezielte Tests, tatsaechlich zugehoerige Lockartefakte, eigene QA. Herstellerfix LangGraph1.2.14+SDK>=0.4.6, checkpoint-sqlite3.1.2 mit gekoppelter Basis>=4.3.0 und BFF-Zod mindestens4.6.6 (Root schon4.6.7) aufloesen; vorhandene Funktionen erhalten. Zwei Agenten-Workflows nutzen SQLite tatsaechlich, daher Abhaengigkeit nicht ohne Persistenzparitaet loeschen; PostgreSQL-Umstellung gesondert. Keine Schwellen-/Audit-Ausnahmen. Deepmerge701 separat: kein Herstellerfix, vorhandenen lokalen Patch und gezielte Gegenprobe verifizieren statt Alarm pauschal wegzudeklarieren. Keine neue DB/Container; vorhandene isolierte Security-Pythonumgebung wiederverwenden, kein globales Tooling aendern. Lead integriert und koordiniert neuen CI-Lauf nur bei tatsaechlich geaenderten Abhaengigkeiten.
 CI-KANONISCHE-BACKENDSUITE-20261114 Erweiterung15.11: realer PR135-Strict-DB-Lauf132621572495 meldet drei Fehler der neuen SQL-Vertraege, weil dieser separate Job TEST_DATABASE_URL nicht deklariert. Lead besitzt zusaetzlich .github/workflows/pytest-postgres-require-db.yml und enge Profilvertraege: denselben vorhandenen Job-Postgres als valeo_probe deklarieren, TEST_DATABASE_URL=DATABASE_URL, kanonische Rollen einmal im Job einrichten. Kein zweiter Datenbank-/Containeraufbau, keine Lockerung des lokalen Datenbankguards; frisches Schema und verpflichtende Tests beibehalten. Kopfkommentar auf kanonischen QG-Produzenten nachziehen.
 
@@ -20905,11 +20905,11 @@ SECURITY-LANGGRAPH-ZOD-20261115 Erweiterung: Lead besitzt zusaetzlich .github/wo
 
 SECURITY-LANGGRAPH-ZOD-20261115 lokal abgenommen: LangGraph1.2.14/checkpoint-sqlite3.1.2, SDK0.4.14/Basis4.3.2; BFF exaktZod4.6.7. Acht reale Bibliotheksvertraege und34 Consumer-/Strictprofilvertraege gemeinsam42pass/2,34s. Zwei vollstaendige Python-Audits, pipcheck, BFF-Produktionsaudit und Typecheck sowie21 bestehende Deepmerge-Gegenproben gruen (ueberlappende Zahlen nicht summieren). BFF hat jetzt eigenen blockierenden Audit im Security-Workflow. Keine Scanner-Ausnahme oder globale Paketinstallation. CI-/Dependabot-Nachlauf offen. SQLite-Workflowpersistenz bleibt bis gesonderter PostgreSQL-Migration erhalten.
 
-## ACTION-MATRIX-O2C-HTTP-20261115 — reserviert, Codex Subagent matrix_next_contract
+## ACTION-MATRIX-O2C-HTTP-20261115 — abgeschlossen, Codex Subagent matrix_next_contract
 Ziel: obsolete kritische O2C-Scheinabnahmen durch kanonische echte HTTP-Vertraege ersetzen. Besitz playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts und neue eng benoetigte O2C-Hilfs-/Vertragstestdateien, eigene QA; Matrix-YAML/Generatorintegration beim Lead erst nach echtem SHA-gebundenem Lauf. Keine Auth-/CI-/Produktionsquellen ohne Erweiterung anfassen. Abnahme signierte Fachrollenkennung, Auftrag mit zwei Positionen anlegen/readback, explizit4aus10 nachsales_delivery, Readback/Rest6/ausgelassenePosition, ReplaygleicheZielID, Uebermenge/Version/readonly/fehlendesToken/Mandantenspoofing ohneWirkung. Keine ErsatzIDs, Erfolgsfallbacks auf404/422/503 oder Skip bei fehlenden Voraussetzungen. Bestehender Testpruefstand/JobDB, keine neueDB/Container/Reset; fremdeAPI/OIDC-Kennung nicht erfinden. Echte Fremdtokenabnahme gesondert bis zweiterTestmandantverfuegbar. Ersttestlauf vom Lead koordiniert; laufender PR135 e8a2e92d5 bleibt unveraendert und wird nicht neu gepusht.
 AI-Harness: kanonischer DocFlow-/Rollen-/Tenantvertrag, Architekturpack/Agentenprotokoll vor Edit lesen, vorhandene echte Partnerquelle und Schema benutzen, fachliche Mengen-/Versions-/Idempotenzwirkung statt lediglich Statuscode; keine Zahlungen/Versand. Lokale Unit-/Sammlungspruefung ist keine Browser-/OIDC- oder HTTP-Fachabnahme. Keine Statusanhebung ohne realen Nachweis.
 
-## INVENTORY-AISLE-DRIFT-20261115 — reserviert, Codex Subagent inventory_drift_diagnosis
+## INVENTORY-AISLE-DRIFT-20261115 — abgeschlossen, Codex Subagent inventory_drift_diagnosis
 Ziel: gewachsene Entwicklungsdatenbank blockiert Backendstart2748Neustarts, Revisionruntime_ddl_to_migrations_20261026, kanonischeswarehouse_bins.aisle_id aus20260612 fehlt. BestehendeMigrationskette/frischesSchema sindkorrekt; lautSchema-Drift-Runbook gezieltesOperations-Reparaturskript stattMigration/Skip/Fallback. Besitz neues scripts/repair_inventory_aisle_drift.py, engeUnitvertraege undeigeneQA. StandardnurPlan, ausdrueckliche erwarteteDB+Revision/Katalogvorbedingungen, Apply nurvaleo_migrator/Ownerrolle undbegrenztesWartungsfenster; kanonischeoptionaleString36Spalte+urspruenglicherFK+Index, keineFachdatenloeschung/Zuordnung/RLS-Aenderung. Bestehende korrekteSpalte idempotentverifizieren, inkompatibleFormabweisen. Locktimeout/transaktional, rollbackMoeglichkeit/Zeilenunveraendert; vorhandeneRLS-Gesamtmigration bleibtvollstaendig. LeadkoordiniertStatus/Sitzungen/Backup/realenRollbacknachweisundAnwendung, AgentkeineDB/DockerAktionen. KeineneueDB/Container/Reset, keinehistorischeMigrationumschreiben. AI-Harness: ArchitekturInventar/FK/Tenantgrenzen, vorhandenerkanonischerDDL-Vertrag, Negativ-/Plan-/Anwendungsnachbedingungen; Start-/HTTP-Abnahme erstnachwirklichemErfolg.
 
 INVENTORY-AISLE-DRIFT-20261115 Erweiterung: Katalogvorpruefung belegt zusaetzlich fehlendes lkw_annahme_queue.article_id trotzkanonischerMigrationlkw_annahme_queue_article_reference_20260328: nullableVARCHAR, FKfk_lkw_annahme_queue_article_id mitSETNULL, Indexix_lkw_annahme_queue_article_id. DerselbeOwner darfdiese zweitefestbenannteReferenz imgezieltenOperationsskript atomarwiederherstellen, keinefreieDDL-Generierung. GeplanterSkriptname repair_inventory_reference_drift.py; reineaisleVorarbeiten entsprechendumbenennen. delivery_note_positions.tenant_id istkeineDrift: wirdvondernochfolgendenSalesmigrationvorInventory regulaerangelegt/backfilled, darfnichtvorweggenommenwerden. Snapshot-undRollbacknachweisebeiderReparaturen, keineFachdatenzuordnung.
@@ -20925,6 +20925,71 @@ INVENTORY-AISLE-DRIFT-20261115 und RLS-ALTTEST-BESTELLUNGEN-20261115 Operationsa
 
 CI-KANONISCHE-BACKENDSUITE-20261114 und SECURITY-LANGGRAPH-ZOD-20261115 GitHub-abgenommen aufe8a2e92d5: 68Checksgruen, QG43653854329/Sonar132638443225success, Vollsuite28444pass/72skip/1deselected, StrictDB701pass/4skip. CI/CD43653854364uebernimmtverifizierteEvidenzrealohneeigeneDB/Vollsuite. PR135gemergt: main/develop e9ae5cab6, normalerFFfuerdevelop. FuerMergewarReviewausnahmemitbestehendenAdminrechtennoetig; keineTest-/Branchregelaenderung. FolgesliceO2CHTTPbleibtbiszumechtenRuninArbeit; Operations-/SQLNachweiseundMatrixstatusnichtvermischen.
 
+## LOCAL-RUNTIME-2338578-20261115 — abgeschlossen, Codex Lead
+Ziel: bestehende lokale Backend-/Frontenddienste auf den nach PR136 integrierten Stand2338578d0 aktualisieren, damit localhost3000 den aktuellen Code zeigt. Besitz Operationsfenster nurfuerbestehendeServices backend/frontend-web desProjektsvaleo-neuro-erp, eigeneQA/Handshake/Workboard; keineDB-/Keycloak-/anderenServicecontainerneuaufsetzen, keineVolumes/Imagespauschalloeschen. Buildkontextschliesst.env,artifacts,Backups,node_modulesaus. VorBuild bestehendeComposeidentitaet/Envrollen/DatenbankrevisionundausstehendeMigrationpruefen; bestehendevertraulicheRoot.envnurimSpeicherbzwalsDateiquelleverwenden, nieausgeben/versionieren. ImagesmitbestehendenTagsbauen undnur2Dienste ohneAbhaengigkeiten ersetzen; BackendmountsmuessenaufgeprueftenArtifact-Baumzeigen. FachtestsweiteraufCI/valeo_probe, keineTestgeschaefteaufEntwicklungsDB. AbnahmegesundeDienste,keinRestartloop,HTTPHealth/unauth401,aktuellerFrontendsatzundBrowser-Anmeldegrenze; keinpositiverLogin-/MaskenfachnachweisohneaechteAnmeldung. Haupt-/developStandund67gruenePR136Checks dokumentieren, externeReviewausnahmetransparent. SicherungenundZugangsdatenbleibenlokalignoriert.
+
+LOCAL-RUNTIME-2338578-20261115 Profilpraezisierung: App-/Migrations-DSN und OIDC-Aussteller/JWKS bleiben exakt wie im bestehenden Container. Der alte Container besitzt noch keinen SYSTEM_DATABASE_URL; der aktuelle, bereits gepruefte Compose-Stand uebernimmt die schon vertraulich konfigurierte VALEO_SYSTEM_CONTAINER_DATABASE_URL als vorhandene Rolle valeo_system. Dies vervollstaendigt die beauftragte RLS-Workeranbindung, keine neue Rolle/Grant/Passwortanlage. system_session() ist serverseitig auf begruendeten cross_tenant_scope beschraenkt; normale HTTP-Zugriffe bleiben valeo_app. Umsetzung und Beobachtung dieses Unterschieds ausdruecklich dokumentieren; kein stiller Superuser-Fallback.
+
+LOCAL-RUNTIME-2338578-20261115 ausdrueckliche Nutzerzustimmung am15.11.2026: 'Zustimmung erteilt und bitte handshake an claude und workboard aktualisieren'. Damit ist der zuvor automatisch abgelehnte konkrete Probelauf der17kanonischenMigrationen auf der bestehenden Entwicklungsdatenbank samt kurzemBackend-Wartungsfenster freigegeben. Plan: geprueftevollstaendigeSicherung(8334524Bytes,9218Archiveintraege), Probelaufalsvaleo_migrator/valeo_owner in einerRollbacktransaktion, Katalog-/Zeilenhash-/Revisionsvergleich; erst nachErfolg regulaereUmstellung zweierbestehenderAnwendungsdienste auf2338578d0. KeinReset/neueDB/weitereContainer/pauschaleBereinigung. Claude: waehrenddiesesLive-OperationsfensterskeinekonkurrierendenDDL-/Datenbereinigungsaktionen;valeo_probe wirdnichtmigriertoderzurueckgesetzt. Handshake codex-an-claude-runtime-20261115.md wirdfortgeschrieben.
+
+LOCAL-RUNTIME-2338578-20261115 KoordinationmitClaude: Claude meldet einen einzelnenPytestlauf auf bestehendemvaleo_claude_test (nichtvonCodexangefasst), ca3-5MinutenRestzeit. CodexunterbrichtausschliesslichseineneigenenImagebau, keinefremdenTestprozesse/DockerVMNeustarts. DerfreigegebeneMigrationsprobelauf scheitertevorerst bereitsbeimVerbindungsaufbaumitTimeout, vordemDienststoppundvorDDL/DML. NachClaudesLaufweiterpruefen. UnveraenderlicheQuellgrenze fuerUmstellung2338578d0; unge mergteBELEG-052Migrationen docflow_position_kontrakt_20261110/altrechnungen_schutz_20261110/docflow_archiv_wartung_20261110 werdenwederangewendetnochgestempelt. VorAusfuehrungMigrationsdateienundHeadgegenGit-Baum2338578d0vergleichen. PR132DokukonfliktbleibtClaudesMergeverantwortung;keineblindefremdeAenderungruecksetzen.
+
+LOCAL-RUNTIME-2338578-20261115 Quellfixierung: stattveraenderlichemArbeitsbaum wird ein isolierter, ausschliesslichausGit2338578d0 exportierterAnwendungssatz imignoriertenOperationsverzeichnisvorbereitet. Nur vorhandeneDeploydateien/Quellpakete, keine.env/Gitverzeichnisse/Sicherungsinhalte. VorMigration487Dateien undeinzigerHeadwms_pickposition_stand_20261110gegen2338578d0belegt;spaetereClaude-DateienkoennennichtinDeployquelleneinfliessen. Docker/PGsindnachEigenbuildabbruchnochunzuverlaessig;keineweiterenMigrationen/BuildsbisClaudesTestabschlussundRessourcenerholung.
+
+## NEUSTART-RESUME-20261115 — angehalten auf Nutzerwunsch
+Windows-NeustartwirdvomNutzerdurchgefuehrt; CodexstartetkeineweiterenDocker-/DB-Aktionen. VollstaendigerWiederaufnahmestand: docs/agent-ops/handshakes/resume-windows-neustart-20261115.md; Claude-Handoff: codex-an-claude-runtime-20261115.md. main/develop2338578d0; Arbeitszweigcodex/runtime-deploy-20261115. EigenerBuildabgebrochen; Dockerzuletzt500, DBTimeout. Genehmigter17erProbelaufkamnichtbisDienststopp/DDL/DML; keinDeployderneuenQuelle. Backup8334524Bytes/9218Archiveintraegegeprueftlokal;Quellarchiv.incompleteunbrauchbar. NachNeustartnurIststandpruefen,ClaudesTestfensterrespektierenundgenauQuelle2338578d0fortsetzen. FremdeDB/Branchmigrationennichtanfassen. NutzerzustimmungzumkonkretenProbelaufistdokumentiert;keinenweitreichenderenEingriffdarausableiten.
+
+LOCAL-RUNTIME-2338578-20261115 wiederaufgenommen nach Nutzermeldung Docker frisch gestartet. LesendePruefung: Engine29.9.3, 7,6GiBVM-Gesamtbudget, ca3GiBVMverfuegbar; keinePytestprozesse. Hostreservezuletztknapp,deshalbkeineparallelenBuilds/Tests. BesitzerLead erweitert Dateibesitz auf deploy/docker-compose.desktop.yaml: lokales sparsamesAnwendungsprofilmit1statt4Uvicornworkern undohneveraenderlicheCode-Bindmounts (Code/KatalogbereitsimImage), keinegeänderteAuth-/DBrolle. Standard-Compose/Produktionsprofilebleibenunveraendert. RealeCompose-MergepruefungundnachherHTTP-Abnahme stattneuerTestcontainer. VormImagebau nurdenbestehendenBackenddienstimgenehmigtenWartungsfensterpausieren, keineanderenDienste/DB/Volumes. VorProbealle487Migrationen gegen2338578d0undgenau17Pendingrevisionsinternverifizieren; keineClaude-Stapel.
+
+LOCAL-RUNTIME-2338578-20261115 Profilkonsolidierung: docker-compose.local-preview.yml besitzt bereits den benoetigten1Worker. Dieses vorhandeneProfil wird weiterverwendet und nur um image-eigeneQuellennutzung(keineHostcodebinds)ergaenzt; dasnochunversionierteeigeneDesktop-Doppelprofilwirdentfernt. Dateibesitzstattdeploy/docker-compose.desktop.yaml nun docker-compose.local-preview.yml. Vorschauprofil startet weiterhin nuruvicorn; 17Migrationen werden explizit alskontrollierterSchrittvorherausgefuehrt, keineBoot-MigrationdurchWorker. Der volle genehmigte17erRollback ist inzwischen erfolgreich:Katalog/Revision/439Tabellenhashesidentisch. BackendbleibtfuerdeneinzelnenFrontendbaupausiert;VMhatjetztca5GiBReserve. Backendimageneubauistbereitsfertigundwirdnichtwiederholt.
+
+## UIX-PUBLIC-THEME-BOOTSTRAP-20261115 — abgeschlossen, Codex Lead
+Ziel: echterChrome-NachweisaufdemneuenDockerfrontendzeigtgespeichertesDarkauf/publicLoginignoriert (html.darkfalse,beideModihell), obwohldieStudio-Loginmaskezentralrendert. Dateibesitz packages/frontend-web/src/main.tsx, hooks/useTheme.ts, neuergezielterBootstraptest, eigeneQA undkurzerZusatzdocs/design/valeo-meridian-experience.md. VorhandeneThemeinitialisierungzentralvorerstenRenderanwenden, keineLogin-Sonderseite/Renderer-/CSS-Fork, keineSchema-/API-/Rollen-/Mandantenaenderung. Abnahme roteGegenprobebisherigerBootstrap, gespeicherteSystempraeferenz/ungültigeroderblockierterStorage, ersteRenderreihenfolge; kleinerVitestlauf1Worker, Typecheck,echterChromeHell/DunkelmitScreenshotundKontrast. Migrations-/Backendquellebleibt2338578d0;keineClaudeMigrationen/neuenDB/Container. WeitereFrontendbauaktionnurseriellimfreienRessourcenfenster. AktuelleOps-ProfileundSQL-Nachweisedavongetrenntdokumentieren.
+
+LOCAL-RUNTIME-2338578-20261115 SQL-/Dienstumstellung abgeschlossen und fuerClaude freigegeben:17erRollbackmit439Tabellenhashesidentisch, danachregulaeresUpgradebiswms_pickposition_stand_20261110nurQuelle2338578d0;659RLS-Tabellen,aktuelleBackend-/Frontendimagesgesund, /health200/DocFlowunauth401, realerBrowser3000/3001login. KeineClaudeMigrationgestempelt/fremdeDBangefasst. Claude darf eigenstaendigeArbeitaufBranchesundbestehendervaleo_claude_testfortsetzen; grosseTests/Buildsweiterabstimmen. CodexnurkleinerTheme-Frontendtest,keineaktuelleSQL-/Buildlast. Handoffcodex-an-claude-runtime-20261115.mdaktualisiert.
+
+### UIX-PUBLIC-THEME-BOOTSTRAP-20261115 – Implementierung geprueft
+
+Codex: gemeinsamer Theme-Start vor React-Render, inklusive Speicherfehler-Fallback.
+Gegenprobe 5/7 rot vor Fix; danach 86 gezielte Tests gruen (8 Bootstrap/Speicher,
+78 bestehende Studio-Kontrastfaelle). QA: theme-bootstrap-20261115.md.
+Offen bleiben Neubau und reale Browserabnahme des korrigierten Frontends.
+Keine SQL-Operationen; Claude bleibt fuer seine bestehenden Branches/DB freigegeben.
+
+### Abschluss UIX-PUBLIC-THEME-BOOTSTRAP-20261115 / lokale Bereitstellung
+
+Codex: 86 gezielte Tests bestanden; Frontend separat gebaut und ersetzt.
+Echter Chrome: Hell-/Dunkelwahl wirksam, Screenshots visuell geprueft, keine
+JS-Fehler, Anmeldung auf 3000/3001 weiterhin erforderlich. Theme-Slice geschlossen.
+SQL-Fenster abgeschlossen; Nachweis local-runtime-2338578-20261115.md.
+Backend unveraendert auf freigegebenem 2338578d0, ein Worker, keine Codebindmounts.
+Claude bleibt freigegeben; keine laufenden Codex-Builds oder Datenbanktests.
+
+## ACTION-MATRIX-O2C-INVOICE-20261115 — abgeschlossen, Codex
+
+Ziel: enger echter HTTP-Nachweis Lieferschein zu Ausgangsrechnungsentwurf auf
+kanonischem DocFlow. Dateibesitz playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts,
+eigene QA; Workboard/Handshake beim Lead. Vorhandene Partneranlage und signierte
+POWER/READ-Fixtures wiederverwenden, keine ErsatzIDs, tolerierten Fehlercodes,
+Skips, neue Datenbanken/Container oder lokale schweren Testlaeufe. Abnahme:
+Quellenkette, konkrete Mengen/Betrag/Steuer, Readback, Replay ohne Doppelwirkung,
+Rollen-/Mandanten-/Versions-/Uebermengennegative ohne Wirkung und Doppelrechnungsweg
+abgewiesen. Keine Behauptung von Festschreibung/PDF/Zahlung/OP aus Entwurfsanlage.
+PR137-Quellkopf bleibt unveraendert; neue CI erst nach dessen Integration.
+
+ACTION-MATRIX-O2C-INVOICE-20261115 implementiert/reviewt: dritter echter HTTP-Fall
+mit Quellenkette und Wiederholungs-/Versions-/Rollen-/Mengen-/Mandantenspoofing-
+Gegenproben. Enge TypeScript-Pruefung und Sammlung (3 Faelle) gruen; reale CI-
+Fachabnahme noch offen. Rechnungsstatus kanonisch open, keine Ausstellung/PDF/
+Buchung/Zahlung behauptet. PR137 laeuft unveraendert, neue CI erst danach.
+
+PR137-Integrationsupdate: main ist zwischenzeitlich durch Claudes PR132 auf
+138172598 vorgezogen. Beide Themen (gepruefte Theme-Korrektur und enger O2C-
+Rechnungsbelegvertrag) sind nun in einem Integrationskopf zusammengefuehrt.
+Statt zwei weiterer Backend-Vollsuiten wird genau ein neuer kanonischer Lauf
+auf dem aktuellen gemeinsamen Stand verwendet. Alte CI-Ergebnisse sind nur
+Vorabnachweise, keine Abnahme dieses neuen Kopfes. Keine Branchregel gelockert.
+
 ## FAHRPLAN-VERKAUFSPRODUKT-20261115 — abgeschlossen (PR #138 gemergt), Claude Code
 Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
 Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
@@ -20937,3 +21002,50 @@ Ziel: veraltete Claude-Claims schliessen. Geprueft per `git merge-base --is-ance
 Dateibesitz: nur Ueberschriften der genannten Eintraege in diesem Workboard.
 Offener Pruefpunkt (nicht als erledigt gemeldet): elf Branches sind nach Commit-Vergleich (`git cherry`) nicht vollstaendig in main: rls-domain-erp, rls-domain-logistics, rls-domain-ops, rls-domain-ops-teil2, standardmandant-abbau, tenant-fallback-abbau, urheber-aus-token, ustva-wahrheit (alle 27./28.10.), pos-checkout-wahrheit, crm-chains-rest, inventory-ownership. Ihre PRs (#53, #54, #80-#88) sind geschlossen, nicht gemergt. Ob der Inhalt ueber PR #101 bzw. #116 auf anderem Weg in main kam, ist je Branch inhaltlich zu pruefen, bevor Branch und Arbeitsbaum entfernt werden.
 Abnahme: Docs-Governance gruen; PR gegen main.
+
+## M0-CI-GESAMTBASIS-20261115 — reserviert, Codex Lead
+
+Meilenstein M0 des freigegebenen Verkaufsprodukt-Fahrplans. Ziel: rote main-
+Workflows Quality Gate/Sonar, CI/CD, E2E Full UAT und Runtime API Sweep konkret
+auseinanderhalten und beheben. Besitz betroffene CI-/Evidenzvertraege und enge
+Nachweistests, eigene QA/Handshake; Workboard-Bereinigung zunaechst nur eigene
+nachweislich fertige Claims. Fremde Claude-Altclaims bleiben bei Claude. Kein
+Gate senken, keine Baselineverschiebung oder Quellen aus Coverage ausblenden.
+Der laufende PR137 muss erst auf dem gemeinsamen Dokumentationsstand abgenommen
+werden. Weitere main-Merges bitte ueber den Integrationslead koordinieren,
+damit Quellen nicht erneut waehrend einer Vollsuite fortgeschrieben werden.
+Branches und einzelne Tests auf bestehenden eigenen Pruefstaenden bleiben frei.
+Keine neuen Testdatenbanken/Container, keine fremden Prozesse abbrechen.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex besitzt fuer den konkreten
+RuntimeSweep500 zusaetzlich app/api/v1/endpoints/crm_lead_gen.py (nur preview-
+Mandantenabhaengigkeit), tests/test_crm_lead_preview_context.py (neu), eigeneQA.
+Ursache: CrmLeadGenService verlangt einen Mandanten, preview uebergibt keinen.
+Abnahme HTTP200 mit serverseitigem Kontext und unveraenderten Filtern, 401/403
+ohne Token/geprueften Kontext, Spoofing allein oeffnet nichts. Externe Daten-
+und Authentifizierungsgrenzen im Unitvertrag simuliert; keine Datenbank, kein
+Docker, keine Aussage ueber echte GAP-Daten oder JWT-Verifikation. PR137-Kopf
+4c7c6374b bleibt waehrend seiner CI unveraendert.
+
+M0-CI-GESAMTBASIS-20261115 LeadPreview lokal abgenommen: sechs rote HTTP-
+Gegenproben vor Fix, danach zehn gruen. Gepruefter Mandantenkontext wird an
+Service uebergeben; kein neuer Fallback. Externe Identitaet/GAP-Daten simuliert,
+keine DB/Docker-Aktion. Echter RuntimeSweep des neuen SHA noch offen; QA
+m0-runtime-lead-preview-20261115.md. PR137 bleibt auf4c7c6374b unveraendert.
+
+### M0-Integrationsstand nach PR139
+
+Der bereits gemergte Kontraktstand7724b8f62 ist in PR137 uebernommen, ebenso der
+separat gepruefte LeadPreview-Fix (zehn HTTP-Vertraege). Der vorhandene OpenAPI-
+Vertrag hatte HTTPBearer und dieselben fuenf Filter bereits; keine neuen Client-
+Parameter oder Datenfelder. Quelle und Vertrauenskette werden korrigiert.
+Keine weitere Live-Migration: die lokale Bereitstellung bleibt auf2338578d0
+plus separat ausgeliefertem Themefix. Der neue Main-Kontrakt wird nicht still
+auf eine laufende Entwicklungsdatenbank migriert.
+
+M0-UAT-Diagnose praezisiert: crm360-model-based.spec.ts erwartet das entfernte
+KIM-DOM (#crm-main-viewport). /crm leitet inzwischen zur nativen Kundenliste
+beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaendig;
+eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
+nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
+werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.

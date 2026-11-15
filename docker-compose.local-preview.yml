@@ -2,6 +2,10 @@
 # One worker avoids four simultaneous full-registry imports on developer laptops.
 services:
   backend:
+    # The image includes reviewed code, configuration and the Studio catalog.
+    # Do not replace it with mutable or stale host files during presentations.
+    # Apply reviewed migrations explicitly before starting this preview profile.
+    volumes: !reset []
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "5"]
   frontend-web:
     ports:
