@@ -11,6 +11,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
+## README-DOKU-20261110 — zur Abnahme, Claude Code
+
+**Owner:** Claude Code. **Stand:** 2026-11-15. **Ziel:** README mit Alleinstellungsmerkmalen und BELEG-052-Stand; Klartext-Zugangsdaten aus Skripten, Staging-Compose-Rueckfaellen und Archiv entfernt. **Dateibesitz:** `README.md`, `scripts/upload-github-secrets.ps1`, `scripts/start_rag_server.py` (nur Zugangsdaten aus der Umgebung), Staging-Compose, Archivdokumente. **Abnahme:** keine Klartext-Zugangsdaten mehr im Arbeitsstand; die Werte stehen weiter in der Git-Historie und muessen rotiert werden.
+
 ## BATCH8-SEED-SCHUTZ-20261104 — abgeschlossen, Codex
 
 **Owner:** Codex. **Ziel:** Irreversible Batch-8-Seedbereinigung gegen Datenverlust absichern. **Dateibesitz:** Migration scheinwege_mandant_20261103, zugehoerige Tests und eigene QA; Workboard-Integration mit Lead. **Abnahme:** unveraenderte Seeds eindeutig nachweisbar, fremde/geaenderte/NULL-Daten bleiben erhalten oder blockieren. **Ergebnis:** vollständige Seed-Geschäftswerte geprüft, abweichende Marketingdaten blockieren, ungesicherte Testreste und Befunde bleiben erhalten. PostgreSQL-Gegenproben 2/2; QA `docs/quality-assurance/batch8-seed-schutz-20261104.md`. **Risiko:** identische Geschäftsdatensätze ohne Herkunftsnachweis sind nicht unterscheidbar; abweichender Marketingbestand erfordert Klärung.

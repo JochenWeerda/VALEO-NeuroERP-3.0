@@ -237,7 +237,7 @@ Error: You don't have permission to create secrets
 - ❌ **NIEMALS Secrets in Logs ausgeben**
 - ❌ **NIEMALS gleiche Passwörter für Staging + Production**
 - ❌ **NIEMALS Secrets teilen via Email/Chat**
-- ❌ **NIEMALS schwache Passwörter** (z.B. "admin123")
+- ❌ **NIEMALS schwache Passwörter** (z.B. "<ADMIN_PASSWORT>")
 
 ---
 

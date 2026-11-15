@@ -30,11 +30,11 @@ Alle Services laufen stabil in Docker:
 ```powershell
 # Keycloak Admin
 Start-Process "http://localhost:8180"
-# Login: admin / admin123!
+# Login: admin / <ADMIN_PASSWORT>
 
 # pgAdmin
 Start-Process "http://localhost:5151"
-# Login: admin@valeo-staging.local / admin123!
+# Login: admin@valeo-staging.local / <ADMIN_PASSWORT>
 ```
 
 ---
@@ -163,7 +163,7 @@ https://github.com/JochenWeerda/VALEO-NeuroERP-3.0/actions
 # Backend-Fenster prüfen (sollte offen sein)
 # Falls Fehler: main.py manuell starten mit:
 
-$env:DATABASE_URL="postgresql://valeo_staging:valeo_staging_2024!@localhost:5532/valeo_neuro_erp_staging"
+$env:DATABASE_URL="postgresql://valeo_staging:<STAGING_PASSWORT>@localhost:5532/valeo_neuro_erp_staging"
 $env:REDIS_URL="redis://localhost:6479/0"
 $env:OIDC_DISCOVERY_URL="http://localhost:8180/realms/valeo-staging/.well-known/openid-configuration"
 $env:CORS_ORIGINS="http://localhost:3000"
@@ -189,19 +189,19 @@ http://localhost:3000
 **Keycloak Admin:**
 ```
 http://localhost:8180
-Login: admin / admin123!
+Login: admin / <ADMIN_PASSWORT>
 ```
 
 **pgAdmin:**
 ```
 http://localhost:5151
-Login: admin@valeo-staging.local / admin123!
+Login: admin@valeo-staging.local / <ADMIN_PASSWORT>
 ```
 
 **Redis Commander:**
 ```
 http://localhost:8181
-Login: admin / admin123!
+Login: admin / <ADMIN_PASSWORT>
 ```
 
 ### Backend-API (wenn gestartet):
@@ -254,7 +254,7 @@ http://localhost:8000/healthz
 ### Backend starten (separates Terminal):
 
 ```powershell
-$env:DATABASE_URL="postgresql://valeo_staging:valeo_staging_2024!@localhost:5532/valeo_neuro_erp_staging"
+$env:DATABASE_URL="postgresql://valeo_staging:<STAGING_PASSWORT>@localhost:5532/valeo_neuro_erp_staging"
 python main.py
 ```
 
