@@ -363,8 +363,8 @@ def add_budget_line(
         ).first()
         if not plan:
             raise HTTPException(404, "Budget-Plan nicht gefunden")
-        if plan[0] == "GESPERRT":
-            raise HTTPException(409, "Budget ist gesperrt — keine Änderungen möglich")
+        if plan[0] != "ENTWURF":
+            raise HTTPException(409, "Budgetpositionen sind nur im ENTWURF aenderbar")
 
         account = db.execute(text("""SELECT id FROM domain_erp.chart_of_accounts
             WHERE id = :id AND tenant_id = :tid AND is_active = TRUE
@@ -424,8 +424,8 @@ def update_budget_line(
         ).first()
         if not plan:
             raise HTTPException(404, "Budget-Plan nicht gefunden")
-        if plan[0] == "GESPERRT":
-            raise HTTPException(409, "Budget ist gesperrt")
+        if plan[0] != "ENTWURF":
+            raise HTTPException(409, "Budgetpositionen sind nur im ENTWURF aenderbar")
 
         line = db.execute(
             text("SELECT id FROM domain_finance.budget_lines WHERE id = :id AND plan_id = :pid AND tenant_id = :tid"),

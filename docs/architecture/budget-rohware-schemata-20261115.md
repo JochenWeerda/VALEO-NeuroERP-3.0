@@ -66,3 +66,17 @@ DDL ausgefuehrt. Eine echte Schema-/RLS-Abnahme wird erst nach erfolgreichem
 PostgreSQL-Lauf ausgewiesen. Keine neue MCP-Freischaltung oder Kanalabnahme wird
 aus Unit-Tests abgeleitet. Die veroeffentlichte Studio-Definition und die
 unveraenderliche Historie produktiver Belege sind hiervon zu unterscheiden.
+
+## Freigabeinhalt und fachliche Abgrenzung
+
+Genehmigte Budgetpositionen sind ueber beide vorhandenen Schreibwege eingefroren;
+Aenderungen sind ausschliesslich im ENTWURF erlaubt. Gemeinsame Plansperren
+serialisieren die Aenderung mit der Genehmigung. Ein weiterer Freigabe- oder
+Wiedereroeffnungsweg wird nicht erfunden.
+
+Die bestehenden Kostenstellen-Periodenbudgets unter domain_controlling und die
+kontenscharfen Finanzjahresplaene sind heute keine nachgewiesen synchronisierten
+Projektionen. Fuehrende Planungswerte, Kostenstellenzuordnung, Buchungsstatus und
+Vorzeichen benoetigen eine fachliche Harmonisierung vor Gesamtfreigabe. Dieser
+Schemaauftrag behauptet deshalb keine einheitliche Budget-Fachkette und schaltet
+keine neuen MCP-Writes frei.

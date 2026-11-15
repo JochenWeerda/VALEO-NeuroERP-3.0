@@ -135,8 +135,16 @@ def test_postgres_schema_and_rls(require_db):
             # Session commits release savepoints only; probe retains its outer rollback.
             with Session(bind=conn, join_transaction_mode='create_savepoint') as db:
                 added = add_budget_line(pa, BudgetLineCreate(account_id=aa, kostenstelle_id=ka, period_month=2, budgeted_amount=Decimal('2.50')), tenant_id=a, db=db)
-                assert approve_budget_plan(pa, tenant_id=a, db=db)['approved'] is True
                 assert update_budget_line(pa, added['id'], BudgetLineUpdate(budgeted_amount=Decimal('3')), tenant_id=a, db=db)['updated'] is True
+                assert approve_budget_plan(pa, tenant_id=a, db=db)['approved'] is True
+                with pytest.raises(HTTPException) as frozen_update:
+                    update_budget_line(pa, added['id'], BudgetLineUpdate(budgeted_amount=Decimal('99')), tenant_id=a, db=db)
+                assert frozen_update.value.status_code == 409
+                with pytest.raises(HTTPException) as frozen_insert:
+                    add_budget_line(pa, BudgetLineCreate(account_id=aa, kostenstelle_id=ka, period_month=2, budgeted_amount=Decimal('99')), tenant_id=a, db=db)
+                assert frozen_insert.value.status_code == 409
+                assert db.execute(text('SELECT budgeted_amount FROM domain_finance.budget_lines WHERE id=:id'), {'id': added['id']}).scalar_one() == Decimal('3')
+                assert db.execute(text('SELECT count(*) FROM domain_finance.budget_lines WHERE plan_id=:id'), {'id': pa}).scalar_one() == 1
                 with pytest.raises(HTTPException) as err:
                     approve_budget_plan(pa, tenant_id=a, db=db)
                 assert err.value.status_code == 409
@@ -225,3 +233,20 @@ def test_budget_list_query_parameter_boundaries():
     for name, value in [('skip', 0), ('limit', 1), ('limit', 500)]:
         _, error = params[name].validate(value, {}, loc=('query', name))
         assert not error
+
+
+@pytest.mark.unit
+@pytest.mark.parametrize('status', ['GENEHMIGT', 'GESPERRT'])
+@pytest.mark.parametrize('operation', ['insert', 'update'])
+def test_non_draft_positions_cannot_change_under_the_existing_approval(status, operation):
+    db = Mock()
+    db.execute.side_effect = [Mock(), Mock(), row((status,))]
+    with pytest.raises(HTTPException) as error:
+        if operation == 'insert':
+            add_budget_line('plan', BudgetLineCreate(account_id='a', period_month=1, budgeted_amount=Decimal('1')), tenant_id='tenant', db=db)
+        else:
+            update_budget_line('plan', 'line', BudgetLineUpdate(budgeted_amount=Decimal('1')), tenant_id='tenant', db=db)
+    assert error.value.status_code == 409
+    assert len(db.execute.call_args_list) == 3
+    assert 'FOR UPDATE' in str(db.execute.call_args_list[-1].args[0])
+    db.commit.assert_not_called()

@@ -1,38 +1,78 @@
-# M0 Rohware: Mandantengrenze (2026-11-15)
+---
+title: M0 Rohware-Schema, Mandantengrenzen und Formelsicherheit
+owner: Codex
+type: reference
+status: in Arbeit
+last_reviewed: 2026-11-15
+---
 
-Die zehn Endpunkte beziehen den aktiven Mandanten aus `get_tenant_id`; Eingaben können den Kontext nicht bestimmen. Widersprüchliche `tenant_id`-Werte im Body werden mit 403 abgewiesen. Schema-Abfragen und -Änderungen binden die verifizierte Mandanten-ID; Positionsabfragen und -Mutationen prüfen zusätzlich die Zugehörigkeit des Elternschemas. Fremde IDs ergeben 404. Die vorhandenen Lager-Schreibrollen bleiben bestehen. Datenbankfehler liefern keine SQL- oder Ausnahmedetails und lösen einen Rollback aus. Fehlende Tabellen bleiben ein 503; diese Änderung erstellt keine Tabellen oder Migration.
+# Rohware-Schema und sichere Berechnung
 
-Die isolierten HTTP-Vertragstests verwenden eine synthetische Identitätsgrenze und eine Datenbankattrappe mit zwei Mandanten. Sie prüfen Fremdzugriffe, unveränderte Daten nach Ablehnung, Kontext- und Body-Manipulation sowie eine eigene Berechnung und Positionslöschung. Die Lagerrolle wird dabei als explizite externe Abhängigkeit ersetzt. Dies belegt weder produktive Providerverifikation noch PostgreSQL-Transaktionsverhalten, RLS, Rollenrechte oder das Vorhandensein und die Struktur der Tabellen. Diese Prüfungen bleiben für einen abgestimmten Integrationslauf auf dem gemeinsamen Prüfstand offen.
+## Kanonische Umsetzung
 
-Die Ersatztests decken zusätzlich Anlage, Lesen, Änderung, Aktivierung, Archivierung und Positionslebenszyklus sowie unzulässige Statusübergänge ab. Der Besitz einer Position wird ausschließlich über ihr Schema geprüft; Positionen speichern `tenant_id` und sind über einen zusammengesetzten Fremdschlüssel an das Schema desselben Mandanten gebunden. Die Fehlerfälle simulieren den Ausfall der Tabellenprüfung und einer nachfolgenden Abfrage und prüfen Rollback-Aufrufe und neutrale Fehlermeldungen.
+Der Schema-Editor verwendet den bestehenden Stamm
+`domain_shared.rohware_abrechnungsschemata`; die nie migrierte Tabellenannahme
+rohware_schemata wird nicht als zweiter Katalog nachgebaut. Schema-Code und Name
+entsprechen schema_nr und bezeichnung. Gueltigkeit, Version und Status erweitern
+den Stamm. Formelpositionen liegen in rohware_schema_lines und sind per
+zusammengesetztem FK an Schema und Mandant gebunden. Ein fremder Gruppenverweis
+blockiert die Migration statt Daten umzuschreiben oder zu entfernen.
 
-Die kanonische Migration erweitert `domain_shared.rohware_abrechnungsschemata`; es gibt keinen zweiten Schema-Stamm. Vorhandene aktive Datensätze erhalten AKTIV und das Erstellungsdatum als Gültigkeitsbeginn, inaktive ARCHIV. Ein mandantenfremder Gruppenverweis verhindert die Migration. Neue Schemata benötigen eine vorhandene eigene Gruppe; der alte Gruppenweg legt über denselben Dienst ein aktives Schema mit heutigem Gültigkeitsbeginn an. Der neue Gruppen-Detailpfad prüft den verifizierten Mandanten und zeigt vorhandene aktive Schemata. PostgreSQL- und RLS-Prüfungen sind vorbereitet, aber auf dem gemeinsamen Prüfstand noch nicht ausgeführt.
+Beide Router verwenden get_tenant_id aus dem vertrauenswuerdigen Kontext.
+Widerspruechliche tenant_id im Body ergeben 403, fremde Eltern/Positionen 404.
+Die vorhandenen Lager-Schreibrollen bleiben erhalten. Der neue GET
+`/api/v1/rohware/gruppen/{gruppe_id}/schemata` schliesst den nachgewiesenen
+Clientpfad. Auch dessen erster Datenbankzugriff wird neutral mit Rollback/503
+behandelt; SQL- oder Ausnahmetext wird nicht ausgegeben.
 
-Ein geplanter Downgrade entfernt die Formelpositionen und die ergänzten Lebenszyklusdaten; Stammzeilen, Gruppen und deren aktuelles `aktiv` bleiben erhalten. Vor einem solchen Rückbau ist eine Sicherung erforderlich. Der Downgrade wurde nicht ausgeführt. Die PostgreSQL-Tests sind vorbereitet und erfordern den abgestimmten Prüfstand; sie sind weder ein ausgeführter RLS-Nachweis noch eine Freigabe für Migration oder Downgrade.
+Ein gemeinsamer Dienst validiert Kopfwerte, Datumsbereich, positive Version und
+eigene Gruppe. Der Editor erzeugt ENTWURF/inaktiv. Der alte Gruppen-Anlageweg
+erzeugt AKTIV mit kanonischem business_today in der Betriebszeitzone.
+Datenbankstandardwerte erhalten den bisherigen SQL-Anlagevertrag aktiv/heute.
+Externe Altaufrufer, die nur aktiv=false ohne passenden Status setzen, sind
+nicht abgenommen. Bestehende Qualitaetsdefinitionen und Staffeln bleiben erhalten.
 
-Neue Datenbankstandardwerte erhalten den bisherigen Altvertrag: Anlagen ohne neue Felder sind aktiv und ab CURRENT_DATE gültig; der gemeinsame Dienst setzt Entwürfe ausdrücklich auf ENTWURF/inaktiv. Ein Altaufrufer, der ausdrücklich nur `aktiv=false` setzt, würde mit den neuen Konsistenzbedingungen scheitern; die Repository-Suche fand außer dem umgestellten Dienst keinen produktiven Kopfschreiber. Externe SQL-Aufrufer sind damit nicht ausgeschlossen. Die PostgreSQL-Gegenprobe ist vorbereitet und nicht ausgeführt.
+## Formeln
 
-Die Schema-Kopf-API weist ungültige Eingaben vor Schreibzugriff mit 422 ab: `name` ist bei Anlage erforderlich, nicht leer und höchstens 200 Zeichen; ein optionaler `schema_code` ist nicht leer und höchstens 20 Zeichen. Die Gruppenreferenz muss genau einmal als nicht leere `gruppe_id` oder `rohwaren_gruppe` vorliegen und bei Anlage zum aktiven Mandanten gehören. `version` ist eine positive 32-Bit-Ganzzahl ohne String-/Bool-Konvertierung. Datumsfelder akzeptieren ISO-Kalenderdatum oder null; auch beim teilweisen Update wird der zusammengeführte Zeitraum geprüft. Positionsformeln werden ausschliesslich als begrenzte numerische Ausdruecke interpretiert; Python-Code wird nicht ausgefuehrt.
+Ein begrenzter arithmetischer Interpreter ersetzt Python-eval. Er erlaubt nur
+numerische Werte, bekannte Kontextwerte, Rechenoperatoren und abs/min/max/round.
+Attribute, Objektzugriffe, Importe und ausfuehrbarer Python-Code sind ausgeschlossen.
+Laenge, Knotenzahl und Tiefe sind begrenzt; Eingaben, Einzelergebnisse und Summen
+muessen endlich sein. Fehler ergeben neutralen 422 statt eines Nullpreises.
 
-## Formelabsicherung und lokaler Nachweis
+## Nachweise und Herkunft
 
-Der neue arithmetische Interpreter erlaubt Zahlen, bekannte Kontextwerte, Rechenoperatoren und abs/min/max/round. Attribute, Objektzugriffe, Importe, Container und ausfuehrbarer Python-Code sind ausgeschlossen. Laenge, Knotenzahl und Tiefe sind begrenzt; nicht endliche Eingaben, Ergebnisse und Summen werden mit neutralem 422 abgewiesen. Ungueltige Formeln werden nicht als Nullbetrag eingerechnet.
+- 46 aktuelle enge Rohware-HTTP-/Eingabevertraege bestanden, einschliesslich
+  Mandantenmanipulation, eigenem Lebenszyklus, Geschaeftstag und Datenbankfehlern.
+  Identitaetsgrenze und DB sind dort explizite Attrappen, kein RLS-Nachweis.
+- 50 Formel-/HTTP-Sicherheitsfaelle und die vier bisherigen Formelvertraege
+  bestanden. 21 angrenzende Waage-/Istwertfaelle bestanden separat; ueberlappende
+  Testmengen werden nicht addiert.
+- StrictDB 43748281469 auf 4866020db: 692 passed / 3 skipped insgesamt,
+  einschliesslich echtem Rohware-Lebenszyklus, FK-Negativfaellen und RLS als
+  valeo_app ohne Superuser/BYPASSRLS. Korrigierter Inventarjob 43750385711
+  erfolgreich. Beide Jobs verwenden ihre vorhandene einzelne PostgreSQL-DB.
+- Runtime-Sweep 43748929572 auf 309596320: 1069 Ziele, 997 2xx, 67 erwartete 4xx,
+  keine 500er-/Transport-/Auth-Fehler. Die drei Budget-/Rohware-Tabellen-503 sind
+  beseitigt. Fuenf andere 503 bleiben offen; der Gesamtsweep ist deshalb rot.
+- Katalog aus fresh-schema-table-catalog des Jobs 43751847958 byteidentisch
+  uebernommen. Auf dem folgenden Stand 5048c093f bestanden im Quality Gate
+  43753749497 sowohl reine Migrations-/RLS-Pruefung als auch physischer Katalog;
+  dessen vollstaendige Suite war beim letzten Nachweis noch in Arbeit.
 
-Gezielter Lauf: 113 Tests bestanden (50 Formel-/HTTP-Sicherheitsfaelle, vier bisherige Formelvertraege, 43 Rohware-HTTP-Vertraege und 16 Budget-Einheitstests). Ein PostgreSQL-Test wurde dabei ausdruecklich ausgeschlossen; der zweite gehoerte nicht zur Auswahl. Ein erster Lauf mit --noconftest und Markerauswahl hatte zwei fehlende require_db-Fixtures, weil deren Markierung erst durch conftest erfolgt; dies ist kein PostgreSQL-Nachweis. Bandit meldet fuer die vier geprueften Implementierungsdateien keinen Befund, aber bestehende unnoetige nosec-Kommentare. Die echte PostgreSQL-Abnahme folgt im bestehenden strikten CI-Job.
+## Lernen und Betriebsgrenzen
 
-Erster PostgreSQL-Lauf auf 9dcd531c5: Migrationen erfolgreich, 702 bestanden, vier uebersprungen, ein Fehler im neuen Rohware-Test. Dessen synthetischer schema_code war laenger als der produktive 20-Zeichen-Vertrag. Beide erzeugten Dienst-Codes wurden auf maximal 20 Zeichen begrenzt; keine produktive Validierung gelockert. Der Budget-PostgreSQL-Vertrag bestand. Rohware-Abnahme und Inventare erfordern den korrigierten Nachlauf. Lauf 43747351697.
+Der erste PostgreSQL-Test verwendete einen zu langen synthetischen Schema-Code.
+Die Testkennung wurde korrigiert, die produktive Grenze nicht gelockert.
+RLS-Inventar wird vor ORM-create_all auf dem reinen Migrationsstand exportiert,
+der physische Anwendungskatalog danach. Upload erst nach erfolgreichen Tests.
 
-## Kombinierte PostgreSQL-Abnahme
+Eine lokale Offline-Aktualisierung ohne explizites UTF-8 erzeugte Mojibake im
+Katalog, nicht in der DB. Der echte CI-Katalog ersetzte sie binaer mit gepruefter
+Hashgleichheit und Unicode-Bezeichnern. Text/JSON immer explizit UTF-8 lesen;
+Artefakte binaer uebernehmen. Das vorbereitete, nie gestartete Image eb6845b79
+wurde nach Pruefung auf fehlende Nutzung entfernt.
 
-Run 43748281469 auf 4866020db4d32fbc34bac1446c446744e73781c4 ist erfolgreich: 692 bestanden, drei uebersprungen, 27753 abgewaehlt. Darin sind beide neuen require_db-Vertraege enthalten. Die gegenueber c1720145f veraenderte Gesamtzahl folgt dem inzwischen integrierten Abbau alter Rechnungswege; die Zahlen werden nicht addiert. Migrationen liefen auf dem Job-Pruefstand, RLS-Verhalten als valeo_app ohne Superuser/BYPASSRLS. Der erfolgreiche Lauf exportierte den physischen Tabellenkatalog (707 Tabellen) und das RLS-Inventar (798 erfasste Tabellen); diese Artefakte wurden unveraendert uebernommen. Keine lokale/live Migration, kein Browser- oder MCP-Schreibnachweis. Fruehere Aussagen zum ausstehenden PostgreSQL-Lauf oben dokumentieren den vorherigen Zwischenstand.
-
-Gesamt-CI fand anschliessend einen neu eingefuehrten date.today-Aufruf im gemeinsamen Dienst. Aktivierung verwendet jetzt den kanonischen business_today in der Betriebszeitzone; ein gezielter Test bindet den Geschaeftstag unabhaengig vom lokalen Systemdatum. Keine Ratsche oder Zeitzonenregel gelockert.
-
-Inventar-Gegenprobe der Gesamt-CI: Der StrictDB-Job hatte vor dem Export bereits init_db mit ORM-create_all ausgefuehrt. Zehn additive ORM-Tabellen ohne Migration waren dadurch im exportierten RLS-Inventar, das reine Migrationsschema der Quality-Gate-Vorpruefung kennt sie nicht. Kein Datenleck und kein PostgreSQL-Verhaltensfehler; der Nachweisweg war falsch. Export erfolgt jetzt vor ORM-Ergaenzung auf init_db --nur-migrationen, Verhaltenstests danach in derselben Job-Datenbank mit dem bisherigen additiven Setup. Upload bleibt ausschliesslich nach erfolgreichen Verhaltenstests. Die vorher uebernommenen Inventare werden durch diesen korrigierten Nachweis ersetzt; keine Ausnahme oder Ratsche gelockert.
-
-Korrigierter Lauf 43750385711 auf e9ca99301 erfolgreich. Die unveraenderten Migrationstabellen und deren Klassen wurden verglichen; genau die zehn additiven ORM-Tabellen entfallen im kanonischen RLS-Inventar, keine gemeinsame Tabelle veraendert. Die drei RLS-Artefakte dieses Laufs ersetzen die vorigen. Der physische Anwendungskatalog aus 43748281469 bleibt erhalten: Er beschreibt absichtlich den initialisierten Anwendungsstand inklusive ORM. Im Workflow erfolgt kuenftig RLS-Export vor ORM, physischer Katalog danach, Upload beider erst nach erfolgreichen Verhaltenstests. Keine neue Datenbank, kein Reset und keine Filterausnahme.
-Runtime-Sweep 43748929572 auf 309596320: 1069 Ziele, 997 2xx, 67 erwartete 4xx, keine 500er-/Transport-/Auth-Fehler; Budgetliste/-summary und Rohwarekatalog nicht mehr unter den unerwarteten 503. Fuenf andere 503 bleiben bestehen; der Gesamtsweep ist deshalb weiterhin rot.
-
-Angrenzender Befund bei der abschliessenden Lesekontrolle: Die neue Gruppen-Detailroute hatte den ersten Datenbankzugriff noch ausserhalb der neutralen Fehlerbehandlung. Sie rollt einen solchen Fehler jetzt zurueck und liefert 503 ohne SQL-/Ausnahmetext; 404/401 bleiben erhalten. Zwei HTTP-Negativtests sichern dies gezielt ab.
-
-Katalog-Gegenprobe auf eb6845b79: Eine lokale Offline-Lineage-Aktualisierung las JSON versehentlich mit der Windows-Standardcodierung statt UTF-8. Dadurch wurden ownership_reason-Pfeile und der Umlaut im Katalognamen erloesklasse verfälscht; keine Datenbankspalte wurde geaendert. Der Quality-Gate-Pruefstand erkannte den Drift und erntete den korrekten Katalog. Beide Dateien wurden byteidentisch aus dessen Artefakt fresh-schema-table-catalog (43751847958) uebernommen; Unicode-Bezeichner und SHA-256-Gleichheit geprueft. Lernregel: Artefakte binaer kopieren; jeden JSON-/Text-Lesezugriff ausdruecklich mit encoding=utf-8, niemals plattformabhaengige Standardcodierung. Das vorbereitete Image eb6845b79 bleibt fuer Bereitstellung gesperrt, da es den fehlerhaften Katalog enthaelt.
+Keine lokale/live Migration, kein Browser-Schreibnachweis und keine neue
+MCP-Schreibfreischaltung. Der geplante Downgrade verliert neue Formelpositionen
+und Lebenszyklusdaten, erfordert eine Sicherung und wurde nicht ausgefuehrt.

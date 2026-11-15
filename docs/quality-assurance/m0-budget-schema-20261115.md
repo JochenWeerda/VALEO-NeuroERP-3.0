@@ -1,20 +1,58 @@
-# Budgetplanung: Persistenz und Grenzen (2026-11-15)
+---
+title: M0 Budget-Schema und Freigabegrenzen
+owner: Codex
+type: reference
+status: in Arbeit
+last_reviewed: 2026-11-15
+---
 
-Die Migration `budget_planning_schema_20261115` legt die beiden vom vorhandenen Budgetrouter verwendeten Tabellen an. Positionen referenzieren Plan, bebuchbares Konto und optional Kostenstelle jeweils mit Mandant. Das Konto ist das bestehende `domain_erp.chart_of_accounts`; die Kostenstelle stammt aus `domain_finance.kostenstellen`. Die Konto-Eindeutigkeit stammt aus `bank_gl_binding_20261001`; die neue Kostenstellen-Eindeutigkeit wird beim Downgrade nach Entfernen der Budgettabellen zurückgenommen. Beide Tabellen erhalten RLS und bedingte `valeo_app`-Rechte. Die Migration wurde nicht ausgeführt.
+# Budget-Schema und Freigabegrenzen
 
-Der Schreibweg prüft Konto und Kostenstelle vor dem Einfügen auf Mandantenzugehörigkeit, das Konto zusätzlich auf Aktivität, Löschung und Bebuchbarkeit. Eine Plansperre serialisiert Genehmigung und Positionsänderungen. Bestehende Statusregeln bleiben erhalten. Der Detailweg liefert bereits Positionen; ein weiterer Positions-Leseweg wurde mangels nachgewiesenem Verbraucher nicht ergänzt. Istwert-SQL-Fehler im Vergleich liefern 503 und Rollback statt eines erfundenen Nullwertes. Tabellenprüfungen rollen bei Fehlern zurück.
+## Umsetzung
 
-## Nachweis und offene Grenzen
+`domain_finance.budget_plans` und `budget_lines` erhalten Mandantenbindung,
+vier aktionsgetrennte RLS-Policies, Indizes und zusammengesetzte Fremdschluessel.
+Eine Position referenziert ausschliesslich den eigenen Plan, das eigene aktive,
+nicht geloeschte, bebuchbare Konto aus `domain_erp.chart_of_accounts` und optional
+die eigene Kostenstelle aus `domain_finance.kostenstellen`. Kein zweiter Konten-
+oder Kostenstellenstamm. Betraege muessen endlich sein und in NUMERIC(16,2)
+passen; mehr als zwei Nachkommastellen werden nicht still gerundet.
 
-- Datenbankfreie Tests: `tests/test_budget_schema_contract.py` und `tests/test_budget_actuals_unavailable.py`, 18 bestanden mit `-m unit --noconftest --no-cov` und unerreichbarer Dummy-Datenbank.
-- PostgreSQL-Test ist definiert, aber nicht ausgeführt. Migration, tatsächliche Rechte/RLS, Fremdschlüssel und Lebenszyklus benötigen eine Abnahme auf dem vorhandenen gemeinsamen Prüfstand oder im CI. Der vorbereitete Test prüft drei getrennte Fremdschlüsselverletzungen anhand von SQLSTATE und Constraint, RLS unter der echten eingeschränkten Anwendungsrolle, eigenes CRUD und die vorhandenen Genehmigungs- und Sperrregeln. Er erzeugt keine Datenbank und verwendet die zurückgerollte Transaktion der kanonischen Prüfhilfe. Bis zur Ausführung besteht kein Schema-Abnahmenachweis. Nicht endliche Beträge werden bei Anlage und Änderung zurückgewiesen; eine fachliche Rundungsregel ist nicht vereinbart.
-- Die bestehende Summary summiert sämtliche Journalzeilen des Jahres; der Vergleich berücksichtigt Konto und Monat, aber keine Kostenstelle. Buchungsstatus, Vorzeichen, Kontenauswahl und Kostenstellenzuordnung sind fachlich nicht geklärt. Diese Ergebnisse sind daher nicht als fachlich abgenommene Budget-Ist-Auswertung zu betrachten. Die Migration löst diese Fachfrage nicht.
-- Kein zusätzlicher Browser-, API- oder vollständiger CI-Lauf; Dokumentations- und Workboard-Integration erfolgt durch den Lead.
+Neue Plaene beginnen ausschliesslich als ENTWURF, auch bei direktem Handleraufruf.
+Die bestehende Finanzschreibrolle darf Positionen nur im ENTWURF anlegen oder
+aendern. Genehmigung benoetigt weiter finance_admin. Genehmigung und
+Positionsmutationen sperren denselben Plan: Nach Genehmigung darf der Inhalt
+nicht unter unveraenderter Freigabe weitergeschrieben werden. GENEHMIGT und
+GESPERRT ergeben fuer beide Positions-Writes 409. Kein ungepruefter
+Wiedereroeffnungsweg. Der Detailweg liefert Positionen bereits; ein zusaetzlicher
+Positions-Leseweg ohne Verbraucher wurde nicht eingefuehrt.
 
-Beim Anlegen ist nur `ENTWURF` zulässig; andere Status werden vor dem Tabellenzugriff mit 422 abgewiesen. Genehmigung bleibt dem vorhandenen administrativen Freigabeweg vorbehalten. Der datenbankfreie Rollentest prüft die tatsächlichen Routenbindungen und Rollenprüfer direkt; ein HTTP-Rollenintegrationstest steht aus. Ein Weg zum Sperren wurde nicht nachgewiesen; die bestehenden Regeln für bereits gesperrte Pläne bleiben erhalten.
+Die Budgetliste paginiert mit tenantbezogener Gesamtzahl und stabiler Sortierung.
+Nicht verfuegbare Istwerte liefern Rollback und neutralen 503, keinen erfundenen
+Nullverbrauch. Eine fehlende Plan-ID ergibt 404.
 
-Beträge müssen in `NUMERIC(16,2)` passen; Werte mit mehr als zwei Nachkommastellen werden abgewiesen statt still gerundet. Der Kostenstellen-Report zeigt aktive Kostenstellen, dies belegt jedoch kein allgemeines Schreibverbot für inaktive Kostenstellen. Deshalb prüft der Budget-Schreibweg deren Mandantenzugehörigkeit, ohne einen neuen Aktivitätsvertrag zu erfinden.
+## Nachweise
 
-## PostgreSQL-Abnahme nach Integration
+- Aktuelle datenbankfreie Budget-/Istwertvertraege: 25 bestanden, ein echter
+  PostgreSQL-Vertrag ausdruecklich ausgeschlossen. Enthalten sind vier neue
+  Negativfaelle fuer Aenderungen genehmigter/gesperrter Positionen.
+- Vor dieser letzten Freigabeverschaerfung bestanden beide neuen DB-Vertraege
+  im kombinierten StrictDB-Job 43748281469 auf 4866020db (692 passed / 3 skipped
+  insgesamt). Echte eingeschraenkte Rolle valeo_app, RLS, drei getrennte
+  Fremdschluessel und eigener Lebenszyklus wurden geprueft.
+- Der erweiterte PostgreSQL-Vertrag prueft jetzt zusaetzlich: positive Aenderung
+  vor Genehmigung, danach abgewiesenes Ergaenzen und Aendern, unveraenderter Betrag
+  und unveraenderte Positionszahl. Dieser erweiterte Nachweis ist noch ausstehend.
+- Keine neue Datenbank oder Dockerinstanz pro Test. Die kanonische Pruefhilfe
+  rollt alle eigenen Daten und Transaktionen zurueck.
 
-Der vorbereitete Budget-Vertrag bestand im erfolgreichen strikten Job 43748281469 auf 4866020db4d32fbc34bac1446c446744e73781c4 (692 bestanden, drei uebersprungen insgesamt). Die Migrationen, eigenen und fremden CRUD-Zugriffe als valeo_app, drei mandantengebundene Fremdschluessel sowie Genehmigungs-/Sperrregeln sind damit gegen PostgreSQL nachgewiesen. Physische Inventare wurden aus diesem Job uebernommen. Die oben genannten fachlichen Grenzen der Ist-Auswertung bleiben offen; ebenso Browser-/kanaluebergreifende Abnahme und lokale Bereitstellung.
+## Grenzen
+
+Die Summary summiert Journalzeilen des Jahres; der Vergleich beruecksichtigt
+Konto und Monat, aber noch keine Kostenstelle. Buchungsstatus, Vorzeichen und
+Kostenstellenzuordnung benoetigen eine fachliche Harmonisierung. Bestehende
+Kostenstellen-Periodenbudgets unter domain_controlling sind keine nachgewiesene
+Projektion dieser kontenscharfen Jahresplaene; eine gemeinsame fuehrende
+Planungs-/Freigabewahrheit ist damit nicht belegt. Keine fachliche Gesamtfreigabe
+oder neue MCP-Schreibfreischaltung daraus ableiten. Browserabnahme und lokale
+Bereitstellung dieser Migrationen stehen aus.
