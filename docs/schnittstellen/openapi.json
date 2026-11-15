@@ -29686,14 +29686,20 @@
       "BudgetPlanCreate": {
         "properties": {
           "plan_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": ".*\\S.*",
             "title": "Plan Name",
             "type": "string"
           },
           "plan_year": {
+            "maximum": 9999.0,
+            "minimum": 1.0,
             "title": "Plan Year",
             "type": "integer"
           },
           "status": {
+            "const": "ENTWURF",
             "default": "ENTWURF",
             "title": "Status",
             "type": "string"
@@ -299477,6 +299483,31 @@
     "/api/v1/finance/budgets": {
       "get": {
         "operationId": "list_budget_plans_api_v1_finance_budgets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -299487,6 +299518,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -393592,15 +393633,6 @@
               "title": "Nur Aktive",
               "type": "boolean"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -393641,17 +393673,6 @@
       },
       "post": {
         "operationId": "create_rohwarengruppe_api_v1_rohware_gruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -393730,15 +393751,6 @@
               ],
               "title": "Schema Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -393779,17 +393791,6 @@
       },
       "post": {
         "operationId": "create_qualitaet_api_v1_rohware_gruppen_qualitaeten_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -393852,15 +393853,6 @@
               ],
               "title": "Gruppe Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -393901,17 +393893,6 @@
       },
       "post": {
         "operationId": "create_schema_api_v1_rohware_gruppen_schemata_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -393974,15 +393955,6 @@
               ],
               "title": "Gruppe Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -394023,17 +393995,6 @@
       },
       "post": {
         "operationId": "create_staffel_api_v1_rohware_gruppen_staffeln_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -394106,15 +394067,6 @@
               ],
               "title": "Analysewert"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -394150,6 +394102,57 @@
         ]
       }
     },
+    "/api/v1/rohware/gruppen/{gruppe_id}/schemata": {
+      "get": {
+        "operationId": "list_gruppe_schemata_api_v1_rohware_gruppen__gruppe_id__schemata_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_id",
+            "required": true,
+            "schema": {
+              "title": "Gruppe Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AbrechnungsschemaOut"
+                  },
+                  "title": "Response List Gruppe Schemata Api V1 Rohware Gruppen  Gruppe Id  Schemata Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schemata einer Rohwarengruppe auflisten",
+        "tags": [
+          "Rohware - Gruppen & Abrechnungsschemata"
+        ]
+      }
+    },
     "/api/v1/rohware/gruppen/{gruppe_nr}": {
       "delete": {
         "operationId": "delete_rohwarengruppe_api_v1_rohware_gruppen__gruppe_nr__delete",
@@ -394160,15 +394163,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -394266,22 +394260,6 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],

@@ -204,5 +204,3 @@ class TestFormulaEval:
             {"basis_preis": 200.0, "menge_kg": 5000.0},
         )
         assert result == pytest.approx(1000.0)
-
-

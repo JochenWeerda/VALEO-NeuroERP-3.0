@@ -21144,3 +21144,5 @@ Lead ersetzt zusaetzlich ausschliesslich konstante SQL-Identifier-Fstrings im
 neuen Schemadienst durch gleichwertige Literalabfragen, statt Scanner-Ausnahmen
 aufzunehmen. Keine Rolle/DDL/DB/Schema-/Formel-Fachregel ausweiten. Lead integriert
 Artefakte und DB-Nachweise; keine neue Testdatenbank/Container.
+
+M0-SCHEMA-BUDGET-ROHWARE / FORMEL-SAFETY Zwischenstand: kanonische Migrationen und Gruppen-Detailroute implementiert; keine zweite Rohware-Stammtabelle. Formelinterpreter ohne eval, 113 gezielte Tests bestanden. PostgreSQL/RLS noch nicht abgenommen; bestehender strikter CI-Job exportiert Inventare erst nach erfolgreichen Tests. Keine lokale Datenbankmigration und keine neue Datenbank/Container. QA m0-rohware-tenant-20261115.md und m0-budget-schema-20261115.md.

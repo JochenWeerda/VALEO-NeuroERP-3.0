@@ -7,10 +7,10 @@ from __future__ import annotations
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 import logging
 from decimal import Decimal
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -47,6 +47,7 @@ def _check_tables(db: Session) -> None:
         db.execute(text("SELECT 1 FROM domain_finance.budget_plans LIMIT 0"))
         db.execute(text("SELECT 1 FROM domain_finance.budget_lines LIMIT 0"))
     except Exception:
+        db.rollback()
         raise _503()
 
 
@@ -55,20 +56,25 @@ def _check_tables(db: Session) -> None:
 # ---------------------------------------------------------------------------
 
 class BudgetPlanCreate(BaseModel):
-    plan_year: int
-    plan_name: str
-    status: str = "ENTWURF"
+    plan_year: int = Field(..., ge=1, le=9999)
+    plan_name: str = Field(..., min_length=1, max_length=255, pattern=r".*\S.*")
+    status: Literal["ENTWURF"] = "ENTWURF"
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def normalize_initial_status(cls, value):
+        return value.upper() if isinstance(value, str) else value
 
 
 class BudgetLineCreate(BaseModel):
     kostenstelle_id: Optional[str] = None
     account_id: str
     period_month: int = Field(..., ge=1, le=12)
-    budgeted_amount: Decimal
+    budgeted_amount: Decimal = Field(..., allow_inf_nan=False, max_digits=16, decimal_places=2)
 
 
 class BudgetLineUpdate(BaseModel):
-    budgeted_amount: Optional[Decimal] = None
+    budgeted_amount: Optional[Decimal] = Field(None, allow_inf_nan=False, max_digits=16, decimal_places=2)
     period_month: Optional[int] = Field(None, ge=1, le=12)
 
 
@@ -79,16 +85,23 @@ class BudgetLineUpdate(BaseModel):
 @router.get("", tags=["finance", "budget-planning"], summary="Budget plans auflisten",
     response_model=BudgetPlanningOut, dependencies=[Depends(finance_read)])
 def list_budget_plans(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     _check_tables(db)
     try:
-        rows = db.execute(
-            text("SELECT * FROM domain_finance.budget_plans WHERE tenant_id = :tid ORDER BY plan_year DESC, plan_name"),
+        total = db.execute(
+            text("SELECT COUNT(*) FROM domain_finance.budget_plans WHERE tenant_id = :tid"),
             {"tid": tenant_id},
+        ).scalar_one()
+        rows = db.execute(
+            text("SELECT * FROM domain_finance.budget_plans WHERE tenant_id = :tid "
+                 "ORDER BY plan_year DESC, plan_name, id LIMIT :limit OFFSET :skip"),
+            {"tid": tenant_id, "limit": limit, "skip": skip},
         ).mappings().all()
-        return {"items": [dict(r) for r in rows], "total": len(rows)}
+        return {"items": [dict(r) for r in rows], "total": total, "skip": skip, "limit": limit}
     except HTTPException:
         raise
     except Exception as exc:
@@ -103,9 +116,9 @@ def create_budget_plan(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
+    if body.status.upper() != "ENTWURF":
+        raise HTTPException(422, "Budget kann nur als ENTWURF angelegt werden")
     _check_tables(db)
-    if body.status.upper() not in VALID_STATUSES:
-        raise HTTPException(422, f"status muss einer von {VALID_STATUSES} sein")
     try:
         from app.core.uuid7 import uuid7
         pid = str(uuid7())
@@ -235,7 +248,7 @@ def approve_budget_plan(
     _check_tables(db)
     try:
         plan = db.execute(
-            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -307,8 +320,10 @@ def budget_vs_actual(
                     },
                 ).scalar()
                 actual = float(actual_row or 0)
-            except Exception:
-                actual = 0.0
+            except Exception as exc:
+                db.rollback()
+                logger.error("Budget actuals unavailable", exc_info=True)
+                raise HTTPException(503, "Budget-Istwerte derzeit nicht verfuegbar") from exc
 
             variance = round(budgeted - actual, 2)
             pct = round(variance / budgeted * 100, 1) if budgeted != 0 else 0.0
@@ -343,13 +358,26 @@ def add_budget_line(
     _check_tables(db)
     try:
         plan = db.execute(
-            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
             raise HTTPException(404, "Budget-Plan nicht gefunden")
         if plan[0] == "GESPERRT":
             raise HTTPException(409, "Budget ist gesperrt — keine Änderungen möglich")
+
+        account = db.execute(text("""SELECT id FROM domain_erp.chart_of_accounts
+            WHERE id = :id AND tenant_id = :tid AND is_active = TRUE
+              AND deleted_at IS NULL AND COALESCE(is_summary, FALSE) = FALSE
+            FOR SHARE"""), {"id": body.account_id, "tid": tenant_id}).first()
+        if not account:
+            raise HTTPException(422, "Eigenes aktives bebuchbares Konto nicht gefunden")
+        if body.kostenstelle_id is not None:
+            cost_center = db.execute(text("""SELECT id FROM domain_finance.kostenstellen
+                WHERE id = :id AND tenant_id = :tid FOR SHARE"""),
+                {"id": body.kostenstelle_id, "tid": tenant_id}).first()
+            if not cost_center:
+                raise HTTPException(422, "Eigene Kostenstelle nicht gefunden")
 
         from app.core.uuid7 import uuid7
         lid = str(uuid7())
@@ -365,7 +393,7 @@ def add_budget_line(
                 "kst": body.kostenstelle_id,
                 "aid": body.account_id,
                 "mo": body.period_month,
-                "amt": float(body.budgeted_amount),
+                "amt": body.budgeted_amount,
                 "tid": tenant_id,
             },
         )
@@ -391,7 +419,7 @@ def update_budget_line(
     _check_tables(db)
     try:
         plan = db.execute(
-            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid"),
+            text("SELECT status FROM domain_finance.budget_plans WHERE id = :id AND tenant_id = :tid FOR UPDATE"),
             {"id": plan_id, "tid": tenant_id},
         ).first()
         if not plan:
@@ -412,8 +440,6 @@ def update_budget_line(
 
         set_parts = [f"{k} = :{k}" for k in fields]
         params = {**fields, "id": line_id, "pid": plan_id, "tid": tenant_id}
-        if "budgeted_amount" in fields:
-            params["budgeted_amount"] = float(params["budgeted_amount"])
         db.execute(
             text(
                 f"UPDATE {_TABLE_LINES} SET {', '.join(set_parts)} WHERE id = :id AND plan_id = :pid AND tenant_id = :tid"  # nosec B608  # reviewed-safe: Bezeichner stammen aus Modulkonstanten, Werte sind gebunden

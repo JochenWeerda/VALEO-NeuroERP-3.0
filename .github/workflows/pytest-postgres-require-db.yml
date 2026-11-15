@@ -59,3 +59,26 @@ jobs:
 
       - name: Run tests (-m needs_live_db, strict DB)
         run: pytest tests/ -m needs_live_db --tb=short -q --no-cov
+
+      - name: Export inventories from the migrated job database
+        run: |
+          python scripts/generate_table_catalog.py
+          python scripts/rls_inventory.py
+          python scripts/rls_domain_matrix.py
+          python scripts/generate_code_inventories.py
+
+      - name: Upload verified schema inventories
+        uses: actions/upload-artifact@v4
+        with:
+          name: schema-inventories-${{ github.sha }}
+          path: |
+            docs/admin/table-catalog.json
+            docs/admin/table-catalog.md
+            docs/admin/rls-inventory.json
+            docs/admin/rls-domain-matrix.json
+            docs/admin/rls-domain-matrix.md
+            docs/admin/migration-inventory.md
+            docs/schnittstellen/endpoint-inventory.md
+            docs/entwickler/service-inventory.md
+          if-no-files-found: error
+          retention-days: 14

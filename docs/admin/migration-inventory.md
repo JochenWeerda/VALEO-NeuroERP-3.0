@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-14
+last_reviewed: 2026-11-15
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -123,6 +123,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `bewerbung_statuswoerterbuch_20261006` | Die Bewerbungspipeline bekommt ein Woerterbuch — in der Datenbank. |
 | `billing_batch_20260821` | Billing batch orchestration and audit. |
 | `bp_merge_tab23_json_20260330` | Merge heads + domain_crm.business_partners.tab_23 JSONB (Tab-23 Stammdaten) |
+| `budget_planning_schema_20261115` | Create tenant-bound budget plans and lines. |
 | `business_partner_contacts_instructions_20260214` | Add business partner contacts and instructions tables. |
 | `business_partner_discount_price_tables_20260214` | Add normalized discount and price agreement tables for business partners. |
 | `business_partner_gap_811_normalized_20260214` | Close 8.11 business partner field gaps with normalized CRM tables. |
@@ -457,6 +458,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `rls_system_read_justified_20261027` | Shared 'system' rows readable only where justified (RLS, system-wide). |
 | `rls_system_role_20261026` | Row-level security for tables freed by the valeo_system connection (RLS plan P6). |
 | `rls_verified_agrar_20261027` | RLS for two Agrar tables whose API tenant fallbacks have been removed. |
+| `rohware_schema_canonical_20261115` | Extend the canonical raw-material settlement catalog with lifecycle and formula lines. |
 | `ruestlisten_tabelle_20261103` | Rüstlisten (Kommissioniervorbereitung): Tabelle, die der Weg /lager/ruestliste schon benutzt. |
 | `runtime_ddl_to_migrations_20261026` | Move schema objects that the application created at request time into the migration chain. |
 | `runtime_sweep_repair_20260702` | RUNTIME-SWEEP-REPAIR-001: Fresh-DB-Drift schliessen (SPEC-P0-02). |

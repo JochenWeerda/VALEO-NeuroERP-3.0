@@ -108,3 +108,19 @@ weiteren main-Merges ohne Integrationsabstimmung; Branch-Arbeit bleibt frei.
 Der Full-UAT-Fehler betrifft auch das entfernte KIM-DOM: die Route /crm fuehrt
 heute in native Kundenliste/-akte. Die alten Fachaktionen muessen entsprechend
 der Studio-Teststrategie nachweislich ersetzt werden; nicht einfach ignorieren.
+
+## PR137 integriert / neuer Schemaauftrag
+
+PR137 wurde nach68erfolgreichenChecks auf8c6d20b2d integriert. main unddevelop
+stehen aufc20a665a70dca99d169c9674f0db67fe1590fced (develop normalerFF, keinForce).
+Wie bei den vorigen Meilensteinen war die bestehende Admin-Review-Ausnahme fuer
+die externe Review erforderlich; kein Testgate oder Branchschutz wurde geaendert.
+Das ist keine main-Sonar-Gesamtfreigabe: der bekannteNewCodeCoverage-Rest bleibtM0.
+
+Der Nutzer hat danach die tatsaechliche Ergaenzung fehlender Tabellen/Routen
+beauftragt. Codex besitzt dazu M0-SCHEMA-BUDGET-ROHWARE-20261115. Budgetmigration
+Parentdocflow_position_kontrakt_20261110, danach kanonischeRohware-Erweiterung;
+keinzweiterSchema-Stamm. Bitte künftigeBelegmigrationen vorIntegration am dann
+aktuellen gemeinsamenHead ausrichten, keine Codex-Tabelle livevorwegnehmen.
+Schema-/RLS-Nachweise laufen ueber den vorhandenenStrictDB-CIJob, nichtueber
+neueDatenbanken. LaufenderlokalerBackendstandbleibtunveraendert2338578d0+Theme.

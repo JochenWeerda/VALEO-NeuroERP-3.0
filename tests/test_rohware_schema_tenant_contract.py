@@ -1,9 +1,11 @@
 """HTTP contract with explicit identity and database doubles; no PostgreSQL/RLS proof."""
 import copy
+from types import SimpleNamespace
 import pytest
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.testclient import TestClient
 from app.api.v1.endpoints import rohware_schema as endpoint
+from app.api.v1.endpoints import rohwarengruppen as groups
 from app.core.database import get_db
 from app.core.security import require_bearer_token
 
@@ -21,6 +23,7 @@ class Result:
     def mappings(self): return self
     def fetchone(self): return self.rows[0] if self.rows else None
     def all(self): return self.rows
+    def fetchall(self): return self.rows
 
 class DB:
     def __init__(self):
@@ -38,6 +41,14 @@ class DB:
         if self.fail == 'probe' or (self.fail == 'query' and not sql.startswith('SELECT 1')):
             raise RuntimeError('private SQL secret')
         if sql.startswith('SELECT 1'): return Result()
+        if sql.startswith('SELECT id FROM domain_shared.rohware_abrechnungsschemata WHERE tenant_id = :tid'):
+            return Result([v for v in self.schemas.values() if v['tenant_id'] == p['tid'] and v.get('schema_code') == p['nr']])
+        if sql.startswith('SELECT * FROM domain_shared.rohware_abrechnungsschemata WHERE id = :id AND tenant_id = :tid'):
+            v = self.schemas.get(p['id']); return Result([SimpleNamespace(_mapping=v)] if v and v['tenant_id'] == p['tid'] else [])
+        if sql.startswith('SELECT * FROM domain_shared.rohware_abrechnungsschemata WHERE tenant_id = :tid'):
+            return Result([SimpleNamespace(_mapping=v) for v in self.schemas.values() if v['tenant_id'] == p['tid'] and v.get('gruppe_id') == p.get('gid') and v.get('aktiv')])
+        if sql.startswith('SELECT id FROM domain_shared.rohwarengruppen'):
+            return Result([('ga',)] if p.get('tenant_id') == 'A' and p.get('value') in ('ga', 'GE') else [])
         tenant = p.get('tenant_id')
         if 'rohware_schema_lines' in sql:
             assert 's.tenant_id = :tenant_id' in sql
@@ -51,19 +62,18 @@ class DB:
                     del self.lines[p['line_id']]; return Result(rowcount=1)
                 return Result()
             if sql.lstrip().startswith('INSERT'):
-                if allowed: self.lines[p['id']] = {k: v for k, v in p.items() if k != 'tenant_id'}; return Result(rowcount=1)
+                if allowed: self.lines[p['id']] = dict(p); return Result(rowcount=1)
                 return Result()
-        if sql.lstrip().startswith('INSERT INTO rohware_schemata'):
-            self.schemas[p['id']] = dict(p)
+        if sql.lstrip().startswith('INSERT INTO domain_shared.rohware_abrechnungsschemata'):
+            self.schemas[p['id']] = {'id': p['id'], 'tenant_id': tenant, 'name': p['name'], 'schema_code': p['code'], 'gruppe_id': p['group_id'], 'rohwaren_gruppe': 'GE', 'gueltig_ab': p['valid_from'], 'status': p['status'], 'aktiv': p['active'], 'schema_nr': p['code'], 'bezeichnung': p['name'], 'artikel_nr': p['article'], 'created_at': '2026-01-01T00:00:00'}
             return Result(rowcount=1)
-        if sql.lstrip().startswith('UPDATE rohware_schemata'):
+        if sql.lstrip().startswith('UPDATE domain_shared.rohware_abrechnungsschemata'):
             assert 'tenant_id = :tenant_id' in sql
             row = self.schemas.get(p['id'])
             if row and row['tenant_id'] == tenant:
-                if "status = 'AKTIV'" in sql: row['status'] = 'AKTIV'
-                elif "status = 'ARCHIV'" in sql: row['status'] = 'ARCHIV'
+                if 'status = :status' in sql: row['status'] = p['status']; row['aktiv'] = p['active']
                 else:
-                    row.update({k: v for k, v in p.items() if k not in ('id', 'tenant_id')})
+                    row.update({('name' if k == 'bezeichnung' else 'schema_code' if k == 'schema_nr' else k): v for k, v in p.items() if k not in ('id', 'tenant_id')})
                 return Result(rowcount=1)
             return Result()
         if sql.lstrip().startswith('SELECT'):
@@ -82,7 +92,7 @@ def client():
         if identity['verified']:
             request.state.tenant_id = identity['tenant']; request.state.tenant_verified = True
         return 'synthetic'
-    app = FastAPI(); app.include_router(endpoint.router, prefix=URL)
+    app = FastAPI(); app.include_router(endpoint.router, prefix=URL); app.include_router(groups.router, prefix='/api/v1')
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[require_bearer_token] = boundary
     app.dependency_overrides[endpoint.SCHREIBEN['LAGER'][0].dependency] = lambda: None
@@ -133,7 +143,7 @@ def test_same_tenant_calculation_and_line_deletion(client):
 def test_own_lifecycle_and_state_invariants(client):
     c, db, _ = client
     foreign = copy.deepcopy((db.schemas['b'], db.lines['lb']))
-    response = c.post(URL, headers=TOKEN, json={'name': 'Getreide', 'gueltig_ab': '2026-01-01'})
+    response = c.post(URL, headers=TOKEN, json={'name': 'Getreide', 'rohwaren_gruppe': 'GE', 'gueltig_ab': '2026-01-01'})
     assert response.status_code == 201, response.text
     schema_id = response.json()['id']
     assert db.schemas[schema_id]['tenant_id'] == 'A'
@@ -145,7 +155,7 @@ def test_own_lifecycle_and_state_invariants(client):
                   json={'bezeichnung': 'Grundpreis', 'berechnungsformel': 'basis_preis'})
     assert line.status_code == 201, line.text
     line_id = line.json()['id']
-    assert 'tenant_id' not in line.json() and 'tenant_id' not in db.lines[line_id]
+    assert db.lines[line_id]['tenant_id'] == 'A'
     assert c.get(URL + '/' + schema_id + '/lines', headers=TOKEN).json()[0]['id'] == line_id
     assert c.post(URL + '/' + schema_id + '/aktivieren', headers=TOKEN).json()['status'] == 'AKTIV'
     before = copy.deepcopy(db.schemas[schema_id])
@@ -170,3 +180,70 @@ def test_db_failure_rolls_back_and_redacts_details(client, failure):
     assert 'private' not in response.text and 'SQL' not in response.text
     assert db.rollbacks == 1 and db.commits == 0
 
+
+
+def test_group_route_uses_verified_parent_and_active_catalog(client):
+    c, db, identity = client
+    db.schemas['a'].update({'gruppe_id':'ga', 'aktiv':True, 'schema_nr':'S-A', 'bezeichnung':'A', 'artikel_nr':None, 'created_at':'2026-01-01T00:00:00'})
+    r = c.get('/api/v1/rohware/gruppen/ga/schemata', headers=TOKEN)
+    assert r.status_code == 200, r.text
+    assert [row['id'] for row in r.json()] == ['a']
+    identity['tenant'] = 'B'
+    assert c.get('/api/v1/rohware/gruppen/ga/schemata', headers=TOKEN).status_code == 404
+    assert c.get('/api/v1/rohware/gruppen/ga/schemata').status_code == 401
+
+
+def test_legacy_create_shares_canonical_active_catalog(client):
+    c, db, _ = client
+    r = c.post('/api/v1/rohware/gruppen/schemata', headers=TOKEN,
+               json={'schema_nr':'GE1', 'bezeichnung':'Getreide', 'gruppe_id':'ga'})
+    assert r.status_code == 201, r.text
+    schema_id = r.json()['id']
+    assert db.schemas[schema_id]['status'] == 'AKTIV'
+    assert db.schemas[schema_id]['gueltig_ab'] is not None
+    detail = c.get(URL + '/' + schema_id, headers=TOKEN)
+    assert detail.status_code == 200 and detail.json()['schema_code'] == 'GE1'
+    assert c.get('/api/v1/rohware/gruppen/ga/schemata', headers=TOKEN).json()[0]['id'] == schema_id
+
+
+@pytest.mark.parametrize('invalid', [
+    {'version': None}, {'version': '2'}, {'version': 0}, {'version': True},
+    {'version': 2147483648}, {'name': ''}, {'name': '  '}, {'name': 'x' * 201},
+    {'schema_code': ''}, {'schema_code': 'x' * 21}, {'gueltig_ab': '2026-02-30'},
+    {'gueltig_bis': '20260101'}, {'gueltig_ab': '2026-03-01', 'gueltig_bis': '2026-02-01'},
+    {'gruppe_id': None}, {'rohwaren_gruppe': []},
+])
+def test_invalid_header_rejected_before_insert(client, invalid):
+    c, db, _ = client
+    body = {'name': 'Getreide', 'rohwaren_gruppe': 'GE'}
+    if 'gruppe_id' in invalid: body.pop('rohwaren_gruppe')
+    body.update(invalid)
+    before = copy.deepcopy((db.schemas, db.lines))
+    response = c.post(URL, headers=TOKEN, json=body)
+    assert response.status_code == 422, response.text
+    assert not db.calls and db.commits == 0
+    assert (db.schemas, db.lines) == before
+
+@pytest.mark.parametrize('invalid', [
+    {'version': 'invalid'}, {'name': ''}, {'gueltig_ab': '2026-02-30'},
+    {'gueltig_bis': '2025-12-31'},
+])
+def test_invalid_patch_never_writes_and_checks_merged_dates(client, invalid):
+    c, db, _ = client
+    before = copy.deepcopy((db.schemas, db.lines))
+    response = c.patch(URL + '/a', headers=TOKEN, json=invalid)
+    assert response.status_code == 422, response.text
+    assert not any(sql.lstrip().startswith(('UPDATE', 'INSERT', 'DELETE')) for sql, _ in db.calls)
+    assert db.commits == 0 and (db.schemas, db.lines) == before
+
+
+@pytest.mark.parametrize('field,value', [('schema_nr', '  '), ('bezeichnung', '  '), ('bezeichnung', 'x' * 201)])
+def test_legacy_create_rejects_invalid_header_without_writes(client, field, value):
+    c, db, _ = client
+    body = {'schema_nr': 'GE1', 'bezeichnung': 'Getreide', 'gruppe_id': 'ga'}
+    body[field] = value
+    before = copy.deepcopy((db.schemas, db.lines))
+    response = c.post('/api/v1/rohware/gruppen/schemata', headers=TOKEN, json=body)
+    assert response.status_code == 422, response.text
+    assert not any(sql.lstrip().startswith(('UPDATE', 'INSERT', 'DELETE')) for sql, _ in db.calls)
+    assert db.commits == 0 and (db.schemas, db.lines) == before

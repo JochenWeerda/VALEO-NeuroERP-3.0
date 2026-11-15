@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-15T08:16:16Z'
+generated_at: '2026-11-15T18:31:38Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -398,6 +398,8 @@ domains:
     - rations_lifecycle_service
     - rations_readiness_service
     - rations_reference_data_service
+    - rohware_formula
+    - rohware_schema_service
     - settlement_approval_service
     - settlement_document_archive_service
     - settlement_drying_service
@@ -2391,8 +2393,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 344
-  backend_services_mapped: 344
+  backend_services_total: 346
+  backend_services_mapped: 346
   backend_endpoints_total: 480
   backend_endpoints_mapped: 480
 unmapped:
