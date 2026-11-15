@@ -54,18 +54,22 @@ jobs:
 
       - name: Migrate database (Alembic head)
         run: |
-          python scripts/init_db.py
-          python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
+          python scripts/init_db.py --nur-migrationen
 
-      - name: Run tests (-m needs_live_db, strict DB)
-        run: pytest tests/ -m needs_live_db --tb=short -q --no-cov
-
-      - name: Export inventories from the migrated job database
+      - name: Export inventories from the canonical migration schema
         run: |
           python scripts/generate_table_catalog.py
           python scripts/rls_inventory.py
           python scripts/rls_domain_matrix.py
           python scripts/generate_code_inventories.py
+
+      - name: Prepare additive ORM tables and application roles for behavior tests
+        run: |
+          python scripts/init_db.py
+          python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
+
+      - name: Run tests (-m needs_live_db, strict DB)
+        run: pytest tests/ -m needs_live_db --tb=short -q --no-cov
 
       - name: Upload verified schema inventories
         uses: actions/upload-artifact@v4
