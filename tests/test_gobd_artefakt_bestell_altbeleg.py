@@ -1,4 +1,4 @@
-"""GoBD-Archiveintrag in der Transaktion des Belegs; Bestell-Altbelege schreibgeschuetzt.
+"""GoBD-Archiveintrag in der Transaktion des Belegs.
 
 Bis zum 07.10.2026 committete ``register_artifact`` selbst — und schrieb damit die
 halbe Arbeit des Aufrufers fest —, rollte bei einem Fehler **dessen** Transaktion
@@ -7,9 +7,7 @@ das: Eine Rechnung galt als gebucht, deren Buchung verworfen war; eine E-Rechnun
 wurde ohne Archivnachweis ausgeliefert; eine Buchungsuebergabe bei einem
 Datenbankfehler leer exportiert und archiviert.
 
-Bestellungen aus dem frueheren Dokumentspeicher liessen sich weiter aendern,
-freigeben (``approvedBy = "system"``) und stornieren — ausserhalb der kanonischen
-Bestellung. Die Bestellstatistik zaehlte nur diese Altbelege.
+Die Bestell-Altbelege und ihr Weg /purchase-orders sind mit BELEG-052 Phase 3b entfernt; DocFlow fuehrt die Bestellung.
 """
 
 from __future__ import annotations
@@ -143,72 +141,6 @@ class TestArchiveintrag:
         with pytest.raises(GobdArtifactError):
             # content_hash_sha256 ist NOT NULL: der Eintrag kann nicht gelingen.
             register_artifact(db, HAUS, "RE-X", "pdf", None, "k", doc_type="sales_invoice")  # type: ignore[arg-type]
-
-
-@pytest.fixture(scope="module")
-def client(engine):
-    from fastapi.testclient import TestClient
-
-    from app.main import app
-
-    return TestClient(app, raise_server_exceptions=False)
-
-
-def kopf() -> dict[str, str]:
-    return {"X-Tenant-ID": HAUS, "Authorization": "Bearer dev-token"}
-
-
-def altbeleg(engine) -> str:
-    import json
-
-    from sqlalchemy import text
-
-    nummer = f"PO-ALT-{uuid.uuid4().hex[:6]}"
-    daten = {"id": str(uuid.uuid4()), "purchaseOrderNumber": nummer, "supplierId": "Landtechnik Sued",
-             "status": "ENTWURF", "tenantId": HAUS, "items": [], "totalAmount": 100.0}
-    with engine.begin() as v:
-        v.execute(text("INSERT INTO documents (id, doc_type, doc_number, data, created_at, updated_at) "
-                       "VALUES (:i, 'purchase_order', :n, CAST(:d AS jsonb), NOW(), NOW())"),
-                  {"i": str(uuid.uuid4()), "n": nummer, "d": json.dumps(daten)})
-    return nummer
-
-
-class TestBestellAltbelege:
-    def test_ein_altbeleg_bleibt_lesbar(self, engine, client):
-        nummer = altbeleg(engine)
-        antwort = client.get(f"/api/v1/purchase-orders/{nummer}", headers=kopf())
-        assert antwort.status_code == 200, antwort.text
-
-    @pytest.mark.parametrize("weg,rumpf", [
-        ("/api/v1/purchase-orders/{}/approve", None),
-        ("/api/v1/purchase-orders/{}/cancel-with-reason", {"reason": "Fehler"}),
-    ])
-    def test_ein_altbeleg_wird_nicht_mehr_fortgeschrieben(self, engine, client, weg, rumpf):
-        nummer = altbeleg(engine)
-        antwort = client.post(weg.format(nummer), headers=kopf(), json=rumpf or {})
-        assert antwort.status_code == 409, antwort.text
-        assert "schreibgeschuetzt" in antwort.json()["detail"]
-        assert client.get(f"/api/v1/purchase-orders/{nummer}", headers=kopf()).json()["status"] == "ENTWURF"
-
-    def test_aendern_eines_altbelegs_ebenso(self, engine, client):
-        nummer = altbeleg(engine)
-        antwort = client.patch(f"/api/v1/purchase-orders/{nummer}", headers=kopf(), json={"notes": "x"})
-        assert antwort.status_code == 409
-
-    def test_unbekannt_bleibt_404(self, client):
-        assert client.post("/api/v1/purchase-orders/GIBT-ES-NICHT/approve", headers=kopf()).status_code == 404
-
-    def test_die_statistik_zaehlt_auch_die_kanonischen_bestellungen(self, engine, client):
-        from sqlalchemy import text
-
-        with engine.begin() as v:
-            v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                           " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, 'entwurf')"),
-                      {"i": str(uuid.uuid4()), "h": HAUS, "n": f"EK-{uuid.uuid4().hex[:6]}", "l": LIEFERANT})
-        statistik = client.get("/api/v1/purchase-orders/statistics", headers=kopf()).json()
-        liste = client.get("/api/v1/purchase-orders?pageSize=500", headers=kopf()).json()
-        assert statistik["totalOrders"] == liste["total"]
-        assert statistik["totalOrders"] >= 1
 
 
 def test_kein_aufrufer_verschluckt_den_archivfehler():
