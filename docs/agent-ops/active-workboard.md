@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## README-DOKU-20261110 — zur Abnahme, Claude Code
+## README-DOKU-20261110 — abgeschlossen, Claude Code (PR #132 gemergt 15.11.2026)
 
 **Owner:** Claude Code. **Stand:** 2026-11-15. **Ziel:** README mit Alleinstellungsmerkmalen und BELEG-052-Stand; Klartext-Zugangsdaten aus Skripten, Staging-Compose-Rueckfaellen und Archiv entfernt. **Dateibesitz:** `README.md`, `scripts/upload-github-secrets.ps1`, `scripts/start_rag_server.py` (nur Zugangsdaten aus der Umgebung), Staging-Compose, Archivdokumente. **Abnahme:** keine Klartext-Zugangsdaten mehr im Arbeitsstand; die Werte stehen weiter in der Git-Historie und muessen rotiert werden.
 
@@ -20924,3 +20924,9 @@ Ziel: genau2alteTestbestellungenmitLieferantenverweisineinenanderenMandanten blo
 INVENTORY-AISLE-DRIFT-20261115 und RLS-ALTTEST-BESTELLUNGEN-20261115 Operationsabnahme abgeschlossen: 53 Unitfaelle gruen, echter Rollback und beide Apply-/Leerlaufpfade belegt; sieben exakt gesicherte Alt-Testzeilen entfernt, alle uebrigen Daten erhalten. Reguläres Upgrade erreicht lokalen Kopf ruestlisten_tabelle_20261103; 618 RLS-Tabellen, beide validierten Tenant-Verbund-FKs, Backendrolle valeo_app ohne Superuser/BYPASSRLS/CREATEROLE. Echter HTTP-Nachweis /health=200, /api/v1/docflow/ ohne Token=401, Container gesund ohne weitere Neustarts. Aktueller Artifact-Code ist damit nicht als lokal bereitgestellt behauptet; bestehende Mounts zeigen noch auf alten Hauptbaum. QA inventory-reference-drift-20261115.md.
 
 CI-KANONISCHE-BACKENDSUITE-20261114 und SECURITY-LANGGRAPH-ZOD-20261115 GitHub-abgenommen aufe8a2e92d5: 68Checksgruen, QG43653854329/Sonar132638443225success, Vollsuite28444pass/72skip/1deselected, StrictDB701pass/4skip. CI/CD43653854364uebernimmtverifizierteEvidenzrealohneeigeneDB/Vollsuite. PR135gemergt: main/develop e9ae5cab6, normalerFFfuerdevelop. FuerMergewarReviewausnahmemitbestehendenAdminrechtennoetig; keineTest-/Branchregelaenderung. FolgesliceO2CHTTPbleibtbiszumechtenRuninArbeit; Operations-/SQLNachweiseundMatrixstatusnichtvermischen.
+
+## FAHRPLAN-VERKAUFSPRODUKT-20261115 — zur Abnahme, Claude Code
+Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
+Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
+Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
+Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
