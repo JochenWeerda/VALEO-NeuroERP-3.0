@@ -43,7 +43,7 @@ services:
     environment:
       - NEUROERP_URL=http://neuroerp-frontend:3000
       - NEUROERP_USER=${NEUROERP_USER:-admin}
-      - NEUROERP_PASS=${NEUROERP_PASS:-admin123}
+      - NEUROERP_PASS=${NEUROERP_PASS:-<ADMIN_PASSWORT>}
     depends_on:
       neuroerp-frontend:
         condition: service_healthy
@@ -64,7 +64,7 @@ services:
     environment:
       - NEUROERP_URL=http://neuroerp-frontend:3000
       - NEUROERP_USER=${NEUROERP_USER:-admin}
-      - NEUROERP_PASS=${NEUROERP_PASS:-admin123}
+      - NEUROERP_PASS=${NEUROERP_PASS:-<ADMIN_PASSWORT>}
     depends_on:
       neuroerp-frontend:
         condition: service_healthy

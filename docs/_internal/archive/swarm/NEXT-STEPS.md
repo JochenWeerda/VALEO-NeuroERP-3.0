@@ -11,7 +11,7 @@ Alle Komponenten sind konfiguriert und einsatzbereit!
 Die Datei `.env.swarm` wurde erstellt mit:
 - `NEUROERP_URL=http://localhost:3000`
 - `NEUROERP_USER=admin`
-- `NEUROERP_PASS=admin123`
+- `NEUROERP_PASS=<ADMIN_PASSWORT>`
 
 **Falls du andere Credentials benÃ¶tigst**, bearbeite `.env.swarm` oder setze ENV-Variablen:
 
@@ -19,7 +19,7 @@ Die Datei `.env.swarm` wurde erstellt mit:
 # PowerShell
 $env:NEUROERP_URL="http://localhost:3000"
 $env:NEUROERP_USER="admin"
-$env:NEUROERP_PASS="admin123"
+$env:NEUROERP_PASS="<ADMIN_PASSWORT>"
 ```
 
 ### Schritt 2: Frontend prÃ¼fen/starten

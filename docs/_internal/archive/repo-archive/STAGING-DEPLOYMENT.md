@@ -81,7 +81,7 @@ Start-Sleep -Seconds 60
 
 # Browser öffnen
 Start-Process "http://localhost:8180"
-# Login: admin / admin123!
+# Login: admin / <ADMIN_PASSWORT>
 # Realm importieren: config/keycloak/realm-staging.json
 ```
 
@@ -186,7 +186,7 @@ curl http://localhost:8001/healthz
 **Option A: Via Admin-Console (empfohlen für erste Setup)**
 
 1. Browser: http://localhost:8180
-2. Login: `admin` / `admin123!`
+2. Login: `admin` / `<ADMIN_PASSWORT>`
 3. Master-Realm → Realm-Dropdown → "Create Realm"
 4. "Browse" → `config/keycloak/realm-staging.json` auswählen
 5. "Create" klicken
@@ -619,7 +619,7 @@ docker exec -i valeo-staging-postgres pg_restore \
 - ✅ Separate Realm (Isolation von Production)
 - ✅ Test-Users (keine echten User-Daten)
 - ✅ SSL/TLS für External-Access (via Ingress/Reverse-Proxy)
-- ⚠️ Admin-Password ändern! (Default: `admin123!`)
+- ⚠️ Admin-Password ändern! (Default: `<ADMIN_PASSWORT>`)
 
 **Production-Realm:**
 - ✅ Strong Passwords
