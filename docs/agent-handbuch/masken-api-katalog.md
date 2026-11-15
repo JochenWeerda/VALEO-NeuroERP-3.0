@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-14
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -134,6 +134,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/formular/agent-contract` |
 | `agrar/saatgut/prognose` | Prognose | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/prognose/agent-contract` |
 | `agrar/saatgut/royalties` | Royalties | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/royalties/agent-contract` |
+| `agrar/saatgut/sorte` | Sorte | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
 | `agrar/saatgut/vermehrung` | Vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/vermehrung/agent-contract` |
 | `agrar/saatzucht-partien-liste` | Saatzucht-Partien | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatzucht-partien-liste/agent-contract` |
 | `agrar/schlaege-karte-liste` | Schlagkarte | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-karte-liste/agent-contract` |
@@ -692,7 +693,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `rezepte/rezept` | Rezept | produktion | niedrig | — | `GET /api/v1/masks/rezepte/rezept/agent-contract` |
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
-| `sales/delivery-note` | Lieferschein | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
 | `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
@@ -4391,6 +4391,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/saatgut/sorte` — Sorte
+
+**Zweck:** Sortenstammdaten anzeigen und bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/saatgut/sorte/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/saatgut/sorte/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__saatgut__sorte/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/varieties/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kultur hat Sorte {entity_id}?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `/api/v1/agrar/varieties/{entity_id}` |
 
 ---
 
@@ -25475,49 +25513,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `sales/delivery-note` — Lieferschein
-
-**Zweck:** Warenbeleg: Kunde, Auftrag, Artikel, Menge und Charge. Fahrzeug und Beförderung stehen am Frachtbrief.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/delivery-note/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/delivery-note/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/delivery-note/readiness` |
-| Rollout-Route | `/mask-rollout/sales__delivery-note/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/screen-summary`
-
-**Data Sources:**
-
-- `entity` → `/api/v1/sales/delivery-notes/{entity_id}`
-- `positionen` → `/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/positionen`
-- `dokumente` → `/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/dokumente`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Zeige alle Positionen und Chargen von Lieferschein {entity_id}.
-- Welche Dokumente sind mit Lieferschein {entity_id} verknuepft?
-- Was ist der aktuelle Status von Lieferschein {entity_id}?
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `drucken` | Lieferschein drucken | safe | nein | `/api/v1/sales/delivery-notes/{entity_id}/actions/drucken` |
 
 ---
 

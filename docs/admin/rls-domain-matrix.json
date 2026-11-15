@@ -1645,7 +1645,6 @@
     "app/api/v1/endpoints/payment_runs.py",
     "app/api/v1/endpoints/purchase_invoice_verification.py",
     "app/api/v1/endpoints/rohware_sammelabrechnung.py",
-    "app/api/v1/endpoints/sales_delivery_notes.py",
     "app/api/v1/endpoints/strecke.py",
     "app/api/v1/endpoints/zinsabrechnung.py",
     "app/services/agrar_settlement_service.py",
@@ -1663,7 +1662,7 @@
    "identitaet": {
     "kopfzeile": 2,
     "nutzlast": 1,
-    "token": 21
+    "token": 20
    },
    "standardmandant_stellen": [],
    "null_stellen": [
@@ -2906,7 +2905,6 @@
     "app/api/v1/endpoints/harvest_acceptance.py",
     "app/api/v1/endpoints/hofliste.py",
     "app/api/v1/endpoints/personal.py",
-    "app/core/screen_definitions.py",
     "app/core/screen_definitions_listen.py",
     "app/domains/operations/repository.py",
     "app/domains/verladung/repository.py",
@@ -3358,7 +3356,6 @@
     "app/api/v1/endpoints/rations_optimization.py",
     "app/api/v1/endpoints/rations_zugang.py",
     "app/api/v1/endpoints/recent_documents.py",
-    "app/api/v1/endpoints/sales_delivery_notes.py",
     "app/api/v1/endpoints/self_billing.py",
     "app/api/v1/endpoints/users.py",
     "app/api/v1/endpoints/ux_overlays.py",
@@ -3385,7 +3382,7 @@
     "kopfzeile": 1,
     "nutzlast": 9,
     "standardmandant": 3,
-    "token": 69
+    "token": 68
    },
    "standardmandant_stellen": [
     "app/api/v1/endpoints/rations_optimization.py:6336",

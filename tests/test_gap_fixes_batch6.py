@@ -122,22 +122,6 @@ def test_cancel_acceptance_missing_reason_returns_422_or_404():
 
 
 # ===========================================================================
-# DELIVERY NOTES — ship / deliver workflow
-# ===========================================================================
-
-def test_ship_nonexistent_delivery_note_returns_404():
-    resp = _client.post("/api/v1/sales/delivery-notes/does-not-exist/ship", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-def test_deliver_nonexistent_delivery_note_returns_404():
-    resp = _client.post("/api/v1/sales/delivery-notes/does-not-exist/deliver", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-# ===========================================================================
 # SUSTAINABILITY — catalog/read-model now DB-backed
 # ===========================================================================
 

@@ -43,7 +43,7 @@ def register() -> dict:
             if action["key"] in seen:
                 continue
             seen.add(action["key"])
-            checked = support(action)
+            checked = support(action, screen_id=screen_id)
             if checked.supported:
                 supported.append(f"mask:{screen_id}:{action['key']}")
             else:

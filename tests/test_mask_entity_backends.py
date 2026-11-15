@@ -214,7 +214,6 @@ def test_rollout_tab_routen_sind_dediziert_registriert() -> None:
     paths = {getattr(route, "path", "") for route in app.routes}
     assert "/api/v1/mask-rollouts/crm/opportunity/{entity_id}/tabs/aktivitaeten" in paths
     assert "/api/v1/mask-rollouts/lager/article-stock/{entity_id}/tabs/bestand" in paths
-    assert "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/positionen" in paths
     assert "/api/v1/mask-rollouts/{screen_id:path}/{entity_id}/tabs/{tab_key}" in paths
 
 
