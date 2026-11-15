@@ -2,18 +2,18 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-28",
  "summary": {
-  "tabellen": 73,
+  "tabellen": 63,
   "nach_klasse": {
-   "A": 40,
+   "A": 35,
    "B": 19,
-   "C": 14
+   "C": 9
   },
   "nach_ursache": {
-   "dienst": 17,
-   "position": 11,
+   "dienst": 16,
+   "position": 7,
    "referenzdaten": 15,
    "mandant_nullbar": 12,
-   "standardmandant": 12,
+   "standardmandant": 7,
    "identitaet": 2,
    "abnahme_ausstehend": 4
   },
@@ -27,7 +27,7 @@
     "standardmandant": 4
    },
    "crm": {
-    "dienst": 6
+    "dienst": 5
    },
    "dev_mock": {
     "identitaet": 1
@@ -45,9 +45,7 @@
    },
    "inventory": {
     "dienst": 5,
-    "position": 4,
-    "referenzdaten": 7,
-    "standardmandant": 4
+    "referenzdaten": 7
    },
    "log": {
     "dienst": 1,
@@ -64,9 +62,6 @@
    },
    "portal": {
     "position": 1
-   },
-   "public": {
-    "standardmandant": 1
    },
    "shared": {
     "abnahme_ausstehend": 1,
@@ -964,80 +959,6 @@
    "policy": "keine Aktivierung vor begruendeter Domain-Migration und Verhaltenstestabnahme (rls-exceptions.json: rollout_abnahme)"
   },
   {
-   "table": "domain_crm.contacts",
-   "domain": "crm",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_crm.customers"
-   ],
-   "ursache": "dienst",
-   "gruende": [
-    "dienst",
-    "position",
-    "referenzdaten",
-    "standardmandant"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/api/v1/schemas/__init__.py",
-    "app/api/v1/schemas/crm.py",
-    "app/api/v1/schemas/finance.py",
-    "app/api/v1/schemas/inventory.py",
-    "app/crm/models.py",
-    "app/crm/schemas.py",
-    "app/domains/crm/models.py",
-    "app/domains/crm/services/daily_report_service.py",
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/agrar_models.py",
-    "app/security/physical_security.py",
-    "app/services/einvoice_generator.py",
-    "app/services/gdpr_request_processor.py",
-    "app/services/geo_pipeline.py",
-    "app/services/mcp_execution_service.py",
-    "services/crm-core/app/db/models.py",
-    "services/crm-multichannel/app/api/v1/endpoints/multichannel.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/business_partners.py",
-    "app/api/v1/endpoints/compliance_dsgvo.py",
-    "app/api/v1/endpoints/contacts.py",
-    "app/api/v1/endpoints/customer_extensions.py",
-    "app/api/v1/endpoints/master_data.py",
-    "app/crm/router.py",
-    "app/crm/seed.py",
-    "app/infrastructure/repositories/implementations.py",
-    "app/infrastructure/repositories/interfaces.py",
-    "app/services/customer_service.py",
-    "services/crm-core/app/api/v1/endpoints/activities.py",
-    "services/crm-core/app/api/v1/endpoints/contacts.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "dienst": 4,
-    "nutzlast": 2,
-    "standardmandant": 2,
-    "token": 4
-   },
-   "standardmandant_stellen": [
-    "services/crm-core/app/api/v1/endpoints/activities.py:20",
-    "services/crm-core/app/api/v1/endpoints/contacts.py:20"
-   ],
-   "null_stellen": [
-    "app/services/mcp_execution_service.py:3248"
-   ],
-   "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3248"
-   ],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
    "table": "domain_crm.crm_opportunities",
    "domain": "crm",
    "class": "A",
@@ -1927,126 +1848,6 @@
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
-   "table": "domain_inventory.article_alternative_eans",
-   "domain": "inventory",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_inventory.articles"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.articles"
-  },
-  {
-   "table": "domain_inventory.article_analyses",
-   "domain": "inventory",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_inventory.articles"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.articles"
-  },
-  {
-   "table": "domain_inventory.article_print_settings",
-   "domain": "inventory",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_inventory.articles"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.articles"
-  },
-  {
-   "table": "domain_inventory.article_units",
-   "domain": "inventory",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_inventory.articles"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py"
-   ],
-   "schreiber": [],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_inventory.articles"
-  },
-  {
    "table": "domain_inventory.material_flow_edges",
    "domain": "inventory",
    "class": "A",
@@ -2131,132 +1932,6 @@
    },
    "bereinigung": [],
    "policy": "getrennt: SELECT eigener Mandant + 'system' lesen (Begruendung je Tabellenfamilie); INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_inventory.nawaro_area_sheet_rows",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nawaro.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_inventory.nawaro_contract_sheet_rows",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nawaro.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 1,
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_inventory.nawaro_raps_balances",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nawaro_raps.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
-  },
-  {
-   "table": "domain_inventory.nawaro_raps_certificates",
-   "domain": "inventory",
-   "class": "A",
-   "tenant_type": "character varying",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [],
-   "modell": [
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/l3c_models.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/nawaro_raps.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "token": 1
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_inventory.silo_cells",
@@ -3335,35 +3010,6 @@
     "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
    ],
    "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_portal.customer_orders"
-  },
-  {
-   "table": "public.read_model_snapshots",
-   "domain": "public",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "eltern": [],
-   "ursache": "standardmandant",
-   "gruende": [],
-   "modell": [
-    "app/infrastructure/models/read_model_snapshots.py"
-   ],
-   "leser": [
-    "app/infrastructure/models/__init__.py",
-    "app/infrastructure/models/read_model_snapshots.py"
-   ],
-   "schreiber": [
-    "app/core/read_model_persistence.py"
-   ],
-   "worker": [],
-   "identitaet": {},
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": null,
-   "bereinigung": [
-    "Datenbefund fehlt (Tabelle nicht in der gewachsenen Datenbank)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant"
   },
   {
    "table": "domain_shared.admin_api_keys",

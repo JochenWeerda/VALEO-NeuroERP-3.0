@@ -56,9 +56,8 @@ jobs:
         run: |
           python scripts/init_db.py --nur-migrationen
 
-      - name: Export inventories from the canonical migration schema
+      - name: Export RLS inventories from the canonical migration schema
         run: |
-          python scripts/generate_table_catalog.py
           python scripts/rls_inventory.py
           python scripts/rls_domain_matrix.py
           python scripts/generate_code_inventories.py
@@ -67,6 +66,9 @@ jobs:
         run: |
           python scripts/init_db.py
           python scripts/provision_db_roles.py --url "$DATABASE_URL" --anwenden
+
+      - name: Export physical catalog from the initialized application schema
+        run: python scripts/generate_table_catalog.py
 
       - name: Run tests (-m needs_live_db, strict DB)
         run: pytest tests/ -m needs_live_db --tb=short -q --no-cov
