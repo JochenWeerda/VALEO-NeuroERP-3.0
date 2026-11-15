@@ -54,7 +54,7 @@ SERVICE_NAME=service-bus
 RABBITMQ_HOST=localhost
 RABBITMQ_PORT=5672
 RABBITMQ_USERNAME=admin
-RABBITMQ_PASSWORD=admin123
+RABBITMQ_PASSWORD=CHANGE_ME
 RABBITMQ_VHOST=/
 
 ***REMOVED*** Exchange Configuration
@@ -126,7 +126,7 @@ npm run docker:run
 ***REMOVED******REMOVED******REMOVED*** Management UI
 - **URL:** `http://localhost:15672`
 - **Username:** admin
-- **Password:** admin123
+- **Password:** aus `RABBITMQ_PASSWORD`
 
 ***REMOVED******REMOVED*** 🔒 Security
 

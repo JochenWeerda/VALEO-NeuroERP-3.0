@@ -71,9 +71,9 @@ Nach erfolgreichem Start:
 |---------|-----|-------|
 | **Frontend** | http://localhost:3001 | test-admin / Test123! |
 | **Backend API** | http://localhost:8001/docs | - |
-| **Keycloak** | http://localhost:8180 | admin / admin123! |
-| **pgAdmin** | http://localhost:5151 | admin@valeo-staging.local / admin123! |
-| **Redis Commander** | http://localhost:8181 | admin / admin123! |
+| **Keycloak** | http://localhost:8180 | admin / <ADMIN_PASSWORT> |
+| **pgAdmin** | http://localhost:5151 | admin@valeo-staging.local / <ADMIN_PASSWORT> |
+| **Redis Commander** | http://localhost:8181 | admin / <ADMIN_PASSWORT> |
 
 ### Test-User
 

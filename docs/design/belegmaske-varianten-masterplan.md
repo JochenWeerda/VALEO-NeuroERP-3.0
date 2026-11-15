@@ -233,3 +233,23 @@ so, dass früh etwas Sichtbares entsteht und kein Schritt eine neue Sonderarchit
 - Eine eigene Rechnungsverwaltung in der Finanzbuchhaltung.
 - Der Tax Rules Service (EU-TEDB-Adapter, versionierte Regeln mit Freigabe) — eigener Plan; die
   Belegvarianten nehmen den Steuerschlüssel, woher er auch kommt.
+
+## I. Umsetzungsstand BELEG-052 — DocFlow einziger Belegspeicher (Stand 10.11.2026)
+
+Vorgehen je Belegart: **a** Zugänge auf DocFlow → **b** Altwege entfernen (eigener PR, keine neuen Module) →
+**c** Altbestand übernehmen oder bereinigen. Altbestände in den alten Belegspeichern sind laut Entscheidung vom
+10.11.2026 ausschließlich Testdaten und dürfen entfernt werden.
+
+| Belegart | Stand | PR |
+| --- | --- | --- |
+| Gutschrift | nur noch in DocFlow, Zugangsparität REST/Studio/CLI/MCP | #123 |
+| Auftrag | Kopfbausteine, Zugänge auf die Belegmaske, Altmaske und `/sales/orders` entfernt, Auftragsbestätigung als eigener Stand `confirmed`, `domain_crm.sales_orders` als Sicht | #127, #128, #129 |
+| Lieferschein (1a) | WMS-Pickliste bucht den Lagerabgang aus dem DocFlow-Lieferschein; Belegdruck mit Druckvermerk und Nachdruck-Begründung (GoBD) | #130 |
+| Lieferschein (1b) | alter Lieferscheinweg entfernt | #131 |
+| Kontraktbezug | Positionsbaustein Kontrakt, Kontrakt-Abruf bei Lieferscheinfreigabe, Charge/Batch beim Umwandeln | Branch |
+| Rechnung (2a/2b) | E-Rechnung aus dem DocFlow-Beleg, Original im GoBD-Archiv in der Buchungstransaktion, MCP-Rechnung aus DocFlow-Lieferschein; Altwege entfernt | Branches |
+| Einkauf (3a) | MCP-Bestellung und Freigabevorschlag aus DocFlow, Belegkontrolle aus DocFlow, Wareneingang „Einlagern“ bucht den Lagerzugang (Storno bucht zurück), Anlieferavis über DocFlow | Branch |
+| Einkauf (3b) | Angebot/Anfrage → DocFlow-Bestellentwurf, Kennzahlen je Belegart für Cockpits, Altwege entfernen | in Arbeit |
+
+Agentisches Buchen (ADR-086) ist fachlich angenommen. Wirksam wird die Autonomiepolitik je Mandant erst durch die
+Freigabe einer berechtigten Person im System.
