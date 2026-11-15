@@ -11,7 +11,7 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 # Active Workboard
 
-## README-DOKU-20261110 — zur Abnahme, Claude Code
+## README-DOKU-20261110 — abgeschlossen, Claude Code (PR #132 gemergt 15.11.2026)
 
 **Owner:** Claude Code. **Stand:** 2026-11-15. **Ziel:** README mit Alleinstellungsmerkmalen und BELEG-052-Stand; Klartext-Zugangsdaten aus Skripten, Staging-Compose-Rueckfaellen und Archiv entfernt. **Dateibesitz:** `README.md`, `scripts/upload-github-secrets.ps1`, `scripts/start_rag_server.py` (nur Zugangsdaten aus der Umgebung), Staging-Compose, Archivdokumente. **Abnahme:** keine Klartext-Zugangsdaten mehr im Arbeitsstand; die Werte stehen weiter in der Git-Historie und muessen rotiert werden.
 
@@ -20925,7 +20925,7 @@ INVENTORY-AISLE-DRIFT-20261115 und RLS-ALTTEST-BESTELLUNGEN-20261115 Operationsa
 
 CI-KANONISCHE-BACKENDSUITE-20261114 und SECURITY-LANGGRAPH-ZOD-20261115 GitHub-abgenommen aufe8a2e92d5: 68Checksgruen, QG43653854329/Sonar132638443225success, Vollsuite28444pass/72skip/1deselected, StrictDB701pass/4skip. CI/CD43653854364uebernimmtverifizierteEvidenzrealohneeigeneDB/Vollsuite. PR135gemergt: main/develop e9ae5cab6, normalerFFfuerdevelop. FuerMergewarReviewausnahmemitbestehendenAdminrechtennoetig; keineTest-/Branchregelaenderung. FolgesliceO2CHTTPbleibtbiszumechtenRuninArbeit; Operations-/SQLNachweiseundMatrixstatusnichtvermischen.
 
-## LOCAL-RUNTIME-2338578-20261115 — reserviert, Codex Lead
+## LOCAL-RUNTIME-2338578-20261115 — abgeschlossen, Codex Lead
 Ziel: bestehende lokale Backend-/Frontenddienste auf den nach PR136 integrierten Stand2338578d0 aktualisieren, damit localhost3000 den aktuellen Code zeigt. Besitz Operationsfenster nurfuerbestehendeServices backend/frontend-web desProjektsvaleo-neuro-erp, eigeneQA/Handshake/Workboard; keineDB-/Keycloak-/anderenServicecontainerneuaufsetzen, keineVolumes/Imagespauschalloeschen. Buildkontextschliesst.env,artifacts,Backups,node_modulesaus. VorBuild bestehendeComposeidentitaet/Envrollen/DatenbankrevisionundausstehendeMigrationpruefen; bestehendevertraulicheRoot.envnurimSpeicherbzwalsDateiquelleverwenden, nieausgeben/versionieren. ImagesmitbestehendenTagsbauen undnur2Dienste ohneAbhaengigkeiten ersetzen; BackendmountsmuessenaufgeprueftenArtifact-Baumzeigen. FachtestsweiteraufCI/valeo_probe, keineTestgeschaefteaufEntwicklungsDB. AbnahmegesundeDienste,keinRestartloop,HTTPHealth/unauth401,aktuellerFrontendsatzundBrowser-Anmeldegrenze; keinpositiverLogin-/MaskenfachnachweisohneaechteAnmeldung. Haupt-/developStandund67gruenePR136Checks dokumentieren, externeReviewausnahmetransparent. SicherungenundZugangsdatenbleibenlokalignoriert.
 
 LOCAL-RUNTIME-2338578-20261115 Profilpraezisierung: App-/Migrations-DSN und OIDC-Aussteller/JWKS bleiben exakt wie im bestehenden Container. Der alte Container besitzt noch keinen SYSTEM_DATABASE_URL; der aktuelle, bereits gepruefte Compose-Stand uebernimmt die schon vertraulich konfigurierte VALEO_SYSTEM_CONTAINER_DATABASE_URL als vorhandene Rolle valeo_system. Dies vervollstaendigt die beauftragte RLS-Workeranbindung, keine neue Rolle/Grant/Passwortanlage. system_session() ist serverseitig auf begruendeten cross_tenant_scope beschraenkt; normale HTTP-Zugriffe bleiben valeo_app. Umsetzung und Beobachtung dieses Unterschieds ausdruecklich dokumentieren; kein stiller Superuser-Fallback.
@@ -20943,7 +20943,7 @@ LOCAL-RUNTIME-2338578-20261115 wiederaufgenommen nach Nutzermeldung Docker frisc
 
 LOCAL-RUNTIME-2338578-20261115 Profilkonsolidierung: docker-compose.local-preview.yml besitzt bereits den benoetigten1Worker. Dieses vorhandeneProfil wird weiterverwendet und nur um image-eigeneQuellennutzung(keineHostcodebinds)ergaenzt; dasnochunversionierteeigeneDesktop-Doppelprofilwirdentfernt. Dateibesitzstattdeploy/docker-compose.desktop.yaml nun docker-compose.local-preview.yml. Vorschauprofil startet weiterhin nuruvicorn; 17Migrationen werden explizit alskontrollierterSchrittvorherausgefuehrt, keineBoot-MigrationdurchWorker. Der volle genehmigte17erRollback ist inzwischen erfolgreich:Katalog/Revision/439Tabellenhashesidentisch. BackendbleibtfuerdeneinzelnenFrontendbaupausiert;VMhatjetztca5GiBReserve. Backendimageneubauistbereitsfertigundwirdnichtwiederholt.
 
-## UIX-PUBLIC-THEME-BOOTSTRAP-20261115 — reserviert, Codex Lead
+## UIX-PUBLIC-THEME-BOOTSTRAP-20261115 — abgeschlossen, Codex Lead
 Ziel: echterChrome-NachweisaufdemneuenDockerfrontendzeigtgespeichertesDarkauf/publicLoginignoriert (html.darkfalse,beideModihell), obwohldieStudio-Loginmaskezentralrendert. Dateibesitz packages/frontend-web/src/main.tsx, hooks/useTheme.ts, neuergezielterBootstraptest, eigeneQA undkurzerZusatzdocs/design/valeo-meridian-experience.md. VorhandeneThemeinitialisierungzentralvorerstenRenderanwenden, keineLogin-Sonderseite/Renderer-/CSS-Fork, keineSchema-/API-/Rollen-/Mandantenaenderung. Abnahme roteGegenprobebisherigerBootstrap, gespeicherteSystempraeferenz/ungültigeroderblockierterStorage, ersteRenderreihenfolge; kleinerVitestlauf1Worker, Typecheck,echterChromeHell/DunkelmitScreenshotundKontrast. Migrations-/Backendquellebleibt2338578d0;keineClaudeMigrationen/neuenDB/Container. WeitereFrontendbauaktionnurseriellimfreienRessourcenfenster. AktuelleOps-ProfileundSQL-Nachweisedavongetrenntdokumentieren.
 
 LOCAL-RUNTIME-2338578-20261115 SQL-/Dienstumstellung abgeschlossen und fuerClaude freigegeben:17erRollbackmit439Tabellenhashesidentisch, danachregulaeresUpgradebiswms_pickposition_stand_20261110nurQuelle2338578d0;659RLS-Tabellen,aktuelleBackend-/Frontendimagesgesund, /health200/DocFlowunauth401, realerBrowser3000/3001login. KeineClaudeMigrationgestempelt/fremdeDBangefasst. Claude darf eigenstaendigeArbeitaufBranchesundbestehendervaleo_claude_testfortsetzen; grosseTests/Buildsweiterabstimmen. CodexnurkleinerTheme-Frontendtest,keineaktuelleSQL-/Buildlast. Handoffcodex-an-claude-runtime-20261115.mdaktualisiert.
@@ -20965,7 +20965,7 @@ SQL-Fenster abgeschlossen; Nachweis local-runtime-2338578-20261115.md.
 Backend unveraendert auf freigegebenem 2338578d0, ein Worker, keine Codebindmounts.
 Claude bleibt freigegeben; keine laufenden Codex-Builds oder Datenbanktests.
 
-## ACTION-MATRIX-O2C-INVOICE-20261115 — reserviert, Codex
+## ACTION-MATRIX-O2C-INVOICE-20261115 — abgeschlossen, Codex
 
 Ziel: enger echter HTTP-Nachweis Lieferschein zu Ausgangsrechnungsentwurf auf
 kanonischem DocFlow. Dateibesitz playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts,
@@ -20989,3 +20989,9 @@ Rechnungsbelegvertrag) sind nun in einem Integrationskopf zusammengefuehrt.
 Statt zwei weiterer Backend-Vollsuiten wird genau ein neuer kanonischer Lauf
 auf dem aktuellen gemeinsamen Stand verwendet. Alte CI-Ergebnisse sind nur
 Vorabnachweise, keine Abnahme dieses neuen Kopfes. Keine Branchregel gelockert.
+
+## FAHRPLAN-VERKAUFSPRODUKT-20261115 — zur Abnahme, Claude Code
+Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
+Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
+Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
+Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
