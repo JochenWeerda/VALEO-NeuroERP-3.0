@@ -483,29 +483,6 @@
       "creation": null
     },
     {
-      "screen_id": "finance/ap-invoice",
-      "missing_actions": [
-        "freigeben"
-      ],
-      "creation_changed": false,
-      "actions": [
-        {
-          "key": "freigeben",
-          "label": "Freigeben",
-          "kind": "primary",
-          "dangerLevel": "moderate",
-          "permission": "finance.ap.freigabe",
-          "enabledWhen": "approval_can_decide",
-          "humanApprovalRequired": true,
-          "forbiddenForAgents": true,
-          "requiresConfirmation": true,
-          "commandEndpoint": "/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben",
-          "method": "POST"
-        }
-      ],
-      "creation": null
-    },
-    {
       "screen_id": "finance/ar-open-item",
       "missing_actions": [
         "mahnen"

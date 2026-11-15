@@ -74,21 +74,16 @@ class TestUIX046CommandEndpoints:
         actions = self._get_actions("finance/ar-open-item")
         assert actions["mahnen"]["dangerLevel"] == "moderate"
 
-    def test_finance_ap_invoice_freigeben_has_command_endpoint(self):
-        actions = self._get_actions("finance/ap-invoice")
-        a = actions["freigeben"]
-        assert "commandEndpoint" in a, "freigeben muss commandEndpoint haben"
-        assert "stubReason" not in a, "freigeben darf keinen stubReason mehr haben"
-        assert "/ap/invoices/" in a["commandEndpoint"]
-        assert "{entity_id}" in a["commandEndpoint"]
+    def test_eingangsrechnung_freigabe_has_command_endpoint(self):
+        # finance/ap-invoice ist entfernt (BELEG-052 Phase 3b): die Freigabe liegt an der Belegmaske.
+        from app.core.screen_definitions_beleg import build_beleg_screen_definition
 
-    def test_freigeben_requires_confirmation(self):
-        actions = self._get_actions("finance/ap-invoice")
-        assert actions["freigeben"].get("requiresConfirmation") is True
-
-    def test_freigeben_danger_level_moderate(self):
-        actions = self._get_actions("finance/ap-invoice")
-        assert actions["freigeben"]["dangerLevel"] == "moderate"
+        actions = {a["key"]: a for a in build_beleg_screen_definition("purchase_invoice")["actions"]}
+        a = actions["freigabe_erteilen:post"]
+        assert "stubReason" not in a, "Freigabe darf keinen stubReason haben"
+        assert "/docflow/{entity_id}/approvals/" in a["commandEndpoint"]
+        assert a.get("requiresConfirmation") is True
+        assert a.get("forbiddenForAgents") is True
 
 
 # ---------------------------------------------------------------------------
@@ -180,7 +175,7 @@ class TestUIX048AgentSafety:
             )
 
     def test_reference_masks_use_meridian_profiles(self):
-        finance = get_screen_definition("finance/ap-invoice")
+        finance = get_screen_definition("finance/ar-open-item")
         crm = get_screen_definition("crm/customer-360")
         inventory = get_screen_definition("lager/article-stock")
         assert finance["layout"]["tableProfile"] == "financial"

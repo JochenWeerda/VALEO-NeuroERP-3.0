@@ -709,6 +709,7 @@ def build_workspace_einkauf_screen_definition() -> dict[str, Any]:
         summary=[
             {"key": "offen", "label": "Offene Bestellungen", "tone": "neutral"},
             {"key": "volumen", "label": "Einkaufsvolumen", "tone": "neutral"},
+            {"key": "partner", "label": "Aktive Lieferanten", "tone": "neutral"},
         ],
         tiles=[
             cockpit_nav_tile("rechnungspruefung", "Rechnungspruefung", target_screen_id="beleg-liste/purchase-invoice", tone="warning"),
