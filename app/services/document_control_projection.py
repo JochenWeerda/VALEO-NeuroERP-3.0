@@ -22,150 +22,89 @@ def _safe_rows(db: Session, sql: str, params: dict[str, Any]) -> list[dict[str, 
         return None
 
 
-def collect_open_purchase_orders(db: Session, tenant_id: str) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT CAST(id AS TEXT) AS document_ref,
-               COALESCE(order_number, document_number, CAST(id AS TEXT)) AS document_number,
-               CAST(supplier_id AS TEXT) AS partner_ref,
-               supplier_name AS partner_name
-          FROM domain_procurement.purchase_orders
-         WHERE tenant_id=:tid
-           AND LOWER(COALESCE(status,'')) IN ('open','partial','freigegeben','bestellt')
-         LIMIT 500
-        """,
-        {"tid": tenant_id},
-    )
+# Quelle ist DocFlow, der einzige Belegspeicher (BELEG-052). Vorher lasen die Sammler
+# domain_procurement.purchase_orders - eine Tabelle, die keine Migration anlegt (die Projektion fand nie eine
+# Bestellung) - und domain_sales.delivery_notes, in die seit Phase 1b nichts mehr geschrieben wird.
+_BESTELLUNGEN_OFFEN = """
+    SELECT CAST(h.id AS TEXT) AS document_ref,
+           COALESCE(h.doc_number, CAST(h.id AS TEXT)) AS document_number,
+           h.supplier_id AS partner_ref,
+           l.firmenname AS partner_name
+      FROM domain_docflow.document_headers h
+ LEFT JOIN domain_einkauf.lieferanten l
+        ON l.tenant_id::text = h.tenant_id::text
+       AND (l.id::text = h.supplier_id OR l.lieferantennummer = h.supplier_id)
+     WHERE h.tenant_id::text = :tid AND h.doc_type = 'purchase_order' AND h.deleted_at IS NULL
+       AND h.status IN ('open', 'confirmed')
+       AND (NOT :ohne_wareneingang OR NOT EXISTS (
+            SELECT 1 FROM domain_docflow.document_links k
+              JOIN domain_docflow.document_headers g ON g.id = k.to_header_id
+             WHERE k.tenant_id = h.tenant_id AND k.from_header_id = h.id
+               AND g.doc_type = 'goods_receipt' AND g.deleted_at IS NULL
+               AND g.status NOT IN ('cancelled', 'reversed')))
+     LIMIT 500
+"""
+
+_LIEFERSCHEINE_OHNE_RECHNUNG = """
+    SELECT CAST(h.id AS TEXT) AS document_ref,
+           COALESCE(h.doc_number, CAST(h.id AS TEXT)) AS document_number,
+           h.customer_id AS partner_ref,
+           c.company_name AS partner_name
+      FROM domain_docflow.document_headers h
+ LEFT JOIN domain_crm.customers c
+        ON c.tenant_id::text = h.tenant_id::text
+       AND (c.id::text = h.customer_id OR c.customer_number = h.customer_id)
+     WHERE h.tenant_id::text = :tid AND h.doc_type = 'sales_delivery' AND h.deleted_at IS NULL
+       AND h.status IN ('open', 'completed')
+       AND NOT EXISTS (
+            SELECT 1 FROM domain_docflow.document_links k
+              JOIN domain_docflow.document_headers r ON r.id = k.to_header_id
+             WHERE k.tenant_id = h.tenant_id AND k.from_header_id = h.id
+               AND r.doc_type = 'sales_invoice' AND r.deleted_at IS NULL
+               AND r.status NOT IN ('cancelled', 'reversed'))
+     LIMIT 500
+"""
+
+
+def _faelle(rows: list[dict[str, Any]] | None, art: str, belegart: str, notiz: str) -> list[dict[str, Any]]:
     if rows is None:
         return []
     return [
         {
-            "exception_type": "open_purchase_order",
+            "exception_type": art,
             "document_ref": row["document_ref"],
             "document_number": row["document_number"],
             "partner_ref": row.get("partner_ref"),
             "partner_name": row.get("partner_name"),
-            "source_route": f"/einkauf/bestellung/{row['document_ref']}",
-            "source_key": f"proj:open_purchase_order:{row['document_ref']}",
-            "notes": "Projiziert: unerledigte Bestellung",
+            "source_route": f"/belege/{belegart}/{row['document_ref']}",
+            "source_key": f"proj:{art}:{row['document_ref']}",
+            "notes": notiz,
             "reason": "Live-Projektion Belegkontrolle",
         }
         for row in rows
     ]
+
+
+def collect_open_purchase_orders(db: Session, tenant_id: str) -> list[dict[str, Any]]:
+    rows = _safe_rows(db, _BESTELLUNGEN_OFFEN, {"tid": tenant_id, "ohne_wareneingang": False})
+    return _faelle(rows, "open_purchase_order", "purchase_order", "Projiziert: unerledigte Bestellung")
 
 
 def collect_missing_inbound_documents(db: Session, tenant_id: str) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT CAST(po.id AS TEXT) AS document_ref,
-               COALESCE(po.order_number, CAST(po.id AS TEXT)) AS document_number,
-               CAST(po.supplier_id AS TEXT) AS partner_ref,
-               po.supplier_name AS partner_name
-          FROM domain_procurement.purchase_orders po
-     LEFT JOIN domain_procurement.goods_receipts gr
-            ON gr.tenant_id=po.tenant_id AND gr.purchase_order_id=po.id
-         WHERE po.tenant_id=:tid
-           AND LOWER(COALESCE(po.status,'')) IN ('open','partial','bestellt','freigegeben')
-           AND gr.id IS NULL
-         LIMIT 500
-        """,
-        {"tid": tenant_id},
-    )
-    if rows is None:
-        return []
-    return [
-        {
-            "exception_type": "missing_inbound_document",
-            "document_ref": row["document_ref"],
-            "document_number": row["document_number"],
-            "partner_ref": row.get("partner_ref"),
-            "partner_name": row.get("partner_name"),
-            "source_route": f"/einkauf/bestellung/{row['document_ref']}",
-            "source_key": f"proj:missing_inbound_document:{row['document_ref']}",
-            "notes": "Projiziert: Bestellung ohne Wareneingang",
-            "reason": "Live-Projektion Belegkontrolle",
-        }
-        for row in rows
-    ]
-
-
-def collect_blocked_delivery_notes(db: Session, tenant_id: str) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT CAST(id AS TEXT) AS document_ref,
-               COALESCE(delivery_number, document_number, CAST(id AS TEXT)) AS document_number,
-               CAST(customer_id AS TEXT) AS partner_ref,
-               customer_name AS partner_name
-          FROM domain_sales.delivery_notes
-         WHERE tenant_id=:tid
-           AND (
-                LOWER(COALESCE(status,'')) IN ('blocked','gesperrt','hold')
-                OR COALESCE(blocked, FALSE) = TRUE
-           )
-         LIMIT 500
-        """,
-        {"tid": tenant_id},
-    )
-    if rows is None:
-        return []
-    return [
-        {
-            "exception_type": "blocked_delivery_note",
-            "document_ref": row["document_ref"],
-            "document_number": row["document_number"],
-            "partner_ref": row.get("partner_ref"),
-            "partner_name": row.get("partner_name"),
-            "source_route": f"/verkauf/lieferschein/{row['document_ref']}",
-            "source_key": f"proj:blocked_delivery_note:{row['document_ref']}",
-            "notes": "Projiziert: gesperrter Lieferschein",
-            "reason": "Live-Projektion Belegkontrolle",
-        }
-        for row in rows
-    ]
+    rows = _safe_rows(db, _BESTELLUNGEN_OFFEN, {"tid": tenant_id, "ohne_wareneingang": True})
+    return _faelle(rows, "missing_inbound_document", "purchase_order", "Projiziert: Bestellung ohne Wareneingang")
 
 
 def collect_uninvoiced_delivery_notes(db: Session, tenant_id: str) -> list[dict[str, Any]]:
-    rows = _safe_rows(
-        db,
-        """
-        SELECT CAST(id AS TEXT) AS document_ref,
-               COALESCE(delivery_number, document_number, CAST(id AS TEXT)) AS document_number,
-               CAST(customer_id AS TEXT) AS partner_ref,
-               customer_name AS partner_name
-          FROM domain_sales.delivery_notes
-         WHERE tenant_id=:tid
-           AND LOWER(COALESCE(status,'')) IN ('delivered','shipped','offen','open','gebucht')
-           AND COALESCE(invoiced, FALSE) = FALSE
-           AND invoice_id IS NULL
-         LIMIT 500
-        """,
-        {"tid": tenant_id},
-    )
-    if rows is None:
-        return []
-    return [
-        {
-            "exception_type": "uninvoiced_delivery_note",
-            "document_ref": row["document_ref"],
-            "document_number": row["document_number"],
-            "partner_ref": row.get("partner_ref"),
-            "partner_name": row.get("partner_name"),
-            "source_route": f"/verkauf/lieferschein/{row['document_ref']}",
-            "source_key": f"proj:uninvoiced_delivery_note:{row['document_ref']}",
-            "notes": "Projiziert: nicht fakturierter Lieferschein",
-            "reason": "Live-Projektion Belegkontrolle",
-        }
-        for row in rows
-    ]
+    rows = _safe_rows(db, _LIEFERSCHEINE_OHNE_RECHNUNG, {"tid": tenant_id})
+    return _faelle(rows, "uninvoiced_delivery_note", "sales_delivery", "Projiziert: nicht fakturierter Lieferschein")
 
 
+# Gesperrte Lieferscheine projiziert nichts mehr: DocFlow kennt keinen Sperrstand am Lieferschein; der Sammler las
+# nur den stillgelegten Altspeicher.
 DEFAULT_COLLECTORS: list[Collector] = [
     collect_open_purchase_orders,
     collect_missing_inbound_documents,
-    collect_blocked_delivery_notes,
     collect_uninvoiced_delivery_notes,
 ]
 

@@ -106,7 +106,7 @@ def test_email_terms_are_written_as_proposed_calendar_items_idempotently() -> No
     assert item["layer"] == "logistik"
     assert item["payload"]["mail_id"] == "mail-7712"
     assert item["payload"]["matched_object"]["type"] == "purchase_order"
-    assert item["object_screen_id"] == "einkauf/purchase-order"
+    assert item["object_screen_id"] == "beleg-liste/purchase-order"
     assert db.commits == 2
 
 

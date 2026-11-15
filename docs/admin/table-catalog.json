@@ -146,7 +146,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -320,7 +320,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -418,7 +418,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -532,7 +532,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -576,7 +576,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -648,7 +648,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -826,7 +826,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -970,7 +970,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -1043,7 +1043,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -1117,7 +1117,7 @@
             }
           ],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -1171,7 +1171,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -1200,7 +1200,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -1262,7 +1262,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "agrar",
-          "ownership_reason": "Praefix 'agrar_' → domain_agrar.",
+          "ownership_reason": "Praefix 'agrar_' â†’ domain_agrar.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -9428,7 +9428,7 @@
             }
           ],
           "owner_domain": "finance",
-          "ownership_reason": "Praefix 'kpi_' → domain_controlling.",
+          "ownership_reason": "Praefix 'kpi_' â†’ domain_controlling.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -9499,7 +9499,7 @@
             }
           ],
           "owner_domain": "finance",
-          "ownership_reason": "Praefix 'kpi_' → domain_controlling.",
+          "ownership_reason": "Praefix 'kpi_' â†’ domain_controlling.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -13701,6 +13701,7 @@
             "app/services/customer_service.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
+            "app/services/document_control_projection.py",
             "app/services/finance_dunning_service.py",
             "app/services/gdpr_request_processor.py",
             "app/services/gutschrift_docflow.py",
@@ -15494,7 +15495,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -15557,7 +15558,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -15636,7 +15637,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -15700,7 +15701,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -15857,7 +15858,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -15877,13 +15878,15 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_return_service.py",
             "app/services/docflow_service.py",
+            "app/services/document_control_projection.py",
             "app/services/finance_freigabe.py",
             "app/services/gutschrift_docflow.py",
             "app/services/kontrollkorb.py",
             "app/services/mcp_execution_service.py",
             "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py",
-            "app/services/warehouse_service.py"
+            "app/services/warehouse_service.py",
+            "app/services/wareneingang_avis_service.py"
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
@@ -15892,7 +15895,8 @@
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",
             "app/services/mcp_execution_service.py",
-            "app/services/settlement_document_archive_service.py"
+            "app/services/settlement_document_archive_service.py",
+            "app/services/wareneingang_avis_service.py"
           ]
         },
         "document_items": {
@@ -16024,7 +16028,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -16126,7 +16130,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -16136,7 +16140,9 @@
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/document_control_projection.py",
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/services/docflow_service.py"
@@ -16211,7 +16217,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -16280,7 +16286,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -16399,7 +16405,7 @@
             }
           ],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -16462,7 +16468,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "dms-compliance",
-          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "ownership_reason": "Praefix 'document_' â†’ domain_docflow.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -18027,13 +18033,11 @@
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/procurement_match_service.py",
-            "app/services/procurement_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/procurement_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
-            "app/services/einkauf_compat_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/einkauf_compat_service.py"
           ]
         },
         "bestellungen": {
@@ -18428,6 +18432,7 @@
             "app/infrastructure/models/einkauf_models.py",
             "app/services/beleg_anlage.py",
             "app/services/bestell_kommunikation_service.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
@@ -18438,8 +18443,7 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/einkauf_lieferschein.py",
-            "app/services/einkauf_compat_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/einkauf_compat_service.py"
           ]
         },
         "bestellvorschlaege": {
@@ -19608,6 +19612,7 @@
             "app/services/customer_reference.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
+            "app/services/document_control_projection.py",
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
@@ -31085,6 +31090,7 @@
             "app/seeds/inventory_seed.py",
             "app/services/agri_flush_booking.py",
             "app/services/customer_reference.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_count_sheet_command.py",
@@ -31100,12 +31106,12 @@
             "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/seeds/inventory_seed.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_compat_service.py",
             "app/services/inventory_correction_service.py",
-            "app/services/warehouse_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/warehouse_service.py"
           ]
         },
         "bin_locations": {
@@ -33434,6 +33440,7 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/agri_lot_link_booking_service.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_balance_reconciliation.py",
@@ -33455,13 +33462,13 @@
             "app/services/agri_flush_booking.py",
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
             "app/services/mobile_sync_service.py",
-            "app/services/warehouse_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/warehouse_service.py"
           ]
         },
         "lkw_annahme_queue": {
@@ -36845,9 +36852,9 @@
             "app/infrastructure/models/wms_models.py",
             "app/seeds/inventory_seed.py",
             "app/services/customer_reference.py",
+            "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/mask_rollout_summary_service.py",
-            "app/services/wareneingang_avis_service.py"
+            "app/services/mask_rollout_summary_service.py"
           ],
           "written_by": [
             "app/seeds/inventory_seed.py"
@@ -40142,7 +40149,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40338,7 +40345,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40409,7 +40416,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40477,7 +40484,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40550,7 +40557,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40675,7 +40682,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40750,7 +40757,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40874,7 +40881,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -40973,7 +40980,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41079,7 +41086,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41150,7 +41157,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41255,7 +41262,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41644,7 +41651,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41713,7 +41720,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -41816,7 +41823,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42020,7 +42027,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42084,7 +42091,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42149,7 +42156,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42232,7 +42239,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42281,7 +42288,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42341,7 +42348,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42420,7 +42427,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42484,7 +42491,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42562,7 +42569,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42676,7 +42683,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42735,7 +42742,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42834,7 +42841,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42904,7 +42911,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -42973,7 +42980,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43027,7 +43034,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43166,7 +43173,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43285,7 +43292,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43349,7 +43356,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43448,7 +43455,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43552,7 +43559,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43630,7 +43637,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43728,7 +43735,7 @@
             }
           ],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43822,7 +43829,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -43889,7 +43896,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "inventory",
-          "ownership_reason": "Praefix 'ops_' → domain_ops.",
+          "ownership_reason": "Praefix 'ops_' â†’ domain_ops.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48457,7 +48464,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48532,7 +48539,7 @@
             }
           ],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48623,7 +48630,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48660,7 +48667,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48746,7 +48753,7 @@
             }
           ],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48835,7 +48842,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48885,7 +48892,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -48951,7 +48958,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -49033,7 +49040,7 @@
           ],
           "foreign_keys": [],
           "owner_domain": "crm",
-          "ownership_reason": "Praefix 'sales_' → domain_sales.",
+          "ownership_reason": "Praefix 'sales_' â†’ domain_sales.",
           "placement": "prefix",
           "primary_key": [
             "id"
@@ -53170,7 +53177,7 @@
               "type": "text"
             },
             {
-              "name": "erlösklasse",
+              "name": "erlÃ¶sklasse",
               "nullable": true,
               "type": "text"
             },
@@ -62588,7 +62595,7 @@
   "sibling_models": [
     {
       "left": "domain_crm.crm_consents",
-      "reason": "Zwei Fachmodelle, zwei Tabellen — nicht umdeuten.",
+      "reason": "Zwei Fachmodelle, zwei Tabellen â€” nicht umdeuten.",
       "right": "domain_crm.crm_contact_consents"
     }
   ]

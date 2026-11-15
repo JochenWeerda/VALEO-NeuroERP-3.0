@@ -29,8 +29,9 @@ const anlieferavisConfig: MaskConfig = {
           label: 'Bestellung',
           type: 'lookup',
           required: true,
-          endpoint: '/api/v1/purchase-orders?status=FREIGEGEBEN',
-          displayField: 'purchaseOrderNumber',
+          // Bestellungen stehen nur noch in DocFlow (BELEG-052): freigegebene Bestellungen der Belegliste.
+          endpoint: '/api/v1/belege/purchase_order?status=open',
+          displayField: 'beleg_nr',
           valueField: 'id'
         },
         { name: 'avisNummer', label: 'Avis-Nummer', type: 'text', required: true },
