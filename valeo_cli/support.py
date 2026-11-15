@@ -12,6 +12,7 @@ import re
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
+from valeo_cli import resource
 
 MODES = ("execute", "dryRun", "validate", "propose")
 
@@ -43,8 +44,10 @@ class Support:
     reason: str | None = None
 
 
-def support(action: dict[str, Any]) -> Support:
+def support(action: dict[str, Any], screen_id: str | None = None) -> Support:
     """Kann die CLI diese Aktion so ausfuehren wie die Maske? Sonst: warum nicht."""
+    if action.get('responseAdapter'):
+        return Support(True) if resource.supported(action, screen_id) else Support(False, 'ressource_ungueltig')
     if "readView" in action:
         view = action["readView"]
         endpoint = view.get("endpoint") if isinstance(view, dict) else None
@@ -81,6 +84,7 @@ def support(action: dict[str, Any]) -> Support:
 
 
 REASON_TEXT = {
+    "ressource_ungueltig": "Dieser Ressourcenvertrag ist fuer die CLI nicht freigegeben.",
     "eingabe_in_maske": "Diese Aktion erfordert die Eingabe und Bestaetigung in der Maske (kein Sendeweg deklariert).",
     "leseansicht_ungueltig": "Die deklarierte Leseansicht ist nicht gültig.",
     "kein_endpunkt": "Die Aktion hat keinen Kommando-Endpunkt; die Maske verdrahtet sie selbst.",
@@ -122,9 +126,12 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
     """Methode, Pfad und Koerper — derselbe Umschlag wie im generischen Zweig von useActionRuntime."""
     if mode not in MODES:
         raise ValueError(f"Unbekannter Modus {mode!r}; erlaubt: {', '.join(MODES)}")
-    checked = support(action)
+    checked = support(action, screen_id=screen_id)
     if not checked.supported:
         raise ValueError(reason_text(checked.reason))
+    if action.get('responseAdapter'):
+        # Ressourcen benoetigen Identitaets- und Antwortpruefung des dedizierten CLI-Pfads.
+        raise ValueError('Ressourcenaktionen verwenden den dedizierten Ressourcenadapter.')
     if action.get("commandBinding"):
         raise ValueError("Adapteraktionen baut valeo_cli.docflow, nicht der generische Weg.")
     flow_endpoint = input_flow_endpoint(action)

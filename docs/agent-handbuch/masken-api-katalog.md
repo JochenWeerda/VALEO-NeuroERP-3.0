@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-15
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (780 Masken).
+> Generiert aus `app/core/screen_definitions.py` (782 Masken).
 
 ## Übersicht
 
@@ -134,6 +134,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/formular/agent-contract` |
 | `agrar/saatgut/prognose` | Prognose | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/prognose/agent-contract` |
 | `agrar/saatgut/royalties` | Royalties | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/royalties/agent-contract` |
+| `agrar/saatgut/sorte` | Sorte | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
 | `agrar/saatgut/vermehrung` | Vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/vermehrung/agent-contract` |
 | `agrar/saatzucht-partien-liste` | Saatzucht-Partien | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatzucht-partien-liste/agent-contract` |
 | `agrar/schlaege-karte-liste` | Schlagkarte | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-karte-liste/agent-contract` |
@@ -692,6 +693,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `rezepte/rezept` | Rezept | produktion | niedrig | — | `GET /api/v1/masks/rezepte/rezept/agent-contract` |
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
+| `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
 | `sales/lieferung-storno` | Lieferung storno | sales | niedrig | — | `GET /api/v1/masks/sales/lieferung-storno/agent-contract` |
@@ -4389,6 +4391,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/saatgut/sorte` — Sorte
+
+**Zweck:** Sortenstammdaten anzeigen und bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/saatgut/sorte/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/saatgut/sorte/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__saatgut__sorte/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/varieties/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kultur hat Sorte {entity_id}?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `/api/v1/agrar/varieties/{entity_id}` |
 
 ---
 
@@ -25473,6 +25513,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `sales/invoice` — Ausgangsrechnung
+
+**Zweck:** Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/sales/invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/sales/invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/sales/invoice/readiness` |
+| Rollout-Route | `/mask-rollout/sales__invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Summary:** `/api/v1/sales/invoices/{entity_id}/screen-summary`
+
+**Data Sources:**
+
+- `entity` → `/api/v1/sales/invoices/{entity_id}`
+- `positionen` → `/api/v1/sales/invoices/{entity_id}/tabs/positionen`
+- `herkunft` → `/api/v1/sales/invoices/{entity_id}/tabs/herkunft`
+- `steuer` → `/api/v1/sales/invoices/{entity_id}/tabs/steuer`
+
+**MCP-Tools (Domäne):**
+
+- `sales.order.status` — scope `sales:read`, Risiko niedrig
+- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
+- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
+- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
+- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
+- `sales.invoice.post` — scope `sales:write`, Risiko hoch
+
+**Beispiel-Prompts:**
+
+- Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?
+- Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?
+- Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?
 
 ---
 

@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-10
+# Architecture Index — generiert 2026-11-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-10T01:39:21Z'
+generated_at: '2026-11-15T08:33:42Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -834,6 +834,7 @@ domains:
     - portal_preisspiegel_service
     - sales_credit_service
     - sales_invoice_mask
+    - sales_invoice_service
     - sales_match_service
     - sales_offer_import
     - sales_posting_service
@@ -902,6 +903,8 @@ domains:
     - sales_blanket_orders
     - sales_credit
     - sales_credit_notes
+    - sales_invoice_einvoice
+    - sales_invoices
     - sales_match
     - sales_order_commands
     - sales_reports
@@ -1449,6 +1452,7 @@ domains:
     - finance_datev
     - finance_dunning
     - finance_followup
+    - finance_invoices
     - finance_op
     - finance_period
     - finance_read_models
@@ -1492,6 +1496,7 @@ domains:
     - subsidiary_ledger_reconciliation
     - tax_keys
     - vat_return_export
+    - xrechnung
     - zahlungsbedingungen
     - zinsabrechnung
     - zu_abschlaggruppen
@@ -2141,6 +2146,7 @@ domains:
     - blockchain_runtime
     - channel_work_surfaces
     - collab_notes
+    - collective_documents
     - command_catalog
     - compat
     - config_service
@@ -2387,10 +2393,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 344
-  backend_services_mapped: 344
-  backend_endpoints_total: 476
-  backend_endpoints_mapped: 476
+  backend_services_total: 345
+  backend_services_mapped: 345
+  backend_endpoints_total: 481
+  backend_endpoints_mapped: 481
 unmapped:
   frontend_routes: []
   backend_services: []

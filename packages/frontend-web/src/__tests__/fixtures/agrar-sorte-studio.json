@@ -1,0 +1,331 @@
+{
+  "schemaVersion": 1,
+  "id": "agrar/saatgut/sorte",
+  "domain": "agrar",
+  "mode": "detail",
+  "title": "Sorte",
+  "subtitle": "Sortenregister",
+  "adapter": {
+    "type": "native",
+    "sourceId": "agrar/saatgut/sorte",
+    "temporary": false
+  },
+  "dataSources": [
+    {
+      "key": "entity",
+      "endpoint": "/api/v1/agrar/varieties/{entity_id}"
+    }
+  ],
+  "tabs": [
+    {
+      "key": "kopf",
+      "label": "Stammdaten",
+      "lazy": false,
+      "keepAlive": true,
+      "dataSourceKey": "entity",
+      "fields": [
+        {
+          "key": "variety_number",
+          "label": "Sortennummer",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "name",
+          "label": "Sorte",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "text"
+        },
+        {
+          "key": "crop_type",
+          "label": "Kultur",
+          "type": "text"
+        },
+        {
+          "key": "zuechter",
+          "label": "Züchter",
+          "type": "text"
+        },
+        {
+          "key": "zulassungsjahr",
+          "label": "Zulassungsjahr",
+          "type": "number"
+        },
+        {
+          "key": "reifezahl",
+          "label": "Reifezahl",
+          "type": "text"
+        },
+        {
+          "key": "qualitaetsgruppe",
+          "label": "Qualitätsgruppe",
+          "type": "text"
+        },
+        {
+          "key": "aktiv",
+          "label": "Aktiv",
+          "type": "boolean",
+          "readOnly": true
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "key": "edit",
+      "label": "Bearbeiten",
+      "kind": "primary",
+      "dangerLevel": "safe",
+      "permission": "agrar.sorte.update",
+      "commandEndpoint": "/api/v1/agrar/varieties/{entity_id}",
+      "method": "PUT",
+      "forbiddenForAgents": true,
+      "responseAdapter": "resource.v1",
+      "inputPrefill": "entity",
+      "inputFields": [
+        {
+          "key": "variety_number",
+          "label": "Sortennummer",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "name",
+          "label": "Sorte",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "description",
+          "label": "Beschreibung",
+          "type": "text"
+        },
+        {
+          "key": "crop_type",
+          "label": "Kultur",
+          "type": "text"
+        },
+        {
+          "key": "zuechter",
+          "label": "Züchter",
+          "type": "text"
+        },
+        {
+          "key": "zulassungsjahr",
+          "label": "Zulassungsjahr",
+          "type": "number"
+        },
+        {
+          "key": "reifezahl",
+          "label": "Reifezahl",
+          "type": "text"
+        },
+        {
+          "key": "qualitaetsgruppe",
+          "label": "Qualitätsgruppe",
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "agentContract": {
+    "businessPurpose": "Sortenstammdaten anzeigen und bearbeiten.",
+    "examplePrompts": [
+      "Welche Kultur hat Sorte {entity_id}?"
+    ],
+    "sensitiveFields": [],
+    "testSelectors": {
+      "screenRoot": "[data-testid='agrar-sorte-stamm']",
+      "primaryAction": "[data-testid='action-edit']",
+      "summaryArea": "[data-testid='mask-summary']"
+    },
+    "dangerousActions": [
+      {
+        "key": "edit",
+        "reason": "Nur menschliche Ausfuehrung gemaess dem Fachaktionsvertrag."
+      }
+    ],
+    "synonyms": [
+      "sorte",
+      "sortenstamm"
+    ]
+  },
+  "layout": {
+    "preferredMode": "desktopDense",
+    "mobileMode": "mobileStack",
+    "touchTargetPx": 44,
+    "floorplan": "objectPage",
+    "columnNavigation": "single",
+    "sectionNavigation": "anchors",
+    "density": "compact",
+    "contextRail": "combined",
+    "summaryPlacement": "header",
+    "stickyHeader": true,
+    "stickyFooter": true
+  },
+  "performance": {
+    "initialPayloadBudgetKb": 36,
+    "requiresLazyTabs": true,
+    "requiresVirtualTables": false,
+    "lookupMinChars": 2,
+    "bundleGroup": "agrar"
+  },
+  "identityField": "name",
+  "noWorkflowReason": "Sortenstamm ohne eigenen Ablauf.",
+  "noProcessChainReason": "Sortenstamm ohne eigenen Ablauf.",
+  "summary": [
+    {
+      "key": "name",
+      "label": "Kennung",
+      "value": null,
+      "kind": "identity"
+    }
+  ],
+  "processChains": {
+    "k1_ernte": {
+      "label": "Ernte",
+      "steps": [
+        {
+          "key": "kontrakt",
+          "label": "Kontrakt",
+          "screenId": "agrar/kontrakte",
+          "routePath": "/kontrakte"
+        },
+        {
+          "key": "avis",
+          "label": "Avis",
+          "screenId": "einkauf/anlieferavis",
+          "routePath": "/einkauf/anlieferavis"
+        },
+        {
+          "key": "qualitaet",
+          "label": "Qualitaet",
+          "screenId": "qualitaet/reklamation",
+          "routePath": "/qualitaet/reklamationen"
+        },
+        {
+          "key": "einlagerung",
+          "label": "Einlagerung",
+          "screenId": "lager/article-stock",
+          "routePath": "/lager/bestandsuebersicht"
+        },
+        {
+          "key": "abrechnung",
+          "label": "Abrechnung",
+          "screenId": "agrar/harvest-settlement",
+          "routePath": "/agrar/kontrakt-settlement"
+        }
+      ]
+    },
+    "k2_verkauf": {
+      "label": "Verkauf",
+      "steps": [
+        {
+          "key": "auftrag",
+          "label": "Auftrag",
+          "screenId": "beleg-liste/sales-order",
+          "routePath": "/verkauf/auftraege"
+        },
+        {
+          "key": "lieferschein",
+          "label": "Lieferschein",
+          "screenId": "beleg-liste/sales-delivery",
+          "routePath": "/sales/lieferungen"
+        },
+        {
+          "key": "rechnung",
+          "label": "Rechnung",
+          "screenId": "sales/invoice",
+          "routePath": "/verkauf/rechnungen"
+        },
+        {
+          "key": "offene_posten",
+          "label": "Offene Posten",
+          "screenId": "finance/ar-open-item",
+          "routePath": "/finance/op-debitoren"
+        },
+        {
+          "key": "zahlung",
+          "label": "Zahlung",
+          "screenId": "finance/payment-run",
+          "routePath": "/fibu/zahlungslaeufe"
+        }
+      ]
+    },
+    "k3_einkauf": {
+      "label": "Einkauf",
+      "steps": [
+        {
+          "key": "anfrage",
+          "label": "Anfrage",
+          "screenId": "einkauf/anfrage",
+          "routePath": "/einkauf/anfragen"
+        },
+        {
+          "key": "angebot",
+          "label": "Angebot",
+          "screenId": "einkauf/angebot",
+          "routePath": "/einkauf/angebote"
+        },
+        {
+          "key": "bestellung",
+          "label": "Bestellung",
+          "screenId": "einkauf/purchase-order",
+          "routePath": "/einkauf/bestellungen"
+        },
+        {
+          "key": "bestaetigung",
+          "label": "Auftragsbestaetigung",
+          "screenId": "einkauf/auftragsbestaetigung",
+          "routePath": "/einkauf/auftragsbestaetigungen"
+        },
+        {
+          "key": "avis",
+          "label": "Avis",
+          "screenId": "einkauf/anlieferavis",
+          "routePath": "/einkauf/anlieferavis"
+        },
+        {
+          "key": "rechnung",
+          "label": "Rechnung",
+          "screenId": "finance/ap-invoice",
+          "routePath": "/einkauf/rechnungseingang"
+        },
+        {
+          "key": "zahlung",
+          "label": "Zahlung",
+          "screenId": "finance/payment-run",
+          "routePath": "/fibu/zahlungslaeufe"
+        }
+      ]
+    },
+    "k4_crm": {
+      "label": "CRM",
+      "steps": [
+        {
+          "key": "lead",
+          "label": "Lead",
+          "screenId": "crm/lead",
+          "routePath": "/crm/leads"
+        },
+        {
+          "key": "opportunity",
+          "label": "Opportunity",
+          "screenId": "crm/opportunity",
+          "routePath": "/crm/opportunities"
+        },
+        {
+          "key": "kunde",
+          "label": "Kunde",
+          "screenId": "crm/customer-360",
+          "routePath": "/verkauf/kunden-liste"
+        }
+      ]
+    }
+  }
+}

@@ -39,7 +39,7 @@ Alle Schritte wurden erfolgreich umgesetzt. Das System ist **vollständig konfig
 - `swarm/start-swarm.ps1` - PowerShell Start-Script
 
 ### ✅ Konfiguration
-- `.env.swarm` - Umgebungsvariablen (admin/admin123)
+- `.env.swarm` - Umgebungsvariablen (admin/<ADMIN_PASSWORT>)
 - `docker-compose.swarm.yml` - Mit korrekten Default-Credentials
 
 ## 🚀 Jetzt starten

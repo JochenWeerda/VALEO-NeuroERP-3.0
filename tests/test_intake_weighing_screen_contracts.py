@@ -1,7 +1,20 @@
+import json
+from pathlib import Path
+
 from app.core.screen_definitions_intake_weighing import (
     build_intake_registration, build_intake_quality, build_intake_queue,
     build_scale_list, build_scale_create, build_weighing_tickets,
 )
+
+
+def test_frontend_behavior_fixtures_match_current_studio_definitions():
+    """UI tests must not stay green by rendering an obsolete schema snapshot."""
+    path = Path(__file__).resolve().parents[1] / "packages/frontend-web/src/__tests__/fixtures/intake-weighing-screens.json"
+    fixtures = json.loads(path.read_text(encoding="utf-8"))
+    builders = (build_intake_registration, build_intake_quality, build_intake_queue,
+                build_scale_list, build_scale_create, build_weighing_tickets)
+    current = {definition["id"]: definition for definition in (builder() for builder in builders)}
+    assert fixtures == current, "Regenerate UI fixtures from the current Studio builders and review behavior changes"
 
 
 def test_eight_ids_use_fixed_domain_specialists_and_no_generic_table_substitution():
