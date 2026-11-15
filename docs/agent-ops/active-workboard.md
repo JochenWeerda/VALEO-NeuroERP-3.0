@@ -20930,3 +20930,9 @@ Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
 Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
 Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
+
+## BELEG-052-RECHNUNG-2A-20261110 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme (PR #140). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: Rechnungszugaenge auf DocFlow. MCP sales.invoice.propose/post auf DocFlow-Lieferschein und Umwandlung; Kontroll-Worklist und Flow-Spine auf beleg-liste/sales-invoice; E-Rechnung (XRechnung) aus dem DocFlow-Beleg mit GoBD-Archiv; gebuchte Ausgangsrechnung archiviert ihr Original; Schutz-Migration altrechnungen_schutz_20261110; Belegfamilie 1.11.0.
+Dateibesitz: app/services/beleg_erechnung.py, app/api/v1/endpoints/beleg_erechnung.py, Migrationen docflow_archiv_wartung_20261110 und altrechnungen_schutz_20261110, config/architecture-domain-prefixes.yaml (neuer Endpunkt eingeordnet), zugehoerige Tests und Projektionen.
+Abnahme: Testsatz auf frischer Datenbank 1.505 bestanden; Baseline-Integritaet, Familien-/Belegmasken-Versionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
