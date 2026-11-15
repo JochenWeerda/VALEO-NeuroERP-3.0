@@ -21042,3 +21042,19 @@ beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaen
 eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
+
+## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
+
+Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften
+Mandantenkontext in allen zehn Lese-/Schreibwegen durchsetzen. Aktuell optionaler
+Querymandant bei Listen, payloadmandant bei Anlage und ungefilterte Einzelwege.
+Dateibesitz app/api/v1/endpoints/rohware_schema.py, neuer enger Test
+ tests/test_rohware_schema_tenant_contract.py, eigene QA; Lead besitzt Doku/Integration.
+Keine Tabelle erfinden, keine Migration/DDL/DB/Docker, kein neuer Sicherheitskern;
+bestehende Rollen und get_tenant_id nutzen. Existierende Fachregeln und berechnete
+Werte erhalten; Fremdbeleg/-zeile wie nicht vorhanden, Payload kann Mandant nicht
+ueberschreiben. Guards vor Lesen/Mutation, keine DB-Details in Antworten. Gegenproben
+mit zwei isolierten Kontexten, verweigerten Mutationen und erhaltenem Zustand;
+wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte RLS-Abnahme behaupten.
+Die fehlenden Tabellen bleiben separat ein schemafachlicher 503-Blocker.
+PR137 bleibt waehrend seiner Abnahme unveraendert auf8c6d20b2d.
