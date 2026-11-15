@@ -21066,3 +21066,11 @@ ein fehlgeschlagener Journalzugriff als tatsaechlicher Istwert0 erscheint.
 Gueltige Nullwerte und erfolgreiche Werte erhalten; Fehlzustand mit Rollback
 und neutraler503Antwort. Keine Kontierungsregel, Tabelle/Migration oder Rolle
 aendern; kanonische Budgettabellen und Konten-/Periodenabgleich separat offen.
+
+M0-ROHWARE-TENANT-20261115 Review-Erweiterung: Besitz zusaetzlich nur der zwei
+alten Rohware-Handler-Mockfaelle in tests/test_waage_import_rohware_schema.py
+(test_rohware_schema_create_and_activate, test_rohware_schema_testrechnung_grundpreis).
+Erst durch staerkere HTTP-Faelle mit eigenem Create/Readback/Update/Statuswechsel/
+Zeilenanlage ersetzen, danach entfernen; alle Waage-/Formelvertraege erhalten.
+Auch Abweisung widerspruechlicher Bodymandanten vor erstem Datenbankzugriff und
+neutrale DB-Fehler mit Rollback nachweisen. Keine Rollen-/RLS-Abnahme aus Attrappen.
