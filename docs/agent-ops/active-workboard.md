@@ -20960,3 +20960,15 @@ JS-Fehler, Anmeldung auf 3000/3001 weiterhin erforderlich. Theme-Slice geschloss
 SQL-Fenster abgeschlossen; Nachweis local-runtime-2338578-20261115.md.
 Backend unveraendert auf freigegebenem 2338578d0, ein Worker, keine Codebindmounts.
 Claude bleibt freigegeben; keine laufenden Codex-Builds oder Datenbanktests.
+
+## ACTION-MATRIX-O2C-INVOICE-20261115 — reserviert, Codex
+
+Ziel: enger echter HTTP-Nachweis Lieferschein zu Ausgangsrechnungsentwurf auf
+kanonischem DocFlow. Dateibesitz playwright-tests/specs/e2e-matrix/o2c-semantic-chain.spec.ts,
+eigene QA; Workboard/Handshake beim Lead. Vorhandene Partneranlage und signierte
+POWER/READ-Fixtures wiederverwenden, keine ErsatzIDs, tolerierten Fehlercodes,
+Skips, neue Datenbanken/Container oder lokale schweren Testlaeufe. Abnahme:
+Quellenkette, konkrete Mengen/Betrag/Steuer, Readback, Replay ohne Doppelwirkung,
+Rollen-/Mandanten-/Versions-/Uebermengennegative ohne Wirkung und Doppelrechnungsweg
+abgewiesen. Keine Behauptung von Festschreibung/PDF/Zahlung/OP aus Entwurfsanlage.
+PR137-Quellkopf bleibt unveraendert; neue CI erst nach dessen Integration.
