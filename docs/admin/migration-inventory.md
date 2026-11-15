@@ -103,6 +103,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `agri_silo_lot_link_20260619` | WM-AGRI-LOT-LINK: silo_cells.legacy_silo_id → domain_inventory.silos |
 | `agri_silo_material_flow_20260612` | Agrar: Siloanlagen, Silozellen, Materialfluss-Knoten/Kanten (domain_inventory). |
 | `agribusiness_farmers_table_20260525` | Agribusiness farmers table |
+| `altrechnungen_schutz_20261110` | Schutz vor dem Entfernen des alten Rechnungswegs: keine echten Altrechnungen ausserhalb DocFlow (BELEG-052 2b). |
 | `approval_engine_20261013` | Freigaben fuer buchungs- und stornorelevante Vorgaenge (APPROVAL-001). |
 | `approval_log_20261013` | Unveraenderliches Freigabeprotokoll fuer alle Bereiche (APPROVAL-001). |
 | `articles_image_url_20260322` | Add image_url to articles |
@@ -168,6 +169,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `doc_artifact_version_20260611` | DOM-DOC-004.2 — Artefakt-Versionierung + Freigabe-Status. |
 | `doc_followup_20260611` | DOM-DOC-004.3 — Bescheid/Rückmeldung + Wiedervorlage am Vorgang. |
 | `doc_nachweisraum_lifecycle_20260623` | DOM-DOC-004 — Nachweisraum Dokument-Lifecycle + GoBD-Export Tabellen |
+| `docflow_archiv_wartung_20261110` | Archivierte Belegoriginale: Loeschen nur mit dem DocFlow-Wartungsschalter (BELEG-052 Phase 2). |
 | `docflow_auftraege_uebernahme_20261109` | Verkaufsauftraege nach DocFlow uebernehmen; domain_crm.sales_orders wird Sicht auf DocFlow (BELEG-052). |
 | `docflow_auftragsbestaetigung_20261109` | DocFlow-Stand ``confirmed``: Auftragsbestaetigung (BELEG-052, Nutzerentscheidung 09.11.2026). |
 | `docflow_core_20260215` | docflow core tables and command idempotency |

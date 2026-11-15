@@ -20996,12 +20996,18 @@ Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
 Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
 
-## WORKBOARD-ALTCLAIMS-CLAUDE-20261115 — zur Abnahme, Claude Code (M0)
+## WORKBOARD-ALTCLAIMS-CLAUDE-20261115 — abgeschlossen, Claude Code (M0)
 Owner: Claude Code. Stand: zur Abnahme. Meilenstein: M0 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: veraltete Claude-Claims schliessen. Geprueft per `git merge-base --is-ancestor <branch> origin/main`: alle Claims vom 25.-27.10.2026 (Abhaengigkeiten, Drizzle, DB-Rollen, Dienst-Versionstabellen, RLS-Plan, RLS P0-P7, RLS je Domaene) sind in main enthalten; Ueberschriften auf `abgeschlossen` gesetzt (33 Eintraege). Dazu CI-DAUERROT (#99), RLS-REST-AUF-MAIN (#101), BATCH8 (#102), BATCH9 (#103), FAHRPLAN (#138).
 Dateibesitz: nur Ueberschriften der genannten Eintraege in diesem Workboard.
 Pruefpunkt elf Branches vom 26.-28.10. (PRs #53, #54, #80-#88 geschlossen statt gemergt) - inhaltlich geprueft 15.11.2026: rls-domain-erp, rls-domain-logistics, rls-domain-ops, rls-domain-ops-teil2, standardmandant-abbau, tenant-fallback-abbau, urheber-aus-token, ustva-wahrheit, pos-checkout-wahrheit: jeder Fachcommit liegt unter gleichem Titel in main (umgesetzt ueber #101/#116), in main fehlen nur die Claim-Commits und zwei reine Doku-Commits; die Migration rls_domain_ops_teil2_20261028 ist in main vorhanden. crm-chains-rest: betraf crm-consent, crm-gdpr, crm-marketing (mit #117 entfernt, damit gegenstandslos) und crm-ai - crm-ai hat weiter keine eigene Versionstabelle und steht als einziger Eintrag in der Ratsche OHNE_EIGENE_VERSIONSTABELLE (tests/test_service_alembic_version_tables.py); das bleibt offen (M5). inventory-ownership: nur eine Doku-Korrektur fehlt. Damit koennen die elf Branches und ihre Arbeitsbaeume entfernt werden.
 Abnahme: Docs-Governance gruen; PR gegen main.
+
+## BELEG-052-RECHNUNG-2A-20261110 — abgeschlossen (PR #140 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme (PR #140). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: Rechnungszugaenge auf DocFlow. MCP sales.invoice.propose/post auf DocFlow-Lieferschein und Umwandlung; Kontroll-Worklist und Flow-Spine auf beleg-liste/sales-invoice; E-Rechnung (XRechnung) aus dem DocFlow-Beleg mit GoBD-Archiv; gebuchte Ausgangsrechnung archiviert ihr Original; Schutz-Migration altrechnungen_schutz_20261110; Belegfamilie 1.11.0.
+Dateibesitz: app/services/beleg_erechnung.py, app/api/v1/endpoints/beleg_erechnung.py, Migrationen docflow_archiv_wartung_20261110 und altrechnungen_schutz_20261110, config/architecture-domain-prefixes.yaml (neuer Endpunkt eingeordnet), zugehoerige Tests und Projektionen.
+Abnahme: Testsatz auf frischer Datenbank 1.505 bestanden; Baseline-Integritaet, Familien-/Belegmasken-Versionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 
 ## M0-CI-GESAMTBASIS-20261115 — reserviert, Codex Lead
 

@@ -52,6 +52,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
 | `beleg_anlage` | Belege aus Fachwegen anlegen: immer in DocFlow (BELEG-052 Stufe 3, Nutzerentscheidung 08.11.2026). |
 | `beleg_druck` | Belegdruck: ein PDF je DocFlow-Beleg aus dem Belegvertrag (BELEG-052 Stufe 2b, 09.11.2026). |
+| `beleg_erechnung` | E-Rechnung (XRechnung 3.0, UBL 2.1) aus dem DocFlow-Beleg (BELEG-052 Phase 2, 10.11.2026). |
 | `beleg_liste` | Belegliste aus DocFlow: eine Quelle fuer Maske (Familie ``beleg-liste``), CLI, MCP (``beleg_suchen``) und REST. |
 | `bestell_kommunikation_service` | Kommunikation zu einer Bestellung — wirklich versendet, am fuehrenden Beleg. |
 | `bewerbung_einwilligung_service` | Erteilen und Widerrufen der Aufbewahrungs-Einwilligung. |
