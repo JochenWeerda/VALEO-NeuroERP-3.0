@@ -20,7 +20,7 @@ if (-not (Test-Path ".env.swarm")) {
     @"
 NEUROERP_URL=http://localhost:3000
 NEUROERP_USER=admin
-NEUROERP_PASS=admin123
+NEUROERP_PASS=<ADMIN_PASSWORT>
 "@ | Out-File -FilePath ".env.swarm" -Encoding UTF8
     Write-Host "✅ .env.swarm erstellt" -ForegroundColor Green
 }

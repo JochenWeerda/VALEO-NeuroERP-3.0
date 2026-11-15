@@ -1287,6 +1287,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agrar/saatgut/sorte": {
+      "definition_hash": "e0c5ea05a9ad40302ad5cf5840f8edc917de2cd9eb821420a3d69cf2dd764d62",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "agrar/saatgut/vermehrung": {
       "definition_hash": "4121769f049c2dbb32ac405ed7dd730fc69300046993ab78331f1680123f018e",
       "gates_passed": [
@@ -8270,8 +8281,7 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
-        "E"
+        "C"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"

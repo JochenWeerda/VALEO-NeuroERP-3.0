@@ -1,7 +1,9 @@
-"""Lieferantengutschriften und der alte Rechnungsweg lesen und schreiben nur im eigenen Mandanten.
+"""Lieferantengutschriften lesen und schreiben nur im eigenen Mandanten; Altbelege werden eindeutig zugeordnet.
 
 Bis 13.10.2026 lieferten die Lesewege die Belege aller Mandanten; die Freigabe zur Buchung, das Aendern und das
 Loeschen trafen auch fremde Belege, und der Handelnde kam aus einem Kopf, den jeder setzen kann.
+
+Der alte Rechnungsweg /finance/invoices ist mit BELEG-052 Phase 2b entfernt; die Ausgangsrechnung fuehrt DocFlow.
 
 Geprueft gegen die echte Datenbank.
 """
@@ -16,7 +18,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import text
 
-from app.api.v1.endpoints import credit_debit_memos, finance_invoices
+from app.api.v1.endpoints import credit_debit_memos
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
 from app.core.exceptions import register_domain_exception_handlers
@@ -38,11 +40,9 @@ def haus(monkeypatch):
         lege_kunden_an(db, mandant, "kunde-1", "kunde-2", "kunde-des-angreifers")
         lege_kunden_an(db, anderer, f"kunde-{anderer}")
         db.commit()
-    monkeypatch.setattr(finance_invoices, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
     register_domain_exception_handlers(app)
     app.include_router(credit_debit_memos.router)
-    app.include_router(finance_invoices.router)
     ersetze_mandant(app, mandant)
     client = TestClient(app, raise_server_exceptions=False)
     herrenlos: list[str] = []
@@ -158,65 +158,12 @@ def test_anlegen_und_buchen_nennen_die_anmeldung_nicht_einen_kopf(haus):
     assert wer == "anna"
 
 
-# ── Alter Rechnungsweg ────────────────────────────────────────────────────────
+# ── Altbelege zuordnen ────────────────────────────────────────────────────────
 
 def _rechnung(nummer: str, kunde: str = "kunde-1", **mehr) -> dict:
     return {"number": nummer, "date": "2026-10-13", "customerId": kunde, "dueDate": "2026-11-12", "status": "ENTWURF",
             "subtotalNet": 100.0, "totalTax": 19.0, "totalGross": 119.0, **mehr}
 
-
-def _lege_an(haus, wer: dict, wo: str, **mehr) -> str:
-    nummer = f"LM-{uuid.uuid4().hex[:10]}"
-    if wo != haus["mandant"]:
-        mehr.setdefault("kunde", f"kunde-{wo}")
-    antwort = haus["als"](wer, wo).post("/finance/invoices", json=_rechnung(nummer, **mehr))
-    assert antwort.status_code == 200, antwort.text
-    return nummer
-
-
-def test_die_rechnung_traegt_ihren_mandanten_und_ist_nur_dort_lesbar(haus):
-    eigen = _lege_an(haus, ANNA, haus["mandant"])
-    fremd = _lege_an(haus, CLARA, haus["anderer"])
-    assert _beleg(eigen)["tenantId"] == haus["mandant"] and _beleg(fremd)["tenantId"] == haus["anderer"]
-    assert haus["als"](ANNA).get(f"/finance/invoices/{eigen}").json()["invoice"]["number"] == eigen
-    assert haus["als"](ANNA).get(f"/finance/invoices/{fremd}").status_code == 404
-    liste = haus["als"](ANNA).get("/finance/invoices", params={"limit": 1000}).json()
-    assert [r["number"] for r in liste["invoices"]] == [eigen] and liste["total"] == 1
-
-
-def test_eine_fremde_rechnung_wird_weder_geaendert_noch_geloescht(haus):
-    fremd = _lege_an(haus, CLARA, haus["anderer"])
-    vorher = _beleg(fremd)
-    geaendert = haus["als"](ANNA).put(f"/finance/invoices/{fremd}", json=_rechnung(fremd, kunde="kunde-des-angreifers"))
-    assert geaendert.status_code == 404
-    assert haus["als"](ANNA).delete(f"/finance/invoices/{fremd}").status_code == 404
-    assert _beleg(fremd) == vorher
-    # Die eigene laesst sich aendern und behaelt ihren Mandanten.
-    eigen = _lege_an(haus, ANNA, haus["mandant"])
-    assert haus["als"](ANNA).put(f"/finance/invoices/{eigen}", json=_rechnung(eigen, kunde="kunde-2")).status_code == 200
-    assert (_beleg(eigen)["customerId"], _beleg(eigen)["tenantId"]) == ("kunde-2", haus["mandant"])
-    assert haus["als"](ANNA).delete(f"/finance/invoices/{eigen}").status_code == 204 and _beleg(eigen) is None
-
-
-def test_eine_vergebene_nummer_ueberschreibt_nicht_die_rechnung_eines_anderen_mandanten(haus):
-    """Die Nummer ist im Speicher systemweit eindeutig; das Anlegen ersetzte bis 13.10.2026 still den fremden Beleg."""
-    fremd = _lege_an(haus, CLARA, haus["anderer"])
-    vorher = _beleg(fremd)
-    antwort = haus["als"](ANNA).post("/finance/invoices", json=_rechnung(fremd, kunde="kunde-des-angreifers"))
-    assert antwort.status_code == 409 and "bereits vergeben" in antwort.text
-    assert _beleg(fremd) == vorher
-
-
-def test_eine_altrechnung_ohne_mandant_wird_niemandem_ausgeliefert(haus):
-    alt = _ohne_mandant(haus, "sales_invoice", _rechnung("x"))
-    assert haus["als"](ANNA).get(f"/finance/invoices/{alt}").status_code == 404
-    assert alt not in [r["number"] for r in haus["als"](ANNA).get("/finance/invoices", params={"limit": 1000}).json()["invoices"]]
-    assert haus["als"](ANNA).delete(f"/finance/invoices/{alt}").status_code == 404
-    assert haus["als"](ANNA).post("/finance/invoices", json=_rechnung(alt)).status_code == 409
-    assert "tenantId" not in _beleg(alt)
-
-
-# ── Altbelege zuordnen ────────────────────────────────────────────────────────
 
 def _offener_posten(mandant: str, nummer: str) -> None:
     with SessionLocal() as db:
@@ -253,8 +200,6 @@ def test_ein_altbeleg_bekommt_seinen_mandanten_nur_wenn_die_buchung_ihn_eindeuti
         assert lauf(True)["zugeordnet"] == {eindeutig}
         assert _beleg(eindeutig)["tenantId"] == haus["mandant"]
         assert "tenantId" not in _beleg(strittig) and "tenantId" not in _beleg(ungebucht)
-        assert haus["als"](ANNA).get(f"/finance/invoices/{eindeutig}").status_code == 200
-        assert haus["als"](CLARA, haus["anderer"]).get(f"/finance/invoices/{eindeutig}").status_code == 404
         assert lauf(True)["zugeordnet"] == set()                         # ein zweiter Lauf findet nichts mehr
     finally:
         with SessionLocal() as db:

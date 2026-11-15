@@ -553,6 +553,11 @@ export interface DocumentScreenVariantRef {
   materializedHash: string
 }
 
+/** Provenance of a non-document mask family; it is not an authorization. */
+export interface MaskScreenVariantRef extends Omit<DocumentScreenVariantRef, 'family'> {
+  family: string
+}
+
 export interface ListPreset {
   key: string
   label: string
@@ -581,6 +586,7 @@ export interface ScreenDefinition {
   flowSpineWorkspace?: { processKey: string }
   listExperience?: ListExperience
   documentVariant?: DocumentScreenVariantRef
+  maskVariant?: MaskScreenVariantRef
   /** Declared native creation; new/neu are never fetched as entity IDs. */
   creation?: {
     adapter?: 'docflow.create.v1'
@@ -671,6 +677,26 @@ export interface ScreenDefinition {
   agentContract?: Partial<AgentMaskContract>
 }
 
+export function validateMaskVariantBinding(screen: Pick<ScreenDefinition, 'maskVariant' | 'documentVariant'>): string[] {
+  const errors: string[] = []
+  if (screen.maskVariant !== undefined) {
+    const binding = screen.maskVariant
+    const version = /^[1-9][0-9]*\.[0-9]+\.[0-9]+$/
+    const hash = /^[0-9a-f]{64}$/
+    if (!binding || typeof binding.family !== 'string' || !/^[a-z][a-z0-9-]{1,40}$/.test(binding.family)
+      || binding.family === 'beleg' || typeof binding.variantId !== 'string' || !binding.variantId.trim()
+      || typeof binding.baseVersion !== 'string' || !version.test(binding.baseVersion)
+      || typeof binding.variantVersion !== 'string' || !version.test(binding.variantVersion)
+      || ![binding.baseHash, binding.variantHash, binding.materializedHash].every(value => typeof value === 'string' && hash.test(value))) {
+      errors.push('maskVariant requires an exact valid base and variant binding')
+    }
+  }
+  if (screen.documentVariant !== undefined && screen.maskVariant !== undefined) {
+    errors.push('documentVariant and maskVariant cannot both be present')
+  }
+  return errors
+}
+
 export function validateScreenDefinition(screen: ScreenDefinition): string[] {
   const errors: string[] = []
   if (!validTextFileDefinitions(screen)) errors.push('fileContent is invalid')
@@ -689,6 +715,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
       errors.push('documentVariant requires an exact valid base and variant binding')
     }
   }
+  errors.push(...validateMaskVariantBinding(screen))
   if (!screen.title) errors.push('title is required')
   errors.push(...computedDefinitionErrors(screen))
 

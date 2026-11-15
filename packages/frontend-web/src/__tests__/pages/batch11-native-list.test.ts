@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createElement } from 'react'
 import { fireEvent, screen } from '@testing-library/react'
 import { mountBatchList, transport } from '../native-batch11-12-contract-harness'
@@ -115,14 +115,32 @@ describe('Batch 11 route inventory (source-level evidence only)', () => {
     expect(listenPy).toContain(`"${screenId}"`)
   })
 
-  it('mounts the routed Kundenliste through its real builder, runtime and table renderer', async () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it.each([false, true])('öffnet die Kundenakte über die echte Liste (Touch: %s)', async (touch) => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: touch && /pointer: coarse|max-width/.test(query), media: query, onchange: null,
+      addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent: () => false,
+    }))
+    window.history.replaceState(null, '', '/')
     mountBatchList(createElement(KundenListePage), 'crm/kunden-liste', {
       id: 'synthetic-customer', name: 'SYNTHETIC-CUSTOMER', kunden_nr: 'K-001', ort: 'Bremen',
     })
-    expect(await screen.findByText('SYNTHETIC-CUSTOMER')).toBeTruthy()
+    const name = await screen.findByText('SYNTHETIC-CUSTOMER')
     expect(transport.get).toHaveBeenCalledWith('/api/v1/masks/crm__kunden-liste/screen-definition', expect.anything())
-    fireEvent.click(screen.getByRole('button', { name: 'SYNTHETIC-CUSTOMER' }))
-    fireEvent.click(screen.getByRole('button', { name: 'In Vollansicht öffnen' }))
+    if (touch) {
+      const button = screen.getByRole('button', { name: /SYNTHETIC-CUSTOMER/ })
+      expect(button).toHaveAttribute('tabindex', '0')
+      fireEvent.click(button)
+    } else {
+      const row = name.closest('[role="row"]')
+      expect(row).not.toBeNull()
+      expect(row).toHaveAttribute('tabindex', '0')
+      fireEvent.keyDown(row!, { key: 'Enter' })
+    }
+    const open = screen.getByRole('button', { name: 'In Vollansicht öffnen' })
+    expect(open).toHaveClass('min-h-touch')
+    fireEvent.click(open)
     expect(window.location.pathname).toBe('/crm/kunden/synthetic-customer')
     expect(transport.request).not.toHaveBeenCalled()
   })

@@ -12,7 +12,7 @@ const transport = vi.hoisted(() => ({ get: vi.fn(), request: vi.fn(), navigate: 
 vi.mock('@/lib/api-client', () => ({ apiClient: { get: transport.get, request: transport.request },
   getAxiosErrorMessage: (error: Error) => error.message }))
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'synthetic-user', roles: transport.roles, scopes: [] } }) }))
-vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => transport.navigate }))
+vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => transport.navigate, useParams: () => ({}) }))
 
 beforeEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); transport.roles = [] })
 

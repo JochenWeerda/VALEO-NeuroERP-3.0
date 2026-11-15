@@ -179,3 +179,23 @@ def test_cli_laedt_belegzustand_und_bucht_ueber_den_adapter(tmp_path, monkeypatc
         code = cli.main(["ausfuehren", "beleg/sales-invoice", "buchen", "--id", "doc-9", "--ja", "--version", "2"],
                         http=http, out=lines.append, stdin=io.StringIO(""))
     assert code == 1 and "Belegversion hat sich geaendert" in lines[-1] and calls[-1][1].endswith("/kopf")
+
+
+def test_studio_positionsauswahl_wird_identisch_als_teilmenge_gesendet():
+    act = action("convert")
+    act["inputFields"] = [{"key": "quantities_by_source_item_id", "type": "table"}]
+    rows = [{"source_item_id": "line-1", "quantity": 4, "remaining_quantity": 6, "unit": "kg"}]
+    for mode in ("dryRun", "execute"):
+        _, _, body = prepare("convert", act=act, mode=mode, payload={"quantities_by_source_item_id": rows})
+        assert body["quantities_by_source_item_id"] == {"line-1": 4}
+        assert body["expected_version"] == 7
+        assert body["dry_run"] is (mode == "dryRun")
+
+
+@pytest.mark.parametrize("value", [None, {}, [], {"line-1": 0}, {"line-1": -1}, {"line-1": float("nan")},
+    {"line-1": float("inf")}, {"line-1": True},
+    [{"source_item_id": "line-1", "quantity": 7, "remaining_quantity": 6}],
+    [{"source_item_id": "line-1", "quantity": 1, "remaining_quantity": 6}]*2])
+def test_ungueltige_teilmengen_werden_nicht_zu_volluebernahme(value):
+    with pytest.raises(ValueError):
+        docflow.conversion_quantities(value)

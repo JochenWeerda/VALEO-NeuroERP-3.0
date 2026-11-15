@@ -4,14 +4,14 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-10
+last_reviewed: 2026-11-15
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (778 Masken).
+> Generiert aus `app/core/screen_definitions.py` (781 Masken).
 
 ## Übersicht
 
@@ -134,6 +134,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/formular/agent-contract` |
 | `agrar/saatgut/prognose` | Prognose | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/prognose/agent-contract` |
 | `agrar/saatgut/royalties` | Royalties | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/royalties/agent-contract` |
+| `agrar/saatgut/sorte` | Sorte | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
 | `agrar/saatgut/vermehrung` | Vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/vermehrung/agent-contract` |
 | `agrar/saatzucht-partien-liste` | Saatzucht-Partien | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatzucht-partien-liste/agent-contract` |
 | `agrar/schlaege-karte-liste` | Schlagkarte | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-karte-liste/agent-contract` |
@@ -435,6 +436,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/lieferanten-konditionen` | Lieferanten-Konditionen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten-konditionen/agent-contract` |
 | `einkauf/lieferanten-reklamationen` | Lieferanten-Reklamationen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/lieferanten-reklamationen/agent-contract` |
 | `einkauf/mahnwesen-lieferanten` | Mahnwesen Lieferanten | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/mahnwesen-lieferanten/agent-contract` |
+| `einkauf/purchase-order` | Bestellung | einkauf | mittel | `procure-to-pay` | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
 | `einkauf/rechnung-abgleich-liste` | Rechnungsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnung-abgleich-liste/agent-contract` |
 | `einkauf/reports` | Reports | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/reports/agent-contract` |
 | `einkauf/retouren-liste` | Retouren | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/retouren-liste/agent-contract` |
@@ -486,6 +488,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fibu/zahlungslaeufe-liste` | Zahlungslaeufe | finance | niedrig | — | `GET /api/v1/masks/fibu/zahlungslaeufe-liste/agent-contract` |
 | `fibu/zahlungsmeldungen` | Neue Zahlungsmeldung [KASSZAME] | fibu | niedrig | — | `GET /api/v1/masks/fibu/zahlungsmeldungen/agent-contract` |
 | `finance/abschluss` | Monats-/Jahresabschluss | finance | niedrig | — | `GET /api/v1/masks/finance/abschluss/agent-contract` |
+| `finance/ap-invoice` | Eingangsrechnung | finance | mittel | `procure-to-pay` | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
 | `finance/ar-open-item` | Offener Posten | finance | mittel | `order-to-cash` | `GET /api/v1/masks/finance/ar-open-item/agent-contract` |
 | `finance/audit-trail` | Finanz-Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail/agent-contract` |
 | `finance/audit-trail-liste` | Audit-Trail | finance | niedrig | — | `GET /api/v1/masks/finance/audit-trail-liste/agent-contract` |
@@ -4387,6 +4390,44 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/saatgut/sorte` — Sorte
+
+**Zweck:** Sortenstammdaten anzeigen und bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/saatgut/sorte/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/saatgut/sorte/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__saatgut__sorte/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/varieties/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Kultur hat Sorte {entity_id}?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `/api/v1/agrar/varieties/{entity_id}` |
 
 ---
 
@@ -12011,8 +12052,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12052,8 +12095,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12093,8 +12138,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12134,8 +12181,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12175,8 +12224,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12216,8 +12267,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12256,8 +12309,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12297,8 +12352,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12338,8 +12395,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12375,12 +12434,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/belege/purchase_order/kennzahlen`
+- `entity` → `/api/v1/purchase-orders/statistics`
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12416,8 +12477,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12452,8 +12515,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12488,8 +12553,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12525,8 +12592,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12561,8 +12630,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12599,8 +12670,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12635,8 +12708,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12672,8 +12747,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12708,8 +12785,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12744,8 +12823,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12780,8 +12861,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12817,8 +12900,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12856,8 +12941,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12892,8 +12979,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12929,8 +13018,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -12965,8 +13056,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13000,8 +13093,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13035,8 +13130,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13071,8 +13168,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13107,8 +13206,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13142,8 +13243,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13179,8 +13282,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13215,8 +13320,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13251,8 +13358,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13287,8 +13396,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13323,8 +13434,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13338,6 +13451,54 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `einkauf/purchase-order` — Bestellung
+
+**Zweck:** Fuehrende Einkaufsbestellung: Bestellfall, L3-Kopf, Positionen mit Kontrakt und Ladetermin, Skontostaffel, Bedarf und Direktlieferung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/purchase-order/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/purchase-order/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/purchase-order/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__purchase-order/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Summary:** `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/screen-summary`
+
+**Data Sources:**
+
+- `entity` → `/api/v1/einkauf/bestellungen/{entity_id}`
+- `positionen` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/positionen`
+- `kommunikation` → `/api/v1/mask-rollouts/einkauf/purchase-order/{entity_id}/tabs/kommunikation`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welcher Bestellfall gilt fuer Bestellung {entity_id}?
+- Wann ist Ladetermin und Liefertermin von Bestellung {entity_id}?
+- Welche Positionen haben noch offene Restmenge?
+- Ist Bestellung {entity_id} eine Direktlieferung mit Ueberschlag am Lager?
+
+**Sensible Felder:** `zahlungsbedingung, skonto1_prozent, skonto2_prozent, betrag`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `—` |
+| `speichern` | Speichern | safe | nein | `/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern` |
+| `versenden` | Versenden | moderate | nein | `/api/v1/einkauf/bestellungen/{entity_id}/versenden` |
 
 ---
 
@@ -13359,8 +13520,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13394,8 +13557,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13430,8 +13595,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13465,8 +13632,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13505,8 +13674,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13547,8 +13718,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13583,8 +13756,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -13616,12 +13791,14 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/belege/purchase_order/kennzahlen`
+- `entity` → `/api/v1/purchase-orders/statistics`
 
 **MCP-Tools (Domäne):**
 
+- `einkauf.bestellung.speichern` — scope `einkauf:write`, Risiko mittel
 - `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
 - `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.versenden` — scope `einkauf:write`, Risiko mittel
 - `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
 - `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
 
@@ -15290,6 +15467,47 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `finance/ap-invoice` — Eingangsrechnung
+
+**Zweck:** Eingangsrechnung: Kopfdaten, Positionen und Freigabe-Historie fuer AP-Buchhalter und Audit.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/finance/ap-invoice/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/finance/ap-invoice/agent-contract` |
+| Readiness | `GET /api/v1/masks/finance/ap-invoice/readiness` |
+| Rollout-Route | `/mask-rollout/finance__ap-invoice/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Summary:** `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/screen-summary`
+
+**Data Sources:**
+
+- `entity` → `/api/v1/finance/ap/invoices/{entity_id}`
+- `positionen` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/positionen`
+- `freigabe` → `/api/v1/mask-rollouts/finance/ap-invoice/{entity_id}/tabs/freigabe`
+
+**MCP-Tools (Domäne):**
+
+- `finance.ap_invoice.propose` — scope `finance:write`, Risiko hoch
+- `fibu.open_items.list` — scope `finance:read`, Risiko niedrig
+- `fibu.dunning.status` — scope `finance:read`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Was ist der Freigabe-Status von Eingangsrechnung {entity_id}?
+- Wann ist Eingangsrechnung {entity_id} faellig und wie hoch ist der Bruttobetrag?
+
+**Sensible Felder:** `brutto, mwst, faellig_am`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `freigeben` | Freigeben | moderate | ja | `/api/v1/finance/ap/invoices/{entity_id}/actions/freigeben` |
 
 ---
 
