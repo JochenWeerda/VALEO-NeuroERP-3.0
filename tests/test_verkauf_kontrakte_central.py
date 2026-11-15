@@ -3,8 +3,7 @@ Tests: Rahmenaufträge, Kreditlimit, Sammelrechnung, Zentrale Kontrakte-Engine
 """
 from __future__ import annotations
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
-from decimal import Decimal
+from unittest.mock import MagicMock
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -47,7 +46,7 @@ def test_released_total_returns_zero_when_null():
 
 @pytest.mark.unit
 def test_blanket_order_row_to_model():
-    from app.api.v1.endpoints.sales_blanket_orders import _row_to_blanket, BlanketOrderOut
+    from app.api.v1.endpoints.sales_blanket_orders import _row_to_blanket
     row = {
         "id": "bo-1",
         "customer_id": "c-1",
@@ -193,14 +192,3 @@ def test_contract_row_to_model():
     assert result.status == "AKTIV"
 
 
-@pytest.mark.unit
-def test_collective_invoice_create_schema():
-    """Sammelrechnung Schema validiert Pflichtfelder."""
-    from app.api.v1.endpoints.collective_documents import CollectiveInvoiceCreate
-    payload = CollectiveInvoiceCreate(
-        customer_id="c-1",
-        delivery_note_ids=["dn-1", "dn-2"],
-        invoice_date="2026-05-17",
-    )
-    assert len(payload.delivery_note_ids) == 2
-    assert payload.customer_id == "c-1"

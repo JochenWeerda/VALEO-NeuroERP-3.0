@@ -1042,7 +1042,6 @@
     "app/api/v1/endpoints/crm_kim.py",
     "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
     "app/api/v1/endpoints/debtors.py",
-    "app/api/v1/endpoints/finance_invoices.py",
     "app/api/v1/endpoints/kunden_stamm_pflege.py",
     "app/api/v1/endpoints/portal_kundenzugaenge.py",
     "app/api/v1/endpoints/prospecting.py",
@@ -1155,7 +1154,7 @@
     "dienst": 14,
     "nutzlast": 8,
     "standardmandant": 6,
-    "token": 25
+    "token": 24
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",
@@ -1186,11 +1185,9 @@
     "app/api/v1/endpoints/compat.py:1835",
     "app/api/v1/endpoints/compat.py:1842",
     "app/api/v1/endpoints/compat.py:1865",
-    "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3248"
    ],
    "gemeinsam_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3248"
    ],
    "daten": {
@@ -1615,9 +1612,9 @@
     "app/api/v1/endpoints/auto_matching.py",
     "app/api/v1/endpoints/bank_reconciliation.py",
     "app/api/v1/endpoints/compat.py",
+    "app/api/v1/endpoints/credit_management.py",
     "app/api/v1/endpoints/crm_360.py",
     "app/api/v1/endpoints/crm_360_reads.py",
-    "app/api/v1/endpoints/finance_invoices.py",
     "app/api/v1/endpoints/finance_stammdaten.py",
     "app/api/v1/endpoints/liquidity.py",
     "app/api/v1/endpoints/liquidity_planning.py",
@@ -1633,7 +1630,6 @@
     "app/services/scheduler_service.py"
    ],
    "schreiber": [
-    "app/api/v1/endpoints/collective_documents.py",
     "app/api/v1/endpoints/credit_debit_memos.py",
     "app/api/v1/endpoints/dauerauftraege.py",
     "app/api/v1/endpoints/dunning.py",
@@ -1662,7 +1658,7 @@
    "identitaet": {
     "kopfzeile": 2,
     "nutzlast": 1,
-    "token": 20
+    "token": 19
    },
    "standardmandant_stellen": [],
    "null_stellen": [
@@ -1670,11 +1666,9 @@
     "app/api/v1/endpoints/compat.py:1835",
     "app/api/v1/endpoints/compat.py:1842",
     "app/api/v1/endpoints/compat.py:1865",
-    "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3248"
    ],
    "gemeinsam_stellen": [
-    "app/api/v1/endpoints/finance_invoices.py:114",
     "app/services/mcp_execution_service.py:3248"
    ],
    "daten": {

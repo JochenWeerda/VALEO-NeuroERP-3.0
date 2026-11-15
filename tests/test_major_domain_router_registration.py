@@ -19,7 +19,6 @@ def test_major_gap_closure_routers_are_reachable():
         "/einkauf/rfq",
         "/sales/blanket-orders/",
         "/sales/credit-management/customers/{customer_id}/credit-status",
-        "/sales/collective-documents/collective-invoice",
         "/vertraege",
         "/vertraege/analytics",
         "/contracts/{contract_id}",

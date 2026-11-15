@@ -63,11 +63,9 @@ def test_die_belegkette_liest_vorhandene_tabellen(ergebnis: dict) -> None:
     belegkette = {
         "sales_invoices.py",
         "sales_orders.py",
-        "collective_documents.py",
         "credit_management.py",
         "liquidity.py",
         "liquidity_planning.py",
-        "xrechnung.py",
     }
     verstoesse = [
         f"{tabelle} in {', '.join(sorted(set(dateien) & belegkette))}"

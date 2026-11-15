@@ -12175,7 +12175,6 @@
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_segments.py",
-            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/crm/router.py",
             "app/infrastructure/models/__init__.py",
@@ -13680,7 +13679,6 @@
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/customers.py",
             "app/api/v1/endpoints/debtors.py",
-            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/api/v1/endpoints/kunden_stamm_pflege.py",
@@ -17534,7 +17532,6 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/collective_documents.py",
             "app/domains/documents/allocation_models.py",
             "app/services/sales_invoice_mask.py"
           ]
@@ -17625,7 +17622,6 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/collective_documents.py",
             "app/domains/documents/allocation_models.py",
             "app/services/sales_invoice_mask.py"
           ]
@@ -20919,8 +20915,7 @@
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_sql.py",
             "app/api/v1/endpoints/finance_actions.py",
-            "app/api/v1/endpoints/stmd_duplikat.py",
-            "app/api/v1/endpoints/xrechnung.py"
+            "app/api/v1/endpoints/stmd_duplikat.py"
           ]
         },
         "cash_movements": {
@@ -22531,7 +22526,6 @@
             "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
             "app/api/v1/endpoints/finance_actions.py",
-            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/financial_reports.py",
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/api/v1/endpoints/health.py",
@@ -23046,10 +23040,10 @@
             "app/api/v1/endpoints/auto_matching.py",
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/credit_management.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/api/v1/endpoints/dunning.py",
-            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/liquidity.py",
             "app/api/v1/endpoints/liquidity_planning.py",
@@ -23077,7 +23071,6 @@
             "fibu/zahlungsmeldungen"
           ],
           "written_by": [
-            "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/credit_debit_memos.py",
             "app/api/v1/endpoints/dauerauftraege.py",
             "app/api/v1/endpoints/dunning.py",
@@ -48104,7 +48097,6 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
-            "app/api/v1/endpoints/sales_invoices.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/services/docflow_service.py",
             "app/services/sales_match_service.py",
@@ -48279,9 +48271,7 @@
           "read_by": [
             "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/branches.py",
-            "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/logistics_tours.py",
-            "app/api/v1/endpoints/sales_invoices.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/services/beleg_anlage.py",
@@ -48298,8 +48288,6 @@
             "admin/branches"
           ],
           "written_by": [
-            "app/api/v1/endpoints/collective_documents.py",
-            "app/api/v1/endpoints/finance_invoices.py",
             "app/api/v1/endpoints/logistics_tours.py",
             "app/api/v1/endpoints/sales_credit_notes.py",
             "app/services/sales_storno_service.py",
@@ -48646,7 +48634,6 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/xrechnung.py",
             "app/domains/documents/sales_invoice_models.py"
           ]
         },
@@ -48736,9 +48723,7 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/collective_documents.py",
             "app/api/v1/endpoints/credit_management.py",
-            "app/api/v1/endpoints/xrechnung.py",
             "app/domains/documents/sales_invoice_models.py"
           ]
         },
@@ -60636,7 +60621,6 @@
             "app/api/v1/endpoints/admin_suite.py",
             "app/api/v1/endpoints/agrar_wetter.py",
             "app/api/v1/endpoints/health.py",
-            "app/api/v1/endpoints/sales_invoice_einvoice.py",
             "app/api/v1/endpoints/vat_return_export.py",
             "app/core/geheimnis.py",
             "app/core/policy_overrides.py",
@@ -60666,9 +60650,6 @@
             "app/services/studio_migration.py",
             "app/services/studio_process_simulation.py",
             "app/workers/mail_poll_worker.py"
-          ],
-          "screens": [
-            "sales/invoice"
           ],
           "written_by": [
             "app/api/v1/endpoints/admin_monitoring.py",

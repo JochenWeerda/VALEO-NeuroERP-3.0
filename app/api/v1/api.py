@@ -31,7 +31,6 @@ from app.api.v1.endpoints import (
     articles,
     sales_blanket_orders,
     credit_management,
-    collective_documents,
     docflow,
     warehouses,
     warehouse_wms,
@@ -43,7 +42,6 @@ from app.api.v1.endpoints import (
     gap,
     geo,
     prospecting,
-    finance_invoices,
     audit,
     accounting_periods,
     payment_matching,
@@ -506,11 +504,6 @@ api_router.include_router(
     tags=["sales", "credit-management"]
 )
 
-api_router.include_router(
-    collective_documents.router,
-    prefix="/sales/collective-documents",
-    tags=["sales", "collective-documents"]
-)
 
 # Angebote: DocFlow einziger Belegspeicher (BELEG-052, 09.11.2026); /sales/offers und /sales/quotations entfallen.
 from app.api.v1.endpoints import beleg_import  # noqa: E402
@@ -577,13 +570,7 @@ api_router.include_router(
 )
 
 # Rechnungsposition als eigenes Objekt: Ziel der Mengenzuordnung.
-from app.api.v1.endpoints import sales_invoices  # noqa: E402
 
-api_router.include_router(
-    sales_invoices.router,
-    prefix="/sales",
-    tags=["sales", "invoices"]
-)
 
 api_router.include_router(
     leads.router,
@@ -645,10 +632,6 @@ api_router.include_router(
     tags=["finance", "journal-entries"]
 )
 
-api_router.include_router(
-    finance_invoices.router,
-    tags=["finance", "invoices"]
-)
 
 
 api_router.include_router(
@@ -2148,8 +2131,6 @@ api_router.include_router(kontrakt_hedging.router)
 api_router.include_router(erechnung_import.router)
 
 # Slice-006: E-Rechnung Export (XRechnung 3.0 / ZUGFeRD 2.x) für B2B-Verkaufsrechnungen
-from app.api.v1.endpoints import sales_invoice_einvoice  # noqa: E402
-api_router.include_router(sales_invoice_einvoice.router)
 
 # Slice-008: DSGVO Art. 30 Verarbeitungsverzeichnis (RoPA)
 from app.api.v1.endpoints import gdpr_art30_ropa  # noqa: E402
@@ -2369,8 +2350,6 @@ from app.api.v1.endpoints import stmd_duplikat  # noqa: E402
 api_router.include_router(stmd_duplikat.router, tags=["stammdaten", "qualitaet"])
 
 # INT-XRECHNUNG-001: XRechnung 3.0 / UBL 2.1 E-Rechnung Export
-from app.api.v1.endpoints import xrechnung  # noqa: E402
-api_router.include_router(xrechnung.router, tags=["schnittstellen", "e-rechnung"])
 
 # INT-BANK-001: Bank-API / SEPA-Import (MT940 + CAMT.053)
 
