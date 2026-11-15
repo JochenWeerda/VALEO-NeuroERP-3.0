@@ -5,7 +5,7 @@ audience: [management, produkt, agent, entwickler]
 owner: Claude Code
 status: aktiv
 last_reviewed: 2026-11-15
-version: 1.0.0
+version: 1.1.0
 description: Verbindlicher Gesamtfahrplan der VALEO NeuroERP Suite - Meilensteine M0 bis M8 mit messbarer Abnahme, Arbeitsteilung der Agenten und Koordinationsregeln.
 ---
 
@@ -39,6 +39,43 @@ nennt die Meilenstein-ID aus diesem Dokument.
 | Koordination | rund 125 Workboard-Einträge nicht abgeschlossen, viele veraltet; Workboard 2,3 MB | Workboard |
 
 In M0 zu klären: Stand ZUGFeRD, tatsächlicher Schalter der Agent-Schreibfreigabe, Mandanten-Anlageweg.
+
+## Qualitätsmaßstab: Referenz-ERP (Vorgabe des Nutzers, 15.11.2026)
+
+Grundlage ist der Architekturvergleich VALEO gegen ERPNext, metasfresh und Open Mercato vom 15.11.2026.
+
+- VALEO behält seine KI-native Architektur: eine Fachaktion für Maske, REST, CLI und MCP, DocFlow als Belegspeicher,
+  risikobasierte Agentenfreigaben.
+- Die fachliche Prozessreife etablierter ERP-Systeme ist der Maßstab für die Abnahme. ERPNext dient als Referenz für
+  Finanzbuchhaltung, Bestandsführung und Bewertung; metasfresh für Beschaffung, Kontrakte, Logistik und Qualität;
+  Open Mercato für Agenten-Skills, Werkzeugverträge und Freigaben.
+- Der Hebel liegt in der Zuverlässigkeit der vorhandenen Module, nicht in weiteren Modulen.
+- Abgenommen wird an vollständigen Belegketten, nicht an Einzelfunktionen. Strukturelle Abdeckung (Katalog, Ratsche)
+  ersetzt keine Ende-zu-Ende-Abnahme mit Browser und Datenbank.
+- Fremder Code wird nicht übernommen, bevor Lizenz, Abhängigkeiten und Folgen geprüft sind.
+
+### Referenzketten (Pflichtfälle der Abnahme)
+
+| Kette | Referenz | Prüfschwerpunkt | Meilenstein |
+|---|---|---|---|
+| Bestellung → Wareneingang → Eingangsrechnung | ERPNext | Drei-Wege-Abgleich, Preis- und Mengenabweichung, Zwischenkonto | M1, M3 |
+| Auftrag → Teillieferung → Rechnung | ERPNext, metasfresh | Restmengen, Storno, Belegbezüge je Position | M1 |
+| Hauptbuch, Nebenbuch, offene Posten | ERPNext | Buchungsgleichheit, Abstimmung, Zahlungszuordnung | M3 |
+| Lager und Warenbewertung | ERPNext, metasfresh | Menge, Wert und Quellbeleg abstimmbar; Korrektur, Rückdatierung, Umbuchung, Charge | M3, M4 |
+| Getreideannahme und Abrechnung | VALEO-Fachmodell | Waage, Feuchte, Besatz, Schwund, Kontrakt, Fremdware, Silovermischung | M4 |
+| Agentenaktion | Open Mercato | Rechte, Freigabe, Idempotenz, Protokoll | Strang A |
+| Kontrakt, Tour und Kommissionierung, Qualität | metasfresh | Teilabrufe, Mengenbindung, Picklisten, Sperrung und Freigabe | M4 |
+
+Musterfall für M4 und M6: ein Kontrakt über 500 t Getreide mit mehreren Teilanlieferungen, Qualitätsabzügen,
+Rechnungsabweichung und späterer Korrektur, vollständig durchgebucht.
+
+### Arbeitspaket VALEO-ERP-REFERENCE-AUDIT-001 (offen, noch nicht vergeben)
+
+Lesendes, datei- und testgenaues Gap-Audit gegen die drei Referenzsysteme. Ergebnis unter
+`docs/architecture/erp-reference-audit/`: Zusammenfassung, Gap-Matrix je Domäne, Finanz-, Lieferketten- und
+Studio/KI-Audit, priorisierte Umsetzungsliste mit den zehn kleinsten Maßnahmen größten Nutzens. Keine Änderung an
+Code oder Schema; Code und reproduzierbare Tests zählen mehr als Dokumentation. Das Audit speist die Abnahmeblätter
+aus M4 und die Integritätspunkte aus M3.
 
 ## Meilensteine
 
