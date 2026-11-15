@@ -61,3 +61,29 @@ ueberlappenden Agentenzahlen addiert. Der echte GitHub-Produzent-/Consumer-
 Nachweis auf dem neuen Commit ist separat erforderlich.
 
 PR135-Erstlauf: Der separate Strict-DB-Job stellte nur DATABASE_URL bereit; die drei neuen verpflichtenden PostgreSQL-Vertraege lehnten die fehlende explizite TEST_DATABASE_URL korrekt ab. Korrektur: derselbe einzelne Job-Service heisst valeo_probe, beide URLs stimmen ueberein, kanonische Datenrollen werden nach init_db eingerichtet. Der lokale Profilvertrag besteht; echter CI-Nachlauf bleibt erforderlich.
+
+## GitHub-Abnahme auf e8a2e92d5
+
+PR 135 besteht mit allen 68 Checks. Die Nachweise beziehen sich auf den
+geprueften PR-Kopf `e8a2e92d5`, nicht pauschal auf spaetere Commits.
+
+| Nachweis | Ergebnis |
+| --- | --- |
+| Quality Gate 43653854329 | Erfolgreich, einschliesslich kritischer Coverage und Image-Smoke |
+| Kanonische Backend-Vollsuite | 28.444 bestanden, 72 uebersprungen, einer abgewaehlt; 2.009,95 Sekunden |
+| Gesamtdeckung | 76,10 Prozent; geforderte Schwelle 60 Prozent |
+| Sonar-Job 132638443225 | Erfolgreich mit `sonar.qualitygate.wait=true` |
+| CI/CD 43653854364 | Erfolgreich; echte Evidenzuebernahme ohne zweite Backend-Vollsuite oder eigene PostgreSQL-Instanz |
+| Strict-DB 43653854377 | 701 bestanden, vier uebersprungen, 27.812 abgewaehlt; 145,68 Sekunden |
+
+Der Consumer bestaetigt am 15.11.2026 um 00:20:13 UTC ausdruecklich:
+`Canonical backend evidence verified for this checkout.` Ueberlappende
+Testzahlen werden nicht addiert.
+
+PR 135 wurde am 15.11.2026 um 00:22:20 UTC nach `main` integriert:
+`e9ae5cab651d293c62e7a7b182dae4547408b8bc`. Nach Abstammungspruefung wurde
+`develop` ohne Force auf denselben Commit vorgezogen. Alle Checks waren vor
+Integration gruen. Der normale Merge war wegen der vorgeschriebenen externen
+Review gesperrt; fuer diese Reviewausnahme wurden die vorhandenen
+Administratorrechte genutzt. Keine Testanforderung oder Branchregel wurde
+geaendert. Ein Nachlauf der Merge-SHA ist vom belegten PR-Lauf zu unterscheiden.
