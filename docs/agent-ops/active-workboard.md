@@ -21058,3 +21058,11 @@ mit zwei isolierten Kontexten, verweigerten Mutationen und erhaltenem Zustand;
 wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte RLS-Abnahme behaupten.
 Die fehlenden Tabellen bleiben separat ein schemafachlicher 503-Blocker.
 PR137 bleibt waehrend seiner Abnahme unveraendert auf8c6d20b2d.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung: Codex Lead besitzt zusaetzlich die
+Istwert-Fehlerbehandlung in app/api/v1/endpoints/budget_planning.py sowie neuen
+Test tests/test_budget_actuals_unavailable.py und eigene QA. Verhindern, dass
+ein fehlgeschlagener Journalzugriff als tatsaechlicher Istwert0 erscheint.
+Gueltige Nullwerte und erfolgreiche Werte erhalten; Fehlzustand mit Rollback
+und neutraler503Antwort. Keine Kontierungsregel, Tabelle/Migration oder Rolle
+aendern; kanonische Budgettabellen und Konten-/Periodenabgleich separat offen.
