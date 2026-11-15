@@ -20995,3 +20995,17 @@ Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
 Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
 Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
+
+## M0-CI-GESAMTBASIS-20261115 — reserviert, Codex Lead
+
+Meilenstein M0 des freigegebenen Verkaufsprodukt-Fahrplans. Ziel: rote main-
+Workflows Quality Gate/Sonar, CI/CD, E2E Full UAT und Runtime API Sweep konkret
+auseinanderhalten und beheben. Besitz betroffene CI-/Evidenzvertraege und enge
+Nachweistests, eigene QA/Handshake; Workboard-Bereinigung zunaechst nur eigene
+nachweislich fertige Claims. Fremde Claude-Altclaims bleiben bei Claude. Kein
+Gate senken, keine Baselineverschiebung oder Quellen aus Coverage ausblenden.
+Der laufende PR137 muss erst auf dem gemeinsamen Dokumentationsstand abgenommen
+werden. Weitere main-Merges bitte ueber den Integrationslead koordinieren,
+damit Quellen nicht erneut waehrend einer Vollsuite fortgeschrieben werden.
+Branches und einzelne Tests auf bestehenden eigenen Pruefstaenden bleiben frei.
+Keine neuen Testdatenbanken/Container, keine fremden Prozesse abbrechen.
