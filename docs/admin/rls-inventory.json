@@ -1,25 +1,25 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 785,
+  "tables": 798,
   "by_class": {
-   "A": 719,
+   "A": 727,
    "B": 22,
-   "C": 9,
+   "C": 14,
    "D": 35
   },
-  "rls_enabled": 687,
+  "rls_enabled": 690,
   "tenant_types": {
-   "character varying": 340,
+   "character varying": 344,
    "character varying(100)": 9,
    "character varying(120)": 64,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 83,
+   "character varying(36)": 85,
    "character varying(50)": 1,
-   "character varying(64)": 104,
+   "character varying(64)": 105,
    "character varying(80)": 24,
-   "text": 110,
+   "text": 111,
    "uuid": 4
   }
  },
@@ -1214,6 +1214,17 @@
    "policies": 4
   },
   {
+   "table": "domain_crm.contacts",
+   "class": "C",
+   "tenant_type": null,
+   "rls": false,
+   "force_rls": false,
+   "policies": 0,
+   "tenant_parents": [
+    "domain_crm.customers"
+   ]
+  },
+  {
    "table": "domain_crm.credit_limits",
    "class": "A",
    "tenant_type": "character varying(120)",
@@ -2254,6 +2265,22 @@
    "policies": 4
   },
   {
+   "table": "domain_finance.budget_lines",
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_finance.budget_plans",
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
    "table": "domain_finance.dispute_records",
    "class": "A",
    "tenant_type": "character varying",
@@ -2774,6 +2801,28 @@
    "policies": 4
   },
   {
+   "table": "domain_inventory.article_alternative_eans",
+   "class": "C",
+   "tenant_type": null,
+   "rls": false,
+   "force_rls": false,
+   "policies": 0,
+   "tenant_parents": [
+    "domain_inventory.articles"
+   ]
+  },
+  {
+   "table": "domain_inventory.article_analyses",
+   "class": "C",
+   "tenant_type": null,
+   "rls": false,
+   "force_rls": false,
+   "policies": 0,
+   "tenant_parents": [
+    "domain_inventory.articles"
+   ]
+  },
+  {
    "table": "domain_inventory.article_batches",
    "class": "A",
    "tenant_type": "character varying",
@@ -2798,6 +2847,17 @@
    "policies": 4
   },
   {
+   "table": "domain_inventory.article_print_settings",
+   "class": "C",
+   "tenant_type": null,
+   "rls": false,
+   "force_rls": false,
+   "policies": 0,
+   "tenant_parents": [
+    "domain_inventory.articles"
+   ]
+  },
+  {
    "table": "domain_inventory.article_selections",
    "class": "A",
    "tenant_type": "character varying",
@@ -2812,6 +2872,17 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
+  },
+  {
+   "table": "domain_inventory.article_units",
+   "class": "C",
+   "tenant_type": null,
+   "rls": false,
+   "force_rls": false,
+   "policies": 0,
+   "tenant_parents": [
+    "domain_inventory.articles"
+   ]
   },
   {
    "table": "domain_inventory.articles",
@@ -3030,12 +3101,28 @@
    "policies": 0
   },
   {
+   "table": "domain_inventory.nawaro_area_sheet_rows",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": false,
+   "force_rls": false,
+   "policies": 0
+  },
+  {
    "table": "domain_inventory.nawaro_area_sheets",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
+  },
+  {
+   "table": "domain_inventory.nawaro_contract_sheet_rows",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": false,
+   "force_rls": false,
+   "policies": 0
   },
   {
    "table": "domain_inventory.nawaro_contract_sheets",
@@ -3052,6 +3139,22 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
+  },
+  {
+   "table": "domain_inventory.nawaro_raps_balances",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": false,
+   "force_rls": false,
+   "policies": 0
+  },
+  {
+   "table": "domain_inventory.nawaro_raps_certificates",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": false,
+   "force_rls": false,
+   "policies": 0
   },
   {
    "table": "domain_inventory.nawaro_raps_profiles",
@@ -5469,6 +5572,14 @@
    "policies": 4
   },
   {
+   "table": "domain_shared.rohware_schema_lines",
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
    "table": "domain_shared.rohware_za_staffel_zeilen",
    "class": "A",
    "tenant_type": "text",
@@ -6370,6 +6481,14 @@
    "table": "public.outbox_events",
    "class": "B",
    "tenant_type": "character varying(50)",
+   "rls": false,
+   "force_rls": false,
+   "policies": 0
+  },
+  {
+   "table": "public.read_model_snapshots",
+   "class": "A",
+   "tenant_type": "character varying(64)",
    "rls": false,
    "force_rls": false,
    "policies": 0

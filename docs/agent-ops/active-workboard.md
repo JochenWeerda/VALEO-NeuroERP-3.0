@@ -21166,3 +21166,5 @@ aufzunehmen. Keine Rolle/DDL/DB/Schema-/Formel-Fachregel ausweiten. Lead integri
 Artefakte und DB-Nachweise; keine neue Testdatenbank/Container.
 
 M0-SCHEMA-BUDGET-ROHWARE / FORMEL-SAFETY Zwischenstand: kanonische Migrationen und Gruppen-Detailroute implementiert; keine zweite Rohware-Stammtabelle. Formelinterpreter ohne eval, 113 gezielte Tests bestanden. PostgreSQL/RLS noch nicht abgenommen; bestehender strikter CI-Job exportiert Inventare erst nach erfolgreichen Tests. Keine lokale Datenbankmigration und keine neue Datenbank/Container. QA m0-rohware-tenant-20261115.md und m0-budget-schema-20261115.md.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 / FORMEL-SAFETY: Implementierung und PostgreSQL-Abnahme abgeschlossen, Integration in Arbeit. Kombinierter Quellstand 4866020db, StrictDB 43748281469 erfolgreich mit 692 passed / 3 skipped. Beide neuen DB-Vertraege bestanden als valeo_app; Inventare aus genau diesem Lauf uebernommen. 113 gezielte neue/angrenzende Tests sowie 21 bisherige Waage-/Istwerttests und 25 Architekturtests gruen (ueberlappende Testmengen nicht addieren). Browser-/MCP-Freischaltung und fachliche Budget-Ist-Semantik nicht daraus ableiten.

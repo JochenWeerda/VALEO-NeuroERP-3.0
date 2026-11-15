@@ -14,3 +14,7 @@ Der Schreibweg prüft Konto und Kostenstelle vor dem Einfügen auf Mandantenzuge
 Beim Anlegen ist nur `ENTWURF` zulässig; andere Status werden vor dem Tabellenzugriff mit 422 abgewiesen. Genehmigung bleibt dem vorhandenen administrativen Freigabeweg vorbehalten. Der datenbankfreie Rollentest prüft die tatsächlichen Routenbindungen und Rollenprüfer direkt; ein HTTP-Rollenintegrationstest steht aus. Ein Weg zum Sperren wurde nicht nachgewiesen; die bestehenden Regeln für bereits gesperrte Pläne bleiben erhalten.
 
 Beträge müssen in `NUMERIC(16,2)` passen; Werte mit mehr als zwei Nachkommastellen werden abgewiesen statt still gerundet. Der Kostenstellen-Report zeigt aktive Kostenstellen, dies belegt jedoch kein allgemeines Schreibverbot für inaktive Kostenstellen. Deshalb prüft der Budget-Schreibweg deren Mandantenzugehörigkeit, ohne einen neuen Aktivitätsvertrag zu erfinden.
+
+## PostgreSQL-Abnahme nach Integration
+
+Der vorbereitete Budget-Vertrag bestand im erfolgreichen strikten Job 43748281469 auf 4866020db4d32fbc34bac1446c446744e73781c4 (692 bestanden, drei uebersprungen insgesamt). Die Migrationen, eigenen und fremden CRUD-Zugriffe als valeo_app, drei mandantengebundene Fremdschluessel sowie Genehmigungs-/Sperrregeln sind damit gegen PostgreSQL nachgewiesen. Physische Inventare wurden aus diesem Job uebernommen. Die oben genannten fachlichen Grenzen der Ist-Auswertung bleiben offen; ebenso Browser-/kanaluebergreifende Abnahme und lokale Bereitstellung.
