@@ -60,21 +60,6 @@ def test_eigener_beleg_liefert_nur_den_eigenen(haus):
 
 
 
-def test_die_eingangsrechnungsmaske_zeigt_keine_fremde_rechnung(haus):
-    from app.services.mask_rollout_summary_service import MaskRolloutSummaryService
-
-    eigen = haus["ablegen"]("ap_invoice", haus["mandant"], totalGross=10)
-    fremd = haus["ablegen"]("ap_invoice", haus["anderer"], totalGross=10)
-    alt = haus["ablegen"]("ap_invoice", None, totalGross=10)
-    with SessionLocal() as db:
-        dienst = MaskRolloutSummaryService(db, haus["mandant"])
-        assert dienst.build_summary("finance/ap-invoice", eigen)["title"] == eigen
-        for nummer in (fremd, alt):
-            with pytest.raises(HTTPException) as fehler:
-                dienst.build_summary("finance/ap-invoice", nummer)
-            assert fehler.value.status_code == 404
-
-
 # ── Statusnachtraege an der Speichergrenze ───────────────────────────────────
 
 MANDANT = "00000000-0000-0000-0000-000000000001"

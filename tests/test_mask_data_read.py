@@ -96,6 +96,13 @@ def channels(case, monkeypatch):
     app.include_router(mask_screen_definition.router, prefix="/api/v1")
     app.include_router(mcp_tool_registry.router, prefix="/api/v1")
     install_tenant_bindings(app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
+    # Die Maske finance/ap-invoice ist entfernt (BELEG-052 Phase 3b). Der Vertrag gilt der gemeinsamen Quellen-
+    # aufloesung; deshalb eine hier registrierte Maske mit dem echten Leseweg der Eingangsrechnung.
+    echte = service.get_screen_definition
+    pruefmaske = {"id": "pruefstand/ap-rechnung",
+                  "dataSources": [{"key": "entity", "endpoint": "/api/v1/finance/ap/invoices/{entity_id}"}]}
+    monkeypatch.setattr(service, "get_screen_definition",
+                        lambda screen, **kw: pruefmaske if screen == pruefmaske["id"] else echte(screen, **kw))
     original_async, original_sync = service.read_async, service.read_sync
     async def inprocess_async(body, tenant, authorization):
         return await original_async(body, tenant, authorization, transport=httpx.ASGITransport(app=app))
@@ -118,14 +125,14 @@ def _headers(case, role="FINANCE_LESEN", scope="masks:read", tenant=None):
 def _mcp(case, headers, entity):
     return case[0].post("/api/v1/mcp/tools/call", headers=headers, json={
         "tool_name":"mask.data.read", "mode":"dryRun", "parameters":{
-            "screen_id":"finance/ap-invoice", "source_key":"entity", "entity_id":entity}})
+            "screen_id":"pruefstand/ap-rechnung", "source_key":"entity", "entity_id":entity}})
 
 
 def _cli(case, monkeypatch, headers, entity):
     from valeo_cli import cli
     monkeypatch.setenv("VALEO_ACCESS_TOKEN", headers["Authorization"].removeprefix("Bearer "))
     lines=[]
-    code=cli.main(["daten","finance/ap-invoice","entity","--id",entity],http=case[0],out=lines.append)
+    code=cli.main(["daten","pruefstand/ap-rechnung","entity","--id",entity],http=case[0],out=lines.append)
     return code, lines
 
 
@@ -133,7 +140,7 @@ def test_signed_human_cli_and_mcp_read_same_real_domain_document(channels, monke
     case=channels;headers=_headers(case);entity=case[5]
     human=case[0].get(f"/api/v1/finance/ap/invoices/{entity}",headers=headers)
     assert human.status_code==200,human.text
-    common=case[0].get(f"/api/v1/masks/finance/ap-invoice/data/entity?entity_id={entity}",headers=headers)
+    common=case[0].get(f"/api/v1/masks/pruefstand/ap-rechnung/data/entity?entity_id={entity}",headers=headers)
     assert common.status_code==200,common.text
     assert common.json()["data"]==human.json()
     mcp=_mcp(case,headers,entity)
@@ -153,7 +160,7 @@ def test_three_channel_permissions_and_tenant_boundaries(channels, monkeypatch, 
                      scope="" if kind=="no_mcp_scope" else "masks:read")
     expected=403 if kind=="no_business_role" else 404 if kind in {"foreign_record","other_tenant"} else 200
     assert case[0].get(f"/api/v1/finance/ap/invoices/{entity}",headers=headers).status_code==expected
-    assert case[0].get(f"/api/v1/masks/finance/ap-invoice/data/entity?entity_id={entity}",headers=headers).status_code==expected
+    assert case[0].get(f"/api/v1/masks/pruefstand/ap-rechnung/data/entity?entity_id={entity}",headers=headers).status_code==expected
     assert _mcp(case,headers,entity).status_code==(403 if kind=="no_mcp_scope" else expected)
     code,_=_cli(case,monkeypatch,headers,entity)
     assert code==(0 if expected==200 else 3 if expected==403 else 2)
@@ -161,7 +168,7 @@ def test_three_channel_permissions_and_tenant_boundaries(channels, monkeypatch, 
 
 def test_forged_selectors_and_invalid_token_never_read_data(channels):
     case=channels;headers=_headers(case)
-    base=f"/api/v1/masks/finance/ap-invoice/data/entity?entity_id={case[5]}"
+    base=f"/api/v1/masks/pruefstand/ap-rechnung/data/entity?entity_id={case[5]}"
     assert case[0].get(base+"&tenant_id="+case[4],headers=headers).status_code==403
     assert case[0].get(base,headers={**headers,"X-Tenant-ID":case[4]}).status_code==403
     assert case[0].get(base,headers={"Authorization":"Bearer invalid"}).status_code==401
