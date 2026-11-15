@@ -77,8 +77,8 @@ class PreisabweichungEinkaufAgent:
                     title=f"Preisabweichung Rechnung {r.get('rechnung_nr', iid)}",
                     reason=f"Rechnungspreis {rp} > Bestellpreis {bp} + {self.toleranz * 100:.0f}% Toleranz (Abweichung {abw:.1f}%).",
                     severity="warning",
-                    target_screen_id="finance/ap-invoice",
-                    target_route=f"/finance/ap-invoice/{iid}",
+                    target_screen_id="beleg/purchase-invoice",
+                    target_route=f"/belege/purchase_invoice/{iid}",
                     payload={"rechnungspreis": rp, "bestellpreis": bp, "abweichung_pct": round(abw, 1)},
                 ))
         return out

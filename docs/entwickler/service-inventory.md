@@ -114,6 +114,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `docflow_followup_service` | Bescheid/Rückmeldung & Wiedervorlage am Vorgang (DOM-DOC-004.3). |
 | `docflow_freigabe` | DocFlow-Belege an der zentralen Approval Engine (APPROVAL-001). |
 | `docflow_gobd_service` | GoBD-Exportpaket & DMS-/Paperless-Liveprobe (DOM-DOC-004.4). |
+| `docflow_lagerzugang` | Lagerzugang des DocFlow-Wareneingangs (BELEG-052 Phase 3b, 10.11.2026). |
 | `docflow_return_service` | Document-return worklist on top of canonical Docflow headers and artifacts. |
 | `docflow_screen_provenance` | Verified screen provenance stored in the existing immutable document command log. |
 | `docflow_service` | Service layer for the canonical Docflow command pipeline (DOCFLOW-P0-01..03). |
@@ -349,7 +350,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `voice_adapter` | Voice Adapter Layer — NC-003 |
 | `waage_import_service` | Tenant-bound ASCII import into the canonical weighing-ticket aggregate. |
 | `warehouse_service` | — |
-| `wareneingang_avis_service` | Wareneingang aus dem Anlieferavis — Bestellung beliefert, Ware im Lager. |
+| `wareneingang_avis_service` | Wareneingang aus dem Anlieferavis — DocFlow-Bestellung beliefert, Ware im Lager (BELEG-052 Phase 3b). |
 | `webfleet_connect` | Aktuelle Fahrzeugpositionen über WEBFLEET.connect. |
 | `webhook_service` | Ausgehende Webhooks — die einzige Stelle, die die Anbindungen anfasst. |
 | `webshop_integration_service` | Service layer for B2B webshop order imports. |

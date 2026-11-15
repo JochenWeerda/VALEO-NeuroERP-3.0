@@ -332,6 +332,11 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
     ]
     if variante.belegart == "sales_order":
         liste.append(_aktion("bestaetigen", "Auftrag bestätigen", BELEGKOMMANDOS["docflow.confirm"]))
+    if variante.belegart == "goods_receipt":
+        # Einlagern bucht den Zugang ins Lager und schliesst den Wareneingang ab (BELEG-052 Phase 3b).
+        liste.append({**_aktion("einlagern", "Einlagern", BELEGKOMMANDOS["docflow.store"]),
+                      "inputFields": [{"key": "lager", "label": "Ziellager (Kennung oder Lagercode)", "type": "text",
+                                       "required": True}]})
     if variante.bucht:
         liste.append(_aktion("buchen", "Buchen", BELEGKOMMANDOS["docflow.post"]))
     for folgeart in variante.folgebelege:

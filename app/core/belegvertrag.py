@@ -62,6 +62,8 @@ BAUSTEIN_FELDER: dict[str, tuple[tuple[str, str, str], ...]] = {
     "zahlung": (("zahlungsbedingung", "Zahlungsbedingung", "text"), ("faellig_am", "Faellig am", "date"),
                 ("skonto_prozent", "Skonto %", "number"), ("skonto_tage", "Skonto-Tage", "number")),
     "referenzen": (("eigene_referenz", "Eigene Referenz", "text"), ("fremde_referenz", "Fremde Referenz", "text")),
+    # Ziellager des Wareneingangs (Kennung oder Lagercode): die Freigabe bucht den Zugang dorthin.
+    "lager": (("lager", "Lager", "text"),),
 }
 
 # Kopfbausteine je Belegart (Reihenfolge = Reihenfolge in der Maske).
@@ -72,7 +74,7 @@ KOPFBAUSTEINE: dict[str, tuple[str, ...]] = {
     "sales_invoice": ("texte", "zahlung", "referenzen"),
     "sales_credit_memo": ("texte", "referenzen"),
     "purchase_order": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
-    "goods_receipt": ("texte", "lieferung", "referenzen"),
+    "goods_receipt": ("lager", "texte", "lieferung", "referenzen"),
     "purchase_invoice": ("texte", "zahlung", "referenzen"),
     "purchase_credit_memo": ("texte", "referenzen"),
 }

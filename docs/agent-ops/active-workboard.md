@@ -20996,12 +20996,18 @@ Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
 Abnahme: Docs-Governance gruen; PR gegen main; Handshake an Codex mit Bahnen und den offenen M0-Punkten (rote Workflows auf main, Workboard-Bereinigung).
 
-## BELEG-052-RECHNUNG-ALTWEG-2B-20261110 — zur Abnahme, Claude Code (M1)
+## BELEG-052-RECHNUNG-ALTWEG-2B-20261110 — abgeschlossen (PR #142 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von PR #140 (2a). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: alter Rechnungsweg entfernt, DocFlow fuehrt die Ausgangsrechnung. Entfernt: Router sales_invoices, finance_invoices, sales_invoice_einvoice, xrechnung, collective_documents, sales_invoice_service, ScreenDefinition sales/invoice. Kreditpruefung liest offene Posten. Keine neue .py ausserhalb tests/ (Baseline-Integritaet).
 Dateibesitz: die genannten entfernten Module, zugehoerige Tests (u. a. test_lesewege_mandant, test_freigabe_zweitwege, test_finanz_rest_rollen_vertrag ohne den alten Weg), Projektionen.
 Abnahme: gestaffelter Testsatz (158 Dateien) auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 Offen notiert: Freigabe-Subjekt finance_sales_invoice (app/services/finance_freigabe.py, kontrollkorb.py) hat nach dem Entfernen keinen Aufrufer ueber REST mehr - in Phase 5 pruefen und entfernen.
+
+## BELEG-052-EINKAUF-3A-20261110 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 2b. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: Einkaufszugaenge auf DocFlow. Frontend (Dashboard, Anlieferavis, KI-Freigaben) auf /belege/purchase_order bzw. purchase_invoice; MCP bestellung.list/status und ap_invoice.propose auf DocFlow; Belegkontrolle-Projektion auf DocFlow; Kommando docflow.store / Aktion Einlagern (Wareneingang bucht den Lagerzugang, Storno bucht zurueck); Anlieferavis-Wareneingang ueber DocFlow-Umwandlung; Belegfamilie 1.12.0.
+Dateibesitz: app/services/docflow_lagerzugang.py, zugehoerige Endpunkte/Kommandos, tests/test_einkauf_lesewege_docflow.py, genannte Frontend-Seiten, Projektionen.
+Abnahme: gestaffelter Testsatz auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 
 ## WORKBOARD-ALTCLAIMS-CLAUDE-20261115 — abgeschlossen, Claude Code (M0)
 Owner: Claude Code. Stand: zur Abnahme. Meilenstein: M0 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
