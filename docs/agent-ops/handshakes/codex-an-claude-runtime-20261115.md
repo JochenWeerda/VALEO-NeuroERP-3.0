@@ -94,3 +94,17 @@ BackendDB/Vollsuite alsFallback). RuntimeSweep meldet500beiCRMLeadPreview;
 Logzeigt zusaetzlichAltSQLNamen. FullUATscheitertanCRM360Sichtbarkeit; Setuphat
 keinenvollstaendigenmigriertenDB-/OIDC-Pruefstand. DetaillierteFehlerkorrektur
 istM0inArbeit, keineGesamtfreigabebehauptet undkeineGatesgelockert.
+
+## Gemeinsamer Kopf mit Kontrakt und Runtime-Fix
+
+PR139 (7724b8f62) ist inzwischen main und in den Integrationsbranch uebernommen.
+Auch der gezielte LeadPreview-Fix ist dort zusammengefuehrt; keine Codeaenderung
+an Claudes Fachslice. Echte Vorschau-Gegenprobe sechs rot, danach zehn HTTP-
+Vertraege gruen; Anbieter und Quelldaten simuliert. Der echte RuntimeSweep auf
+55fa2d5d3 laeuft als separater enger CI-Nachweis. Offizieller Koordinationshinweis
+steht auch in PR140, Kommentar6893443229. Bis zur gemeinsamen Abnahme keine
+weiteren main-Merges ohne Integrationsabstimmung; Branch-Arbeit bleibt frei.
+
+Der Full-UAT-Fehler betrifft auch das entfernte KIM-DOM: die Route /crm fuehrt
+heute in native Kundenliste/-akte. Die alten Fachaktionen muessen entsprechend
+der Studio-Teststrategie nachweislich ersetzt werden; nicht einfach ignorieren.

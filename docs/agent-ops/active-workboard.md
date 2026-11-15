@@ -21025,3 +21025,20 @@ Gegenproben vor Fix, danach zehn gruen. Gepruefter Mandantenkontext wird an
 Service uebergeben; kein neuer Fallback. Externe Identitaet/GAP-Daten simuliert,
 keine DB/Docker-Aktion. Echter RuntimeSweep des neuen SHA noch offen; QA
 m0-runtime-lead-preview-20261115.md. PR137 bleibt auf4c7c6374b unveraendert.
+
+### M0-Integrationsstand nach PR139
+
+Der bereits gemergte Kontraktstand7724b8f62 ist in PR137 uebernommen, ebenso der
+separat gepruefte LeadPreview-Fix (zehn HTTP-Vertraege). Der vorhandene OpenAPI-
+Vertrag hatte HTTPBearer und dieselben fuenf Filter bereits; keine neuen Client-
+Parameter oder Datenfelder. Quelle und Vertrauenskette werden korrigiert.
+Keine weitere Live-Migration: die lokale Bereitstellung bleibt auf2338578d0
+plus separat ausgeliefertem Themefix. Der neue Main-Kontrakt wird nicht still
+auf eine laufende Entwicklungsdatenbank migriert.
+
+M0-UAT-Diagnose praezisiert: crm360-model-based.spec.ts erwartet das entfernte
+KIM-DOM (#crm-main-viewport). /crm leitet inzwischen zur nativen Kundenliste
+beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaendig;
+eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
+nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
+werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
