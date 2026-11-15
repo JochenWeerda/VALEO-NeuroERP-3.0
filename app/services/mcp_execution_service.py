@@ -22,7 +22,6 @@ from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFa
 from app.core.reklamation import ReklamationsStatus, ReklamationZustandsmaschine
 from app.services import crm_lead_service, mcp_beleg_tools, mcp_mask_actions, mcp_studio_authoring
 from app.services.crm_kontakt_service import CrmKontaktService
-from app.services.document_allocation_service import LineToRegister
 from app.services.einkauf_compat_service import EinkaufCompatService, _NICHT_BESTELLBAR
 from app.services.feeding_actual_measure_service import (
     ActualMeasureConflict,
@@ -51,11 +50,6 @@ from app.services.rations_lifecycle_service import (
     RationLifecycleConflict,
     RationLifecycleNotFound,
     RationLifecycleService,
-)
-from app.services.sales_invoice_service import (
-    InvoiceCreationError,
-    SalesInvoiceService,
-    SourceLine,
 )
 from app.services.wareneingang_avis_service import (
     WareneingangAvisError,
@@ -543,7 +537,6 @@ _WEIGHING_SCREEN_ID = "waage/wiegeschein"
 _WEIGHING_ROUTE_PREFIX = "/waage/wiegeschein"
 _STOCK_SCREEN_ID = "lager/article-stock"
 _STOCK_ROUTE_PREFIX = "/lager/artikel"
-_BILLABLE_DELIVERY_STATUSES = ("posted", "printed", "gebucht")
 # Stand des Auftrags in DocFlow (Pruefbedingung ``chk_docflow_header_status``) - BELEG-052: einziger Belegspeicher.
 _ORDER_NEXT_STEP = {
     "draft": "Auftrag vervollständigen und freigeben",
@@ -3687,12 +3680,6 @@ def _log_contact(db: Session, request: ToolExecutionRequest, actor: str, tenant:
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _money(totals: Any, key: str) -> float:
-    if isinstance(totals, str):
-        totals = json.loads(totals)
-    if not isinstance(totals, dict) or totals.get(key) is None:
-        raise HTTPException(409, "Delivery note has no stored totals")
-    return round(float(totals[key]), 2)
 
 
 _AP_INVOICE_ROUTE_PREFIX = "/finance/ap-invoice"
@@ -3857,21 +3844,22 @@ def _propose_invoice(db: Session, request: ToolExecutionRequest, actor: str, ten
                     result = json.loads(result)
                 db.rollback()
                 return {**result, "replayed": True}
+        # BELEG-052: Lieferscheine stehen in DocFlow; Summen und Positionen aus dem Beleg selbst.
         note = db.execute(text("""
-            SELECT n.id, n.status, n.totals,
-                   (SELECT COUNT(*) FROM domain_sales.delivery_note_positions p
-                    WHERE p.delivery_note_id = n.id) AS positionen
-            FROM domain_sales.delivery_notes n
-            WHERE n.tenant_id=:tenant AND n.delivery_note_number=:nr
-            FOR SHARE OF n
+            SELECT h.id, h.status, h.total_net, h.total_tax,
+                   (SELECT COUNT(*) FROM domain_docflow.document_items i
+                    WHERE i.header_id = h.id AND i.tenant_id = h.tenant_id) AS positionen
+            FROM domain_docflow.document_headers h
+            WHERE h.tenant_id=:tenant AND h.doc_type='sales_delivery' AND h.doc_number=:nr AND h.deleted_at IS NULL
+            FOR SHARE OF h
         """), {"tenant": tenant, "nr": invoice.lieferschein_nr}).mappings().first()
         if not note:
             raise HTTPException(404, "Delivery note not found in the authenticated tenant")
-        if note["status"] not in _BILLABLE_DELIVERY_STATUSES:
+        if note["status"] not in ("open", "completed"):
             raise HTTPException(409, "Delivery note is not ready to invoice")
         preview = {
-            "betrag_netto": _money(note["totals"], "netto"),
-            "mwst": _money(note["totals"], "mwst"),
+            "betrag_netto": float(note["total_net"] or 0),
+            "mwst": float(note["total_tax"] or 0),
             "positionen": int(note["positionen"] or 0),
         }
         if request.mode != "propose":
@@ -5047,31 +5035,6 @@ def _stock_movement_stornieren(db: Session, request: ToolExecutionRequest, actor
         raise HTTPException(503, "ERP tool transaction failed; no success confirmed") from exc
 
 
-def _invoice_sources_from_positions(ls_id: str, positions: list[dict]) -> list[SourceLine]:
-    sources: list[SourceLine] = []
-    for pos in positions:
-        zeile = LineToRegister.from_mapping(pos)
-        if not zeile.line_id or not zeile.unit:
-            continue
-        sources.append(SourceLine(
-            document_type="delivery_note",
-            document_id=ls_id,
-            line_id=zeile.line_id,
-            article_id=zeile.article_id,
-            article_number=pos.get("artikel_nr"),
-            description=pos.get("bezeichnung"),
-            quantity=Decimal(str(zeile.quantity or 0)),
-            unit=str(zeile.unit),
-            unit_price=Decimal(str(pos.get("netto_preis") or 0)),
-            vat_rate=(
-                Decimal(str(pos["mwst_prozent"]))
-                if pos.get("mwst_prozent") is not None
-                else None
-            ),
-        ))
-    return sources
-
-
 def _post_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant: str) -> dict:
     """Create a sales invoice draft from an approved proposal. Never skips human approval."""
     try:
@@ -5140,47 +5103,37 @@ def _post_invoice(db: Session, request: ToolExecutionRequest, actor: str, tenant
         }
         if request.mode != "execute":
             return {"success": True, "mode": request.mode, "posted": False, **preview}
+        # BELEG-052: Der Lieferschein ist DocFlow-Beleg; die Rechnung entsteht ueber die DocFlow-Umwandlung
+        # (delivery_to_invoice, Restmengen, Rechnungsweg) - derselbe Weg wie in der Belegmaske.
         note = db.execute(text("""
-            SELECT n.id, n.status, n.customer_id, n.delivery_note_number
-            FROM domain_sales.delivery_notes n
-            WHERE n.tenant_id=:tenant AND n.delivery_note_number=:nr
-            FOR UPDATE OF n
+            SELECT id, status, customer_id, doc_number
+            FROM domain_docflow.document_headers
+            WHERE tenant_id = :tenant AND doc_type = 'sales_delivery' AND doc_number = :nr AND deleted_at IS NULL
+            FOR UPDATE
         """), {"tenant": tenant, "nr": lieferschein_nr}).mappings().first()
         if not note:
             raise HTTPException(404, "Delivery note not found in the authenticated tenant")
-        if note["status"] not in _BILLABLE_DELIVERY_STATUSES:
+        if note["status"] not in ("open", "completed"):
             raise HTTPException(409, "Delivery note is not ready to invoice")
-        positions = [
-            dict(row) for row in db.execute(text("""
-                SELECT p.*
-                FROM domain_sales.delivery_note_positions p
-                JOIN domain_sales.delivery_notes n ON n.id = p.delivery_note_id
-                WHERE p.delivery_note_id = :id
-                  AND n.tenant_id = :tenant
-                ORDER BY p.pos_nr
-            """), {"id": note["id"], "tenant": tenant}).mappings().all()
-        ]
-        sources = _invoice_sources_from_positions(str(note["id"]), positions)
-        invoice_number = f"RE-{note['delivery_note_number'] or str(note['id'])[:8]}"
+        from app.api.v1.schemas.docflow_schemas import DocflowConvertRequest
+        from app.core.exceptions import ConflictError as _Konflikt, ValidationFailedError as _Pruefgrund
+        from app.services.docflow_service import DocflowService
+
         try:
+            # Eigene Sitzung mit Savepoint: Die Umwandlung schreibt fest, die MCP-Transaktion bleibt eine.
             with Session(bind=db.connection(), join_transaction_mode="create_savepoint") as child:
-                ergebnis = SalesInvoiceService(child, tenant).create_from_sources(
-                    invoice_number=invoice_number,
-                    customer_id=str(note.get("customer_id") or ""),
-                    invoice_date=rechnungsdatum,
-                    sources=sources,
-                    reason="rechnung_aus_lieferschein_mcp",
-                    user_id=actor,
-                    note=f"MCP post from proposal {payload.proposal_id}",
-                )
-        except InvoiceCreationError as exc:
-            raise HTTPException(409, str(exc)) from exc
-        invoice_id = str(ergebnis.invoice.id)
-        db.execute(text("""
-            UPDATE domain_sales.delivery_notes
-            SET status = 'invoiced', updated_at = NOW()
-            WHERE id = :id AND tenant_id = :tenant
-        """), {"id": note["id"], "tenant": tenant})
+                umgewandelt = DocflowService(child, tenant, actor).convert(str(note["id"]), DocflowConvertRequest(
+                    target_doc_type="sales_invoice", idempotency_key=f"mcp-{request.idempotency_key}"[:120],
+                    created_by=actor))
+        except (_Konflikt, _Pruefgrund) as exc:
+            raise HTTPException(409, str(getattr(exc, "detail", exc))) from exc
+        invoice_id = str(umgewandelt["target_doc_id"])
+        db.execute(text(
+            "UPDATE domain_docflow.document_headers SET document_date = :d WHERE id = :id AND tenant_id = :t "
+            "AND status = 'open'"), {"d": rechnungsdatum, "id": invoice_id, "t": tenant})
+        invoice_number = str(db.execute(text(
+            "SELECT doc_number FROM domain_docflow.document_headers WHERE id = :id AND tenant_id = :t"),
+            {"id": invoice_id, "t": tenant}).scalar())
         execution_result = {
             "invoice_id": invoice_id,
             "invoice_number": invoice_number,

@@ -12,7 +12,6 @@ CALLERS = (
     "app/services/agrar_settlement_service.py",
     "app/services/einkauf_compat_service.py",
     "app/api/v1/endpoints/zinsabrechnung.py",
-    "app/api/v1/endpoints/collective_documents.py",
     "app/api/v1/endpoints/dauerauftraege.py",
     "app/api/v1/endpoints/erechnung_import.py",
     "app/api/v1/endpoints/ers_settlement.py",

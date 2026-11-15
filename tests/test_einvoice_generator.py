@@ -253,21 +253,6 @@ class TestZugferdCIIBuilder:
         assert len(items) == 2
 
 
-class TestSalesInvoiceEndpoints:
-    """Slice-006: API-Endpoints für SalesInvoice."""
-
-    def test_router_registered_with_three_routes(self):
-        from app.api.v1.endpoints.sales_invoice_einvoice import router
-        paths = [r.path for r in router.routes]
-        assert any("xrechnung" in p for p in paths)
-        assert any("zugferd" in p for p in paths)
-        assert len(router.routes) == 3
-
-    def test_router_paths_include_invoice_number_param(self):
-        from app.api.v1.endpoints.sales_invoice_einvoice import router
-        paths = [r.path for r in router.routes]
-        assert all("{invoice_number}" in p for p in paths)
-
 
 class TestRounding:
     """Sicherstellen: Geldwerte werden mit 2 Nachkommastellen formatiert."""

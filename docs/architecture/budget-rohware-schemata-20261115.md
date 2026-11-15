@@ -50,7 +50,7 @@ Die Budgetliste ist begrenzt und meldet die gesamte tenantbezogene Trefferzahl.
 
 ## Migration und Nachweis
 
-Die Kette baut auf dem bereits gemergten docflow_position_kontrakt_20261110 auf:
+Die Kette baut auf dem bereits gemergten altrechnungen_schutz_20261110 auf:
 budget_planning_schema_20261115 -> rohware_schema_canonical_20261115.
 Neue Tabellen erhalten sofort RLS und passende Indizes. Die Ruecknahme entfernt
 nur die eigenen Ergaenzungen; neue Budget-/Formeldaten gingen dabei verloren,

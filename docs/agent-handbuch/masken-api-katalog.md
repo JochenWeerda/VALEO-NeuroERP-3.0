@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (782 Masken).
+> Generiert aus `app/core/screen_definitions.py` (781 Masken).
 
 ## Übersicht
 
@@ -239,7 +239,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `beleg-liste/purchase-order` | Bestellungen | einkauf | niedrig | — | `GET /api/v1/masks/beleg-liste/purchase-order/agent-contract` |
 | `beleg-liste/sales-credit-memo` | Gutschriften | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-credit-memo/agent-contract` |
 | `beleg-liste/sales-delivery` | Lieferscheine | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-delivery/agent-contract` |
-| `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
+| `beleg-liste/sales-invoice` | Ausgangsrechnungen | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-invoice/agent-contract` |
 | `beleg-liste/sales-offer` | Angebote | sales | niedrig | — | `GET /api/v1/masks/beleg-liste/sales-offer/agent-contract` |
 | `beleg-liste/sales-order` | Aufträge | sales | niedrig | `order-to-cash` | `GET /api/v1/masks/beleg-liste/sales-order/agent-contract` |
 | `belege/belegfolge` | Belegfolge | documents | niedrig | — | `GET /api/v1/masks/belege/belegfolge/agent-contract` |
@@ -693,7 +693,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `rezepte/rezept` | Rezept | produktion | niedrig | — | `GET /api/v1/masks/rezepte/rezept/agent-contract` |
 | `sales/auftrag-lieferschein-abgleich` | Auftrag lieferschein abgleich | sales | niedrig | — | `GET /api/v1/masks/sales/auftrag-lieferschein-abgleich/agent-contract` |
 | `sales/auftragskette` | Auftragskette | sales | niedrig | — | `GET /api/v1/masks/sales/auftragskette/agent-contract` |
-| `sales/invoice` | Ausgangsrechnung | sales | niedrig | — | `GET /api/v1/masks/sales/invoice/agent-contract` |
 | `sales/kalkulationen/neu` | Kalkulation | sales | niedrig | — | `GET /api/v1/masks/sales/kalkulationen/neu/agent-contract` |
 | `sales/kreditlimit-pruefung` | Kreditlimit-Pruefung | sales | niedrig | — | `GET /api/v1/masks/sales/kreditlimit-pruefung/agent-contract` |
 | `sales/lieferung-storno` | Lieferung storno | sales | niedrig | — | `GET /api/v1/masks/sales/lieferung-storno/agent-contract` |
@@ -25513,44 +25512,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
-
----
-
-### `sales/invoice` — Ausgangsrechnung
-
-**Zweck:** Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.
-
-| | |
-|---|---|
-| ScreenDefinition | `GET /api/v1/masks/sales/invoice/screen-definition` |
-| Agent-Contract | `GET /api/v1/masks/sales/invoice/agent-contract` |
-| Readiness | `GET /api/v1/masks/sales/invoice/readiness` |
-| Rollout-Route | `/mask-rollout/sales__invoice/:entityId` |
-| Adapter | `native` (temporary=nein) |
-
-**Summary:** `/api/v1/sales/invoices/{entity_id}/screen-summary`
-
-**Data Sources:**
-
-- `entity` → `/api/v1/sales/invoices/{entity_id}`
-- `positionen` → `/api/v1/sales/invoices/{entity_id}/tabs/positionen`
-- `herkunft` → `/api/v1/sales/invoices/{entity_id}/tabs/herkunft`
-- `steuer` → `/api/v1/sales/invoices/{entity_id}/tabs/steuer`
-
-**MCP-Tools (Domäne):**
-
-- `sales.order.status` — scope `sales:read`, Risiko niedrig
-- `sales.gutschrift.speichern` — scope `sales:write`, Risiko mittel
-- `sales.gutschrift.propose` — scope `sales:write`, Risiko hoch
-- `sales.gutschrift.buchen` — scope `sales:write`, Risiko hoch
-- `sales.invoice.propose` — scope `sales:write`, Risiko hoch
-- `sales.invoice.post` — scope `sales:write`, Risiko hoch
-
-**Beispiel-Prompts:**
-
-- Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?
-- Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?
-- Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?
 
 ---
 

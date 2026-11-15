@@ -168,12 +168,6 @@ def test_empty_or_untyped_references_are_rejected(case, value):
         service._resolve_account_id(value)
 
 
-def test_retired_duplicate_invoice_booking_cannot_return():
-    from app.api.v1.endpoints import finance_invoices
-
-    assert not hasattr(finance_invoices, "_create_gl_booking_and_op")
-    assert not hasattr(finance_invoices, "_ensure_account")
-
 
 def test_many_lines_use_one_validation_query_before_any_journal_write(
     case, monkeypatch

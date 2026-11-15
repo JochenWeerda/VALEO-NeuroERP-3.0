@@ -240,8 +240,8 @@
         {
           "key": "rechnung",
           "label": "Rechnung",
-          "screenId": "sales/invoice",
-          "routePath": "/verkauf/rechnungen"
+          "screenId": "beleg-liste/sales-invoice",
+          "routePath": "/belege/sales_invoice"
         },
         {
           "key": "offene_posten",

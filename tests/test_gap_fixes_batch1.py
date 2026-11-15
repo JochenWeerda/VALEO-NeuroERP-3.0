@@ -13,7 +13,6 @@ from conftest import skip_if_db_unavailable
 from app.api.v1.endpoints.auto_matching import (
     MatchingRule,
     MatchingRuleCreate,
-    MatchingStatistics,
 )
 
 _HEADERS = {"Authorization": "Bearer dev-token", "X-Tenant-ID": "test-tenant"}
@@ -82,16 +81,6 @@ def test_create_rule_missing_fields_returns_422():
 # FINANCE INVOICES — DELETE /{invoice_number}
 # ===========================================================================
 
-def test_delete_nonexistent_invoice_returns_404():
-    resp = _client.delete("/api/v1/finance/invoices/INV-DOES-NOT-EXIST", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-def test_list_invoices_returns_200():
-    resp = _client.get("/api/v1/finance/invoices", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 200
 
 
 # ===========================================================================

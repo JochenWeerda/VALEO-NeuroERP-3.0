@@ -16,13 +16,11 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import FastAPI, HTTPException
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
 from app.documents.router_helpers import eigener_beleg, get_repository
-from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
 @pytest.fixture
@@ -60,24 +58,6 @@ def test_eigener_beleg_liefert_nur_den_eigenen(haus):
         assert eigener_beleg("sales_invoice", alt, haus["mandant"], repo) is None
         assert eigener_beleg("sales_invoice", eigen, "", repo) is None
 
-
-def test_die_e_rechnung_entsteht_nur_aus_der_eigenen_rechnung(haus):
-    from app.api.v1.endpoints.sales_invoice_einvoice import router
-
-    zeile = {"customerId": "K-1", "dueDate": "2026-11-14", "subtotalNet": 100, "totalTax": 19, "totalGross": 119,
-             "lines": [{"article": "Weizen", "qty": 2, "price": 50, "vatRate": 19}]}
-    eigen = haus["ablegen"]("sales_invoice", haus["mandant"], **zeile)
-    fremd = haus["ablegen"]("sales_invoice", haus["anderer"], **zeile)
-    alt = haus["ablegen"]("sales_invoice", None, **zeile)
-
-    app = FastAPI()
-    app.include_router(router)
-    ersetze_nutzer(app, "SALES_ADMIN")
-    ersetze_mandant(app, haus["mandant"])
-    c = TestClient(app, raise_server_exceptions=False)
-    assert c.get(f"/sales/invoices/{eigen}/einvoice/xrechnung").status_code == 200
-    assert c.get(f"/sales/invoices/{fremd}/einvoice/xrechnung").status_code == 404
-    assert c.get(f"/sales/invoices/{alt}/einvoice/xrechnung").status_code == 404
 
 
 def test_die_eingangsrechnungsmaske_zeigt_keine_fremde_rechnung(haus):

@@ -355,8 +355,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/verkauf/rechnungen",
-      "screenId": "sales/invoice"
+      "routePath": "/belege/sales_invoice",
+      "screenId": "beleg-liste/sales-invoice"
      },
      {
       "key": "offene_posten",
@@ -597,7 +597,11 @@
     "ausgangsrechnungen",
     "faktura liste",
     "offene rechnungen",
-    "rechnungsuebersicht"
+    "rechnungsuebersicht",
+    "rechnung",
+    "ausgangsrechnung",
+    "faktura",
+    "sammelrechnung"
    ],
    "testSelectors": {
     "screenRoot": "[data-testid='screen-beleg-liste/sales-invoice']"
@@ -822,6 +826,10 @@
    "requiresLazyTabs": false,
    "requiresVirtualTables": true
   },
+  "processChain": {
+   "chainId": "k2_verkauf",
+   "stepKey": "rechnung"
+  },
   "processChains": {
    "k1_ernte": {
     "label": "Ernte",
@@ -876,8 +884,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/verkauf/rechnungen",
-      "screenId": "sales/invoice"
+      "routePath": "/belege/sales_invoice",
+      "screenId": "beleg-liste/sales-invoice"
      },
      {
       "key": "offene_posten",
@@ -1428,8 +1436,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/verkauf/rechnungen",
-      "screenId": "sales/invoice"
+      "routePath": "/belege/sales_invoice",
+      "screenId": "beleg-liste/sales-invoice"
      },
      {
       "key": "offene_posten",

@@ -23,7 +23,6 @@ ALTER_STAND = re.compile(
 
 # Stand 09.11.2026 - nur streichen, nie ergaenzen.
 LESER = frozenset({
-    "app/api/v1/endpoints/collective_documents.py",
     "app/api/v1/endpoints/compat.py",
     "app/api/v1/endpoints/credit_management.py",
     "app/api/v1/endpoints/crm_360.py",

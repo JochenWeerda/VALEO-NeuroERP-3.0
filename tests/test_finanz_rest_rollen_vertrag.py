@@ -50,17 +50,6 @@ WEGE = {
         ("GET", "/finance/read-models/_status", "read"),
         ("GET", "/finance/read-models/cash-closings/{closing_id}", "read"),
     ],
-    "finance_invoices": [
-        ("POST", "/finance/invoices", "beleg_write"),
-        ("GET", "/finance/invoices/{invoice_number}", "beleg_read"),
-        ("PUT", "/finance/invoices/{invoice_number}", "beleg_write"),
-        ("GET", "/finance/invoices", "beleg_read"),
-        ("DELETE", "/finance/invoices/{invoice_number}", "admin"),
-        ("POST", "/finance/invoices/{invoice_number}/storno", "beleg_write"),
-        # Kundensuche und Steuervorschau der Erfassung lesen nur (Runtime46).
-        ("GET", "/finance/invoices/customer-lookup", "beleg_read"),
-        ("POST", "/finance/invoices/steuer-vorschau", "beleg_read"),
-    ],
     "document_control": [
         ("POST", "/document-control/exceptions", "beleg_write"),
         ("GET", "/document-control/exceptions", "beleg_read"),

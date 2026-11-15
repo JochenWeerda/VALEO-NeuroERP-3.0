@@ -5142,7 +5142,7 @@ Legt eine Gutschrift (kaufmaennische Rechnungskorrektur) als DocFlow-Entwurf (Be
 
 ### `sales.invoice.post` — Rechnung aus freigegebenem Vorschlag anlegen
 
-Legt eine Verkaufsrechnung (Status entwurf) aus einem freigegebenen agent_proposals-Datensatz (rechnung_vorschlag) an. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. FIBU-Journal/OP bleiben im UI-Pfad create-invoice. OIDC-Token mit sales:write und tenant_id erforderlich.
+Legt eine DocFlow-Ausgangsrechnung (offen, ungebucht) per Umwandlung des Lieferscheins aus einem freigegebenen agent_proposals-Datensatz (rechnung_vorschlag) an. Parameter nur proposal_id. Default dryRun. execute erfordert idempotency_key und approval_status=approved. Kein Freigabe-Boolean im Aufruf. FIBU-Journal/OP bleiben im UI-Pfad create-invoice. OIDC-Token mit sales:write und tenant_id erforderlich.
 
 - **Scope:** `sales:write`
 - **Idempotent:** ja
@@ -5192,7 +5192,7 @@ Legt eine Verkaufsrechnung (Status entwurf) aus einem freigegebenen agent_propos
 
 ### `sales.invoice.propose` — Rechnungsvorschlag aus Lieferschein
 
-Legt einen ausstehenden Rechnungsvorschlag zu einem gebuchten Lieferschein an. HTTP-Aufruf an POST /api/v1/mcp/tools/call mit tool_name=sales.invoice.propose. Default dryRun liest nur Summen. propose speichert agent_proposals mit approval_status pending und bucht keine Rechnung. execute ist nicht angebunden. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit sales:write und tenant_id erforderlich.
+Legt einen ausstehenden Rechnungsvorschlag zu einem freigegebenen DocFlow-Lieferschein an (BELEG-052). HTTP-Aufruf an POST /api/v1/mcp/tools/call mit tool_name=sales.invoice.propose. Default dryRun liest nur Summen. propose speichert agent_proposals mit approval_status pending und bucht keine Rechnung. execute ist nicht angebunden. Ein Freigabe-Boolean im Aufruf wird abgewiesen. OIDC-Token mit sales:write und tenant_id erforderlich.
 
 - **Scope:** `sales:write`
 - **Idempotent:** nein

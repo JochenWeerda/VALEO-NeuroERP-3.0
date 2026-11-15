@@ -2,7 +2,7 @@
 
 Routine bucht die Buchhaltung selbst; Auffaelliges steht im Pruefkorb; nur ein kritischer Befund sperrt.
 
-Geprueft gegen die echte Datenbank: Eingangsrechnung der Finanzbuchhaltung, Verkaufsgutschrift, alter Rechnungsweg
+Geprueft gegen die echte Datenbank: Eingangsrechnung der Finanzbuchhaltung
 und der gemeinsame Freigabeweg ``/approvals``.
 """
 
@@ -17,7 +17,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import text
 
 from app.api.v1.endpoints import (
-    ap_invoices, approvals, docflow, finance_invoices, kontrolle,
+    ap_invoices, approvals, docflow, kontrolle,
 )
 from app.auth.deps import get_current_user
 from app.core.database import SessionLocal
@@ -83,11 +83,9 @@ def haus(monkeypatch):
     from app.services.ap_invoice_approval_service import APApprovalWorkflowService
     monkeypatch.setattr(APApprovalWorkflowService, "status", freigegeben)
     monkeypatch.setattr(docflow_service, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
-    monkeypatch.setattr(finance_invoices, "assert_customer_allowed_for_invoice", lambda *_a, **_k: None)
     app = FastAPI()
     register_domain_exception_handlers(app)
     app.include_router(ap_invoices.router)
-    app.include_router(finance_invoices.router)
     app.include_router(docflow.router, prefix="/docflow")
     app.include_router(approvals.router, prefix="/approvals")
     app.include_router(kontrolle.router, prefix="/kontrolle")
@@ -225,40 +223,6 @@ def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus, monkeypatch
         with pytest.raises(HTTPException) as error:
             post_ap_invoice_kernel_sync(db, invoice_id=doppelt, tenant_id=haus["mandant"], posted_by="kernel")
         assert error.value.status_code == 409
-    assert _buchungen(haus) == 1
-
-
-# ── Verkaufsgutschrift ────────────────────────────────────────────────────────
-
-def _alte_rechnung(nummer: str, preis: float, status: str = "VERSENDET") -> dict:
-    return {"number": nummer, "date": "2026-10-13", "customerId": "kunde-1", "dueDate": "2026-11-12", "status": status,
-            "lines": [{"article": "Weizen", "qty": 1, "price": preis, "taxCode": "3"}]}
-
-
-def test_der_alte_rechnungsweg_bucht_und_storniert_mit_rollenrecht(haus):
-    klein, gross = f"AR-{uuid.uuid4().hex[:8]}", f"AR-{uuid.uuid4().hex[:8]}"
-    assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(klein, 100)).status_code == 200
-    assert haus["als"](ANNA).post("/finance/invoices", json=_alte_rechnung(gross, 9000)).status_code == 200  # 10.710 EUR
-    assert _buchungen(haus) == 2
-    # Ein regelkonformer Storno: ohne zweite Person.
-    storno = haus["als"](ANNA).post(f"/finance/invoices/{klein}/storno")
-    assert storno.status_code == 200, storno.text
-    assert _buchungen(haus) == 3
-
-
-def test_der_alte_weg_storniert_keine_docflow_rechnung(haus):
-    """Bis 13.10.2026 fand er ihre Buchung ueber die Nummer und nahm sie ohne Beleg zurueck."""
-    nummer = f"DF-{uuid.uuid4().hex[:8]}"
-    beleg = haus["als"](ANNA).post("/docflow/", json={
-        "doc_type": "sales_invoice", "doc_number": nummer, "status": "open", "customer_id": "kunde-1",
-        "items": [{"article_number": "A-1", "quantity": 1, "unit_price": 100, "tax_code": "3"}]})
-    assert beleg.status_code == 200, beleg.text
-    doc = beleg.json()["id"]
-    assert haus["als"](ANNA).post(f"/docflow/{doc}/post", json={"idempotency_key": f"b-{uuid.uuid4().hex}"}).status_code == 200
-    antwort = haus["als"](CLARA).post(f"/finance/invoices/{nummer}/storno")
-    assert antwort.status_code == 409 and "DocFlow-Beleg" in antwort.text
-    with SessionLocal() as db:
-        assert db.execute(text("SELECT status FROM domain_docflow.document_headers WHERE id = :id"), {"id": doc}).scalar() == "posted"
     assert _buchungen(haus) == 1
 
 

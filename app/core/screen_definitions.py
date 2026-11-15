@@ -1108,123 +1108,6 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_sales_invoice_screen_definition() -> dict[str, Any]:
-    """Native ScreenDefinition fuer sales/invoice (FSX-RECHNUNGSMASKE-MERIDIAN).
-
-    Die Rechnung ist eine **Objektseite**, keine Transaktion: Sie wird gelesen
-    und geprueft, nicht gebucht. Deshalb `objectPage` und volle Breite statt
-    Spaltennavigation — die Positionstabelle braucht den Platz.
-
-    Zwei Register statt einer aufklappbaren Zeile: Die Positionen tragen ihren
-    Deckungsstand als Spalte („Belegt", „40 dt ohne Zuordnung"), und die
-    einzelnen Zuordnungen stehen im Register *Herkunft*. Als Tabelle ist die
-    Frage „welche Positionen kommen aus Lieferschein LS-7" sortierbar, statt
-    zwanzig Zeilen einzeln aufzuklappen.
-    """
-    return {
-        "schemaVersion": 1,
-        "id": "sales/invoice",
-        "domain": "sales",
-        "mode": "detail",
-        "title": "Ausgangsrechnung",
-        "subtitle": "Verkauf / Faktura",
-        "identityField": "invoice_number",
-        "adapter": {"type": "native", "sourceId": "sales/invoice", "temporary": False},
-        "summaryEndpoint": "/api/v1/sales/invoices/{entity_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/sales/invoices/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/positionen", "pageSize": 50},
-            {"key": "herkunft", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/herkunft", "pageSize": 50},
-            {"key": "steuer", "endpoint": "/api/v1/sales/invoices/{entity_id}/tabs/steuer", "pageSize": 25},
-        ],
-        "tabs": [
-            {
-                "key": "kopf", "label": "Rechnungskopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
-                    {"key": "invoice_number", "label": "Rechnungsnr.", "type": "text", "readOnly": True},
-                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
-                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
-                    {"key": "invoice_date", "label": "Rechnungsdatum", "type": "date", "readOnly": True},
-                    {"key": "due_date", "label": "Faellig", "type": "date", "readOnly": True},
-                    {"key": "status", "label": "Status", "type": "text", "readOnly": True},
-                    {"key": "net_amount", "label": "Netto", "type": "currency", "readOnly": True},
-                    {"key": "vat_amount", "label": "Umsatzsteuer", "type": "currency", "readOnly": True},
-                    {"key": "gross_amount", "label": "Brutto", "type": "currency", "readOnly": True},
-                ],
-                # Umsatzsteuer je Steuersatz wie auf der gedruckten Rechnung;
-                # die Summe ergibt auf den Cent den Kopfbetrag.
-                "tables": [{"key": "steuer", "label": "Steuerausweis", "dataSourceKey": "steuer",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "steuersatz", "label": "Steuersatz", "width": 150},
-                                {"key": "positionen", "label": "Positionen", "numeric": True, "renderKind": "number", "width": 110},
-                                {"key": "net_amount", "label": "Netto", "numeric": True, "renderKind": "currency"},
-                                {"key": "vat_amount", "label": "Umsatzsteuer", "numeric": True, "renderKind": "currency"},
-                                {"key": "gross_amount", "label": "Brutto", "numeric": True, "renderKind": "currency"},
-                            ]}],
-            },
-            {
-                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "line_no", "label": "Pos.", "width": 60, "sortable": True},
-                                {"key": "article_number", "label": "Artikel-Nr.", "width": 120},
-                                {"key": "description", "label": "Bezeichnung", "width": 220, "filterable": True},
-                                {"key": "quantity", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "unit", "label": "Einheit", "width": 70},
-                                {"key": "unit_price", "label": "Einzelpreis", "numeric": True, "renderKind": "currency"},
-                                {"key": "net_amount", "label": "Netto", "numeric": True, "sortable": True, "renderKind": "currency"},
-                                # Der Deckungsstand steht an der Position: Wer die
-                                # Menge sieht, sieht auch, ob sie belegt ist.
-                                {"key": "herkunft", "label": "Herkunft", "width": 170, "filterable": True},
-                            ],
-                            "rowDetail": {"fields": [
-                                {"key": "line_no", "label": "Pos."},
-                                {"key": "article_number", "label": "Artikel-Nr."},
-                                {"key": "description", "label": "Bezeichnung"},
-                                {"key": "quantity", "label": "Menge", "renderKind": "number"},
-                                {"key": "unit", "label": "Einheit"},
-                                {"key": "unit_price", "label": "Einzelpreis", "renderKind": "currency"},
-                                {"key": "net_amount", "label": "Netto", "renderKind": "currency"},
-                                {"key": "vat_rate", "label": "Steuersatz %", "renderKind": "number"},
-                                {"key": "herkunft", "label": "Herkunft"},
-                                {"key": "quellen", "label": "Zuordnungen", "renderKind": "number"},
-                            ]}}],
-            },
-            {
-                "key": "herkunft", "label": "Herkunft", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "herkunft", "label": "Zuordnungen", "dataSourceKey": "herkunft",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "line_no", "label": "Pos.", "width": 60, "sortable": True},
-                                {"key": "source_type", "label": "Belegart", "width": 120, "filterable": True},
-                                {"key": "source_document_id", "label": "Beleg", "width": 220, "filterable": True},
-                                {"key": "source_line_id", "label": "Quellposition", "width": 110},
-                                {"key": "quantity", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "unit", "label": "Einheit", "width": 70},
-                                {"key": "reason", "label": "Grund", "width": 180, "filterable": True},
-                            ]}],
-            },
-        ],
-        "actions": [],
-        "noWorkflowReason": "Die Rechnungsmaske ist lesend — Buchung, Storno und Zahlungsstand liegen in Finanzbuchhaltung und offenen Posten, nicht am Beleg.",
-        "agentContract": {
-            "businessPurpose": "Ausgangsrechnung mit Positionen und dem Nachweis, aus welcher Lieferscheinposition welche berechnete Teilmenge stammt.",
-            "examplePrompts": [
-                "Woher stammt die berechnete Menge von Position 2 der Rechnung {entity_id}?",
-                "Welche Positionen der Rechnung {entity_id} sind nicht vollstaendig durch Zuordnungen belegt?",
-                "Aus welchen Lieferscheinen ist Rechnung {entity_id} entstanden?",
-            ],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='sales-invoice']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "objectPage", "columnNavigation": "single", "sectionNavigation": "anchors", "tableProfile": "financial", "summaryPlacement": "header", "stickyHeader": True},
-        "interaction": {"enterMovesFocus": True},
-        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
-    }
-
-
 def build_einkauf_purchase_order_screen_definition() -> dict[str, Any]:
     """Fuehrende native Bestellmaske (L3-Kopf/Position plus drei Bestellfaelle)."""
     return {
@@ -5039,7 +4922,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "einkauf/supplier": build_supplier_screen_definition,
     "crm/opportunity": build_crm_opportunity_screen_definition,
     "lager/article-stock": build_lager_article_stock_screen_definition,
-    "sales/invoice": build_sales_invoice_screen_definition,
     "strecke/streckengeschaeft": build_strecke_streckengeschaeft_screen_definition,
     "versand/versand-avis": build_versand_avis_screen_definition,
     "strecke/vorlaeufig": build_strecke_vorlaeufig_screen_definition,
@@ -5664,8 +5546,8 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "lager/stock-movement": ["lagerbewegung", "warenbewegung", "umbuchung"],
     "lager/fremdware": ["fremdware", "fremdbestand", "kommissionsware", "poolware", "eigentuemerbestand"],
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
-    "sales/invoice": ["rechnung", "ausgangsrechnung", "faktura", "sammelrechnung", "herkunft der menge"],
-    "beleg-liste/sales-invoice": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
+    "beleg-liste/sales-invoice": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht",
+                                  "rechnung", "ausgangsrechnung", "faktura", "sammelrechnung"],
     "strecke/streckengeschaeft": ["streckengeschaeft", "strecke", "drop ship"],
     "versand/versand-avis": ["versand avis", "avis drucken", "versandbenachrichtigung"],
     "strecke/vorlaeufig": ["vorlaeufige streckengeschaefte", "geplante tour", "offene strecke"],
@@ -5801,7 +5683,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "lager/leitstand": "/lager/materialfluss-visualisierung",
     "lager/stock-movement": "/lager/lagerbewegungen",
     "qualitaet/reklamation": "/qualitaet/reklamationen",
-    "sales/invoice": "/verkauf/rechnungen",
     "beleg-liste/sales-invoice": "/belege/sales_invoice",
     "beleg-liste/sales-order": "/verkauf/auftraege",
     "beleg-liste/sales-delivery": "/sales/lieferungen",

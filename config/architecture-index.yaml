@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-15T18:31:38Z'
+generated_at: '2026-11-15T18:40:40Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -836,7 +836,6 @@ domains:
     - portal_preisspiegel_service
     - sales_credit_service
     - sales_invoice_mask
-    - sales_invoice_service
     - sales_match_service
     - sales_offer_import
     - sales_posting_service
@@ -905,8 +904,6 @@ domains:
     - sales_blanket_orders
     - sales_credit
     - sales_credit_notes
-    - sales_invoice_einvoice
-    - sales_invoices
     - sales_match
     - sales_order_commands
     - sales_reports
@@ -1055,6 +1052,7 @@ domains:
     - audit_hardening
     - beleg_anlage
     - beleg_druck
+    - beleg_erechnung
     - beleg_liste
     - compliance_pcn_lifecycle_service
     - compliance_service
@@ -1089,6 +1087,7 @@ domains:
     - atlas_zollausfuhr
     - audit
     - audit_evidence
+    - beleg_erechnung
     - beleg_import
     - beleg_versand
     - belege
@@ -1452,7 +1451,6 @@ domains:
     - finance_datev
     - finance_dunning
     - finance_followup
-    - finance_invoices
     - finance_op
     - finance_period
     - finance_read_models
@@ -1496,7 +1494,6 @@ domains:
     - subsidiary_ledger_reconciliation
     - tax_keys
     - vat_return_export
-    - xrechnung
     - zahlungsbedingungen
     - zinsabrechnung
     - zu_abschlaggruppen
@@ -2146,7 +2143,6 @@ domains:
     - blockchain_runtime
     - channel_work_surfaces
     - collab_notes
-    - collective_documents
     - command_catalog
     - compat
     - config_service
@@ -2395,8 +2391,8 @@ mapping_stats:
   frontend_routes_mapped: 1145
   backend_services_total: 346
   backend_services_mapped: 346
-  backend_endpoints_total: 480
-  backend_endpoints_mapped: 480
+  backend_endpoints_total: 476
+  backend_endpoints_mapped: 476
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -124,3 +124,5 @@ keinzweiterSchema-Stamm. Bitte künftigeBelegmigrationen vorIntegration am dann
 aktuellen gemeinsamenHead ausrichten, keine Codex-Tabelle livevorwegnehmen.
 Schema-/RLS-Nachweise laufen ueber den vorhandenenStrictDB-CIJob, nichtueber
 neueDatenbanken. LaufenderlokalerBackendstandbleibtunveraendert2338578d0+Theme.
+
+Integration nach parallel gemergten PR140/142/143: Budgetmigration jetzt Parent altrechnungen_schutz_20261110, danach Rohware. Keine fremde Revision gestempelt oder lokal angewendet. Gemeinsamer Ausgangspunkt origin/main 8695c25a2. Erster CI-Lauf: Migrationen bestanden, 702 Tests bestanden, ein synthetischer Rohware-Code zu lang; korrigiert in c1720145f. Abschliessender kombinierter Nachweis folgt.

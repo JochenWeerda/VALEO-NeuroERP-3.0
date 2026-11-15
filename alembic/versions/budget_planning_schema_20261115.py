@@ -1,12 +1,12 @@
 """Create tenant-bound budget plans and lines.
 
 Revision ID: budget_planning_schema_20261115
-Revises: docflow_position_kontrakt_20261110
+Revises: altrechnungen_schutz_20261110
 """
 from alembic import op
 
 revision = "budget_planning_schema_20261115"
-down_revision = "docflow_position_kontrakt_20261110"
+down_revision = "altrechnungen_schutz_20261110"
 branch_labels = None
 depends_on = None
 

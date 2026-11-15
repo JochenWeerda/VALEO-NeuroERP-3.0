@@ -54,28 +54,6 @@ Fachliche Sonderteile, die eine Variante einhängt; sie gehören nicht zum Grund
 
 Je Beleg-ScreenDefinition: Feld im Reiter `kopf` und Spalte der Tabelle `positionen`.
 
-### `sales/invoice`
-
-| Bereich | Bisher | Im Vertrag |
-|---|---|---|
-| kopf | `invoice_number` | `beleg_nr` |
-| kopf | `customer_name` | `partner.name` |
-| kopf | `customer_number` | `partner.nummer` |
-| kopf | `status` | `status` |
-| kopf | `invoice_date` | `belegdatum` |
-| kopf | `due_date` | `baustein:zahlung` |
-| kopf | `net_amount` | `summen.netto` |
-| kopf | `vat_amount` | `summen.steuer` |
-| kopf | `gross_amount` | `summen.brutto` |
-| positionen | `line_no` | `positionen[].pos_nr` |
-| positionen | `article_number` | `positionen[].artikel_nr` |
-| positionen | `description` | `positionen[].bezeichnung` |
-| positionen | `quantity` | `positionen[].menge` |
-| positionen | `unit` | `positionen[].einheit` |
-| positionen | `unit_price` | `positionen[].einzelpreis` |
-| positionen | `net_amount` | `positionen[].netto` |
-| positionen | `herkunft` | `kette[].beleg_nr` |
-
 ### `einkauf/purchase-order`
 
 | Bereich | Bisher | Im Vertrag |
