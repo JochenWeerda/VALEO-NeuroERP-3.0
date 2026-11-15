@@ -1289,7 +1289,7 @@
       "version": "1.0.0"
     },
     "agrar/saatgut/sorte": {
-      "definition_hash": "e0c5ea05a9ad40302ad5cf5840f8edc917de2cd9eb821420a3d69cf2dd764d62",
+      "definition_hash": "cb75287201498fbfd2e73503b0543ad2e48fb5006e5ad36292ac05160566eaea",
       "gates_passed": [
         "A",
         "B",
