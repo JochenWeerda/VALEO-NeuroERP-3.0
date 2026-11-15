@@ -1,5 +1,9 @@
 # VALEO-NeuroERP Go-Live Checklist
 
+> Stand 15.11.2026: Diese Liste ist eine generische Vorlage und wird nicht gepflegt. Reihenfolge und Abnahmekriterien
+> bis zum Produktivbetrieb stehen in [docs/roadmap/fahrplan-verkaufsprodukt.md](docs/roadmap/fahrplan-verkaufsprodukt.md)
+> (Meilensteine M5 bis M8).
+
 ## Phase 1: Pre-Deployment
 
 ### Infrastructure

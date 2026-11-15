@@ -20925,7 +20925,7 @@ INVENTORY-AISLE-DRIFT-20261115 und RLS-ALTTEST-BESTELLUNGEN-20261115 Operationsa
 
 CI-KANONISCHE-BACKENDSUITE-20261114 und SECURITY-LANGGRAPH-ZOD-20261115 GitHub-abgenommen aufe8a2e92d5: 68Checksgruen, QG43653854329/Sonar132638443225success, Vollsuite28444pass/72skip/1deselected, StrictDB701pass/4skip. CI/CD43653854364uebernimmtverifizierteEvidenzrealohneeigeneDB/Vollsuite. PR135gemergt: main/develop e9ae5cab6, normalerFFfuerdevelop. FuerMergewarReviewausnahmemitbestehendenAdminrechtennoetig; keineTest-/Branchregelaenderung. FolgesliceO2CHTTPbleibtbiszumechtenRuninArbeit; Operations-/SQLNachweiseundMatrixstatusnichtvermischen.
 
-## FAHRPLAN-VERKAUFSPRODUKT-20261115 — in Arbeit, Claude Code
+## FAHRPLAN-VERKAUFSPRODUKT-20261115 — zur Abnahme, Claude Code
 Owner: Claude Code. Stand: in Arbeit (Claim 15.11.2026).
 Ziel: einen gepflegten Gesamtfahrplan bis zum Verkaufsprodukt ins Repo bringen (Meilensteine M0-M8 mit messbarer Abnahme, Arbeitsteilung Codex/Claude/Cursor, Regeln fuer Workboard und Handshakes). Grundlage: Nutzerentscheidungen vom 15.11.2026 (alle Domaenen; Betrieb in drei Stufen Spiegelbetrieb eigener Server -> On-Premises -> SaaS; kriteriengetrieben; vollstaendige Fibu).
 Dateibesitz: docs/roadmap/fahrplan-verkaufsprodukt.md (neu), docs/roadmap/README.md, GO-LIVE-CHECKLIST.md (nur Verweis), docs/agent-ops/handshakes/claude-an-codex-fahrplan-20261115.md (neu), dieser Workboard-Eintrag. Kein Code, keine Migration, keine Datenbank.
