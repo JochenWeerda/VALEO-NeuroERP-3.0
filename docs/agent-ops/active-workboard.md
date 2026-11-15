@@ -21128,3 +21128,19 @@ strict-DB-Tests. Ein vorhandener PostgreSQL-Job, keine Zusatzdatenbank oder
 weiterer Container. Diese Artefakte liefern den physischen Tabellenkatalog,
 solange der gemeinsame lokale Pruefstand Metadatenrechte nicht bereitstellt.
 Keine Testselektion schwaechen, kein Datenbefund oder Geheimnis im Export.
+
+## M0-ROHWARE-FORMEL-SAFETY-20261115 — reserviert, Codex
+
+Vor Aktivierung neuer Tabellen gefunden: _eval_formula nutzt echtes eval mit
+leerem builtins-Dict, aber ohne AST-Zugriffsbeschraenkung. Objektzugriffe bleiben
+damit prinzipiell moeglich. Besitz Sicherheitsagent: neue reine begrenzte
+Arithmetik app/services/rohware_formula.py, nur _eval_formula und Testrechnungs-
+Eingabe-/Fehlerpfad in app/api/v1/endpoints/rohware_schema.py, neue enge
+Formel-Sicherheitsvertraege und QA. Vorhandene gueltige Mathematik/Funktionen
+erhalten; kein eval/compile, keine Attribute/Subscripts/Comprehensions/Lambdas/
+Importe, begrenzte Formelgroesse/AST-Tiefe und nur endliche Zahlen. Ungueltige
+Testrechnung darf keinen scheinbar gueltigen Gesamtpreis liefern.
+Lead ersetzt zusaetzlich ausschliesslich konstante SQL-Identifier-Fstrings im
+neuen Schemadienst durch gleichwertige Literalabfragen, statt Scanner-Ausnahmen
+aufzunehmen. Keine Rolle/DDL/DB/Schema-/Formel-Fachregel ausweiten. Lead integriert
+Artefakte und DB-Nachweise; keine neue Testdatenbank/Container.
