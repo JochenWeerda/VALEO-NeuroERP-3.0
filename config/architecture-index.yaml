@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-15
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-15T08:16:16Z'
+generated_at: '2026-11-15T08:33:42Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1053,6 +1053,7 @@ domains:
     - audit_hardening
     - beleg_anlage
     - beleg_druck
+    - beleg_erechnung
     - beleg_liste
     - compliance_pcn_lifecycle_service
     - compliance_service
@@ -1087,6 +1088,7 @@ domains:
     - atlas_zollausfuhr
     - audit
     - audit_evidence
+    - beleg_erechnung
     - beleg_import
     - beleg_versand
     - belege
@@ -2391,10 +2393,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 344
-  backend_services_mapped: 344
-  backend_endpoints_total: 480
-  backend_endpoints_mapped: 480
+  backend_services_total: 345
+  backend_services_mapped: 345
+  backend_endpoints_total: 481
+  backend_endpoints_mapped: 481
 unmapped:
   frontend_routes: []
   backend_services: []
