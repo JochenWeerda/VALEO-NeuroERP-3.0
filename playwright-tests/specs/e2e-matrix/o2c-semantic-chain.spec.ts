@@ -1,5 +1,5 @@
-/** Real HTTP evidence for o2c-001/002. Creates its own tenant-owned customer through the canonical API.
- * Invoice, payment, dunning and external export remain unimplemented matrix gaps;
+/** Real HTTP evidence for o2c-001/002 and delivery-to-invoice conversion for o2c-003.
+ * Invoice issuance/PDF, payment, dunning and external export remain separate matrix gaps;
  * the removed legacy smoke accepted failures and provided no evidence for them.
  */
 import { randomUUID } from 'node:crypto'
@@ -39,8 +39,8 @@ async function login(role: 'POWER' | 'READ'): Promise<string> {
   return (await holeTokens(user, password)).access
 }
 const read = (token: string, id: string) => http<Header>(token, 'get', `${ROOT}/${id}`, 200)
-const options = (token: string, id: string) => http<Options>(token, 'get',
-  `${ROOT}/${id}/conversion-options?target_doc_type=sales_delivery`, 200)
+const options = (token: string, id: string, target: 'sales_delivery' | 'sales_invoice' = 'sales_delivery') =>
+  http<Options>(token, 'get', `${ROOT}/${id}/conversion-options?target_doc_type=${target}`, 200)
 
 async function createOrder(token: string) {
   const run = randomUUID()
@@ -146,4 +146,80 @@ test('o2c-002 @critical — partial delivery persists, replay and rejected write
   expect(await read(power, delivery.id)).toEqual(delivery)
   // HTTP commits are real. Retain the uniquely numbered own customers and documents as evidence;
   // no database reset or unsafe broad cleanup. Foreign-token isolation needs tenant B.
+})
+
+test('o2c-003 @critical — delivery becomes one persisted invoice without double billing', async () => {
+  const power = await login('POWER')
+  const readonly = await login('READ')
+  const { saved: order, run } = await createOrder(power)
+  const orderOptions = await options(power, order.id)
+  const deliveryCommand = { target_doc_type: 'sales_delivery', idempotency_key: `invoice-delivery-${run}`,
+    expected_version: orderOptions.version, quantities_by_source_item_id: { [order.items[0].id]: 4 } }
+  const deliveryResult = await http<{ target_doc_id: string; status: string }>(
+    power, 'post', `${ROOT}/${order.id}/convert`, 200, deliveryCommand)
+  expect(deliveryResult.status).toBe('ok')
+  const delivery = await read(power, deliveryResult.target_doc_id)
+  expect(delivery).toMatchObject({ doc_type: 'sales_delivery', status: 'open', tenant_id: E2E_MANDANT,
+    customer_id: order.customer_id, source_ref: order.id, total_net: 80, total_tax: 0, total_gross: 80 })
+  expect(delivery.items).toHaveLength(1)
+  expect(delivery.items[0]).toMatchObject({ source_line_id: order.items[0].id, quantity: 4,
+    unit_price: 20, line_total_net: 80 })
+  const invoiceOptions = await options(power, delivery.id, 'sales_invoice')
+  expect(invoiceOptions).toMatchObject({ source_doc_id: delivery.id, source_doc_type: 'sales_delivery',
+    target_doc_type: 'sales_invoice', version: delivery.version })
+  expect(invoiceOptions.items).toEqual([expect.objectContaining({ source_item_id: delivery.items[0].id,
+    quantity: 4, remaining_quantity: 4 })])
+  const invoiceCommand = { target_doc_type: 'sales_invoice', idempotency_key: `invoice-convert-${run}`,
+    expected_version: invoiceOptions.version, quantities_by_source_item_id: { [delivery.items[0].id]: 4 } }
+  const orderWithDelivery = await read(power, order.id)
+  const directCommand = { ...invoiceCommand, idempotency_key: `invoice-direct-${run}`,
+    expected_version: orderWithDelivery.version,
+    quantities_by_source_item_id: { [order.items[0].id]: 4 } }
+  // Valid commands make the authorization and business-rule failures observable.
+  await http('', 'post', `${ROOT}/${delivery.id}/convert`, 401, invoiceCommand)
+  await http(readonly, 'post', `${ROOT}/${delivery.id}/convert`, 403, invoiceCommand)
+  const otherTenant = randomUUID()
+  await http(power, 'post', `${ROOT}/${delivery.id}/convert`, 403, invoiceCommand, otherTenant)
+  await http(power, 'post', `${ROOT}/${delivery.id}/convert?tenant_id=${otherTenant}`, 403, invoiceCommand)
+  await http(power, 'post', `${ROOT}/${order.id}/convert`, 409, directCommand)
+  await http(power, 'post', `${ROOT}/${delivery.id}/convert`, 409,
+    { ...invoiceCommand, idempotency_key: `invoice-future-version-${run}`, expected_version: invoiceOptions.version + 1 })
+  await http(power, 'post', `${ROOT}/${delivery.id}/convert`, 400,
+    { ...invoiceCommand, idempotency_key: `invoice-overqty-${run}`,
+      quantities_by_source_item_id: { [delivery.items[0].id]: 5 } })
+  expect(await options(power, delivery.id, 'sales_invoice')).toEqual(invoiceOptions)
+  expect(await read(power, delivery.id)).toEqual(delivery)
+  expect(await read(power, order.id)).toEqual(orderWithDelivery)
+
+  const result = await http<{ command: string; status: string; source_doc_id: string;
+    target_doc_id: string; idempotent_hit: boolean }>(
+      power, 'post', `${ROOT}/${delivery.id}/convert`, 200, invoiceCommand)
+  expect(result).toMatchObject({ command: 'convert', status: 'ok', source_doc_id: delivery.id,
+    idempotent_hit: false })
+  expect(result.target_doc_id).toMatch(/^[0-9a-f-]{36}$/i)
+  const invoice = await read(power, result.target_doc_id)
+  expect(invoice).toMatchObject({ tenant_id: E2E_MANDANT, doc_type: 'sales_invoice', status: 'open',
+    customer_id: order.customer_id, source_ref: delivery.id, total_net: 80, total_tax: 0, total_gross: 80,
+    version: 1 })
+  expect(invoice.items).toHaveLength(1)
+  expect(invoice.items[0]).toMatchObject({ source_line_id: delivery.items[0].id,
+    article_number: order.items[0].article_number, quantity: 4, unit_price: 20, line_total_net: 80 })
+  const invoiceRemaining = await options(power, delivery.id, 'sales_invoice')
+  expect(invoiceRemaining.version).toBe(invoiceOptions.version + 1)
+  expect(invoiceRemaining.items).toEqual([expect.objectContaining({ source_item_id: delivery.items[0].id,
+    remaining_quantity: 0 })])
+  const deliveryAfter = await read(power, delivery.id)
+  const orderAfter = await read(power, order.id)
+  expect(deliveryAfter.items).toEqual(delivery.items)
+  expect(orderAfter.items).toEqual(order.items)
+  const replay = await http<typeof result>(power, 'post', `${ROOT}/${delivery.id}/convert`, 200, invoiceCommand)
+  expect(replay).toMatchObject({ ...result, idempotent_hit: true })
+  // A new command must reject the genuinely superseded source version, unlike an exact replay.
+  await http(power, 'post', `${ROOT}/${delivery.id}/convert`, 409,
+    { ...invoiceCommand, idempotency_key: `invoice-stale-${run}`,
+      quantities_by_source_item_id: { [delivery.items[0].id]: 1 } })
+  expect(await options(power, delivery.id, 'sales_invoice')).toEqual(invoiceRemaining)
+  expect(await read(power, delivery.id)).toEqual(deliveryAfter)
+  expect(await read(power, invoice.id)).toEqual(invoice)
+  expect(await read(power, order.id)).toEqual(orderAfter)
 })

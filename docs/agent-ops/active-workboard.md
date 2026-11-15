@@ -20972,3 +20972,9 @@ Quellenkette, konkrete Mengen/Betrag/Steuer, Readback, Replay ohne Doppelwirkung
 Rollen-/Mandanten-/Versions-/Uebermengennegative ohne Wirkung und Doppelrechnungsweg
 abgewiesen. Keine Behauptung von Festschreibung/PDF/Zahlung/OP aus Entwurfsanlage.
 PR137-Quellkopf bleibt unveraendert; neue CI erst nach dessen Integration.
+
+ACTION-MATRIX-O2C-INVOICE-20261115 implementiert/reviewt: dritter echter HTTP-Fall
+mit Quellenkette und Wiederholungs-/Versions-/Rollen-/Mengen-/Mandantenspoofing-
+Gegenproben. Enge TypeScript-Pruefung und Sammlung (3 Faelle) gruen; reale CI-
+Fachabnahme noch offen. Rechnungsstatus kanonisch open, keine Ausstellung/PDF/
+Buchung/Zahlung behauptet. PR137 laeuft unveraendert, neue CI erst danach.
