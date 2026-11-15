@@ -21080,3 +21080,11 @@ gezielte Faelle gruen. SQL-/Verbindungsfehler werden nicht als Istwertnull
 zurueckgegeben. Echter Nullwert und Erfolg erhalten; neutral503undRollback-
 Aufruf. DB-Ergebnisattrappen, kein echter SQL-/RLS-Nachweis. QA
 m0-budget-actuals-20261115.md; fehlende Budgettabellen separat offen.
+
+M0-ROHWARE-TENANT-20261115 lokaler Guardnachweis: 19 neue HTTP-Faelle plus
+16 erhaltene Waage-/Formelfaelle gemeinsam35pass. Zwei schwache direkte
+Rohware-Mocks nach staerkerem Lebenszyklus-Ersatz entfernt. DB-/Rollen-/
+Identitaetsattrappen, keine echte RLS-Abnahme. Nutzervorgabe danach erweitert:
+fehlende Tabellen/Routen tatsaechlich ergaenzen, auf vorhandenen kanonischen
+Rohware-Stamm aufbauen und keine zweite unabhaengige Schema-Stammtabelle.
+Getrennte Architektur-/Migrationsclaims folgen vor strukturellen Edits.

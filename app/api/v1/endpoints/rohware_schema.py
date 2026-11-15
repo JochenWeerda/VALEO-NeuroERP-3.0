@@ -28,6 +28,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import BaseSchema
 from pydantic import ConfigDict as _ConfigDict
@@ -56,7 +57,22 @@ def _check_tables(db: Session) -> None:
     try:
         db.execute(text("SELECT 1 FROM rohware_schemata LIMIT 1"))
     except Exception:
+        db.rollback()
         raise HTTPException(status_code=503, detail=_MIGRATION_503["detail"])
+
+
+def _reject_tenant_override(payload: Dict[str, Any], tenant_id: str) -> None:
+    if "tenant_id" in payload and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=403, detail="Mandantenkontext stimmt nicht überein")
+
+
+def _require_schema(db: Session, schema_id: str, tenant_id: str) -> None:
+    row = db.execute(
+        text("SELECT id FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+        {"id": schema_id, "tenant_id": tenant_id},
+    ).fetchone()
+    if not row:
+        raise HTTPException(status_code=404, detail="Schema nicht gefunden")
 
 
 # ---------------------------------------------------------------------------
@@ -69,23 +85,20 @@ async def list_schemata(
     status: Optional[str] = Query(None, description="AKTIV | ENTWURF | ARCHIV"),
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=500),
-    tenant_id: Optional[str] = Query(None),
+    tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
     """Liste aller Abrechnungsschemata (optional gefiltert)."""
     try:
         _check_tables(db)
-        conditions = []
-        params: Dict[str, Any] = {"skip": skip, "limit": limit}
+        conditions = ["tenant_id = :tenant_id"]
+        params: Dict[str, Any] = {"skip": skip, "limit": limit, "tenant_id": tenant_id}
         if rohwaren_gruppe:
             conditions.append("rohwaren_gruppe = :rohwaren_gruppe")
             params["rohwaren_gruppe"] = rohwaren_gruppe
         if status:
             conditions.append("status = :status")
             params["status"] = status
-        if tenant_id:
-            conditions.append("tenant_id = :tenant_id")
-            params["tenant_id"] = tenant_id
 
         where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
         rows = db.execute(
@@ -95,17 +108,20 @@ async def list_schemata(
         return [dict(r) for r in rows]
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.post("", response_model=RohwareOut, status_code=201, summary="Schema anlegen", dependencies=SCHREIBEN["LAGER"])
 async def create_schema(
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Neues Abrechnungsschema anlegen (Status=ENTWURF)."""
     try:
+        _reject_tenant_override(payload, tenant_id)
         _check_tables(db)
         schema_id = str(uuid.uuid4())
         now = datetime.utcnow().isoformat()
@@ -118,7 +134,7 @@ async def create_schema(
             "gueltig_bis": payload.get("gueltig_bis"),
             "version": payload.get("version", 1),
             "status": "ENTWURF",
-            "tenant_id": payload.get("tenant_id"),
+            "tenant_id": tenant_id,
             "created_at": now,
             "updated_at": now,
         }
@@ -139,33 +155,34 @@ async def create_schema(
         return row
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.get("/{schema_id}", response_model=RohwareOut, summary="Schema abrufen")
-async def get_schema(schema_id: str, db: Session = Depends(get_db)):
+async def get_schema(schema_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     """Schema-Detail inkl. Positionen."""
     try:
         _check_tables(db)
         schema = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         if not schema:
             raise HTTPException(status_code=404, detail=f"Schema {schema_id} nicht gefunden")
         lines = db.execute(
-            text("SELECT * FROM rohware_schema_lines WHERE schema_id = :id ORDER BY sort_order"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schema_lines WHERE schema_id = :id AND EXISTS (SELECT 1 FROM rohware_schemata s WHERE s.id = :id AND s.tenant_id = :tenant_id) ORDER BY sort_order"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().all()
         result = dict(schema)
         result["lines"] = [dict(l) for l in lines]
         return result
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.patch("/{schema_id}", response_model=RohwareOut, summary="Schema aktualisieren", dependencies=SCHREIBEN["LAGER"])
@@ -173,13 +190,15 @@ async def update_schema(
     schema_id: str,
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Schema aktualisieren â€” nur im Status ENTWURF erlaubt."""
     try:
+        _reject_tenant_override(payload, tenant_id)
         _check_tables(db)
         row = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         if not row:
             raise HTTPException(status_code=404, detail=f"Schema {schema_id} nicht gefunden")
@@ -193,30 +212,30 @@ async def update_schema(
         updates["updated_at"] = datetime.utcnow().isoformat()
         set_clause = ", ".join(f"{k} = :{k}" for k in updates)
         db.execute(
-            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-            {**updates, "id": schema_id},
+            text(f"UPDATE rohware_schemata SET {set_clause} WHERE id = :id AND tenant_id = :tenant_id"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
+            {**updates, "id": schema_id, "tenant_id": tenant_id},
         )
         db.commit()
         updated = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         return dict(updated)
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.post("/{schema_id}/aktivieren", response_model=RohwareOut, summary="Aktivieren", dependencies=SCHREIBEN["LAGER"])
-async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
+async def aktivieren(schema_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     """Setzt Status ENTWURF â†’ AKTIV. Voraussetzung: gueltig_ab muss gesetzt sein."""
     try:
         _check_tables(db)
         row = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         if not row:
             raise HTTPException(status_code=404, detail=f"Schema {schema_id} nicht gefunden")
@@ -232,31 +251,31 @@ async def aktivieren(schema_id: str, db: Session = Depends(get_db)):
             )
         db.execute(
             text(
-                "UPDATE rohware_schemata SET status = 'AKTIV', updated_at = :now WHERE id = :id"
+                "UPDATE rohware_schemata SET status = 'AKTIV', updated_at = :now WHERE id = :id AND tenant_id = :tenant_id"
             ),
-            {"now": datetime.utcnow().isoformat(), "id": schema_id},
+            {"now": datetime.utcnow().isoformat(), "id": schema_id, "tenant_id": tenant_id},
         )
         db.commit()
         updated = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         return dict(updated)
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.post("/{schema_id}/archivieren", response_model=RohwareOut, summary="Archivieren", dependencies=SCHREIBEN["LAGER"])
-async def archivieren(schema_id: str, db: Session = Depends(get_db)):
+async def archivieren(schema_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     """Setzt Status AKTIV â†’ ARCHIV."""
     try:
         _check_tables(db)
         row = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         if not row:
             raise HTTPException(status_code=404, detail=f"Schema {schema_id} nicht gefunden")
@@ -267,21 +286,21 @@ async def archivieren(schema_id: str, db: Session = Depends(get_db)):
             )
         db.execute(
             text(
-                "UPDATE rohware_schemata SET status = 'ARCHIV', updated_at = :now WHERE id = :id"
+                "UPDATE rohware_schemata SET status = 'ARCHIV', updated_at = :now WHERE id = :id AND tenant_id = :tenant_id"
             ),
-            {"now": datetime.utcnow().isoformat(), "id": schema_id},
+            {"now": datetime.utcnow().isoformat(), "id": schema_id, "tenant_id": tenant_id},
         )
         db.commit()
         updated = db.execute(
-            text("SELECT * FROM rohware_schemata WHERE id = :id"),
-            {"id": schema_id},
+            text("SELECT * FROM rohware_schemata WHERE id = :id AND tenant_id = :tenant_id"),
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().fetchone()
         return dict(updated)
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 # ---------------------------------------------------------------------------
@@ -289,21 +308,23 @@ async def archivieren(schema_id: str, db: Session = Depends(get_db)):
 # ---------------------------------------------------------------------------
 
 @router.get("/{schema_id}/lines", response_model=list[RohwareOut], summary="Lines auflisten")
-async def list_lines(schema_id: str, db: Session = Depends(get_db)):
+async def list_lines(schema_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     """Alle Positionen eines Schemas."""
     try:
         _check_tables(db)
+        _require_schema(db, schema_id, tenant_id)
         lines = db.execute(
             text(
-                "SELECT * FROM rohware_schema_lines WHERE schema_id = :id ORDER BY sort_order"
+                "SELECT * FROM rohware_schema_lines WHERE schema_id = :id AND EXISTS (SELECT 1 FROM rohware_schemata s WHERE s.id = :id AND s.tenant_id = :tenant_id) ORDER BY sort_order"
             ),
-            {"id": schema_id},
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().all()
         return [dict(l) for l in lines]
     except HTTPException:
         raise
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.post("/{schema_id}/lines", response_model=RohwareOut, status_code=201, summary="Line hinzufÃ¼gen", dependencies=SCHREIBEN["LAGER"])
@@ -311,10 +332,13 @@ async def add_line(
     schema_id: str,
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Position zu einem Schema hinzufÃ¼gen."""
     try:
+        _reject_tenant_override(payload, tenant_id)
         _check_tables(db)
+        _require_schema(db, schema_id, tenant_id)
         line_id = str(uuid.uuid4())
         row = {
             "id": line_id,
@@ -326,24 +350,26 @@ async def add_line(
             "sort_order": payload.get("sort_order", 10),
             "created_at": datetime.utcnow().isoformat(),
         }
-        db.execute(
+        result = db.execute(
             text(
                 """
                 INSERT INTO rohware_schema_lines
                     (id, schema_id, positions_typ, bezeichnung, berechnungsformel, einheit, sort_order, created_at)
-                VALUES
-                    (:id, :schema_id, :positions_typ, :bezeichnung, :berechnungsformel, :einheit, :sort_order, :created_at)
+                SELECT :id, :schema_id, :positions_typ, :bezeichnung, :berechnungsformel, :einheit, :sort_order, :created_at
+                WHERE EXISTS (SELECT 1 FROM rohware_schemata s WHERE s.id = :schema_id AND s.tenant_id = :tenant_id)
                 """
             ),
-            row,
+            {**row, "tenant_id": tenant_id},
         )
+        if result.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Schema nicht gefunden")
         db.commit()
         return row
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 @router.delete("/{schema_id}/lines/{line_id}", status_code=204, response_class=Response, response_model=None, summary="Line lÃ¶schen", dependencies=SCHREIBEN["LAGER"])
@@ -351,15 +377,16 @@ async def delete_line(
     schema_id: str,
     line_id: str,
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """Position aus Schema entfernen."""
     try:
         _check_tables(db)
         result = db.execute(
             text(
-                "DELETE FROM rohware_schema_lines WHERE id = :line_id AND schema_id = :schema_id"
+                "DELETE FROM rohware_schema_lines WHERE id = :line_id AND schema_id = :schema_id AND EXISTS (SELECT 1 FROM rohware_schemata s WHERE s.id = :schema_id AND s.tenant_id = :tenant_id)"
             ),
-            {"line_id": line_id, "schema_id": schema_id},
+            {"line_id": line_id, "schema_id": schema_id, "tenant_id": tenant_id},
         )
         db.commit()
         if result.rowcount == 0:
@@ -369,9 +396,9 @@ async def delete_line(
             )
     except HTTPException:
         raise
-    except Exception as e:
+    except Exception:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
 
 # ---------------------------------------------------------------------------
@@ -405,15 +432,21 @@ async def testrechnung(
     schema_id: str,
     payload: Dict[str, Any],
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
     """
     Berechnet Testpreis anhand der Schema-Formeln.
     Body: { basis_preis, feuchte, hl_gewicht, bruch, menge_kg }
     """
     try:
+        _reject_tenant_override(payload, tenant_id)
         _check_tables(db)
+        _require_schema(db, schema_id, tenant_id)
     except HTTPException:
         raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
     context: Dict[str, float] = {
         "basis_preis": float(payload.get("basis_preis", 0)),
@@ -426,12 +459,13 @@ async def testrechnung(
     try:
         lines = db.execute(
             text(
-                "SELECT * FROM rohware_schema_lines WHERE schema_id = :id ORDER BY sort_order"
+                "SELECT * FROM rohware_schema_lines WHERE schema_id = :id AND EXISTS (SELECT 1 FROM rohware_schemata s WHERE s.id = :id AND s.tenant_id = :tenant_id) ORDER BY sort_order"
             ),
-            {"id": schema_id},
+            {"id": schema_id, "tenant_id": tenant_id},
         ).mappings().all()
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"DB-Fehler: {e}")
+    except Exception:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Datenbank nicht verfügbar")
 
     if not lines:
         raise HTTPException(status_code=404, detail=f"Schema {schema_id} hat keine Positionen")
