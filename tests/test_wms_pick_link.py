@@ -10,7 +10,7 @@ Prüft:
 from __future__ import annotations
 
 from decimal import Decimal
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -168,16 +168,15 @@ class TestConfirmPickListShipsDeliveryNote:
         db.execute.side_effect = execute_side
         return db
 
-    def test_setzt_delivery_note_auf_shipped_wenn_abgeschlossen(self):
+    def test_abschluss_schreibt_keinen_lieferschein_altspeicher(self):
         db = self._db_for_confirm()
         svc = _svc(db)
         result = svc.confirm_pick_list("PL-001", [{"line_id": "LINE-1", "quantity_picked": 10}])
         assert result["status"] == "COMPLETED"
-        # Prüfen: UPDATE delivery_notes SET status = 'shipped' wurde aufgerufen
+        # Der Altspeicher wird nicht mehr fortgeschrieben (BELEG-052); den DocFlow-Lieferschein schliesst sein
+        # Kommando ab (tests/test_lieferschein_pickliste_docflow.py).
         update_calls = [str(c.args[0]) for c in db.execute.call_args_list]
-        assert any("delivery_notes" in s and "shipped" in s for s in update_calls), (
-            "Lieferschein wurde nicht auf shipped gesetzt"
-        )
+        assert not any("domain_sales.delivery_notes" in s for s in update_calls)
 
     def test_kein_delivery_note_update_bei_anderem_doc_type(self):
         db = self._db_for_confirm(source_doc_type="MANUAL")

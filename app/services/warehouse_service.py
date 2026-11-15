@@ -532,12 +532,6 @@ class WarehouseService:
                 from app.services.docflow_service import DocflowService
 
                 DocflowService(self.db, self.tenant_id).lieferung_abschliessen(pl_meta.source_doc_ref, pick_list_id)
-            elif pl_meta and pl_meta.source_doc_type == "DELIVERY_NOTE" and pl_meta.source_doc_ref:
-                self.db.execute(text("""
-                    UPDATE domain_sales.delivery_notes
-                    SET status = 'shipped', updated_at = NOW()
-                    WHERE id = :id AND tenant_id = :tid AND status IN ('posted', 'printed')
-                """), {"id": pl_meta.source_doc_ref, "tid": self.tenant_id})
 
         self.db.commit()
         return {"pick_list_id": pick_list_id, "status": new_pl_status}

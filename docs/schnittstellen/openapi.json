@@ -184061,30 +184061,6 @@
         "title": "PreviewIn",
         "type": "object"
       },
-      "app__api__v1__endpoints__sales_storno__StornoIn": {
-        "properties": {
-          "bediener": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Bediener"
-          },
-          "grund": {
-            "title": "Grund",
-            "type": "string"
-          }
-        },
-        "required": [
-          "grund"
-        ],
-        "title": "StornoIn",
-        "type": "object"
-      },
       "app__api__v1__endpoints__self_billing__PreviewIn": {
         "properties": {
           "harvest_acceptance_id": {
@@ -391426,68 +391402,6 @@
         ]
       }
     },
-    "/api/v1/sales/deliveries/{delivery_no}/storno": {
-      "post": {
-        "operationId": "storno_delivery_api_v1_sales_deliveries__delivery_no__storno_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "delivery_no",
-            "required": true,
-            "schema": {
-              "title": "Delivery No",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/app__api__v1__endpoints__sales_storno__StornoIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Lieferschein stornieren (durchgängig in den Match)",
-        "tags": [
-          "sales",
-          "o2c",
-          "storno",
-          "sales",
-          "o2c",
-          "storno"
-        ]
-      }
-    },
     "/api/v1/sales/match": {
       "get": {
         "operationId": "match_api_v1_sales_match_get",
@@ -392357,60 +392271,6 @@
           "sales",
           "credit-notes",
           "returns"
-        ]
-      }
-    },
-    "/api/v1/sales/storno/status": {
-      "get": {
-        "operationId": "storno_status_api_v1_sales_storno_status_get",
-        "parameters": [
-          {
-            "description": "Auftragsnummer oder -ID",
-            "in": "query",
-            "name": "auftrag",
-            "required": true,
-            "schema": {
-              "description": "Auftragsnummer oder -ID",
-              "title": "Auftrag",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Storno-/Gutschrift-Status je Auftrag",
-        "tags": [
-          "sales",
-          "o2c",
-          "storno",
-          "sales",
-          "o2c",
-          "storno"
         ]
       }
     },

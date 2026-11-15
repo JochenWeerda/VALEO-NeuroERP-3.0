@@ -23,7 +23,6 @@ from app.core.uuid7 import uuid7
 logger = logging.getLogger(__name__)
 
 from app.api.v1.schemas.base import StatusResponse
-from app.documents.router_helpers import eigener_beleg, get_repository, save_to_store
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -94,32 +93,8 @@ async def create_return(
     )
     db.commit()
 
-    # Belegbruch schließen: Lieferschein und Rechnung als retourniert markieren
-    if payload.delivery_note_reference:
-        try:
-            db.execute(
-                text("""
-                    UPDATE domain_sales.delivery_notes
-                    SET status = 'returned', updated_at = NOW()
-                    WHERE (id = :ref OR delivery_note_number = :ref)
-                      AND tenant_id = :tid
-                      AND status NOT IN ('returned', 'BERECHNET')
-                """),
-                {"ref": payload.delivery_note_reference, "tid": tid},
-            )
-            db.commit()
-        except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch
-            pass
-
-    if payload.invoice_reference:
-        try:
-            repo = get_repository(db)
-            inv = eigener_beleg("sales_invoice", payload.invoice_reference, tid, repo)
-            if inv and inv.get("status") not in ("STORNIERT", "GUTGESCHRIEBEN"):
-                inv["status"] = "GUTGESCHRIEBEN"
-                save_to_store("sales_invoice", payload.invoice_reference, inv, repo)
-        except Exception:  # noqa: BLE001 — Rechnungsstatus-Update nicht kritisch
-            pass
+    # Lieferschein und Rechnung fuehrt DocFlow (BELEG-052): die Retoure haelt ihre Bezuege selbst
+    # (delivery_note_reference, invoice_reference); die Altspeicher werden nicht mehr fortgeschrieben.
 
     return ReturnOut(id=ret_id, tenant_id=tid, **payload.model_dump(exclude={"tenant_id"}))
 

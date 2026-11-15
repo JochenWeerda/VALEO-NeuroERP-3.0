@@ -303,7 +303,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_offer_import` | Atomic, idempotent import of explicitly specified sales offers. |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
 | `sales_preisabweichung_service` | DOM-SALES-004.4 — Preisabweichungs-Prüfung + Eskalation/Freigabe Service. |
-| `sales_storno_service` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4) — durchgängig. |
 | `schaden_service` | Schadenmeldungen und Versicherungsvertraege — eine Meldung, die es gibt. |
 | `scheduler_service` | Scheduler Service |
 | `secrets_vault` | Secrets Vault Service — NC-15 |

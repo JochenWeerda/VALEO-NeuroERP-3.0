@@ -39,7 +39,6 @@ LESER = frozenset({
     "app/services/procurement_service.py",
     "app/services/sales_credit_service.py",
     "app/services/sales_match_service.py",
-    "app/services/sales_storno_service.py",
     "app/services/webshop_integration_service.py",
     "modules/einkauf/services/bestellvorschlag_service.py",
 })

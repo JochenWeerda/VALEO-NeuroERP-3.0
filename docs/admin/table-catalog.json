@@ -48279,17 +48279,10 @@
             "app/services/o2c_chain_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
-            "app/services/sales_storno_service.py",
             "app/services/warehouse_service.py"
           ],
           "screens": [
             "admin/branches"
-          ],
-          "written_by": [
-            "app/api/v1/endpoints/logistics_tours.py",
-            "app/api/v1/endpoints/sales_credit_notes.py",
-            "app/services/sales_storno_service.py",
-            "app/services/warehouse_service.py"
           ]
         },
         "sales_ab_status_log": {
@@ -48511,8 +48504,7 @@
           "read_by": [
             "app/services/finance_freigabe.py",
             "app/services/gutschrift_docflow.py",
-            "app/services/mcp_execution_service.py",
-            "app/services/sales_storno_service.py"
+            "app/services/mcp_execution_service.py"
           ]
         },
         "sales_delivery_notes": {

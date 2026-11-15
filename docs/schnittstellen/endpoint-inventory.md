@@ -419,7 +419,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_order_commands` | Lieferschein-Status und Preisabweichung (DOM-SALES-004) unter ``/sales/orders``; Bearbeiter aus dem Token. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
-| `sales_storno` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4). |
 | `sanctions_compliance` | Sanctions Compliance API — Verbotsliste / Sanktionsprüfung |
 | `scan` | Mobile-Scan / Barcode-Dispatch API. |
 | `schaeden` | Schadenmeldungen und Versicherungsvertraege. |

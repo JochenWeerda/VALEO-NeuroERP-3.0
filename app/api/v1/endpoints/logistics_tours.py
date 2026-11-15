@@ -775,23 +775,8 @@ def save_pod(
             {"stop_id": stop_id, "tenant_id": tenant_id},
         ).mappings().first()
 
-        # Belegbruch schließen: Lieferschein-Status auf 'delivered' setzen
-        dn_ref = row.get("delivery_note_ref")
-        if dn_ref:
-            try:
-                db.execute(
-                    text("""
-                        UPDATE domain_sales.delivery_notes
-                        SET status = 'delivered', updated_at = NOW()
-                        WHERE (id = :ref OR delivery_note_number = :ref)
-                          AND tenant_id = :tid
-                          AND status NOT IN ('delivered', 'BERECHNET')
-                    """),
-                    {"ref": dn_ref, "tid": tenant_id},
-                )
-                db.commit()
-            except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch für POD-Erfolg
-                db.rollback()  # sonst bleibt die Sitzung in einer abgebrochenen Transaktion
+        # Der Lieferschein ist DocFlow-Beleg (BELEG-052). Sein Stand "ausgeliefert" folgt der bestaetigten Pickliste
+        # (Bestand und Beleg in einer Transaktion); der Zustellnachweis steht am Tourstopp und aendert ihn nicht.
 
         return dict(row)
     except HTTPException:
