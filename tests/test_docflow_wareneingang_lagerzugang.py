@@ -184,3 +184,77 @@ def test_wareneingang_aus_avis_wandelt_die_docflow_bestellung_und_lagert_ein(w):
                            {"id": avis}).scalar() == "ERHALTEN"
     with pytest.raises(WareneingangAvisError, match="nichts mehr offen"):
         buche_wareneingang_aus_avis(w["db"], avis, w["t"], "HL-1", "LS-78", "lager-1")
+
+
+def test_rest_weg_meldet_unbekannten_beleg_und_unerwarteten_fehler(w, monkeypatch):
+    """Unbekannter Beleg ist 404; ein unerwarteter Fehler wird zurueckgerollt und als 500 gemeldet, nicht verschluckt."""
+    import asyncio
+
+    from fastapi import HTTPException
+
+    from app.api.v1.endpoints.docflow import store_goods_receipt
+    from app.api.v1.schemas.docflow_schemas import DocflowStoreRequest
+    from app.services.docflow_service import DocflowService
+
+    nutzer = {"sub": "lager-1", "roles": ["LAGER_BEARBEITEN"]}
+
+    def lagere(beleg: str, wer=nutzer):
+        return asyncio.run(store_goods_receipt(beleg, DocflowStoreRequest(idempotency_key=f"rest-{uuid.uuid4().hex}",
+                                                                          lager="HL-1"),
+                                               tenant_id=w["t"], db=w["db"], nutzer=wer))
+
+    # Ohne Beleg laesst sich die Belegart nicht bestimmen: die Lagerrolle bekommt 403, ein Berechtigter 404.
+    with pytest.raises(HTTPException) as verwehrt:
+        lagere(str(uuid.uuid4()))
+    assert verwehrt.value.status_code == 403
+    with pytest.raises(HTTPException) as unbekannt:
+        lagere(str(uuid.uuid4()), {"sub": "admin-1", "roles": ["admin"]})
+    assert unbekannt.value.status_code == 404
+
+    we = _wareneingang(w)
+
+    def kaputt(*_a, **_k):
+        raise RuntimeError("Speicher weg")
+
+    monkeypatch.setattr(DocflowService, "einlagern", kaputt)
+    with pytest.raises(HTTPException) as fehler:
+        lagere(we)
+    assert fehler.value.status_code == 500 and "Speicher weg" in fehler.value.detail
+
+
+def test_pruefung_des_zugangs_gleiche_einheit_und_leere_positionen(w):
+    from app.core.exceptions import ValidationFailedError
+    from app.services.docflow_lagerzugang import pruefe_lagerzugang
+
+    lager, vorhaben = pruefe_lagerzugang(w["db"], w["t"], [
+        {"line_number": 1, "article_number": "DUE-1", "quantity": 0, "unit": "kg"},      # ohne Menge: uebergangen
+        {"line_number": 2, "article_number": "DUE-1", "quantity": 250, "unit": "kg"},    # Lagereinheit: unveraendert
+    ], "HL-1")
+    assert lager == w["lager"] and [float(v[2]) for v in vorhaben] == [250.0]
+    with pytest.raises(ValidationFailedError, match="keine Position mit Menge"):
+        pruefe_lagerzugang(w["db"], w["t"], [{"line_number": 1, "article_number": "DUE-1", "quantity": 0}], "HL-1")
+
+
+def test_avis_ohne_freigegebene_bestellung_oder_mit_fremdem_lager_bucht_nichts(w):
+    from app.api.v1.schemas.docflow_schemas import DocflowCreateRequest, DocflowLineInput
+    from app.services.docflow_service import DocflowService
+    from app.services.wareneingang_avis_service import WareneingangAvisError, buche_wareneingang_aus_avis
+
+    def avis(nummer: str, bestell_nr: str) -> str:
+        kennung = str(uuid.uuid4())
+        w["db"].execute(sa.text("INSERT INTO einkauf_anlieferavis (id, tenant_id, avis_nummer, bestell_nr, status) "
+                                "VALUES (:id, :t, :n, :b, 'ANGEKUENDIGT')"),
+                        {"id": kennung, "t": w["t"], "n": nummer, "b": bestell_nr})
+        return kennung
+
+    entwurf = DocflowService(w["db"], w["t"], "einkauf-1").create_document(DocflowCreateRequest.model_validate({
+        "doc_type": "purchase_order", "doc_number": "EK-ENTWURF", "supplier_id": "L-1",
+        "items": [DocflowLineInput(article_number="DUE-1", quantity=5, unit="dt", unit_price=30).model_dump()]}))
+    assert _status(w, entwurf) == "draft"
+    with pytest.raises(WareneingangAvisError, match="nicht freigegeben"):
+        buche_wareneingang_aus_avis(w["db"], avis("AV-2", "EK-ENTWURF"), w["t"], "HL-1", "LS-1", "lager-1")
+
+    _bestellung(w, "EK-AV-3")
+    with pytest.raises(WareneingangAvisError, match="Lager HL-9"):
+        buche_wareneingang_aus_avis(w["db"], avis("AV-3", "EK-AV-3"), w["t"], "HL-9", "LS-2", "lager-1")
+    assert _bestand(w) == (0.0, [])
