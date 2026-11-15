@@ -155,8 +155,7 @@ def budget_summary(
             {"pid": plan["id"], "tid": tenant_id},
         ).scalar() or 0
 
-        # Actual spend from journal_entries if available
-        actual = 0.0
+        # Missing actuals must remain unavailable, never masquerade as zero spend.
         try:
             actual = db.execute(
                 text(
@@ -172,8 +171,10 @@ def budget_summary(
                 ),
                 {"tid": tenant_id, "yr": plan["plan_year"]},
             ).scalar() or 0.0
-        except Exception:
-            actual = 0.0
+        except Exception as exc:
+            db.rollback()
+            logger.error("Budget actuals unavailable", exc_info=True)
+            raise HTTPException(503, "Budget-Istwerte derzeit nicht verfuegbar") from exc
 
         pct = round(float(actual) / float(total_budget) * 100, 1) if float(total_budget) > 0 else 0.0
         return {

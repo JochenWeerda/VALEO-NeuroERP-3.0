@@ -21074,3 +21074,9 @@ Erst durch staerkere HTTP-Faelle mit eigenem Create/Readback/Update/Statuswechse
 Zeilenanlage ersetzen, danach entfernen; alle Waage-/Formelvertraege erhalten.
 Auch Abweisung widerspruechlicher Bodymandanten vor erstem Datenbankzugriff und
 neutrale DB-Fehler mit Rollback nachweisen. Keine Rollen-/RLS-Abnahme aus Attrappen.
+
+M0 Budget-Istwertschutz lokal abgenommen: zwei rote Gegenproben vor Fix, fuenf
+gezielte Faelle gruen. SQL-/Verbindungsfehler werden nicht als Istwertnull
+zurueckgegeben. Echter Nullwert und Erfolg erhalten; neutral503undRollback-
+Aufruf. DB-Ergebnisattrappen, kein echter SQL-/RLS-Nachweis. QA
+m0-budget-actuals-20261115.md; fehlende Budgettabellen separat offen.
