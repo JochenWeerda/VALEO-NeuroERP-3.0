@@ -729,13 +729,18 @@ async def get_article_position_context(
             row = db.execute(
                 text(
                     """
-                    SELECT dp.unit_price, dn.created_at, dp.quantity
-                    FROM domain_sales.delivery_note_positions dp
-                    JOIN domain_sales.delivery_notes dn ON dn.id = dp.delivery_note_id
-                    WHERE dp.article_id = :article_id
-                      AND dn.customer_id = :customer_id
-                      AND dn.tenant_id = :tenant_id
-                    ORDER BY dn.created_at DESC
+                    -- DocFlow ist der Belegspeicher (BELEG-052): der letzte berechnete Preis des Kunden.
+                    SELECT i.unit_price, h.document_date, i.quantity
+                    FROM domain_docflow.document_items i
+                    JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id
+                    JOIN domain_inventory.articles a ON a.tenant_id = i.tenant_id AND a.article_number = i.article_number
+                    WHERE a.id::text = :article_id
+                      AND h.customer_id = :customer_id
+                      AND h.tenant_id = :tenant_id
+                      AND h.doc_type = 'sales_invoice'
+                      AND h.status NOT IN ('draft', 'cancelled', 'reversed')
+                      AND h.deleted_at IS NULL
+                    ORDER BY h.document_date DESC
                     LIMIT 1
                     """
                 ),

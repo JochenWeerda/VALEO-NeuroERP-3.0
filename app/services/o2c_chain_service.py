@@ -1,11 +1,10 @@
 """Order-to-Cash-Kette (DOM-SALES-004) — Angebot → Auftrag → Lieferschein → Rechnung.
 
-Read-only Sicht je Kundenauftrag über die (jetzt verknüpften) O2C-Stufen:
-  Angebot (domain_crm.sales_offers) → Auftrag (domain_crm.sales_orders)
-  → Lieferschein (domain_sales.delivery_notes.sales_order_id) → Rechnung
-  (delivery_notes.invoice_number).
-Liefert kanonischen Status (angebot→auftrag→geliefert→berechnet) und Lücken
-(kein Lieferschein, keine Rechnung). Keine Schreibvorgänge.
+Read-only Sicht je Kundenauftrag. Quelle ist DocFlow, der einzige Belegspeicher (BELEG-052): die Belege stehen in
+``domain_docflow.document_headers``, ihre Folge in ``document_header_links`` (``offer_to_order``,
+``order_to_delivery``, ``delivery_to_invoice``, ``order_to_invoice``). Stornierte Folgebelege zaehlen nicht als
+erreichte Stufe. Liefert den kanonischen Stand (angebot→auftrag→geliefert→berechnet) und Luecken (kein
+Lieferschein, keine Rechnung). Keine Schreibvorgaenge.
 """
 
 from __future__ import annotations
@@ -35,42 +34,65 @@ class O2CChainService:
     def _order(self, ref: str) -> Optional[dict]:
         r = self.db.execute(
             text(
-                "SELECT id, order_number, sales_offer_id, customer_id, customer_name, status, "
-                "total_amount, currency, created_at FROM domain_crm.sales_orders "
-                "WHERE tenant_id = :t AND (id::text = :v OR order_number = :v) "
-                "AND deleted_at IS NULL LIMIT 1"
+                "SELECT h.id, h.doc_number AS order_number, h.customer_id, h.status, h.total_gross AS total_amount, "
+                "h.currency, h.created_at, "
+                "(SELECT c.company_name FROM domain_crm.customers c WHERE c.id = h.customer_id "
+                " AND c.tenant_id = h.tenant_id LIMIT 1) AS customer_name "
+                "FROM domain_docflow.document_headers h "
+                "WHERE h.tenant_id = :t AND h.doc_type = 'sales_order' AND (h.id = :v OR h.doc_number = :v) "
+                "AND h.deleted_at IS NULL LIMIT 1"
             ),
             {"t": self.tenant_id, "v": ref},
         ).mappings().first()
         return dict(r) if r else None
 
-    def _offer(self, offer_id) -> Optional[dict]:
-        if not offer_id:
-            return None
+    def _offer(self, order_id: str) -> Optional[dict]:
         r = self.db.execute(
-            text("SELECT id, offer_number, status, total_amount, created_at "
-                 "FROM domain_crm.sales_offers WHERE id = :id LIMIT 1"),
-            {"id": offer_id},
+            text("SELECT a.id, a.doc_number AS offer_number, a.status, a.total_gross AS total_amount, a.created_at "
+                 "FROM domain_docflow.document_header_links k "
+                 "JOIN domain_docflow.document_headers a ON a.id = k.from_header_id AND a.tenant_id = k.tenant_id "
+                 "WHERE k.tenant_id = :t AND k.to_header_id = :oid AND k.relation_type = 'offer_to_order' "
+                 "AND a.deleted_at IS NULL ORDER BY k.created_at LIMIT 1"),
+            {"t": self.tenant_id, "oid": order_id},
         ).mappings().first()
         return dict(r) if r else None
 
     def _deliveries(self, order_id: str) -> list[dict]:
         rows = self.db.execute(
-            text("SELECT id, delivery_note_number, delivery_date, status, invoice_number, is_delivered "
-                 "FROM domain_sales.delivery_notes WHERE sales_order_id::text = :oid AND tenant_id = :t "
-                 "ORDER BY delivery_date"),
+            text("SELECT d.id, d.doc_number AS delivery_note_number, d.document_date AS delivery_date, d.status, "
+                 "(SELECT r.doc_number FROM domain_docflow.document_header_links kr "
+                 "  JOIN domain_docflow.document_headers r ON r.id = kr.to_header_id AND r.tenant_id = kr.tenant_id "
+                 "  WHERE kr.tenant_id = d.tenant_id AND kr.from_header_id = d.id "
+                 "  AND kr.relation_type = 'delivery_to_invoice' AND r.deleted_at IS NULL "
+                 "  AND r.status NOT IN ('cancelled', 'reversed') ORDER BY kr.created_at LIMIT 1) AS invoice_number "
+                 "FROM domain_docflow.document_header_links k "
+                 "JOIN domain_docflow.document_headers d ON d.id = k.to_header_id AND d.tenant_id = k.tenant_id "
+                 "WHERE k.tenant_id = :t AND k.from_header_id = :oid AND k.relation_type = 'order_to_delivery' "
+                 "AND d.deleted_at IS NULL AND d.status NOT IN ('cancelled', 'reversed') "
+                 "ORDER BY d.document_date"),
             {"oid": order_id, "t": self.tenant_id},
         ).mappings().all()
         return [dict(r) for r in rows]
+
+    def _direct_invoices(self, order_id: str) -> list[str]:
+        """Rechnungen, die unmittelbar aus dem Auftrag entstanden sind (ohne Lieferschein)."""
+        return [str(n) for n in self.db.execute(
+            text("SELECT r.doc_number FROM domain_docflow.document_header_links k "
+                 "JOIN domain_docflow.document_headers r ON r.id = k.to_header_id AND r.tenant_id = k.tenant_id "
+                 "WHERE k.tenant_id = :t AND k.from_header_id = :oid AND k.relation_type = 'order_to_invoice' "
+                 "AND r.deleted_at IS NULL AND r.status NOT IN ('cancelled', 'reversed')"),
+            {"oid": order_id, "t": self.tenant_id},
+        ).scalars().all()]
 
     def trace(self, ref: str) -> dict[str, Any]:
         order = self._order(ref)
         if not order:
             return {"found": False, "detail": "Auftrag nicht auflösbar."}
         oid = str(order["id"])
-        offer = self._offer(order.get("sales_offer_id"))
+        offer = self._offer(oid)
         deliveries = self._deliveries(oid)
-        invoices = sorted({d["invoice_number"] for d in deliveries if d.get("invoice_number")})
+        invoices = sorted({d["invoice_number"] for d in deliveries if d.get("invoice_number")}
+                          | set(self._direct_invoices(oid)))
 
         nodes: list[dict] = []
         if offer:
@@ -125,14 +147,23 @@ class O2CChainService:
         rows = self.db.execute(
             text(
                 """
-                SELECT o.order_number, o.customer_name, o.status, o.total_amount, o.created_at,
-                       (SELECT count(*) FROM domain_sales.delivery_notes d
-                        WHERE d.sales_order_id::text = o.id AND d.tenant_id = o.tenant_id) AS n_ls,
-                       (SELECT count(*) FROM domain_sales.delivery_notes d
-                        WHERE d.sales_order_id::text = o.id AND d.tenant_id = o.tenant_id
-                        AND d.invoice_number IS NOT NULL) AS n_rg
-                FROM domain_crm.sales_orders o
-                WHERE o.tenant_id = :t AND o.deleted_at IS NULL
+                SELECT o.doc_number AS order_number, o.status, o.total_gross AS total_amount, o.created_at,
+                       (SELECT c.company_name FROM domain_crm.customers c
+                         WHERE c.id = o.customer_id AND c.tenant_id = o.tenant_id LIMIT 1) AS customer_name,
+                       (SELECT count(*) FROM domain_docflow.document_header_links k
+                         JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id
+                         WHERE k.tenant_id = o.tenant_id AND k.from_header_id = o.id
+                           AND k.relation_type = 'order_to_delivery' AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')) AS n_ls,
+                       (SELECT count(*) FROM domain_docflow.document_header_links k
+                         JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id
+                         WHERE k.tenant_id = o.tenant_id AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')
+                           AND ((k.from_header_id = o.id AND k.relation_type = 'order_to_invoice')
+                             OR (k.relation_type = 'delivery_to_invoice' AND k.from_header_id IN (
+                                   SELECT kl.to_header_id FROM domain_docflow.document_header_links kl
+                                    WHERE kl.tenant_id = o.tenant_id AND kl.from_header_id = o.id
+                                      AND kl.relation_type = 'order_to_delivery')))) AS n_rg
+                FROM domain_docflow.document_headers o
+                WHERE o.tenant_id = :t AND o.doc_type = 'sales_order' AND o.deleted_at IS NULL
                 ORDER BY o.created_at DESC LIMIT :lim
                 """
             ),

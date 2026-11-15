@@ -551,23 +551,11 @@ class WarehouseService:
         - FEFO-Vorschlag je Position aus bin_stock
         """
         docflow = self._docflow_lieferschein(ls_id)
-        if docflow:
-            if docflow.status != "open":
-                raise ValueError(f"Lieferschein muss freigegeben sein (Status: {docflow.status})")
-            dn_nummer = docflow.doc_number
-        else:
-            dn = self.db.execute(text("""
-                SELECT id, status, delivery_note_number
-                FROM domain_sales.delivery_notes
-                WHERE id = :id AND tenant_id = :tid
-            """), {"id": ls_id, "tid": self.tenant_id}).fetchone()
-            if not dn:
-                raise ValueError(f"Lieferschein {ls_id} nicht gefunden")
-            if dn.status not in ("posted", "printed"):
-                raise ValueError(
-                    f"Lieferschein muss gebucht oder gedruckt sein (Status: {dn.status})"
-                )
-            dn_nummer = dn.delivery_note_number
+        if not docflow:
+            raise ValueError(f"Lieferschein {ls_id} nicht gefunden")
+        if docflow.status != "open":
+            raise ValueError(f"Lieferschein muss freigegeben sein (Status: {docflow.status})")
+        dn_nummer = docflow.doc_number
 
         # Check no open pick list exists for this delivery note
         existing = self.db.execute(text("""
@@ -580,24 +568,15 @@ class WarehouseService:
                 f"Für diesen Lieferschein existiert bereits eine offene Pick-Liste ({existing.id})"
             )
 
-        if docflow:
-            # Positionen des Belegs; der Artikel ueber seine Nummer im Mandanten (DocFlow fuehrt die Nummer).
-            positions = self.db.execute(text("""
-                SELECT a.id::text AS artikel_id, i.quantity AS menge, i.unit AS einheit
-                FROM domain_docflow.document_items i
-                JOIN domain_inventory.articles a
-                  ON a.article_number = i.article_number AND a.tenant_id::text = i.tenant_id
-                WHERE i.header_id = :id AND i.tenant_id = :tid AND i.quantity > 0
-                ORDER BY i.line_number
-            """), {"id": ls_id, "tid": self.tenant_id}).fetchall()
-        else:
-            positions = self.db.execute(text("""
-                SELECT artikel_id, menge, einheit
-                FROM domain_sales.delivery_note_positions
-                WHERE delivery_note_id = :id
-                  AND artikel_id IS NOT NULL AND menge > 0
-                ORDER BY pos_nr
-            """), {"id": ls_id}).fetchall()
+        # Positionen des Belegs; der Artikel ueber seine Nummer im Mandanten (DocFlow fuehrt die Nummer).
+        positions = self.db.execute(text("""
+            SELECT a.id::text AS artikel_id, i.quantity AS menge, i.unit AS einheit
+            FROM domain_docflow.document_items i
+            JOIN domain_inventory.articles a
+              ON a.article_number = i.article_number AND a.tenant_id::text = i.tenant_id
+            WHERE i.header_id = :id AND i.tenant_id = :tid AND i.quantity > 0
+            ORDER BY i.line_number
+        """), {"id": ls_id, "tid": self.tenant_id}).fetchall()
 
         if not positions:
             raise ValueError("Lieferschein hat keine Positionen mit Artikel-Referenz")
