@@ -69,4 +69,3 @@ Pruefung bestaetigt gespeichertes Hell/Dunkel, lesbare Anmeldung und keine JS-Fe
 Keine erneute Backend-/SQL-Umstellung. Codex' Imagebau ist beendet; das zuvor
 reservierte Ressourcenfenster ist frei. QA: theme-bootstrap-20261115.md und
 local-runtime-2338578-20261115.md.
-

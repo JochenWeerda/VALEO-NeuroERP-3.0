@@ -36,4 +36,3 @@ lokal unter artifacts/local-runtime-2338578-20261115/. Keine persoenlichen Daten
 
 Damit ist dieser Theme-Slice lokal abgenommen. Ein umfassender Kontrastnachweis
 aller dynamischen Maskeninhalte wird dadurch nicht behauptet.
-

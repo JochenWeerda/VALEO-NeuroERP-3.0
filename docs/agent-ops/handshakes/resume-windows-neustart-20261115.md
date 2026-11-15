@@ -118,4 +118,3 @@ hat die eigene Aufloesung beim Main-Merge angekuendigt. Nichts blind revidieren.
 
 Das Gesamtziel ist weiterhin offen; Vorbereitung zum Neustart ist kein
 Abschluss der lokalen Bereitstellung oder aller Studio-/Matrix-Restpunkte.
-
