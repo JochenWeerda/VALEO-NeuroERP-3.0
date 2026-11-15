@@ -20982,3 +20982,10 @@ mit Quellenkette und Wiederholungs-/Versions-/Rollen-/Mengen-/Mandantenspoofing-
 Gegenproben. Enge TypeScript-Pruefung und Sammlung (3 Faelle) gruen; reale CI-
 Fachabnahme noch offen. Rechnungsstatus kanonisch open, keine Ausstellung/PDF/
 Buchung/Zahlung behauptet. PR137 laeuft unveraendert, neue CI erst danach.
+
+PR137-Integrationsupdate: main ist zwischenzeitlich durch Claudes PR132 auf
+138172598 vorgezogen. Beide Themen (gepruefte Theme-Korrektur und enger O2C-
+Rechnungsbelegvertrag) sind nun in einem Integrationskopf zusammengefuehrt.
+Statt zwei weiterer Backend-Vollsuiten wird genau ein neuer kanonischer Lauf
+auf dem aktuellen gemeinsamen Stand verwendet. Alte CI-Ergebnisse sind nur
+Vorabnachweise, keine Abnahme dieses neuen Kopfes. Keine Branchregel gelockert.
