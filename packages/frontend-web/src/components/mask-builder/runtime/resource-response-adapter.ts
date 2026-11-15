@@ -8,6 +8,8 @@ import type { ActionRequest, ActionResult, ActionRuntimeOptions } from './Action
 
 const RESOURCE_ROUTES: Record<string, string[]> = {
 
+  'agrar/saatgut/sorte': ['PUT /api/v1/agrar/varieties/{entity_id}'],
+
   'crm/campaign-template': ['DELETE /api/v1/crm/campaigns/templates/{entity_id}', 'PUT /api/v1/crm/campaigns/templates/{entity_id}', 'POST /api/v1/crm/campaigns/templates/{entity_id}/duplicate'],
 
   'crm/campaign': ['DELETE /api/v1/crm/campaigns/{entity_id}', 'PUT /api/v1/crm/campaigns/{entity_id}', ...['activate','pause','resume','complete','archive','recipients'].map(key => `POST /api/v1/crm/campaigns/{entity_id}/${key}`)],
@@ -24,7 +26,7 @@ export function checkResourceAction(action: ScreenActionDefinition, req: ActionR
 
   const route = `${action.method ?? 'POST'} ${action.commandEndpoint ?? ''}`
 
-  if (action.responseAdapter !== 'resource.v1' || !opts.entityId || opts.entityId.length > 128 || /[\s/\\?#]/.test(opts.entityId) || opts.isAgentCaller || action.forbiddenForAgents !== true
+  if (action.responseAdapter !== 'resource.v1' || !opts.entityId || ['.', '..'].includes(opts.entityId) || opts.entityId.length > 128 || /[\s/\\?#]/.test(opts.entityId) || opts.isAgentCaller || action.forbiddenForAgents !== true
 
     || req.mode !== 'execute' || !RESOURCE_ROUTES[opts.screenId]?.includes(route)) throw new Error('REST-Ressourcenaktion ist für diesen Aufruf gesperrt.')
 
@@ -34,7 +36,7 @@ export function checkResourceAction(action: ScreenActionDefinition, req: ActionR
 
 export function resourceActionResult(action: ScreenActionDefinition, req: ActionRequest, opts: ActionRuntimeOptions, body: unknown, status?: number): ActionResult {
   const deletion = action.method === 'DELETE' && ['DELETE /api/v1/crm/campaigns/{entity_id}', 'DELETE /api/v1/crm/campaigns/templates/{entity_id}'].includes(`${action.method} ${action.commandEndpoint}`)
-  if (deletion && status === 204 && (body == null || body === '') && opts.entityId && !/[\s/\\?#]/.test(opts.entityId) && opts.entityId.length <= 128) {
+  if (deletion && status === 204 && (body == null || body === '') && opts.entityId && !['.', '..'].includes(opts.entityId) && !/[\s/\\?#]/.test(opts.entityId) && opts.entityId.length <= 128) {
     return { actionKey: req.actionKey, mode: req.mode, success: true, resourceId: opts.entityId, affectedIds: [opts.entityId] }
   }
   if (deletion) throw new Error('Die Löschung wurde nicht eindeutig bestätigt.')
@@ -45,7 +47,7 @@ export function resourceActionResult(action: ScreenActionDefinition, req: Action
 
   const createsChild = action.method === 'POST' && (action.commandEndpoint?.endsWith('/duplicate') || action.commandEndpoint === '/api/v1/crm/campaigns/{entity_id}/recipients')
 
-  if (typeof id !== 'string' || !id.trim() || id.length > 128 || /[\s/\\?#]/.test(id)
+  if (typeof id !== 'string' || !id.trim() || ['.', '..'].includes(id) || id.length > 128 || /[\s/\\?#]/.test(id)
 
     || (createsChild ? id === opts.entityId : id !== opts.entityId)
 

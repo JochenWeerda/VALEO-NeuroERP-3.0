@@ -1,0 +1,761 @@
+{
+  "lager": {
+    "domain": "einkauf",
+    "layout": {
+      "contextRail": "none",
+      "density": "compact",
+      "floorplan": "worklist",
+      "mobileMode": "mobileStack",
+      "preferredMode": "desktopDense",
+      "tableProfile": "inventory",
+      "touchTargetPx": 44
+    },
+    "mode": "list",
+    "noWorkflowReason": "Vorschlagsliste; die Bestellung entsteht als DocFlow-Entwurf und laeuft in der Belegmaske weiter.",
+    "performance": {
+      "bundleGroup": "einkauf",
+      "initialPayloadBudgetKb": 60,
+      "lookupMinChars": 2,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true
+    },
+    "schemaVersion": 1,
+    "actions": [
+      {
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern",
+        "dangerLevel": "low",
+        "inputFields": [
+          {
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
+            "type": "text"
+          }
+        ],
+        "key": "speichern",
+        "kind": "primary",
+        "label": "Als Vorschlag speichern",
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "zone": "header"
+      },
+      {
+        "command": "list.exportCsv",
+        "dangerLevel": "safe",
+        "key": "export",
+        "kind": "secondary",
+        "label": "CSV-Export",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_verkauf",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Verkauf",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_rohware",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Rohware",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_bedarf",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Bedarf",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_gespeichert",
+        "kind": "secondary",
+        "label": "Gespeicherte Bestellvorschläge",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge.",
+        "zone": "header"
+      }
+    ],
+    "adapter": {
+      "sourceId": "bestellvorschlag/lager",
+      "temporary": false,
+      "type": "native"
+    },
+    "agentContract": {
+      "businessPurpose": "Bestellvorschlag Lager: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.",
+      "examplePrompts": [
+        "Welche Artikel liegen unter Meldebestand?",
+        "Speichere den Bestellvorschlag Lager."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-bestellvorschlag/lager']"
+      }
+    },
+    "dataSources": [
+      {
+        "endpoint": "/api/v1/einkauf/bestellvorschlaege/lager",
+        "key": "list",
+        "pageSize": 500
+      }
+    ],
+    "id": "bestellvorschlag/lager",
+    "subtitle": "Artikel unter Meldebestand mit Vorschlagsmenge",
+    "tables": [
+      {
+        "columns": [
+          {
+            "filterable": true,
+            "key": "artikel_nr",
+            "label": "Artikel",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_bezeichnung",
+            "label": "Bezeichnung",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_gruppe",
+            "label": "Gruppe",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "ist_bestand",
+            "label": "Bestand",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "offene_auftraege",
+            "label": "Offene Aufträge",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "bedarf",
+            "label": "Bedarf",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "aggregate": "sum",
+            "key": "vorschlag_menge",
+            "label": "Vorschlag",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "reichweite_tage",
+            "label": "Reichweite (Tage)",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "lieferant_name",
+            "label": "Lieferant",
+            "priority": "secondary",
+            "sortable": true
+          },
+          {
+            "key": "letzter_preis",
+            "label": "Letzter Preis",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "currency",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "preis_einheit",
+            "label": "je",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "wiederbeschaffungs_tage",
+            "label": "WBZ (Tage)",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "key": "meldebestand",
+            "label": "Meldebestand",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "mindestbestand",
+            "label": "Mindestbestand",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          }
+        ],
+        "dataSourceKey": "list",
+        "key": "list",
+        "label": "Bestellvorschlag Lager",
+        "pageSize": 50,
+        "rowActions": [],
+        "rowHeight": 40,
+        "serverPagination": false,
+        "virtualized": true
+      }
+    ],
+    "title": "Bestellvorschlag Lager",
+    "variant": {
+      "family": "bestellvorschlag",
+      "id": "lager"
+    },
+    "maskVariant": {
+      "family": "bestellvorschlag",
+      "baseVersion": "1.0.0",
+      "baseHash": "7eb0cafc3fb4d4a13fa8e4f2b2286cf47d2b13ba990276157a9e767870eacfdc",
+      "variantId": "lager",
+      "variantVersion": "1.0.0",
+      "variantHash": "716711479f19c4f1ae6f99d5f7f6acbf9a596ec777b94cb147afb0f5f4eaf147",
+      "materializedHash": "d2643e13ada2ea98ed27a8e6b723deb80239e02e38436391c2f97da7a294b5e8"
+    }
+  },
+  "rohware": {
+    "domain": "einkauf",
+    "layout": {
+      "contextRail": "none",
+      "density": "compact",
+      "floorplan": "worklist",
+      "mobileMode": "mobileStack",
+      "preferredMode": "desktopDense",
+      "tableProfile": "inventory",
+      "touchTargetPx": 44
+    },
+    "mode": "list",
+    "noWorkflowReason": "Vorschlagsliste; die Bestellung entsteht als DocFlow-Entwurf und laeuft in der Belegmaske weiter.",
+    "performance": {
+      "bundleGroup": "einkauf",
+      "initialPayloadBudgetKb": 60,
+      "lookupMinChars": 2,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true
+    },
+    "schemaVersion": 1,
+    "actions": [
+      {
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern",
+        "dangerLevel": "low",
+        "inputFields": [
+          {
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
+            "type": "text"
+          }
+        ],
+        "key": "speichern",
+        "kind": "primary",
+        "label": "Als Vorschlag speichern",
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "zone": "header"
+      },
+      {
+        "command": "list.exportCsv",
+        "dangerLevel": "safe",
+        "key": "export",
+        "kind": "secondary",
+        "label": "CSV-Export",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_lager",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Lager",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Lager.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_verkauf",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Verkauf",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/verkauf",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Verkauf.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_bedarf",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Bedarf",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_gespeichert",
+        "kind": "secondary",
+        "label": "Gespeicherte Bestellvorschläge",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge.",
+        "zone": "header"
+      }
+    ],
+    "adapter": {
+      "sourceId": "bestellvorschlag/rohware",
+      "temporary": false,
+      "type": "native"
+    },
+    "agentContract": {
+      "businessPurpose": "Bestellvorschlag Rohware: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.",
+      "examplePrompts": [
+        "Welche Artikel liegen unter Meldebestand?",
+        "Speichere den Bestellvorschlag Lager."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-bestellvorschlag/rohware']"
+      }
+    },
+    "dataSources": [
+      {
+        "endpoint": "/api/v1/einkauf/bestellvorschlaege/rohware",
+        "key": "list",
+        "pageSize": 500
+      }
+    ],
+    "id": "bestellvorschlag/rohware",
+    "subtitle": "Rohware aus offenen Kontrakten",
+    "tables": [
+      {
+        "columns": [
+          {
+            "filterable": true,
+            "key": "artikel_nr",
+            "label": "Artikel",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_bezeichnung",
+            "label": "Bezeichnung",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_gruppe",
+            "label": "Gruppe",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "ist_bestand",
+            "label": "Bestand",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "offene_auftraege",
+            "label": "Offene Aufträge",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "bedarf",
+            "label": "Bedarf",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "aggregate": "sum",
+            "key": "vorschlag_menge",
+            "label": "Vorschlag",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "reichweite_tage",
+            "label": "Reichweite (Tage)",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "lieferant_name",
+            "label": "Lieferant",
+            "priority": "secondary",
+            "sortable": true
+          },
+          {
+            "key": "letzter_preis",
+            "label": "Letzter Preis",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "currency",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "preis_einheit",
+            "label": "je",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "wiederbeschaffungs_tage",
+            "label": "WBZ (Tage)",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "key": "mindestbestand",
+            "label": "Mindestbestand",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          }
+        ],
+        "dataSourceKey": "list",
+        "key": "list",
+        "label": "Bestellvorschlag Rohware",
+        "pageSize": 50,
+        "rowActions": [],
+        "rowHeight": 40,
+        "serverPagination": false,
+        "virtualized": true
+      }
+    ],
+    "title": "Bestellvorschlag Rohware",
+    "variant": {
+      "family": "bestellvorschlag",
+      "id": "rohware"
+    },
+    "maskVariant": {
+      "family": "bestellvorschlag",
+      "baseVersion": "1.0.0",
+      "baseHash": "7eb0cafc3fb4d4a13fa8e4f2b2286cf47d2b13ba990276157a9e767870eacfdc",
+      "variantId": "rohware",
+      "variantVersion": "1.0.0",
+      "variantHash": "a90c9abb3fa81089ca60c23a9f4b9e312618bb81a2a2e3405d46f624f57668ff",
+      "materializedHash": "36c010d444c02f0b8812985021128a3767e4bc7180ff205be058ed61965c237f"
+    }
+  },
+  "verkauf": {
+    "domain": "einkauf",
+    "layout": {
+      "contextRail": "none",
+      "density": "compact",
+      "floorplan": "worklist",
+      "mobileMode": "mobileStack",
+      "preferredMode": "desktopDense",
+      "tableProfile": "inventory",
+      "touchTargetPx": 44
+    },
+    "mode": "list",
+    "noWorkflowReason": "Vorschlagsliste; die Bestellung entsteht als DocFlow-Entwurf und laeuft in der Belegmaske weiter.",
+    "performance": {
+      "bundleGroup": "einkauf",
+      "initialPayloadBudgetKb": 60,
+      "lookupMinChars": 2,
+      "requiresLazyTabs": false,
+      "requiresVirtualTables": true
+    },
+    "schemaVersion": 1,
+    "actions": [
+      {
+        "commandEndpoint": "/api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern",
+        "dangerLevel": "low",
+        "inputFields": [
+          {
+            "key": "bezeichnung",
+            "label": "Bezeichnung",
+            "type": "text"
+          }
+        ],
+        "key": "speichern",
+        "kind": "primary",
+        "label": "Als Vorschlag speichern",
+        "method": "POST",
+        "permission": "einkauf.bestellvorschlag.create",
+        "requiresConfirmation": false,
+        "zone": "header"
+      },
+      {
+        "command": "list.exportCsv",
+        "dangerLevel": "safe",
+        "key": "export",
+        "kind": "secondary",
+        "label": "CSV-Export",
+        "localEffect": "download",
+        "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_lager",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Lager",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/lager",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Lager.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_rohware",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Rohware",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/rohware",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Rohware.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_bedarf",
+        "kind": "secondary",
+        "label": "Bestellvorschlag Bedarf",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/bedarf",
+        "stubReason": "Wechselt zur Variante Bestellvorschlag Bedarf.",
+        "zone": "header"
+      },
+      {
+        "dangerLevel": "safe",
+        "key": "ansicht_gespeichert",
+        "kind": "secondary",
+        "label": "Gespeicherte Bestellvorschläge",
+        "localEffect": "navigation",
+        "navigationRoute": "/einkauf/bestellvorschlaege/ansicht/gespeichert",
+        "stubReason": "Wechselt zur Variante Gespeicherte Bestellvorschläge.",
+        "zone": "header"
+      }
+    ],
+    "adapter": {
+      "sourceId": "bestellvorschlag/verkauf",
+      "temporary": false,
+      "type": "native"
+    },
+    "agentContract": {
+      "businessPurpose": "Bestellvorschlag Verkauf: pruefen, was zu bestellen ist, und den Vorschlag in eine Bestellung ueberfuehren.",
+      "examplePrompts": [
+        "Welche Artikel liegen unter Meldebestand?",
+        "Speichere den Bestellvorschlag Lager."
+      ],
+      "sensitiveFields": [],
+      "testSelectors": {
+        "screenRoot": "[data-testid='screen-bestellvorschlag/verkauf']"
+      }
+    },
+    "dataSources": [
+      {
+        "endpoint": "/api/v1/einkauf/bestellvorschlaege/verkauf",
+        "key": "list",
+        "pageSize": 500
+      }
+    ],
+    "id": "bestellvorschlag/verkauf",
+    "subtitle": "Vorschlag aus dem Abverkauf des Zeitraums",
+    "tables": [
+      {
+        "columns": [
+          {
+            "filterable": true,
+            "key": "artikel_nr",
+            "label": "Artikel",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_bezeichnung",
+            "label": "Bezeichnung",
+            "priority": "primary",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "artikel_gruppe",
+            "label": "Gruppe",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "ist_bestand",
+            "label": "Bestand",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "offene_auftraege",
+            "label": "Offene Aufträge",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "bedarf",
+            "label": "Bedarf",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "aggregate": "sum",
+            "key": "vorschlag_menge",
+            "label": "Vorschlag",
+            "numeric": true,
+            "priority": "primary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          },
+          {
+            "key": "reichweite_tage",
+            "label": "Reichweite (Tage)",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "lieferant_name",
+            "label": "Lieferant",
+            "priority": "secondary",
+            "sortable": true
+          },
+          {
+            "key": "letzter_preis",
+            "label": "Letzter Preis",
+            "numeric": true,
+            "priority": "secondary",
+            "renderKind": "currency",
+            "sortable": true
+          },
+          {
+            "filterable": true,
+            "key": "preis_einheit",
+            "label": "je",
+            "priority": "tertiary",
+            "sortable": true
+          },
+          {
+            "key": "wiederbeschaffungs_tage",
+            "label": "WBZ (Tage)",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "number",
+            "sortable": true
+          },
+          {
+            "key": "mindestbestand",
+            "label": "Mindestbestand",
+            "numeric": true,
+            "priority": "tertiary",
+            "renderKind": "quantity",
+            "sortable": true,
+            "unitField": "einheit"
+          }
+        ],
+        "dataSourceKey": "list",
+        "key": "list",
+        "label": "Bestellvorschlag Verkauf",
+        "pageSize": 50,
+        "rowActions": [],
+        "rowHeight": 40,
+        "serverPagination": false,
+        "virtualized": true
+      }
+    ],
+    "title": "Bestellvorschlag Verkauf",
+    "variant": {
+      "family": "bestellvorschlag",
+      "id": "verkauf"
+    },
+    "maskVariant": {
+      "family": "bestellvorschlag",
+      "baseVersion": "1.0.0",
+      "baseHash": "7eb0cafc3fb4d4a13fa8e4f2b2286cf47d2b13ba990276157a9e767870eacfdc",
+      "variantId": "verkauf",
+      "variantVersion": "1.0.0",
+      "variantHash": "fac465ff3ee33d2cfc84734354c6b8d32bbba5eef5f7d6f1a24e1124aafecf30",
+      "materializedHash": "0560a7098b33884f9c28b1bb00304a546b2782a9bc49e528627f6b90b67a07c6"
+    }
+  }
+}

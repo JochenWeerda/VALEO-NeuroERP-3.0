@@ -153,6 +153,7 @@ _IDENTITAET = {
     "crm/customer-360": "firma",
     "agrar/ration": "name",
     "agrar/saatgut": "artikelnummer",
+    "agrar/saatgut/sorte": "name",
     "crm/lead": "company_name",
     "crm/opportunity": "name",
     "einkauf/anfrage": "anfrageNummer",
@@ -175,7 +176,6 @@ _IDENTITAET = {
     # Die Einwilligung haengt an einer Person; ihr Name ist die Identitaet der Maske.
     "personal/bewerbung-einwilligung": "applicant_name",
     "qualitaet/reklamation": "reklamation_nr",
-    "sales/delivery-note": "delivery_note_number",
     "sales/invoice": "invoice_number",
 }
 
@@ -510,21 +510,6 @@ def _kopf_keys(mask_id: str) -> set[str]:
 
 
 @pytest.mark.integration
-def test_lieferschein_nennt_die_niederlassung(client, stamm: dict) -> None:
-    kopf = _kopf(stamm["mandant"])
-    angelegt = client.post("/api/v1/sales/delivery-notes", headers=kopf, json={
-        "customer_id": stamm["kunde"],
-        "branch_id": stamm["niederlassung"],
-        "delivery_date": "2026-09-29",
-        "positionen": [],
-    })
-    assert angelegt.status_code == 201, angelegt.text
-
-    gelesen = client.get(_entity_url("sales/delivery-note", angelegt.json()["id"]), headers=kopf)
-    assert gelesen.status_code == 200, gelesen.text
-    assert gelesen.json()["branch_name"] == "Niederlassung Suedheide"
-    assert "branch_name" in _kopf_keys("sales/delivery-note")
-
 
 @pytest.mark.integration
 def test_lagerbewegung_nennt_das_lager(client, stamm: dict, monkeypatch) -> None:

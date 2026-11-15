@@ -17,7 +17,6 @@ class TestSpecP104CommandInventory:
         assert main() == 0
 
     @pytest.mark.parametrize("screen_id,action_key", [
-        ("sales/delivery-note", "drucken"),
         ("finance/payment-run", "freigeben"),
         ("einkauf/angebot", "bestellen"),
         ("crm/opportunity", "create_activity"),

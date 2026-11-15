@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-10",
+  "generatedAt": "2026-11-14",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -148,7 +148,6 @@
       "mask_ids": [
         "crm/customer-360",
         "beleg-liste/sales-order",
-        "sales/delivery-note",
         "beleg-liste/sales-delivery",
         "finance/ar-open-item",
         "finance/payment-run",
@@ -4005,6 +4004,40 @@
           "permission": "agrar.saatgut.royalties.update",
           "commandEndpoint": null,
           "method": null,
+          "stubReason": null
+        }
+      ],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "agrar.contract.get",
+        "agrar.weighing_ticket.list",
+        "agrar.ration.transition",
+        "agrar.feeding.supply_handoff",
+        "agrar.feeding.actual_measure",
+        "agrar.feeding.configure_threshold",
+        "agrar.feed_analysis.transition"
+      ]
+    },
+    {
+      "mask_id": "agrar/saatgut/sorte",
+      "title": "Sorte",
+      "domain": "agrar",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/agrar__saatgut__sorte/:entityId",
+      "agent_contract_url": "/api/v1/masks/agrar/saatgut/sorte/agent-contract",
+      "screen_definition_url": "/api/v1/masks/agrar/saatgut/sorte/screen-definition",
+      "readiness_url": "/api/v1/masks/agrar/saatgut/sorte/readiness",
+      "risk_summary": "low",
+      "actions": [
+        {
+          "key": "edit",
+          "label": "Bearbeiten",
+          "dangerLevel": "safe",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "agrar.sorte.update",
+          "commandEndpoint": "/api/v1/agrar/varieties/{entity_id}",
+          "method": "PUT",
           "stubReason": null
         }
       ],
@@ -25179,41 +25212,6 @@
       ]
     },
     {
-      "mask_id": "sales/delivery-note",
-      "title": "Lieferschein",
-      "domain": "sales",
-      "process_keys": [
-        "order-to-cash"
-      ],
-      "rollout_route": "/mask-rollout/sales__delivery-note/:entityId",
-      "agent_contract_url": "/api/v1/masks/sales/delivery-note/agent-contract",
-      "screen_definition_url": "/api/v1/masks/sales/delivery-note/screen-definition",
-      "readiness_url": "/api/v1/masks/sales/delivery-note/readiness",
-      "risk_summary": "low",
-      "actions": [
-        {
-          "key": "drucken",
-          "label": "Lieferschein drucken",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "sales.lieferschein.drucken",
-          "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
-          "method": "POST",
-          "stubReason": null
-        }
-      ],
-      "sensitive_fields": [],
-      "mcp_tool_ids": [
-        "sales.order.status",
-        "sales.gutschrift.speichern",
-        "sales.gutschrift.propose",
-        "sales.gutschrift.buchen",
-        "sales.invoice.propose",
-        "sales.invoice.post"
-      ]
-    },
-    {
       "mask_id": "sales/invoice",
       "title": "Ausgangsrechnung",
       "domain": "sales",
@@ -27448,5 +27446,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 151
+  "event_count": 150
 }

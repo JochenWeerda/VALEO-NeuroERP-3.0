@@ -12,6 +12,13 @@ version: 1.0.0
 
 Ernteannahme, Kontrakte, Trocknung, Selbstabrechnung, Materialfluss, Futtermittel.
 
+Das Sortenregister verwendet den kanonischen mandantengebundenen
+`/api/v1/agrar/varieties`-Vertrag. Seit 14.11.2026 bleibt dessen Listen-GET
+auch bei leeren Mandanten schreibfrei; Anlage erfolgt ausdruecklich ueber den
+vorhandenen autorisierten POST. Die Studio-Objektdefinition zeigt und
+bearbeitet vorhandene Sorten ueber denselben Detail-/PUT-Vertrag.
+[Leseweg-Nachweis](../../../quality-assurance/sorten-readonly-20261114.md).
+
 Der native Produktionsleitstand projiziert Mischfutterauftraege und allgemeine
 Muehlen-/Umbuchungs-/Stapel-/Nachbearbeitungsvorgaenge, ohne Bestands-, Chargen-
 oder FIBU-Logik zu duplizieren.

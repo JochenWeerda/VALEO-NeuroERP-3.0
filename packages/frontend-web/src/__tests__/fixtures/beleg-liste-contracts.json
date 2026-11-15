@@ -85,7 +85,10 @@
    "synonyms": [
     "lieferscheine",
     "auslieferungen",
-    "delivery notes"
+    "delivery notes",
+    "lieferschein",
+    "lieferung",
+    "warenausgang"
    ],
    "testSelectors": {
     "screenRoot": "[data-testid='screen-beleg-liste/sales-delivery']"
@@ -199,8 +202,16 @@
        "value": "open"
       },
       {
+       "label": "Bestätigt",
+       "value": "confirmed"
+      },
+      {
        "label": "Freigegeben",
        "value": "released"
+      },
+      {
+       "label": "Abgeschlossen",
+       "value": "completed"
       },
       {
        "label": "Gebucht",
@@ -270,12 +281,12 @@
   },
   "maskVariant": {
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
-   "baseVersion": "1.0.0",
+   "baseVersion": "1.1.0",
    "family": "beleg-liste",
-   "materializedHash": "0484f0351a67cd979a71bffcff5d4e81ebfdf451424c990411709c3123ea98af",
-   "variantHash": "e3cb3733d70f13a523a9cd8f429eb8dc240c4df0b243a4ea74a77c11df67deb1",
+   "materializedHash": "6285c2151776fe5910fb6c677a3ae51c127bb16c5ba2e9f6e46dea7a107de436",
+   "variantHash": "610c750b54626ba77d0b27f3a176bce6fc0f3b5d59f855be8f2a9b4d441d3c61",
    "variantId": "sales_delivery",
-   "variantVersion": "1.0.0"
+   "variantVersion": "1.1.0"
   },
   "mode": "list",
   "noWorkflowReason": "Belegliste; Freigeben, Umwandeln, Buchen und Stornieren laufen in der Belegmaske je Beleg.",
@@ -285,6 +296,10 @@
    "lookupMinChars": 2,
    "requiresLazyTabs": false,
    "requiresVirtualTables": true
+  },
+  "processChain": {
+   "chainId": "k2_verkauf",
+   "stepKey": "lieferschein"
   },
   "processChains": {
    "k1_ernte": {
@@ -334,8 +349,8 @@
      {
       "key": "lieferschein",
       "label": "Lieferschein",
-      "routePath": "/verkauf/lieferschein-erfassung",
-      "screenId": "sales/delivery-note"
+      "routePath": "/sales/lieferungen",
+      "screenId": "beleg-liste/sales-delivery"
      },
      {
       "key": "rechnung",
@@ -712,8 +727,16 @@
        "value": "open"
       },
       {
+       "label": "Bestätigt",
+       "value": "confirmed"
+      },
+      {
        "label": "Freigegeben",
        "value": "released"
+      },
+      {
+       "label": "Abgeschlossen",
+       "value": "completed"
       },
       {
        "label": "Gebucht",
@@ -783,12 +806,12 @@
   },
   "maskVariant": {
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
-   "baseVersion": "1.0.0",
+   "baseVersion": "1.1.0",
    "family": "beleg-liste",
-   "materializedHash": "badd9b40b07f3e31a8e65994b5563aecccd181e03b27a1981250bb6653a745f7",
-   "variantHash": "1c08eee999278ab503bdb8ba45dcedb4d187cd41e247d2f24f224f869bcdcbe1",
+   "materializedHash": "c01de2e5ae6a970e030fcb19e13d5606aaff570d48473c8d297bfe28fdbcd9ef",
+   "variantHash": "f680c260bdd04faa1cf4b470c5382d7c061a52143a3fd8e253fb120352de6ed4",
    "variantId": "sales_invoice",
-   "variantVersion": "1.0.0"
+   "variantVersion": "1.1.0"
   },
   "mode": "list",
   "noWorkflowReason": "Belegliste; Freigeben, Umwandeln, Buchen und Stornieren laufen in der Belegmaske je Beleg.",
@@ -847,8 +870,8 @@
      {
       "key": "lieferschein",
       "label": "Lieferschein",
-      "routePath": "/verkauf/lieferschein-erfassung",
-      "screenId": "sales/delivery-note"
+      "routePath": "/sales/lieferungen",
+      "screenId": "beleg-liste/sales-delivery"
      },
      {
       "key": "rechnung",
@@ -1256,8 +1279,16 @@
        "value": "open"
       },
       {
+       "label": "Bestätigt",
+       "value": "confirmed"
+      },
+      {
        "label": "Freigegeben",
        "value": "released"
+      },
+      {
+       "label": "Abgeschlossen",
+       "value": "completed"
       },
       {
        "label": "Gebucht",
@@ -1327,12 +1358,12 @@
   },
   "maskVariant": {
    "baseHash": "0472e1817831f20cfec4ff6434bedb95fd89a4a5efc389fa9ba1377a01c98429",
-   "baseVersion": "1.0.0",
+   "baseVersion": "1.1.0",
    "family": "beleg-liste",
-   "materializedHash": "2b346bbb5b9920b9426bbecac47d125e3121cc2f23ef088c2329da86c40e262c",
-   "variantHash": "0b60670843dbf75770f2dfbda8525aed0531548b2513e16fe7475482dd6821b3",
+   "materializedHash": "87ac9b1437ef85872060e3705389c7c1de64c2f88b3e5c4b50e0ef7c2641098e",
+   "variantHash": "ec061625aa4a5f33c89a1b772bb993fdd9612bd4bfddfc0df81710e3b40c7134",
    "variantId": "sales_offer",
-   "variantVersion": "1.0.0"
+   "variantVersion": "1.1.0"
   },
   "mode": "list",
   "noWorkflowReason": "Belegliste; Freigeben, Umwandeln, Buchen und Stornieren laufen in der Belegmaske je Beleg.",
@@ -1391,8 +1422,8 @@
      {
       "key": "lieferschein",
       "label": "Lieferschein",
-      "routePath": "/verkauf/lieferschein-erfassung",
-      "screenId": "sales/delivery-note"
+      "routePath": "/sales/lieferungen",
+      "screenId": "beleg-liste/sales-delivery"
      },
      {
       "key": "rechnung",

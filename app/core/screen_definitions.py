@@ -1108,102 +1108,6 @@ def build_lager_article_stock_screen_definition() -> dict[str, Any]:
     )
 
 
-def build_sales_delivery_note_screen_definition() -> dict[str, Any]:
-    """Native ScreenDefinition fuer sales/delivery-note (UIX-041)."""
-    return {
-        "schemaVersion": 1,
-        "id": "sales/delivery-note",
-        "domain": "sales",
-        "mode": "detail",
-        "title": "Lieferschein",
-        "subtitle": "Warenbeleg. Der Frachtbrief bleibt der Transportbeleg.",
-        "identityField": "delivery_note_number",
-        "adapter": {"type": "native", "sourceId": "sales/delivery-note", "temporary": False},
-        "summaryEndpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/screen-summary",
-        "dataSources": [
-            {"key": "entity", "endpoint": "/api/v1/sales/delivery-notes/{entity_id}"},
-            {"key": "positionen", "endpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/positionen", "pageSize": 50},
-            {"key": "dokumente", "endpoint": "/api/v1/mask-rollouts/sales/delivery-note/{entity_id}/tabs/dokumente", "pageSize": 25},
-        ],
-        "tabs": [
-            {
-                "key": "kopf", "label": "Lieferschein-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-                "fields": [
-                    # Schluessel wie im Endpunkt. Vorher standen hier
-                    # Wunschnamen (ls_nr, auftrag_nr, kunde) — der Beleg kam
-                    # mit 200 und der Kopf blieb leer.
-                    {"key": "delivery_note_number", "label": "LS-Nr.", "type": "text", "readOnly": True},
-                    {"key": "sales_order_number", "label": "Auftrag", "type": "text", "readOnly": True},
-                    {"key": "customer_name", "label": "Kunde", "type": "text", "readOnly": True},
-                    {"key": "customer_number", "label": "Kunden-Nr.", "type": "text", "readOnly": True},
-                    {"key": "delivery_date", "label": "Lieferdatum", "type": "date", "readOnly": True},
-                    # Versandart und Lagerort fuehrt der Lieferschein nicht.
-                    # LKW-Nr. ist die interne Fahrzeugnummer, nicht das Kennzeichen.
-                    {"key": "is_self_pickup", "label": "Selbstabholer", "type": "boolean", "readOnly": True},
-                    {"key": "truck_number", "label": "LKW-Nr.", "type": "text", "readOnly": True},
-                    {"key": "branch_name", "label": "Niederlassung", "type": "text", "readOnly": True},
-                    {"key": "invoice_number", "label": "Rechnungsnr.", "type": "text", "readOnly": True},
-                    {"key": "status", "label": "Status", "type": "text", "readOnly": True},
-                ],
-            },
-            {
-                "key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                            "serverPagination": True, "pageSize": 50, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "pos_nr", "label": "Pos.", "width": 50, "sortable": True},
-                                {"key": "artikel_nr", "label": "Artikel-Nr.", "width": 120},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 200, "filterable": True},
-                                {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                                {"key": "einheit", "label": "Einheit", "width": 70},
-                                {"key": "charge", "label": "Charge", "width": 120},
-                            ]}],
-            },
-            {
-                "key": "dokumente", "label": "Dokumente", "lazy": True, "keepAlive": False,
-                "tables": [{"key": "dokumente", "label": "Dokumente", "dataSourceKey": "dokumente",
-                            "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                            "columns": [
-                                {"key": "datum", "label": "Datum", "sortable": True, "renderKind": "date", "width": 110},
-                                {"key": "typ", "label": "Typ", "width": 120, "filterable": True},
-                                {"key": "bezeichnung", "label": "Bezeichnung", "width": 220},
-                                {"key": "benutzer", "label": "Benutzer", "width": 140},
-                            ]}],
-            },
-        ],
-        "actions": [
-            {
-                "key": "drucken",
-                "label": "Lieferschein drucken",
-                "kind": "primary",
-                "dangerLevel": "safe",
-                "permission": "sales.lieferschein.drucken",
-                "commandEndpoint": "/api/v1/sales/delivery-notes/{entity_id}/actions/drucken",
-                "method": "POST",
-                "zone": "footer",
-                "keyboardShortcut": "Ctrl+P",
-            },
-        ],
-        "noWorkflowReason": "Lieferschein-Status wird ueber den Verkaufsauftrag gesteuert — kein eigener Workflow-Lebenszyklus.",
-        "agentContract": {
-            "businessPurpose": "Warenbeleg: Kunde, Auftrag, Artikel, Menge und Charge. Fahrzeug und Beförderung stehen am Frachtbrief.",
-            "examplePrompts": [
-                "Zeige alle Positionen und Chargen von Lieferschein {entity_id}.",
-                "Welche Dokumente sind mit Lieferschein {entity_id} verknuepft?",
-                "Was ist der aktuelle Status von Lieferschein {entity_id}?",
-            ],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='sales-delivery-note']", "primaryAction": "[data-testid='action-drucken']", "summaryArea": "[data-testid='mask-summary']"},
-        },
-        # Durchgehende Belegseite: Kopf, Positionen und Dokumente untereinander,
-        # die Register bleiben als Sprungmarken (MERIDIAN-BELEG-ONEPAGE).
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "transaction", "sectionNavigation": "anchors", "summaryPlacement": "footer", "stickyHeader": True, "stickyFooter": True},
-        "interaction": {"enterMovesFocus": True},
-        "performance": {"initialPayloadBudgetKb": 48, "requiresLazyTabs": True, "requiresVirtualTables": True, "lookupMinChars": 2, "bundleGroup": "sales"},
-    }
-
-
-
 def build_sales_invoice_screen_definition() -> dict[str, Any]:
     """Native ScreenDefinition fuer sales/invoice (FSX-RECHNUNGSMASKE-MERIDIAN).
 
@@ -5135,7 +5039,6 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
     "einkauf/supplier": build_supplier_screen_definition,
     "crm/opportunity": build_crm_opportunity_screen_definition,
     "lager/article-stock": build_lager_article_stock_screen_definition,
-    "sales/delivery-note": build_sales_delivery_note_screen_definition,
     "sales/invoice": build_sales_invoice_screen_definition,
     "strecke/streckengeschaeft": build_strecke_streckengeschaeft_screen_definition,
     "versand/versand-avis": build_versand_avis_screen_definition,
@@ -5364,23 +5267,6 @@ _ROLLOUT_TAB_COLUMNS: dict[str, dict[str, list[dict[str, Any]]]] = {
             _num("wert", "Wert", render_kind="currency"),
             _txt("waehrung", "Waehrung", width=70),
             _status("status", "Status"),
-        ],
-    },
-    "sales/delivery-note": {
-        "positionen": [
-            _txt("pos_nr", "Pos.", width=50),
-            _txt("artikel_nr", "Artikel-Nr.", width=120),
-            _txt("bezeichnung", "Bezeichnung", width=200),
-            _num("menge", "Menge"),
-            _txt("einheit", "Einheit", width=70),
-            _txt("charge", "Charge", width=120),
-            _txt("lagerort", "Lagerort"),
-        ],
-        "auftraege": [
-            _txt("auftrag_nr", "Auftrag-Nr.", width=130),
-            _date("datum", "Datum"),
-            _txt("pos_nr", "Pos.", width=50),
-            _num("auftragsmenge", "Auftr.-Menge"),
         ],
     },
     "agrar/harvest-settlement": {
@@ -5778,7 +5664,6 @@ _AGENT_SYNONYMS: dict[str, list[str]] = {
     "lager/stock-movement": ["lagerbewegung", "warenbewegung", "umbuchung"],
     "lager/fremdware": ["fremdware", "fremdbestand", "kommissionsware", "poolware", "eigentuemerbestand"],
     "qualitaet/reklamation": ["reklamation", "beanstandung", "maengelruege"],
-    "sales/delivery-note": ["lieferschein", "lieferung", "warenausgang"],
     "sales/invoice": ["rechnung", "ausgangsrechnung", "faktura", "sammelrechnung", "herkunft der menge"],
     "beleg-liste/sales-invoice": ["rechnungen", "ausgangsrechnungen", "faktura liste", "offene rechnungen", "rechnungsuebersicht"],
     "strecke/streckengeschaeft": ["streckengeschaeft", "strecke", "drop ship"],
@@ -5916,7 +5801,6 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     "lager/leitstand": "/lager/materialfluss-visualisierung",
     "lager/stock-movement": "/lager/lagerbewegungen",
     "qualitaet/reklamation": "/qualitaet/reklamationen",
-    "sales/delivery-note": "/verkauf/lieferschein-erfassung",
     "sales/invoice": "/verkauf/rechnungen",
     "beleg-liste/sales-invoice": "/belege/sales_invoice",
     "beleg-liste/sales-order": "/verkauf/auftraege",

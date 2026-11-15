@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from sqlalchemy.orm import Session
+from pydantic import ValidationError
 
 from app.auth.beleg_roles import darf
 from app.core.belegvertrag import BELEGARTEN, Beleg, Belegaktion
@@ -104,18 +105,27 @@ def fuehre_aus(db: Session, tenant_id: str, belegart: str, beleg_id: str, aktion
         relation = TRANSITIONS.get(belegart, {}).get(ziel)
         if not relation:
             raise ValidationFailedError(f"{ziel} ist kein Folgebeleg von {bezeichnung}.")
-        # Der ganze Rest je Position, ausdruecklich: Ein blosser Wiederholungsaufruf erzeugt keinen zweiten Folgebeleg.
-        schon = svc.umgewandelte_mengen(beleg_id, relation)
-        mengen = {}
-        for position in svc.fetch_items(beleg_id):
-            rest = float(position.get("quantity") or 0) - float(schon.get(str(position["id"]), 0))
-            if rest > 0:
-                mengen[str(position["id"])] = rest
-        if not mengen:
-            raise ConflictError("Alle Mengen sind bereits übernommen.")
-        ergebnis = svc.convert(beleg_id, DocflowConvertRequest(
-            target_doc_type=ziel, idempotency_key=schluessel(f"umwandeln-{ziel}"), expected_version=version,
-            quantities_by_source_item_id=mengen))
+        if "quantities_by_source_item_id" in eingaben:
+            mengen = eingaben["quantities_by_source_item_id"]
+            if not isinstance(mengen, dict) or not mengen:
+                raise ValidationFailedError("Explizite Positionsmengen fehlen.")
+        else:
+            # Legacy full-remainder action; explicit partial quantities are never overwritten.
+            schon = svc.umgewandelte_mengen(beleg_id, relation)
+            mengen = {}
+            for position in svc.fetch_items(beleg_id):
+                rest = float(position.get("quantity") or 0) - float(schon.get(str(position["id"]), 0))
+                if rest > 0:
+                    mengen[str(position["id"])] = rest
+            if not mengen:
+                raise ConflictError("Alle Mengen sind bereits übernommen.")
+        try:
+            anfrage = DocflowConvertRequest(
+                target_doc_type=ziel, idempotency_key=schluessel(f"umwandeln-{ziel}"), expected_version=version,
+                quantities_by_source_item_id=mengen)
+        except ValidationError as exc:
+            raise ValidationFailedError("Positionsmengen sind ungueltig.") from exc
+        ergebnis = svc.convert(beleg_id, anfrage)
         return f"{BELEGARTEN[ziel].bezeichnung} erstellt aus {bezeichnung} {kopf['doc_number']} (Beleg {ergebnis.get('target_doc_id')})."
 
     engine = DocflowFreigabe(db, tenant_id)

@@ -6665,7 +6665,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "1cea78dc2390da777916a6714518dfdf61646e1dd069bba51f37bfa691c9d1e7",
+        "definitionHash": "94cd3f9362168d6e61c1446180440ef42d0c73ce95605bbc5c3be8d731ac3178",
         "patch": {
           "actions": [
             {
@@ -6794,11 +6794,6 @@
                       "key": "charge",
                       "label": "Charge",
                       "type": "text"
-                    },
-                    {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
                     }
                   ],
                   "tableEditing": {
@@ -6851,6 +6846,58 @@
               "enabledWhen": "aktion_umwandeln_purchase_invoice",
               "folgebelegart": "purchase_invoice",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:purchase_invoice",
               "kind": "primary",
               "kommando": "docflow.convert",
@@ -7182,11 +7229,6 @@
                     "key": "charge",
                     "label": "Charge",
                     "type": "text"
-                  },
-                  {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
                   }
                 ],
                 "tableEditing": {
@@ -7416,11 +7458,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -7598,7 +7635,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "3345518b0014b2789afba3e419c383c5778d7d3692084ae03b72bc0310b164ec"
+        "patchHash": "d53525c70f73529d08c3f410f37430940eec2a1024a64165dcb760eeef6960a7"
       }
     },
     "purchase_credit_memo": {
@@ -15558,7 +15595,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "f6ad2678db17d2b2a203bcb9965829311c1b632b64060db0c097ff7f5b49beba",
+        "definitionHash": "7839160e233b529971862a14026c948918cb2d43a6940ef09d8e81cd1cebf9d1",
         "patch": {
           "actions": [
             {
@@ -15656,11 +15693,6 @@
                     {
                       "key": "charge",
                       "label": "Charge",
-                      "type": "text"
-                    },
-                    {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
                       "type": "text"
                     },
                     {
@@ -16138,11 +16170,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -16397,11 +16424,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "einzelpreis",
                       "label": "Einzelpreis",
                       "numeric": true,
@@ -16599,7 +16621,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "c167e1301a8be4fd9c40ffe92d6be811ec52f524ed7fdb69c852767c8a1c6ace"
+        "patchHash": "ee02f66a8e7abd97876e70e24976f194709338680feafa88fa455ea58cf289a3"
       }
     },
     "purchase_invoice": {
@@ -25066,7 +25088,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "e466ec2f70fcbe99ee156cf97b8307e7fa229eeecec939f5b9db6eb80afe59bf",
+        "definitionHash": "da607ce5716b69d8568510f5348d1d913b66f78ebe5503609505656093af81a5",
         "patch": {
           "actions": [
             {
@@ -25191,11 +25213,6 @@
                       "type": "text"
                     },
                     {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
-                    },
-                    {
                       "key": "unit_price",
                       "label": "Einzelpreis",
                       "required": true,
@@ -25291,6 +25308,58 @@
               "enabledWhen": "aktion_umwandeln_purchase_credit_memo",
               "folgebelegart": "purchase_credit_memo",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:purchase_credit_memo",
               "kind": "secondary",
               "kommando": "docflow.convert",
@@ -25717,11 +25786,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -26004,11 +26068,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -26214,7 +26273,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "55126ebb8cbfc7986b645fb4fff752ef4bae68518f47e52479f7660650075c8e"
+        "patchHash": "044468652ee88a295c375a0ac43af5f970dd5eb51f9d0e6ed3ee4151ac0a8cde"
       }
     },
     "purchase_order": {
@@ -34237,7 +34296,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "5f9e923d8cd968a6d64356d00acbe4d459c61d99ad235006bd81134eb26d5cb4",
+        "definitionHash": "c7da5f95411f01b49c33673db4afc903e3559dfbe329da537b9676e54a933ade",
         "patch": {
           "actions": [
             {
@@ -34410,11 +34469,6 @@
                       "type": "text"
                     },
                     {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
-                    },
-                    {
                       "key": "unit_price",
                       "label": "Einzelpreis",
                       "required": true,
@@ -34491,6 +34545,58 @@
               "enabledWhen": "aktion_umwandeln_goods_receipt",
               "folgebelegart": "goods_receipt",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:goods_receipt",
               "kind": "primary",
               "kommando": "docflow.convert",
@@ -34514,6 +34620,58 @@
               "enabledWhen": "aktion_umwandeln_purchase_invoice",
               "folgebelegart": "purchase_invoice",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:purchase_invoice",
               "kind": "secondary",
               "kommando": "docflow.convert",
@@ -34895,11 +35053,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -35226,11 +35379,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -35437,7 +35585,7 @@
             "partnerrolle": "lieferant"
           }
         },
-        "patchHash": "2e3f1686c663527a12ed599ebb592d80c6416a2995ee41ba17c45c35316442ae"
+        "patchHash": "8f36792b045acc4da45f93e5773c7559df20728e19e4fc7af724fc11a29e627e"
       }
     },
     "sales_credit_memo": {
@@ -43277,7 +43425,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "4acb64c6c4dc1ae4997c7c13d9eeb01c68cbfcc894a5c0ed786f4258f83ee525",
+        "definitionHash": "d917d9d213cab068e24c714eaed1c178284ed89be4eddaedd016bed20502ed39",
         "patch": {
           "actions": [
             {
@@ -43375,11 +43523,6 @@
                     {
                       "key": "charge",
                       "label": "Charge",
-                      "type": "text"
-                    },
-                    {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
                       "type": "text"
                     },
                     {
@@ -43852,11 +43995,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -44106,11 +44244,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "einzelpreis",
                       "label": "Einzelpreis",
                       "numeric": true,
@@ -44303,7 +44436,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "bca2d0ea024b32c9052ec6d4ce0c5e6e10dac94f572019d0a718c26932e4ccd2"
+        "patchHash": "ded99c3fdfc9f70d09e6e42136645ef89f46fa45ae02d9814ac89ec47b6c7b65"
       }
     },
     "sales_delivery": {
@@ -50970,7 +51103,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "7d2ea9977be3b1639a79c1632f653aadca73770c217b13e07cbe20ebbe64ffba",
+        "definitionHash": "8c063c448cc79ac33d07ace7f3e60108aa45a5881d7a5a52efee821c1d538647",
         "patch": {
           "actions": [
             {
@@ -51117,11 +51250,6 @@
                       "key": "charge",
                       "label": "Charge",
                       "type": "text"
-                    },
-                    {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
                     }
                   ],
                   "tableEditing": {
@@ -51174,6 +51302,58 @@
               "enabledWhen": "aktion_umwandeln_sales_invoice",
               "folgebelegart": "sales_invoice",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:sales_invoice",
               "kind": "primary",
               "kommando": "docflow.convert",
@@ -51523,11 +51703,6 @@
                     "key": "charge",
                     "label": "Charge",
                     "type": "text"
-                  },
-                  {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
                   }
                 ],
                 "tableEditing": {
@@ -51778,11 +51953,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -51960,7 +52130,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "d5a8db3aba9dd22f8da2f6d3db7fd52767fadf5b97d3c3eb2eb224175c2aa2f5"
+        "patchHash": "58951fb896d6412b61a77097a601c6881567c4b519c8af015f5b84fff8d587f0"
       }
     },
     "sales_invoice": {
@@ -60307,7 +60477,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "81d3072235093a914386e726dd82bd4ca0dd9bdc2f647d9eda4ca577d4b0f377",
+        "definitionHash": "88757109b72370b7beb406a99b801561a13f378e3ba4cd127dd9b20df5effc56",
         "patch": {
           "actions": [
             {
@@ -60432,11 +60602,6 @@
                       "type": "text"
                     },
                     {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
-                    },
-                    {
                       "key": "unit_price",
                       "label": "Einzelpreis",
                       "required": true,
@@ -60527,6 +60692,58 @@
               "enabledWhen": "aktion_umwandeln_sales_credit_memo",
               "folgebelegart": "sales_credit_memo",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:sales_credit_memo",
               "kind": "secondary",
               "kommando": "docflow.convert",
@@ -60953,11 +61170,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -61235,11 +61447,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -61440,7 +61647,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "c4c71574128a4a19740380a89d14519583b7271590887c0e4562fd716d1dd44b"
+        "patchHash": "516fff9a0e35ba11f97d9fc776f0c90d93dab9a74a550031915ab5171eb7c3cd"
       }
     },
     "sales_offer": {
@@ -69127,7 +69334,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "6d23a5cab39a66e012219a044bd2f61f6de04b636004cc6a571be7c42fd7809f",
+        "definitionHash": "c1ce9793e68ee09d67746a400cd6874c228294613c35df4201b78b4960e0a0b9",
         "patch": {
           "actions": [
             {
@@ -69300,11 +69507,6 @@
                       "type": "text"
                     },
                     {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
-                    },
-                    {
                       "key": "unit_price",
                       "label": "Einzelpreis",
                       "required": true,
@@ -69376,6 +69578,58 @@
               "enabledWhen": "aktion_umwandeln_sales_order",
               "folgebelegart": "sales_order",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:sales_order",
               "kind": "primary",
               "kommando": "docflow.convert",
@@ -69757,11 +70011,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -70083,11 +70332,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -70288,7 +70532,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "9a57d824d9e89c9dcc1d611a595410d852c0adea2055a64c1e0ce0e6792f6bfa"
+        "patchHash": "ed52246290d6892133894421468a06627dc64c73d4bd99b59f33354cb908fc5c"
       }
     },
     "sales_order": {
@@ -78229,7 +78473,7 @@
       "1.9.0": {
         "baseHash": "17a51e623ce1c00d819b52245bbc680fb9d952e470cd0b5b9967889c35c82218",
         "baseVersion": "1.9.0",
-        "definitionHash": "1b8ef5ba5130564d4e3085f4f7a1db8ae21ec820baa058e2a99aae594f5b4730",
+        "definitionHash": "447fe30a0b77470ad9eee1e0a7db85f5ce637c3c0293161abb23176edba0e482",
         "patch": {
           "actions": [
             {
@@ -78402,11 +78646,6 @@
                       "type": "text"
                     },
                     {
-                      "key": "contract_ref",
-                      "label": "Kontrakt",
-                      "type": "text"
-                    },
-                    {
                       "key": "unit_price",
                       "label": "Einzelpreis",
                       "required": true,
@@ -78497,6 +78736,58 @@
               "enabledWhen": "aktion_umwandeln_sales_delivery",
               "folgebelegart": "sales_delivery",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:sales_delivery",
               "kind": "primary",
               "kommando": "docflow.convert",
@@ -78520,6 +78811,58 @@
               "enabledWhen": "aktion_umwandeln_sales_invoice",
               "folgebelegart": "sales_invoice",
               "forbiddenForAgents": true,
+              "inputFields": [
+                {
+                  "helpText": "Menge je Position eintragen. Null uebernimmt nichts. Restmengen werden vor Ausfuehrung erneut geprueft.",
+                  "key": "quantities_by_source_item_id",
+                  "label": "Zu uebernehmende Positionen",
+                  "required": true,
+                  "rowFields": [
+                    {
+                      "key": "line_number",
+                      "label": "Position",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "article_number",
+                      "label": "Artikel",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "label": "Bezeichnung",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "unit",
+                      "label": "Einheit",
+                      "readOnly": true,
+                      "type": "text"
+                    },
+                    {
+                      "key": "remaining_quantity",
+                      "label": "Restmenge",
+                      "readOnly": true,
+                      "type": "number"
+                    },
+                    {
+                      "key": "quantity",
+                      "label": "Uebernahmemenge",
+                      "required": true,
+                      "type": "number"
+                    }
+                  ],
+                  "tableEditing": {
+                    "allowAdd": false,
+                    "allowDelete": false,
+                    "maxRows": 200
+                  },
+                  "type": "table"
+                }
+              ],
               "key": "umwandeln:sales_invoice",
               "kind": "secondary",
               "kommando": "docflow.convert",
@@ -78901,11 +79244,6 @@
                     "type": "text"
                   },
                   {
-                    "key": "contract_ref",
-                    "label": "Kontrakt",
-                    "type": "text"
-                  },
-                  {
                     "key": "unit_price",
                     "label": "Einzelpreis",
                     "required": true,
@@ -79227,11 +79565,6 @@
                       "width": 120
                     },
                     {
-                      "key": "kontrakt",
-                      "label": "Kontrakt",
-                      "width": 120
-                    },
-                    {
                       "key": "menge_offen",
                       "label": "Offen",
                       "numeric": true,
@@ -79433,7 +79766,7 @@
             "partnerrolle": "kunde"
           }
         },
-        "patchHash": "54bfe20b26dbaea20d1a3e6586f2f2d0402470ee559ed5704654889a17423d4e"
+        "patchHash": "4f634b997178ba639a4ea3ddb2093ec27469e9850abe798892efb1e982aedad1"
       }
     }
   }
