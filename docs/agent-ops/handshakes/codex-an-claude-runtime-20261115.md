@@ -60,3 +60,13 @@ Der Nutzer startet Windows und die Programme selbst neu, weil Docker haengt. Cod
 Das SQL-Wartungsfenster auf valeo_neuro_erp ist abgeschlossen. Alle17Migrationenaus2338578d0wurdenzuerstkomplettzurueckgerollt(Katalog/Revision/439Tabellenhashesidentisch)unddanachregulaerbiswms_pickposition_stand_20261110angewendet;659RLS-Tabellen. KeinerderBELEG-052-Headswurdeangewendetodergestempelt. BeidebestehendenAnwendungsdienste sindmitaktuellenImagesgesund; Backend1Worker/valeo_app,keineveraenderlichenCodebinds,Frontendan3000und3001zeigtimsauberenChromezugriffdieAnmeldung. VollsicherungundLaufzeitdatenlokalgesichert,keinefremdeDBangefasst.
 
 Claude darf auf eigenen Branches und der bestehenden valeo_claude_test weiterarbeiten. Es bestehen von Codex keine laufenden Schemaoperationen mehr. Ungemergte Migrationen weiterhin nicht auf valeo_neuro_erp oder valeo_probe bringen. Aktuell laeuft bei Codex nur ein kleiner Frontendtest fuer die globale Theme-Initialisierung; kein Imagebau oder grosser Datenbanktest. Schwere Docker-Builds und grosse Testsuiten weiterhin seriell abstimmen. Eine spaetere Frontend-Neubauaktion von Codex wartet auf ein freies Ressourcenfenster. Codex besitzt nur main.tsx/useTheme.ts, einen neuen Theme-Bootstraptest und seine Ops-Dokumentation; Claudes Beleg-/Kontraktdateien bleiben unberuehrt.
+
+## Frontend-Nachlauf abgeschlossen
+
+Die gemeinsame Theme-Initialisierung ist in dbec1c872 korrigiert, 86 gezielte Tests
+gruen. Das Frontend wurde inzwischen separat gebaut und ersetzt; reale Chrome-
+Pruefung bestaetigt gespeichertes Hell/Dunkel, lesbare Anmeldung und keine JS-Fehler.
+Keine erneute Backend-/SQL-Umstellung. Codex' Imagebau ist beendet; das zuvor
+reservierte Ressourcenfenster ist frei. QA: theme-bootstrap-20261115.md und
+local-runtime-2338578-20261115.md.
+

@@ -20951,3 +20951,12 @@ Gegenprobe 5/7 rot vor Fix; danach 86 gezielte Tests gruen (8 Bootstrap/Speicher
 78 bestehende Studio-Kontrastfaelle). QA: theme-bootstrap-20261115.md.
 Offen bleiben Neubau und reale Browserabnahme des korrigierten Frontends.
 Keine SQL-Operationen; Claude bleibt fuer seine bestehenden Branches/DB freigegeben.
+
+### Abschluss UIX-PUBLIC-THEME-BOOTSTRAP-20261115 / lokale Bereitstellung
+
+Codex: 86 gezielte Tests bestanden; Frontend separat gebaut und ersetzt.
+Echter Chrome: Hell-/Dunkelwahl wirksam, Screenshots visuell geprueft, keine
+JS-Fehler, Anmeldung auf 3000/3001 weiterhin erforderlich. Theme-Slice geschlossen.
+SQL-Fenster abgeschlossen; Nachweis local-runtime-2338578-20261115.md.
+Backend unveraendert auf freigegebenem 2338578d0, ein Worker, keine Codebindmounts.
+Claude bleibt freigegeben; keine laufenden Codex-Builds oder Datenbanktests.

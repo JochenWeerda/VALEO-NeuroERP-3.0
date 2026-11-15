@@ -1,11 +1,16 @@
 ---
 title: Wiederaufnahme nach Windows-Neustart am 15.11.2026
 owner: Codex
-status: unterbrochen durch Neustart
+status: wiederaufgenommen und SQL-Fenster abgeschlossen
 last_reviewed: 2026-11-15
 ---
 
 # Resume: LOCAL-RUNTIME-2338578-20261115
+
+Aktualisierung: Wiederaufnahme abgeschlossen, 17 freigegebene Migrationen regulaer
+angewendet, Backend und Frontend gesund. Die folgenden Neustartnotizen beschreiben
+den historischen Unterbrechungsstand und sind keine Aufforderung zur Wiederholung.
+Aktueller Nachweis: docs/quality-assurance/local-runtime-2338578-20261115.md.
 
 ## Arbeitsort und Git-Stand
 
@@ -113,3 +118,4 @@ hat die eigene Aufloesung beim Main-Merge angekuendigt. Nichts blind revidieren.
 
 Das Gesamtziel ist weiterhin offen; Vorbereitung zum Neustart ist kein
 Abschluss der lokalen Bereitstellung oder aller Studio-/Matrix-Restpunkte.
+
