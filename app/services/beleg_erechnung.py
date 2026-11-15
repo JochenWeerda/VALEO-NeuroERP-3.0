@@ -26,7 +26,7 @@ _EINHEIT_CODE = {"dt": "DTN", "kg": "KGM", "t": "TNE", "g": "GRM", "l": "LTR", "
 def einheit_code(einheit: Optional[str]) -> str:
     from app.core.agrar_units import normalisiere
 
-    schluessel = normalisiere(einheit or "").lower() if einheit else ""
+    schluessel = normalisiere(einheit).lower() if einheit else ""
     code = _EINHEIT_CODE.get(schluessel)
     if not code:
         raise ValidationFailedError(f"Einheit {einheit!r} hat keinen UN/ECE-Code fuer die E-Rechnung.")

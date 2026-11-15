@@ -1,5 +1,5 @@
 {
-  "date": "2026-07-06",
+  "date": "2026-11-15",
   "profiles": [
     {
       "id": "tax-gobd",
@@ -13,7 +13,7 @@
           "title": "Unveraenderbarkeit und Gegenbuchung",
           "evidence": [
             "app/services/finance_transaction_service.py",
-            "tests/test_crm360_finance_handover.py"
+            "tests/test_finance_transaction_service.py"
           ],
           "external_gate": null,
           "required_content": [
