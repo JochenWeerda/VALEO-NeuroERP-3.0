@@ -57,7 +57,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 
 ## Geschwister-Modelle
 
-- `domain_crm.crm_consents` neben `domain_crm.crm_contact_consents` — Zwei Fachmodelle, zwei Tabellen â€” nicht umdeuten.
+- `domain_crm.crm_consents` neben `domain_crm.crm_contact_consents` — Zwei Fachmodelle, zwei Tabellen — nicht umdeuten.
 
 ## Gleicher Tabellenname in mehreren Schemas
 
@@ -1493,7 +1493,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `dms_inbox` | `platform` | native | `id` | id, dms_document_id, dms_url, ocr_text, parsed_fields, confidence, status, created_at, tenant_id |
 | `entity_notes` | `platform` | native | `id` | id, tenant_id, entity_type, entity_id, body, mentions, created_by, created_at, updated_at, deleted_at |
 | `erloeskennziffern` | `platform` | native | `id` | id, tenant_id, ekz_nr, bezeichnung, aktiv, created_at |
-| `erloeskontenzuordnung` | `platform` | native | `id` | id, tenant_id, ekz_id, gueltig_ab, steuerschluessel, erlÃ¶sklasse, steuergruppe, buchungsklasse, konto_erloese, konto_aufwand, konto_umsatzsteuer, konto_vorsteuer, created_at |
+| `erloeskontenzuordnung` | `platform` | native | `id` | id, tenant_id, ekz_id, gueltig_ab, steuerschluessel, erlösklasse, steuergruppe, buchungsklasse, konto_erloese, konto_aufwand, konto_umsatzsteuer, konto_vorsteuer, created_at |
 | `farmers` | `platform` | native | `id` | id, tenant_id, farmer_number, first_name, last_name, full_name, email, phone, farmer_type, status, portal_access_enabled, created_at, updated_at |
 | `feeding_feed_analysis_findings` | `platform` | native | `id` | id, tenant_id, analysis_id, code, severity, message, nutrient_code, observed_value, acknowledged, created_at |
 | `feeding_feed_analysis_revisions` | `platform` | native | `id` | id, tenant_id, analysis_id, revision, snapshot, reason, changed_by, changed_at |
