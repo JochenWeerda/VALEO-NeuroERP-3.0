@@ -457,3 +457,13 @@ Die native Studio-Liste `compliance/zulassungen-liste` nutzt den typisierten, ma
 ### Deklarative Zustellhistorie (05.11.2026)
 
 ScreenActionDefinition.readView beschreibt eine rein lesende, objektbezogene Tabellenansicht. Der gemeinsame Dialog verwendet ScreenDefinition, RenderPlan, UniversalMaskRuntime und UniversalMaskRenderer mit zentralen Theme-Tokens. Benutzer-/Mandantenwechsel und entzogene Aktionsrechte blenden Ergebnisse aus; Abfrageschluessel trennen Identitaeten. Ziel-GET und Rollenmodell bleiben verbindlich. Komponentenpruefungen ersetzen keine authentifizierte Browser- und Kontrastabnahme.
+
+## Globale Theme-Initialisierung (2026-11-15)
+
+Die gemeinsame Anwendung wendet die gespeicherte Hell-/Dunkelwahl vor dem ersten
+React-Render an. Das gilt auch fuer die native Studio-Anmeldung ohne TopBar.
+Ohne gueltige Wahl gilt die Betriebssystempraeferenz; gesperrter Browserspeicher
+verhindert weder den Start noch das Umschalten. Meridian-Attribute und zentrale
+Renderer-Tokens bleiben erhalten. Regression: acht Bootstrap-/Speicherfaelle;
+zusammen mit dem bestehenden Studio-Kontrastvertrag 86 Tests bestanden.
+Die Sichtabnahme des neu gebauten Images ist gesondert nachzuweisen.
