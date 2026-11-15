@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import Any
 from uuid import uuid4
 
+from app.core.business_time import business_today
 from fastapi import HTTPException
 from sqlalchemy import text
 
@@ -70,7 +71,7 @@ def create(db, tenant_id, *, schema_code, name, group, valid_from=None,
     validate_header({"schema_code": schema_code, "name": name, "version": version,
                      "gueltig_ab": valid_from, "gueltig_bis": valid_until})
     identifier = str(uuid4())
-    valid_from = valid_from or (date.today() if activate else None)
+    valid_from = valid_from or (business_today() if activate else None)
     if activate and not valid_from:
         raise HTTPException(422, "gueltig_ab erforderlich")
     db.execute(text("""INSERT INTO domain_shared.rohware_abrechnungsschemata

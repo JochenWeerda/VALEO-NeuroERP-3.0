@@ -247,3 +247,15 @@ def test_legacy_create_rejects_invalid_header_without_writes(client, field, valu
     assert response.status_code == 422, response.text
     assert not any(sql.lstrip().startswith(('UPDATE', 'INSERT', 'DELETE')) for sql, _ in db.calls)
     assert db.commits == 0 and (db.schemas, db.lines) == before
+
+
+def test_legacy_activation_uses_business_day(monkeypatch):
+    from datetime import date
+    from unittest.mock import Mock
+    from app.services import rohware_schema_service as schemas
+    business_day = date(2026, 12, 1)
+    monkeypatch.setattr(schemas, 'business_today', lambda: business_day)
+    db = Mock()
+    schemas.create(db, 'tenant', schema_code='S', name='Probe', group='own', activate=True)
+    assert db.execute.call_args.args[1]['valid_from'] == business_day
+    assert db.execute.call_args.args[1]['active'] is True
