@@ -2,7 +2,10 @@
 import { StrictMode, Suspense, lazy } from 'react'
 import ReactDOM, { type Root } from 'react-dom/client'
 import { PageLoader } from '@/app/PageLoader'
+import { initializeTheme } from '@/hooks/useTheme'
 import './index.css'
+
+initializeTheme()
 
 const AppRuntime = lazy(() =>
   import('@/app/AppRuntime').then((module) => ({ default: module.default })),

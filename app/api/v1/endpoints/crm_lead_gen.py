@@ -50,8 +50,9 @@ def lead_preview(
     top_pct: float = Query(0.10, ge=0.01, le=1.0, description="Top-Anteil (0.10 = 10%)"),
     max_leads: int = Query(200, ge=1, le=2000),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
-    return CrmLeadGenService(db).preview(
+    return CrmLeadGenService(db, tenant_id).preview(
         quelle=quelle, plz_min=plz_min, plz_max=plz_max, top_pct=top_pct, max_leads=max_leads
     )
 
