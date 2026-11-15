@@ -32,7 +32,7 @@ def test_canonical_schema_lifecycle_foreign_keys_and_rls(require_db):
                 FROM domain_shared.rohware_abrechnungsschemata WHERE id=:id"""), {'id': legacy_id}).one()
             assert tuple(legacy) == ('AKTIV', True, True)
             group = schemas.group_id(db, a, group_id=ga)
-            schema_id = schemas.create(db, a, schema_code='s-' + marker, name='Prüfung',
+            schema_id = schemas.create(db, a, schema_code='s-' + marker[:16], name='Prüfung',
                                        group=group, valid_from='2026-01-01')
             draft = db.execute(sa.text('SELECT status, aktiv FROM domain_shared.rohware_abrechnungsschemata WHERE id=:id'), {'id':schema_id}).one()
             assert tuple(draft) == ('ENTWURF', False)
@@ -80,7 +80,7 @@ def test_canonical_schema_lifecycle_foreign_keys_and_rls(require_db):
             assert conn.execute(sa.text('SELECT bezeichnung FROM domain_shared.rohware_schema_lines WHERE schema_id=:id'), {'id':schema_id}).scalar() == 'Preis'
             with Session(bind=conn, join_transaction_mode='create_savepoint') as app_db:
                 own_group = schemas.group_id(app_db, a, group_id=ga)
-                own_id = schemas.create(app_db, a, schema_code='app-' + marker, name='App', group=own_group, valid_from='2026-01-01')
+                own_id = schemas.create(app_db, a, schema_code='app-' + marker[:16], name='App', group=own_group, valid_from='2026-01-01')
                 schemas.transition(app_db, a, own_id, 'AKTIV')
                 app_db.execute(sa.text('''INSERT INTO domain_shared.rohware_schema_lines
                     (id, tenant_id, schema_id, positions_typ, bezeichnung, berechnungsformel, einheit)
