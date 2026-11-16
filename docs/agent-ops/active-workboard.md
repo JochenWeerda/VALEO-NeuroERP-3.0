@@ -21244,3 +21244,16 @@ WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt ze
 WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bewusstem Oeffnen, kompakter Aufgabenprojektion und versteckter Anpassungssteuerung; keine neue Seitenarchitektur. CSS-Layer-Reihenfolge zentral repariert, echte berechnete Titel-/Radiuswerte und Kontrast geprueft. 67 Verhaltenstests sowie volle Frontend-Typpruefung bestanden. Sechs synthetische Browserfaelle mit produktiven Komponenten, ohne persoenliche Anmeldung/DB, bestehen. Lokales finales Frontend-Image folgt; kein Backend-/DB-Neustart. QA workspace-home-usability-20261116.md.
 
 WORKSPACE-HOME-USABILITY-20261116 lokal bereitgestellt: Quelle6ea0b08ef, Frontendimagecde458f352c8; nur bestehenden Frontend ersetzt. 67 Oberflaechen-/Fachwegtests plus 86 Themevertraege, volle Typpruefung und sechs finale Browser-/Kontrastfaelle bestanden. Beide SSO-Einstiege nach Aktivierung erneut fehlerfrei, alle drei Dienste healthy. Keine persoenliche Anmeldung, keine DB-Aenderung. PR148 nach PR147 integrieren; lokale Wartung beendet.
+
+
+## GROUPED-APP-LAUNCHER-20261116 — reserviert, Codex Lead
+
+Nutzerpraezisierung mit drei Bildern: Start ist primaer funktional gruppierter
+App-/Masken-Launcher, kein Dashboard. Vorhandene Launchpad-Komponenten und
+Navigations-/Studio-Kataloge weiterverwenden. Besitz: LaunchpadBoard,
+launchpad-spaces, AdaptiveWorkspaceLayer, start-dashboard und eng betroffene
+Tests/visueller Harness; eigene QA/Design-Doku/Handshake. Getrennte Delegation
+Board versus Home-Integration. Abnahme: Symbolstarter nach Fachgruppen,
+Direktnavigation, Suche, Personalisierung und Theme; keine Kennzahlen/Tafeln
+auf dem Standardstart, bestehende operative Komposition getrennt erreichbar.
+Keine Attrappen, Rechteerweiterung, neue Datenbank oder Container.
