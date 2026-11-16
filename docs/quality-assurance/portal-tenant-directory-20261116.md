@@ -124,3 +124,15 @@ Der gemeinsame Doc-Generator-Metacheck prueft die Matrix nun vor der langen
 Gesamtsuite. Im fehlgeschlagenen Lauf entstand kein versiegelter Backend-
 Abdeckungsnachweis; deshalb wird fuer den Endstand kein vollstaendig gruener
 Gesamtnachweis aus dem fehlgeschlagenen Lauf behauptet.
+
+## Sonar-Nachlauf
+
+Endstand9f1bc6037: Backend28389passed,71skipped,1deselected und kritische
+Backendabdeckung bestanden; Frontend und Docker-Bautest ebenfalls gruen.
+Sonar meldete ausschliesslich fuenf neue Reliability-Befunde S3923 in
+CustomerPortalLayout: beide Zweige lieferten nach Theme-Vereinheitlichung
+dieselben Klassen. Security, Maintainability, Hotspot-Pruefung und Duplikate
+gruen; neue Abdeckung91.6%. Identische Farbzweige und deren ungenutzte private
+terra-Option entfernt. Keine Theme-Werte, Navigationsrechte oder Datenwege
+geaendert. 14 gezielte Portal-/Sitzungsvertraege danach bestanden.
+Vollstaendige Frontend-Typpruefung nach der Vereinfachung ebenfalls gruen.

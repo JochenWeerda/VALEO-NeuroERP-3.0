@@ -60,13 +60,11 @@ function PortalNavLink({
   active,
   onNavigate,
   compact = false,
-  terra = false,
 }: {
   item: NavItem
   active: boolean
   onNavigate?: () => void
   compact?: boolean
-  terra?: boolean
 }) {
   const Icon = item.icon
 
@@ -76,13 +74,9 @@ function PortalNavLink({
       onClick={onNavigate}
       className={clsx(
         'flex items-center justify-between rounded-lg px-4 py-3 text-sm font-medium transition-colors',
-        terra
-          ? active
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-          : active
-            ? 'bg-primary/10 text-primary'
-            : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+        active
+          ? 'bg-primary/10 text-primary'
+          : 'text-muted-foreground hover:bg-muted hover:text-foreground',
         compact && 'px-3 py-2',
       )}
     >
@@ -126,12 +120,8 @@ export default function CustomerPortalLayout() {
   const kontoName = konto?.name ?? 'Kundenportal'
   const kontoKuerzel = kontoName.split(/\s+/).map((teil) => teil[0] ?? '').join('').slice(0, 2).toUpperCase()
 
-  const navActiveClass = isTerraAgrar
-    ? 'bg-primary/10 text-primary'
-    : 'bg-primary/10 text-primary'
-  const navInactiveClass = isTerraAgrar
-    ? 'text-muted-foreground hover:bg-muted hover:text-foreground'
-    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+  const navActiveClass = 'bg-primary/10 text-primary'
+  const navInactiveClass = 'text-muted-foreground hover:bg-muted hover:text-foreground'
 
   const isActivePath = (path: string) => {
     if (path === '/portal') {
@@ -256,7 +246,6 @@ export default function CustomerPortalLayout() {
                       item={item}
                       active={isActivePath(item.path)}
                       compact
-                      terra={isTerraAgrar}
                       onNavigate={() => setMoreMenuOpen(false)}
                     />
                   ))}
@@ -285,7 +274,7 @@ export default function CustomerPortalLayout() {
               >
                 <Avatar className="h-8 w-8">
                   <AvatarFallback
-                    className={isTerraAgrar ? 'bg-primary/10 text-primary' : 'bg-primary/10 text-primary'}
+                    className="bg-primary/10 text-primary"
                   >
                     {kontoKuerzel}
                   </AvatarFallback>
@@ -364,7 +353,6 @@ export default function CustomerPortalLayout() {
                   key={item.path}
                   item={item}
                   active={isActivePath(item.path)}
-                  terra={isTerraAgrar}
                   onNavigate={() => setMobileMenuOpen(false)}
                 />
               ))}
@@ -413,9 +401,7 @@ export default function CustomerPortalLayout() {
                     ? isTerraAgrar
                       ? 'text-primary'
                       : 'text-status-success'
-                    : isTerraAgrar
-                      ? 'text-muted-foreground'
-                      : 'text-muted-foreground',
+                    : 'text-muted-foreground',
                 )}
               >
                 <Icon className="h-5 w-5" />
