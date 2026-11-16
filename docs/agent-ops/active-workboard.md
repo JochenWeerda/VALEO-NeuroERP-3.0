@@ -21327,3 +21327,5 @@ MAIN-INTEGRATION-20261116: Nutzerauftrag main-Push. Eigene PR-Kette147–151 ist
 MAIN-INTEGRATION Inventarfix reserviert Codex: scripts/check_tenant_isolation.py und eigener Regressionstest. CI meldet fehlende Klassifikation des neuen Portal-Verzeichnisadapters; explizit eigene verifizierte Identitaetsmitgliedschaft statt falscher Shared-/Stateless-Ausnahme klassifizieren. Keine Schwellenlockerung oder DB-Rechteaenderung.
 
 MAIN-INTEGRATION Inventarfix umgesetzt: eigene Kategorie identity-membership fuer gepruefte eigene Portal-Zuordnungen mit Nachweisquellen. Drei Regressionstests und alle neun Verbesserungspipelines bestanden. Unbekannte Adapter blockieren unveraendert; kein System-/Shared-Freibrief und keine geaenderte Autorisierung.
+
+MAIN-INTEGRATION Katalogfix reserviert Codex: docs/admin/table-catalog.json und .md. Frisches CI-Schema Run43946243084 meldet ausschliesslich drei neue read_by-Verweise auf portal_tenant_directory; keine Tabellen-/Spaltenaenderung. Uebernahme des exakten CI-Artefakts nach strukturellem Vergleich, keine lokale DB-Migration.
