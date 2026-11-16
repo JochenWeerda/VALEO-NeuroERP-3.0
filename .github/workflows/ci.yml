@@ -58,7 +58,7 @@ jobs:
         run: python scripts/consume_backend_evidence.py
       
       - name: Upload coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v6
         with:
           files: ./coverage.xml
       
