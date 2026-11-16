@@ -21190,3 +21190,16 @@ M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex Lead besitzt tests/test_c
 M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: auch tests/test_fsx003_quality_gate_wiring.py fuer semantische Pruefung der weiter verpflichtenden secret-scan-Abhaengigkeit plus schnellem Metagate; FSX bleibt eigenstaendig an path-guard. Beide reinen Workflow-Testdateien in bestehendes improvement-integrity vorziehen und nur dort ausfuehren. Backend benoetigt dessen Erfolg, danach volle Produktsuite mit unveraendertem Coverage-Scope. Keine neue CI-Datenbank/Container und kein neuer Job.
 
 M0-CI-Fast-Fail lokal abgenommen: gesamter neuer Metatestsatz135pass, enger Satz44pass (ueberlappend). Reiner StrictDB-/Evidenz-/FSX-Wiringvertrag vor die Backend-DB-Suite verlegt, verpflichtende Abhaengigkeit, doppelte Ausfuehrung dieser beiden Dateien vermieden. Alle Produkttests/Coverage-Scope bleiben unveraendert; neuer Gesamt-CI-Lauf erforderlich. QA m0-ci-contract-fast-fail-20261115.md. Erweiterte Budget-Freigabegegenprobe echt auf249 bestanden (StrictDB43755370395).
+
+## M0-LOCAL-SCHEMA-ROLLOUT-20261116 — reserviert, Codex Lead
+
+Ziel: abgenommenen main a5f60738a lokal bereitstellen. Besitz: bestehende
+Backend-/Frontend-Container im Projekt valeo-neuro-erp, fuenf ausschliesslich
+gemergte Migrationen in valeo_neuro_erp, eigene private Betriebsartefakte,
+eigene QA/Handshake/Workboard. Keine fremden Dienste oder Testdatenbanken.
+Abnahme: Sicherung mit validiertem Archiv, Quellen-/Rollen-/Aktivitaetspruefung,
+transaktionale Rollback-Probe, kanonisches Alembic, gesunde bestehende Dienste
+und lesende Auth-/Routenpruefung. Keine lokalen Fachtest-Schreibdaten und kein
+Reset/Prune. Bei Fremdnutzung warten, bei Abweichung abbrechen. Quelle und alle
+68 erfolgreichen PR-Pruefungen sind vor Ausfuehrung verifiziert; Review-Ausnahme
+betraf nur die externe Review, kein Testgate. main/develop auf a5f60738a.
