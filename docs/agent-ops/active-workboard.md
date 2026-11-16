@@ -21267,3 +21267,18 @@ GROUPED-APP-LAUNCHER-20261116 Erweiterung vor Edit: Nutzer fordert aussagekraeft
 GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich, zentrale fachliche Symbolzuordnung nach Katalog-ID (Dokumentarten unterscheidbar). 34 Verhaltenstests, volle Typpruefung und sechs finale Browser-Kontrastfaelle bestanden. Eigenen ueberholten Build fuer Nutzerkorrekturen abgebrochen, finaler einzelner Build folgt. Keine Rechte-/DB-Aenderungen.
 
 GROUPED-APP-LAUNCHER-20261116 lokal aktiv: Quelle745cca250, Imageb72327848a9b. Alle drei Dienste healthy, beide SSO-Einstiege nach Aktivierung fehlerfrei. Kurze Gruppentitel, semantische Fachsymbole, Suche und persoenliche Anpassung. 34 Tests, volle Typpruefung und sechs synthetische Desktop-/Themefaelle bestanden. Keine DB- oder Rechteaenderung. PR149 nach148/147 integrieren, lokale Wartung beendet.
+
+
+## AGRARPORTAL-ENTRY-ISOLATION-20261116 — reserviert, Codex Lead
+
+Nutzerauftrag: sichtbarer Agrarportal-Einstieg fuer Landwirte mit Bestellungen,
+Dokumenten, Futterberatung und Schlagkartei; Mandanten- UND Kundenbetriebsgrenze.
+Bestand: CustomerPortalLayout, portal_kunde/portal_recht, Kundenzugaenge,
+Portal-Shop/Feldbuch/Futterberatung existieren. Kein paralleles Portal bauen.
+Besitz: Launchpad-Portalgruppe/-Symbole/-Tests, passende Sicherheitsbestandsanalyse
+und eigene QA/Architektur-/Handshake-Doku. Backendkorrekturen erst nach konkretem
+Befund und ergaenztem Dateibesitz. Keine pauschale Rollenerweiterung oder
+automatische Vermarktung von Betriebsdaten. Optionales Marketing/Analyse und
+notwendige Servicedaten zweckbezogen trennen. Keine neue DB/Container.
+Abnahme: bestehende verifizierte Kundenkonto-/Mandantenwege, fremde Kunden
+bleiben gesperrt; vorhandene Portal-ScreenDefinitions weiterverwenden.
