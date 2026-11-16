@@ -21068,3 +21068,125 @@ beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaen
 eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
+
+## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
+
+Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften
+Mandantenkontext in allen zehn Lese-/Schreibwegen durchsetzen. Aktuell optionaler
+Querymandant bei Listen, payloadmandant bei Anlage und ungefilterte Einzelwege.
+Dateibesitz app/api/v1/endpoints/rohware_schema.py, neuer enger Test
+ tests/test_rohware_schema_tenant_contract.py, eigene QA; Lead besitzt Doku/Integration.
+Keine Tabelle erfinden, keine Migration/DDL/DB/Docker, kein neuer Sicherheitskern;
+bestehende Rollen und get_tenant_id nutzen. Existierende Fachregeln und berechnete
+Werte erhalten; Fremdbeleg/-zeile wie nicht vorhanden, Payload kann Mandant nicht
+ueberschreiben. Guards vor Lesen/Mutation, keine DB-Details in Antworten. Gegenproben
+mit zwei isolierten Kontexten, verweigerten Mutationen und erhaltenem Zustand;
+wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte RLS-Abnahme behaupten.
+Die fehlenden Tabellen bleiben separat ein schemafachlicher 503-Blocker.
+PR137 bleibt waehrend seiner Abnahme unveraendert auf8c6d20b2d.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung: Codex Lead besitzt zusaetzlich die
+Istwert-Fehlerbehandlung in app/api/v1/endpoints/budget_planning.py sowie neuen
+Test tests/test_budget_actuals_unavailable.py und eigene QA. Verhindern, dass
+ein fehlgeschlagener Journalzugriff als tatsaechlicher Istwert0 erscheint.
+Gueltige Nullwerte und erfolgreiche Werte erhalten; Fehlzustand mit Rollback
+und neutraler503Antwort. Keine Kontierungsregel, Tabelle/Migration oder Rolle
+aendern; kanonische Budgettabellen und Konten-/Periodenabgleich separat offen.
+
+M0-ROHWARE-TENANT-20261115 Review-Erweiterung: Besitz zusaetzlich nur der zwei
+alten Rohware-Handler-Mockfaelle in tests/test_waage_import_rohware_schema.py
+(test_rohware_schema_create_and_activate, test_rohware_schema_testrechnung_grundpreis).
+Erst durch staerkere HTTP-Faelle mit eigenem Create/Readback/Update/Statuswechsel/
+Zeilenanlage ersetzen, danach entfernen; alle Waage-/Formelvertraege erhalten.
+Auch Abweisung widerspruechlicher Bodymandanten vor erstem Datenbankzugriff und
+neutrale DB-Fehler mit Rollback nachweisen. Keine Rollen-/RLS-Abnahme aus Attrappen.
+
+M0 Budget-Istwertschutz lokal abgenommen: zwei rote Gegenproben vor Fix, fuenf
+gezielte Faelle gruen. SQL-/Verbindungsfehler werden nicht als Istwertnull
+zurueckgegeben. Echter Nullwert und Erfolg erhalten; neutral503undRollback-
+Aufruf. DB-Ergebnisattrappen, kein echter SQL-/RLS-Nachweis. QA
+m0-budget-actuals-20261115.md; fehlende Budgettabellen separat offen.
+
+M0-ROHWARE-TENANT-20261115 lokaler Guardnachweis: 19 neue HTTP-Faelle plus
+16 erhaltene Waage-/Formelfaelle gemeinsam35pass. Zwei schwache direkte
+Rohware-Mocks nach staerkerem Lebenszyklus-Ersatz entfernt. DB-/Rollen-/
+Identitaetsattrappen, keine echte RLS-Abnahme. Nutzervorgabe danach erweitert:
+fehlende Tabellen/Routen tatsaechlich ergaenzen, auf vorhandenen kanonischen
+Rohware-Stamm aufbauen und keine zweite unabhaengige Schema-Stammtabelle.
+Getrennte Architektur-/Migrationsclaims folgen vor strukturellen Edits.
+
+## M0-SCHEMA-BUDGET-ROHWARE-20261115 — reserviert, Codex
+
+Nutzerauftrag15.11: fehlende Tabellen und Routen ergaenzen. Strukturentscheidung:
+Budgetplaene/-zeilen in domain_finance als tenantgebundene Tabellen einfuehren;
+Konten referenzieren das fuehrende Journal domain_erp.chart_of_accounts, optionale
+Kostenstellen domain_finance.kostenstellen. Rohware nutzt den vorhandenen
+Stamm domain_shared.rohware_abrechnungsschemata, erweitert um Gueltigkeit,
+Bearbeitungsstatus/Version und zugeordnete Formelpositionen, keinen zweiten
+unabhaengigen Schema-Katalog. Vorhandene Gruppen-/Qualitaets-/Staffelverbraucher
+erhalten; Gruppenzuordnung mandantensicher. Die bestehende Pfadabweichung
+GET /rohware/gruppen/{gruppe_id}/schemata schliessen. Ein eigener Budget-
+Positions-Leseweg nur wenn realer vorhandener Verbraucher ihn benoetigt.
+
+Besitz Budget-Subagent: app/api/v1/endpoints/budget_planning.py, Migration
+alembic/versions/budget_planning_schema_20261115.py (Parent docflow_position_kontrakt_20261110),
+eigene neue Budget-Schema-/PostgreSQL-Vertraege und QA; bereits geschuetzten
+Istwertfehlerpfad erhalten und denselben Fehler in vs-actual schliessen.
+Besitz Rohware-Subagent: vorhandener Rohware-Schemarouter und Gruppenrouter,
+bei Bedarf zentraler Fachservice, Migration rohware_schema_canonical_20261115.py
+(Parent budget_planning_schema_20261115), vorhandene neue Rohware-Vertraege,
+eigene neue SQL-Nachweise und QA. Keine fremden Beleg-/Kontraktdateien editieren.
+Lead: Integration, Architektur-/API-Artefakte, Workboard/Handshake, reale DB-/CI-
+Abnahme und Ressourcenkoordination. Keine lokalen DDL/Grants/Migrationen durch
+Subagenten; kein neuer Pruefstand/Container. RLS und tenantgebundene Fremdschluessel
+ab erster Migration, keine Standardmandanten oder SQL-Fehler als leere Erfolge.
+
+Pruefstandstatus als valeo_agent und read-only Migrationskennung scheitert an
+SELECT-Rechten auf alembic_version. Kein Grant/Reset und keine DDL ausgefuehrt.
+Schemaarbeit und unabhaengige Pruefungen laufen weiter; echte Schemaabnahme erst
+im freigegebenen bestehenden Pruefstand bzw. vorhandener CI-Jobdatenbank.
+PR137 bleibt unveraendert8c6d20b2d; keine erneute CI durch Zwischenstaende.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 Nachweisweg: Lead besitzt zusaetzlich
+.github/workflows/pytest-postgres-require-db.yml nur fuer Export/Upload der
+echten Schema-Inventare nach vorhandener Jobmigration und vor unveraenderten
+strict-DB-Tests. Ein vorhandener PostgreSQL-Job, keine Zusatzdatenbank oder
+weiterer Container. Diese Artefakte liefern den physischen Tabellenkatalog,
+solange der gemeinsame lokale Pruefstand Metadatenrechte nicht bereitstellt.
+Keine Testselektion schwaechen, kein Datenbefund oder Geheimnis im Export.
+
+## M0-ROHWARE-FORMEL-SAFETY-20261115 — reserviert, Codex
+
+Vor Aktivierung neuer Tabellen gefunden: _eval_formula nutzt echtes eval mit
+leerem builtins-Dict, aber ohne AST-Zugriffsbeschraenkung. Objektzugriffe bleiben
+damit prinzipiell moeglich. Besitz Sicherheitsagent: neue reine begrenzte
+Arithmetik app/services/rohware_formula.py, nur _eval_formula und Testrechnungs-
+Eingabe-/Fehlerpfad in app/api/v1/endpoints/rohware_schema.py, neue enge
+Formel-Sicherheitsvertraege und QA. Vorhandene gueltige Mathematik/Funktionen
+erhalten; kein eval/compile, keine Attribute/Subscripts/Comprehensions/Lambdas/
+Importe, begrenzte Formelgroesse/AST-Tiefe und nur endliche Zahlen. Ungueltige
+Testrechnung darf keinen scheinbar gueltigen Gesamtpreis liefern.
+Lead ersetzt zusaetzlich ausschliesslich konstante SQL-Identifier-Fstrings im
+neuen Schemadienst durch gleichwertige Literalabfragen, statt Scanner-Ausnahmen
+aufzunehmen. Keine Rolle/DDL/DB/Schema-/Formel-Fachregel ausweiten. Lead integriert
+Artefakte und DB-Nachweise; keine neue Testdatenbank/Container.
+
+M0-SCHEMA-BUDGET-ROHWARE / FORMEL-SAFETY Zwischenstand: kanonische Migrationen und Gruppen-Detailroute implementiert; keine zweite Rohware-Stammtabelle. Formelinterpreter ohne eval, 113 gezielte Tests bestanden. PostgreSQL/RLS noch nicht abgenommen; bestehender strikter CI-Job exportiert Inventare erst nach erfolgreichen Tests. Keine lokale Datenbankmigration und keine neue Datenbank/Container. QA m0-rohware-tenant-20261115.md und m0-budget-schema-20261115.md.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 / FORMEL-SAFETY: Implementierung und PostgreSQL-Abnahme abgeschlossen, Integration in Arbeit. Kombinierter Quellstand 4866020db, StrictDB 43748281469 erfolgreich mit 692 passed / 3 skipped. Beide neuen DB-Vertraege bestanden als valeo_app; Inventare aus genau diesem Lauf uebernommen. 113 gezielte neue/angrenzende Tests sowie 21 bisherige Waage-/Istwerttests und 25 Architekturtests gruen (ueberlappende Testmengen nicht addieren). Browser-/MCP-Freischaltung und fachliche Budget-Ist-Semantik nicht daraus ableiten.
+
+M0-SCHEMA-BUDGET-ROHWARE Nachlauf: kanonisches RLS-Inventar aus erfolgreichem 43750385711 ersetzt (ohne zehn additive ORM-Tabellen); physischer Anwendungskatalog bewusst nach ORM-Initialisierung. Exportstufen getrennt, Upload nach Tests; keine Ratsche/Allowlist gelockert. Runtime-Sweep 43748929572: drei Tabellen-503 beseitigt, fuenf andere 503 offen, keine 500er/Auth-/Transportfehler. Gesamt-CI folgt auf dem vollstaendig synchronisierten Stand.
+
+M0-Rohware Abschlusskontrolle: neuer Gruppen-Detailweg behandelt auch den ersten Datenbankfehler mit Rollback/neutralem 503. 46 enge HTTP-/Eingabevertraege bestanden, einschliesslich zwei neuer Fehlerpfade und Geschaeftstag-Nachweis. Keine neue Route oder Schemaaenderung; bestehende 401/404 bleiben erhalten.
+
+M0-INTEGRATIONSFENSTER-PR145 — Lead Codex, in Arbeit: gemeinsame Basis af086a7dd inklusive PR144. Bitte weitere main-Merges bis zum Abschluss dieser Abnahme mit dem Lead koordinieren, damit keine wiederholten Vollpruefungen durch wechselnde Basis entstehen. Parallelentwicklung auf eigenen Branches frei. Keine lokale DB-/Docker-Sperre. Physische Metadaten unveraendert gegen erfolgreichen CI-Export verifiziert; Code-/Lineageprojektionen fuer den kombinierten Stand erneuert.
+
+M0-Katalog-Learning: lokale Standardcodierung verfälschte generierte JSON-Zeichen; kein DB-Drift. Byteidentischer CI-Katalog aus 43751847958 wiederhergestellt, SHA/Unicode geprueft. Text/JSON ausdruecklich UTF-8 lesen; vorbereitete Imageversion eb6845b79 nicht deployen. Weitere Abnahme auf korrigiertem Stand.
+
+M0-Budget-Freigabegegenprobe: erkannte Altregel liess genehmigte Positionen weiter veraendern. Beide Writes jetzt nur ENTWURF, gemeinsam mit Genehmigung ueber Plansperre serialisiert. Vier neue Negativvertraege und erweiterte PostgreSQL-Pruefung gegen stille Aenderung unter bestehender Genehmigung. Keine neue Wiedereroeffnung oder Rolle.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex Lead besitzt tests/test_consume_backend_evidence.py und .github/workflows/quality-gate.yml fuer den konkreten veralteten StrictDB-Aufbauvertrag und dessen Vorziehen in das unabhaengige schnelle Integritaetsgate. Abnahme: identischer Einzel-Pruefstand und kanonische Rollen, reine RLS-Ernte vor ORM und Anwendungskatalog danach, Upload nur nach Tests; saemtliche Harnessvertraege frueh einmalig ausfuehren, Backend nur bei bestandenem Metagate. Kein Coverage-Gate oder Test abschwaechen. Vollsuite249006062: 28395 bestanden, genau ein veralteter Infrastrukturvertrag rot. Keine lokalen DB-/Containeraktionen.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: auch tests/test_fsx003_quality_gate_wiring.py fuer semantische Pruefung der weiter verpflichtenden secret-scan-Abhaengigkeit plus schnellem Metagate; FSX bleibt eigenstaendig an path-guard. Beide reinen Workflow-Testdateien in bestehendes improvement-integrity vorziehen und nur dort ausfuehren. Backend benoetigt dessen Erfolg, danach volle Produktsuite mit unveraendertem Coverage-Scope. Keine neue CI-Datenbank/Container und kein neuer Job.
+
+M0-CI-Fast-Fail lokal abgenommen: gesamter neuer Metatestsatz135pass, enger Satz44pass (ueberlappend). Reiner StrictDB-/Evidenz-/FSX-Wiringvertrag vor die Backend-DB-Suite verlegt, verpflichtende Abhaengigkeit, doppelte Ausfuehrung dieser beiden Dateien vermieden. Alle Produkttests/Coverage-Scope bleiben unveraendert; neuer Gesamt-CI-Lauf erforderlich. QA m0-ci-contract-fast-fail-20261115.md. Erweiterte Budget-Freigabegegenprobe echt auf249 bestanden (StrictDB43755370395).

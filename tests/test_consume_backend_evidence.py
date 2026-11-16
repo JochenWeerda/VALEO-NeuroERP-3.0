@@ -265,6 +265,48 @@ def test_strict_db_job_reuses_its_single_declared_probe_and_canonical_roles():
     job = workflow["jobs"]["require-db"]
     assert list(job["services"]) == ["postgres"]
     assert job["services"]["postgres"]["env"]["POSTGRES_DB"] == "valeo_probe"
-    setup = next(step["run"] for step in job["steps"] if step.get("name") == "Migrate database (Alembic head)")
-    assert "scripts/init_db.py" in setup and "scripts/provision_db_roles.py" in setup
+    steps = job["steps"]
+    def command_index(*parts):
+        matches = [index for index, step in enumerate(steps)
+                   if all(part in step.get("run", "") for part in parts)]
+        assert len(matches) == 1
+        return matches[0]
+    migrate = command_index("python scripts/init_db.py --nur-migrationen")
+    rls = command_index("python scripts/rls_inventory.py")
+    prepare = command_index("python scripts/init_db.py\n", "python scripts/provision_db_roles.py")
+    physical = command_index("python scripts/generate_table_catalog.py")
+    tests = command_index("pytest tests/ -m needs_live_db", "--no-cov")
+    uploads = [index for index, step in enumerate(steps)
+               if step.get("uses", "").startswith("actions/upload-artifact@")]
+    assert len(uploads) == 1
+    upload = uploads[0]
+    assert migrate < rls < prepare < physical < tests < upload
+    assert '--code-only' not in steps[rls]['run']
+    assert '--nur-migrationen' not in steps[prepare]['run']
+    assert '--url "$DATABASE_URL" --anwenden' in steps[prepare]['run']
+    assert steps[upload].get('if') in (None, 'success()', '${{ success() }}')
+    assert not any(steps[index].get('continue-on-error', False)
+                   for index in (migrate, rls, prepare, physical, tests, upload))
+    assert 'if' not in steps[tests]
     assert environment["PYTEST_REQUIRE_DB_STRICT"] == "1"
+
+
+def test_workflow_contracts_fail_before_heavy_backend_without_duplicate_execution():
+    import yaml
+    root = Path(__file__).resolve().parents[1]
+    jobs = yaml.safe_load((root / '.github/workflows/quality-gate.yml').read_text(encoding='utf-8'))['jobs']
+    early = jobs['improvement-integrity']
+    backend = jobs['backend']
+    assert early['needs'] == ['path-guard']
+    assert 'services' not in early
+    assert {'secret-scan', 'improvement-integrity'} <= set(backend['needs'])
+    runners = [step for step in early['steps']
+               if 'tests/test_consume_backend_evidence.py' in step.get('run', '')]
+    assert len(runners) == 1
+    assert not runners[0].get('continue-on-error', False)
+    assert '--noconftest' in runners[0]['run']
+    assert runners[0]['run'].split().count('tests/test_consume_backend_evidence.py') == 1
+    assert runners[0]['run'].split().count('tests/test_fsx003_quality_gate_wiring.py') == 1
+    product = next(step['run'] for step in backend['steps'] if step.get('name') == 'Run tests')
+    assert '--ignore=tests/test_consume_backend_evidence.py' in product
+    assert '--ignore=tests/test_fsx003_quality_gate_wiring.py' in product

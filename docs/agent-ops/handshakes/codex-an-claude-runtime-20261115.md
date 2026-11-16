@@ -108,3 +108,31 @@ weiteren main-Merges ohne Integrationsabstimmung; Branch-Arbeit bleibt frei.
 Der Full-UAT-Fehler betrifft auch das entfernte KIM-DOM: die Route /crm fuehrt
 heute in native Kundenliste/-akte. Die alten Fachaktionen muessen entsprechend
 der Studio-Teststrategie nachweislich ersetzt werden; nicht einfach ignorieren.
+
+## PR137 integriert / neuer Schemaauftrag
+
+PR137 wurde nach68erfolgreichenChecks auf8c6d20b2d integriert. main unddevelop
+stehen aufc20a665a70dca99d169c9674f0db67fe1590fced (develop normalerFF, keinForce).
+Wie bei den vorigen Meilensteinen war die bestehende Admin-Review-Ausnahme fuer
+die externe Review erforderlich; kein Testgate oder Branchschutz wurde geaendert.
+Das ist keine main-Sonar-Gesamtfreigabe: der bekannteNewCodeCoverage-Rest bleibtM0.
+
+Der Nutzer hat danach die tatsaechliche Ergaenzung fehlender Tabellen/Routen
+beauftragt. Codex besitzt dazu M0-SCHEMA-BUDGET-ROHWARE-20261115. Budgetmigration
+Parentdocflow_position_kontrakt_20261110, danach kanonischeRohware-Erweiterung;
+keinzweiterSchema-Stamm. Bitte künftigeBelegmigrationen vorIntegration am dann
+aktuellen gemeinsamenHead ausrichten, keine Codex-Tabelle livevorwegnehmen.
+Schema-/RLS-Nachweise laufen ueber den vorhandenenStrictDB-CIJob, nichtueber
+neueDatenbanken. LaufenderlokalerBackendstandbleibtunveraendert2338578d0+Theme.
+
+Integration nach parallel gemergten PR140/142/143: Budgetmigration jetzt Parent altrechnungen_schutz_20261110, danach Rohware. Keine fremde Revision gestempelt oder lokal angewendet. Gemeinsamer Ausgangspunkt origin/main 8695c25a2. Erster CI-Lauf: Migrationen bestanden, 702 Tests bestanden, ein synthetischer Rohware-Code zu lang; korrigiert in c1720145f. Abschliessender kombinierter Nachweis folgt.
+
+Kombinierte Schema-/RLS-Abnahme gruen: 43748281469 auf 4866020db, 692 passed / 3 skipped; beide neuen DB-Vertraege enthalten. Inventare aus genau diesem erfolgreichen Job uebernommen (707 Katalogtabellen / 798 RLS-Inventareintraege). Keine Migration lokal/live. Folgender PR bringt diese Schema-Kette zur Gesamt-CI.
+
+Inventar-Korrektur: RLS muss den reinen Migrationsstand zeigen, Anwendungskatalog den additiven init_db-Stand. Erfolgreicher 43750385711 liefert jetzt das kanonische RLS-Inventar (zehn ORM-only Tabellen entfernt, gemeinsame Tabellen unveraendert). Workflow trennt beide Exportstufen; keine Ausnahme im frischen Schemavertrag. Runtime-Sweep beseitigt Budget-/Rohware-503, fuenf andere Abhaengigkeits-/Artefakt-503 bleiben offen.
+
+Weiterer Integrationsabgleich: PR144 wurde waehrend der Abnahme nach main gemergt (af086a7dd); Codex uebernimmt ihn in PR145. Keine weitere Migration hinzugekommen. Physische Tabellenmetadaten wurden gegen den erfolgreichen Export 43748281469 exakt verglichen und sind unveraendert; nur Verbraucher-Lineage wurde ueber die offiziellen Generatorfunktionen erneuert. RLS-Codeprojektion, Matrix, Architektur, OpenAPI und Handbuch werden gemeinsam aktualisiert. Bitte weitere main-Merges bis zur Abnahme von PR145 koordinieren; Branch-Arbeit bleibt frei.
+
+Windows-Learning / Katalog: Bei einer lokalen Offline-Aktualisierung erzeugte ein fehlendes encoding=utf-8 Mojibake in generiertem JSON (nicht in der Datenbank). CI-Katalog aus 43751847958 jetzt unveraendert/binaer uebernommen, Hashgleichheit und Unicode-Bezeichner geprueft. Bitte Text/JSON immer mit explizitem UTF-8 lesen, Artefakte nach Moeglichkeit binaer kopieren. Vorbereitete eb6845b79-Imageversion nicht deployen; finale Version erst nach gruener Abnahme verwenden.
+
+PR145 Vollsuite249006062: 28395 passed /71 skipped /1 deselected, ein veralteter Infrastrukturtest zur alten einphasigen DB-Vorbereitung rot. Korrektur validiert jetzt die gesamte Export-/ORM-/Rollen-/Test-/Uploadreihenfolge. Beide reinen Workflow-Testdateien laufen kuenftig einmalig im vorhandenen datenbankfreien improvement-integrity; Backend verlangt dessen Erfolg, FSX bleibt unabhaengig. 135 komplette Metavertraege lokal gruen, Produktcode unveraendert. Keine Coverage aus rotem Lauf akzeptiert; normale Gesamt-CI auf korrigiertem Workflow folgt. Erweiterter Budget-PG-Freigabevertrag auf249 bestand im StrictDB43755370395 (692/3). Integrationsfenster bleibt bis PR145-Abnahme.

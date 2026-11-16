@@ -1,25 +1,25 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 785,
+  "tables": 788,
   "by_class": {
-   "A": 719,
+   "A": 722,
    "B": 22,
    "C": 9,
    "D": 35
   },
-  "rls_enabled": 687,
+  "rls_enabled": 690,
   "tenant_types": {
    "character varying": 340,
    "character varying(100)": 9,
    "character varying(120)": 64,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 83,
+   "character varying(36)": 85,
    "character varying(50)": 1,
    "character varying(64)": 104,
    "character varying(80)": 24,
-   "text": 110,
+   "text": 111,
    "uuid": 4
   }
  },
@@ -2249,6 +2249,22 @@
    "table": "domain_finance.billing_batches",
    "class": "A",
    "tenant_type": "text",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_finance.budget_lines",
+   "class": "A",
+   "tenant_type": "character varying(36)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_finance.budget_plans",
+   "class": "A",
+   "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -5462,6 +5478,14 @@
   },
   {
    "table": "domain_shared.rohware_qualitaeten",
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_shared.rohware_schema_lines",
    "class": "A",
    "tenant_type": "text",
    "rls": true,
