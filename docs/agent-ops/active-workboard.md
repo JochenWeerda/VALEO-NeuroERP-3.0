@@ -21246,7 +21246,7 @@ WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bew
 WORKSPACE-HOME-USABILITY-20261116 lokal bereitgestellt: Quelle6ea0b08ef, Frontendimagecde458f352c8; nur bestehenden Frontend ersetzt. 67 Oberflaechen-/Fachwegtests plus 86 Themevertraege, volle Typpruefung und sechs finale Browser-/Kontrastfaelle bestanden. Beide SSO-Einstiege nach Aktivierung erneut fehlerfrei, alle drei Dienste healthy. Keine persoenliche Anmeldung, keine DB-Aenderung. PR148 nach PR147 integrieren; lokale Wartung beendet.
 
 
-## GROUPED-APP-LAUNCHER-20261116 — reserviert, Codex Lead
+## GROUPED-APP-LAUNCHER-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
 
 Nutzerpraezisierung mit drei Bildern: Start ist primaer funktional gruppierter
 App-/Masken-Launcher, kein Dashboard. Vorhandene Launchpad-Komponenten und
@@ -21265,3 +21265,5 @@ Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppe
 GROUPED-APP-LAUNCHER-20261116 Erweiterung vor Edit: Nutzer fordert aussagekraeftige Icons. Zentrale semantische Symbolzuordnung launchpad-icons.ts nach bestehenden Katalogidentitaeten plus zugehoeriger Vertrag; Nav-Symbole bleiben Fallback fuer unbekannte Eintraege. Keine Fachroute oder Rollenentscheidung aus dem Symbol ableiten.
 
 GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich, zentrale fachliche Symbolzuordnung nach Katalog-ID (Dokumentarten unterscheidbar). 34 Verhaltenstests, volle Typpruefung und sechs finale Browser-Kontrastfaelle bestanden. Eigenen ueberholten Build fuer Nutzerkorrekturen abgebrochen, finaler einzelner Build folgt. Keine Rechte-/DB-Aenderungen.
+
+GROUPED-APP-LAUNCHER-20261116 lokal aktiv: Quelle745cca250, Imageb72327848a9b. Alle drei Dienste healthy, beide SSO-Einstiege nach Aktivierung fehlerfrei. Kurze Gruppentitel, semantische Fachsymbole, Suche und persoenliche Anpassung. 34 Tests, volle Typpruefung und sechs synthetische Desktop-/Themefaelle bestanden. Keine DB- oder Rechteaenderung. PR149 nach148/147 integrieren, lokale Wartung beendet.

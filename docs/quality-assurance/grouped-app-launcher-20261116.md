@@ -60,3 +60,18 @@ das neutrale Raster. Keine heuristische Rollen- oder Befehlsentscheidung.
 finale Theme-/Desktopansichten nach dieser Ergaenzung bestanden.
 Der erste eigene Build wurde fuer die Nutzerpraezisierungen gezielt abgebrochen;
 keine parallelen oder fremden Builds beendet. Finale Quelle folgt im Nachlauf.
+
+## Lokal bereitgestellt
+
+Finale Quelle745cca250, Frontendimage
+sha256:b72327848a9b21ed8020fe0eaac0d07ec51f7915abca838e20d4cb50f1253d22.
+Ausschliesslich den vorhandenen Frontend-Container ersetzt. Backend,
+Frontend und Keycloak healthy; keine Migration oder Backend-Neustart.
+Anschliessende echte SSO-Klicks auf3000/3001 bestanden: Discovery200,
+sichtbare Provider-Anmeldung und null fehlgeschlagene Browseranfragen.
+Keine persoenlichen Zugangsdaten eingegeben.
+
+Der Launcher selbst ist mit den echten Komponenten synthetisch visuell und
+funktional geprueft; eine persoenliche ERP-Anmeldung wird daraus nicht
+abgeleitet. PR149 baut auf148 und147 auf. Lokal aktiv und nach GitHub
+gepusht; main-/develop-Integration steht separat aus.
