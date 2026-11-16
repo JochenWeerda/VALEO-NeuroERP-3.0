@@ -21203,3 +21203,13 @@ und lesende Auth-/Routenpruefung. Keine lokalen Fachtest-Schreibdaten und kein
 Reset/Prune. Bei Fremdnutzung warten, bei Abweichung abbrechen. Quelle und alle
 68 erfolgreichen PR-Pruefungen sind vor Ausfuehrung verifiziert; Review-Ausnahme
 betraf nur die externe Review, kein Testgate. main/develop auf a5f60738a.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Erweiterung vor Edit: Nutzer meldet SSO Failed to fetch.
+Lesend bestaetigt: Windows-WSL-Relay liefert auf localhost:8080 Tomcat404, waehrend
+Keycloak intern200 liefert. Keine fremden Prozesse beenden. Codex besitzt
+Dockerfile.frontend, docker-compose.local-preview.yml, eigene enge Tests/QA
+fuer expliziten freien lokalen Identitaetsport8081, durchgaengigen Issuer und
+Docker-Build-Konfiguration. Auch bestehender Keycloak-Container im Wartungsclaim;
+keine Realm-/Benutzer-/Rollen-/Datenbankaenderung, keine gelockerte Tokenpruefung.
+Abnahme: Discovery/CORS und SSO-Weiterleitung auf3000/3001 sowie passender Backend-
+Issuer; vorhandene Daten/Volumes und andere Dienste erhalten.
