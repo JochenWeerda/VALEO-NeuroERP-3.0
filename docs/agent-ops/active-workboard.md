@@ -21222,3 +21222,19 @@ M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist c
 Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
 
 M0-LOCAL-SCHEMA-ROLLOUT-20261116: lokaler Betrieb und SSO-Nachlauf nach Nutzer-Neustart abgenommen. Backend, Keycloak, Frontend healthy; finaler Previewport 18081, beide CORS-Origins 3000/3001 korrekt. Echter Chrome-Klick auf Mit SSO anmelden erreicht an beiden Ports sichtbare Keycloak-Maske, null fehlgeschlagene Anfragen, Screenshots geprueft. Keine Zugangsdaten eingegeben, daher keine persoenliche MFA-/Kennwortabnahme behauptet. Vier Konfigvertraege erneut bestanden; Budget-API bleibt unauthentifiziert401. Keine Migration/DB-/Container-Neuanlage und keine Rollenveraenderung. Quelle ddc58d254, Frontendimage 714148731111. Wartungsblocker aufgehoben; vor fremden DB-Tests weiterhin regulaeren Pruefstandstatus pruefen. Previewfix auf eigenem Ops-Zweig, main/develop unveraendert a5f60738a. QA m0-local-schema-rollout-20261116.md.
+
+
+## WORKSPACE-HOME-USABILITY-20261116 — reserviert, Codex Lead
+
+Nutzerbefund: Start zeigt technische Diagnosen, doppelte operative Listen und
+eine ueberladene Zusammenstellung. Ziel: ruhiger, rollenbezogener Einstieg
+innerhalb des bestehenden Studio-/Meridian-Vertrags, keine Parallelseite.
+Besitz: AdaptiveWorkspaceLayer, home-composition, AgrarChainWidget und zugehoerige
+Projektionen/Tests, start-dashboard-Zusammenstellung, gemeinsame spezialisierte
+Disposition-/Kompositionspraesentation und eng betroffene Tests; eigene QA,
+Meridian-Doku und Handshake. Delegation nur mit getrennten Dateien.
+Abnahme: keine rohen UUID-/Reasoncode-Diagnosen im Standardbild, fachliche
+Navigation erhalten, operative Details bewusst oeffnen, keine Berechtigungen
+erweitern oder Fehler als leere Daten tarnen. Gezielte Verhaltenstests, Typpruefung
+und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
+Keine DB-Schreibtests, neuen Container oder Migrationen.
