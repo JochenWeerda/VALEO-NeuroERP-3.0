@@ -21299,3 +21299,19 @@ Naechste abgegrenzte Portal-Slices (offen, keine konkurrierenden Claims):
   tenantweite Fachseite als kundenisolierte Freigabe ausgeben.
 
 AGRARPORTAL-ENTRY-ISOLATION-20261116 Einstieg lokal aktiv: Frontend3b750ff68/ee27f8273cfb; alle Dienste healthy und SSO3000/3001 nach Aktivierung fehlerfrei. 33 Frontendtests, volle Typpruefung, je sechs Launcher-/Portalrahmenansichten bestanden. Keine echte Kunden-Fachketten- oder Mehrmandanten-Tokenabnahme behauptet. PR150 nach149/148/147. Folgeslices PORTAL-TENANT-BROKER, PORTAL-CUSTOMER-DOCUMENT und PORTAL-FEED-CUSTOMER-SCOPE bleiben offen; keine laufende DB-Nutzung aus diesem Slice.
+
+
+## PORTAL-TENANT-BROKER-20261116 — reserviert, Codex Lead
+
+Phase1: eigene gueltige Handelspartner-Zuordnungen aus domain_portal.kundenzugaenge
+lesend ermitteln. Bestehende cross_tenant_scope/system_session bewusst verwenden,
+kein unautorisierter Tenantwechsel und keine generischen RLS-Ausnahmen.
+Besitz: neuer eng begrenzter Portal-Handelspartner-Service/-Router, Registrierung
+in API v1, zugehoerige Tests/Vertragsartefakte und eigene Architektur/QA/Handshake-Doku.
+Ausgabe nur Metadaten eigener aktiver Beziehungen; Eingabe-Subject ausschliesslich
+aus gepruefter Identitaet. Systemverbindung zwingend und read-only, keine stillen
+App-Verbindungs-Fallbacks fuer scheinbar vollstaendige Listen.
+Abnahme: Fremdpersonen, widerrufene/abgelaufene Beziehungen, geloeschte Kunden,
+gesperrte Mandanten und falsche DB-Rolle abweisen. Bestehender einzelner signierter
+Mandantenkontext bleibt unveraendert. Token-/Kontextausstellung ist nachfolgende
+Phase; reine Auswahlliste nicht als fertigen Wechsel ausgeben. Keine neue DB/Container.
