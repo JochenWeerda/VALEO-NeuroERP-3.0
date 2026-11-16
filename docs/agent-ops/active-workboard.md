@@ -21215,3 +21215,6 @@ Abnahme: Discovery/CORS und SSO-Weiterleitung auf3000/3001 sowie passender Backe
 Issuer; vorhandene Daten/Volumes und andere Dienste erhalten.
 
 Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort18081nachWindows+allenDockerreservierungen+BasisComposegeprueft; QuelleundKonfigvertraegeangepasst. KeineFremddiensteaendern; aktuellesAnwendungswartungsfensterbisAbschlussderSSOGegenprobe.
+
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist committet. Frontend-Kompilierung erfolgreich, Imageexport durch haengende Docker-Engine abgebrochen (RPC EOF). Regulärer Desktop-Neustart scheitert am Stoppen; nur verifizierte Docker-Desktop-Prozesse gezielt beendet und Docker-WSL-Wiederherstellung eingeleitet. Keine Datenloeschung. SSO-Aktivierung und reale Browserabnahme bleiben offen, keine Gesamtfreigabe. Weitere DB-Tests erst nach bestaetigter Engine-Gesundheit.
