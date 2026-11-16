@@ -13709,6 +13709,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/portal_intelligence_service.py",
             "app/services/portal_lohndienst_service.py",
+            "app/services/portal_tenant_directory.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
@@ -46199,7 +46200,8 @@
           "read_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
             "app/api/v1/endpoints/portal_lohndienst.py",
-            "app/auth/portal_kunde.py"
+            "app/auth/portal_kunde.py",
+            "app/services/portal_tenant_directory.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py"
@@ -60880,6 +60882,7 @@
             "app/services/connector_config.py",
             "app/services/finance_read_model_service.py",
             "app/services/llm_gateway.py",
+            "app/services/portal_tenant_directory.py",
             "app/services/studio_entity_commands.py",
             "app/services/studio_entity_simulation.py",
             "app/services/studio_migration.py",

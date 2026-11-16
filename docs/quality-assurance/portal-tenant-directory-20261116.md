@@ -89,3 +89,9 @@ stateless/public/shared und keine globale Ausnahme. Drei Regressionstests
 bestaetigen Klassifikation und weiterhin rote unbekannte Adapter. Lokal alle
 neun Verbesserungspipelines bestanden, einschliesslich Tenant-Klassifikation
 und Baseline-Integritaet.
+
+Der Backendlauf43946243084 erkannte im physischen Tabellenkatalog exakt drei
+fehlende read_by-Verweise auf den neuen Portal-Service; Schemas, Tabellen,
+Spalten und sonstige Katalogwerte unveraendert. Die beiden generierten
+Katalogdateien wurden aus fresh-schema-table-catalog dieses exakten CI-Laufs
+uebernommen. Keine Migration oder lokale Schemaanpassung.
