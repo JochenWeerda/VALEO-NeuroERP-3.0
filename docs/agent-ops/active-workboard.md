@@ -21238,3 +21238,5 @@ Navigation erhalten, operative Details bewusst oeffnen, keine Berechtigungen
 erweitern oder Fehler als leere Daten tarnen. Gezielte Verhaltenstests, Typpruefung
 und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
 Keine DB-Schreibtests, neuen Container oder Migrationen.
+
+WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt zentrale Schrift-/Radius-Tokens leer, Titel dadurch 16px statt Hierarchie; Suchkuerzel von Axe als teilweise verdeckt markiert. Codex besitzt zusaetzlich src/index.css und eng betroffene Tokenvertraege fuer die konkrete zentrale Token-Selbstreferenzdiagnose. Kein individueller CSS-Bypass; Browser muss nichtleere Tokens und beide Themes nachweisen.
