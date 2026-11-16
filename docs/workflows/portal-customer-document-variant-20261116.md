@@ -87,3 +87,20 @@ keine echte Kundenautorisierung und darf keine Rechte erteilen.
 
 Kostenloser Service erteilt keine pauschale Marketing-/Trainingsfreigabe;
 Zwecke und Rechtsgrundlagen bleiben gemaess dem Mandantenauswahlvertrag getrennt.
+
+## Konkreter Bestandsnachweis fuer den Folgeslice
+
+Der Dokument-Store app/documents/router.py kennt customer_inquiry und dessen
+Folgeweg zu sales_offer/sales_order. Die gemeinsame UI-Familie liegt in
+app/core/screen_definitions_beleg.py und config/document_screen_versions.json;
+customer_inquiry ist dort noch kein registriertes Kind. Die Familienbeschreibung
+belegt Planung, keine fertige Anfragemaske. Registrierung/Versionierung und
+kundenbezogener Command-Vertrag sind deshalb explizit nachzuziehen.
+
+Portal-Anfragen werden bereits kundenbegrenzt gelesen
+(app/services/portal_compat_service.py), aber ein kundenberechtigter
+kanonischer Schreibadapter fehlt. Interne sales_orders-Schreibrollen duerfen
+nicht einfach an Kunden vergeben werden. DMS dms_images.py nimmt bisher
+Artikelbilder mit interner Belegrolle an; Anfragefotos brauchen einen eigenen
+objektgebundenen Vertrag in derselben DMS-Strecke. Eine verifizierte Kunden-
+Lieferstellen-/Silo-Verknuepfung ist aus dem geprueften Bestand nicht belegt.

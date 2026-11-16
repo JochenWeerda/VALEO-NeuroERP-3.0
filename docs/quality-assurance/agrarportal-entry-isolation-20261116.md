@@ -75,3 +75,19 @@ Bestehende serverseitige PortalKunde-/Tenantguards wurden lesend geprueft;
 keine Backendautorisierung veraendert und keine neue DB-Verhaltenssuite
 behauptet. Keine lokalen Fachtest-Schreibdaten, Migrationen, Datenbank- oder
 Containerneuanlage. Lokaler Einzel-Frontendbuild folgt im Betriebsnachlauf.
+
+## Lokale Aktivierung
+
+Frontendquelle3b750ff68, Image
+sha256:ee27f8273cfbc0e38fb53c84432108a12205e1482d707b0ae891acb1bbe355f0.
+Nur bestehenden Frontend-Container ersetzt; Backend, Keycloak und Datenbanken
+unveraendert. Alle drei Dienste healthy. Nach Aktivierung beide echten
+SSO-Weiterleitungen auf3000/3001 erneut bestanden: Discovery200, sichtbare
+Provider-Anmeldung, null fehlgeschlagene Browseranfragen, keine eingegebenen
+Zugangsdaten. Der interne Benutzer kann nach Neuladen Kundenansicht pruefen
+und einen Kunden im aktiven Mandanten auswaehlen. Die geplanten neuen
+Fachfunktionen und der Mehrmandantenwechsel werden daraus nicht abgeleitet.
+
+Quellen und Nachweise auf PR150, gestapelt nach149/148/147. Lokal aktiv,
+keine main-/develop-Integration behauptet. Keine Migration oder Fachtestdaten
+in der Entwicklungsdatenbank.

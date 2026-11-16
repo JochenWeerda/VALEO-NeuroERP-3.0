@@ -21269,7 +21269,7 @@ GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich,
 GROUPED-APP-LAUNCHER-20261116 lokal aktiv: Quelle745cca250, Imageb72327848a9b. Alle drei Dienste healthy, beide SSO-Einstiege nach Aktivierung fehlerfrei. Kurze Gruppentitel, semantische Fachsymbole, Suche und persoenliche Anpassung. 34 Tests, volle Typpruefung und sechs synthetische Desktop-/Themefaelle bestanden. Keine DB- oder Rechteaenderung. PR149 nach148/147 integrieren, lokale Wartung beendet.
 
 
-## AGRARPORTAL-ENTRY-ISOLATION-20261116 — reserviert, Codex Lead
+## AGRARPORTAL-ENTRY-ISOLATION-20261116 — Einstieg lokal abgenommen, Codex Lead; Folge-Fachslices offen
 
 Nutzerauftrag: sichtbarer Agrarportal-Einstieg fuer Landwirte mit Bestellungen,
 Dokumenten, Futterberatung und Schlagkartei; Mandanten- UND Kundenbetriebsgrenze.
@@ -21286,3 +21286,16 @@ bleiben gesperrt; vorhandene Portal-ScreenDefinitions weiterverwenden.
 AGRARPORTAL-ENTRY-ISOLATION-20261116 Erweiterung vor Edit: Nutzer praezisiert kundenbezogenen Direktstart nach Anmeldung und internen Launcher-Einstieg zur gekennzeichneten Kundenansicht. Besitz zusaetzlich hooks/useAuth.ts, lib/portal-landing.ts, CustomerPortalLayout, PortalKontoWahl, lib/portal-konto.ts und passende Tests. Bestehende servergepruefte Kundenkonten fuer Landingsentscheidung nutzen, keine fingierte Benutzeranmeldung. Globaler Kontostore an aktuellen verifizierten Sitzungs-/Mandantenkontext binden. Audit: vertrauenswuerdiger Mehrmandanten-Tokenwechsel fehlt bisher; keine frei waehlbaren X-Tenant-ID zulassen. Eigener ADR-/Vertragsentwurf erforderlich, nicht als fertige Funktion ausgeben.
 
 AGRARPORTAL-ENTRY-ISOLATION-20261116: Portalgruppe, serverbasiertes Kundenlanding und klarer interner Pruefeinstieg implementiert. Globalen Portalzustand gegen Identitaets-/Mandanten-/Rollen-/Scope-/Providersitzungswechsel gebunden; alte Requests vor Konto-Freigabe abbrechen. 33 Frontendtests, volle Typpruefung sowie je sechs Portalrahmen-/Launcher-Kontrastansichten bestanden; keine echte DB-/Tokenwechsel-Abnahme behauptet. Interne tenantweite Futterberatung im Kunden-Pruefmodus gesperrt, kein Rechtebypass. Offen: echter autorisierter Handelspartnerwechsel, kundenbezogene Futter-Fachwege und gemeinsame Beleg-Kundenvariante statt separatem CustomerOrder-Modell. Vertrage in agrarportal-tenant-selection-20261116.md und portal-customer-document-variant-20261116.md. Keine Backend-/DB-Aenderung. Lokaler Einzel-Frontendbuild folgt.
+
+
+Naechste abgegrenzte Portal-Slices (offen, keine konkurrierenden Claims):
+- PORTAL-TENANT-BROKER-20261116: autorisierte Handelspartner-Mitgliedschaft,
+  provider-/sitzungsgebundener Token-/Kontextwechsel und echte Isolationstests.
+- PORTAL-CUSTOMER-DOCUMENT-20261116: customer_inquiry als Belegfamilienkind,
+  kundenberechtigte Anfrage-/Auftrags-Commands, Adress- und DMS-Anhangsvertrag,
+  eigene Historien-/Silo-Vorschlaege; CustomerOrder-Doppelweg kontrolliert abloesen.
+- PORTAL-FEED-CUSTOMER-SCOPE-20261116: kundenbezogene Rezepte/Betriebe/Gruppen
+  und Folgereferenzen ueber dieselbe PortalKunde-Pruefung; keine interne
+  tenantweite Fachseite als kundenisolierte Freigabe ausgeben.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Einstieg lokal aktiv: Frontend3b750ff68/ee27f8273cfb; alle Dienste healthy und SSO3000/3001 nach Aktivierung fehlerfrei. 33 Frontendtests, volle Typpruefung, je sechs Launcher-/Portalrahmenansichten bestanden. Keine echte Kunden-Fachketten- oder Mehrmandanten-Tokenabnahme behauptet. PR150 nach149/148/147. Folgeslices PORTAL-TENANT-BROKER, PORTAL-CUSTOMER-DOCUMENT und PORTAL-FEED-CUSTOMER-SCOPE bleiben offen; keine laufende DB-Nutzung aus diesem Slice.
