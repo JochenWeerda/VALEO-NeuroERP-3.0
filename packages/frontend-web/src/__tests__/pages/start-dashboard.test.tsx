@@ -232,11 +232,11 @@ describe('StartDashboardPage', () => {
     mockAnnahmeNav()
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Start', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText(/Wo bin ich, was kann ich tun, was ist wichtig/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mein Arbeitsplatz', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText(/Ihre Aufgaben und Anwendungen auf einen Blick/i)).toBeInTheDocument()
     expect(screen.getByTestId('adaptive-workspace-layer')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-work-items')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Handlungsbedarf', level: 2 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Für Sie priorisiert', level: 2 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'App-Katalog öffnen' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Oberfläche fixieren' })).toHaveClass('h-11')
     expect(screen.getByRole('button', { name: 'App-Katalog öffnen' })).toHaveClass('h-11')
@@ -254,6 +254,9 @@ describe('StartDashboardPage', () => {
     expect(screen.queryByText('Auftrag bis Zahlung')).not.toBeInTheDocument()
     expect(screen.queryByText(/logistics:read/i)).not.toBeInTheDocument()
     expect(screen.getByLabelText('Rollen-Cockpit')).toBeInTheDocument()
+    expect(screen.queryByTestId('adaptive-workspace-inbox')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Dispo-Tafel' }))
     expect(screen.getByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-composition-host')).toHaveAttribute(
       'data-host-variant',
@@ -272,7 +275,7 @@ describe('StartDashboardPage', () => {
       '/disposition/touren-disposition',
     )
     expect(screen.getByTestId('disposition-board')).toBeInTheDocument()
-    expect(await screen.findByText('keine Kette')).toBeInTheDocument()
+    expect(await screen.findByText('Keine offenen Agrarvorgänge.')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-agrar-chain')).toHaveAttribute('data-chain-status', 'empty')
     expect(
       analyticsGetMock.mock.calls.some((call) => String(call[0]) === '/api/v1/kontrakte'),
@@ -286,6 +289,7 @@ describe('StartDashboardPage', () => {
     mockInboxQueue()
     renderPage()
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('inbox-row-INBOX-9')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Zur Belegmaske INBOX-9' })).not.toBeInTheDocument()
     expect(screen.getByTestId('inbox-open-reason-INBOX-9')).toHaveTextContent(
@@ -299,6 +303,7 @@ describe('StartDashboardPage', () => {
     mockInboxQueue({ documentKind: 'EINGANGSRECHNUNG', canOpen: true })
     renderPage()
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('inbox-row-INBOX-9')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Zur Belegmaske INBOX-9' })).toHaveAttribute(
       'href',

@@ -13,7 +13,7 @@ import { dispositionBoardScreen } from '@/components/mask-builder/specialized/di
 import { registeredSpecializedTypes } from '@/components/mask-builder/specialized/registry'
 import { DISPOSITION_BOARD_EVENTS } from '@/components/mask-builder/specialized/types'
 import { orderDragId } from '@/components/mask-builder/specialized/board-dnd'
-import { TIMELINE_FIELD_MISSING, formatStopLatLng } from '@/components/mask-builder/specialized/load-timeline'
+import { formatStopLatLng } from '@/components/mask-builder/specialized/load-timeline'
 import { QUANTITY_POST_FORBIDDEN, postDispositionAssignment } from '@/components/mask-builder/specialized/post-assignment'
 import type { User } from '@/lib/auth'
 import {
@@ -211,7 +211,7 @@ describe('disposition_board specialized component', () => {
     expect(screen.getByRole('heading', { name: 'Aufträge / Kontrakte' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Ressourcen / Planung' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Betriebszustände' })).toBeInTheDocument()
-    expect(screen.getByText('/logistik/tourenplanung')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Tourenplanung' })).toHaveAttribute('href', '/logistik/tourenplanung')
     expect(FakeEventSource.instances[0]?.url).toBe(
       `${WORKSPACE_TOUR_SSE_URL}&token=dispo-fixture-jwt`,
     )
@@ -512,7 +512,7 @@ describe('disposition_board specialized component', () => {
     render(wrap(
       <DispositionBoard contract={dispositionBoardScreen.specialized!} />,
     ))
-    expect(await screen.findByTestId('dispo-timeline-empty')).toHaveTextContent(TIMELINE_FIELD_MISSING)
+    expect(await screen.findByTestId('dispo-timeline-empty')).toHaveTextContent('keine geplanten Ankunftszeiten')
     expect(screen.queryByTestId('dispo-map-marker-stop-1')).not.toBeInTheDocument()
     expect(screen.queryByTestId('dispo-stop-map')).not.toBeInTheDocument()
   })
@@ -553,7 +553,7 @@ describe('disposition_board specialized component', () => {
     expect(screen.getByTestId('dispo-stop-coord-stop-1')).toHaveTextContent(`LS-1 ${coord}`)
     expect(screen.getByTestId('dispo-timeline-stop-stop-1')).toHaveAttribute('data-lat', '53.0793')
     expect(screen.getByTestId('dispo-timeline-stop-stop-1')).toHaveAttribute('data-lng', '8.8017')
-    expect(screen.getByTestId('dispo-map-note')).toHaveTextContent('nur lat/lng aus der Tour')
+    expect(screen.getByTestId('dispo-map-note')).toHaveTextContent('Stopps mit hinterlegtem Standort')
   })
 
   it('hält die Tafel bei SSE-401 und zeigt den Fehler', async () => {
@@ -593,6 +593,33 @@ describe('disposition_board specialized component', () => {
     expect(screen.queryByText('Verladung unterwegs')).not.toBeInTheDocument()
     expect(screen.queryByText('Gesperrte Chargen')).not.toBeInTheDocument()
     expect(screen.queryByText('Waage offen')).not.toBeInTheDocument()
+  })
+
+  it('fasst gleiche Betriebszustände zusammen und zeigt weitere auf Wunsch', async () => {
+    vi.spyOn(apiClient, 'get').mockImplementation(async (url: string) => {
+      if (url === WEIGHING_TICKETS_ENDPOINT) {
+        const items = Array.from({ length: 6 }, (_, index) => ({
+          id: `ticket-${index}`,
+          ticket_number: `WS-${index}`,
+          status: 'open',
+          first_weighing_at: '2026-10-22T08:15:00.000Z',
+        }))
+        return { data: { items: [...items, { ...items[0], id: 'duplicate' }] } } as never
+      }
+      return { data: { items: [] } } as never
+    })
+    render(wrap(<DispositionBoard contract={dispositionBoardScreen.specialized!} />))
+    const more = await screen.findByRole('button', { name: 'Alle 6 Betriebszustände anzeigen' })
+    expect(more).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByTestId('dispo-ops-waage-ticket-5')).not.toBeInTheDocument()
+    fireEvent.click(more)
+    expect(screen.getByTestId('dispo-ops-waage-ticket-5')).toBeInTheDocument()
+    expect(screen.getByTestId('dispo-ops-waage-ticket-0')).toHaveTextContent('2 Meldungen')
+    expect(screen.queryByTestId('dispo-ops-waage-duplicate')).not.toBeInTheDocument()
+    const less = screen.getByRole('button', { name: 'Weniger anzeigen' })
+    expect(less).toHaveAttribute('aria-expanded', 'true')
+    fireEvent.click(less)
+    expect(screen.queryByTestId('dispo-ops-waage-ticket-5')).not.toBeInTheDocument()
   })
 
   it('hängt SSE Waage belegt und Einlagerung mit Zeit an', async () => {

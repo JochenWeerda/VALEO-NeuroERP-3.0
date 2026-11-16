@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { AxiosError } from 'axios'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -163,18 +163,21 @@ describe('Agrar-Kette in der Rangliste', () => {
 
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
 
     const waageRow = within(work).getByRole('link', { name: 'K-2: Waage' }).closest('li')
     expect(waageRow).toHaveAttribute('data-fachaktion-id', 'agrar.chain.kon.K-2.waage')
     expect(within(work).getByRole('link', { name: 'K-2: Waage' })).toHaveAttribute('href', '/waage/wiegungen')
-    expect(waageRow).toHaveTextContent('layer:situational')
-    expect(waageRow).toHaveTextContent('signal:open-task')
-    expect(waageRow).toHaveTextContent('severity:3')
-    expect(waageRow).not.toHaveTextContent('pinned')
+    expect(waageRow).toHaveTextContent('Nächsten Schritt im Kontrakt bearbeiten')
+    expect(waageRow).not.toHaveTextContent('Angehefteter Einstieg')
     expect(work).not.toHaveTextContent('K-9')
     expect(work).not.toHaveTextContent('Abgeschlossen')
 
+    const overview = screen.getByText('Agrarvorgänge im Überblick')
+    const details = overview.closest('details')
+    expect(details).not.toHaveAttribute('open')
+    fireEvent.click(overview)
+    expect(details).toHaveAttribute('open')
     expect(screen.getAllByRole('link', { name: 'K-2: Waage' })).toHaveLength(2)
     expect(screen.getByText('K-9: Abgeschlossen')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'K-9: Abgeschlossen' })).not.toBeInTheDocument()
@@ -220,7 +223,8 @@ describe('Agrar-Kette in der Rangliste', () => {
     })
 
     const empty = renderLayer()
-    expect(await screen.findByText('keine Kette')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Agrarvorgänge im Überblick'))
+    expect(await screen.findByText('Keine offenen Agrarvorgänge.')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-work-items').querySelector('[data-fachaktion-id^="agrar.chain."]')).toBeNull()
     empty.unmount()
 
@@ -305,17 +309,17 @@ describe('Agrar-Kette in der Rangliste', () => {
     await waitFor(() => {
       expect(within(work).getByRole('link', { name: 'K-2: Waage' })).toBeInTheDocument()
       const approval = within(work).getByRole('link', { name: 'Rechnungen auf meine Freigabe' }).closest('li')
-      expect(approval).toHaveTextContent('count:1')
+      expect(approval).toHaveTextContent('Für Ihren aktuellen Arbeitsbereich empfohlen')
     })
 
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
     expect(items[0]).not.toHaveTextContent('count:')
     const waageRow = within(work).getByRole('link', { name: 'K-2: Waage' }).closest('li')
     expect(waageRow).toHaveAttribute('data-fachaktion-id', 'agrar.chain.kon.K-2.waage')
-    expect(waageRow).toHaveTextContent('signal:open-task')
-    expect(waageRow).not.toHaveTextContent('pinned')
+    expect(waageRow).toHaveTextContent('Nächsten Schritt im Kontrakt bearbeiten')
+    expect(waageRow).not.toHaveTextContent('Angehefteter Einstieg')
     expect(work.querySelector('[data-fachaktion-id^="inbox.queue."]')).toBeNull()
     expect(screen.queryByTestId('workspace-specialist-slots')).not.toBeInTheDocument()
   })

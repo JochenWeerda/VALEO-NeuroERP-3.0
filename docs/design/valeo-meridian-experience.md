@@ -467,3 +467,28 @@ verhindert weder den Start noch das Umschalten. Meridian-Attribute und zentrale
 Renderer-Tokens bleiben erhalten. Regression: acht Bootstrap-/Speicherfaelle;
 zusammen mit dem bestehenden Studio-Kontrastvertrag 86 Tests bestanden.
 Die Sichtabnahme des neu gebauten Images ist gesondert nachzuweisen.
+
+
+## Start und zentrale CSS-Kaskade (16.11.2026)
+
+Der Arbeitsplatz nutzt weiterhin die vorhandene Launchpad-Navigation, den
+Studio-Kompositionshost und die registrierten spezialisierten Renderer.
+Priorisierte Aufgaben werden kompakt gezeigt, gleichartige UUID-Aufgaben
+zusammengefasst, jede Fachnavigation bleibt einzeln erhalten. Diagnoseschluessel
+bleiben in Ranking-/Auditdaten, nicht im sichtbaren Standardtext. Operative
+Tafeln und das zusaetzliche native Rollen-Cockpit werden bewusst geoeffnet;
+Kompositionsanpassung ist eine getrennte Aktion. Kein zweiter Maskenrenderer.
+
+Die zentrale CSS-Layer-Reihenfolge muss vor saemtlichen Token-Imports stehen:
+`@layer theme, base, components, utilities;`. Andernfalls registriert ein
+Token-Import base zuerst, Tailwinds spaetere Theme-Aliase gewinnen und
+gleichnamige var()-Referenzen machen Schrift-/Radiuswerte ungueltig. Eine
+synthetische Browserabnahme prueft deshalb berechnete Werte und Kontrast,
+nicht nur CSS-Quelltext. Das gilt fuer alle generierten Masken.
+
+Referenzprinzipien: rollenbezogene Spaces/Pages aus
+[SAP Fiori](https://www.sap.com/design-system/fiori-design-web/v1-96/foundations/integration-and-services/sap-fiori-launchpad/launchpad),
+Modularbeit und Shortcuts aus [ERPNext](https://docs.frappe.io/erpnext/workspace),
+bewusste Dashboard-Anpassung aus [metasfresh](https://docs.metasfresh.org/webui_collection/EN/Dashboard.html),
+modulare Widgets aus [Open Mercato](https://docs.openmercato.com/architecture/system-overview).
+Es werden Prinzipien angewendet, keine fremden Komponenten kopiert.

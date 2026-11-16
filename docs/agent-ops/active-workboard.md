@@ -21240,3 +21240,5 @@ und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
 Keine DB-Schreibtests, neuen Container oder Migrationen.
 
 WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt zentrale Schrift-/Radius-Tokens leer, Titel dadurch 16px statt Hierarchie; Suchkuerzel von Axe als teilweise verdeckt markiert. Codex besitzt zusaetzlich src/index.css und eng betroffene Tokenvertraege fuer die konkrete zentrale Token-Selbstreferenzdiagnose. Kein individueller CSS-Bypass; Browser muss nichtleere Tokens und beide Themes nachweisen.
+
+WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bewusstem Oeffnen, kompakter Aufgabenprojektion und versteckter Anpassungssteuerung; keine neue Seitenarchitektur. CSS-Layer-Reihenfolge zentral repariert, echte berechnete Titel-/Radiuswerte und Kontrast geprueft. 67 Verhaltenstests sowie volle Frontend-Typpruefung bestanden. Sechs synthetische Browserfaelle mit produktiven Komponenten, ohne persoenliche Anmeldung/DB, bestehen. Lokales finales Frontend-Image folgt; kein Backend-/DB-Neustart. QA workspace-home-usability-20261116.md.

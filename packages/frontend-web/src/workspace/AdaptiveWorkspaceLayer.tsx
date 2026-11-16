@@ -27,6 +27,7 @@ import { useFeature } from '@/hooks/useFeature'
 import { useLaunchpadPersonalization } from '@/hooks/useLaunchpadPersonalization'
 import { useWorkspaceCompositionOverlay } from '@/hooks/useWorkspaceCompositionOverlay'
 import { WorkspaceCompositionHost } from '@/studio/WorkspaceCompositionHost'
+import { groupWorkspaceItems, workspaceActionHint, workspaceActionLabel } from './presentation'
 import { WORKSPACE_FACHAKTIONEN } from './registry'
 import { authorizeFachaktionen, mapFachaktionToCommand } from './command-mapping'
 import { rankedLaunchpadTileIds, workspaceNow } from './home-signals'
@@ -43,7 +44,7 @@ import {
 } from './home-composition'
 import { requestExistingCommandPalette } from './request-command-palette'
 import { openInboxItemInMask } from './sibling-slots'
-import type { TypedFachaktion } from './types'
+import type { RankedWorkItem, TypedFachaktion } from './types'
 
 function pinKeys(action: TypedFachaktion): string[] {
   return action.launchpadTileId ? [action.id, action.launchpadTileId] : [action.id]
@@ -163,63 +164,7 @@ export function AdaptiveWorkspaceLayer(): JSX.Element {
     ? spaceId
     : (catalogSpaces[0]?.id ?? '')
 
-  return (
-    <div className="flex flex-col gap-4" data-testid="adaptive-workspace-layer">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Start</h1>
-          <p className="text-sm text-muted-foreground">
-            Wo bin ich, was kann ich tun, was ist wichtig.
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant={overlay.surfaceLocked ? 'default' : 'outline'}
-          className="h-11"
-          aria-pressed={overlay.surfaceLocked}
-          aria-label={overlay.surfaceLocked ? 'Oberfläche gelöst' : 'Oberfläche fixieren'}
-          onClick={() => setOverlay((current) => setSurfaceLocked(current, !current.surfaceLocked))}
-        >
-          {overlay.surfaceLocked ? 'Oberfläche fixiert' : 'Oberfläche fixieren'}
-        </Button>
-      </header>
-
-      <section aria-label="Dialog" data-testid="workspace-dialog-layer">
-        <h2 className="text-lg font-semibold text-foreground">Dialog</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Strg+K öffnet die Suche.</p>
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-2 h-11 max-w-lg justify-start"
-          aria-label="Suche öffnen"
-          data-testid="workspace-dialog-palette"
-          disabled={!commandPaletteEnabled}
-          onClick={() => {
-            if (!commandPaletteEnabled) {
-              return
-            }
-            requestExistingCommandPalette()
-          }}
-        >
-          <Search className="mr-2 h-4 w-4" aria-hidden="true" />
-          <span>Suche</span>
-          <kbd className="ml-auto rounded bg-muted px-2 py-0.5 text-xs">Strg+K</kbd>
-        </Button>
-      </section>
-
-      <section aria-label="Handlungsbedarf" data-testid="workspace-work-items">
-        <h2 className="text-lg font-semibold text-foreground">Handlungsbedarf</h2>
-        {abrufeAuthHint ? (
-          <p
-            className="mt-2 text-sm text-status-error"
-            role="alert"
-            data-testid="workspace-abrufe-error"
-          >
-            {abrufeAuthHint}
-          </p>
-        ) : null}
-        <ul className="mt-2 flex flex-col gap-2">
-          {ranked.map((item) => {
+  const renderWorkItem = (item: RankedWorkItem, reference?: string): JSX.Element => {
             const command = mapFachaktionToCommand(item.action)
             const path = typeof command.actionParams.path === 'string' ? command.actionParams.path : item.action.target.route
             const pinned = pinKeys(item.action).some((key) => (overlay.pinnedTileIds ?? []).includes(key))
@@ -236,19 +181,19 @@ export function AdaptiveWorkspaceLayer(): JSX.Element {
                     to={path as RouteTarget}
                     className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
                   >
-                    {item.action.label}
+                    {reference ?? workspaceActionLabel(item.action.label)}
                   </Link>
                   {item.action.kind === 'prepare-command' ? (
                     <p className="text-2xs tracking-wide uppercase text-muted-foreground">vorbereiten — nicht buchen</p>
                   ) : null}
-                  <p className="truncate text-xs text-muted-foreground">{item.reasonCodes.join(' · ')}</p>
+                  <p className="truncate text-xs text-muted-foreground">{workspaceActionHint(item)}</p>
                 </div>
                 <Button
                   type="button"
                   variant="ghost"
                   className="h-11"
                   aria-pressed={pinned}
-                  aria-label={pinned ? `${item.action.label} lösen` : `${item.action.label} pinnen`}
+                  aria-label={pinned ? `${reference ?? workspaceActionLabel(item.action.label)} lösen` : `${reference ?? workspaceActionLabel(item.action.label)} pinnen`}
                   onClick={() => {
                     setOverlay((current) =>
                       pinKeys(item.action).reduce(
@@ -262,21 +207,73 @@ export function AdaptiveWorkspaceLayer(): JSX.Element {
                 </Button>
               </li>
             )
-          })}
-        </ul>
+  }
+
+  return (
+    <div className="flex flex-col gap-4" data-testid="adaptive-workspace-layer">
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground">Mein Arbeitsplatz</h1>
+          <p className="text-sm text-muted-foreground">
+            Ihre Aufgaben und Anwendungen auf einen Blick.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant={overlay.surfaceLocked ? 'default' : 'outline'}
+          className="h-11"
+          aria-pressed={overlay.surfaceLocked}
+          aria-label={overlay.surfaceLocked ? 'Oberfläche gelöst' : 'Oberfläche fixieren'}
+          onClick={() => setOverlay((current) => setSurfaceLocked(current, !current.surfaceLocked))}
+        >
+          {overlay.surfaceLocked ? 'Oberfläche fixiert' : 'Oberfläche fixieren'}
+        </Button>
+      </header>
+
+      <section aria-label="Schnelleinstieg" data-testid="workspace-dialog-layer">
+        <Button
+          type="button"
+          variant="outline"
+          className="h-11 w-full max-w-xl justify-start bg-card"
+          aria-label="Suche öffnen"
+          data-testid="workspace-dialog-palette"
+          disabled={!commandPaletteEnabled}
+          onClick={() => {
+            if (!commandPaletteEnabled) {
+              return
+            }
+            requestExistingCommandPalette()
+          }}
+        >
+          <Search className="mr-2 h-4 w-4" aria-hidden="true" />
+          <span>Anwendung oder Vorgang suchen</span>
+          <kbd className="ml-auto rounded bg-muted px-2 py-0.5 text-xs">Strg+K</kbd>
+        </Button>
       </section>
 
-      <AgrarChainWidget view={chain} />
-
-      {specialistKinds.length > 0 ? (
-        <WorkspaceCompositionHost
-          key={`${homeComposition.composition.id}:${homeComposition.composition.studioVersion}:${specialistKinds.join(',')}`}
-          composition={homeComposition.composition}
-          variant="embedded"
-          onOpenMask={(item) => openInboxItemInMask(item, navigate)}
-          onQueue={onInboxQueue}
-        />
-      ) : null}
+      <section aria-label="Handlungsbedarf" data-testid="workspace-work-items">
+        <h2 className="text-lg font-semibold text-foreground">Für Sie priorisiert</h2>
+        {abrufeAuthHint ? (
+          <p
+            className="mt-2 text-sm text-status-error"
+            role="alert"
+            data-testid="workspace-abrufe-error"
+          >
+            Ein Teil der Aufgaben ist derzeit nicht verfügbar. Prüfen Sie den Zugriff im Dispositionsbereich.
+          </p>
+        ) : null}
+        {ranked.length === 0 ? <p className="mt-2 text-sm text-muted-foreground">Zurzeit sind keine Aufgaben priorisiert. Öffnen Sie unten einen Arbeitsbereich.</p> : null}
+        <ul className="mt-2 grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+          {groupWorkspaceItems(ranked).map(group => group.length === 1 ? renderWorkItem(group[0]) : (
+            <li key={group[0].action.id} className="rounded-lg border border-border bg-card px-3 py-3">
+              <details>
+                <summary className="cursor-pointer text-sm font-medium text-foreground">{group.length} Kontrakte · {workspaceActionLabel(group[0].action.label).replace('Kontrakt · ', '')}</summary>
+                <ul className="mt-2 space-y-2">{group.map((item, index) => renderWorkItem(item, `Vorgang ${index + 1} öffnen`))}</ul>
+              </details>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       {catalogSpaces.length > 0 ? (
         <LaunchpadBoard
@@ -288,6 +285,23 @@ export function AdaptiveWorkspaceLayer(): JSX.Element {
           rankedTileIds={rankedTileIds}
         />
       ) : null}
+
+      <details className="rounded-lg border border-border bg-card p-4">
+        <summary className="cursor-pointer text-sm font-semibold text-foreground">Agrarvorgänge im Überblick</summary>
+        <div className="mt-3"><AgrarChainWidget view={chain} /></div>
+      </details>
+
+      {specialistKinds.length > 0 ? (
+        <WorkspaceCompositionHost
+          key={`${homeComposition.composition.id}:${homeComposition.composition.studioVersion}:${specialistKinds.join(',')}`}
+          composition={homeComposition.composition}
+          variant="embedded"
+          onOpenMask={(item) => openInboxItemInMask(item, navigate)}
+          onQueue={onInboxQueue}
+        />
+      ) : null}
+
+
     </div>
   )
 }
