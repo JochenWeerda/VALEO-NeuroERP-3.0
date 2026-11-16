@@ -30,7 +30,7 @@ import {
   saveWorkspaceCompositionSession,
   setSpecializedKindEnabled,
 } from '@/studio/workspace-composition-session'
-import { AdaptiveWorkspaceLayer } from '@/workspace/AdaptiveWorkspaceLayer'
+import StartDashboardPage from '@/pages/start-dashboard'
 import {
   FACHAKTION_MCP_CALL_PATH,
   FACHAKTION_RESOLVE_TOOL,
@@ -299,13 +299,15 @@ describe('Launcher-Flaechen Evidence (ohne Browser-Login)', () => {
     saveWorkspaceCompositionSession(
       setSpecializedKindEnabled(WORKSPACE_COMPOSITION_FIXTURE, 'disposition_board', false),
     )
-    render(wrap(<AdaptiveWorkspaceLayer />))
+    render(wrap(<StartDashboardPage />))
+    fireEvent.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
 
     expect(await screen.findByTestId('adaptive-workspace-layer')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Start' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Mein Arbeitsplatz' })).toBeInTheDocument()
     expect(screen.getByTestId('workspace-work-items')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-dialog-layer')).toBeInTheDocument()
-    expect(screen.getByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
+    expect(await screen.findByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(screen.queryByTestId('workspace-disposition-entry')).not.toBeInTheDocument()
   })
 

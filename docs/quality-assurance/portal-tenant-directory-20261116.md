@@ -95,3 +95,18 @@ fehlende read_by-Verweise auf den neuen Portal-Service; Schemas, Tabellen,
 Spalten und sonstige Katalogwerte unveraendert. Die beiden generierten
 Katalogdateien wurden aus fresh-schema-table-catalog dieses exakten CI-Laufs
 uebernommen. Keine Migration oder lokale Schemaanpassung.
+
+## Frontend-Gesamtvertrag fuer main
+
+Der erste komplette Frontendlauf am gebuendelten Stack fand 15 Fehler in
+fuenf Testdateien (2136 bestanden). Vier Workspace-Vertraege erwarteten noch
+das Dashboard als Standard, alte interne Rankingcodes und automatisch
+geoeffnete Inbox. Sie verwenden nun den expliziten Arbeitsuebersichtsmodus
+bzw. oeffnen Arbeitsuebersicht/Document-Inbox ueber die echte Bedienfolge.
+Die Auth-Refresh-Attrappe stellt die inzwischen benoetigten getUser/
+getAccessToken-Leser ausdruecklich bereit; ohne Portalsitzung wird weiterhin
+kein Kundenkontokopf gesendet. Keine Produktions-Fallbacks fuer Testattrappen.
+
+Gezielte Gesamtabnahme dieser fuenf Dateien: 23/23 bestanden, kein Skip.
+Auth-, Fehler-, Filter-, Routing-, Rangfolge- und Nichtbuchungspruefungen
+bleiben erhalten. Artefakt: artifacts/main-integration-frontend-contracts.json.

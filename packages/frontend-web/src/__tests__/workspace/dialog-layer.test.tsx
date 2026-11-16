@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { AdaptiveWorkspaceLayer } from '@/workspace/AdaptiveWorkspaceLayer'
+import StartDashboardPage from '@/pages/start-dashboard'
 import { requestExistingCommandPalette } from '@/workspace/request-command-palette'
 
 const postMock = vi.hoisted(() => vi.fn())
@@ -68,7 +68,7 @@ function renderLayer(): void {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <AdaptiveWorkspaceLayer />
+        <StartDashboardPage />
       </QueryClientProvider>
     </MemoryRouter>,
   )
@@ -95,8 +95,9 @@ describe('Dialogebene', () => {
     window.addEventListener('keydown', onKey, true)
     try {
       renderLayer()
+      await user.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
       expect(screen.getByTestId('workspace-dialog-layer')).toBeInTheDocument()
-      expect(screen.getByText('Strg+K öffnet die Suche.')).toBeInTheDocument()
+      expect(screen.getByText('Strg+K')).toBeInTheDocument()
       expect(screen.queryByRole('textbox', { name: 'Belege und Apps suchen' })).not.toBeInTheDocument()
       expect(screen.queryByRole('heading', { name: 'Treffer' })).not.toBeInTheDocument()
 
