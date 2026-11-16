@@ -21282,3 +21282,5 @@ automatische Vermarktung von Betriebsdaten. Optionales Marketing/Analyse und
 notwendige Servicedaten zweckbezogen trennen. Keine neue DB/Container.
 Abnahme: bestehende verifizierte Kundenkonto-/Mandantenwege, fremde Kunden
 bleiben gesperrt; vorhandene Portal-ScreenDefinitions weiterverwenden.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Erweiterung vor Edit: Nutzer praezisiert kundenbezogenen Direktstart nach Anmeldung und internen Launcher-Einstieg zur gekennzeichneten Kundenansicht. Besitz zusaetzlich hooks/useAuth.ts, lib/portal-landing.ts, CustomerPortalLayout, PortalKontoWahl, lib/portal-konto.ts und passende Tests. Bestehende servergepruefte Kundenkonten fuer Landingsentscheidung nutzen, keine fingierte Benutzeranmeldung. Globaler Kontostore an aktuellen verifizierten Sitzungs-/Mandantenkontext binden. Audit: vertrauenswuerdiger Mehrmandanten-Tokenwechsel fehlt bisher; keine frei waehlbaren X-Tenant-ID zulassen. Eigener ADR-/Vertragsentwurf erforderlich, nicht als fertige Funktion ausgeben.
