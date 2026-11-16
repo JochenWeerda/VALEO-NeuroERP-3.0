@@ -103,6 +103,22 @@ export function canonicalizeLaunchpadSpaceId(spaceId: string | undefined): strin
  */
 export const LAUNCHPAD_SPACES: LaunchpadSpaceDef[] = [
   {
+    id: 'agrarportal',
+    label: { de: 'Agrarportal', en: 'Farmer portal' },
+    pages: [{
+      id: 'kundenbetrieb',
+      label: { de: 'Agrarportal für Kunden', en: 'Farmer self-service' },
+      tileItemIds: ['kundenportal'],
+      extraTiles: [
+        { id: 'portal-bestellen', label: { de: 'Bestellung aufgeben', en: 'Place an order' }, path: '/portal/shop' },
+        { id: 'portal-bestellungen', label: { de: 'Meine Bestellungen', en: 'My orders' }, path: '/portal/bestellungen' },
+        { id: 'portal-dokumente', label: { de: 'Meine Dokumente', en: 'My documents' }, path: '/portal/dokumente' },
+        { id: 'portal-futter', label: { de: 'Futterberechnung', en: 'Feed advice' }, path: '/portal/rationsoptimierung' },
+        { id: 'portal-feldbuch', label: { de: 'Schlagkartei', en: 'Field records' }, path: '/portal/feldbuch' },
+      ],
+    }],
+  },
+  {
     id: 'handel',
     label: { de: 'Handel & CRM', en: 'Trade & CRM' },
     pages: [

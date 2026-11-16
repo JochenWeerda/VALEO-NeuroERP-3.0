@@ -510,3 +510,6 @@ Arbeitsuebersicht oeffnen gemountet. Der Standardstart fuehrt keine
 Dashboard-Lesezugriffe aus. Business-Masken bleiben in derselben
 ScreenDefinition-/RenderPlan-/Runtime-Kette, der Launcher veraendert weder
 Fachcommands noch serverseitige Rollen- und Mandantenpruefungen.
+
+
+Agrarportal-Einstieg 16.11: Kundenlandings basieren auf bestehenden servergeprueften Kundenkonten; interne Pruefansicht ist klar markiert und kontextgebunden. Vorhandene Portal-ScreenDefinitions weiterverwenden, keine parallel handgebaute Kundenmaske. Die Kundenvariante der gemeinsamen Belegfamilie muss Portal-Kundengrenze und freigegebene Fachcommands durchgaengig erfuellen. Siehe [Portal-QA](../quality-assurance/agrarportal-entry-isolation-20261116.md) und [Kunden-Belegvertrag](../workflows/portal-customer-document-variant-20261116.md).

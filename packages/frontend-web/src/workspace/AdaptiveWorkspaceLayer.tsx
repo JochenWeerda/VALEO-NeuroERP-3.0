@@ -22,6 +22,8 @@ import { LaunchpadBoard } from '@/components/navigation/LaunchpadBoard'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { auth } from '@/lib/auth'
+import { canInspectCustomerPortal } from '@/lib/portal-landing'
+import { beginPortalInspection } from '@/lib/portal-konto'
 import { tenantFromToken } from '@/lib/tenant-from-token'
 import { useFeature } from '@/hooks/useFeature'
 import { useLaunchpadPersonalization } from '@/hooks/useLaunchpadPersonalization'
@@ -308,6 +310,7 @@ export function OperationalWorkspaceLayer(): JSX.Element {
 
 /** The launchpad is navigation, not a second business-mask implementation. */
 function LauncherWorkspaceLayer(): JSX.Element {
+  const { user } = useAuth()
   const sections = useNavSections()
   const { i18n } = useTranslation()
   const [spaceId, setSpaceId] = useState('')
@@ -321,6 +324,9 @@ function LauncherWorkspaceLayer(): JSX.Element {
       <h1 className="text-2xl font-semibold tracking-tight text-foreground">Anwendungen</h1>
       <p className="text-sm text-muted-foreground">Wählen Sie einen Bereich und öffnen Sie die gewünschte Maske.</p>
     </header>
+    {canInspectCustomerPortal(user) ? <Button variant="outline" className="self-start" asChild>
+      <Link to="/portal?preview=customer" onClick={(event) => { if (!beginPortalInspection()) event.preventDefault() }}>Kundenansicht prüfen</Link>
+    </Button> : null}
     <LaunchpadBoard presentation="launcher" catalogSpaces={catalogSpaces} spaceId={spaceId}
       onSpaceIdChange={setSpaceId} pageBySpace={pageBySpace} onPageBySpaceChange={setPageBySpace} />
   </div>

@@ -13,6 +13,8 @@ import type { NavItem } from './types'
 
 type AppIcon = NavItem['icon']
 const ICONS: Record<string, AppIcon> = {
+  kundenportal: Tractor, 'portal-bestellen': ShoppingCart, 'portal-bestellungen': ClipboardList,
+  'portal-dokumente': FileCheck2, 'portal-futter': Calculator, 'portal-feldbuch': Sprout,
   kunden: Users, kundenakte: ContactRound, 'kunden-karte': MapPin,
   aktivitaeten: CalendarDays, vertreterstamm: BriefcaseBusiness, betriebsprofile: Tractor,
   angebot: BadgePercent, 'ausgehend-angebot': FilePlus2,

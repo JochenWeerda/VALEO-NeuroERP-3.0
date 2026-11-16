@@ -11,6 +11,9 @@ import type { NavItem } from '@/app/navigation/types'
 import { LAUNCHPAD_OVERLAY_STORAGE_KEY } from '@/app/navigation/launchpad-personalization'
 import i18n from '@/i18n/config'
 import StartDashboardPage from '@/pages/start-dashboard'
+import type { User } from '@/lib/auth'
+
+const portalPreviewSession = vi.hoisted(() => ({ user: null as User | null }))
 
 const analyticsGetMock = vi.hoisted(() => vi.fn())
 const useNavSectionsMock = vi.hoisted(() => vi.fn())
@@ -24,7 +27,7 @@ vi.mock('@/hooks/useFeature', () => ({
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null }),
+  useAuth: () => ({ user: portalPreviewSession.user }),
 }))
 
 vi.mock('@/workspace/home-signals', async (importOriginal) => {
@@ -218,6 +221,7 @@ function mockAnnahmeNav(): void {
 
 describe('StartDashboardPage', () => {
   beforeEach(() => {
+    portalPreviewSession.user = null
     vi.stubGlobal('EventSource', SilentEventSource)
     window.localStorage.clear()
     window.sessionStorage.clear()
@@ -229,11 +233,19 @@ describe('StartDashboardPage', () => {
     vi.unstubAllGlobals()
   })
 
+  it('offers staff a clearly named customer inspection entry without granting it to ordinary users', async () => {
+    mockAnnahmeNav()
+    portalPreviewSession.user = { sub: 'synthetic-staff', name: 'Test', email: '', roles: ['SALES_LESEN'], scopes: [], exp: 9999999999 }
+    renderPage(false)
+    expect(await screen.findByRole('link', { name: 'Kundenansicht prüfen' })).toHaveAttribute('href', '/portal?preview=customer')
+  })
+
   it('starts with grouped app launchers and makes no dashboard reads before opening the overview', async () => {
     mockAnnahmeNav()
     renderPage(false)
     expect(await screen.findByRole('heading', { name: 'Anwendungen', level: 1 })).toBeInTheDocument()
     expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Kundenansicht prüfen' })).not.toBeInTheDocument()
     expect(screen.queryByTestId('workspace-work-items')).not.toBeInTheDocument()
     expect(screen.queryByTestId('workspace-composition-host')).not.toBeInTheDocument()
     expect(analyticsGetMock).not.toHaveBeenCalled()
