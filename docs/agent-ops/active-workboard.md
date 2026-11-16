@@ -21213,3 +21213,5 @@ Docker-Build-Konfiguration. Auch bestehender Keycloak-Container im Wartungsclaim
 keine Realm-/Benutzer-/Rollen-/Datenbankaenderung, keine gelockerte Tokenpruefung.
 Abnahme: Discovery/CORS und SSO-Weiterleitung auf3000/3001 sowie passender Backend-
 Issuer; vorhandene Daten/Volumes und andere Dienste erhalten.
+
+Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort18081nachWindows+allenDockerreservierungen+BasisComposegeprueft; QuelleundKonfigvertraegeangepasst. KeineFremddiensteaendern; aktuellesAnwendungswartungsfensterbisAbschlussderSSOGegenprobe.

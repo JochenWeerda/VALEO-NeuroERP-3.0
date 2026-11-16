@@ -15,8 +15,8 @@ def preview():
 
 def test_public_identity_origin_is_shared_by_all_three_participants():
     services = preview()
-    origin = 'http://localhost:${VALEO_LOCAL_IDENTITY_PORT:-8081}'
-    assert services['keycloak']['ports'] == ['127.0.0.1:${VALEO_LOCAL_IDENTITY_PORT:-8081}:8080']
+    origin = 'http://localhost:${VALEO_LOCAL_IDENTITY_PORT:-18081}'
+    assert services['keycloak']['ports'] == ['127.0.0.1:${VALEO_LOCAL_IDENTITY_PORT:-18081}:8080']
     assert services['keycloak']['environment']['KC_HOSTNAME'] is None
     assert services['keycloak']['environment']['KC_HOSTNAME_URL'] == origin
     issuer = origin+'/realms/valeo-neuro-erp'
@@ -42,3 +42,24 @@ def test_profile_does_not_disable_authentication_or_change_provider_internal_por
     assert set(services['backend']['environment'])=={'OIDC_ISSUER_URL'}
     assert not any('SECRET' in key or 'PASSWORD' in key or 'TOKEN' in key
                    for key in services['frontend-web']['build']['args'])
+
+
+def test_default_identity_port_does_not_collide_with_other_compose_services():
+    import re
+    base=yaml.safe_load((ROOT/'docker-compose.yml').read_text(encoding='utf-8'))['services']
+    other_ports=set()
+    for name,service in base.items():
+        if name == 'keycloak':
+            continue
+        for mapping in service.get('ports',[]):
+            if isinstance(mapping,dict):
+                if mapping.get('published') is not None:
+                    other_ports.add(str(mapping['published']))
+                continue
+            mapping=re.sub(r'\$\{[^}]*:-([^}]+)\}',r'\1',str(mapping))
+            parts=mapping.split(':')
+            if len(parts)>=2:
+                other_ports.add(parts[-2])
+    configured=preview()['keycloak']['ports'][0]
+    default=re.search(r'VALEO_LOCAL_IDENTITY_PORT:-(\d+)',configured).group(1)
+    assert default not in other_ports

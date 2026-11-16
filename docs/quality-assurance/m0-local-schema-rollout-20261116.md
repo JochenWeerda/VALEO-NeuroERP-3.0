@@ -39,7 +39,7 @@ Docker-Wildcardlistener. Keine fremden Prozesse oder globalen WSL-Einstellungen
 werden veraendert.
 
 Das lokale Previewprofil veroeffentlicht Keycloak deshalb ausschliesslich an
-127.0.0.1:8081 (ueber VALEO_LOCAL_IDENTITY_PORT anpassbar). KC_HOSTNAME_URL,
+127.0.0.1:18081 (ueber VALEO_LOCAL_IDENTITY_PORT anpassbar). KC_HOSTNAME_URL,
 Backend-OIDC_ISSUER_URL und der oeffentliche Frontend-Discovery-Buildparameter
 verwenden denselben Ursprung. Der alte KC_HOSTNAME wird entfernt; der interne
 Keycloak-Port bleibt8080. Dockerfile.frontend nimmt nur die zwei oeffentlichen
@@ -52,3 +52,5 @@ ohne geheime Werte auszugeben. Keycloak speichert bereits in PostgreSQL;
 Benutzer, Rollen, Realm und Datenvolumes werden nicht veraendert. Authentifizierung,
 Issuer-/Nonce-/Audience-Pruefung und PKCE bleiben bestehen. Die reale neue
 Discovery-/CORS-/SSO-Gegenprobe folgt vor Abschluss dieses Nachweises.
+
+Die zunaechst nur gegen Windows gepruefte Portwahl8081 war innerhalb Docker fuer Redis-Commander reserviert. Der Start scheiterte an dieser Belegung. Der korrigierte Standard18081 ist gegen Windows-Listener, saemtliche vorhandenen Container-Portreservierungen und die anderen Compose-Dienste geprueft. Ein neuer Negativvertrag verhindert kuenftige Kollisionen mit dem Basis-Stack; kein fremder Dienst wird angehalten.
