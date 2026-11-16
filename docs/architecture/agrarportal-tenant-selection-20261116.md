@@ -100,3 +100,25 @@ bereits signierten Mandanten. `stage=discovery_only` und
 Diese Phase stellt weder Token noch Rollen aus und aendert keine Zuordnung.
 Der vertrauenswuerdige Kontextwechsel und dessen Browserabnahme bleiben die
 naechste Phase. Ohne diese Abnahme wird kein funktionierender Wechsel behauptet.
+
+## Bestehende Vertrauensgrenze fuer Phase 2
+
+Bestandsaudit: Der Keycloak-Export mappt `tenant_id` derzeit aus einem globalen
+Benutzerattribut. `app/core/security.py` und `app/core/tenant_binding.py`
+verlangen genau einen geprueften Token-Mandanten. `identity_session.py` bindet
+und widerruft bestehende Provider-Sitzungen ueber Redis, stellt aber keine
+neuen Mandantenkontexte aus. Ein vorhandener Token-Exchange-Aussteller wurde
+im Backend, Frontend und den Konfigurations-/Betriebsskripten nicht gefunden.
+
+Deshalb wird Phase 2 nicht als blosses Dropdown umgesetzt. Der Kontext muss
+an Original-Issuer, Subject, Provider-Sitzung, Zielmandant und aktuelle
+Kundenzuordnung gebunden werden. Auswahlrechte und fachliche Rollen sind
+serverseitig erneut zu pruefen; kein freies Rollenfeld und keine Vereinigung
+der Rollen aller Handelspartner. Widerruf der Elternsitzung, der Zuordnung
+oder der Rechte muss auch Folgeanfragen und Streams sperren.
+
+Eine separate Brokersitzung erfordert einen ausdruecklichen Validator und
+eine Vertrauensrichtlinie; ein fremdes Token wird vom heutigen Validator
+zu Recht abgewiesen. Alternativ benoetigt ein Provider-Exchange seinen
+eigenen Nachweis fuer Issuer, Audience, Claims und Widerruf. Globale
+Benutzerattribute werden fuer die Auswahl nicht umgeschrieben.
