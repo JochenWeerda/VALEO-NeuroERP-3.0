@@ -21323,3 +21323,5 @@ PORTAL-TENANT-BROKER Phase1: GET /portal/handelspartner mit gepruefter Identitae
 PORTAL-TENANT-BROKER Phase1 gepusht als93e23359f, PR151 gestapelt nach150; kein main-Merge/Deployment behauptet. Phase2-Bestandsaudit bestaetigt fehlenden Kontextaussteller (Redis identity_session prueft/widerruft nur). Signierten Originaltenant nicht durch globales Keycloak-Attributumschreiben oder freie Header umgehen; Audit im Architekturvertrag nachgezogen.
 
 MAIN-INTEGRATION-20261116: Nutzerauftrag main-Push. Eigene PR-Kette147–151 ist vollstaendig in PR151 enthalten und dessen Ziel jetzt main. Gemeinsame Gesamt-CI am Endstand vor Merge; keine Umgehung roter/fehlender Gates. Fremde PR146 und Dependency-PRs nicht Bestandteil. Nach Integration eigene enthaltene PRs147–150 schliessen.
+
+MAIN-INTEGRATION Inventarfix reserviert Codex: scripts/check_tenant_isolation.py und eigener Regressionstest. CI meldet fehlende Klassifikation des neuen Portal-Verzeichnisadapters; explizit eigene verifizierte Identitaetsmitgliedschaft statt falscher Shared-/Stateless-Ausnahme klassifizieren. Keine Schwellenlockerung oder DB-Rechteaenderung.
