@@ -79,7 +79,7 @@ function renderLayer(): ReturnType<typeof render> {
   return render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <AdaptiveWorkspaceLayer />
+        <AdaptiveWorkspaceLayer mode="workspace" />
       </QueryClientProvider>
     </MemoryRouter>,
   )

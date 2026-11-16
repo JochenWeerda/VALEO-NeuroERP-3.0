@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Truck } from 'lucide-react'
 import { MemoryRouter } from '@/app/routing/test-router'
@@ -73,7 +73,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-function renderPage(): void {
+function renderPage(openOverview = true): void {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -89,6 +89,7 @@ function renderPage(): void {
       </QueryClientProvider>
     </MemoryRouter>,
   )
+  if (openOverview) fireEvent.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
 }
 
 function mockInboxQueue(options?: { documentKind?: string; canOpen?: boolean }): void {
@@ -226,6 +227,22 @@ describe('StartDashboardPage', () => {
 
   afterEach(() => {
     vi.unstubAllGlobals()
+  })
+
+  it('starts with grouped app launchers and makes no dashboard reads before opening the overview', async () => {
+    mockAnnahmeNav()
+    renderPage(false)
+    expect(await screen.findByRole('heading', { name: 'Anwendungen', level: 1 })).toBeInTheDocument()
+    expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-work-items')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-composition-host')).not.toBeInTheDocument()
+    expect(analyticsGetMock).not.toHaveBeenCalled()
+    expect(screen.getByRole('link', { name: 'Warteschlange' })).toHaveAttribute('href', '/annahme/warteschlange')
+    await userEvent.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
+    expect(await screen.findByTestId('workspace-work-items')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Zurück zu den Anwendungen' }))
+    expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-work-items')).not.toBeInTheDocument()
   })
 
   it('zeigt Adaptive Workspace auf der Startseite ohne Flow-Spine-Kacheln', async () => {

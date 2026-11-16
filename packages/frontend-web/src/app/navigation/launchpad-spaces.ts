@@ -28,6 +28,7 @@ export type LaunchpadSpaceDef = {
 export type LaunchpadTileKind = 'app' | 'task' | 'kpi' | 'alert'
 
 export type LaunchpadAppTile = {
+  icon?: NavItem['icon']
   id: string
   label: string
   path: string
@@ -385,7 +386,7 @@ function fallbackTiles(section: NavItem | undefined): LaunchpadAppTile[] {
     .filter((child) => !isLaunchpadHiddenNavId(child.id))
     .flatMap((child) => {
       const path = routablePath(child)
-      return path ? [{ id: child.id, label: child.label, path, keywords: child.keywords }] : []
+      return path ? [{ id: child.id, label: child.label, path, icon: child.icon, keywords: child.keywords }] : []
     })
     .slice(0, MAX_PAGE_TILES)
 }
@@ -413,7 +414,7 @@ export function resolveLaunchpadSpaces(sections: NavItem[], lang?: string): Laun
             const item = byId.get(itemId)
             const path = routablePath(item)
             if (item && path) {
-              pushTile({ id: item.id, label: item.label, path, keywords: item.keywords })
+              pushTile({ id: item.id, label: item.label, path, icon: item.icon, keywords: item.keywords })
             }
           }
         } else if (section) {

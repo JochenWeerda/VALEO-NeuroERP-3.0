@@ -9,7 +9,7 @@ import AxeBuilder from '@axe-core/playwright'
 
 const frontend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 const repo = path.resolve(frontend, '../..')
-const output = path.join(repo, 'artifacts/workspace-home-visual-20261116')
+const output = path.join(repo, 'artifacts/app-launcher-visual-20261116')
 const pagePath = '/__workspace_home_visual'
 const server = await createServer({ root: frontend, server: { host: '127.0.0.1', port: 0, open: false }, plugins: [{
   name: 'isolated-workspace-home', configureServer(vite) {
@@ -47,10 +47,10 @@ try {
       const name = `${viewport.width}x${viewport.height}-${theme}`
       try {
         await page.goto(`${origin}${pagePath}?theme=${theme}`, { waitUntil: 'domcontentloaded', timeout: 120000 })
-        await page.getByRole('heading', { name: 'Mein Arbeitsplatz', exact: true }).waitFor({ timeout: 120000 })
-        const disclosure = page.getByRole('button', { name: 'Dispo-Tafel', exact: true })
-        if (await disclosure.count() !== 1 || await disclosure.getAttribute('aria-expanded') !== 'false') failures.push('Dispo-Tafel is not initially collapsed')
-        if (await page.getByTestId('disposition-board').count()) failures.push('Dispo board mounted before opening')
+        await page.getByRole('heading', { name: 'Anwendungen', exact: true }).waitFor({ timeout: 120000 })
+        await page.getByTestId('launchpad-overview').waitFor()
+        if (await page.getByTestId('workspace-composition-host').count()) failures.push('Operational dashboard mounted on launcher start')
+        if (!(await page.getByTestId('launchpad-overview').getByRole('link').count())) failures.push('No app launchers available')
         const text = await page.locator('body').innerText()
         if (/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i.test(text)) failures.push('Raw UUID in visible text')
         if (/\b(?:reason[_ -]?code|create_from_inbox_bucht_nicht|[a-z]+(?:_[a-z]+){2,})\b/i.test(text)) failures.push('Reason code or technical identifier in visible text')

@@ -118,7 +118,7 @@ function renderHomeLayer(): void {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <AdaptiveWorkspaceLayer />
+        <AdaptiveWorkspaceLayer mode="workspace" />
       </QueryClientProvider>
     </MemoryRouter>,
   )

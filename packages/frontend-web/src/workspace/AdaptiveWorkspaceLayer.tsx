@@ -50,7 +50,7 @@ function pinKeys(action: TypedFachaktion): string[] {
   return action.launchpadTileId ? [action.id, action.launchpadTileId] : [action.id]
 }
 
-export function AdaptiveWorkspaceLayer(): JSX.Element {
+export function OperationalWorkspaceLayer(): JSX.Element {
   const sections = useNavSections()
   const { i18n } = useTranslation()
   const { user } = useAuth()
@@ -304,4 +304,28 @@ export function AdaptiveWorkspaceLayer(): JSX.Element {
 
     </div>
   )
+}
+
+/** The launchpad is navigation, not a second business-mask implementation. */
+function LauncherWorkspaceLayer(): JSX.Element {
+  const sections = useNavSections()
+  const { i18n } = useTranslation()
+  const [spaceId, setSpaceId] = useState('')
+  const [pageBySpace, setPageBySpace] = useState<Record<string, string>>({})
+  const catalogSpaces = useMemo(
+    () => resolveLaunchpadSpaces(sections, i18n.resolvedLanguage ?? i18n.language),
+    [sections, i18n.resolvedLanguage, i18n.language],
+  )
+  return <div className="flex flex-col gap-6" data-testid="app-launcher-home">
+    <header className="space-y-1">
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground">Anwendungen</h1>
+      <p className="text-sm text-muted-foreground">Wählen Sie einen Bereich und öffnen Sie die gewünschte Maske.</p>
+    </header>
+    <LaunchpadBoard presentation="launcher" catalogSpaces={catalogSpaces} spaceId={spaceId}
+      onSpaceIdChange={setSpaceId} pageBySpace={pageBySpace} onPageBySpaceChange={setPageBySpace} />
+  </div>
+}
+
+export function AdaptiveWorkspaceLayer({ mode = 'launcher' }: { mode?: 'launcher' | 'workspace' }): JSX.Element {
+  return mode === 'workspace' ? <OperationalWorkspaceLayer /> : <LauncherWorkspaceLayer />
 }
