@@ -21325,3 +21325,5 @@ PORTAL-TENANT-BROKER Phase1 gepusht als93e23359f, PR151 gestapelt nach150; kein 
 MAIN-INTEGRATION-20261116: Nutzerauftrag main-Push. Eigene PR-Kette147–151 ist vollstaendig in PR151 enthalten und dessen Ziel jetzt main. Gemeinsame Gesamt-CI am Endstand vor Merge; keine Umgehung roter/fehlender Gates. Fremde PR146 und Dependency-PRs nicht Bestandteil. Nach Integration eigene enthaltene PRs147–150 schliessen.
 
 MAIN-INTEGRATION Inventarfix reserviert Codex: scripts/check_tenant_isolation.py und eigener Regressionstest. CI meldet fehlende Klassifikation des neuen Portal-Verzeichnisadapters; explizit eigene verifizierte Identitaetsmitgliedschaft statt falscher Shared-/Stateless-Ausnahme klassifizieren. Keine Schwellenlockerung oder DB-Rechteaenderung.
+
+MAIN-INTEGRATION Inventarfix umgesetzt: eigene Kategorie identity-membership fuer gepruefte eigene Portal-Zuordnungen mit Nachweisquellen. Drei Regressionstests und alle neun Verbesserungspipelines bestanden. Unbekannte Adapter blockieren unveraendert; kein System-/Shared-Freibrief und keine geaenderte Autorisierung.

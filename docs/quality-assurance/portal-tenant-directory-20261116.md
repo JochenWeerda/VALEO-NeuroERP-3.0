@@ -78,3 +78,14 @@ unveraendert. Fuer weitere Umgebungen ist dieselbe gezielte Einrichtung nach
 koordiniertem Fenster notwendig, falls die regulaere Rollenprovisionierung
 diese Leserechte noch nicht eingerichtet hat. `DATABASE_URL` kommt nur aus
 der Prozessumgebung; Direktverbindungen tragen `PGAPPNAME=agent:codex-portal-broker`.
+
+## Gesamt-CI: explizite Inventarklassifikation
+
+Der erste gemeinsame main-Lauf meldete ausschliesslich im Integritaetsjob
+eine fehlende Klassifikation von portal_handelspartner.py. Die neue Kategorie
+identity-membership beschreibt die gepruefte eigene Mitgliedschaft ueber
+Mandanten hinweg mit Quellen-/Test-/QA-Verweis. Keine falsche Einstufung als
+stateless/public/shared und keine globale Ausnahme. Drei Regressionstests
+bestaetigen Klassifikation und weiterhin rote unbekannte Adapter. Lokal alle
+neun Verbesserungspipelines bestanden, einschliesslich Tenant-Klassifikation
+und Baseline-Integritaet.
