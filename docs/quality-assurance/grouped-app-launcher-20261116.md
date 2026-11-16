@@ -46,3 +46,5 @@ Behauptung, alle Masken-/Fachketten seien damit abgenommen.
 
 Lokale Image-Aktivierung folgt im Betriebsnachlauf. Keine Datenbanken,
 Migrationen oder neuen Container fuer diese Abnahme.
+
+Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.

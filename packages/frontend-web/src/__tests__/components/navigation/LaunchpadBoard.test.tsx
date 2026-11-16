@@ -98,8 +98,8 @@ describe('LaunchpadBoard', () => {
       onSpaceIdChange={() => undefined} pageBySpace={{}} onPageBySpaceChange={() => undefined}
       presentation="launcher" /></MemoryRouter>)
 
-    expect(screen.getByRole('heading', { name: /Handel & CRM.*Meine Kunden/ })).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: /Ernte & Warenannahme.*Annahme & Waage/ })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Meine Kunden' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Annahme & Waage' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Kunden' })).toHaveAttribute('href', '/verkauf/kunden-liste')
     expect(screen.queryByRole('link', { name: 'Doppelt' })).not.toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('2 Einstiege')

@@ -21259,3 +21259,5 @@ auf dem Standardstart, bestehende operative Komposition getrennt erreichbar.
 Keine Attrappen, Rechteerweiterung, neue Datenbank oder Container.
 
 GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarter statt Dashboard. Default zeigt vorhandene Navigation als gruppierte Symbole und echte Maskenlinks mit Suche; keine operativen Dashboard-GETs. Bestehende Studio-Komposition bleibt ueber Arbeitsuebersicht oeffnen erreichbar. Overlay/Anpassung erhalten, keine Rechte-/DB-Aenderung. 32 Verhaltenstests, Such-Aliasregression, volle Typpruefung und sechs synthetische Theme-/Desktop-Browserfaelle bestanden. Lokaler Einzel-Frontendbuild folgt, basiert auf PR148 und147. QA grouped-app-launcher-20261116.md.
+
+Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.

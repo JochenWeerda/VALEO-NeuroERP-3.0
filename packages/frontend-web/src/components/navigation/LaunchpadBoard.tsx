@@ -607,7 +607,7 @@ function LauncherOverview({ spaces, query, onQueryChange, onOpenCatalog, onPerso
       <div className="grid gap-8 md:grid-cols-2 2xl:grid-cols-3">
       {groups.map(({ space, page, tiles }) => (
         <section key={`${space.id}:${page.id}`} aria-label={`${space.label}: ${page.label}`}>
-          <h2 className="text-base font-semibold text-foreground">{space.label} <span aria-hidden="true">/</span> {page.label}</h2>
+          <h2 className="text-base font-semibold text-foreground">{page.label}</h2>
           <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 md:grid-cols-3 xl:grid-cols-4">
             {tiles.map((tile) => {
               const Icon = tile.icon ?? LayoutGrid
