@@ -21224,7 +21224,7 @@ Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit cont
 M0-LOCAL-SCHEMA-ROLLOUT-20261116: lokaler Betrieb und SSO-Nachlauf nach Nutzer-Neustart abgenommen. Backend, Keycloak, Frontend healthy; finaler Previewport 18081, beide CORS-Origins 3000/3001 korrekt. Echter Chrome-Klick auf Mit SSO anmelden erreicht an beiden Ports sichtbare Keycloak-Maske, null fehlgeschlagene Anfragen, Screenshots geprueft. Keine Zugangsdaten eingegeben, daher keine persoenliche MFA-/Kennwortabnahme behauptet. Vier Konfigvertraege erneut bestanden; Budget-API bleibt unauthentifiziert401. Keine Migration/DB-/Container-Neuanlage und keine Rollenveraenderung. Quelle ddc58d254, Frontendimage 714148731111. Wartungsblocker aufgehoben; vor fremden DB-Tests weiterhin regulaeren Pruefstandstatus pruefen. Previewfix auf eigenem Ops-Zweig, main/develop unveraendert a5f60738a. QA m0-local-schema-rollout-20261116.md.
 
 
-## WORKSPACE-HOME-USABILITY-20261116 — reserviert, Codex Lead
+## WORKSPACE-HOME-USABILITY-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
 
 Nutzerbefund: Start zeigt technische Diagnosen, doppelte operative Listen und
 eine ueberladene Zusammenstellung. Ziel: ruhiger, rollenbezogener Einstieg
@@ -21242,3 +21242,5 @@ Keine DB-Schreibtests, neuen Container oder Migrationen.
 WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt zentrale Schrift-/Radius-Tokens leer, Titel dadurch 16px statt Hierarchie; Suchkuerzel von Axe als teilweise verdeckt markiert. Codex besitzt zusaetzlich src/index.css und eng betroffene Tokenvertraege fuer die konkrete zentrale Token-Selbstreferenzdiagnose. Kein individueller CSS-Bypass; Browser muss nichtleere Tokens und beide Themes nachweisen.
 
 WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bewusstem Oeffnen, kompakter Aufgabenprojektion und versteckter Anpassungssteuerung; keine neue Seitenarchitektur. CSS-Layer-Reihenfolge zentral repariert, echte berechnete Titel-/Radiuswerte und Kontrast geprueft. 67 Verhaltenstests sowie volle Frontend-Typpruefung bestanden. Sechs synthetische Browserfaelle mit produktiven Komponenten, ohne persoenliche Anmeldung/DB, bestehen. Lokales finales Frontend-Image folgt; kein Backend-/DB-Neustart. QA workspace-home-usability-20261116.md.
+
+WORKSPACE-HOME-USABILITY-20261116 lokal bereitgestellt: Quelle6ea0b08ef, Frontendimagecde458f352c8; nur bestehenden Frontend ersetzt. 67 Oberflaechen-/Fachwegtests plus 86 Themevertraege, volle Typpruefung und sechs finale Browser-/Kontrastfaelle bestanden. Beide SSO-Einstiege nach Aktivierung erneut fehlerfrei, alle drei Dienste healthy. Keine persoenliche Anmeldung, keine DB-Aenderung. PR148 nach PR147 integrieren; lokale Wartung beendet.

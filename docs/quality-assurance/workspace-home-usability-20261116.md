@@ -57,3 +57,21 @@ Komposition und zentrale Darstellung; keine angemeldete reale Fachketten-
 oder Rechte-Gesamtfreigabe. Persoenliche Konten wurden nicht verwendet.
 
 Vollstaendige Frontend-Typpruefung bestanden. Image-Aktivierung folgt im Betriebsnachlauf unten.
+
+## Lokaler Betriebsnachlauf
+
+Finale kompakte Aufgabenanordnung erneut in allen sechs Browserfaellen
+bestanden. Berechnet: Titel33px, --text-2xl=2.0625rem, --radius=0.75rem.
+Keine Kontrastverletzungen oder offenen Axe-Hinweise. Zusaetzlich
+86 bestehende Theme-Bootstrap-/Studio-Kontrasttests bestanden.
+
+Image aus Quelle6ea0b08ef gebaut und ausschliesslich bestehenden
+Frontend-Container ersetzt:
+sha256:cde458f352c8868f4e2fd1a520a3725ea99f1d3ce1ea265c850d0b3876ba87fb.
+Backend, Frontend und Keycloak healthy. Danach echte Browser-SSO-Klicks auf
+3000 und3001 erneut erfolgreich, Discovery200, sichtbare Provider-Anmeldung,
+null fehlgeschlagene Anfragen, keine Kennwoerter eingegeben. Datenbanken und
+Backend wurden nicht neu gestartet.
+
+Lokal bereitgestellt, Quellstand und Dokumentation auf GitHub. Integrations-PR148
+baut auf SSO-PR147 auf; noch keine main-/develop-Integration behauptet.
