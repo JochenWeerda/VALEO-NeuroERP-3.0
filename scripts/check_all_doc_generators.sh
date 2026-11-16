@@ -22,6 +22,9 @@ python scripts/generate_screen_registry_snapshot.py --check
 echo "== Code-Inventare"
 python scripts/generate_code_inventories.py --check
 
+echo "== RLS-Domain-Matrix (versionierte Befunde, ohne Datenbank)"
+python scripts/rls_domain_matrix.py --check
+
 echo "== Container-Inventar"
 python scripts/generate_container_inventory.py --check
 

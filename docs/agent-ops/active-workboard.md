@@ -21335,3 +21335,5 @@ MAIN-INTEGRATION Frontend-Vertraege reserviert Codex Lead: fuenf im Gesamtlauf r
 MAIN-INTEGRATION Frontend-Vertraege korrigiert: 23/23 gezielte Tests in fuenf Dateien gruen. Expliziter Arbeitsuebersichtsmodus, echte Disclosure-Klicks, nutzerverstaendliche Hinweise und vollstaendige Auth-Mocks; negative Nachweise erhalten. Keine Produktionscodeaenderung. Gemeinsamer GitHub-Nachlauf folgt nach Typpruefung.
 
 MAIN-INTEGRATION RLS-Matrix reserviert Codex: docs/admin/rls-domain-matrix.json/.md und scripts/check_all_doc_generators.sh. Gesamtsuite28388passed, ein Driftvertrag rot durch neue Portal-Service-Lesereferenzen. Matrix aus vorhandenen versionierten Befunden regenerieren (ohne --data/DB), fruehen Generatorcheck aufnehmen; keine Policy-/Ausnahmen-/Schwellenaenderung.
+
+MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) betraf einen neuen Kunden-Leserverweis/Identitaetszaehler, keine Policyaenderung. Fuenf Matrixvertraege und --check danach gruen. Frueher Meta-Generatorcheck verhindert spaete Wiederentdeckung nach Gesamtlauf. Endlauf fuer versiegelte Abdeckung erforderlich; keine Freigabe aus einem roten Lauf abgeleitet.

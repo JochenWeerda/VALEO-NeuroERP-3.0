@@ -110,3 +110,17 @@ kein Kundenkontokopf gesendet. Keine Produktions-Fallbacks fuer Testattrappen.
 Gezielte Gesamtabnahme dieser fuenf Dateien: 23/23 bestanden, kein Skip.
 Auth-, Fehler-, Filter-, Routing-, Rangfolge- und Nichtbuchungspruefungen
 bleiben erhalten. Artefakt: artifacts/main-integration-frontend-contracts.json.
+
+## Abschliessender RLS-Matrixbefund
+
+Gesamtlauf43951775776: 28388 Backendtests bestanden, 71 uebersprungen, ein
+gezielt ausgeschlossener Test; einzig test_matrix_ist_aktuell rot. Die
+RLS-Domain-Matrix fehlte genau ein neuer Kunden-Leser und dessen heuristische
+Identitaetszaehlung. Generator ohne --data und ohne Datenbank ausgefuehrt:
+keine Policy-/Ausnahmen-/Datenstands- oder Fachschemaaenderung. Alle fuenf
+Matrixvertraege danach gezielt bestanden; --check gruen.
+
+Der gemeinsame Doc-Generator-Metacheck prueft die Matrix nun vor der langen
+Gesamtsuite. Im fehlgeschlagenen Lauf entstand kein versiegelter Backend-
+Abdeckungsnachweis; deshalb wird fuer den Endstand kein vollstaendig gruener
+Gesamtnachweis aus dem fehlgeschlagenen Lauf behauptet.
