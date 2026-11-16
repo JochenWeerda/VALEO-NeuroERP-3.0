@@ -1,3 +1,4 @@
+import { launchpadIcon } from './launchpad-icons'
 import type { NavItem } from '@/app/navigation/types'
 
 type LaunchpadText = {
@@ -405,7 +406,7 @@ export function resolveLaunchpadSpaces(sections: NavItem[], lang?: string): Laun
             return
           }
           seen.add(tile.id)
-          tiles.push({ ...tile, kind: tile.kind ?? launchpadTileKind(tile.id) })
+          tiles.push({ ...tile, icon: launchpadIcon(tile.id, tile.icon), kind: tile.kind ?? launchpadTileKind(tile.id) })
         }
 
         const section = page.sectionId ? byId.get(page.sectionId) : undefined

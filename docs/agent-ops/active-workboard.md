@@ -21263,3 +21263,5 @@ GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarte
 Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.
 
 GROUPED-APP-LAUNCHER-20261116 Erweiterung vor Edit: Nutzer fordert aussagekraeftige Icons. Zentrale semantische Symbolzuordnung launchpad-icons.ts nach bestehenden Katalogidentitaeten plus zugehoeriger Vertrag; Nav-Symbole bleiben Fallback fuer unbekannte Eintraege. Keine Fachroute oder Rollenentscheidung aus dem Symbol ableiten.
+
+GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich, zentrale fachliche Symbolzuordnung nach Katalog-ID (Dokumentarten unterscheidbar). 34 Verhaltenstests, volle Typpruefung und sechs finale Browser-Kontrastfaelle bestanden. Eigenen ueberholten Build fuer Nutzerkorrekturen abgebrochen, finaler einzelner Build folgt. Keine Rechte-/DB-Aenderungen.

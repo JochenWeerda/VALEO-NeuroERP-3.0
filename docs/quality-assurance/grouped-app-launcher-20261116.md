@@ -48,3 +48,15 @@ Lokale Image-Aktivierung folgt im Betriebsnachlauf. Keine Datenbanken,
 Migrationen oder neuen Container fuer diese Abnahme.
 
 Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.
+
+## Funktionsbezogene Symbole
+
+Auf Nutzerwunsch zentrale Zuordnung nach kanonischen Katalogidentitaeten:
+Angebot/Anlage, Auftrag, Lieferung und Rechnung verwenden unterschiedliche
+Symbole; weitere fuer Waage, Lager, Labor, Kontrakte, Produktion und Finanzen.
+Vorhandene Navigationssymbole bleiben Fallback fuer neue Eintraege, erst danach
+das neutrale Raster. Keine heuristische Rollen- oder Befehlsentscheidung.
+34 Tests des zusammenhaengenden Launcher-Satzes, volle Typpruefung und sechs
+finale Theme-/Desktopansichten nach dieser Ergaenzung bestanden.
+Der erste eigene Build wurde fuer die Nutzerpraezisierungen gezielt abgebrochen;
+keine parallelen oder fremden Builds beendet. Finale Quelle folgt im Nachlauf.
