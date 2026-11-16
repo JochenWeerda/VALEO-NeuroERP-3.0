@@ -21315,3 +21315,5 @@ Abnahme: Fremdpersonen, widerrufene/abgelaufene Beziehungen, geloeschte Kunden,
 gesperrte Mandanten und falsche DB-Rolle abweisen. Bestehender einzelner signierter
 Mandantenkontext bleibt unveraendert. Token-/Kontextausstellung ist nachfolgende
 Phase; reine Auswahlliste nicht als fertigen Wechsel ausgeben. Keine neue DB/Container.
+
+PORTAL-TENANT-BROKER Erweiterung 2026-11-16: Nachweis fand fehlende Lese-ACLs fuer vorhandene valeo_system-Rolle im Pruefstand. Besitz zusaetzlich scripts/provision_portal_directory_reads.py und eigener Plantest. Enges Einrichtungsfenster nur valeo_probe: bestehende Rolle pruefen, USAGE auf drei Schemas und SELECT auf genau drei Verzeichnisquellen, keine Schreibrechte/DDL/Passwort-/Rollenanlage; vorher aktive Sessions pruefen. Entwicklungsdatenbank unveraendert.
