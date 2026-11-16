@@ -79,3 +79,24 @@ kann diese Freiwilligkeit ausschliessen.
 [EDPB](https://www.edpb.europa.eu/sme/be-compliant/process-personal-data-lawfully_en),
 [DSGVO Art. 6/7](https://eur-lex.europa.eu/legal-content/DE/ALL/?uri=celex%3A32016R0679).
 Es wurde in diesem Slice weder Profiling noch Marketingtracking eingeschaltet.
+
+## Phase 1: eigenes Handelspartnerverzeichnis
+
+`GET /api/v1/portal/handelspartner` ermittelt ausschliesslich aktive eigene
+Zuordnungen aus `domain_portal.kundenzugaenge`, verbunden mit nicht geloeschten
+Kunden desselben Mandanten und aktiven Handelsmandanten. Die Benutzerkennung
+kommt ausschliesslich aus der geprueften Identitaet. Bestehende Portalrechte
+bestimmen die beruecksichtigten Beziehungsrollen; reine interne Zuordnungen
+werden nicht als Kundenmitgliedschaft behandelt. Keine zweite Rollenliste.
+
+Die bestehende Systemverbindung ist zwingend: expliziter Cross-Tenant-Scope,
+`SET TRANSACTION READ ONLY`, exakt `valeo_system` mit BYPASSRLS ohne Superuser.
+Keine App-Verbindungs-Rueckfaelle. Mehr als 100 Handelspartner blockieren die
+Antwort statt stiller Teilmengen. Jede Sitzung wird zurueckgerollt und geschlossen.
+Die Antwort enthaelt nur ID, Namen, Zahl eigener Kundenkonten und Markierung des
+bereits signierten Mandanten. `stage=discovery_only` und
+`context_switch_available=false` kennzeichnen die Vertragsgrenze explizit.
+
+Diese Phase stellt weder Token noch Rollen aus und aendert keine Zuordnung.
+Der vertrauenswuerdige Kontextwechsel und dessen Browserabnahme bleiben die
+naechste Phase. Ohne diese Abnahme wird kein funktionierender Wechsel behauptet.

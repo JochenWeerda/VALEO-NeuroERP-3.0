@@ -21301,7 +21301,7 @@ Naechste abgegrenzte Portal-Slices (offen, keine konkurrierenden Claims):
 AGRARPORTAL-ENTRY-ISOLATION-20261116 Einstieg lokal aktiv: Frontend3b750ff68/ee27f8273cfb; alle Dienste healthy und SSO3000/3001 nach Aktivierung fehlerfrei. 33 Frontendtests, volle Typpruefung, je sechs Launcher-/Portalrahmenansichten bestanden. Keine echte Kunden-Fachketten- oder Mehrmandanten-Tokenabnahme behauptet. PR150 nach149/148/147. Folgeslices PORTAL-TENANT-BROKER, PORTAL-CUSTOMER-DOCUMENT und PORTAL-FEED-CUSTOMER-SCOPE bleiben offen; keine laufende DB-Nutzung aus diesem Slice.
 
 
-## PORTAL-TENANT-BROKER-20261116 — reserviert, Codex Lead
+## PORTAL-TENANT-BROKER-20261116 — Phase 1 lokal abgenommen, Codex Lead
 
 Phase1: eigene gueltige Handelspartner-Zuordnungen aus domain_portal.kundenzugaenge
 lesend ermitteln. Bestehende cross_tenant_scope/system_session bewusst verwenden,
@@ -21317,3 +21317,5 @@ Mandantenkontext bleibt unveraendert. Token-/Kontextausstellung ist nachfolgende
 Phase; reine Auswahlliste nicht als fertigen Wechsel ausgeben. Keine neue DB/Container.
 
 PORTAL-TENANT-BROKER Erweiterung 2026-11-16: Nachweis fand fehlende Lese-ACLs fuer vorhandene valeo_system-Rolle im Pruefstand. Besitz zusaetzlich scripts/provision_portal_directory_reads.py und eigener Plantest. Enges Einrichtungsfenster nur valeo_probe: bestehende Rolle pruefen, USAGE auf drei Schemas und SELECT auf genau drei Verzeichnisquellen, keine Schreibrechte/DDL/Passwort-/Rollenanlage; vorher aktive Sessions pruefen. Entwicklungsdatenbank unveraendert.
+
+PORTAL-TENANT-BROKER Phase1: GET /portal/handelspartner mit gepruefter Identitaet, expliziter READ-ONLY-Systemsession und Metadaten eigener aktiver Zuordnungen implementiert. 23 Tests einschliesslich echter PostgreSQL-Filter und valeo_system/READ ONLY bestanden, keine Skips. Fehlende ACLs im freien valeo_probe gezielt als USAGE/SELECT auf drei Quellen eingerichtet (vorher Rollback-Probelauf); keine Migration/Schemaaenderung/Schreibrechte. OpenAPI, Index, Inventare, Agent-Handbuch synchron; Summary/Response 100%. Token-/Kontextwechsel bleibt Phase2, kundengebundene Beleg-/Futterketten bleiben eigene Slices. Backend nicht lokal ausgerollt. QA portal-tenant-directory-20261116.md.

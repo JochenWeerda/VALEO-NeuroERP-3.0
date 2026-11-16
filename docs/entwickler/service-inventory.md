@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-15
+last_reviewed: 2026-11-16
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -270,6 +270,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `portal_interessent_service` | — |
 | `portal_lohndienst_service` | — |
 | `portal_preisspiegel_service` | — |
+| `portal_tenant_directory` | Read-only directory of the authenticated person's own portal trade partners. |
 | `pos_accounting_service` | — |
 | `pos_compat_service` | Service layer for compat POS domain routes. |
 | `pos_fiscal_document_service` | — |
