@@ -73,3 +73,38 @@ ist auf dem Ops-Zweig gespeichert; main/develop bleiben beim abgenommenen
 Anwendungsstand a5f60738a, bis der SSO-Nachlauf abgenommen ist.
 
 Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
+
+
+## Wiederaufnahme nach Docker-Neustart: SSO abgenommen
+
+Am 16.11.2026 nach dem vom Nutzer ausgefuehrten Neustart antwortet Docker
+29.9.3 wieder. Bestehendes Backend und Keycloak sind healthy. Der einzelne
+Frontend-Build aus unveraenderlicher Quelle ddc58d254 wurde abgeschlossen und
+ausschliesslich der bestehende Frontend-Container ersetzt. Image:
+sha256:714148731111e4ac69e0e7319d6de76b39fbe0b51da064f7befa3f7c8bf8a4ac.
+Alle drei Dienste sind healthy; keine weitere Migration, kein neuer Container
+oder Testpruefstand und keine Benutzer-/Rollenveraenderung.
+
+Direkte Discovery liefert fuer Origin localhost:3000 und localhost:3001 HTTP200,
+den Issuer http://localhost:18081/realms/valeo-neuro-erp sowie jeweils den
+passenden Access-Control-Allow-Origin. Vier enge Konfigurationsvertraege erneut
+bestanden; die frueheren elf schliessen sieben Produktionskonfigurationsfaelle ein.
+
+Reale Browsergegenprobe in zwei frischen Chrome-Kontexten: Loginseite laden,
+Discovery im Browser lesen, den echten Knopf Mit SSO anmelden klicken und auf
+die sichtbare Keycloak-Benutzerkennung warten. Beide Frontendports bestanden
+mit null fehlgeschlagenen Browseranfragen. Screenshots beider Login- und
+Providerseiten sowie sso-browser-proof.json liegen im ignorierten lokalen
+Betriebsartefaktverzeichnis. Beide Provider-Screenshots visuell geprueft; keine
+Zugangsdaten eingegeben oder gespeichert. Das belegt die reparierte
+Weiterleitung, nicht eine persoenliche Kennwort-/MFA-Anmeldung.
+
+Die erste Testhilfe las den Discovery-Response erst nach Navigation; Chrome
+verwarf diesen Body. Die Hilfe liest ihn nun vorher im echten Browser, ohne
+Request-Interception oder Lockerung von CORS/Issuer-Pruefungen. Beide
+anschliessenden vollstaendigen Portfaelle bestanden.
+
+Abschliessend: Backend healthz200, Login3000/3001 jeweils200, geschuetzter
+Budget-GET weiterhin401 ohne Token. Der lokale SSO-Betriebsblocker ist
+geschlossen. Die Anwendungs-/Schemaabnahme a5f60738a bleibt unveraendert; die
+Previewkorrektur liegt zur separaten Integration auf dem Ops-Zweig.

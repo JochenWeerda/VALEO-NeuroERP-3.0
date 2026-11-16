@@ -21191,7 +21191,7 @@ M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: auch tests/test_fsx003_quality_
 
 M0-CI-Fast-Fail lokal abgenommen: gesamter neuer Metatestsatz135pass, enger Satz44pass (ueberlappend). Reiner StrictDB-/Evidenz-/FSX-Wiringvertrag vor die Backend-DB-Suite verlegt, verpflichtende Abhaengigkeit, doppelte Ausfuehrung dieser beiden Dateien vermieden. Alle Produkttests/Coverage-Scope bleiben unveraendert; neuer Gesamt-CI-Lauf erforderlich. QA m0-ci-contract-fast-fail-20261115.md. Erweiterte Budget-Freigabegegenprobe echt auf249 bestanden (StrictDB43755370395).
 
-## M0-LOCAL-SCHEMA-ROLLOUT-20261116 — reserviert, Codex Lead
+## M0-LOCAL-SCHEMA-ROLLOUT-20261116 — lokal abgenommen, Codex Lead; Preview-Integration offen
 
 Ziel: abgenommenen main a5f60738a lokal bereitstellen. Besitz: bestehende
 Backend-/Frontend-Container im Projekt valeo-neuro-erp, fuenf ausschliesslich
@@ -21220,3 +21220,5 @@ Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort180
 M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist committet. Frontend-Kompilierung erfolgreich, Imageexport durch haengende Docker-Engine abgebrochen (RPC EOF). Regulärer Desktop-Neustart scheitert am Stoppen; nur verifizierte Docker-Desktop-Prozesse gezielt beendet und Docker-WSL-Wiederherstellung eingeleitet. Keine Datenloeschung. SSO-Aktivierung und reale Browserabnahme bleiben offen, keine Gesamtfreigabe. Weitere DB-Tests erst nach bestaetigter Engine-Gesundheit.
 
 Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116: lokaler Betrieb und SSO-Nachlauf nach Nutzer-Neustart abgenommen. Backend, Keycloak, Frontend healthy; finaler Previewport 18081, beide CORS-Origins 3000/3001 korrekt. Echter Chrome-Klick auf Mit SSO anmelden erreicht an beiden Ports sichtbare Keycloak-Maske, null fehlgeschlagene Anfragen, Screenshots geprueft. Keine Zugangsdaten eingegeben, daher keine persoenliche MFA-/Kennwortabnahme behauptet. Vier Konfigvertraege erneut bestanden; Budget-API bleibt unauthentifiziert401. Keine Migration/DB-/Container-Neuanlage und keine Rollenveraenderung. Quelle ddc58d254, Frontendimage 714148731111. Wartungsblocker aufgehoben; vor fremden DB-Tests weiterhin regulaeren Pruefstandstatus pruefen. Previewfix auf eigenem Ops-Zweig, main/develop unveraendert a5f60738a. QA m0-local-schema-rollout-20261116.md.
