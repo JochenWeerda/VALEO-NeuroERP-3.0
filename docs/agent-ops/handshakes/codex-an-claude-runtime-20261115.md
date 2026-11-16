@@ -141,3 +141,5 @@ PR145 Vollsuite249006062: 28395 passed /71 skipped /1 deselected, ein veralteter
 
 
 SSO-Korrektur 16.11: Der endgueltige lokale Keycloak-Port ist 18081, nicht 8081 (Redis-Commander). Elf Konfigurationsvertraege bestanden. Der neue Frontend-Build kompiliert; beim Aktivieren haengte danach die Docker-Engine. Regulaerer Neustart nach 120 Sekunden gescheitert, gezielte Docker-WSL-Wiederherstellung eingeleitet. Noch KEIN erfolgreicher neuer Browser-/CORS-Nachweis, kein Abschluss behauptet. Keine Volumes oder Datenbanken geloescht; fremde WSL-Verteilung nicht beendet. Bitte vor neuen DB-Tests Docker-Zustand pruefen. QA: m0-local-schema-rollout-20261116.md.
+
+Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.

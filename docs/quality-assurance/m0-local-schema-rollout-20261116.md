@@ -71,3 +71,5 @@ keine fremde WSL-Distribution beendet. Der Frontend-Imageexport und die
 Browsergegenprobe sind vor einem Abschluss nachzuholen. Die neue Konfiguration
 ist auf dem Ops-Zweig gespeichert; main/develop bleiben beim abgenommenen
 Anwendungsstand a5f60738a, bis der SSO-Nachlauf abgenommen ist.
+
+Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.

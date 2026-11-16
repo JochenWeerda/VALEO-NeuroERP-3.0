@@ -21218,3 +21218,5 @@ Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort180
 
 
 M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist committet. Frontend-Kompilierung erfolgreich, Imageexport durch haengende Docker-Engine abgebrochen (RPC EOF). Regulärer Desktop-Neustart scheitert am Stoppen; nur verifizierte Docker-Desktop-Prozesse gezielt beendet und Docker-WSL-Wiederherstellung eingeleitet. Keine Datenloeschung. SSO-Aktivierung und reale Browserabnahme bleiben offen, keine Gesamtfreigabe. Weitere DB-Tests erst nach bestaetigter Engine-Gesundheit.
+
+Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
