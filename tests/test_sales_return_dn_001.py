@@ -1,4 +1,4 @@
-"""SALES-RETURN-001 — Retoure anlegen → delivery_notes.status='returned' + Invoice GUTGESCHRIEBEN."""
+"""SALES-RETURN-001 — Retoure anlegen: haelt Lieferschein- und Rechnungsbezug, schreibt keinen Altspeicher."""
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -32,44 +32,21 @@ def _make_payload(dn_ref: str | None = "LS-2026-001", inv_ref: str | None = "RG-
     return p
 
 
-class TestSalesReturnBelegbruch:
+class TestSalesReturnBelegbezug:
     @pytest.mark.asyncio
-    async def test_delivery_note_wird_returned(self):
-        """Retoure mit DN-Ref → delivery_notes UPDATE ausgeführt."""
+    async def test_retoure_haelt_ihre_bezuege_und_schreibt_keinen_altspeicher(self):
+        """Lieferschein und Rechnung fuehrt DocFlow (BELEG-052): die Retoure schreibt nur sich selbst."""
         from app.api.v1.endpoints.sales_credit_notes import create_return
 
         db = MagicMock()
-
         with (
             patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_delivery"),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.documents.router_helpers.get_from_store", return_value={"status": "delivered"}),
-            patch("app.api.v1.endpoints.sales_credit_notes.save_to_store"),
             patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="RET-UUID-001"),
         ):
-            await create_return(payload=_make_payload(), tenant_id=TENANT, db=db)
+            ergebnis = await create_return(payload=_make_payload(), tenant_id=TENANT, db=db)
 
-        all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
-        dn_updates = [s for s in all_sqls if "delivery_notes" in s and "returned" in s]
-        assert len(dn_updates) > 0
-
-    @pytest.mark.asyncio
-    async def test_invoice_wird_gutgeschrieben_bei_retoure(self):
-        """Retoure mit Rechnungsreferenz → save_to_store mit GUTGESCHRIEBEN."""
-        from app.api.v1.endpoints.sales_credit_notes import create_return
-
-        db = MagicMock()
-        invoice_data = {"status": "OFFEN", "tenantId": TENANT}
-
-        with (
-            patch("app.api.v1.endpoints.sales_credit_notes.assert_customer_allowed_for_delivery"),
-            patch("app.api.v1.endpoints.sales_credit_notes.get_repository", return_value=None),
-            patch("app.documents.router_helpers.get_from_store", return_value=invoice_data),
-            patch("app.api.v1.endpoints.sales_credit_notes.save_to_store") as mock_save,
-            patch("app.api.v1.endpoints.sales_credit_notes.uuid7", return_value="RET-UUID-002"),
-        ):
-            await create_return(payload=_make_payload(dn_ref=None), tenant_id=TENANT, db=db)
-
-        assert mock_save.called
-        saved = mock_save.call_args[0][2]
-        assert saved["status"] == "GUTGESCHRIEBEN"
+        sqls = [str(c.args[0]) for c in db.execute.call_args_list]
+        assert not [s for s in sqls if "delivery_notes" in s or "sales_invoices" in s]
+        assert len([s for s in sqls if "INSERT" in s.upper()]) == 1
+        assert (ergebnis.delivery_note_reference, ergebnis.invoice_reference) == ("LS-2026-001", "RG-2026-100")
+        assert db.commit.call_count == 1

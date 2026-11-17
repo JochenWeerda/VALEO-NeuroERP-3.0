@@ -193,21 +193,8 @@ async def delete_branch(
     """Delete a branch."""
     _get_branch_or_404(db, branch_id, tenant_id)
     
-    # Check if branch is used in delivery notes
-    used = db.execute(
-        text("""
-            SELECT COUNT(*) FROM domain_sales.delivery_notes 
-            WHERE branch_id = :branch_id
-        """),
-        {"branch_id": branch_id}
-    ).scalar()
-    
-    if used and used > 0:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Cannot delete branch: it is used in {used} delivery note(s)"
-        )
-    
+    # Die Pruefung gegen den Lieferschein-Altspeicher entfaellt (BELEG-052): DocFlow-Belege tragen noch keine
+    # Niederlassung (Kopfbaustein "organisation" steht aus); es gibt dort nichts, was die Niederlassung hielte.
     db.execute(
         text("""
             DELETE FROM domain_shared.branches 

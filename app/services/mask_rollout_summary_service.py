@@ -20,7 +20,7 @@ from app.infrastructure.models import StockMovement as StockMovementModel
 
 
 # Nur diese Masken lesen Tabellen mit UUID-typisiertem Schluessel
-# (domain_einkauf.bestellungen, domain_einkauf.lieferanten). Dort bricht eine
+# (domain_einkauf.lieferanten). Dort bricht eine
 # Nicht-UUID den Vergleich in PostgreSQL ab; alle anderen fuehren Text-IDs.
 _UUID_KEYED_SCREENS = frozenset({"einkauf/supplier"})
 
@@ -384,10 +384,13 @@ class MaskRolloutSummaryService:
             rows = self.db.execute(
                 text(
                     """
-                    SELECT id, bestell_nr, status, bestelldatum, gesamtbetrag
-                    FROM domain_einkauf.bestellungen
-                    WHERE tenant_id = :tenant_id AND lieferant_id = :lieferant_id
-                    ORDER BY bestelldatum DESC NULLS LAST
+                    -- DocFlow ist der Belegspeicher (BELEG-052 S3).
+                    SELECT id, doc_number AS bestell_nr, status, document_date::date AS bestelldatum,
+                           total_net AS gesamtbetrag
+                    FROM domain_docflow.document_headers
+                    WHERE tenant_id = :tenant_id AND supplier_id = :lieferant_id
+                      AND doc_type = 'purchase_order' AND deleted_at IS NULL
+                    ORDER BY document_date DESC NULLS LAST
                     LIMIT 200
                     """
                 ),

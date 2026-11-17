@@ -80,8 +80,10 @@ async def get_sales_summary(
         deliveries = db.execute(
             text("""
                 SELECT COUNT(*)
-                FROM domain_sales.delivery_notes
-                WHERE tenant_id = :tid AND lieferdatum >= :from AND lieferdatum <= :to
+                FROM domain_docflow.document_headers
+                WHERE tenant_id = :tid AND doc_type = 'sales_delivery' AND deleted_at IS NULL
+                  AND status NOT IN ('draft', 'cancelled', 'reversed')
+                  AND document_date >= :from AND document_date <= :to
             """),
             {"tid": tenant_id, "from": period_from, "to": period_to},
         ).fetchone()

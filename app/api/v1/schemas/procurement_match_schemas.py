@@ -68,6 +68,7 @@ class InvoiceOut(BaseSchema):
     zugeordneter_auftrag: Optional[str] = None
     zugeordneter_lieferschein: Optional[str] = None
     status: Optional[str] = None
+    quelle: Optional[str] = Field(default=None, description="docflow (Eingangsrechnung) oder e-rechnung-postfach")
 
 
 class MatchHinweisOut(BaseSchema):
@@ -202,6 +203,7 @@ class MatchOut(BaseSchema):
 
     found: bool = Field(default=False, description="False, wenn die Bestellung nicht aufloesbar ist")
     detail: Optional[str] = Field(default=None, description="Begruendung im Nichttrefferfall")
+    bestellung_id: Optional[str] = Field(default=None, description="DocFlow-Belegkennung der Bestellung")
     bestellnummer: Optional[str] = None
     status: Optional[str] = None
     lieferant_id: Optional[str] = None

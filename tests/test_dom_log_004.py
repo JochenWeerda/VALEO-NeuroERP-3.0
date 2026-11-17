@@ -51,8 +51,9 @@ class TestDispositionService:
     def test_within_capacity_returns_ok(self):
         from app.services.logistics_disposition_service import check_tour_disposition
         stop = {"id": "s1", "tour_id": "t1", "stop_order": 0, "delivery_note_ref": "DN-001", "planned_arrival": None}
-        dn_row = {"total_weight_kg": 5000.0}
-        db = _mock_execute({"tour_stops": [stop], "delivery_notes": dn_row})
+        # Ladegewicht aus den Positionen des DocFlow-Lieferscheins: 50 dt = 5.000 kg, Stueck ohne Gewicht.
+        positionen = [{"quantity": 50, "unit": "dt"}, {"quantity": 3, "unit": "Stk"}]
+        db = _mock_execute({"tour_stops": [stop], "document_items": positionen})
         result = check_tour_disposition(db, "t1", "tenant1", capacity_kg=20000.0)
         assert result["result"] == "OK"
         assert result["utilization_pct"] == pytest.approx(25.0)
@@ -60,8 +61,8 @@ class TestDispositionService:
     def test_overloaded_raises(self):
         from app.services.logistics_disposition_service import check_tour_disposition, DispositionError
         stop = {"id": "s1", "tour_id": "t1", "stop_order": 0, "delivery_note_ref": "DN-001", "planned_arrival": None}
-        dn_row = {"total_weight_kg": 25000.0}
-        db = _mock_execute({"tour_stops": [stop], "delivery_notes": dn_row})
+        positionen = [{"quantity": 25, "unit": "t"}]
+        db = _mock_execute({"tour_stops": [stop], "document_items": positionen})
         with pytest.raises(DispositionError, match="überbucht"):
             check_tour_disposition(db, "t1", "tenant1", capacity_kg=20000.0)
 

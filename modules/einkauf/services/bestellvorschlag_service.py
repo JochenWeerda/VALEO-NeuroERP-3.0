@@ -890,7 +890,7 @@ def vorschlag_zu_bestellungen(
         if lieferant_id is None:
             continue  # Bestellung ohne Lieferant nicht anlegen (NOT NULL)
 
-        # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung mit
+        # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher das ORM-Modell der Altbestellung mit
         # fester Mehrwertsteuer 7 % und "Preis je 100 kg" gegen Menge in t). Die Menge steht in der Einheit des
         # Preises (z. B. dt bei Preis je 100 kg), umgerechnet ueber app/core/agrar_units.py; Steuer nur per Schluessel.
         from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit

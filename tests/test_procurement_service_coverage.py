@@ -8,10 +8,10 @@ from __future__ import annotations
 from datetime import datetime, date
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 import pytest
 
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import EntityNotFoundError
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -63,36 +63,6 @@ def _make_lieferant(**kwargs):
     obj.__table__.columns = [
         SimpleNamespace(name=k) for k in defaults
     ]
-    return obj
-
-
-def _make_bestellung(**kwargs):
-    defaults = {
-        "id": "best-001",
-        "bestellnummer": "EK-2600101",
-        "tenant_id": "tenant-test",
-        "lieferant_id": "lf-001",
-        "bestelldatum": date(2026, 1, 1),
-        "lieferdatum_wunsch": date(2026, 1, 10),
-        "lieferdatum_zugesagt": None,
-        "status": "entwurf",
-        "versand_art": "email",
-        "versandt_am": None,
-        "netto_summe": Decimal("5000.00"),
-        "mwst_betrag": Decimal("950.00"),
-        "brutto_summe": Decimal("5950.00"),
-        "unsere_referenz": None,
-        "ihre_referenz": None,
-        "freitext_kopf": None,
-        "freitext_fuss": None,
-        "notiz": None,
-        "positionen": [],
-        "lieferant": None,
-    }
-    defaults.update(kwargs)
-    obj = MagicMock()
-    for k, v in defaults.items():
-        setattr(obj, k, v)
     return obj
 
 
@@ -204,121 +174,6 @@ class TestUpdateLieferant:
         db.commit.assert_called_once()
 
 
-# ── Tests: list_bestellungen ──────────────────────────────────────────────────
-
-class TestListBestellungen:
-    def test_returns_empty(self):
-        svc = _make_svc()
-        result = svc.list_bestellungen()
-        assert result == []
-
-    def test_returns_mapped_bestellungen(self):
-        db = _make_db()
-        best = _make_bestellung()
-        db.all.return_value = [best]
-        svc = _make_svc(db)
-        result = svc.list_bestellungen()
-        assert len(result) == 1
-        assert result[0]["bestellnummer"] == "EK-2600101"
-        assert result[0]["netto_summe"] == 5000.0
-
-
-# ── Tests: get_bestellung ─────────────────────────────────────────────────────
-
-class TestGetBestellung:
-    def test_raises_not_found(self):
-        svc = _make_svc()
-        svc.db.first.return_value = None
-        with pytest.raises(EntityNotFoundError) as exc_info:
-            svc.get_bestellung("missing")
-        assert "EinkaufBestellung" in str(exc_info.value)
-
-    def test_returns_bestellung(self):
-        db = _make_db()
-        best = _make_bestellung()
-        db.first.return_value = best
-        svc = _make_svc(db)
-        result = svc.get_bestellung("best-001")
-        assert result["bestellnummer"] == "EK-2600101"
-        assert result["netto_summe"] == 5000.0
-
-
-# ── Tests: freigebe_bestellung ────────────────────────────────────────────────
-
-class TestFreegebeBestellung:
-    def test_raises_not_found(self):
-        svc = _make_svc()
-        svc.db.first.return_value = None
-        with pytest.raises(EntityNotFoundError):
-            svc.freigebe_bestellung("missing")
-
-    def test_raises_validation_for_wrong_status(self):
-        db = _make_db()
-        best = _make_bestellung(status="freigegeben")
-        db.first.return_value = best
-        svc = _make_svc(db)
-        with pytest.raises(ValidationFailedError) as exc_info:
-            svc.freigebe_bestellung("best-001")
-        assert "freigegeben" in str(exc_info.value)
-
-    def test_freigabe_sets_status(self):
-        db = _make_db()
-        best = _make_bestellung(status="entwurf", netto_summe=Decimal("0"))
-        db.first.return_value = best
-        svc = _make_svc(db)
-        result = svc.freigebe_bestellung("best-001")
-        assert best.status == "freigegeben"
-        assert result["status"] == "freigegeben"
-        db.commit.assert_called()
-
-
-# ── Tests: storniere_bestellung ───────────────────────────────────────────────
-
-class TestStorniereBestellung:
-    def test_raises_not_found(self):
-        svc = _make_svc()
-        svc.db.first.return_value = None
-        with pytest.raises(EntityNotFoundError):
-            svc.storniere_bestellung("missing")
-
-    def test_raises_for_abgeschlossen(self):
-        db = _make_db()
-        best = _make_bestellung(status="abgeschlossen")
-        db.first.return_value = best
-        svc = _make_svc(db)
-        with pytest.raises(ValidationFailedError):
-            svc.storniere_bestellung("best-001")
-
-    def test_storniert_sets_status(self):
-        db = _make_db()
-        best = _make_bestellung(status="freigegeben")
-        db.first.return_value = best
-        svc = _make_svc(db)
-        result = svc.storniere_bestellung("best-001")
-        assert best.status == "storniert"
-        assert result["status"] == "storniert"
-
-
-# ── Tests: update_bestellung ──────────────────────────────────────────────────
-
-class TestUpdateBestellung:
-    def test_raises_not_found(self):
-        svc = _make_svc()
-        svc.db.first.return_value = None
-        with pytest.raises(EntityNotFoundError):
-            svc.update_bestellung("missing", {"status": "freigegeben"})
-
-    def test_updates_allowed_fields(self):
-        db = _make_db()
-        best = _make_bestellung()
-        db.first.return_value = best
-        svc = _make_svc(db)
-        result = svc.update_bestellung("best-001", {"status": "freigegeben", "notiz": "Dringend"})
-        assert best.status == "freigegeben"
-        assert best.notiz == "Dringend"
-        db.commit.assert_called_once()
-
-
 # ── Tests: list_vorschlaege ───────────────────────────────────────────────────
 
 class TestListVorschlaege:
@@ -373,29 +228,6 @@ class TestDeleteVorschlag:
         svc.delete_vorschlag("vs-001")
         db.delete.assert_called_once_with(vs)
         db.commit.assert_called_once()
-
-
-# ── Tests: create_bestellung ──────────────────────────────────────────────────
-
-class TestCreateBestellung:
-    def test_creates_with_positionen(self):
-        db = _make_db()
-        new_best = _make_bestellung(id="best-new", bestellnummer="EK-260518120000")
-        db.refresh.side_effect = lambda obj: None
-
-        with patch("app.services.procurement_service.uuid7", return_value="best-new"), \
-             patch("app.services.procurement_service.EinkaufBestellung", return_value=new_best), \
-             patch("app.services.procurement_service.EinkaufBestellungPosition"):
-            svc = _make_svc(db)
-            result = svc.create_bestellung({
-                "lieferant_id": "lf-001",
-                "positionen": [
-                    {"artikel_nr": "100", "artikel_bezeichnung": "Weizen", "menge": 10.0, "einheit": "t"},
-                ],
-            })
-        assert result["bestellnummer"] == "EK-260518120000"
-        db.flush.assert_called()
-        db.commit.assert_called()
 
 
 # ── Tests: list_kontrakte ─────────────────────────────────────────────────────

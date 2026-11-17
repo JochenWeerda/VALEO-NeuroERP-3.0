@@ -84,13 +84,12 @@ def _build_esg_from_db_or_fallback(tenant_id: str, jahr: int, db: Session):
     from sqlalchemy import text as sql_text
     try:
         rows = db.execute(sql_text("""
-            SELECT dn.delivery_note_number, dn.delivery_date,
-                   dnp.article_id, dnp.quantity, dnp.unit
-            FROM domain_sales.delivery_notes dn
-            JOIN domain_sales.delivery_note_positions dnp ON dnp.delivery_note_id = dn.id
-            WHERE dn.tenant_id = :tid
-              AND EXTRACT(YEAR FROM dn.delivery_date) = :jahr
-              AND dn.status NOT IN ('cancelled', 'draft')
+            SELECT h.doc_number, h.document_date, i.article_number, i.quantity, i.unit
+            FROM domain_docflow.document_headers h
+            JOIN domain_docflow.document_items i ON i.header_id = h.id AND i.tenant_id = h.tenant_id
+            WHERE h.tenant_id = :tid AND h.doc_type = 'sales_delivery' AND h.deleted_at IS NULL
+              AND EXTRACT(YEAR FROM h.document_date) = :jahr
+              AND h.status NOT IN ('cancelled', 'draft', 'reversed')
             LIMIT 500
         """), {"tid": tenant_id, "jahr": jahr}).fetchall()
         has_real_data = len(rows) > 0

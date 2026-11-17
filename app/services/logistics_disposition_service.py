@@ -36,20 +36,33 @@ def _fetch_tour_stops(db: Session, tour_id: str, tenant_id: str) -> List[Dict[st
 
 
 def _fetch_delivery_weight(db: Session, delivery_note_ref: str, tenant_id: str) -> Optional[float]:
-    """Try to read total_weight_kg from domain_sales.delivery_notes by ref."""
+    """Ladegewicht des DocFlow-Lieferscheins in kg: Summe der Positionen, deren Einheit ein Gewicht ist.
+
+    Positionen in Stueck haben kein Gewicht am Beleg; hat keine Position eines, bleibt das Ergebnis ``None``
+    (nicht 0 - das waere eine Angabe).
+    """
+    from app.core.agrar_units import globaler_faktor
+
     try:
         # Eigener Savepoint: ein Lesefehler darf die Transaktion des Checks nicht abbrechen.
         with db.begin_nested():
-            row = db.execute(
+            zeilen = db.execute(
                 text(
-                    "SELECT total_weight_kg FROM domain_sales.delivery_notes "
-                    "WHERE (id = :ref OR delivery_note_number = :ref) AND tenant_id = :tid "
-                    "LIMIT 1"
+                    "SELECT i.quantity, i.unit FROM domain_docflow.document_items i "
+                    "JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id "
+                    "WHERE h.tenant_id = :tid AND h.doc_type = 'sales_delivery' AND h.deleted_at IS NULL "
+                    "AND (h.id = :ref OR h.doc_number = :ref)"
                 ),
                 {"ref": delivery_note_ref, "tid": tenant_id},
-            ).mappings().first()
-        if row and row.get("total_weight_kg") is not None:
-            return float(row["total_weight_kg"])
+            ).mappings().all()
+        gewicht, gefunden = 0.0, False
+        for zeile in zeilen:
+            faktor = globaler_faktor(str(zeile["unit"]), "kg") if zeile["unit"] else None
+            if faktor is not None and zeile["quantity"] is not None:
+                gewicht += float(zeile["quantity"]) * float(faktor)
+                gefunden = True
+        if gefunden:
+            return gewicht
     except Exception as exc:
         logger.warning("disposition: delivery note weight lookup failed for %s: %s", delivery_note_ref, exc)
     return None

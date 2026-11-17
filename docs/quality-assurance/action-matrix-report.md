@@ -5,13 +5,13 @@ type: reference
 audience: [qa, entwickler]
 owner: Claude Code
 status: aktiv
-last_reviewed: 2026-11-15
+last_reviewed: 2026-11-17
 version: 3.0.0
 ---
 
 # Action-Matrix-Report
 
-> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-15 18:12:37 UTC
+> Generiert via `scripts/generate_action_matrix_report.py` · 2026-11-17 13:43:45 UTC
 
 Die Einstufungen und Tags stammen ausschliesslich aus YAML. Sie sind keine Pruefung von Testfall,
 fachlicher Wirkung, CI-Ergebnis oder Commit-SHA. Fuer keine Aktion ist hier ein konkreter
@@ -164,4 +164,4 @@ Einzelbefunde und erforderliche Nachweise: [Matrix-Audit](action-matrix-audit-20
 
 - wms-003/004/005: QS-Freigabe und Auslagerung ohne E2E
 
-*Stand: 2026-11-15 18:12:37 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*
+*Stand: 2026-11-17 13:43:45 UTC · 38 Aktionen · Slice: SEMANTIC-ACTION-MATRIX-002*

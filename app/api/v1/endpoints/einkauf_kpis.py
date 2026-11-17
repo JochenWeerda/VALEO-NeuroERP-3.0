@@ -31,6 +31,54 @@ from app.api.v1.schemas.einkauf_kpis_schemas import EinkaufKpisOut
 
 router = APIRouter(prefix="/einkauf", tags=["einkauf", "kpi"])
 
+# Kennzahlen der Bestellung aus DocFlow, dem einzigen Belegspeicher (BELEG-052 S3).
+_BESTELLUNGEN = """
+    WITH po AS (
+        SELECT h.id, h.supplier_id, h.total_net, h.document_date::date AS bestelldatum,
+               CASE WHEN h.bausteine #>> '{lieferung,liefertermin}' ~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+                    THEN left(h.bausteine #>> '{lieferung,liefertermin}', 10)::date END AS zugesagt
+        FROM domain_docflow.document_headers h
+        WHERE h.tenant_id = :tid AND h.doc_type = 'purchase_order' AND h.deleted_at IS NULL
+          AND h.status NOT IN ('draft', 'cancelled', 'reversed')
+          AND h.document_date::date BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
+    ),
+    we AS (
+        SELECT k.from_header_id AS po_id, MIN(z.document_date::date) AS erste_lieferung
+        FROM domain_docflow.document_header_links k
+        JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id
+        WHERE k.tenant_id = :tid AND k.relation_type = 'order_to_receipt'
+          AND k.from_header_id IN (SELECT id FROM po)
+          AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')
+        GROUP BY k.from_header_id
+    )
+"""
+
+_TERMIN_SQL = _BESTELLUNGEN + """
+            SELECT COUNT(*) FILTER (WHERE we.erste_lieferung <= po.zugesagt)::FLOAT
+                       / NULLIF(COUNT(*) FILTER (WHERE po.zugesagt IS NOT NULL), 0),
+                   AVG(we.erste_lieferung - po.bestelldatum)
+            FROM po JOIN we ON we.po_id = po.id
+        """
+
+_FUELLGRAD_SQL = _BESTELLUNGEN + """
+            SELECT SUM(COALESCE(g.menge, 0))::FLOAT / NULLIF(SUM(i.quantity)::FLOAT, 0)
+            FROM po
+            JOIN domain_docflow.document_items i ON i.header_id = po.id AND i.tenant_id = :tid
+            LEFT JOIN LATERAL (
+                SELECT SUM(l.quantity_linked) AS menge
+                FROM domain_docflow.document_links l
+                JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+                WHERE l.tenant_id = :tid AND l.from_item_id = i.id AND l.relation_type = 'order_to_receipt'
+                  AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')
+            ) g ON TRUE
+        """
+
+_VOLUMEN_SQL = _BESTELLUNGEN + """
+SELECT supplier_id, SUM(total_net) AS spend FROM po
+WHERE supplier_id IS NOT NULL GROUP BY supplier_id ORDER BY spend DESC, supplier_id
+LIMIT 10000
+"""
+
 
 @router.get("/kpis", summary="Kpis abrufen",
     response_model=EinkaufKpisOut
@@ -43,7 +91,7 @@ def get_kpis(
 ) -> dict[str, Any]:
     """Einkaufs-KPIs berechnen.
 
-    Alle Teilberechnungen per try/except abgesichert — fehlende Tabellen liefern None.
+    Bestellkennzahlen aus DocFlow; nur die Preisabweichung haengt an der Rechnungspruefung.
     """
 
     date_params: dict[str, Any] = {
@@ -52,148 +100,64 @@ def get_kpis(
         "date_to": date_to or "2999-12-31",
     }
 
-    # ── On-Time Delivery Rate ──────────────────────────────────────────────
-    on_time_delivery_rate: Optional[float] = None
-    try:
-        row = db.execute(
-            text("""
-                SELECT
-                    COUNT(*) FILTER (WHERE actual_delivery_date <= promised_delivery_date)::FLOAT
-                        / NULLIF(COUNT(*), 0)
-                FROM domain_einkauf.bestellungen
-                WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-                  AND actual_delivery_date IS NOT NULL
-            """),
-            date_params,
-        ).scalar()
-        on_time_delivery_rate = float(row) if row is not None else None
-    except Exception as e:  # noqa: BLE001
-        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
+    # Quelle ist DocFlow, der einzige Belegspeicher (BELEG-052 S3). Bis 16.11.2026 fragten diese Kennzahlen
+    # domain_einkauf.bestellungen nach Spalten, die es dort nie gab (actual_delivery_date, gesamtbetrag, ...): Jede
+    # Abfrage scheiterte still und lieferte None.
 
-    # ── Fill Rate ─────────────────────────────────────────────────────────
-    fill_rate: Optional[float] = None
-    try:
-        row = db.execute(
-            text("""
-                SELECT
-                    SUM(gelieferte_menge)::FLOAT / NULLIF(SUM(bestellte_menge)::FLOAT, 0)
-                FROM domain_einkauf.bestellung_positionen bp
-                JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
-                WHERE b.tenant_id = :tid
-                  AND b.bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-            """),
-            date_params,
-        ).scalar()
-        fill_rate = float(row) if row is not None else None
-    except Exception as e:  # noqa: BLE001
-        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
+    # ── Termintreue und Wiederbeschaffungszeit (erster Wareneingang je Bestellung) ─────────
+    termin = db.execute(
+        text(_TERMIN_SQL),
+        date_params,
+    ).one()
+    on_time_delivery_rate: Optional[float] = float(termin[0]) if termin[0] is not None else None
+    avg_lead_time_days: Optional[float] = round(float(termin[1]), 2) if termin[1] is not None else None
+
+    # ── Fill Rate: in Wareneingaenge umgewandelte Menge / bestellte Menge ──────────────────
+    row = db.execute(
+        text(_FUELLGRAD_SQL),
+        date_params,
+    ).scalar()
+    fill_rate: Optional[float] = float(row) if row is not None else None
 
     # ── Price Variance ────────────────────────────────────────────────────
     price_variance: Optional[float] = None
     try:
-        row = db.execute(
-            text("""
-                SELECT AVG((invoice_amount - po_amount) / NULLIF(po_amount, 0))
-                FROM domain_einkauf.invoice_verification
-                WHERE tenant_id = :tid
-                  AND created_at BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-                  AND po_amount IS NOT NULL AND invoice_amount IS NOT NULL
-            """),
-            date_params,
-        ).scalar()
-        price_variance = float(row) if row is not None else None
-    except Exception as e:  # noqa: BLE001
-        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
-
-    # ── Avg Lead Time ─────────────────────────────────────────────────────
-    avg_lead_time_days: Optional[float] = None
-    try:
-        row = db.execute(
-            text("""
-                SELECT AVG(EXTRACT(EPOCH FROM (actual_delivery_date::TIMESTAMPTZ
-                           - bestelldatum::TIMESTAMPTZ)) / 86400)
-                FROM domain_einkauf.bestellungen
-                WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-                  AND actual_delivery_date IS NOT NULL
-            """),
-            date_params,
-        ).scalar()
-        avg_lead_time_days = round(float(row), 2) if row is not None else None
-    except Exception as e:  # noqa: BLE001
-        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
-
-    # ── Top-5 Suppliers by Spend ──────────────────────────────────────────
-    top_5_suppliers: list[dict[str, Any]] = []
-    try:
-        rows = db.execute(
-            text("""
-                SELECT lieferant_id, SUM(gesamtbetrag) AS total_spend
-                FROM domain_einkauf.bestellungen
-                WHERE tenant_id = :tid
-                  AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-                GROUP BY lieferant_id
-                ORDER BY total_spend DESC
-                LIMIT 5
-            """),
-            date_params,
-        ).fetchall()
-        top_5_suppliers = [
-            {"supplier_id": str(r[0]), "total_spend": float(r[1])} for r in rows
-        ]
-    except Exception as e:  # noqa: BLE001
-        logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
-
-    # ── ABC-Analyse ───────────────────────────────────────────────────────
-    abc_analysis: dict[str, Any] = {}
-    try:
-        rows = db.execute(
-            text("""
-                WITH supplier_spend AS (
-                    SELECT lieferant_id, SUM(gesamtbetrag) AS spend
-                    FROM domain_einkauf.bestellungen
+        with db.begin_nested():
+            row = db.execute(
+                text("""
+                    SELECT AVG((invoice_amount - po_amount) / NULLIF(po_amount, 0))
+                    FROM domain_einkauf.invoice_verification
                     WHERE tenant_id = :tid
-                      AND bestelldatum BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
-                    GROUP BY lieferant_id
-                ),
-                totals AS (SELECT SUM(spend) AS grand_total FROM supplier_spend),
-                ranked AS (
-                    SELECT lieferant_id, spend,
-                           SUM(spend) OVER (ORDER BY spend DESC) AS running_total,
-                           (SELECT grand_total FROM totals) AS grand_total
-                    FROM supplier_spend
-                ),
-                classified AS (
-                    SELECT lieferant_id, spend,
-                           CASE
-                               WHEN running_total / NULLIF(grand_total, 0) <= 0.8 THEN 'A'
-                               WHEN running_total / NULLIF(grand_total, 0) <= 0.95 THEN 'B'
-                               ELSE 'C'
-                           END AS abc_class
-                    FROM ranked
-                )
-                SELECT abc_class,
-                       COUNT(*) AS supplier_count,
-                       SUM(spend) AS class_spend,
-                       (SELECT grand_total FROM totals) AS grand_total
-                FROM classified
-                GROUP BY abc_class
-                ORDER BY abc_class
-            """),
-            date_params,
-        ).fetchall()
-
-        for r in rows:
-            cls = r[0]
-            grand = float(r[3]) if r[3] else 1.0
-            abc_analysis[cls] = {
-                "count": int(r[1]),
-                "spend": float(r[2]) if r[2] else 0.0,
-                "spend_percent": round(float(r[2]) / grand * 100, 2) if r[2] and grand else 0.0,
-            }
-    except Exception as e:  # noqa: BLE001
+                      AND created_at BETWEEN CAST(:date_from AS DATE) AND CAST(:date_to AS DATE)
+                      AND po_amount IS NOT NULL AND invoice_amount IS NOT NULL
+                """),
+                date_params,
+            ).scalar()
+        price_variance = float(row) if row is not None else None
+    except Exception as e:  # noqa: BLE001 - Savepoint zurueckgerollt; die uebrigen Kennzahlen bleiben gueltig
         logger.debug("KPI-Abfrage nicht verfügbar (Tabelle fehlt oder Schema-Fehler): %s", e)
+
+    # ── Einkaufsvolumen je Lieferant (netto): Top 5 und ABC ───────────────────────────────
+    volumen = db.execute(
+        text(_VOLUMEN_SQL),
+        date_params,
+    ).fetchmany(10000)  # je Lieferant eine Zeile, harte Obergrenze wie im SQL
+    top_5_suppliers: list[dict[str, Any]] = [
+        {"supplier_id": str(r[0]), "total_spend": float(r[1] or 0)} for r in volumen[:5]
+    ]
+    abc_analysis: dict[str, Any] = {}
+    gesamt = sum(float(r[1] or 0) for r in volumen)
+    laufend = 0.0
+    for r in volumen:
+        spend = float(r[1] or 0)
+        laufend += spend
+        anteil = laufend / gesamt if gesamt else 1.0
+        klasse = "A" if anteil <= 0.8 else "B" if anteil <= 0.95 else "C"
+        eintrag = abc_analysis.setdefault(klasse, {"count": 0, "spend": 0.0, "spend_percent": 0.0})
+        eintrag["count"] += 1
+        eintrag["spend"] += spend
+    for eintrag in abc_analysis.values():
+        eintrag["spend_percent"] = round(eintrag["spend"] / gesamt * 100, 2) if gesamt else 0.0
 
     return {
         "date_from": date_from,

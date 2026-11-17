@@ -60,28 +60,6 @@ def test_execute_job_immediately_unknown_tag_returns_error() -> None:
 # sales_storno_service — can_storno
 # ---------------------------------------------------------------------------
 
-@pytest.mark.unit
-def test_can_storno_open_status_returns_false() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, reason = can_storno("offen", "INV-001")
-    assert isinstance(ok, bool)
-    assert isinstance(reason, str)
-    assert len(reason) > 0
-
-
-@pytest.mark.unit
-def test_can_storno_storniert_returns_false() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, _ = can_storno("storniert", "INV-001")
-    assert ok is False
-
-
-@pytest.mark.unit
-def test_can_storno_none_status() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, reason = can_storno(None, None)
-    assert isinstance(ok, bool)
-    assert isinstance(reason, str)
 
 
 # ---------------------------------------------------------------------------

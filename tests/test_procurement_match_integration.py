@@ -40,6 +40,8 @@ class TestProcurementMatchIntegration:
         assert data["summary"]["drei_wege_abgeglichen"] is True
         assert data["three_way"]["geliefert_wert"] == 27700.0
         assert data["three_way"]["fakturiert_netto"] == 27700.0
+        assert [r["quelle"] for r in data["rechnungen"]] == ["docflow"]
+        assert [z["status"] for z in data["positionen"]] == ["vollstaendig", "teilgeliefert"]
 
     def test_three_way_demo_po_002_ers_preview_960(self):
         r = client.get(
@@ -50,7 +52,11 @@ class TestProcurementMatchIntegration:
         assert r.status_code == 200
         data = r.json()
         assert data["found"] is True
-        assert data["summary"]["hat_abweichung"] is True
+        # Voll geliefert, aber 22 t berechnet: die Rechnungsstufe weicht ab, nicht die Menge.
+        assert data["summary"]["hat_abweichung"] is False
+        assert data["three_way"]["status"] == "wertabweichung"
+        assert data["summary"]["drei_wege_abgeglichen"] is False
+        assert data["rechnungen"][0]["quelle"] == "e-rechnung-postfach"
         preview = data["ers_preview"]
         assert preview["berechtigt"] is True
         assert preview["betrag_netto"] == 960.0

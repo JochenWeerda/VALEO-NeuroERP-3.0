@@ -84,10 +84,14 @@ def _lookup_sales_delivery_note(db: Session, ref: str, tenant_id: str) -> Option
     row = db.execute(
         text(
             """
-            SELECT id, delivery_note_number, status, delivery_date, customer_id, sales_order_id
-            FROM domain_sales.delivery_notes
-            WHERE tenant_id = :tenant_id
-              AND (id::text = :ref OR delivery_note_number = :ref)
+            SELECT h.id, h.doc_number AS delivery_note_number, h.status, h.document_date AS delivery_date,
+                   h.customer_id,
+                   (SELECT k.from_header_id FROM domain_docflow.document_header_links k
+                     WHERE k.to_header_id = h.id AND k.tenant_id = h.tenant_id
+                       AND k.relation_type = 'order_to_delivery' ORDER BY k.created_at LIMIT 1) AS sales_order_id
+            FROM domain_docflow.document_headers h
+            WHERE h.tenant_id = :tenant_id AND h.doc_type = 'sales_delivery' AND h.deleted_at IS NULL
+              AND (h.id = :ref OR h.doc_number = :ref)
             LIMIT 1
             """
         ),
@@ -161,7 +165,7 @@ def resolve_sales_delivery_note_by_ref(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
-    """Read-only: Auflösung von ``delivery_note_ref`` gegen ``domain_sales.delivery_notes``."""
+    """Read-only: Auflösung von ``delivery_note_ref`` gegen den DocFlow-Lieferschein."""
     try:
         summary = _lookup_sales_delivery_note(db, ref, tenant_id)
         if not summary:
@@ -775,23 +779,8 @@ def save_pod(
             {"stop_id": stop_id, "tenant_id": tenant_id},
         ).mappings().first()
 
-        # Belegbruch schließen: Lieferschein-Status auf 'delivered' setzen
-        dn_ref = row.get("delivery_note_ref")
-        if dn_ref:
-            try:
-                db.execute(
-                    text("""
-                        UPDATE domain_sales.delivery_notes
-                        SET status = 'delivered', updated_at = NOW()
-                        WHERE (id = :ref OR delivery_note_number = :ref)
-                          AND tenant_id = :tid
-                          AND status NOT IN ('delivered', 'BERECHNET')
-                    """),
-                    {"ref": dn_ref, "tid": tenant_id},
-                )
-                db.commit()
-            except Exception:  # noqa: BLE001 — Lieferschein-Update nicht kritisch für POD-Erfolg
-                db.rollback()  # sonst bleibt die Sitzung in einer abgebrochenen Transaktion
+        # Der Lieferschein ist DocFlow-Beleg (BELEG-052). Sein Stand "ausgeliefert" folgt der bestaetigten Pickliste
+        # (Bestand und Beleg in einer Transaktion); der Zustellnachweis steht am Tourstopp und aendert ihn nicht.
 
         return dict(row)
     except HTTPException:

@@ -4325,7 +4325,7 @@
       "version": "1.0.0"
     },
     "einkauf/bestellung-freigabe": {
-      "definition_hash": "7bc582ad8cd26aec89975bd19ee52b531716a12390f4b6cfe42bedb93db44a3a",
+      "definition_hash": "29edc370a7eca11f0f8cb7682399655c2ac73d232ca011dfda1748dda4bbc58e",
       "gates_passed": [
         "A",
         "B",
@@ -4336,7 +4336,7 @@
       "version": "1.0.0"
     },
     "einkauf/dienstleistungen-haltung-liste": {
-      "definition_hash": "dad03e79b6e1bf505680317d8b47fcded391dab5c4929e06bfa20a4dc52a8ea6",
+      "definition_hash": "2b19508e889b5eef39f2e50f417bc7ac2a539d8e59072cf3919e07a37894a20a",
       "gates_passed": [
         "A",
         "B",
@@ -4347,7 +4347,7 @@
       "version": "1.0.0"
     },
     "einkauf/einkauf-vorgang-liste": {
-      "definition_hash": "eefb952670caa2b826bccadfcd096093cc93e06f4251b0b04c029fd604a3dbc9",
+      "definition_hash": "cbdaa77d9ea425e8fa37f688669b66bc8be36723065500abed5dccf11d253d4a",
       "gates_passed": [
         "A",
         "B",
