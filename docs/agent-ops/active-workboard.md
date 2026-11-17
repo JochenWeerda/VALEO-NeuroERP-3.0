@@ -21372,3 +21372,5 @@ unveraendert; keine technischen Gates umgangen. Separater main-Nachlauf
 bleibt auf aktuellem Mergecommit zu beobachten.
 
 RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung des vorhandenen optionalen Meta-Webhooks, WhatsAppWeb-Vorgabe erhalten), neue enge Tests und eigene QA. Keine Proplanta-/FAOSTAT-Freischaltung ohne echte Quelle, keine Runtime-Ausnahmen/Gates lockern, keine DB/Docker-Ressourcen anlegen. Gemeinsame OpenAPI/Inventare regeneriert nurLead. Keine konkurrierenden Builds/Tests.
+
+RUNTIME-FIVE-503 Praezisierung: Dockerfile-Ansatz gestoppt, weil produktives Dockerfile.backend und ausgeschlossene Dokuquellen keinen vollstaendigen Bericht erzeugen wuerden. Kein unvollstaendiges Artefakt einbauen. Agentbesitz erweitert auf .github/workflows/runtime-sweep.yml fuer echten Report aus vollem Checkout vor Appstart. Image-Artefaktversorgung bleibt getrennt offen; keine .dockerignore-/Dockerfile.backend-Aenderung ohne neuen konkreten Claim. Enger Webhooktest darf ohne DB/Container laufen.
