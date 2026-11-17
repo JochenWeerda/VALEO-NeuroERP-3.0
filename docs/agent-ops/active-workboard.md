@@ -21341,3 +21341,32 @@ MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) bet
 MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
+
+## CUSTOMER-MASTER-COMPLETENESS-20261117 — reserviert, Codex Lead
+
+Ziel: sichtbare Kunden-/Kundenkartenfelder gegen vorhandenes Feldregister und
+Nutzerreferenz Kundenstammdaten Extraktion pruefen und vollstaendige native
+Studio-Pflege mit Bank-/Zahlungs-/Steuerungsdaten wiederherstellen. Kein
+Rueckbau auf handgemachte Maske, keine pauschale Freigabe interner Daten im
+Kundenportal. Bestehende Modelle/Adapter nutzen, keine zweite Kundenquelle.
+Besitz: betroffene kanonische CRM-ScreenDefinitions, Kundenfeldprojektionen
+und deren vorhandene native Routen/Vertraege nach Inventar; eigene QA,
+Feldparitaetsmatrix und Workboard/Handshake. Referenzchat/Anhang nur fuer
+Feldnamen/Fachfunktionen, keine Echtdaten oder Originalscreens nach Git.
+Vor Aenderungen an Persistenz/Schema Dateibesitz konkret nachtragen.
+Abnahme: Bestandsfeldinventar, sichtbare/bedienbare Gruppen, echte Speicher-
+und Wiederlesevertraege, Rollen-/Mandantengrenzen, passende Browserabnahme.
+
+## RUNTIME-FIVE-503-20261117 — reserviert, Codex Lead
+
+Ziel: fuenf noch offene Runtime503 aus M0-Nachlauf konkret zuordnen und
+beheben; keine erfundenen Erfolgswerte oder gelockerten Fehler-Gates.
+Zunaechst Diagnose vorhandener Nachweise ohne DB-Aenderung; Dateibesitz
+vor jeweiliger Umsetzung konkretisieren. Keine neuen DB/Container.
+
+MAIN-INTEGRATION abgeschlossen: PR151 nach vollstaendig gruener gemeinsamer
+CI samt SonarCloud am 17.11.2026 nach main integriert. Main f9630be04,
+Inhalt identisch zum abgenommenen Head14c2f81c5. Formale Codeowner-Sperre
+mit vorhandener Nutzer-/Administratorfreigabe uebersteuert, Schutzregeln
+unveraendert; keine technischen Gates umgangen. Separater main-Nachlauf
+bleibt auf aktuellem Mergecommit zu beobachten.
