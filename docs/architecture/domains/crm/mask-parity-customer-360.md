@@ -11,6 +11,18 @@ description: Paritaetsmatrix Legacy-Kundenmaske vs. Universal Mask Generator (CR
 
 # CRM Customer 360 — Paritaetsmatrix
 
+## Aktueller Nachlauf 17.11.2026
+
+Die fruehere Tabelle beschreibt den damaligen Teilstand, keine vollstaendige
+Feldparitaet. Die Kundenakte zeigt jetzt zusaetzlich 144 Partnerkopfattribute
+in neun Abschnitten, davon 102 ueber den vorhandenen Studio-Dialog pflegbar.
+Quelle, Rollenschutz, SQL-Vertraege und verbleibende Untertabellen:
+[Feldparitaet 2026-11-17](../../../quality-assurance/customer-master-field-parity-20261117.md).
+Die JSON-Container und geschuetzte Identitaets-/Einwilligungsprozesse werden
+nicht als frei editierbare Ersatzform eingefuehrt.
+
+## Historische Wave-27-Matrix
+
 Referenz fuer Wave 27 (`UIX-CRM-PARITY-003`). Spalten: Legacy-Tab, Generator-Tab, Felder/Liste, API, Status.
 
 > **Native Runtime (UIX-028/034):** Detaillierte Legacy-vs.-Native-Matrix mit Readiness-Gates:

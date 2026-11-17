@@ -518,13 +518,6 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
                       {'key': 'telefon', 'label': 'Telefon', 'type': 'text'},
                       {'key': 'email', 'label': 'E-Mail', 'type': 'email'},
                       {'key': 'branche', 'label': 'Branche', 'type': 'text'}]},
-     {'key': 'edit',
-      'label': 'Erweiterte Pflege',
-      'kind': 'secondary',
-      'dangerLevel': 'safe',
-      'permission': 'crm.customer.update',
-      'zone': 'commit',
-      'navigationRoute': '/verkauf/kunden-stamm/{business_partner_id}?pflege=1'},
      {'key': 'create_activity',
       'requiresIdempotencyKey': True,
       'forbiddenForAgents': True,
@@ -563,6 +556,8 @@ def build_crm_customer_360_screen_definition() -> dict[str, Any]:
         edit["kind"] = "primary"
         definition.setdefault("agentContract", {}).setdefault("testSelectors", {})["primaryAction"] = "[data-testid='action-bearbeiten']"
     _partnerstamm_pflege(definition)
+    from app.core.customer_master_profile import apply_customer_master_profile
+    apply_customer_master_profile(definition)
     return definition
 
 

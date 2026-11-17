@@ -80,6 +80,9 @@ jobs:
       - name: Migrate empty database (Alembic + ORM create_all)
         run: python scripts/init_db.py
 
+      - name: Generate documentation drift report
+        run: python scripts/doc_drift_report.py
+
       - name: Start backend
         run: |
           # Bewusst die Wurzel-``main``: app.main ist die auth-freie

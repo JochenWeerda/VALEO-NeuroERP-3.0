@@ -82,3 +82,14 @@ Modelle. Vor der Studio-Listenfreigabe muessen Collection, Detail und Anlage
 auf denselben vorhandenen Fachvertrag ausgerichtet werden; die zentrale
 Listenpreset-Erweiterung allein entscheidet diese Quellfrage nicht.
 [Nachweis und Integrationsgrenzen](../../../quality-assurance/studio-list-presets-20261029.md).
+
+
+## Interne Kundenkopf-Pflege (17.11.2026)
+
+`GET /api/v1/crm/customers/{id}/master-profile` erweitert die bestehende
+Kundenprojektion um typisierte partner_*-Attribute des eigenen Partners und
+seine erwartete Version. Interne Fachrollen erforderlich; kein Portal-Leseweg.
+`POST .../master-profile/actions/bearbeiten` nutzt SCHREIBEN[CRM], die bestehende
+MaskActionRuntime, serverseitigen Urheber, Versionsvergleich, Idempotenz und
+atomaren Audit-/Outbox-Commit. Keine neue Tabelle, kein Servicecontainer.
+[Grenzen und SQL-Nachweise](../../../quality-assurance/customer-master-field-parity-20261117.md).

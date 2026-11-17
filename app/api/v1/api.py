@@ -1970,6 +1970,8 @@ api_router.include_router(crm_listen_kommandos.router)
 from app.api.v1.endpoints import kunden_stamm_pflege  # noqa: E402
 
 api_router.include_router(kunden_stamm_pflege.router)
+from app.api.v1.endpoints import customer_master_profile  # noqa: E402
+api_router.include_router(customer_master_profile.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
