@@ -21076,21 +21076,21 @@ eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
 
-## BELEG-052-LS-SCHREIBER-S1-20261115 — zur Abnahme, Claude Code (M1)
+## BELEG-052-LS-SCHREIBER-S1-20261115 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3 nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: niemand schreibt mehr in den Lieferschein-Altspeicher domain_sales.delivery_notes. Entfernt: alter Lieferschein-Storno (Router sales_storno, sales_storno_service, Frontend-Client lib/api/sales-storno.ts, UAT-Skript sales_o2c_lifecycle_uat.py) - kein Aufrufer in den Masken, DocFlow storniert selbst. Pickliste, Retoure und Zustellnachweis schreiben den Altspeicher nicht mehr fort. Neue Ratsche tests/test_altspeicher_schreiber_ratsche.py (Schreiber in Alt-Belegspeicher: nur noch einkauf_compat_service -> domain_einkauf.bestellungen).
 Dateibesitz: die genannten Module, app/services/warehouse_service.py (alter Zweig), app/api/v1/endpoints/sales_credit_notes.py, logistics_tours.py (Zustellnachweis), zugehoerige Tests und Projektionen. Keine neue .py ausserhalb tests/.
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offener Fachrest: Der Zustellnachweis am Tourstopp aendert den Lieferschein-Stand nicht mehr (frueher: Altspeicher auf delivered). Ob der Nachweis den DocFlow-Lieferschein abschliessen soll, gehoert zur Referenzkette Tour/Kommissionierung (M4).
 
-## BELEG-052-LS-LESER-S2-20261115 — zur Abnahme, Claude Code (M1)
+## BELEG-052-LS-LESER-S2-20261115 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Leser des Lieferschein-Altspeichers mehr. Belegkette (o2c_chain_service), Positionsabgleich (sales_match_service), Abrechnungsstand (sales_credit_service), letzter Kundenpreis (articles), Tour-Aufloesung und Ladegewicht (logistics_tours, logistics_disposition_service), Verkaufsbericht, ESG-Datenquelle und Pickliste (warehouse_service) lesen DocFlow und seine Belegverknuepfungen. DocFlow laedt nichts mehr aus dem Altspeicher nach. Fachlicher Befund: Der Altspeicher war leer, diese Stellen sahen bis dahin keinen DocFlow-Lieferschein (jeder Auftrag "ohne Lieferschein und Rechnung"); der Positionsabgleich rechnet jetzt mit der je Position umgewandelten Menge statt ueber die Artikelnummer.
 Dateibesitz: die genannten Module, tests/test_o2c_kette_docflow.py (neu), tests/test_altspeicher_schreiber_ratsche.py (Leser-Ratsche), angepasste Tests, Projektionen.
 Abnahme: neue Tests gegen echtes Schema (Kette, Teil-Lieferung, Storno, fremder Mandant) gruen; vollstaendige Pruefkette; CI des PR. Ratsche Uebergangssicht der Auftraege 18 -> 16 Leser.
 Offene Fachreste: (1) Niederlassung am Beleg fehlt (Kopfbaustein organisation) - die Loeschpruefung der Niederlassung gegen Lieferscheine ist deshalb entfallen. (2) Ladegewicht nur aus Positionen mit Gewichtseinheit. (3) ESG-Bericht nutzt die Lieferscheine weiter nur als Kennzeichen "echte Daten vorhanden".
 
-## BELEG-052-BESTELL-LESER-S3-20261116 — zur Abnahme, Claude Code (M1)
+## BELEG-052-BESTELL-LESER-S3-20261116 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Schreiber und kein Leser des Bestell-Altspeichers domain_einkauf.bestellungen/bestellung_positionen mehr. Entfernt (ohne Aufrufer): toter Wareneingang im Compat-Dienst (letzter Schreiber, inkl. Fortschreibung der Liefermengen), ORM-Bestellverwaltung in procurement_service (Liste/Anlage/Aenderung/Freigabe/Obligo/Storno/Versand, Direktlieferung aus Auftrag, Innovations-Nachschau), Lese-Routen GET /einkauf/bestellungen und /{id} (Nutzerentscheidung 10.11.), GET /einkauf/innovationen, Compat-Anlage und Kommunikations-Schreibwege. Auf DocFlow umgestellt: Beschaffungsabgleich/3-Wege-Match (geliefert = je Position umgewandelte Menge, Rechnung aus DocFlow vor E-Rechnungs-Postfach), Compat-Bestellliste, Artikelkontext (offene Bestellmenge, Einkaufspreise), Einkaufs-KPIs, ORDRSP-Positionsabgleich, Rechnungspruefung (Betraege), Lieferanten-Reiter Bestellungen, Portal-Liste veroeffentlichter Bestellungen. Ratsche: kein Leser, kein Schreiber, ORM-Altmodell nur noch im Fax/EDI-Versand; Muster mit Selbsttest.
 Fachlicher Befund: Einkaufs-KPIs und Rechnungspruefung fragten Spalten ab, die es nie gab (actual_delivery_date, gesamtbetrag) und lieferten still None/OFFEN.
@@ -21098,7 +21098,7 @@ Dateibesitz: die genannten Module, tests/procurement_identity_fixture.py (Belege
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offene Fachreste: (1) Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie) - ERS greift nur bei Rechnungsueberzahlung. (2) Bestellfall (Innovation/Direktlieferung) hat in DocFlow keinen Baustein mit Feldern; Innovations-Nachschau und Direktlieferung aus dem Auftrag entfallen bis dahin. (3) Fax-/EDI-Versand (modules/einkauf/services/versand_service.py) haengt am ORM-Altobjekt und hat keinen Aufrufer mehr - auf die DocFlow-Bestellung umhaengen. (4) Lieferanten-Artikelnummer je Position (Baustein einkauf) ohne Felder; ORDRSP gleicht ueber metadata.lieferanten_artnr ab. (5) Die Obligo-Buchung (5100) gab es nur an der Freigabe der Altbestellung (ohne Aufrufer seit 3b); die DocFlow-Freigabe bucht kein Obligo - fachlich klaeren (Obligo ist ausserbilanziell, eher Auswertung als Journal). (6) S4-Ratsche Uebergangssicht Auftraege 16 -> 15 Leser (Direktlieferung entfallen).
 
-## BELEG-052-FACHRESTE-20261117 — in Arbeit, Claude Code (M1)
+## BELEG-052-FACHRESTE-20261117 — zur Abnahme, Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S1-S3 (PR #152). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: die offenen Fachreste aus 3B, S1, S2 und S3 loesen (Entscheidungen nach "was nicht einfach laeuft, laeuft einfach nicht"):
 (1) Ueberlieferung: Der Wareneingang aus der Bestellung nimmt mehr als die Restmenge auf (22 t auf 20 t); Abgleich zeigt "ueberliefert", ERS schreibt die Mehrmenge gut. Alle anderen Folgebelege bleiben begrenzt.
