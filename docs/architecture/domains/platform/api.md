@@ -172,3 +172,11 @@ bestehender Review-/Plan-/Simulations-/Vier-Augen-Freigabeweg.
 ## Verladung: explizite Mandantenbindung (2026-10-23)
 
 Die bestehenden `/api/v1/tours`-Wege verwenden den verifizierten Mandantenkontext fuer alle Tour- und Unterobjektrepositories. Loading-Start/-Ende und Dispatch verwenden den verifizierten Urheber; Status, Tourlog und Loading-Outbox werden gemeinsam bestaetigt. Schema-/Abnahmenachweis: [Verladung Mandant/Atomaritaet](../../../quality-assurance/loading-tenant-atomic-20261023.md). Keine neuen Endpoints oder Container.
+
+## Agrarportal: Handelspartnerverzeichnis
+
+`GET /api/v1/portal/handelspartner` liest nur Metadaten eigener aktiver
+Kundenzuordnungen anhand der geprueften Anmeldung. Kein freier Subject-/Tenant-
+Parameter, kein Tokenwechsel und keine Rollenerweiterung. Die explizit
+schreibgeschuetzte Systemsession ist zwingend. Fehlerhafte Konfiguration sperrt
+den Weg mit 503. [Vertrag und Folgephase](../../agrarportal-tenant-selection-20261116.md).

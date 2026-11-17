@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Truck } from 'lucide-react'
 import { MemoryRouter } from '@/app/routing/test-router'
@@ -11,6 +11,9 @@ import type { NavItem } from '@/app/navigation/types'
 import { LAUNCHPAD_OVERLAY_STORAGE_KEY } from '@/app/navigation/launchpad-personalization'
 import i18n from '@/i18n/config'
 import StartDashboardPage from '@/pages/start-dashboard'
+import type { User } from '@/lib/auth'
+
+const portalPreviewSession = vi.hoisted(() => ({ user: null as User | null }))
 
 const analyticsGetMock = vi.hoisted(() => vi.fn())
 const useNavSectionsMock = vi.hoisted(() => vi.fn())
@@ -24,7 +27,7 @@ vi.mock('@/hooks/useFeature', () => ({
 }))
 
 vi.mock('@/hooks/useAuth', () => ({
-  useAuth: () => ({ user: null }),
+  useAuth: () => ({ user: portalPreviewSession.user }),
 }))
 
 vi.mock('@/workspace/home-signals', async (importOriginal) => {
@@ -73,7 +76,7 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-function renderPage(): void {
+function renderPage(openOverview = true): void {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -89,6 +92,7 @@ function renderPage(): void {
       </QueryClientProvider>
     </MemoryRouter>,
   )
+  if (openOverview) fireEvent.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
 }
 
 function mockInboxQueue(options?: { documentKind?: string; canOpen?: boolean }): void {
@@ -217,6 +221,7 @@ function mockAnnahmeNav(): void {
 
 describe('StartDashboardPage', () => {
   beforeEach(() => {
+    portalPreviewSession.user = null
     vi.stubGlobal('EventSource', SilentEventSource)
     window.localStorage.clear()
     window.sessionStorage.clear()
@@ -228,15 +233,39 @@ describe('StartDashboardPage', () => {
     vi.unstubAllGlobals()
   })
 
+  it('offers staff a clearly named customer inspection entry without granting it to ordinary users', async () => {
+    mockAnnahmeNav()
+    portalPreviewSession.user = { sub: 'synthetic-staff', name: 'Test', email: '', roles: ['SALES_LESEN'], scopes: [], exp: 9999999999 }
+    renderPage(false)
+    expect(await screen.findByRole('link', { name: 'Kundenansicht prüfen' })).toHaveAttribute('href', '/portal?preview=customer')
+  })
+
+  it('starts with grouped app launchers and makes no dashboard reads before opening the overview', async () => {
+    mockAnnahmeNav()
+    renderPage(false)
+    expect(await screen.findByRole('heading', { name: 'Anwendungen', level: 1 })).toBeInTheDocument()
+    expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Kundenansicht prüfen' })).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-work-items')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-composition-host')).not.toBeInTheDocument()
+    expect(analyticsGetMock).not.toHaveBeenCalled()
+    expect(screen.getByRole('link', { name: 'Warteschlange' })).toHaveAttribute('href', '/annahme/warteschlange')
+    await userEvent.click(screen.getByRole('button', { name: 'Arbeitsübersicht öffnen' }))
+    expect(await screen.findByTestId('workspace-work-items')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Zurück zu den Anwendungen' }))
+    expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-work-items')).not.toBeInTheDocument()
+  })
+
   it('zeigt Adaptive Workspace auf der Startseite ohne Flow-Spine-Kacheln', async () => {
     mockAnnahmeNav()
     renderPage()
 
-    expect(await screen.findByRole('heading', { name: 'Start', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText(/Wo bin ich, was kann ich tun, was ist wichtig/i)).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Mein Arbeitsplatz', level: 1 })).toBeInTheDocument()
+    expect(screen.getByText(/Ihre Aufgaben und Anwendungen auf einen Blick/i)).toBeInTheDocument()
     expect(screen.getByTestId('adaptive-workspace-layer')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-work-items')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Handlungsbedarf', level: 2 })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Für Sie priorisiert', level: 2 })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'App-Katalog öffnen' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Oberfläche fixieren' })).toHaveClass('h-11')
     expect(screen.getByRole('button', { name: 'App-Katalog öffnen' })).toHaveClass('h-11')
@@ -254,6 +283,9 @@ describe('StartDashboardPage', () => {
     expect(screen.queryByText('Auftrag bis Zahlung')).not.toBeInTheDocument()
     expect(screen.queryByText(/logistics:read/i)).not.toBeInTheDocument()
     expect(screen.getByLabelText('Rollen-Cockpit')).toBeInTheDocument()
+    expect(screen.queryByTestId('adaptive-workspace-inbox')).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Dispo-Tafel' }))
     expect(screen.getByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-composition-host')).toHaveAttribute(
       'data-host-variant',
@@ -272,7 +304,7 @@ describe('StartDashboardPage', () => {
       '/disposition/touren-disposition',
     )
     expect(screen.getByTestId('disposition-board')).toBeInTheDocument()
-    expect(await screen.findByText('keine Kette')).toBeInTheDocument()
+    expect(await screen.findByText('Keine offenen Agrarvorgänge.')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-agrar-chain')).toHaveAttribute('data-chain-status', 'empty')
     expect(
       analyticsGetMock.mock.calls.some((call) => String(call[0]) === '/api/v1/kontrakte'),
@@ -286,6 +318,7 @@ describe('StartDashboardPage', () => {
     mockInboxQueue()
     renderPage()
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('inbox-row-INBOX-9')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Zur Belegmaske INBOX-9' })).not.toBeInTheDocument()
     expect(screen.getByTestId('inbox-open-reason-INBOX-9')).toHaveTextContent(
@@ -299,6 +332,7 @@ describe('StartDashboardPage', () => {
     mockInboxQueue({ documentKind: 'EINGANGSRECHNUNG', canOpen: true })
     renderPage()
 
+    await userEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('inbox-row-INBOX-9')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Zur Belegmaske INBOX-9' })).toHaveAttribute(
       'href',

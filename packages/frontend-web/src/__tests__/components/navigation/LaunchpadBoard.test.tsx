@@ -85,6 +85,45 @@ describe('LaunchpadBoard', () => {
     window.sessionStorage.removeItem(LAUNCHPAD_OVERLAY_STORAGE_KEY)
   })
 
+  it('zeigt gruppierte Starter, filtert Stichworte und Gruppen und entfernt doppelte Routen', async () => {
+    const user = userEvent.setup()
+    const duplicateCatalog: LaunchpadSpace[] = [
+      { ...catalog[0], pages: [{ ...catalog[0].pages[0], tiles: [
+        { ...catalog[0].pages[0].tiles[0], keywords: ['Adressbuch'] },
+        { id: 'duplicate', label: 'Doppelt', path: '/verkauf/kunden-liste' },
+      ] }] },
+      catalog[1],
+    ]
+    render(<MemoryRouter><LaunchpadBoard catalogSpaces={duplicateCatalog} spaceId="handel"
+      onSpaceIdChange={() => undefined} pageBySpace={{}} onPageBySpaceChange={() => undefined}
+      presentation="launcher" /></MemoryRouter>)
+
+    expect(screen.getByRole('heading', { name: 'Meine Kunden' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Annahme & Waage' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Kunden' })).toHaveAttribute('href', '/verkauf/kunden-liste')
+    expect(screen.queryByRole('link', { name: 'Doppelt' })).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('2 Einstiege')
+    const search = screen.getByLabelText('Apps und Masken suchen')
+    await user.type(search, 'Adressbuch')
+    expect(screen.getByRole('link', { name: 'Kunden' })).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Annahme' })).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent('1 Einstieg')
+    await user.clear(search)
+    await user.type(search, 'Doppelt')
+    expect(screen.getByRole('link', { name: 'Doppelt' })).toHaveAttribute('href', '/verkauf/kunden-liste')
+    await user.clear(search)
+    await user.type(search, 'Ernte')
+    expect(screen.getByRole('link', { name: 'Annahme' })).toBeInTheDocument()
+    await user.clear(search)
+    await user.type(search, 'unbekannt')
+    expect(screen.getByText('Keine passenden Apps oder Masken gefunden.')).toBeInTheDocument()
+    await user.clear(search)
+    await user.click(screen.getByRole('button', { name: 'Startseite anpassen' }))
+    expect(screen.getByRole('tab', { name: 'Handel & CRM' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Fertig' }))
+    expect(screen.getByTestId('launchpad-overview')).toBeInTheDocument()
+  })
+
   it('zeigt Meine Kunden mit drei Einstiegen und Task-Kacheln', () => {
     renderBoard()
     expect(screen.getByRole('link', { name: 'Kunden' })).toHaveAttribute('href', '/verkauf/kunden-liste')

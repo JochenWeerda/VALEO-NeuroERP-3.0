@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { AxiosError } from 'axios'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -16,8 +16,8 @@ import {
 import {
   AGRAR_CHAIN_PATH,
   AGRAR_CONTRACTS_PATH,
-  APPROVAL_QUEUE_PATH,
   AdaptiveWorkspaceLayer,
+  APPROVAL_QUEUE_PATH,
   OPEN_KONTRAKTE_PATH,
 } from '@/workspace'
 
@@ -149,13 +149,14 @@ function renderLayer(): ReturnType<typeof render> {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(
+  const view = render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <AdaptiveWorkspaceLayer />
+        <AdaptiveWorkspaceLayer mode="workspace" />
       </QueryClientProvider>
     </MemoryRouter>,
   )
+  return view
 }
 
 function pinInbox(): void {
@@ -215,6 +216,7 @@ describe('Inbox in der Rangliste', () => {
     })
 
     renderLayer()
+    fireEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
 
     const work = await screen.findByTestId('workspace-work-items')
     await waitFor(() => {
@@ -224,7 +226,7 @@ describe('Inbox in der Rangliste', () => {
 
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
 
     const invoice = within(work).getByRole('link', { name: 'Rechnungseingang erfassen' }).closest('li')
     expect(invoice).toHaveAttribute('data-fachaktion-id', 'inbox.queue.INBOX-9')
@@ -232,10 +234,8 @@ describe('Inbox in der Rangliste', () => {
       'href',
       '/belege/purchase_invoice/neu?inbox=INBOX-9',
     )
-    expect(invoice).toHaveTextContent('layer:situational')
-    expect(invoice).toHaveTextContent('signal:open-task')
-    expect(invoice).toHaveTextContent('severity:3')
-    expect(invoice).not.toHaveTextContent('pinned')
+    expect(invoice).toHaveTextContent('Für Ihren aktuellen Arbeitsbereich empfohlen')
+    expect(invoice).not.toHaveTextContent('Angehefteter Einstieg')
     expect(invoice).not.toHaveTextContent('vorbereiten')
 
     expect(within(work).getByRole('link', { name: 'K-2: Waage' })).toHaveAttribute('href', '/waage/wiegungen')
@@ -261,6 +261,7 @@ describe('Inbox in der Rangliste', () => {
     })
 
     const empty = renderLayer()
+    fireEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByText('Kein Eingang in der Queue.')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-work-items').querySelector('[data-fachaktion-id^="inbox.queue."]')).toBeNull()
     empty.unmount()
@@ -277,6 +278,7 @@ describe('Inbox in der Rangliste', () => {
     })
 
     renderLayer()
+    fireEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
     await waitFor(() => {
       expect(screen.getByTestId('adaptive-workspace-inbox')).toHaveTextContent(/401|Unauthorized|request failed/i)
     })
@@ -331,13 +333,13 @@ describe('Inbox in der Rangliste', () => {
     const work = await screen.findByTestId('workspace-work-items')
     await waitFor(() => {
       const approval = within(work).getByRole('link', { name: 'Rechnungen auf meine Freigabe' }).closest('li')
-      expect(approval).toHaveTextContent('count:3')
+      expect(approval).toHaveTextContent('Für Ihren aktuellen Arbeitsbereich empfohlen')
       expect(within(work).getByRole('link', { name: 'K-2: Waage' })).toBeInTheDocument()
     })
 
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
     expect(items[0]).not.toHaveTextContent('count:')
     expect(work.querySelector('[data-fachaktion-id^="inbox.queue."]')).toBeNull()
     expect(within(work).queryByRole('link', { name: 'Rechnungseingang erfassen' })).not.toBeInTheDocument()

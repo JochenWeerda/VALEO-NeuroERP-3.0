@@ -21009,7 +21009,7 @@ Ziel: Einkaufszugaenge auf DocFlow. Frontend (Dashboard, Anlieferavis, KI-Freiga
 Dateibesitz: app/services/docflow_lagerzugang.py, zugehoerige Endpunkte/Kommandos, tests/test_einkauf_lesewege_docflow.py, genannte Frontend-Seiten, Projektionen.
 Abnahme: gestaffelter Testsatz auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 
-## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — zur Abnahme, Claude Code (M1)
+## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — abgeschlossen (PR #146 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 3a. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: Einkaufs-Altwege entfernt, DocFlow fuehrt die Bestellung. Entfernt: Schreibrouten /purchase-orders (Compat), Eingangslieferschein-Wege, einkauf_bestellung_kommandos, purchase_order_service, command_handlers/procurement, MCP einkauf.bestellung.speichern/versenden, ScreenDefinitions einkauf/purchase-order und finance/ap-invoice. Neu: Angebot/Anfrage legen DocFlow-Entwuerfe an; GET /belege/{art}/kennzahlen speist die Cockpits. Keine neue .py ausserhalb tests/.
 Dateibesitz: die genannten entfernten Module und Masken, app/core/screen_definitions_cockpit.py (Einkauf-Cockpit), config/adaptive_workspace_fachaktionen.yaml (Eingangsrechnung zeigt auf die Belegliste), scripts/agent_handbuch_sources.py, zugehoerige Tests und Projektionen.
@@ -21076,24 +21076,297 @@ eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
 
-## BELEG-052-LS-SCHREIBER-S1-20261115 — in Arbeit, Claude Code (M1)
-Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+## BELEG-052-LS-SCHREIBER-S1-20261115 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3 nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: niemand schreibt mehr in den Lieferschein-Altspeicher domain_sales.delivery_notes. Entfernt: alter Lieferschein-Storno (Router sales_storno, sales_storno_service, Frontend-Client lib/api/sales-storno.ts, UAT-Skript sales_o2c_lifecycle_uat.py) - kein Aufrufer in den Masken, DocFlow storniert selbst. Pickliste, Retoure und Zustellnachweis schreiben den Altspeicher nicht mehr fort. Neue Ratsche tests/test_altspeicher_schreiber_ratsche.py (Schreiber in Alt-Belegspeicher: nur noch einkauf_compat_service -> domain_einkauf.bestellungen).
 Dateibesitz: die genannten Module, app/services/warehouse_service.py (alter Zweig), app/api/v1/endpoints/sales_credit_notes.py, logistics_tours.py (Zustellnachweis), zugehoerige Tests und Projektionen. Keine neue .py ausserhalb tests/.
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offener Fachrest: Der Zustellnachweis am Tourstopp aendert den Lieferschein-Stand nicht mehr (frueher: Altspeicher auf delivered). Ob der Nachweis den DocFlow-Lieferschein abschliessen soll, gehoert zur Referenzkette Tour/Kommissionierung (M4).
 
-## BELEG-052-LS-LESER-S2-20261115 — in Arbeit, Claude Code (M1)
-Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S1. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+## BELEG-052-LS-LESER-S2-20261115 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Leser des Lieferschein-Altspeichers mehr. Belegkette (o2c_chain_service), Positionsabgleich (sales_match_service), Abrechnungsstand (sales_credit_service), letzter Kundenpreis (articles), Tour-Aufloesung und Ladegewicht (logistics_tours, logistics_disposition_service), Verkaufsbericht, ESG-Datenquelle und Pickliste (warehouse_service) lesen DocFlow und seine Belegverknuepfungen. DocFlow laedt nichts mehr aus dem Altspeicher nach. Fachlicher Befund: Der Altspeicher war leer, diese Stellen sahen bis dahin keinen DocFlow-Lieferschein (jeder Auftrag "ohne Lieferschein und Rechnung"); der Positionsabgleich rechnet jetzt mit der je Position umgewandelten Menge statt ueber die Artikelnummer.
 Dateibesitz: die genannten Module, tests/test_o2c_kette_docflow.py (neu), tests/test_altspeicher_schreiber_ratsche.py (Leser-Ratsche), angepasste Tests, Projektionen.
 Abnahme: neue Tests gegen echtes Schema (Kette, Teil-Lieferung, Storno, fremder Mandant) gruen; vollstaendige Pruefkette; CI des PR. Ratsche Uebergangssicht der Auftraege 18 -> 16 Leser.
 Offene Fachreste: (1) Niederlassung am Beleg fehlt (Kopfbaustein organisation) - die Loeschpruefung der Niederlassung gegen Lieferscheine ist deshalb entfallen. (2) Ladegewicht nur aus Positionen mit Gewichtseinheit. (3) ESG-Bericht nutzt die Lieferscheine weiter nur als Kennzeichen "echte Daten vorhanden".
 
-## BELEG-052-BESTELL-LESER-S3-20261116 — in Arbeit, Claude Code (M1)
-Owner: Claude Code. Stand: in Arbeit; PR zusammen mit S1/S2 nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+## BELEG-052-BESTELL-LESER-S3-20261116 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Schreiber und kein Leser des Bestell-Altspeichers domain_einkauf.bestellungen/bestellung_positionen mehr. Entfernt (ohne Aufrufer): toter Wareneingang im Compat-Dienst (letzter Schreiber, inkl. Fortschreibung der Liefermengen), ORM-Bestellverwaltung in procurement_service (Liste/Anlage/Aenderung/Freigabe/Obligo/Storno/Versand, Direktlieferung aus Auftrag, Innovations-Nachschau), Lese-Routen GET /einkauf/bestellungen und /{id} (Nutzerentscheidung 10.11.), GET /einkauf/innovationen, Compat-Anlage und Kommunikations-Schreibwege. Auf DocFlow umgestellt: Beschaffungsabgleich/3-Wege-Match (geliefert = je Position umgewandelte Menge, Rechnung aus DocFlow vor E-Rechnungs-Postfach), Compat-Bestellliste, Artikelkontext (offene Bestellmenge, Einkaufspreise), Einkaufs-KPIs, ORDRSP-Positionsabgleich, Rechnungspruefung (Betraege), Lieferanten-Reiter Bestellungen, Portal-Liste veroeffentlichter Bestellungen. Ratsche: kein Leser, kein Schreiber, ORM-Altmodell nur noch im Fax/EDI-Versand; Muster mit Selbsttest.
 Fachlicher Befund: Einkaufs-KPIs und Rechnungspruefung fragten Spalten ab, die es nie gab (actual_delivery_date, gesamtbetrag) und lieferten still None/OFFEN.
 Dateibesitz: die genannten Module, tests/procurement_identity_fixture.py (Belege per DocFlow-Kommando), angepasste/entfernte Tests, Projektionen und Baselines.
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offene Fachreste: (1) Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie) - ERS greift nur bei Rechnungsueberzahlung. (2) Bestellfall (Innovation/Direktlieferung) hat in DocFlow keinen Baustein mit Feldern; Innovations-Nachschau und Direktlieferung aus dem Auftrag entfallen bis dahin. (3) Fax-/EDI-Versand (modules/einkauf/services/versand_service.py) haengt am ORM-Altobjekt und hat keinen Aufrufer mehr - auf die DocFlow-Bestellung umhaengen. (4) Lieferanten-Artikelnummer je Position (Baustein einkauf) ohne Felder; ORDRSP gleicht ueber metadata.lieferanten_artnr ab. (5) Die Obligo-Buchung (5100) gab es nur an der Freigabe der Altbestellung (ohne Aufrufer seit 3b); die DocFlow-Freigabe bucht kein Obligo - fachlich klaeren (Obligo ist ausserbilanziell, eher Auswertung als Journal). (6) S4-Ratsche Uebergangssicht Auftraege 16 -> 15 Leser (Direktlieferung entfallen).
+
+## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
+
+Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften
+Mandantenkontext in allen zehn Lese-/Schreibwegen durchsetzen. Aktuell optionaler
+Querymandant bei Listen, payloadmandant bei Anlage und ungefilterte Einzelwege.
+Dateibesitz app/api/v1/endpoints/rohware_schema.py, neuer enger Test
+ tests/test_rohware_schema_tenant_contract.py, eigene QA; Lead besitzt Doku/Integration.
+Keine Tabelle erfinden, keine Migration/DDL/DB/Docker, kein neuer Sicherheitskern;
+bestehende Rollen und get_tenant_id nutzen. Existierende Fachregeln und berechnete
+Werte erhalten; Fremdbeleg/-zeile wie nicht vorhanden, Payload kann Mandant nicht
+ueberschreiben. Guards vor Lesen/Mutation, keine DB-Details in Antworten. Gegenproben
+mit zwei isolierten Kontexten, verweigerten Mutationen und erhaltenem Zustand;
+wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte RLS-Abnahme behaupten.
+Die fehlenden Tabellen bleiben separat ein schemafachlicher 503-Blocker.
+PR137 bleibt waehrend seiner Abnahme unveraendert auf8c6d20b2d.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung: Codex Lead besitzt zusaetzlich die
+Istwert-Fehlerbehandlung in app/api/v1/endpoints/budget_planning.py sowie neuen
+Test tests/test_budget_actuals_unavailable.py und eigene QA. Verhindern, dass
+ein fehlgeschlagener Journalzugriff als tatsaechlicher Istwert0 erscheint.
+Gueltige Nullwerte und erfolgreiche Werte erhalten; Fehlzustand mit Rollback
+und neutraler503Antwort. Keine Kontierungsregel, Tabelle/Migration oder Rolle
+aendern; kanonische Budgettabellen und Konten-/Periodenabgleich separat offen.
+
+M0-ROHWARE-TENANT-20261115 Review-Erweiterung: Besitz zusaetzlich nur der zwei
+alten Rohware-Handler-Mockfaelle in tests/test_waage_import_rohware_schema.py
+(test_rohware_schema_create_and_activate, test_rohware_schema_testrechnung_grundpreis).
+Erst durch staerkere HTTP-Faelle mit eigenem Create/Readback/Update/Statuswechsel/
+Zeilenanlage ersetzen, danach entfernen; alle Waage-/Formelvertraege erhalten.
+Auch Abweisung widerspruechlicher Bodymandanten vor erstem Datenbankzugriff und
+neutrale DB-Fehler mit Rollback nachweisen. Keine Rollen-/RLS-Abnahme aus Attrappen.
+
+M0 Budget-Istwertschutz lokal abgenommen: zwei rote Gegenproben vor Fix, fuenf
+gezielte Faelle gruen. SQL-/Verbindungsfehler werden nicht als Istwertnull
+zurueckgegeben. Echter Nullwert und Erfolg erhalten; neutral503undRollback-
+Aufruf. DB-Ergebnisattrappen, kein echter SQL-/RLS-Nachweis. QA
+m0-budget-actuals-20261115.md; fehlende Budgettabellen separat offen.
+
+M0-ROHWARE-TENANT-20261115 lokaler Guardnachweis: 19 neue HTTP-Faelle plus
+16 erhaltene Waage-/Formelfaelle gemeinsam35pass. Zwei schwache direkte
+Rohware-Mocks nach staerkerem Lebenszyklus-Ersatz entfernt. DB-/Rollen-/
+Identitaetsattrappen, keine echte RLS-Abnahme. Nutzervorgabe danach erweitert:
+fehlende Tabellen/Routen tatsaechlich ergaenzen, auf vorhandenen kanonischen
+Rohware-Stamm aufbauen und keine zweite unabhaengige Schema-Stammtabelle.
+Getrennte Architektur-/Migrationsclaims folgen vor strukturellen Edits.
+
+## M0-SCHEMA-BUDGET-ROHWARE-20261115 — reserviert, Codex
+
+Nutzerauftrag15.11: fehlende Tabellen und Routen ergaenzen. Strukturentscheidung:
+Budgetplaene/-zeilen in domain_finance als tenantgebundene Tabellen einfuehren;
+Konten referenzieren das fuehrende Journal domain_erp.chart_of_accounts, optionale
+Kostenstellen domain_finance.kostenstellen. Rohware nutzt den vorhandenen
+Stamm domain_shared.rohware_abrechnungsschemata, erweitert um Gueltigkeit,
+Bearbeitungsstatus/Version und zugeordnete Formelpositionen, keinen zweiten
+unabhaengigen Schema-Katalog. Vorhandene Gruppen-/Qualitaets-/Staffelverbraucher
+erhalten; Gruppenzuordnung mandantensicher. Die bestehende Pfadabweichung
+GET /rohware/gruppen/{gruppe_id}/schemata schliessen. Ein eigener Budget-
+Positions-Leseweg nur wenn realer vorhandener Verbraucher ihn benoetigt.
+
+Besitz Budget-Subagent: app/api/v1/endpoints/budget_planning.py, Migration
+alembic/versions/budget_planning_schema_20261115.py (Parent docflow_position_kontrakt_20261110),
+eigene neue Budget-Schema-/PostgreSQL-Vertraege und QA; bereits geschuetzten
+Istwertfehlerpfad erhalten und denselben Fehler in vs-actual schliessen.
+Besitz Rohware-Subagent: vorhandener Rohware-Schemarouter und Gruppenrouter,
+bei Bedarf zentraler Fachservice, Migration rohware_schema_canonical_20261115.py
+(Parent budget_planning_schema_20261115), vorhandene neue Rohware-Vertraege,
+eigene neue SQL-Nachweise und QA. Keine fremden Beleg-/Kontraktdateien editieren.
+Lead: Integration, Architektur-/API-Artefakte, Workboard/Handshake, reale DB-/CI-
+Abnahme und Ressourcenkoordination. Keine lokalen DDL/Grants/Migrationen durch
+Subagenten; kein neuer Pruefstand/Container. RLS und tenantgebundene Fremdschluessel
+ab erster Migration, keine Standardmandanten oder SQL-Fehler als leere Erfolge.
+
+Pruefstandstatus als valeo_agent und read-only Migrationskennung scheitert an
+SELECT-Rechten auf alembic_version. Kein Grant/Reset und keine DDL ausgefuehrt.
+Schemaarbeit und unabhaengige Pruefungen laufen weiter; echte Schemaabnahme erst
+im freigegebenen bestehenden Pruefstand bzw. vorhandener CI-Jobdatenbank.
+PR137 bleibt unveraendert8c6d20b2d; keine erneute CI durch Zwischenstaende.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 Nachweisweg: Lead besitzt zusaetzlich
+.github/workflows/pytest-postgres-require-db.yml nur fuer Export/Upload der
+echten Schema-Inventare nach vorhandener Jobmigration und vor unveraenderten
+strict-DB-Tests. Ein vorhandener PostgreSQL-Job, keine Zusatzdatenbank oder
+weiterer Container. Diese Artefakte liefern den physischen Tabellenkatalog,
+solange der gemeinsame lokale Pruefstand Metadatenrechte nicht bereitstellt.
+Keine Testselektion schwaechen, kein Datenbefund oder Geheimnis im Export.
+
+## M0-ROHWARE-FORMEL-SAFETY-20261115 — reserviert, Codex
+
+Vor Aktivierung neuer Tabellen gefunden: _eval_formula nutzt echtes eval mit
+leerem builtins-Dict, aber ohne AST-Zugriffsbeschraenkung. Objektzugriffe bleiben
+damit prinzipiell moeglich. Besitz Sicherheitsagent: neue reine begrenzte
+Arithmetik app/services/rohware_formula.py, nur _eval_formula und Testrechnungs-
+Eingabe-/Fehlerpfad in app/api/v1/endpoints/rohware_schema.py, neue enge
+Formel-Sicherheitsvertraege und QA. Vorhandene gueltige Mathematik/Funktionen
+erhalten; kein eval/compile, keine Attribute/Subscripts/Comprehensions/Lambdas/
+Importe, begrenzte Formelgroesse/AST-Tiefe und nur endliche Zahlen. Ungueltige
+Testrechnung darf keinen scheinbar gueltigen Gesamtpreis liefern.
+Lead ersetzt zusaetzlich ausschliesslich konstante SQL-Identifier-Fstrings im
+neuen Schemadienst durch gleichwertige Literalabfragen, statt Scanner-Ausnahmen
+aufzunehmen. Keine Rolle/DDL/DB/Schema-/Formel-Fachregel ausweiten. Lead integriert
+Artefakte und DB-Nachweise; keine neue Testdatenbank/Container.
+
+M0-SCHEMA-BUDGET-ROHWARE / FORMEL-SAFETY Zwischenstand: kanonische Migrationen und Gruppen-Detailroute implementiert; keine zweite Rohware-Stammtabelle. Formelinterpreter ohne eval, 113 gezielte Tests bestanden. PostgreSQL/RLS noch nicht abgenommen; bestehender strikter CI-Job exportiert Inventare erst nach erfolgreichen Tests. Keine lokale Datenbankmigration und keine neue Datenbank/Container. QA m0-rohware-tenant-20261115.md und m0-budget-schema-20261115.md.
+
+M0-SCHEMA-BUDGET-ROHWARE-20261115 / FORMEL-SAFETY: Implementierung und PostgreSQL-Abnahme abgeschlossen, Integration in Arbeit. Kombinierter Quellstand 4866020db, StrictDB 43748281469 erfolgreich mit 692 passed / 3 skipped. Beide neuen DB-Vertraege bestanden als valeo_app; Inventare aus genau diesem Lauf uebernommen. 113 gezielte neue/angrenzende Tests sowie 21 bisherige Waage-/Istwerttests und 25 Architekturtests gruen (ueberlappende Testmengen nicht addieren). Browser-/MCP-Freischaltung und fachliche Budget-Ist-Semantik nicht daraus ableiten.
+
+M0-SCHEMA-BUDGET-ROHWARE Nachlauf: kanonisches RLS-Inventar aus erfolgreichem 43750385711 ersetzt (ohne zehn additive ORM-Tabellen); physischer Anwendungskatalog bewusst nach ORM-Initialisierung. Exportstufen getrennt, Upload nach Tests; keine Ratsche/Allowlist gelockert. Runtime-Sweep 43748929572: drei Tabellen-503 beseitigt, fuenf andere 503 offen, keine 500er/Auth-/Transportfehler. Gesamt-CI folgt auf dem vollstaendig synchronisierten Stand.
+
+M0-Rohware Abschlusskontrolle: neuer Gruppen-Detailweg behandelt auch den ersten Datenbankfehler mit Rollback/neutralem 503. 46 enge HTTP-/Eingabevertraege bestanden, einschliesslich zwei neuer Fehlerpfade und Geschaeftstag-Nachweis. Keine neue Route oder Schemaaenderung; bestehende 401/404 bleiben erhalten.
+
+M0-INTEGRATIONSFENSTER-PR145 — Lead Codex, in Arbeit: gemeinsame Basis af086a7dd inklusive PR144. Bitte weitere main-Merges bis zum Abschluss dieser Abnahme mit dem Lead koordinieren, damit keine wiederholten Vollpruefungen durch wechselnde Basis entstehen. Parallelentwicklung auf eigenen Branches frei. Keine lokale DB-/Docker-Sperre. Physische Metadaten unveraendert gegen erfolgreichen CI-Export verifiziert; Code-/Lineageprojektionen fuer den kombinierten Stand erneuert.
+
+M0-Katalog-Learning: lokale Standardcodierung verfälschte generierte JSON-Zeichen; kein DB-Drift. Byteidentischer CI-Katalog aus 43751847958 wiederhergestellt, SHA/Unicode geprueft. Text/JSON ausdruecklich UTF-8 lesen; vorbereitete Imageversion eb6845b79 nicht deployen. Weitere Abnahme auf korrigiertem Stand.
+
+M0-Budget-Freigabegegenprobe: erkannte Altregel liess genehmigte Positionen weiter veraendern. Beide Writes jetzt nur ENTWURF, gemeinsam mit Genehmigung ueber Plansperre serialisiert. Vier neue Negativvertraege und erweiterte PostgreSQL-Pruefung gegen stille Aenderung unter bestehender Genehmigung. Keine neue Wiedereroeffnung oder Rolle.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex Lead besitzt tests/test_consume_backend_evidence.py und .github/workflows/quality-gate.yml fuer den konkreten veralteten StrictDB-Aufbauvertrag und dessen Vorziehen in das unabhaengige schnelle Integritaetsgate. Abnahme: identischer Einzel-Pruefstand und kanonische Rollen, reine RLS-Ernte vor ORM und Anwendungskatalog danach, Upload nur nach Tests; saemtliche Harnessvertraege frueh einmalig ausfuehren, Backend nur bei bestandenem Metagate. Kein Coverage-Gate oder Test abschwaechen. Vollsuite249006062: 28395 bestanden, genau ein veralteter Infrastrukturvertrag rot. Keine lokalen DB-/Containeraktionen.
+
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: auch tests/test_fsx003_quality_gate_wiring.py fuer semantische Pruefung der weiter verpflichtenden secret-scan-Abhaengigkeit plus schnellem Metagate; FSX bleibt eigenstaendig an path-guard. Beide reinen Workflow-Testdateien in bestehendes improvement-integrity vorziehen und nur dort ausfuehren. Backend benoetigt dessen Erfolg, danach volle Produktsuite mit unveraendertem Coverage-Scope. Keine neue CI-Datenbank/Container und kein neuer Job.
+
+M0-CI-Fast-Fail lokal abgenommen: gesamter neuer Metatestsatz135pass, enger Satz44pass (ueberlappend). Reiner StrictDB-/Evidenz-/FSX-Wiringvertrag vor die Backend-DB-Suite verlegt, verpflichtende Abhaengigkeit, doppelte Ausfuehrung dieser beiden Dateien vermieden. Alle Produkttests/Coverage-Scope bleiben unveraendert; neuer Gesamt-CI-Lauf erforderlich. QA m0-ci-contract-fast-fail-20261115.md. Erweiterte Budget-Freigabegegenprobe echt auf249 bestanden (StrictDB43755370395).
+
+## M0-LOCAL-SCHEMA-ROLLOUT-20261116 — lokal abgenommen, Codex Lead; Preview-Integration offen
+
+Ziel: abgenommenen main a5f60738a lokal bereitstellen. Besitz: bestehende
+Backend-/Frontend-Container im Projekt valeo-neuro-erp, fuenf ausschliesslich
+gemergte Migrationen in valeo_neuro_erp, eigene private Betriebsartefakte,
+eigene QA/Handshake/Workboard. Keine fremden Dienste oder Testdatenbanken.
+Abnahme: Sicherung mit validiertem Archiv, Quellen-/Rollen-/Aktivitaetspruefung,
+transaktionale Rollback-Probe, kanonisches Alembic, gesunde bestehende Dienste
+und lesende Auth-/Routenpruefung. Keine lokalen Fachtest-Schreibdaten und kein
+Reset/Prune. Bei Fremdnutzung warten, bei Abweichung abbrechen. Quelle und alle
+68 erfolgreichen PR-Pruefungen sind vor Ausfuehrung verifiziert; Review-Ausnahme
+betraf nur die externe Review, kein Testgate. main/develop auf a5f60738a.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Erweiterung vor Edit: Nutzer meldet SSO Failed to fetch.
+Lesend bestaetigt: Windows-WSL-Relay liefert auf localhost:8080 Tomcat404, waehrend
+Keycloak intern200 liefert. Keine fremden Prozesse beenden. Codex besitzt
+Dockerfile.frontend, docker-compose.local-preview.yml, eigene enge Tests/QA
+fuer expliziten freien lokalen Identitaetsport8081, durchgaengigen Issuer und
+Docker-Build-Konfiguration. Auch bestehender Keycloak-Container im Wartungsclaim;
+keine Realm-/Benutzer-/Rollen-/Datenbankaenderung, keine gelockerte Tokenpruefung.
+Abnahme: Discovery/CORS und SSO-Weiterleitung auf3000/3001 sowie passender Backend-
+Issuer; vorhandene Daten/Volumes und andere Dienste erhalten.
+
+Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort18081nachWindows+allenDockerreservierungen+BasisComposegeprueft; QuelleundKonfigvertraegeangepasst. KeineFremddiensteaendern; aktuellesAnwendungswartungsfensterbisAbschlussderSSOGegenprobe.
+
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist committet. Frontend-Kompilierung erfolgreich, Imageexport durch haengende Docker-Engine abgebrochen (RPC EOF). Regulärer Desktop-Neustart scheitert am Stoppen; nur verifizierte Docker-Desktop-Prozesse gezielt beendet und Docker-WSL-Wiederherstellung eingeleitet. Keine Datenloeschung. SSO-Aktivierung und reale Browserabnahme bleiben offen, keine Gesamtfreigabe. Weitere DB-Tests erst nach bestaetigter Engine-Gesundheit.
+
+Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116: lokaler Betrieb und SSO-Nachlauf nach Nutzer-Neustart abgenommen. Backend, Keycloak, Frontend healthy; finaler Previewport 18081, beide CORS-Origins 3000/3001 korrekt. Echter Chrome-Klick auf Mit SSO anmelden erreicht an beiden Ports sichtbare Keycloak-Maske, null fehlgeschlagene Anfragen, Screenshots geprueft. Keine Zugangsdaten eingegeben, daher keine persoenliche MFA-/Kennwortabnahme behauptet. Vier Konfigvertraege erneut bestanden; Budget-API bleibt unauthentifiziert401. Keine Migration/DB-/Container-Neuanlage und keine Rollenveraenderung. Quelle ddc58d254, Frontendimage 714148731111. Wartungsblocker aufgehoben; vor fremden DB-Tests weiterhin regulaeren Pruefstandstatus pruefen. Previewfix auf eigenem Ops-Zweig, main/develop unveraendert a5f60738a. QA m0-local-schema-rollout-20261116.md.
+
+
+## WORKSPACE-HOME-USABILITY-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
+
+Nutzerbefund: Start zeigt technische Diagnosen, doppelte operative Listen und
+eine ueberladene Zusammenstellung. Ziel: ruhiger, rollenbezogener Einstieg
+innerhalb des bestehenden Studio-/Meridian-Vertrags, keine Parallelseite.
+Besitz: AdaptiveWorkspaceLayer, home-composition, AgrarChainWidget und zugehoerige
+Projektionen/Tests, start-dashboard-Zusammenstellung, gemeinsame spezialisierte
+Disposition-/Kompositionspraesentation und eng betroffene Tests; eigene QA,
+Meridian-Doku und Handshake. Delegation nur mit getrennten Dateien.
+Abnahme: keine rohen UUID-/Reasoncode-Diagnosen im Standardbild, fachliche
+Navigation erhalten, operative Details bewusst oeffnen, keine Berechtigungen
+erweitern oder Fehler als leere Daten tarnen. Gezielte Verhaltenstests, Typpruefung
+und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
+Keine DB-Schreibtests, neuen Container oder Migrationen.
+
+WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt zentrale Schrift-/Radius-Tokens leer, Titel dadurch 16px statt Hierarchie; Suchkuerzel von Axe als teilweise verdeckt markiert. Codex besitzt zusaetzlich src/index.css und eng betroffene Tokenvertraege fuer die konkrete zentrale Token-Selbstreferenzdiagnose. Kein individueller CSS-Bypass; Browser muss nichtleere Tokens und beide Themes nachweisen.
+
+WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bewusstem Oeffnen, kompakter Aufgabenprojektion und versteckter Anpassungssteuerung; keine neue Seitenarchitektur. CSS-Layer-Reihenfolge zentral repariert, echte berechnete Titel-/Radiuswerte und Kontrast geprueft. 67 Verhaltenstests sowie volle Frontend-Typpruefung bestanden. Sechs synthetische Browserfaelle mit produktiven Komponenten, ohne persoenliche Anmeldung/DB, bestehen. Lokales finales Frontend-Image folgt; kein Backend-/DB-Neustart. QA workspace-home-usability-20261116.md.
+
+WORKSPACE-HOME-USABILITY-20261116 lokal bereitgestellt: Quelle6ea0b08ef, Frontendimagecde458f352c8; nur bestehenden Frontend ersetzt. 67 Oberflaechen-/Fachwegtests plus 86 Themevertraege, volle Typpruefung und sechs finale Browser-/Kontrastfaelle bestanden. Beide SSO-Einstiege nach Aktivierung erneut fehlerfrei, alle drei Dienste healthy. Keine persoenliche Anmeldung, keine DB-Aenderung. PR148 nach PR147 integrieren; lokale Wartung beendet.
+
+
+## GROUPED-APP-LAUNCHER-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
+
+Nutzerpraezisierung mit drei Bildern: Start ist primaer funktional gruppierter
+App-/Masken-Launcher, kein Dashboard. Vorhandene Launchpad-Komponenten und
+Navigations-/Studio-Kataloge weiterverwenden. Besitz: LaunchpadBoard,
+launchpad-spaces, AdaptiveWorkspaceLayer, start-dashboard und eng betroffene
+Tests/visueller Harness; eigene QA/Design-Doku/Handshake. Getrennte Delegation
+Board versus Home-Integration. Abnahme: Symbolstarter nach Fachgruppen,
+Direktnavigation, Suche, Personalisierung und Theme; keine Kennzahlen/Tafeln
+auf dem Standardstart, bestehende operative Komposition getrennt erreichbar.
+Keine Attrappen, Rechteerweiterung, neue Datenbank oder Container.
+
+GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarter statt Dashboard. Default zeigt vorhandene Navigation als gruppierte Symbole und echte Maskenlinks mit Suche; keine operativen Dashboard-GETs. Bestehende Studio-Komposition bleibt ueber Arbeitsuebersicht oeffnen erreichbar. Overlay/Anpassung erhalten, keine Rechte-/DB-Aenderung. 32 Verhaltenstests, Such-Aliasregression, volle Typpruefung und sechs synthetische Theme-/Desktop-Browserfaelle bestanden. Lokaler Einzel-Frontendbuild folgt, basiert auf PR148 und147. QA grouped-app-launcher-20261116.md.
+
+Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.
+
+GROUPED-APP-LAUNCHER-20261116 Erweiterung vor Edit: Nutzer fordert aussagekraeftige Icons. Zentrale semantische Symbolzuordnung launchpad-icons.ts nach bestehenden Katalogidentitaeten plus zugehoeriger Vertrag; Nav-Symbole bleiben Fallback fuer unbekannte Eintraege. Keine Fachroute oder Rollenentscheidung aus dem Symbol ableiten.
+
+GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich, zentrale fachliche Symbolzuordnung nach Katalog-ID (Dokumentarten unterscheidbar). 34 Verhaltenstests, volle Typpruefung und sechs finale Browser-Kontrastfaelle bestanden. Eigenen ueberholten Build fuer Nutzerkorrekturen abgebrochen, finaler einzelner Build folgt. Keine Rechte-/DB-Aenderungen.
+
+GROUPED-APP-LAUNCHER-20261116 lokal aktiv: Quelle745cca250, Imageb72327848a9b. Alle drei Dienste healthy, beide SSO-Einstiege nach Aktivierung fehlerfrei. Kurze Gruppentitel, semantische Fachsymbole, Suche und persoenliche Anpassung. 34 Tests, volle Typpruefung und sechs synthetische Desktop-/Themefaelle bestanden. Keine DB- oder Rechteaenderung. PR149 nach148/147 integrieren, lokale Wartung beendet.
+
+
+## AGRARPORTAL-ENTRY-ISOLATION-20261116 — Einstieg lokal abgenommen, Codex Lead; Folge-Fachslices offen
+
+Nutzerauftrag: sichtbarer Agrarportal-Einstieg fuer Landwirte mit Bestellungen,
+Dokumenten, Futterberatung und Schlagkartei; Mandanten- UND Kundenbetriebsgrenze.
+Bestand: CustomerPortalLayout, portal_kunde/portal_recht, Kundenzugaenge,
+Portal-Shop/Feldbuch/Futterberatung existieren. Kein paralleles Portal bauen.
+Besitz: Launchpad-Portalgruppe/-Symbole/-Tests, passende Sicherheitsbestandsanalyse
+und eigene QA/Architektur-/Handshake-Doku. Backendkorrekturen erst nach konkretem
+Befund und ergaenztem Dateibesitz. Keine pauschale Rollenerweiterung oder
+automatische Vermarktung von Betriebsdaten. Optionales Marketing/Analyse und
+notwendige Servicedaten zweckbezogen trennen. Keine neue DB/Container.
+Abnahme: bestehende verifizierte Kundenkonto-/Mandantenwege, fremde Kunden
+bleiben gesperrt; vorhandene Portal-ScreenDefinitions weiterverwenden.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Erweiterung vor Edit: Nutzer praezisiert kundenbezogenen Direktstart nach Anmeldung und internen Launcher-Einstieg zur gekennzeichneten Kundenansicht. Besitz zusaetzlich hooks/useAuth.ts, lib/portal-landing.ts, CustomerPortalLayout, PortalKontoWahl, lib/portal-konto.ts und passende Tests. Bestehende servergepruefte Kundenkonten fuer Landingsentscheidung nutzen, keine fingierte Benutzeranmeldung. Globaler Kontostore an aktuellen verifizierten Sitzungs-/Mandantenkontext binden. Audit: vertrauenswuerdiger Mehrmandanten-Tokenwechsel fehlt bisher; keine frei waehlbaren X-Tenant-ID zulassen. Eigener ADR-/Vertragsentwurf erforderlich, nicht als fertige Funktion ausgeben.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116: Portalgruppe, serverbasiertes Kundenlanding und klarer interner Pruefeinstieg implementiert. Globalen Portalzustand gegen Identitaets-/Mandanten-/Rollen-/Scope-/Providersitzungswechsel gebunden; alte Requests vor Konto-Freigabe abbrechen. 33 Frontendtests, volle Typpruefung sowie je sechs Portalrahmen-/Launcher-Kontrastansichten bestanden; keine echte DB-/Tokenwechsel-Abnahme behauptet. Interne tenantweite Futterberatung im Kunden-Pruefmodus gesperrt, kein Rechtebypass. Offen: echter autorisierter Handelspartnerwechsel, kundenbezogene Futter-Fachwege und gemeinsame Beleg-Kundenvariante statt separatem CustomerOrder-Modell. Vertrage in agrarportal-tenant-selection-20261116.md und portal-customer-document-variant-20261116.md. Keine Backend-/DB-Aenderung. Lokaler Einzel-Frontendbuild folgt.
+
+
+Naechste abgegrenzte Portal-Slices (offen, keine konkurrierenden Claims):
+- PORTAL-TENANT-BROKER-20261116: autorisierte Handelspartner-Mitgliedschaft,
+  provider-/sitzungsgebundener Token-/Kontextwechsel und echte Isolationstests.
+- PORTAL-CUSTOMER-DOCUMENT-20261116: customer_inquiry als Belegfamilienkind,
+  kundenberechtigte Anfrage-/Auftrags-Commands, Adress- und DMS-Anhangsvertrag,
+  eigene Historien-/Silo-Vorschlaege; CustomerOrder-Doppelweg kontrolliert abloesen.
+- PORTAL-FEED-CUSTOMER-SCOPE-20261116: kundenbezogene Rezepte/Betriebe/Gruppen
+  und Folgereferenzen ueber dieselbe PortalKunde-Pruefung; keine interne
+  tenantweite Fachseite als kundenisolierte Freigabe ausgeben.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Einstieg lokal aktiv: Frontend3b750ff68/ee27f8273cfb; alle Dienste healthy und SSO3000/3001 nach Aktivierung fehlerfrei. 33 Frontendtests, volle Typpruefung, je sechs Launcher-/Portalrahmenansichten bestanden. Keine echte Kunden-Fachketten- oder Mehrmandanten-Tokenabnahme behauptet. PR150 nach149/148/147. Folgeslices PORTAL-TENANT-BROKER, PORTAL-CUSTOMER-DOCUMENT und PORTAL-FEED-CUSTOMER-SCOPE bleiben offen; keine laufende DB-Nutzung aus diesem Slice.
+
+
+## PORTAL-TENANT-BROKER-20261116 — Phase 1 lokal abgenommen, Codex Lead
+
+Phase1: eigene gueltige Handelspartner-Zuordnungen aus domain_portal.kundenzugaenge
+lesend ermitteln. Bestehende cross_tenant_scope/system_session bewusst verwenden,
+kein unautorisierter Tenantwechsel und keine generischen RLS-Ausnahmen.
+Besitz: neuer eng begrenzter Portal-Handelspartner-Service/-Router, Registrierung
+in API v1, zugehoerige Tests/Vertragsartefakte und eigene Architektur/QA/Handshake-Doku.
+Ausgabe nur Metadaten eigener aktiver Beziehungen; Eingabe-Subject ausschliesslich
+aus gepruefter Identitaet. Systemverbindung zwingend und read-only, keine stillen
+App-Verbindungs-Fallbacks fuer scheinbar vollstaendige Listen.
+Abnahme: Fremdpersonen, widerrufene/abgelaufene Beziehungen, geloeschte Kunden,
+gesperrte Mandanten und falsche DB-Rolle abweisen. Bestehender einzelner signierter
+Mandantenkontext bleibt unveraendert. Token-/Kontextausstellung ist nachfolgende
+Phase; reine Auswahlliste nicht als fertigen Wechsel ausgeben. Keine neue DB/Container.
+
+PORTAL-TENANT-BROKER Erweiterung 2026-11-16: Nachweis fand fehlende Lese-ACLs fuer vorhandene valeo_system-Rolle im Pruefstand. Besitz zusaetzlich scripts/provision_portal_directory_reads.py und eigener Plantest. Enges Einrichtungsfenster nur valeo_probe: bestehende Rolle pruefen, USAGE auf drei Schemas und SELECT auf genau drei Verzeichnisquellen, keine Schreibrechte/DDL/Passwort-/Rollenanlage; vorher aktive Sessions pruefen. Entwicklungsdatenbank unveraendert.
+
+PORTAL-TENANT-BROKER Phase1: GET /portal/handelspartner mit gepruefter Identitaet, expliziter READ-ONLY-Systemsession und Metadaten eigener aktiver Zuordnungen implementiert. 23 Tests einschliesslich echter PostgreSQL-Filter und valeo_system/READ ONLY bestanden, keine Skips. Fehlende ACLs im freien valeo_probe gezielt als USAGE/SELECT auf drei Quellen eingerichtet (vorher Rollback-Probelauf); keine Migration/Schemaaenderung/Schreibrechte. OpenAPI, Index, Inventare, Agent-Handbuch synchron; Summary/Response 100%. Token-/Kontextwechsel bleibt Phase2, kundengebundene Beleg-/Futterketten bleiben eigene Slices. Backend nicht lokal ausgerollt. QA portal-tenant-directory-20261116.md.
+
+PORTAL-TENANT-BROKER Phase1 gepusht als93e23359f, PR151 gestapelt nach150; kein main-Merge/Deployment behauptet. Phase2-Bestandsaudit bestaetigt fehlenden Kontextaussteller (Redis identity_session prueft/widerruft nur). Signierten Originaltenant nicht durch globales Keycloak-Attributumschreiben oder freie Header umgehen; Audit im Architekturvertrag nachgezogen.
+
+MAIN-INTEGRATION-20261116: Nutzerauftrag main-Push. Eigene PR-Kette147–151 ist vollstaendig in PR151 enthalten und dessen Ziel jetzt main. Gemeinsame Gesamt-CI am Endstand vor Merge; keine Umgehung roter/fehlender Gates. Fremde PR146 und Dependency-PRs nicht Bestandteil. Nach Integration eigene enthaltene PRs147–150 schliessen.
+
+MAIN-INTEGRATION Inventarfix reserviert Codex: scripts/check_tenant_isolation.py und eigener Regressionstest. CI meldet fehlende Klassifikation des neuen Portal-Verzeichnisadapters; explizit eigene verifizierte Identitaetsmitgliedschaft statt falscher Shared-/Stateless-Ausnahme klassifizieren. Keine Schwellenlockerung oder DB-Rechteaenderung.
+
+MAIN-INTEGRATION Inventarfix umgesetzt: eigene Kategorie identity-membership fuer gepruefte eigene Portal-Zuordnungen mit Nachweisquellen. Drei Regressionstests und alle neun Verbesserungspipelines bestanden. Unbekannte Adapter blockieren unveraendert; kein System-/Shared-Freibrief und keine geaenderte Autorisierung.
+
+MAIN-INTEGRATION Katalogfix reserviert Codex: docs/admin/table-catalog.json und .md. Frisches CI-Schema Run43946243084 meldet ausschliesslich drei neue read_by-Verweise auf portal_tenant_directory; keine Tabellen-/Spaltenaenderung. Uebernahme des exakten CI-Artefakts nach strukturellem Vergleich, keine lokale DB-Migration.
+
+MAIN-INTEGRATION Frontend-Vertraege reserviert Codex Lead: fuenf im Gesamtlauf rote Testdateien workspace/disposition-signal, inbox-ranking, launcher-surfaces-evidence, dialog-layer und auth/http-refresh. Ursachen pruefen: alter Dashboard-Standard statt expliziter Arbeitsuebersicht, unvollstaendige Auth-Mocks. Vertraege auf echte neue Bedienfolge aktualisieren, negative Checks erhalten, keine Produktions-Fallbacks fuer Testattrappen. Aufteilung disposition/inbox an AgentA; dialog/launcher an AgentB; Auth und Integration Lead. Keine DB oder parallelen Builds.
+
+MAIN-INTEGRATION Frontend-Vertraege korrigiert: 23/23 gezielte Tests in fuenf Dateien gruen. Expliziter Arbeitsuebersichtsmodus, echte Disclosure-Klicks, nutzerverstaendliche Hinweise und vollstaendige Auth-Mocks; negative Nachweise erhalten. Keine Produktionscodeaenderung. Gemeinsamer GitHub-Nachlauf folgt nach Typpruefung.
+
+MAIN-INTEGRATION RLS-Matrix reserviert Codex: docs/admin/rls-domain-matrix.json/.md und scripts/check_all_doc_generators.sh. Gesamtsuite28388passed, ein Driftvertrag rot durch neue Portal-Service-Lesereferenzen. Matrix aus vorhandenen versionierten Befunden regenerieren (ohne --data/DB), fruehen Generatorcheck aufnehmen; keine Policy-/Ausnahmen-/Schwellenaenderung.
+
+MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) betraf einen neuen Kunden-Leserverweis/Identitaetszaehler, keine Policyaenderung. Fuenf Matrixvertraege und --check danach gruen. Frueher Meta-Generatorcheck verhindert spaete Wiederentdeckung nach Gesamtlauf. Endlauf fuer versiegelte Abdeckung erforderlich; keine Freigabe aus einem roten Lauf abgeleitet.
+
+MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
+
+MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.

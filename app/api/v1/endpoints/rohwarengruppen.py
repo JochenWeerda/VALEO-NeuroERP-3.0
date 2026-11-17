@@ -30,7 +30,8 @@ from pydantic import BaseModel, Field, model_validator
 from sqlalchemy import text
 
 from app.core.database import get_db
-from app.core.dependencies import get_tenant_id
+from app.core.tenant import get_tenant_id
+from app.services import rohware_schema_service as schemas
 from app.core.uuid7 import uuid7
 
 from app.api.v1.schemas.base import BaseSchema
@@ -297,34 +298,37 @@ def create_schema(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    gruppe = db.execute(text("""
-        SELECT id FROM domain_shared.rohwarengruppen
-        WHERE id = :gid AND tenant_id = :tid
-    """), {"gid": payload.gruppe_id, "tid": tenant_id}).fetchone()
-    if not gruppe:
-        raise HTTPException(404, "Rohwarengruppe nicht gefunden.")
+    try:
+        gruppe_id = schemas.group_id(db, tenant_id, group_id=payload.gruppe_id)
+        existing = db.execute(text("SELECT id FROM domain_shared.rohware_abrechnungsschemata WHERE tenant_id = :tid AND schema_nr = :nr"),
+                              {"tid": tenant_id, "nr": payload.schema_nr}).fetchone()
+        if existing:
+            raise HTTPException(409, "Abrechnungsschema bereits vorhanden")
+        new_id = schemas.create(db, tenant_id, schema_code=payload.schema_nr,
+                                name=payload.bezeichnung, group=gruppe_id,
+                                article=payload.artikel_nr, activate=True)
+        db.commit()
+        row = db.execute(text("SELECT * FROM domain_shared.rohware_abrechnungsschemata WHERE id = :id AND tenant_id = :tid"),
+                         {"id": new_id, "tid": tenant_id}).fetchone()
+        return AbrechnungsschemaOut(**dict(row._mapping))
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(503, "Datenbank nicht verfügbar")
 
-    existing = db.execute(text("""
-        SELECT id FROM domain_shared.rohware_abrechnungsschemata
-        WHERE tenant_id = :tid AND schema_nr = :nr
-    """), {"tid": tenant_id, "nr": payload.schema_nr}).fetchone()
-    if existing:
-        raise HTTPException(409, f"Abrechnungsschema {payload.schema_nr} bereits vorhanden.")
 
-    new_id = uuid7()
-    db.execute(text("""
-        INSERT INTO domain_shared.rohware_abrechnungsschemata
-            (id, tenant_id, schema_nr, bezeichnung, gruppe_id, artikel_nr)
-        VALUES (:id, :tid, :nr, :bez, :gid, :anr)
-    """), {
-        "id": new_id, "tid": tenant_id, "nr": payload.schema_nr,
-        "bez": payload.bezeichnung, "gid": payload.gruppe_id, "anr": payload.artikel_nr,
-    })
-    db.commit()
-    row = db.execute(text(
-        "SELECT * FROM domain_shared.rohware_abrechnungsschemata WHERE id = :id"
-    ), {"id": new_id}).fetchone()
-    return AbrechnungsschemaOut(**dict(row._mapping))
+@router.get("/{gruppe_id}/schemata", response_model=list[AbrechnungsschemaOut], summary="Schemata einer Rohwarengruppe auflisten")
+def list_gruppe_schemata(gruppe_id: str, db=Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
+    try:
+        schemas.group_id(db, tenant_id, group_id=gruppe_id)
+        return list_schemata(gruppe_id=gruppe_id, db=db, tenant_id=tenant_id)
+    except HTTPException:
+        raise
+    except Exception:
+        db.rollback()
+        raise HTTPException(503, "Datenbank nicht verfügbar") from None
 
 
 # ── Qualitätsdefinitionen ─────────────────────────────────────────────────────
