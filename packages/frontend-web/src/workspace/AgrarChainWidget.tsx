@@ -1,3 +1,4 @@
+import { workspaceActionLabel } from './presentation'
 import { useEffect, useState } from 'react'
 import { Link, type RouteTarget } from '@/app/routing/typed-router'
 import {
@@ -62,7 +63,7 @@ export function AgrarChainWidget({ queries, view }: AgrarChainWidgetProps): JSX.
       data-testid="workspace-agrar-chain"
       data-chain-status={state.status}
     >
-      <h2 className="text-lg font-semibold text-foreground">Agrar-Kette</h2>
+      <h2 className="text-lg font-semibold text-foreground">Kontrakte weiterbearbeiten</h2>
       {state.status === 'pending' ? (
         <p className="mt-2 text-sm text-muted-foreground">Kette wird geladen</p>
       ) : null}
@@ -72,7 +73,7 @@ export function AgrarChainWidget({ queries, view }: AgrarChainWidgetProps): JSX.
         </p>
       ) : null}
       {state.status === 'empty' ? (
-        <p className="mt-2 text-sm text-muted-foreground">keine Kette</p>
+        <p className="mt-2 text-sm text-muted-foreground">Keine offenen Agrarvorgänge.</p>
       ) : null}
       {state.status === 'ready' ? (
         <>
@@ -84,7 +85,7 @@ export function AgrarChainWidget({ queries, view }: AgrarChainWidgetProps): JSX.
           <ul className="mt-2 flex flex-col gap-2">
             {state.hints.map((hint) => {
               const link = agrarChainLinkForHint(hint)
-              const label = `${hint.contract_ref}: ${link.label}`
+              const label = workspaceActionLabel(`${hint.contract_ref}: ${link.label}`)
               return (
                 <li
                   key={`${hint.source_model}:${hint.contract_ref}:${hint.next_step}`}
@@ -104,7 +105,7 @@ export function AgrarChainWidget({ queries, view }: AgrarChainWidgetProps): JSX.
                     <p className="text-sm font-medium text-foreground">{label}</p>
                   )}
                   {hint.reason ? (
-                    <p className="truncate text-xs text-muted-foreground">{hint.reason}</p>
+                    <p className="truncate text-xs text-muted-foreground">{hint.next_step === 'blocked' ? 'Dieser Vorgang benötigt eine Prüfung.' : 'Nächster Bearbeitungsschritt'}</p>
                   ) : null}
                 </li>
               )

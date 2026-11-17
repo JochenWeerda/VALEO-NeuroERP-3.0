@@ -18,7 +18,6 @@ import type { User } from '@/lib/auth'
 import { orderDragId, resolveBoardDrop, resourceDropId, timelineDropId } from './board-dnd'
 import { fetchOpenAbrufe } from './load-abrufe'
 import {
-  TIMELINE_FIELD_MISSING,
   axisFromLanes,
   fetchTimelineLanes,
   formatStopLatLng,
@@ -278,6 +277,7 @@ export function DispositionBoard({
   const pendingRef = useRef(new Set<string>())
   const [pendingKeys, setPendingKeys] = useState<Set<string>>(() => new Set())
   const [feedback, setFeedback] = useState<string | null>(null)
+  const [showAllOperations, setShowAllOperations] = useState(false)
 
   const canWrite = DISPOSITION_ASSIGNMENT_WRITE_RELEASED
     && (contract.permissions ?? []).includes('logistics.write')
@@ -358,6 +358,26 @@ export function DispositionBoard({
     [occupancyQuery.data, sse.opsSignals],
   )
 
+  const distinctOps = useMemo(() => {
+    const groups: Array<{ item: (typeof liveOps)[number]; count: number }> = []
+    const byDisplay = new Map<string, number>()
+    for (const item of liveOps) {
+      // Without detail and time there is not enough information to group the display.
+      const key = item.detail && item.at
+        ? JSON.stringify([item.kind, item.label, item.detail, item.at])
+        : null
+      const index = key === null ? undefined : byDisplay.get(key)
+      if (index !== undefined) {
+        groups[index].count += 1
+      } else {
+        if (key !== null) byDisplay.set(key, groups.length)
+        groups.push({ item, count: 1 })
+      }
+    }
+    return groups
+  }, [liveOps])
+  const visibleOps = showAllOperations ? distinctOps : distinctOps.slice(0, 5)
+
   return (
     <DndContext sensors={sensors} onDragEnd={onDragEnd} autoScroll={false}>
       <section
@@ -398,11 +418,7 @@ export function DispositionBoard({
         <article className="rounded-md border p-3" aria-labelledby="dispo-resources-heading">
           <h2 id="dispo-resources-heading" className="text-2xs tracking-wide uppercase text-muted-foreground">Ressourcen / Planung</h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            Adapter auf die bestehende Tafel
-            {' '}
-            <a className="underline" href={EXISTING_TAFEL_ROUTE}>{EXISTING_TAFEL_ROUTE}</a>
-            {' '}
-            (Codex-Godfile, nicht dupliziert). Fuhrpark, Spedition, Fahrer als Drop-Ziele.
+            Touren und Ressourcen im Überblick. Zur <a className="underline" href={EXISTING_TAFEL_ROUTE}>Tourenplanung</a>.
           </p>
           <ul className="mt-2 space-y-2">
             {live && toursQuery.isError ? (
@@ -410,7 +426,7 @@ export function DispositionBoard({
                 Touren nicht lesbar: Recht oder Anmeldung fehlt.
               </li>
             ) : derived.resources.length === 0 ? (
-              <li className="text-sm text-muted-foreground">Keine Touren geladen. Die Godfile-Tafel bleibt die operative Planung.</li>
+              <li className="text-sm text-muted-foreground">Keine Touren vorhanden.</li>
             ) : derived.resources.map((resource) => (
               <ResourceTarget
                 key={resource.id}
@@ -421,7 +437,7 @@ export function DispositionBoard({
             ))}
           </ul>
           <p className="mt-3 text-xs text-muted-foreground" data-testid="dispo-map-note">
-            Stopp-Karte zeichnet nur lat/lng aus der Tour.
+            Die Karte zeigt Stopps mit hinterlegtem Standort.
           </p>
           {live ? <DispositionStopMap stops={stopCoordinates} /> : null}
           {live && stopCoordinates.length > 0 ? (
@@ -445,7 +461,7 @@ export function DispositionBoard({
                   {timelineQuery.error instanceof Error ? timelineQuery.error.message : 'Zeitachse nicht lesbar.'}
                 </p>
               ) : !timelineAxis ? (
-                <p className="text-sm text-muted-foreground" data-testid="dispo-timeline-empty">{TIMELINE_FIELD_MISSING}</p>
+                <p className="text-sm text-muted-foreground" data-testid="dispo-timeline-empty">Für die Zeitachse sind keine geplanten Ankunftszeiten vorhanden.</p>
               ) : (
                 <>
                   <div className="flex justify-between text-2xs text-muted-foreground">
@@ -480,17 +496,17 @@ export function DispositionBoard({
                 </p>
               </li>
             ) : null}
-            {live && occupancyQuery.isLoading && liveOps.length === 0 ? (
+            {live && occupancyQuery.isLoading && distinctOps.length === 0 ? (
               <li className="text-sm text-muted-foreground">Betriebszustände werden geladen…</li>
             ) : live ? (
-              liveOps.length === 0 && !occupancyQuery.isError ? (
+              distinctOps.length === 0 && !occupancyQuery.isError ? (
                 <li className="text-sm text-muted-foreground" data-testid="dispo-ops-empty">
                   Keine aktuellen Betriebszustände.
                 </li>
               ) : (
-                liveOps.map((item) => (
+                visibleOps.map(({ item, count }) => (
                   <li key={item.id} className="flex items-center justify-between text-sm" data-testid={`dispo-ops-${item.id.replaceAll(':', '-')}`}>
-                    <span>{item.label}{item.detail ? ` ${item.detail}` : ''}</span>
+                    <span>{item.label}{item.detail ? ` ${item.detail}` : ''}{count > 1 ? ` (${count} Meldungen)` : ''}</span>
                     <span className="text-muted-foreground">{item.at ? formatAxisTime(item.at) : ''}</span>
                   </li>
                 ))
@@ -504,6 +520,16 @@ export function DispositionBoard({
               ))
             )}
           </ul>
+          {live && distinctOps.length > 5 ? (
+            <button
+              type="button"
+              className="mt-2 text-sm underline"
+              aria-expanded={showAllOperations}
+              onClick={() => setShowAllOperations((current) => !current)}
+            >
+              {showAllOperations ? 'Weniger anzeigen' : `Alle ${distinctOps.length} Betriebszustände anzeigen`}
+            </button>
+          ) : null}
         </article>
 
         {sse.error ? (

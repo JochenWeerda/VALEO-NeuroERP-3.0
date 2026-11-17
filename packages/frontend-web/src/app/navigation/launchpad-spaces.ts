@@ -1,3 +1,4 @@
+import { launchpadIcon } from './launchpad-icons'
 import type { NavItem } from '@/app/navigation/types'
 
 type LaunchpadText = {
@@ -28,6 +29,7 @@ export type LaunchpadSpaceDef = {
 export type LaunchpadTileKind = 'app' | 'task' | 'kpi' | 'alert'
 
 export type LaunchpadAppTile = {
+  icon?: NavItem['icon']
   id: string
   label: string
   path: string
@@ -100,6 +102,22 @@ export function canonicalizeLaunchpadSpaceId(spaceId: string | undefined): strin
  * Flow-Spine-Prozessräume gehören nicht auf die Startseite.
  */
 export const LAUNCHPAD_SPACES: LaunchpadSpaceDef[] = [
+  {
+    id: 'agrarportal',
+    label: { de: 'Agrarportal', en: 'Farmer portal' },
+    pages: [{
+      id: 'kundenbetrieb',
+      label: { de: 'Agrarportal für Kunden', en: 'Farmer self-service' },
+      tileItemIds: ['kundenportal'],
+      extraTiles: [
+        { id: 'portal-bestellen', label: { de: 'Bestellung aufgeben', en: 'Place an order' }, path: '/portal/shop' },
+        { id: 'portal-bestellungen', label: { de: 'Meine Bestellungen', en: 'My orders' }, path: '/portal/bestellungen' },
+        { id: 'portal-dokumente', label: { de: 'Meine Dokumente', en: 'My documents' }, path: '/portal/dokumente' },
+        { id: 'portal-futter', label: { de: 'Futterberechnung', en: 'Feed advice' }, path: '/portal/rationsoptimierung' },
+        { id: 'portal-feldbuch', label: { de: 'Schlagkartei', en: 'Field records' }, path: '/portal/feldbuch' },
+      ],
+    }],
+  },
   {
     id: 'handel',
     label: { de: 'Handel & CRM', en: 'Trade & CRM' },
@@ -385,7 +403,7 @@ function fallbackTiles(section: NavItem | undefined): LaunchpadAppTile[] {
     .filter((child) => !isLaunchpadHiddenNavId(child.id))
     .flatMap((child) => {
       const path = routablePath(child)
-      return path ? [{ id: child.id, label: child.label, path, keywords: child.keywords }] : []
+      return path ? [{ id: child.id, label: child.label, path, icon: child.icon, keywords: child.keywords }] : []
     })
     .slice(0, MAX_PAGE_TILES)
 }
@@ -404,7 +422,7 @@ export function resolveLaunchpadSpaces(sections: NavItem[], lang?: string): Laun
             return
           }
           seen.add(tile.id)
-          tiles.push({ ...tile, kind: tile.kind ?? launchpadTileKind(tile.id) })
+          tiles.push({ ...tile, icon: launchpadIcon(tile.id, tile.icon), kind: tile.kind ?? launchpadTileKind(tile.id) })
         }
 
         const section = page.sectionId ? byId.get(page.sectionId) : undefined
@@ -413,7 +431,7 @@ export function resolveLaunchpadSpaces(sections: NavItem[], lang?: string): Laun
             const item = byId.get(itemId)
             const path = routablePath(item)
             if (item && path) {
-              pushTile({ id: item.id, label: item.label, path, keywords: item.keywords })
+              pushTile({ id: item.id, label: item.label, path, icon: item.icon, keywords: item.keywords })
             }
           }
         } else if (section) {

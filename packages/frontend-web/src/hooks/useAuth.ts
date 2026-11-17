@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { type User, auth } from '@/lib/auth'
+import { apiClient } from '@/lib/api-client'
+import { loginLanding } from '@/lib/portal-landing'
 import { toast } from 'sonner'
 
 interface AuthHook {
@@ -13,7 +15,6 @@ interface AuthHook {
   hasRole: (_role: string) => boolean
 }
 
-const DASHBOARD_PATH = '/'
 const LOGIN_PATH = '/login'
 
 const safeRedirect = (target: string): void => {
@@ -83,9 +84,10 @@ export function useAuth(): AuthHook {
     try {
       await auth.handleCallback(_code, _state)
       setSafeUser(auth.getUser())
-      safeRedirect(DASHBOARD_PATH)
+      const landing = await loginLanding(auth.getUser(), async () => (await apiClient.get('/api/v1/portal/kundenkonten')).data)
+      safeRedirect(landing)
     } catch (error) {
-      console.error('Callback failed:', error)
+      console.error('Callback failed')
       throw error
     } finally {
       setSafeLoading(false)

@@ -9,6 +9,8 @@
  * einem Neuladen gilt bei genau einem Konto dieses, bei mehreren wird neu gewaehlt.
  */
 import { create } from 'zustand'
+import { auth } from '@/lib/auth'
+import { tenantFromToken } from '@/lib/tenant-from-token'
 
 export const KUNDENKONTO_KOPF = 'X-Kundenkonto'
 
@@ -35,17 +37,73 @@ export interface PortalKundenkonto {
 
 interface PortalKontoState {
   aktiv: PortalKundenkonto | null
+  sitzung: string | null
+  sitzungswechsel: number
+  pruefansicht: boolean
   waehle: (konto: PortalKundenkonto | null) => void
+}
+
+/** Dieselben Berechtigungsgrenzen wie DataBootstrap, niemals das Zugriffstoken selbst. */
+export function portalSitzung(): string | null {
+  const user = auth.getUser()
+  const tenant = tenantFromToken(auth.getAccessToken())
+  const claims = user as unknown as { iss?: unknown; sid?: unknown; session_state?: unknown } | null
+  const issuer = typeof claims?.iss === 'string' ? claims.iss : null
+  const sessionId = typeof claims?.sid === 'string' ? claims.sid : typeof claims?.session_state === 'string' ? claims.session_state : null
+  return user?.sub && tenant ? JSON.stringify([user.sub, tenant,
+    [...new Set(user.roles)].sort((a, b) => a.localeCompare(b)),
+    [...new Set(user.scopes)].sort((a, b) => a.localeCompare(b)), issuer, sessionId]) : null
 }
 
 export const usePortalKonto = create<PortalKontoState>((set) => ({
   aktiv: null,
-  waehle: (konto) => set({ aktiv: konto }),
+  sitzung: null,
+  sitzungswechsel: 0,
+  pruefansicht: false,
+  waehle: (konto) => {
+    const sitzung = portalSitzung()
+    set((state) => ({ aktiv: sitzung ? konto : null, sitzung,
+      pruefansicht: Boolean(sitzung && state.sitzung === sitzung && state.pruefansicht) }))
+  },
 }))
+
+// Logout und Identitaetswechsel loeschen die Auswahl auch dann, wenn spaeter dieselbe Identitaet zurueckkehrt.
+if (typeof window !== 'undefined') {
+  window.addEventListener('valeo-auth-changed', () => {
+    const state = usePortalKonto.getState()
+    if (state.sitzung !== portalSitzung()) {
+      usePortalKonto.setState({ aktiv: null, sitzung: portalSitzung(), sitzungswechsel: state.sitzungswechsel + 1,
+        pruefansicht: false })
+    }
+  })
+}
+
+/** Interne Ansicht ist nur eine Oberflaechenauswahl und verleiht keine Berechtigungen. */
+export function beginPortalInspection(): boolean {
+  const sitzung = portalSitzung()
+  if (!sitzung) return false
+  usePortalKonto.setState((state) => ({ aktiv: null, sitzung, pruefansicht: true,
+    sitzungswechsel: state.sitzungswechsel + 1 }))
+  return true
+}
+
+export function endPortalInspection(): void {
+  usePortalKonto.setState((state) => ({ aktiv: null, pruefansicht: false,
+    sitzungswechsel: state.sitzungswechsel + 1 }))
+}
+
+/** Auch vor Verarbeitung eines Anmeldeereignisses niemals eine fremde Sitzung anzeigen. */
+export function isPortalInspection(): boolean {
+  const state = usePortalKonto.getState()
+  const sitzung = portalSitzung()
+  return Boolean(sitzung && state.sitzung === sitzung && state.pruefansicht)
+}
 
 /** Fuer den API-Client: die ID des gewaehlten Kontos, sonst null. */
 export function aktivesKundenkonto(): string | null {
-  return usePortalKonto.getState().aktiv?.customer_id ?? null
+  const state = usePortalKonto.getState()
+  const sitzung = portalSitzung()
+  return sitzung && state.sitzung === sitzung ? state.aktiv?.customer_id ?? null : null
 }
 
 /** Darf das aktive Konto die Portalfunktion nutzen? Interne Betreuung (`rolle === 'intern'`) sieht alles. */

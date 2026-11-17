@@ -3,6 +3,7 @@ import { Link, useNavigate } from '@/app/routing/typed-router'
 import {
   Eye,
   EyeOff,
+  LayoutGrid,
   Pencil,
   Plus,
   RotateCcw,
@@ -74,6 +75,7 @@ type LaunchpadBoardProps = {
   pageBySpace: Record<string, string>
   onPageBySpaceChange: (pages: Record<string, string>) => void
   rankedTileIds?: string[]
+  presentation?: 'board' | 'launcher'
 }
 
 export function LaunchpadBoard({
@@ -83,6 +85,7 @@ export function LaunchpadBoard({
   pageBySpace,
   onPageBySpaceChange,
   rankedTileIds,
+  presentation = 'board',
 }: LaunchpadBoardProps): JSX.Element {
   const { overlay, setOverlay } = useLaunchpadPersonalization()
   const [personalize, setPersonalize] = useState(false)
@@ -93,6 +96,7 @@ export function LaunchpadBoard({
   const [renamePageId, setRenamePageId] = useState<string | null>(null)
   const [groupName, setGroupName] = useState('')
   const [finderQuery, setFinderQuery] = useState('')
+  const [launcherQuery, setLauncherQuery] = useState('')
   const [finderCategory, setFinderCategory] = useState('all')
   const navigate = useNavigate()
   const [settingsTitle, setSettingsTitle] = useState('')
@@ -173,6 +177,10 @@ export function LaunchpadBoard({
 
   return (
     <section className="overflow-hidden rounded-(--radius) border border-border bg-card shadow-sm">
+      {presentation === 'launcher' && !personalize ? (
+        <LauncherOverview spaces={spaces} query={launcherQuery} onQueryChange={setLauncherQuery}
+          onOpenCatalog={() => setFinderOpen(true)} onPersonalize={() => setPersonalize(true)} />
+      ) : (
       <Tabs
         value={activeSpaceId}
         onValueChange={(next) => {
@@ -373,6 +381,7 @@ export function LaunchpadBoard({
           )
         })}
       </Tabs>
+      )}
 
       <Dialog open={finderOpen} onOpenChange={setFinderOpen}>
         <DialogContent className="max-w-2xl bg-background">
@@ -556,6 +565,66 @@ export function LaunchpadBoard({
         </DialogContent>
       </Dialog>
     </section>
+  )
+}
+
+function LauncherOverview({ spaces, query, onQueryChange, onOpenCatalog, onPersonalize }: {
+  spaces: LaunchpadSpace[]
+  query: string
+  onQueryChange: (query: string) => void
+  onOpenCatalog: () => void
+  onPersonalize: () => void
+}): JSX.Element {
+  const needle = query.trim().toLocaleLowerCase()
+  const groups = spaces.flatMap((space) => space.pages.map((page) => {
+    const paths = new Set<string>()
+    const tiles = page.tiles.filter((tile) => {
+      if (paths.has(tile.path)) return false
+      const matches = !needle || [space.label, page.label, tile.label, tile.description ?? '', ...(tile.keywords ?? [])]
+        .some((text) => text.toLocaleLowerCase().includes(needle))
+      if (matches) paths.add(tile.path)
+      return matches
+    })
+    return { space, page, tiles }
+  })).filter((group) => group.tiles.length > 0)
+  const count = groups.reduce((total, group) => total + group.tiles.length, 0)
+
+  return (
+    <div className="space-y-5 p-4 sm:p-5" data-testid="launchpad-overview">
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="min-w-0 flex-1 basis-64">
+          <Label htmlFor="launchpad-search">Apps und Masken suchen</Label>
+          <Input id="launchpad-search" value={query} onChange={(event) => onQueryChange(event.target.value)}
+            placeholder="Name, Stichwort oder Gruppe" className="mt-1 h-11" />
+        </div>
+        <Button type="button" variant="outline" className="h-11" onClick={onOpenCatalog} aria-label="App-Katalog öffnen">App-Katalog</Button>
+        <Button type="button" variant="outline" className="h-11" onClick={onPersonalize} aria-label="Startseite anpassen">
+          <Pencil className="h-4 w-4" /> Startseite anpassen
+        </Button>
+      </div>
+      <p className="text-sm text-muted-foreground" role="status">{count === 1 ? '1 Einstieg' : `${count} Einstiege`}</p>
+      {groups.length === 0 ? <p className="text-sm text-foreground">Keine passenden Apps oder Masken gefunden.</p> : null}
+      <div className="grid gap-8 md:grid-cols-2 2xl:grid-cols-3">
+      {groups.map(({ space, page, tiles }) => (
+        <section key={`${space.id}:${page.id}`} aria-label={`${space.label}: ${page.label}`}>
+          <h2 className="text-base font-semibold text-foreground">{page.label}</h2>
+          <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 md:grid-cols-3 xl:grid-cols-4">
+            {tiles.map((tile) => {
+              const Icon = tile.icon ?? LayoutGrid
+              return (
+                <Link key={tile.id} to={tile.path} className="flex min-w-0 flex-col items-center gap-2 rounded-md p-1 text-center text-sm font-medium text-foreground hover:bg-muted focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+                  <span className="flex h-16 w-16 items-center justify-center rounded-xl border text-foreground" style={launchpadTileSurface(tile.id, tile.kind ?? launchpadTileKind(tile.id))}>
+                    <Icon className="h-7 w-7" aria-hidden="true" />
+                  </span>
+                  <span className="w-full break-words">{tile.label}</span>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      ))}
+      </div>
+    </div>
   )
 }
 

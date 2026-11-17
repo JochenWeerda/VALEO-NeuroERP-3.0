@@ -6,42 +6,74 @@
  * - Keines: Hinweis; ohne gueltige Zuordnung gibt es keine Kundendaten und keine Auftraege.
  * - Interne Betreuung (Innendienst ohne Zuordnung): waehlt einen Kunden des Mandanten; der Server prueft das.
  */
-import { useEffect, type ReactNode } from 'react'
+import { useCallback, useEffect, type ReactNode } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Building2 } from 'lucide-react'
 import { apiClient } from '@/lib/api-client'
-import { usePortalKonto, type PortalKundenkonto } from '@/lib/portal-konto'
+import { portalSitzung, usePortalKonto, type PortalKundenkonto } from '@/lib/portal-konto'
 import { CustomerCombobox, type CustomerLite } from '@/components/crm/CustomerCombobox'
 import { Callout, CalloutDescription, CalloutTitle } from '@/components/ui/callout'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
+let wechselVersion = 0
+let wechselZiel: string | null = null
+
+function gleichesKonto(a: PortalKundenkonto | null, b: PortalKundenkonto | null): boolean {
+  if (!a || !b) return a === b
+  return a.customer_id === b.customer_id && a.customer_number === b.customer_number
+    && a.name === b.name && a.rolle === b.rolle
+    && JSON.stringify([...a.rechte].sort()) === JSON.stringify([...b.rechte].sort())
+}
+
 export function usePortalKonten() {
-  const { aktiv, waehle } = usePortalKonto()
+  const { aktiv: gespeichertesKonto, sitzung: kontoSitzung, waehle } = usePortalKonto()
+  const sitzung = portalSitzung()
+  const aktiv = sitzung && kontoSitzung === sitzung ? gespeichertesKonto : null
   const queryClient = useQueryClient()
   const konten = useQuery<PortalKundenkonto[]>({
-    queryKey: ['portal-kundenkonten'],
-    queryFn: async () => (await apiClient.get<PortalKundenkonto[]>('/api/v1/portal/kundenkonten')).data,
+    queryKey: ['portal-kundenkonten', sitzung],
+    enabled: sitzung !== null,
+    queryFn: async ({ signal }) => (await apiClient.get<PortalKundenkonto[]>('/api/v1/portal/kundenkonten', { signal })).data,
     staleTime: 60_000,
   })
   const liste = konten.data ?? []
 
+  const wechsle = useCallback((konto: PortalKundenkonto | null) => {
+    if (gleichesKonto(konto, aktiv) && kontoSitzung === sitzung) return
+    const sitzungswechsel = usePortalKonto.getState().sitzungswechsel
+    const ziel = JSON.stringify([sitzung, sitzungswechsel, konto])
+    if (wechselZiel === ziel) return
+    wechselZiel = ziel
+    const version = ++wechselVersion
+    waehle(null)
+    // Laufende Anfragen des alten Kontos vor Freigabe der neuen Auswahl abbrechen.
+    void (async () => {
+      try {
+        await queryClient.cancelQueries({ predicate: (q) => q.queryKey[0] !== 'portal-kundenkonten' })
+        if (version !== wechselVersion || !sitzung || portalSitzung() !== sitzung
+          || usePortalKonto.getState().sitzungswechsel !== sitzungswechsel) return
+        waehle(konto)
+        await queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== 'portal-kundenkonten' })
+      } finally {
+        if (version === wechselVersion) wechselZiel = null
+      }
+    })()
+  }, [aktiv, kontoSitzung, queryClient, sitzung, waehle])
+
   useEffect(() => {
     if (!konten.data) return
-    if (aktiv && aktiv.rolle !== 'intern' && !konten.data.some((k) => k.customer_id === aktiv.customer_id)) {
-      waehle(null) // Zuordnung widerrufen: Wahl verfaellt
-      return
+    if (aktiv && aktiv.rolle !== 'intern') {
+      const aktuell = konten.data.find((k) => k.customer_id === aktiv.customer_id)
+      if (!aktuell) {
+        wechsle(null) // Zuordnung widerrufen: Wahl verfaellt
+        return
+      }
+      if (!gleichesKonto(aktiv, aktuell)) wechsle(aktuell)
     }
-    if (!aktiv && konten.data.length === 1) waehle(konten.data[0])
-  }, [konten.data, aktiv, waehle])
-
-  const wechsle = (konto: PortalKundenkonto | null) => {
-    if (konto?.customer_id === aktiv?.customer_id) return
-    waehle(konto)
-    // Alle Kundendaten gehoerten zum vorigen Konto.
-    void queryClient.resetQueries({ predicate: (q) => q.queryKey[0] !== 'portal-kundenkonten' })
-  }
+    if (!aktiv && konten.data.length === 1) wechsle(konten.data[0])
+  }, [konten.data, aktiv, wechsle])
 
   return { konten: liste, aktiv, wechsle, laedt: konten.isLoading, fehler: konten.isError }
 }
@@ -74,9 +106,9 @@ export function PortalKontoWahl() {
   }
   if (!aktiv) return null
   return (
-    <span className="hidden items-center gap-1.5 text-sm text-muted-foreground md:flex">
+    <span className="hidden min-w-0 max-w-64 items-center gap-1.5 text-sm text-muted-foreground md:flex">
       <Building2 className="h-4 w-4" aria-hidden />
-      {bezeichnung(aktiv)}
+      <span className="min-w-0 truncate" title={bezeichnung(aktiv)}>{bezeichnung(aktiv)}</span>
       {aktiv.rolle === 'intern' && (
         <Button variant="ghost" size="sm" onClick={() => wechsle(null)}>
           Kunde wechseln

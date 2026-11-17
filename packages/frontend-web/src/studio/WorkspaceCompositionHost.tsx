@@ -5,7 +5,7 @@
  * Persönliches View-Pin / Start-Fix via Composition-Overlay (localStorage).
  */
 
-import { useMemo } from 'react'
+import { useId, useMemo, useState, type ReactNode } from 'react'
 import { Pin, PinOff } from 'lucide-react'
 import {
   InboxWidget,
@@ -137,6 +137,22 @@ function DispositionBoardSlot({
   )
 }
 
+function EmbeddedSlot({ label, kind, children }: { label: string; kind: string; children: ReactNode }): JSX.Element {
+  const [open, setOpen] = useState(false)
+  const panelId = useId()
+
+  return (
+    <div data-specialized-kind={kind} className="rounded-(--radius) border border-border bg-card p-3">
+      <Button type="button" variant="ghost" aria-expanded={open} aria-controls={panelId} onClick={() => setOpen(!open)}>
+        {label}
+      </Button>
+      <div id={panelId} hidden={!open}>
+        {open ? children : null}
+      </div>
+    </div>
+  )
+}
+
 export function WorkspaceCompositionHost({
   composition,
   inboxQueue,
@@ -153,6 +169,8 @@ export function WorkspaceCompositionHost({
   const plan: WorkspaceCompositionMountPlan = resolveWorkspaceCompositionMounts(personalized)
   const views = normalizeWorkspaceComposition(personalized).views
   const embedded = variant === 'embedded'
+  const [customizing, setCustomizing] = useState(false)
+  const customizationId = useId()
 
   return (
     <div
@@ -172,6 +190,12 @@ export function WorkspaceCompositionHost({
         </header>
       ) : null}
 
+      {embedded ? (
+        <Button type="button" variant="outline" aria-expanded={customizing} aria-controls={customizationId} onClick={() => setCustomizing(!customizing)}>
+          Arbeitsbereich anpassen
+        </Button>
+      ) : null}
+      <div id={customizationId} hidden={embedded && !customizing}>
       <ol
         className="flex flex-col gap-1 rounded-(--radius) border border-border bg-muted/30 p-3"
         data-testid={embedded ? 'workspace-composition-view-pins' : 'workspace-composition-views'}
@@ -236,6 +260,7 @@ export function WorkspaceCompositionHost({
           )
         })}
       </ol>
+      </div>
 
       <div
         className="grid gap-4 lg:grid-cols-2"
@@ -243,24 +268,15 @@ export function WorkspaceCompositionHost({
         aria-label="Spezialkomponenten"
       >
         {plan.slots.map((slot) => {
-          if (slot.kind === 'inbox') {
-            return (
-              <InboxSlot
-                key={slot.id}
-                slot={slot}
-                queue={inboxQueue}
-                onOpenMask={onOpenMask}
-                onQueue={onQueue}
-                forceCompact={embedded}
-              />
-            )
-          }
-          return (
-            <DispositionBoardSlot
-              key={slot.id}
-              slot={slot}
-              homeEntryTestId={embedded}
-            />
+          const content = slot.kind === 'inbox' ? (
+            <InboxSlot slot={slot} queue={inboxQueue} onOpenMask={onOpenMask} onQueue={onQueue} forceCompact={embedded} />
+          ) : (
+            <DispositionBoardSlot slot={slot} homeEntryTestId={embedded} />
+          )
+          return embedded ? (
+            <EmbeddedSlot key={slot.id} label={slot.label} kind={slot.kind}>{content}</EmbeddedSlot>
+          ) : (
+            <div key={slot.id}>{content}</div>
           )
         })}
       </div>

@@ -21190,3 +21190,154 @@ M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: Codex Lead besitzt tests/test_c
 M0-CI-GESAMTBASIS-20261115 Erweiterung vor Edit: auch tests/test_fsx003_quality_gate_wiring.py fuer semantische Pruefung der weiter verpflichtenden secret-scan-Abhaengigkeit plus schnellem Metagate; FSX bleibt eigenstaendig an path-guard. Beide reinen Workflow-Testdateien in bestehendes improvement-integrity vorziehen und nur dort ausfuehren. Backend benoetigt dessen Erfolg, danach volle Produktsuite mit unveraendertem Coverage-Scope. Keine neue CI-Datenbank/Container und kein neuer Job.
 
 M0-CI-Fast-Fail lokal abgenommen: gesamter neuer Metatestsatz135pass, enger Satz44pass (ueberlappend). Reiner StrictDB-/Evidenz-/FSX-Wiringvertrag vor die Backend-DB-Suite verlegt, verpflichtende Abhaengigkeit, doppelte Ausfuehrung dieser beiden Dateien vermieden. Alle Produkttests/Coverage-Scope bleiben unveraendert; neuer Gesamt-CI-Lauf erforderlich. QA m0-ci-contract-fast-fail-20261115.md. Erweiterte Budget-Freigabegegenprobe echt auf249 bestanden (StrictDB43755370395).
+
+## M0-LOCAL-SCHEMA-ROLLOUT-20261116 — lokal abgenommen, Codex Lead; Preview-Integration offen
+
+Ziel: abgenommenen main a5f60738a lokal bereitstellen. Besitz: bestehende
+Backend-/Frontend-Container im Projekt valeo-neuro-erp, fuenf ausschliesslich
+gemergte Migrationen in valeo_neuro_erp, eigene private Betriebsartefakte,
+eigene QA/Handshake/Workboard. Keine fremden Dienste oder Testdatenbanken.
+Abnahme: Sicherung mit validiertem Archiv, Quellen-/Rollen-/Aktivitaetspruefung,
+transaktionale Rollback-Probe, kanonisches Alembic, gesunde bestehende Dienste
+und lesende Auth-/Routenpruefung. Keine lokalen Fachtest-Schreibdaten und kein
+Reset/Prune. Bei Fremdnutzung warten, bei Abweichung abbrechen. Quelle und alle
+68 erfolgreichen PR-Pruefungen sind vor Ausfuehrung verifiziert; Review-Ausnahme
+betraf nur die externe Review, kein Testgate. main/develop auf a5f60738a.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Erweiterung vor Edit: Nutzer meldet SSO Failed to fetch.
+Lesend bestaetigt: Windows-WSL-Relay liefert auf localhost:8080 Tomcat404, waehrend
+Keycloak intern200 liefert. Keine fremden Prozesse beenden. Codex besitzt
+Dockerfile.frontend, docker-compose.local-preview.yml, eigene enge Tests/QA
+fuer expliziten freien lokalen Identitaetsport8081, durchgaengigen Issuer und
+Docker-Build-Konfiguration. Auch bestehender Keycloak-Container im Wartungsclaim;
+keine Realm-/Benutzer-/Rollen-/Datenbankaenderung, keine gelockerte Tokenpruefung.
+Abnahme: Discovery/CORS und SSO-Weiterleitung auf3000/3001 sowie passender Backend-
+Issuer; vorhandene Daten/Volumes und andere Dienste erhalten.
+
+Lokaler SSO-Nachlauf:8081istDocker-internvonRedis-Commanderbelegt. FreierPort18081nachWindows+allenDockerreservierungen+BasisComposegeprueft; QuelleundKonfigvertraegeangepasst. KeineFremddiensteaendern; aktuellesAnwendungswartungsfensterbisAbschlussderSSOGegenprobe.
+
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116 Betriebsnachlauf: Portkonfiguration 18081 ist committet. Frontend-Kompilierung erfolgreich, Imageexport durch haengende Docker-Engine abgebrochen (RPC EOF). Regulärer Desktop-Neustart scheitert am Stoppen; nur verifizierte Docker-Desktop-Prozesse gezielt beendet und Docker-WSL-Wiederherstellung eingeleitet. Keine Datenloeschung. SSO-Aktivierung und reale Browserabnahme bleiben offen, keine Gesamtfreigabe. Weitere DB-Tests erst nach bestaetigter Engine-Gesundheit.
+
+Wiederherstellungsgrenze: Auch Docker Desktop start --timeout 60 endete mit context deadline exceeded; WSL-Auflistung und gezieltes Beenden der Docker-VM antworteten nicht. Keine weiteren konkurrierenden Neustarts ausloesen. Windows-Neustart erforderlich, anschliessend bestehenden Stack und ausschliesslich den SSO-Frontend-Build aus ddc58d254 vervollstaendigen, danach Browsergegenprobe auf 3000/3001. Kein erfolgreicher SSO-Abschluss behauptet.
+
+M0-LOCAL-SCHEMA-ROLLOUT-20261116: lokaler Betrieb und SSO-Nachlauf nach Nutzer-Neustart abgenommen. Backend, Keycloak, Frontend healthy; finaler Previewport 18081, beide CORS-Origins 3000/3001 korrekt. Echter Chrome-Klick auf Mit SSO anmelden erreicht an beiden Ports sichtbare Keycloak-Maske, null fehlgeschlagene Anfragen, Screenshots geprueft. Keine Zugangsdaten eingegeben, daher keine persoenliche MFA-/Kennwortabnahme behauptet. Vier Konfigvertraege erneut bestanden; Budget-API bleibt unauthentifiziert401. Keine Migration/DB-/Container-Neuanlage und keine Rollenveraenderung. Quelle ddc58d254, Frontendimage 714148731111. Wartungsblocker aufgehoben; vor fremden DB-Tests weiterhin regulaeren Pruefstandstatus pruefen. Previewfix auf eigenem Ops-Zweig, main/develop unveraendert a5f60738a. QA m0-local-schema-rollout-20261116.md.
+
+
+## WORKSPACE-HOME-USABILITY-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
+
+Nutzerbefund: Start zeigt technische Diagnosen, doppelte operative Listen und
+eine ueberladene Zusammenstellung. Ziel: ruhiger, rollenbezogener Einstieg
+innerhalb des bestehenden Studio-/Meridian-Vertrags, keine Parallelseite.
+Besitz: AdaptiveWorkspaceLayer, home-composition, AgrarChainWidget und zugehoerige
+Projektionen/Tests, start-dashboard-Zusammenstellung, gemeinsame spezialisierte
+Disposition-/Kompositionspraesentation und eng betroffene Tests; eigene QA,
+Meridian-Doku und Handshake. Delegation nur mit getrennten Dateien.
+Abnahme: keine rohen UUID-/Reasoncode-Diagnosen im Standardbild, fachliche
+Navigation erhalten, operative Details bewusst oeffnen, keine Berechtigungen
+erweitern oder Fehler als leere Daten tarnen. Gezielte Verhaltenstests, Typpruefung
+und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
+Keine DB-Schreibtests, neuen Container oder Migrationen.
+
+WORKSPACE-HOME-USABILITY-20261116 Erweiterung vor Edit: Browsernachweis zeigt zentrale Schrift-/Radius-Tokens leer, Titel dadurch 16px statt Hierarchie; Suchkuerzel von Axe als teilweise verdeckt markiert. Codex besitzt zusaetzlich src/index.css und eng betroffene Tokenvertraege fuer die konkrete zentrale Token-Selbstreferenzdiagnose. Kein individueller CSS-Bypass; Browser muss nichtleere Tokens und beide Themes nachweisen.
+
+WORKSPACE-HOME-USABILITY-20261116 implementiert: bestehender Studio-Host mit bewusstem Oeffnen, kompakter Aufgabenprojektion und versteckter Anpassungssteuerung; keine neue Seitenarchitektur. CSS-Layer-Reihenfolge zentral repariert, echte berechnete Titel-/Radiuswerte und Kontrast geprueft. 67 Verhaltenstests sowie volle Frontend-Typpruefung bestanden. Sechs synthetische Browserfaelle mit produktiven Komponenten, ohne persoenliche Anmeldung/DB, bestehen. Lokales finales Frontend-Image folgt; kein Backend-/DB-Neustart. QA workspace-home-usability-20261116.md.
+
+WORKSPACE-HOME-USABILITY-20261116 lokal bereitgestellt: Quelle6ea0b08ef, Frontendimagecde458f352c8; nur bestehenden Frontend ersetzt. 67 Oberflaechen-/Fachwegtests plus 86 Themevertraege, volle Typpruefung und sechs finale Browser-/Kontrastfaelle bestanden. Beide SSO-Einstiege nach Aktivierung erneut fehlerfrei, alle drei Dienste healthy. Keine persoenliche Anmeldung, keine DB-Aenderung. PR148 nach PR147 integrieren; lokale Wartung beendet.
+
+
+## GROUPED-APP-LAUNCHER-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
+
+Nutzerpraezisierung mit drei Bildern: Start ist primaer funktional gruppierter
+App-/Masken-Launcher, kein Dashboard. Vorhandene Launchpad-Komponenten und
+Navigations-/Studio-Kataloge weiterverwenden. Besitz: LaunchpadBoard,
+launchpad-spaces, AdaptiveWorkspaceLayer, start-dashboard und eng betroffene
+Tests/visueller Harness; eigene QA/Design-Doku/Handshake. Getrennte Delegation
+Board versus Home-Integration. Abnahme: Symbolstarter nach Fachgruppen,
+Direktnavigation, Suche, Personalisierung und Theme; keine Kennzahlen/Tafeln
+auf dem Standardstart, bestehende operative Komposition getrennt erreichbar.
+Keine Attrappen, Rechteerweiterung, neue Datenbank oder Container.
+
+GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarter statt Dashboard. Default zeigt vorhandene Navigation als gruppierte Symbole und echte Maskenlinks mit Suche; keine operativen Dashboard-GETs. Bestehende Studio-Komposition bleibt ueber Arbeitsuebersicht oeffnen erreichbar. Overlay/Anpassung erhalten, keine Rechte-/DB-Aenderung. 32 Verhaltenstests, Such-Aliasregression, volle Typpruefung und sechs synthetische Theme-/Desktop-Browserfaelle bestanden. Lokaler Einzel-Frontendbuild folgt, basiert auf PR148 und147. QA grouped-app-launcher-20261116.md.
+
+Nutzerpraezisierung: Gruppentitel zeigen ausschliesslich den funktionalen Gruppennamen, ohne wiederholten Oberbereich wie Handel & CRM. Der Oberbereich bleibt im Suchindex und semantischen Abschnittskontext erhalten.
+
+GROUPED-APP-LAUNCHER-20261116 Erweiterung vor Edit: Nutzer fordert aussagekraeftige Icons. Zentrale semantische Symbolzuordnung launchpad-icons.ts nach bestehenden Katalogidentitaeten plus zugehoeriger Vertrag; Nav-Symbole bleiben Fallback fuer unbekannte Eintraege. Keine Fachroute oder Rollenentscheidung aus dem Symbol ableiten.
+
+GROUPED-APP-LAUNCHER-20261116: Kurze Gruppentitel ohne wiederholten Oberbereich, zentrale fachliche Symbolzuordnung nach Katalog-ID (Dokumentarten unterscheidbar). 34 Verhaltenstests, volle Typpruefung und sechs finale Browser-Kontrastfaelle bestanden. Eigenen ueberholten Build fuer Nutzerkorrekturen abgebrochen, finaler einzelner Build folgt. Keine Rechte-/DB-Aenderungen.
+
+GROUPED-APP-LAUNCHER-20261116 lokal aktiv: Quelle745cca250, Imageb72327848a9b. Alle drei Dienste healthy, beide SSO-Einstiege nach Aktivierung fehlerfrei. Kurze Gruppentitel, semantische Fachsymbole, Suche und persoenliche Anpassung. 34 Tests, volle Typpruefung und sechs synthetische Desktop-/Themefaelle bestanden. Keine DB- oder Rechteaenderung. PR149 nach148/147 integrieren, lokale Wartung beendet.
+
+
+## AGRARPORTAL-ENTRY-ISOLATION-20261116 — Einstieg lokal abgenommen, Codex Lead; Folge-Fachslices offen
+
+Nutzerauftrag: sichtbarer Agrarportal-Einstieg fuer Landwirte mit Bestellungen,
+Dokumenten, Futterberatung und Schlagkartei; Mandanten- UND Kundenbetriebsgrenze.
+Bestand: CustomerPortalLayout, portal_kunde/portal_recht, Kundenzugaenge,
+Portal-Shop/Feldbuch/Futterberatung existieren. Kein paralleles Portal bauen.
+Besitz: Launchpad-Portalgruppe/-Symbole/-Tests, passende Sicherheitsbestandsanalyse
+und eigene QA/Architektur-/Handshake-Doku. Backendkorrekturen erst nach konkretem
+Befund und ergaenztem Dateibesitz. Keine pauschale Rollenerweiterung oder
+automatische Vermarktung von Betriebsdaten. Optionales Marketing/Analyse und
+notwendige Servicedaten zweckbezogen trennen. Keine neue DB/Container.
+Abnahme: bestehende verifizierte Kundenkonto-/Mandantenwege, fremde Kunden
+bleiben gesperrt; vorhandene Portal-ScreenDefinitions weiterverwenden.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Erweiterung vor Edit: Nutzer praezisiert kundenbezogenen Direktstart nach Anmeldung und internen Launcher-Einstieg zur gekennzeichneten Kundenansicht. Besitz zusaetzlich hooks/useAuth.ts, lib/portal-landing.ts, CustomerPortalLayout, PortalKontoWahl, lib/portal-konto.ts und passende Tests. Bestehende servergepruefte Kundenkonten fuer Landingsentscheidung nutzen, keine fingierte Benutzeranmeldung. Globaler Kontostore an aktuellen verifizierten Sitzungs-/Mandantenkontext binden. Audit: vertrauenswuerdiger Mehrmandanten-Tokenwechsel fehlt bisher; keine frei waehlbaren X-Tenant-ID zulassen. Eigener ADR-/Vertragsentwurf erforderlich, nicht als fertige Funktion ausgeben.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116: Portalgruppe, serverbasiertes Kundenlanding und klarer interner Pruefeinstieg implementiert. Globalen Portalzustand gegen Identitaets-/Mandanten-/Rollen-/Scope-/Providersitzungswechsel gebunden; alte Requests vor Konto-Freigabe abbrechen. 33 Frontendtests, volle Typpruefung sowie je sechs Portalrahmen-/Launcher-Kontrastansichten bestanden; keine echte DB-/Tokenwechsel-Abnahme behauptet. Interne tenantweite Futterberatung im Kunden-Pruefmodus gesperrt, kein Rechtebypass. Offen: echter autorisierter Handelspartnerwechsel, kundenbezogene Futter-Fachwege und gemeinsame Beleg-Kundenvariante statt separatem CustomerOrder-Modell. Vertrage in agrarportal-tenant-selection-20261116.md und portal-customer-document-variant-20261116.md. Keine Backend-/DB-Aenderung. Lokaler Einzel-Frontendbuild folgt.
+
+
+Naechste abgegrenzte Portal-Slices (offen, keine konkurrierenden Claims):
+- PORTAL-TENANT-BROKER-20261116: autorisierte Handelspartner-Mitgliedschaft,
+  provider-/sitzungsgebundener Token-/Kontextwechsel und echte Isolationstests.
+- PORTAL-CUSTOMER-DOCUMENT-20261116: customer_inquiry als Belegfamilienkind,
+  kundenberechtigte Anfrage-/Auftrags-Commands, Adress- und DMS-Anhangsvertrag,
+  eigene Historien-/Silo-Vorschlaege; CustomerOrder-Doppelweg kontrolliert abloesen.
+- PORTAL-FEED-CUSTOMER-SCOPE-20261116: kundenbezogene Rezepte/Betriebe/Gruppen
+  und Folgereferenzen ueber dieselbe PortalKunde-Pruefung; keine interne
+  tenantweite Fachseite als kundenisolierte Freigabe ausgeben.
+
+AGRARPORTAL-ENTRY-ISOLATION-20261116 Einstieg lokal aktiv: Frontend3b750ff68/ee27f8273cfb; alle Dienste healthy und SSO3000/3001 nach Aktivierung fehlerfrei. 33 Frontendtests, volle Typpruefung, je sechs Launcher-/Portalrahmenansichten bestanden. Keine echte Kunden-Fachketten- oder Mehrmandanten-Tokenabnahme behauptet. PR150 nach149/148/147. Folgeslices PORTAL-TENANT-BROKER, PORTAL-CUSTOMER-DOCUMENT und PORTAL-FEED-CUSTOMER-SCOPE bleiben offen; keine laufende DB-Nutzung aus diesem Slice.
+
+
+## PORTAL-TENANT-BROKER-20261116 — Phase 1 lokal abgenommen, Codex Lead
+
+Phase1: eigene gueltige Handelspartner-Zuordnungen aus domain_portal.kundenzugaenge
+lesend ermitteln. Bestehende cross_tenant_scope/system_session bewusst verwenden,
+kein unautorisierter Tenantwechsel und keine generischen RLS-Ausnahmen.
+Besitz: neuer eng begrenzter Portal-Handelspartner-Service/-Router, Registrierung
+in API v1, zugehoerige Tests/Vertragsartefakte und eigene Architektur/QA/Handshake-Doku.
+Ausgabe nur Metadaten eigener aktiver Beziehungen; Eingabe-Subject ausschliesslich
+aus gepruefter Identitaet. Systemverbindung zwingend und read-only, keine stillen
+App-Verbindungs-Fallbacks fuer scheinbar vollstaendige Listen.
+Abnahme: Fremdpersonen, widerrufene/abgelaufene Beziehungen, geloeschte Kunden,
+gesperrte Mandanten und falsche DB-Rolle abweisen. Bestehender einzelner signierter
+Mandantenkontext bleibt unveraendert. Token-/Kontextausstellung ist nachfolgende
+Phase; reine Auswahlliste nicht als fertigen Wechsel ausgeben. Keine neue DB/Container.
+
+PORTAL-TENANT-BROKER Erweiterung 2026-11-16: Nachweis fand fehlende Lese-ACLs fuer vorhandene valeo_system-Rolle im Pruefstand. Besitz zusaetzlich scripts/provision_portal_directory_reads.py und eigener Plantest. Enges Einrichtungsfenster nur valeo_probe: bestehende Rolle pruefen, USAGE auf drei Schemas und SELECT auf genau drei Verzeichnisquellen, keine Schreibrechte/DDL/Passwort-/Rollenanlage; vorher aktive Sessions pruefen. Entwicklungsdatenbank unveraendert.
+
+PORTAL-TENANT-BROKER Phase1: GET /portal/handelspartner mit gepruefter Identitaet, expliziter READ-ONLY-Systemsession und Metadaten eigener aktiver Zuordnungen implementiert. 23 Tests einschliesslich echter PostgreSQL-Filter und valeo_system/READ ONLY bestanden, keine Skips. Fehlende ACLs im freien valeo_probe gezielt als USAGE/SELECT auf drei Quellen eingerichtet (vorher Rollback-Probelauf); keine Migration/Schemaaenderung/Schreibrechte. OpenAPI, Index, Inventare, Agent-Handbuch synchron; Summary/Response 100%. Token-/Kontextwechsel bleibt Phase2, kundengebundene Beleg-/Futterketten bleiben eigene Slices. Backend nicht lokal ausgerollt. QA portal-tenant-directory-20261116.md.
+
+PORTAL-TENANT-BROKER Phase1 gepusht als93e23359f, PR151 gestapelt nach150; kein main-Merge/Deployment behauptet. Phase2-Bestandsaudit bestaetigt fehlenden Kontextaussteller (Redis identity_session prueft/widerruft nur). Signierten Originaltenant nicht durch globales Keycloak-Attributumschreiben oder freie Header umgehen; Audit im Architekturvertrag nachgezogen.
+
+MAIN-INTEGRATION-20261116: Nutzerauftrag main-Push. Eigene PR-Kette147–151 ist vollstaendig in PR151 enthalten und dessen Ziel jetzt main. Gemeinsame Gesamt-CI am Endstand vor Merge; keine Umgehung roter/fehlender Gates. Fremde PR146 und Dependency-PRs nicht Bestandteil. Nach Integration eigene enthaltene PRs147–150 schliessen.
+
+MAIN-INTEGRATION Inventarfix reserviert Codex: scripts/check_tenant_isolation.py und eigener Regressionstest. CI meldet fehlende Klassifikation des neuen Portal-Verzeichnisadapters; explizit eigene verifizierte Identitaetsmitgliedschaft statt falscher Shared-/Stateless-Ausnahme klassifizieren. Keine Schwellenlockerung oder DB-Rechteaenderung.
+
+MAIN-INTEGRATION Inventarfix umgesetzt: eigene Kategorie identity-membership fuer gepruefte eigene Portal-Zuordnungen mit Nachweisquellen. Drei Regressionstests und alle neun Verbesserungspipelines bestanden. Unbekannte Adapter blockieren unveraendert; kein System-/Shared-Freibrief und keine geaenderte Autorisierung.
+
+MAIN-INTEGRATION Katalogfix reserviert Codex: docs/admin/table-catalog.json und .md. Frisches CI-Schema Run43946243084 meldet ausschliesslich drei neue read_by-Verweise auf portal_tenant_directory; keine Tabellen-/Spaltenaenderung. Uebernahme des exakten CI-Artefakts nach strukturellem Vergleich, keine lokale DB-Migration.
+
+MAIN-INTEGRATION Frontend-Vertraege reserviert Codex Lead: fuenf im Gesamtlauf rote Testdateien workspace/disposition-signal, inbox-ranking, launcher-surfaces-evidence, dialog-layer und auth/http-refresh. Ursachen pruefen: alter Dashboard-Standard statt expliziter Arbeitsuebersicht, unvollstaendige Auth-Mocks. Vertraege auf echte neue Bedienfolge aktualisieren, negative Checks erhalten, keine Produktions-Fallbacks fuer Testattrappen. Aufteilung disposition/inbox an AgentA; dialog/launcher an AgentB; Auth und Integration Lead. Keine DB oder parallelen Builds.
+
+MAIN-INTEGRATION Frontend-Vertraege korrigiert: 23/23 gezielte Tests in fuenf Dateien gruen. Expliziter Arbeitsuebersichtsmodus, echte Disclosure-Klicks, nutzerverstaendliche Hinweise und vollstaendige Auth-Mocks; negative Nachweise erhalten. Keine Produktionscodeaenderung. Gemeinsamer GitHub-Nachlauf folgt nach Typpruefung.
+
+MAIN-INTEGRATION RLS-Matrix reserviert Codex: docs/admin/rls-domain-matrix.json/.md und scripts/check_all_doc_generators.sh. Gesamtsuite28388passed, ein Driftvertrag rot durch neue Portal-Service-Lesereferenzen. Matrix aus vorhandenen versionierten Befunden regenerieren (ohne --data/DB), fruehen Generatorcheck aufnehmen; keine Policy-/Ausnahmen-/Schwellenaenderung.
+
+MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) betraf einen neuen Kunden-Leserverweis/Identitaetszaehler, keine Policyaenderung. Fuenf Matrixvertraege und --check danach gruen. Frueher Meta-Generatorcheck verhindert spaete Wiederentdeckung nach Gesamtlauf. Endlauf fuer versiegelte Abdeckung erforderlich; keine Freigabe aus einem roten Lauf abgeleitet.
+
+MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
+
+MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.

@@ -125675,6 +125675,67 @@
         "title": "PortalFeldbuchZeile",
         "type": "object"
       },
+      "PortalHandelspartner": {
+        "properties": {
+          "active": {
+            "description": "Entspricht dem bereits verifizierten Token-Mandanten",
+            "title": "Active",
+            "type": "boolean"
+          },
+          "customer_count": {
+            "description": "Anzahl eigener aktiver Kundenkonten dort",
+            "minimum": 1.0,
+            "title": "Customer Count",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Berechtigter Handelsmandant aus eigener Zuordnung",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name des berechtigten Handelspartners",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "customer_count",
+          "active"
+        ],
+        "title": "PortalHandelspartner",
+        "type": "object"
+      },
+      "PortalHandelspartnerVerzeichnis": {
+        "properties": {
+          "context_switch_available": {
+            "const": false,
+            "default": false,
+            "title": "Context Switch Available",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PortalHandelspartner"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "stage": {
+            "const": "discovery_only",
+            "default": "discovery_only",
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PortalHandelspartnerVerzeichnis",
+        "type": "object"
+      },
       "PortalInteressentListOut": {
         "properties": {
           "count": {
@@ -365046,6 +365107,40 @@
           "feldbuch",
           "portal",
           "feldbuch"
+        ]
+      }
+    },
+    "/api/v1/portal/handelspartner": {
+      "get": {
+        "description": "Liefert ausschliesslich Metadaten eigener gueltiger Portal-Zuordnungen. Waehlt keinen Mandanten, erweitert keine Rolle und gibt keine Geschaeftsdaten zurueck. Ein fremder Subject- oder Tenant-Selektor ist kein Eingabeparameter. Ohne gepruefte System-Leseverbindung bleibt der Weg gesperrt.",
+        "operationId": "meine_handelspartner_api_v1_portal_handelspartner_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalHandelspartnerVerzeichnis"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Gepruefte Identitaet fehlt"
+          },
+          "503": {
+            "description": "Sicheres Zuordnungsverzeichnis nicht verfuegbar"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eigene freigegebene Handelspartner ermitteln",
+        "tags": [
+          "portal",
+          "identity"
         ]
       }
     },

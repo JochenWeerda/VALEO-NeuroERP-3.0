@@ -194,7 +194,8 @@ describe('WorkspaceCompositionHost', () => {
     expect(board).toHaveAttribute('data-specialized-id', 'lkw-disposition-board')
   })
 
-  it('embedded: View-Pins ohne Studio-h1, Home-Testids und onQueue', () => {
+  it('embedded: Slots und Anpassung sind zunächst geschlossen und mounten erst beim Öffnen', async () => {
+    const user = userEvent.setup()
     const onQueue = vi.fn()
     renderHost(
       <WorkspaceCompositionHost
@@ -205,20 +206,33 @@ describe('WorkspaceCompositionHost', () => {
       />,
     )
 
-    expect(screen.getByTestId('workspace-composition-host')).toHaveAttribute(
-      'data-host-variant',
-      'embedded',
-    )
+    expect(screen.getByTestId('workspace-composition-host')).toHaveAttribute('data-host-variant', 'embedded')
     expect(screen.queryByTestId('workspace-composition-views')).not.toBeInTheDocument()
-    expect(screen.getByTestId('workspace-composition-view-pins')).toBeInTheDocument()
-    expect(screen.getByTestId('workspace-specialist-slots')).toBeInTheDocument()
-    expect(screen.getByTestId('workspace-disposition-entry')).toHaveAttribute(
-      'data-board-route',
-      DISPOSITION_BOARD_ROUTE,
-    )
+    const customize = screen.getByRole('button', { name: 'Arbeitsbereich anpassen' })
+    expect(customize).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByTestId('workspace-composition-view-pins')).not.toBeVisible()
+    const board = screen.getByRole('button', { name: 'Dispo-Tafel' })
+    const inbox = screen.getByRole('button', { name: 'Document-Inbox' })
+    expect(board).toHaveAttribute('aria-expanded', 'false')
+    expect(inbox).toHaveAttribute('aria-expanded', 'false')
+    expect(document.getElementById(board.getAttribute('aria-controls')!)).toBeInTheDocument()
+    expect(screen.queryByTestId('disposition-board')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('adaptive-workspace-inbox')).not.toBeInTheDocument()
+    expect(getMock).not.toHaveBeenCalled()
+    expect(onQueue).not.toHaveBeenCalled()
+
+    await user.click(board)
+    expect(board).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('workspace-disposition-entry')).toHaveAttribute('data-board-route', DISPOSITION_BOARD_ROUTE)
     expect(screen.getByTestId('disposition-board')).toBeInTheDocument()
+    await user.click(inbox)
     expect(screen.getByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(onQueue).toHaveBeenCalled()
+    await user.click(inbox)
+    expect(screen.queryByTestId('adaptive-workspace-inbox')).not.toBeInTheDocument()
+    await user.click(customize)
+    expect(customize).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('workspace-composition-view-pins')).toBeVisible()
   })
 
   it('pinnt eine View und fixiert sie als Start — Persistenz im Composition-Overlay', async () => {
@@ -231,6 +245,7 @@ describe('WorkspaceCompositionHost', () => {
       />,
     )
 
+    await user.click(screen.getByRole('button', { name: 'Arbeitsbereich anpassen' }))
     await user.click(screen.getByRole('button', { name: 'Beleg-Inbox pinnen' }))
     await user.click(screen.getByRole('button', { name: 'Beleg-Inbox als Start fixieren' }))
 

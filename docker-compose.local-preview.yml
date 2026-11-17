@@ -1,12 +1,25 @@
 # Local ERP development/presentation runtime; combine with docker-compose.yml.
 # One worker avoids four simultaneous full-registry imports on developer laptops.
 services:
+  keycloak:
+    # A dedicated loopback port avoids Windows/WSL services shadowing port 8080.
+    ports: !override
+      - "127.0.0.1:${VALEO_LOCAL_IDENTITY_PORT:-18081}:8080"
+    environment:
+      KC_HOSTNAME: !reset null
+      KC_HOSTNAME_URL: "http://localhost:${VALEO_LOCAL_IDENTITY_PORT:-18081}"
   backend:
+    environment:
+      OIDC_ISSUER_URL: "http://localhost:${VALEO_LOCAL_IDENTITY_PORT:-18081}/realms/valeo-neuro-erp"
     # The image includes reviewed code, configuration and the Studio catalog.
     # Do not replace it with mutable or stale host files during presentations.
     # Apply reviewed migrations explicitly before starting this preview profile.
     volumes: !reset []
     command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--timeout-keep-alive", "5"]
   frontend-web:
+    build:
+      args:
+        VITE_OIDC_DISCOVERY_URL: "http://localhost:${VALEO_LOCAL_IDENTITY_PORT:-18081}/realms/valeo-neuro-erp/.well-known/openid-configuration"
+        VITE_OIDC_CLIENT_ID: "valeo-neuro-erp-frontend"
     ports:
       - "127.0.0.1:3001:8080"

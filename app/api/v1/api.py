@@ -1366,6 +1366,8 @@ api_router.include_router(
 # Kundenportal: Zuordnung Anmeldung -> Kundenkonto (TENANT-DOC-001)
 from app.api.v1.endpoints import portal_kundenzugaenge  # noqa: E402
 api_router.include_router(portal_kundenzugaenge.router)
+from app.api.v1.endpoints import portal_handelspartner  # noqa: E402
+api_router.include_router(portal_handelspartner.router)
 
 # Kundenportal
 api_router.include_router(

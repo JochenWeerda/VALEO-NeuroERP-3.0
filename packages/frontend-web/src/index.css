@@ -1,3 +1,6 @@
+/* Register cascade order before token imports; base values must override theme aliases. */
+@layer theme, base, components, utilities;
+
 /* Theme-invariante strukturelle Primitive (einmal an :root) vor den Theme-Dateien —
    loest 38 der frueher identischen Doppel-Definitionen in Meridian/Terra auf. */
 @import './styles/tokens/primitives.css' layer(base);

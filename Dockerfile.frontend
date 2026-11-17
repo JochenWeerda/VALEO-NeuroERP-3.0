@@ -11,6 +11,11 @@ RUN pnpm install --filter @valero-neuroerp/frontend-web --frozen-lockfile
 
 COPY packages/frontend-web/ packages/frontend-web/
 WORKDIR /app/packages/frontend-web
+# Public provider settings only; never pass credentials through VITE build args.
+ARG VITE_OIDC_DISCOVERY_URL
+ARG VITE_OIDC_CLIENT_ID
+ENV VITE_OIDC_DISCOVERY_URL=${VITE_OIDC_DISCOVERY_URL} \
+    VITE_OIDC_CLIENT_ID=${VITE_OIDC_CLIENT_ID}
 RUN pnpm run routes:generate && pnpm run build:prod
 
 FROM nginxinc/nginx-unprivileged:1.29-alpine3.23
