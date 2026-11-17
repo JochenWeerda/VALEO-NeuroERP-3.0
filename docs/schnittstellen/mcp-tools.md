@@ -12,7 +12,7 @@ version: 3.0.0
 
 > Automatisch generiert aus `config/mcp_erp_tools.yaml` via `python scripts/generate_mcp_tool_reference.py`. **Nicht manuell bearbeiten.**
 
-Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 73 Tools in 22 Domaenen.
+Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 71 Tools in 22 Domaenen.
 
 ## Uebersicht
 
@@ -45,9 +45,7 @@ Registry `MCP-ERP-TOOLS-001` (Schema 1.0) — 73 Tools in 22 Domaenen.
 | `einkauf.angebot.bestellen` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.anlieferavis.wareneingang` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.list` | einkauf | `einkauf:read` | ja | niedrig | nein |
-| `einkauf.bestellung.speichern` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `einkauf.bestellung.status` | einkauf | `einkauf:read` | ja | niedrig | nein |
-| `einkauf.bestellung.versenden` | einkauf | `einkauf:write` | ja | mittel | nein |
 | `fibu.dunning.status` | finance | `finance:read` | ja | niedrig | nein |
 | `fibu.open_items.list` | finance | `finance:read` | ja | niedrig | nein |
 | `finance.ap_invoice.propose` | finance | `finance:write` | nein | hoch | ja |
@@ -2636,89 +2634,6 @@ Listet Bestellungen des Authentifizierungs-Mandanten mit Status, Liefertermin un
 }
 ```
 
-### `einkauf.bestellung.speichern` — Bestellung speichern
-
-Aktualisiert erlaubte Bestell-Kopffelder im Authentifizierungs-Mandanten (Maske einkauf/purchase-order:speichern; CE /api/v1/einkauf/bestellungen/{id}/actions/speichern). parameters.bestellung_id plus optionale Felder (Liefer-/Ladetermine, Referenzen, Notiz, versand_art), reason. Status/Summen nicht aenderbar. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write. Kein tenant_id-Parameter.
-
-- **Scope:** `einkauf:write`
-- **Idempotent:** ja
-- **Risikoklasse:** mittel
-- **Audit:** write
-- **Human-Approval erforderlich:** nein
-- **Endpoint:** `POST /api/v1/mcp/tools/call`
-
-**Eingabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "bestellung_id": {
-      "type": "string"
-    },
-    "lieferdatum_wunsch": {
-      "type": "string"
-    },
-    "lieferdatum_zugesagt": {
-      "type": "string"
-    },
-    "ladetermin": {
-      "type": "string"
-    },
-    "ladetermin_ab": {
-      "type": "string"
-    },
-    "versand_art": {
-      "type": "string",
-      "enum": [
-        "email",
-        "fax",
-        "edi",
-        "post",
-        "telefon",
-        "manuell"
-      ]
-    },
-    "unsere_referenz": {
-      "type": "string"
-    },
-    "ihre_referenz": {
-      "type": "string"
-    },
-    "notiz": {
-      "type": "string"
-    },
-    "reason": {
-      "type": "string",
-      "minLength": 3
-    }
-  },
-  "required": [
-    "bestellung_id",
-    "reason"
-  ]
-}
-```
-
-**Ausgabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "bestellung_id": {
-      "type": "string"
-    },
-    "bestellnummer": {
-      "type": "string"
-    },
-    "auditEntryId": {
-      "type": "string"
-    }
-  }
-}
-```
-
 ### `einkauf.bestellung.status` — Bestellungs-Status
 
 Gibt DocFlow-Status, Phase (offen/teilgeliefert/abgeschlossen), Lieferant und kanonische Masken-Route (/belege/purchase_order/{id}, Screen beleg/purchase-order) einer Bestellung im Authentifizierungs-Mandanten zurueck. HTTP-Aufruf mit tool_name=einkauf.bestellung.status, parameters.bestellung_id (UUID oder Belegnummer). Default dryRun; execute ist ebenfalls nur Lesen. OIDC-Token mit einkauf:read und tenant_id erforderlich. Kein Versand, kein Obligo.
@@ -2769,71 +2684,6 @@ Gibt DocFlow-Status, Phase (offen/teilgeliefert/abgeschlossen), Lieferant und ka
       "type": "string"
     },
     "screen_id": {
-      "type": "string"
-    }
-  }
-}
-```
-
-### `einkauf.bestellung.versenden` — Bestellung versenden
-
-Versendet eine Bestellung des Authentifizierungs-Mandanten (E-Mail/Fax/EDI/manuell; Maske einkauf/purchase-order:versenden). Kein Obligo-Journal (Freigabe bleibt eigener Pfad). Default dryRun; execute erfordert idempotency_key. Scope einkauf:write.
-
-- **Scope:** `einkauf:write`
-- **Idempotent:** ja
-- **Risikoklasse:** mittel
-- **Audit:** write
-- **Human-Approval erforderlich:** nein
-- **Endpoint:** `POST /api/v1/mcp/tools/call`
-
-**Eingabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "bestellung_id": {
-      "type": "string",
-      "description": "Bestellungs-UUID oder Bestellnummer"
-    },
-    "versand_art": {
-      "type": "string",
-      "enum": [
-        "email",
-        "fax",
-        "edi",
-        "post",
-        "manuell"
-      ],
-      "default": "email"
-    },
-    "empfaenger": {
-      "type": "string",
-      "nullable": true
-    }
-  },
-  "required": [
-    "bestellung_id"
-  ]
-}
-```
-
-**Ausgabe-Schema:**
-
-```json
-{
-  "type": "object",
-  "properties": {
-    "bestellung_id": {
-      "type": "string"
-    },
-    "bestellnummer": {
-      "type": "string"
-    },
-    "versand_status": {
-      "type": "string"
-    },
-    "auditEntryId": {
       "type": "string"
     }
   }

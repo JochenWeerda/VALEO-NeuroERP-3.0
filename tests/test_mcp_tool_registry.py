@@ -1,9 +1,8 @@
 """Tests fuer MCP-ERP-TOOLS-001 Tool-Registry."""
 
 import pytest
-from pathlib import Path
 
-from app.services.mcp_tool_registry_service import McpToolRegistryService, McpToolValidationError
+from app.services.mcp_tool_registry_service import McpToolRegistryService
 
 
 @pytest.fixture()
@@ -79,9 +78,10 @@ def test_tour_and_po_save_writes_are_catalogued(svc: McpToolRegistryService) -> 
     tour = svc.get_tool("logistik.tour.anlegen")
     assert tour["scope"] == "logistics:write"
     assert tour["audit"] == "write"
-    po = svc.get_tool("einkauf.bestellung.speichern")
-    assert po["scope"] == "einkauf:write"
-    assert po["audit"] == "write"
+    # einkauf.bestellung.speichern/versenden sind entfernt (BELEG-052 Phase 3b): die Bestellung schreibt DocFlow.
+    for entfernt in ("einkauf.bestellung.speichern", "einkauf.bestellung.versenden"):
+        with pytest.raises(KeyError):
+            svc.get_tool(entfernt)
 
 
 def test_ap_freigabe_tools_are_catalogued(svc: McpToolRegistryService) -> None:
@@ -116,10 +116,6 @@ def test_lead_qualify_and_po_send_are_catalogued(svc: McpToolRegistryService) ->
     assert lead["scope"] == "crm:write"
     assert lead["audit"] == "write"
     assert lead["risk_class"] == "medium"
-    po = svc.get_tool("einkauf.bestellung.versenden")
-    assert po["scope"] == "einkauf:write"
-    assert po["audit"] == "write"
-    assert po["risk_class"] == "medium"
 
 
 def test_customer_open_is_catalogued(svc: McpToolRegistryService) -> None:

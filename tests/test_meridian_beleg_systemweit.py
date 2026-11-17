@@ -160,9 +160,7 @@ _IDENTITAET = {
     "einkauf/angebot": "angebotNummer",
     "einkauf/anlieferavis": "avisNummer",
     "einkauf/auftragsbestaetigung": "bestaetigungsNummer",
-    "einkauf/purchase-order": "bestellnummer",
     "einkauf/supplier": "lieferantennummer",
-    "finance/ap-invoice": "beleg_nr",
     "finance/ar-open-item": "rechnungsnr",
     "finance/bankkonto": "iban",
     "finance/debitor": "debitoren_nr",
@@ -279,7 +277,9 @@ def test_readiness_meldet_aufgeloestes_layout() -> None:
 def test_readiness_akzeptiert_row_detail_opt_out() -> None:
     from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 
-    definition = get_screen_definition("einkauf/purchase-order")
+    from app.core.screen_definitions_beleg import build_beleg_screen_definition
+
+    definition = build_beleg_screen_definition("purchase_order")
     for tab in definition["tabs"]:
         for table in tab.get("tables") or []:
             table["rowDetail"] = False
@@ -601,32 +601,6 @@ def test_ernteabrechnung_nennt_erzeuger_kampagne_artikel_kontrakt(client, stamm:
     assert body["article_name"] == "Weizen A"
     assert body["contract_number"] == "AK-2026-031"
     assert {"supplier_name", "campaign_name", "article_name", "contract_number"} <= _kopf_keys("agrar/harvest-settlement")
-
-
-@pytest.mark.integration
-def test_bestellung_nennt_niederlassung_und_belegkette(client, stamm: dict) -> None:
-    kopf = _kopf(stamm["mandant"])
-    angelegt = client.post("/api/v1/einkauf/bestellungen", headers=kopf, json={
-        "lieferant_id": stamm["lieferant"],
-        "bestelldatum": "2026-09-29",
-        "niederlassung_id": stamm["niederlassung"],
-        "kontrakt_id": stamm["kontrakt"],
-        "verkaufsbeleg_id": stamm["auftrag"],
-        "kunden_id": stamm["kunden_nr"],
-        "bestellfall": "direktlieferung",
-    })
-    assert angelegt.status_code == 201, angelegt.text
-
-    gelesen = client.get(_entity_url("einkauf/purchase-order", angelegt.json()["id"]), headers=kopf)
-    assert gelesen.status_code == 200, gelesen.text
-    body = gelesen.json()
-    assert body["niederlassung_name"] == "Niederlassung Suedheide"
-    assert body["kontrakt_nummer"] == "EK-K-2026-07"
-    assert body["verkaufsbeleg_nummer"] == stamm["auftrag_nummer"]
-    assert body["kunden_name"] == "Raiffeisen Markt Ost eG"
-    # Die Bezuege bleiben aenderbar und kommen weiter mit.
-    assert body["niederlassung_id"] == stamm["niederlassung"]
-    assert "niederlassung_name" in _kopf_keys("einkauf/purchase-order")
 
 
 @pytest.mark.integration

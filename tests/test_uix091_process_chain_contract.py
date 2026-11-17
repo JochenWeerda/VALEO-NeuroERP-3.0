@@ -15,7 +15,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_purchase_order_gets_einkauf_chain():
-    sd = get_screen_definition("einkauf/purchase-order")
+    sd = get_screen_definition("beleg-liste/purchase-order")
     assert sd is not None
     assert sd["processChain"] == {"chainId": "k3_einkauf", "stepKey": "bestellung"}
 
@@ -121,7 +121,7 @@ def test_readiness_accepts_no_process_chain_reason():
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")
     assert gate["severity"] == "mandatory"
     assert gate["passed"] is True
-    sd = get_screen_definition("einkauf/purchase-order")
+    sd = get_screen_definition("beleg-liste/purchase-order")
     assert sd is not None
     report = _check_readiness(sd)
     gate = next(item for item in report["gates"] if item["gate"] == "missing_process_chain")

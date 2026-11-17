@@ -92,43 +92,6 @@ def test_tour_ce_strips_tenant_override():
     assert insert.call_args.kwargs["tenant_id"] == "tenant-a"
 
 
-def test_po_ce_cross_tenant_is_not_found():
-    http, db = _client_po()
-    db.execute.return_value.mappings.return_value.first.return_value = None
-    response = http.post(
-        "/api/v1/einkauf/bestellungen/PO-X/actions/speichern",
-        json={"notiz": "x", "_mode": "dryRun"},
-    )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["success"] is False
-    assert "nicht gefunden" in (body.get("error") or "").lower()
-    db.commit.assert_not_called()
-
-
-def test_po_ce_dry_run_tenant_scoped():
-    http, db = _client_po()
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "id": "b1",
-        "bestellnummer": "PO-1",
-        "status": "entwurf",
-    }
-    with patch(
-        "app.services.procurement_service.ProcurementService.update_bestellung"
-    ) as upd:
-        response = http.post(
-            "/api/v1/einkauf/bestellungen/b1/actions/speichern",
-            json={"notiz": "Hinweis", "tenant_id": "evil", "_mode": "dryRun"},
-        )
-    assert response.status_code == 200
-    body = response.json()
-    assert body["success"] is True
-    assert body["mode"] == "dryRun"
-    upd.assert_not_called()
-    sql = str(db.execute.call_args[0][0])
-    assert "tenant_id" in sql
-
-
 def test_mcp_tour_rejects_tenant_override():
     http, db = _mcp(["logistics:write"])
     response = http.post(
@@ -142,42 +105,6 @@ def test_mcp_tour_rejects_tenant_override():
     db.execute.assert_not_called()
 
 
-def test_mcp_po_save_rejects_tenant_override():
-    http, db = _mcp(["einkauf:write"])
-    response = http.post(
-        "/mcp/tools/call",
-        json={
-            "tool_name": "einkauf.bestellung.speichern",
-            "parameters": {
-                "bestellung_id": "b1",
-                "notiz": "x",
-                "reason": "Korrektur",
-                "mandanten_id": "evil",
-            },
-        },
-    )
-    assert response.status_code == 422
-    db.execute.assert_not_called()
-
-
-def test_mcp_po_save_cross_tenant_404():
-    http, db = _mcp(["einkauf:write"])
-    db.execute.return_value.mappings.return_value.first.return_value = None
-    response = http.post(
-        "/mcp/tools/call",
-        json={
-            "tool_name": "einkauf.bestellung.speichern",
-            "parameters": {
-                "bestellung_id": "foreign",
-                "notiz": "x",
-                "reason": "Korrektur",
-            },
-        },
-    )
-    assert response.status_code == 404
-    db.commit.assert_not_called()
-
-
 def test_screen_definitions_tour_and_po_command_endpoints():
     from app.core.screen_definitions import get_screen_definition
     from app.core.screen_definitions_capture import build_logistik_tourenplanung_screen_definition
@@ -187,8 +114,5 @@ def test_screen_definitions_tour_and_po_command_endpoints():
     assert anlegen["commandEndpoint"].endswith("/tours/actions/anlegen")
     assert "stubReason" not in anlegen
 
-    po = get_screen_definition("einkauf/purchase-order")
-    save = next(a for a in po["actions"] if a["key"] == "speichern")
-    assert save["commandEndpoint"].endswith("/actions/speichern")
-    assert "inputFlow" not in save
-    assert not save.get("forbiddenForAgents")
+    # Die Bestellmaske einkauf/purchase-order ist entfernt (BELEG-052 Phase 3b); die Bestellung ist Belegmaske.
+    assert get_screen_definition("einkauf/purchase-order") is None

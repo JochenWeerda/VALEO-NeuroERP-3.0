@@ -209,7 +209,6 @@
   "mask:docflow/gobd-export:export_gobd",
   "mask:docflow/nachweisraum:open_detail",
   "mask:docflow/wiedervorlagen:complete",
-  "mask:einkauf/purchase-order:edit",
   "mask:fibu/abschluss-checklist-detail:edit",
   "mask:fibu/abschluss-checklist:edit",
   "mask:fibu/anlage:edit",

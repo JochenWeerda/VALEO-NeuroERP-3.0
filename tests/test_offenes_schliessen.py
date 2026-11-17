@@ -212,59 +212,6 @@ def eintraege(engine, kennung: str) -> list[tuple]:
             "WHERE bestellung_id = :b ORDER BY erfasst_am"), {"b": kennung})]
 
 
-class TestBestellkommunikation:
-    def test_erfassen_landet_am_beleg_und_in_der_liste(self, engine, client):
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications", headers=kopf(),
-                              json={"channel": "telefon", "subject": "Liefertermin", "message": "KW 43"})
-        assert antwort.status_code == 201, antwort.text
-        assert eintraege(engine, kennung) == [("telefon", "erfasst", None)]
-        liste = client.get(f"/api/v1/purchase-orders/{kennung}/communications", headers=kopf()).json()
-        assert [z["subject"] for z in liste] == ["Liefertermin"]
-
-    def test_mail_ohne_einrichtung_wird_nicht_als_versendet_eingetragen(self, engine, client, ohne_smtp):
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/email", headers=kopf(), json={})
-        assert antwort.status_code == 503
-        assert eintraege(engine, kennung) == []
-
-    def test_mail_geht_an_den_lieferanten_und_wird_eingetragen(self, engine, client, smtp):
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/email", headers=kopf(),
-                              json={"message": "Bitte bestaetigen"})
-        assert antwort.status_code == 201, antwort.text
-        assert [n["To"] for n in smtp.nachrichten] == ["bestellung@saatgut-ost.example"]
-        assert eintraege(engine, kennung) == [("email", "versendet", "bestellung@saatgut-ost.example")]
-
-    def test_abgelehnte_mail_wird_nicht_eingetragen(self, engine, client, smtp):
-        smtp.ablehnen = True
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/email", headers=kopf(), json={})
-        assert antwort.status_code == 502
-        assert eintraege(engine, kennung) == []
-
-    def test_portal_veroeffentlicht_und_das_portal_zeigt_es(self, engine, client):
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/portal", headers=kopf(), json={})
-        assert antwort.status_code == 201, antwort.text
-        portal = client.get(f"/api/v1/supplier-portal/lieferanten/{LIEFERANT}/bestellungen", headers=kopf()).json()
-        assert nummer in [z["bestellnummer"] for z in portal]
-        fremd = client.get(f"/api/v1/supplier-portal/lieferanten/{LIEFERANT}/bestellungen", headers=kopf(HAUS_B)).json()
-        assert fremd == []
-
-    def test_ein_entwurf_wird_nicht_veroeffentlicht(self, engine, client):
-        kennung, nummer = bestellung(engine, status="entwurf")
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/portal", headers=kopf(), json={})
-        assert antwort.status_code == 422
-        assert eintraege(engine, kennung) == []
-
-    def test_fremder_mandant_findet_die_bestellung_nicht(self, engine, client):
-        kennung, nummer = bestellung(engine)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications", headers=kopf(HAUS_B), json={})
-        assert antwort.status_code == 404
-        assert eintraege(engine, kennung) == []
-
-
 class TestBankkonten:
     WEG = "/api/v1/banken/konten"
 

@@ -197,3 +197,5 @@ Globale Feldpruefung nutzt jetzt Produktions-OpenAPI statt authfreier Testapp:
 54 Befunde in generischen Batch15-Definitionen, 0 im Kundenprofil. Keine
 Ratsche angehoben; diese Befunde bleiben offen. Keine konkurrierenden Arbeiten
 an screen_definitions_domain_batch15.py begonnen.
+
+PR153 nach main8575b4df9/ClaudePR146 integriert: nur sechs generierte Artefakte konfligierten, aus aktuellen Quellen regeneriert. Eigene Kundenprofile und Claudes Beleg-Rueckbau bleiben erhalten; keine Migration/DB-Aenderung im Integrationsschritt. 88 gezielte Vertraege erneutgruen; aktuelles API-/Godfile-Inventar geprueft. Gemeinsame CI nach Push noch offen.

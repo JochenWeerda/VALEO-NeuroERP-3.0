@@ -1172,22 +1172,6 @@
         ]
       ]
     },
-    "einkauf/purchase-order": {
-      "einkauf.bestellung.update": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ],
-      "einkauf.bestellung.send": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "einkauf/supplier": {
       "einkauf.lieferant.update": [
         [
@@ -1255,14 +1239,6 @@
         ]
       ],
       "finance.zahlungsbedingung.deaktivieren": [
-        [
-          "FINANCE_ADMIN",
-          "admin"
-        ]
-      ]
-    },
-    "finance/ap-invoice": {
-      "finance.ap.freigabe": [
         [
           "FINANCE_ADMIN",
           "admin"

@@ -14,15 +14,16 @@ pytestmark = pytest.mark.unit
 
 
 def test_rollout_catalog_has_nine_candidates() -> None:
-    # sales/delivery-note ist entfernt (BELEG-052 1b): der Lieferschein ist eine Variante der Belegmaske.
-    assert len(ROLLOUT_WAVES_42_51) == 9
-    assert len(all_rollout_screen_ids()) == 9
+    # Lieferschein (1b), Bestellung und Eingangsrechnung (3b) sind entfernt: Varianten der Belegmaske (BELEG-052).
+    assert len(ROLLOUT_WAVES_42_51) == 7
+    assert len(all_rollout_screen_ids()) == 7
 
 
 def test_rollout_catalog_lookup() -> None:
-    spec = get_rollout_spec("finance/ap-invoice")
+    spec = get_rollout_spec("lager/stock-movement")
     assert spec is not None
-    assert spec.registry_mask_id == "finance/ap-invoice-form"
+    assert spec.registry_mask_id == "lager/stock-movement"
+    assert get_rollout_spec("finance/ap-invoice") is None and get_rollout_spec("einkauf/purchase-order") is None
 
 
 def test_build_screen_summary_payload_contract() -> None:
@@ -81,9 +82,7 @@ def test_rollout_screen_definitions_exist(screen_id: str) -> None:
     [
         "lager/stock-movement",
         "lager/article-stock",
-        "finance/ap-invoice-form",
         "finance/op-debitoren",
-        "einkauf/bestellung-stamm",
         "einkauf/lieferanten-stamm",
         "crm/opportunity-detail",
         "agrar/harvest-settlement",

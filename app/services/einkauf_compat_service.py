@@ -342,7 +342,7 @@ class EinkaufCompatService:
         from sqlalchemy import text
         try:
             rows = self.db.execute(text(
-                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, "
+                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, einheit, prioritaet, "
                 "status, datum, created_at FROM einkauf_anfragen "
                 "WHERE tenant_id = :tid ORDER BY created_at DESC LIMIT 500"
             ), {"tid": self.tenant_id}).fetchall()
@@ -360,7 +360,7 @@ class EinkaufCompatService:
         from sqlalchemy import text
         try:
             return self.db.execute(text(
-                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, prioritaet, "
+                "SELECT id, anfrage_nummer, typ, anforderer, artikel, menge, einheit, prioritaet, "
                 "status, datum, created_at FROM einkauf_anfragen "
                 "WHERE (id = :fid OR anfrage_nummer = :fid) AND tenant_id = :tid "
                 "ORDER BY created_at DESC LIMIT 1"
@@ -370,30 +370,39 @@ class EinkaufCompatService:
             return None
 
     async def convert_anfrage_to_order(self, anfrage_id: str) -> dict:
+        """Bestellentwurf in DocFlow aus der Anfrage (BELEG-052; vorher ein weiterer Bestellspeicher).
+
+        Anfragestatus und Entwurf gelten zusammen: Die Anlage committet beides, scheitert sie, bleibt die Anfrage.
+        """
         from sqlalchemy import text
-        from app.services.purchase_order_service import PurchaseOrderService
+        from app.services.beleg_anlage import Position, lege_beleg_an
         row = self._load_anfrage_raw_row(anfrage_id)
         if row is None:
             raise EntityNotFoundError("Anfrage", anfrage_id)
         m = row._mapping
-        po = await PurchaseOrderService(self.db, self.tenant_id).create_purchase_order({
-            "subject": m.get("artikel") or f"Anfrage {m.get('anfrage_nummer')}",
-            "description": f"Erzeugt aus Anfrage {m.get('anfrage_nummer') or m.get('id')}",
-            "deliveryDate": m.get("datum").isoformat()[:10] if m.get("datum") else None,
-            "externalReference": m.get("anfrage_nummer") or str(m.get("id")),
-            "items": [{"description": m.get("artikel") or "Bedarfsposition",
-                       "quantity": float(m.get("menge") or 0), "unitPrice": 0, "unit": "Stk"}],
-        })
+        nummer = str(m.get("anfrage_nummer") or m.get("id"))
         self.db.execute(text(
             "UPDATE einkauf_anfragen SET status = 'BESTELLT', updated_at = CURRENT_TIMESTAMP "
             "WHERE id = :id AND tenant_id = :tid"
         ), {"id": m.get("id"), "tid": self.tenant_id})
-        self.db.commit()
+        entwurf = lege_beleg_an(
+            self.db, self.tenant_id, "purchase_order", partner_id=None,
+            positionen=[Position(artikel_nr=str(m.get("artikel") or "Bedarfsposition"),
+                                 bezeichnung=m.get("artikel") or "Bedarfsposition",
+                                 menge=float(m.get("menge") or 0), einheit=m.get("einheit") or "Stk")],
+            quelle="anfrage", referenz=nummer, entwurf_nr=f"ANF-{nummer}", akteur="einkauf",
+            idempotenz=f"anfrage-bestellung-{m.get('id')}")
         self._invalidate()
         return {"message": "Anfrage in Bestellung ueberfuehrt",
-                "purchaseOrderId": po.get("id"),
-                "purchaseOrderNumber": po.get("purchaseOrderNumber"),
+                "purchaseOrderId": entwurf,
+                "purchaseOrderNumber": self._entwurfsnummer(entwurf),
                 "status": "BESTELLT"}
+
+    def _entwurfsnummer(self, beleg_id: str) -> str | None:
+        from sqlalchemy import text
+        return self.db.execute(text(
+            "SELECT doc_number FROM domain_docflow.document_headers WHERE id = :id AND tenant_id = :tid"
+        ), {"id": beleg_id, "tid": self.tenant_id}).scalar()
 
     def list_bids(self, anfrage_id: str) -> list:
         from sqlalchemy import text
@@ -464,7 +473,7 @@ class EinkaufCompatService:
         bereits bestelltes nicht noch einmal (Zeilensperre gegen Doppelklick).
         """
         from sqlalchemy import text
-        from app.services.procurement_service import ProcurementService
+        from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit
         row = self._load_angebot_raw_row(angebot_id)
         if row is None:
             raise EntityNotFoundError("Angebot", angebot_id)
@@ -488,35 +497,29 @@ class EinkaufCompatService:
             "SELECT 1 FROM domain_einkauf.lieferanten WHERE id = CAST(:id AS uuid) AND tenant_id = :tid"
         ), {"id": str(lieferant), "tid": self.tenant_id}).scalar():
             raise ValidationFailedError("Ein Angebot ohne Lieferanten dieses Mandanten wird nicht bestellt.")
+        nummer = str(m.get("angebots_nummer") or m.get("id"))
         try:
-            # Kanonisch: domain_einkauf.bestellungen - dort liest die Bestellungs-Maske, und
-            # die offenen Mengen sind die Grundlage des Wareneingangs.
-            po = ProcurementService(self.db, self.tenant_id).create_bestellung({
-                "lieferant_id": m.get("lieferant_id"),
-                "bestelldatum": business_today(),
-                "lieferdatum_wunsch": m.get("gueltig_bis"),
-                "angebot_nr": m.get("angebots_nummer") or str(m.get("id")),
-                "notiz": f"Erzeugt aus Angebot {m.get('angebots_nummer') or m.get('id')} "
-                         f"von {m.get('lieferant_name') or 'Lieferant'}",
-                "positionen": [{"artikel_nr": z.artikel_nr or "",
-                                "artikel_bezeichnung": z.bezeichnung or z.artikel_nr or f"Position {z.pos_nr}",
-                                "menge": float(z.menge or 0),
-                                "einzelpreis": float(z.einheitspreis or 0),
-                                "einheit": z.einheit or "Stk",
-                                "preis_einheit": z.einheit or "Stk"} for z in positionen],
-            }, commit=False)
+            # Kanonisch ist DocFlow (BELEG-052): ein Bestellentwurf, freigegeben wird in der Belegmaske. Der
+            # Angebotsstatus steht vorher in derselben Transaktion; die Anlage committet beides.
             self.db.execute(text(
                 "UPDATE einkauf_angebote SET status = 'IN_BESTELLUNG', updated_at = CURRENT_TIMESTAMP "
                 "WHERE id = :id AND tenant_id = :tid"
             ), {"id": m.get("id"), "tid": self.tenant_id})
-            self.db.commit()
+            entwurf = lege_beleg_an(
+                self.db, self.tenant_id, "purchase_order", partner_id=str(lieferant),
+                positionen=[position_in_preiseinheit(
+                    artikel_nr=z.artikel_nr or f"Position {z.pos_nr}", menge=z.menge or 0, einheit=z.einheit or "Stk",
+                    einzelpreis=z.einheitspreis or 0, preis_einheit=z.einheit or "Stk",
+                    bezeichnung=z.bezeichnung or z.artikel_nr) for z in positionen],
+                quelle="angebot", referenz=nummer, entwurf_nr=f"ANG-{nummer}", akteur="einkauf",
+                idempotenz=f"angebot-bestellung-{m.get('id')}")
         except Exception:
             self.db.rollback()
             raise
         self._invalidate()
         return {"message": "Angebot in Bestellung ueberfuehrt",
-                "purchaseOrderId": po.get("id"),
-                "purchaseOrderNumber": po.get("bestellnummer"),
+                "purchaseOrderId": entwurf,
+                "purchaseOrderNumber": self._entwurfsnummer(entwurf),
                 "status": "IN_BESTELLUNG"}
 
     # ── Anlieferavis ──────────────────────────────────────────────────────────

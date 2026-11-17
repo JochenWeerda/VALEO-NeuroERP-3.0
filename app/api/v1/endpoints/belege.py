@@ -64,6 +64,34 @@ def beleg_partner_auswahl(
     return {'items': search_partners(db, tenant_id, belegart, q.strip(), limit)}
 
 
+@router.get("/{belegart}/kennzahlen", response_model=TypedObjectOut, summary="Kennzahlen einer Belegart fuer Cockpits")
+def beleg_kennzahlen(
+    belegart: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+    nutzer: Any = Depends(get_current_user),
+) -> dict[str, Any]:
+    """Offene Belege, Volumen und Partner einer Belegart aus DocFlow (BELEG-052).
+
+    Ersetzt die alte Bestellstatistik, deren Schluessel nie zu den Cockpit-Kacheln passten. Offen: freigegeben oder
+    bestaetigt. Volumen: Brutto aller ausgestellten, nicht stornierten Belege - nur mit Preisrecht, sonst ``None``.
+    """
+    from sqlalchemy import text
+
+    if belegart not in BELEGARTEN:
+        raise HTTPException(status_code=404, detail="Belegart nicht bekannt")
+    verlange(nutzer, "lesen", belegart)
+    zeile = db.execute(text("""
+        SELECT COUNT(*) FILTER (WHERE status IN ('open', 'confirmed')) AS offen,
+               COALESCE(SUM(total_gross) FILTER (WHERE status NOT IN ('draft', 'cancelled', 'reversed')), 0) AS volumen,
+               COUNT(DISTINCT COALESCE(supplier_id, customer_id))
+                   FILTER (WHERE status NOT IN ('draft', 'cancelled', 'reversed')) AS partner
+        FROM domain_docflow.document_headers
+        WHERE tenant_id = :t AND doc_type = :art AND deleted_at IS NULL
+    """), {"t": tenant_id, "art": belegart}).mappings().one()
+    mit_preisen = BELEGARTEN[belegart].mit_preisen and darf(nutzer, "preise", belegart)
+    return {"offen": int(zeile["offen"]), "volumen": round(float(zeile["volumen"]), 2) if mit_preisen else None,
+            "partner": int(zeile["partner"])}
+
+
 def _lies(belegart: str, beleg_id: str, tenant_id: str, db: Session, nutzer: Any) -> Beleg:
     return beleg_lesen(belegart, beleg_id, tenant_id, db, nutzer)
 

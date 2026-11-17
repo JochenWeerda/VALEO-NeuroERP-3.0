@@ -168,7 +168,7 @@ def test_actual_writes_and_finance_gaps_remain_visible():
     assert by_id["mask:einkauf/supplier:neue_bestellung"]["coverage"] == "local_ui"
     assert by_id["mask:admin/postfaecher:neu"]["coverage"] == "local_ui"
     assert by_id["mask:logistik/tourenplanung:anlegen"]["coverage"] == "mapped"
-    assert by_id["mask:einkauf/purchase-order:speichern"]["coverage"] == "mapped"
+    assert "mask:einkauf/purchase-order:speichern" not in by_id  # Maske entfernt (BELEG-052 Phase 3b)
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     # Studio-Listen oeffnen ihre Anlage per Navigation (MASK-STUDIO-ROLLOUT): 15 Bestandsaktionen + je Liste eine.

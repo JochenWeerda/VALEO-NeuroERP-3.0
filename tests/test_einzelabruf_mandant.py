@@ -16,7 +16,6 @@ import uuid
 from unittest.mock import MagicMock, patch
 
 import pytest
-from fastapi import HTTPException
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
@@ -58,21 +57,6 @@ def test_eigener_beleg_liefert_nur_den_eigenen(haus):
         assert eigener_beleg("sales_invoice", alt, haus["mandant"], repo) is None
         assert eigener_beleg("sales_invoice", eigen, "", repo) is None
 
-
-
-def test_die_eingangsrechnungsmaske_zeigt_keine_fremde_rechnung(haus):
-    from app.services.mask_rollout_summary_service import MaskRolloutSummaryService
-
-    eigen = haus["ablegen"]("ap_invoice", haus["mandant"], totalGross=10)
-    fremd = haus["ablegen"]("ap_invoice", haus["anderer"], totalGross=10)
-    alt = haus["ablegen"]("ap_invoice", None, totalGross=10)
-    with SessionLocal() as db:
-        dienst = MaskRolloutSummaryService(db, haus["mandant"])
-        assert dienst.build_summary("finance/ap-invoice", eigen)["title"] == eigen
-        for nummer in (fremd, alt):
-            with pytest.raises(HTTPException) as fehler:
-                dienst.build_summary("finance/ap-invoice", nummer)
-            assert fehler.value.status_code == 404
 
 
 # ── Statusnachtraege an der Speichergrenze ───────────────────────────────────
