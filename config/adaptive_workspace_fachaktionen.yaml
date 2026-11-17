@@ -395,8 +395,8 @@ actions:
     mcp_tool_id: finance.ap_invoice.propose
     mask_action_id: null
     command_endpoint: POST /api/v1/mcp/tools/call
-    screen_id: finance/ap-invoice
-    route_path: /finance/ap-invoice
+    screen_id: beleg-liste/purchase-invoice
+    route_path: /belege/purchase_invoice
     aliases:
       - rechnungsfreigabe vorschlagen
       - ap freigabe vorschlagen
@@ -424,10 +424,10 @@ actions:
       - ist: finance.ap_invoice.posted
         soll: document_posted
     mcp_tool_id: finance.ap_invoice.freigeben
-    mask_action_id: mask:finance/ap-invoice:freigeben
+    mask_action_id: null  # Maske finance/ap-invoice entfernt (BELEG-052 3b); Freigabe an der Belegmaske
     command_endpoint: POST /api/v1/finance/ap/invoices/{entity_id}/actions/freigeben
-    screen_id: finance/ap-invoice
-    route_path: /finance/ap-invoice
+    screen_id: beleg-liste/purchase-invoice
+    route_path: /belege/purchase_invoice
     aliases:
       - rechnungen freigeben
       - rechnung freigeben

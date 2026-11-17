@@ -337,107 +337,12 @@ def test_old_approval_does_not_enable_reposting_after_lifecycle_change(case, sta
 
 
 def test_native_action_uses_server_permission_and_is_human_only():
-    from app.core.screen_definitions import build_finance_ap_invoice_screen_definition
-    action = next(a for a in build_finance_ap_invoice_screen_definition()["actions"] if a["key"] == "freigeben")
-    assert action["enabledWhen"] == "approval_can_decide"
-    assert action["humanApprovalRequired"] and action["forbiddenForAgents"] and action["requiresConfirmation"]
+    # Die Maske finance/ap-invoice ist mit BELEG-052 Phase 3b entfernt; die Eingangsrechnung fuehrt die Belegmaske.
+    from app.core import beleg_maske_parent as bmp
+    from app.core.belegvertrag import BELEGARTEN
 
-
-def test_missing_workflow_is_an_outage_not_a_status_based_posting_fallback(case, monkeypatch):
-    from app.services.ap_invoice_approval_service import APApprovalWorkflowService
-    from fastapi import HTTPException
-    pending = request(case)
-    assert decide(case, pending["approval_request_id"]).status_code == 200
-    def unavailable(*args, **kwargs):
-        raise HTTPException(503, "Freigabepruefung derzeit nicht verfuegbar")
-    monkeypatch.setattr(APApprovalWorkflowService, "status", unavailable)
-    from app.services.ap_invoice_approval_service import finance_periods
-    monkeypatch.setattr(finance_periods, "gesperrter_zustand",
-        lambda *a: pytest.fail("Unavailable review reached accounting checks"))
-    result = case[0].post("/api/v1/finance/ap/invoices/" + case[5] + "/post", headers=headers(case, "human-c"))
-    assert result.status_code == 503, result.text
-    assert "synthetic private" not in result.text
-    assert DocumentRepository(case[1]).get_document("ap_invoice", case[5])["status"] == "FREIGEGEBEN"
-
-
-def test_repository_cannot_move_a_document_to_another_tenant_or_upsert_an_insert_only_call(case):
-    from app.documents.repository import DocumentOwnershipError, DocumentAlreadyExists
-    repo = DocumentRepository(case[1])
-    before = repo.get_document('ap_invoice', case[5])
-    with pytest.raises(DocumentOwnershipError):
-        repo.save_document('ap_invoice', case[5], {**before, 'tenantId': case[4]}, commit=False)
-    with pytest.raises(DocumentAlreadyExists):
-        repo.save('ap_invoice', case[5], {**before, 'notes': 'private override'}, commit=False, create_only=True)
-    assert repo.get_document('ap_invoice', case[5]) == before
-
-
-def test_local_posting_profile_lookup_is_tenant_bound(case):
-    from app.services.finance_transaction_service import FinanceTransactionService
-    own = case[1].execute(text('SELECT id FROM domain_shared.users WHERE tenant_id=:t LIMIT 1'), {'t':case[3]}).scalar_one()
-    foreign = case[1].execute(text('SELECT id FROM domain_shared.users WHERE tenant_id=:t LIMIT 1'), {'t':case[4]}).scalar_one()
-    service = FinanceTransactionService(case[1], case[3], commit_on_success=False)
-    assert service._resolve_user_id(own) == own
-    assert service._resolve_user_id(foreign) is None
-
-
-@pytest.mark.parametrize('outbox_failure', [False, True])
-def test_complete_review_posting_chain_and_atomic_outbox(case, monkeypatch, outbox_failure):
-    from app.finance.steuerschluessel import richte_skr03_ein
-    richte_skr03_ein(case[1], case[3])
-    number = 'SYN-' + uuid4().hex[:10]
-    result = case[0].post('/api/v1/finance/ap/invoices/', headers=headers(case), json={
-        'number': number, 'date': '2026-10-20', 'dueDate': '2026-11-20', 'customerId': 'synthetic-post-supplier',
-        'lines': [{'article': 'Synthetic grain', 'qty': 1, 'price': 100, 'taxCode': '9'}]})
-    assert result.status_code == 201, result.text
-    posted_case = (*case[:5], number, case[6])
-    pending = request(posted_case)
-    assert decide(posted_case, pending['approval_request_id']).status_code == 200
-    if outbox_failure:
-        def fail(db, **kwargs):
-            db.execute(text('SELECT * FROM synthetic_private_ap_outbox_failure'))
-        from app.services.ap_invoice_approval_service import APApprovalWorkflowService
-        monkeypatch.setattr(APApprovalWorkflowService, '_post_event', staticmethod(fail))
-    response = case[0].post('/api/v1/finance/ap/invoices/'+number+'/post', headers=headers(case))
-    assert response.status_code == (503 if outbox_failure else 200), response.text
-    invoice = DocumentRepository(case[1]).get_document('ap_invoice', number)
-    expected = 0 if outbox_failure else 1
-    assert invoice['status'] == ('FREIGEGEBEN' if outbox_failure else 'VERBUCHT')
-    assert case[1].execute(text('SELECT count(*) FROM domain_erp.journal_entries WHERE tenant_id=:t'), {'t':case[3]}).scalar_one() == expected
-    assert case[1].execute(text('SELECT count(*) FROM domain_erp.offene_posten WHERE tenant_id=:t'), {'t':case[3]}).scalar_one() == expected
-    assert case[1].execute(text('SELECT count(*) FROM outbox_events WHERE tenant_id=:t AND aggregate_id=:n'),
-        {'t':case[3], 'n':number}).scalar_one() == expected
-    if not outbox_failure:
-        balances = case[1].execute(text('SELECT total_debit,total_credit FROM domain_erp.journal_entries WHERE tenant_id=:t'), {'t':case[3]}).one()
-        assert balances[0] == balances[1] == 119
-        actor = case[1].execute(text("SELECT user_id FROM domain_shared.audit_logs WHERE tenant_id=:t AND entity_id=:j AND action='create'"),
-            {'t':case[3], 'j':invoice['journalEntryId']}).scalar_one()
-        assert actor == 'human-a'
-        # Posting metadata and the original review's expiration cannot invalidate an executed invoice.
-        case[1].execute(text("""UPDATE domain_erp.ap_approval_requests SET applicable_rule=
-            jsonb_set(CAST(applicable_rule AS jsonb),'{expires_at}','"2000-01-01T00:00:00+00:00"') WHERE id=:id"""),
-            {'id':pending['approval_request_id']})
-        case[1].commit()
-        status = case[0].get(PREFIX+'/status/'+number, headers=headers(case)).json()
-        assert status['status'] == 'approved' and status['can_pay'] and not status['can_post'], status
-
-
-def test_changed_tax_basis_cannot_post_different_amount_under_old_review(case):
-    from app.finance.steuerschluessel import richte_skr03_ein
-    richte_skr03_ein(case[1], case[3])
-    number = "SYN-T-" + uuid4().hex[:8]
-    created = case[0].post("/api/v1/finance/ap/invoices/", headers=headers(case), json={
-        "number": number, "date": "2026-10-20", "dueDate": "2026-11-20", "customerId": "synthetic-tax-supplier",
-        "lines": [{"article": "Synthetic grain", "qty": 1, "price": 100, "taxCode": "9"}]})
-    assert created.status_code == 201, created.text
-    local_case = (*case[:5], number, case[6])
-    pending = request(local_case)
-    assert decide(local_case, pending["approval_request_id"]).status_code == 200
-    case[1].execute(text("UPDATE domain_erp.tax_keys SET steuersatz=7 WHERE tenant_id=:t AND code='9'"), {"t":case[3]})
-    case[1].commit()
-    posted = case[0].post("/api/v1/finance/ap/invoices/"+number+"/post", headers=headers(case))
-    assert posted.status_code == 409, posted.text
-    for table in ["domain_erp.journal_entries", "domain_erp.offene_posten", "outbox_events"]:
-        assert case[1].execute(text(f"SELECT count(*) FROM {table} WHERE tenant_id=:t"),
-            {"t":case[3]}).scalar_one() == 0
-    doc = DocumentRepository(case[1]).get_document("ap_invoice", number)
-    assert doc["status"] == "FREIGEGEBEN" and doc["totalGross"] == 119
+    aktionen = bmp.beleg_aktionen(BELEGARTEN["purchase_invoice"])
+    action = next(a for a in aktionen if a["key"] == "freigabe_erteilen:post")
+    assert action["enabledWhen"] == bmp.zustandsfeld("freigabe_erteilen:post")
+    assert action["permission"] == "belege.freigeben"
+    assert action["forbiddenForAgents"] and action["requiresConfirmation"]

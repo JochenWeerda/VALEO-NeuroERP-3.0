@@ -1546,38 +1546,6 @@ tools:
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 
-  - tool_id: einkauf.bestellung.speichern
-    domain: einkauf
-    name: "Bestellung speichern"
-    description: "Aktualisiert erlaubte Bestell-Kopffelder im Authentifizierungs-Mandanten (Maske einkauf/purchase-order:speichern; CE /api/v1/einkauf/bestellungen/{id}/actions/speichern). parameters.bestellung_id plus optionale Felder (Liefer-/Ladetermine, Referenzen, Notiz, versand_art), reason. Status/Summen nicht aenderbar. Default dryRun; execute erfordert idempotency_key. Scope einkauf:write. Kein tenant_id-Parameter."
-    scope: einkauf:write
-    idempotent: true
-    risk_class: medium
-    data_classification: LOCAL_ONLY
-    input_schema:
-      type: object
-      properties:
-        bestellung_id: { type: string }
-        lieferdatum_wunsch: { type: string }
-        lieferdatum_zugesagt: { type: string }
-        ladetermin: { type: string }
-        ladetermin_ab: { type: string }
-        versand_art: { type: string, enum: [email, fax, edi, post, telefon, manuell] }
-        unsere_referenz: { type: string }
-        ihre_referenz: { type: string }
-        notiz: { type: string }
-        reason: { type: string, minLength: 3 }
-      required: [bestellung_id, reason]
-    output_schema:
-      type: object
-      properties:
-        bestellung_id: { type: string }
-        bestellnummer: { type: string }
-        auditEntryId: { type: string }
-    audit: write
-    endpoint: "POST /api/v1/mcp/tools/call"
-    human_approval_required: false
-
   - tool_id: hr.bewerbung.speichern
     domain: hr
     name: "Bewerbung speichern"
@@ -2214,32 +2182,6 @@ tools:
         route_path: { type: string }
         screen_id: { type: string }
     audit: read
-    endpoint: "POST /api/v1/mcp/tools/call"
-    human_approval_required: false
-
-  - tool_id: einkauf.bestellung.versenden
-    domain: einkauf
-    name: "Bestellung versenden"
-    description: "Versendet eine Bestellung des Authentifizierungs-Mandanten (E-Mail/Fax/EDI/manuell; Maske einkauf/purchase-order:versenden). Kein Obligo-Journal (Freigabe bleibt eigener Pfad). Default dryRun; execute erfordert idempotency_key. Scope einkauf:write."
-    scope: einkauf:write
-    idempotent: true
-    risk_class: medium
-    data_classification: LOCAL_ONLY
-    input_schema:
-      type: object
-      properties:
-        bestellung_id: { type: string, description: "Bestellungs-UUID oder Bestellnummer" }
-        versand_art: { type: string, enum: [email, fax, edi, post, manuell], default: email }
-        empfaenger: { type: string, nullable: true }
-      required: [bestellung_id]
-    output_schema:
-      type: object
-      properties:
-        bestellung_id: { type: string }
-        bestellnummer: { type: string }
-        versand_status: { type: string }
-        auditEntryId: { type: string }
-    audit: write
     endpoint: "POST /api/v1/mcp/tools/call"
     human_approval_required: false
 

@@ -49,11 +49,6 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
         "coverage": "mapped",
         "notes": "MCP-MASK-WRITES-TOP-20261008; crm_lead_service.qualify, Token-Mandant.",
     },
-    "mask:einkauf/purchase-order:versenden": {
-        "mcp_tool_id": "einkauf.bestellung.versenden",
-        "coverage": "mapped",
-        "notes": "MCP-MASK-WRITES-TOP-20261008; Versand ohne Obligo-Journal.",
-    },
     "mask:einkauf/angebot:bestellen": {
         "mcp_tool_id": "einkauf.angebot.bestellen",
         "coverage": "mapped",
@@ -214,15 +209,6 @@ MAPPED_RULES: dict[str, dict[str, str]] = {
         "notes": (
             "MCP-MASK-CE-BATCH2-20261009; CE "
             "/api/v1/logistik/tours/actions/anlegen; Token-Mandant."
-        ),
-    },
-    "mask:einkauf/purchase-order:speichern": {
-        "mcp_tool_id": "einkauf.bestellung.speichern",
-        "coverage": "mapped",
-        "notes": (
-            "MCP-MASK-CE-BATCH2-20261009; CE "
-            "/api/v1/einkauf/bestellungen/{entity_id}/actions/speichern; "
-            "Kopf-Felder ohne Status/Summen; Token-Mandant."
         ),
     },
     "mask:personal/bewerbungen:speichern": {

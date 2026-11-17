@@ -83,8 +83,6 @@
     "app/api/v1/endpoints/edi_api.py::get_offene_nachrichten": 1,
     "app/api/v1/endpoints/edi_api.py::list_partner": 1,
     "app/api/v1/endpoints/einkauf_lieferschein.py::_list_positions": 1,
-    "app/api/v1/endpoints/einkauf_lieferschein.py::abgleich_lieferschein_bestellung": 2,
-    "app/api/v1/endpoints/einkauf_lieferschein.py::einbuchen_lieferschein": 1,
     "app/api/v1/endpoints/einkauf_lieferschein.py::list_frachtauftraege": 1,
     "app/api/v1/endpoints/einkauf_lieferschein.py::list_lieferscheine": 1,
     "app/api/v1/endpoints/erechnung_import.py::list_imports": 1,

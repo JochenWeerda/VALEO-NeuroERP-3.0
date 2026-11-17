@@ -50,6 +50,6 @@ export async function callPoStatusOpen(bestellungId: string): Promise<PoOpenResu
     bestellnummer: String(body.bestellnummer ?? key),
     status: String(body.status ?? ''),
     route_path: route,
-    screen_id: String(body.screen_id ?? 'einkauf/purchase-order'),
+    screen_id: String(body.screen_id ?? 'beleg/purchase-order'),
   }
 }

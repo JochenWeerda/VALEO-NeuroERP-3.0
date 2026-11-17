@@ -390,8 +390,8 @@
      {
       "key": "bestellung",
       "label": "Bestellung",
-      "routePath": "/einkauf/bestellungen",
-      "screenId": "einkauf/purchase-order"
+      "routePath": "/belege/purchase_order",
+      "screenId": "beleg-liste/purchase-order"
      },
      {
       "key": "bestaetigung",
@@ -408,8 +408,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/einkauf/rechnungseingang",
-      "screenId": "finance/ap-invoice"
+      "routePath": "/belege/purchase_invoice",
+      "screenId": "beleg-liste/purchase-invoice"
      },
      {
       "key": "zahlung",
@@ -919,8 +919,8 @@
      {
       "key": "bestellung",
       "label": "Bestellung",
-      "routePath": "/einkauf/bestellungen",
-      "screenId": "einkauf/purchase-order"
+      "routePath": "/belege/purchase_order",
+      "screenId": "beleg-liste/purchase-order"
      },
      {
       "key": "bestaetigung",
@@ -937,8 +937,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/einkauf/rechnungseingang",
-      "screenId": "finance/ap-invoice"
+      "routePath": "/belege/purchase_invoice",
+      "screenId": "beleg-liste/purchase-invoice"
      },
      {
       "key": "zahlung",
@@ -1471,8 +1471,8 @@
      {
       "key": "bestellung",
       "label": "Bestellung",
-      "routePath": "/einkauf/bestellungen",
-      "screenId": "einkauf/purchase-order"
+      "routePath": "/belege/purchase_order",
+      "screenId": "beleg-liste/purchase-order"
      },
      {
       "key": "bestaetigung",
@@ -1489,8 +1489,8 @@
      {
       "key": "rechnung",
       "label": "Rechnung",
-      "routePath": "/einkauf/rechnungseingang",
-      "screenId": "finance/ap-invoice"
+      "routePath": "/belege/purchase_invoice",
+      "screenId": "beleg-liste/purchase-invoice"
      },
      {
       "key": "zahlung",

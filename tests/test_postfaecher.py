@@ -527,22 +527,6 @@ class TestHttp:
         antwort = client.get("/api/v1/admin/postfaecher/verfuegbar", headers=kopf())
         assert [p["kennung"] for p in antwort.json()] == ["info"]
 
-    def test_bestellmail_geht_ueber_das_einkaufspostfach(self, engine, client, als, db, smtp):
-        from sqlalchemy import text
-
-        anlegen(db, kennung="zentrale", ist_standard=True)
-        anlegen(db, kennung="einkauf", verwendungen=["einkauf"], absender_name="Einkauf")
-        nummer = f"EK-{uuid.uuid4().hex[:8]}"
-        with engine.begin() as v:
-            v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                           " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, 'versendet')"),
-                      {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "l": LIEFERANT})
-        als(EINKAUF)  # die Bestellung versendet der Einkauf (Bereichsrolle seit 19.10.2026)
-        antwort = client.post(f"/api/v1/purchase-orders/{nummer}/communications/email", headers=kopf(), json={})
-        assert antwort.status_code == 201, antwort.text
-        assert smtp.gesendet == [{"host": "smtp.ionos.de", "from": "Einkauf <einkauf@genossenschaft.example>",
-                                  "to": "auftrag@duenger.example"}]
-
     def test_ohne_schluessel_503(self, client, als, monkeypatch):
         monkeypatch.delenv("VALEO_SECRET_KEY")
         als(ADMIN)

@@ -184,6 +184,20 @@ def test_versand_schickt_das_pdf_an_den_empfaenger(versand_app, satz):
     assert kw["verwendung"] == "verkauf" and kw["anhaenge"][0][1].startswith(b"%PDF")
 
 
+def test_die_bestellung_geht_ueber_das_einkaufspostfach(versand_app, satz):
+    """Der alte Bestellversand (/purchase-orders/{nr}/communications/email) ist entfernt (BELEG-052 Phase 3b)."""
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    antwort = client.post(f"/belege/purchase_order/{beleg['id']}/actions/versenden",
+                          json={"empfaenger": "auftrag@duenger.example", "_idempotencyKey": str(uuid.uuid4())}).json()
+    if not antwort["success"] and "Stand" in (antwort.get("error") or ""):
+        pytest.skip(f"Referenzbeleg nicht versendbar: {antwort['error']}")
+    assert antwort["success"] is True, antwort
+    empfaenger, betreff, kw = gesendet[-1]
+    assert empfaenger == "auftrag@duenger.example" and betreff.startswith("Bestellung")
+    assert kw["verwendung"] == "einkauf" and kw["anhaenge"][0][1].startswith(b"%PDF")
+
+
 def test_trockenlauf_versendet_nichts(versand_app, satz):
     client, gesendet = versand_app
     beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")

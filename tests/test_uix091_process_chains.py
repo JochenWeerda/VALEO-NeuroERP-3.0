@@ -14,9 +14,9 @@ KNOWN = {
     "agrar/kontrakte", "einkauf/anlieferavis", "qualitaet/reklamation",
     "lager/article-stock", "agrar/harvest-settlement", "beleg-liste/sales-order",
     "beleg-liste/sales-delivery", "beleg-liste/sales-invoice", "finance/ar-open-item", "finance/payment-run",
-    "einkauf/anfrage", "einkauf/angebot", "einkauf/purchase-order",
+    "einkauf/anfrage", "einkauf/angebot", "beleg-liste/purchase-order",
     "einkauf/auftragsbestaetigung",
-    "finance/ap-invoice", "crm/lead", "crm/opportunity", "crm/customer-360",
+    "beleg-liste/purchase-invoice", "crm/lead", "crm/opportunity", "crm/customer-360",
 }
 
 

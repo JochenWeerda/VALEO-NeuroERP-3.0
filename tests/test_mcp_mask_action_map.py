@@ -33,8 +33,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:crm/customer-360:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:crm/opportunity:create_activity"]["mcp_tool_id"] == "crm.activity.create"
     assert by_id["mask:finance/payment-run:freigeben"]["coverage"] == "open_high"
-    assert by_id["mask:finance/ap-invoice:freigeben"]["coverage"] == "blocked_human_only"
-    assert by_id["mask:finance/ap-invoice:freigeben"]["mcp_tool_id"] is None
+    assert "mask:finance/ap-invoice:freigeben" not in by_id  # Maske entfernt (BELEG-052 Phase 3b)
 
     native = {n["mcp_tool_id"] for n in data["mcp_native_writes"]}
     assert native >= {
@@ -78,9 +77,7 @@ def test_mcp_mask_action_map_covers_top_writes_and_blocks_fin_close():
     assert by_id["mask:einkauf/supplier:neue_bestellung"]["coverage"] == "local_ui"
     assert by_id["mask:admin/postfaecher:neu"]["coverage"] == "local_ui"
     assert by_id["mask:logistik/tourenplanung:anlegen"]["mcp_tool_id"] == "logistik.tour.anlegen"
-    assert by_id["mask:einkauf/purchase-order:speichern"]["mcp_tool_id"] == (
-        "einkauf.bestellung.speichern"
-    )
+    assert "mask:einkauf/purchase-order:speichern" not in by_id
     assert data["stats"]["by_coverage"].get("blocked_no_endpoint", 0) == 0
     assert data["stats"]["by_coverage"].get("blocked_missing_tenant", 0) == 0
     from app.core.screen_definitions_listen import LISTEN_SCREEN_BUILDERS

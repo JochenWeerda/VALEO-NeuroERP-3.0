@@ -38,14 +38,15 @@ def test_load_flow_spine_catalog_has_nine_processes() -> None:
 def test_load_screen_definitions_count() -> None:
     masks = load_screen_definitions()
     assert len(masks) >= 26
-    assert "einkauf/purchase-order" in masks
+    assert "beleg-liste/purchase-order" in masks
+    assert "einkauf/purchase-order" not in masks  # BELEG-052 Phase 3b: die Bestellung ist Belegmaske
     assert "sales/sales-order" not in masks  # BELEG-052: der Auftrag ist Belegmaske
 
 
 @pytest.mark.unit
 def test_derive_agent_contract_includes_actions() -> None:
     masks = load_screen_definitions()
-    order = masks["einkauf/purchase-order"]
+    order = masks["beleg-liste/purchase-order"]
     contract = derive_agent_contract(order)
     assert contract["screenId"]
     assert isinstance(contract["readableFields"], list)
@@ -67,7 +68,7 @@ def test_risk_summary_escalates_with_danger_level() -> None:
 @pytest.mark.unit
 def test_mask_to_processes_links_known_masks() -> None:
     assert "order-to-cash" in MASK_TO_PROCESSES["beleg-liste/sales-order"]
-    assert "procure-to-pay" in MASK_TO_PROCESSES["einkauf/purchase-order"]
+    assert "procure-to-pay" in MASK_TO_PROCESSES["beleg-liste/purchase-order"]
 
 
 @pytest.mark.unit

@@ -2,6 +2,7 @@
 
 from app.api.v1.endpoints.mask_screen_definition import _check_readiness
 from app.core.screen_definitions import SCREEN_DEFINITION_BUILDERS, get_screen_definition
+from app.core.screen_definitions_beleg import build_beleg_screen_definition
 
 
 def _action(screen: dict, key: str) -> dict:
@@ -48,22 +49,22 @@ def _table(screen: dict, tab_key: str, table_key: str) -> dict:
 
 def test_document_chain_uses_one_page_layout() -> None:
     """Lieferschein, Rechnung und Bestellung lesen sich gleich (Gewohnheits-Prinzip); der Auftrag ist Belegmaske."""
-    for screen_id in ("einkauf/purchase-order",):
-        screen = get_screen_definition(screen_id)
-        assert screen is not None, screen_id
-        assert screen["layout"]["sectionNavigation"] == "anchors", screen_id
+    # Die Belege sind Varianten einer Belegmaske (BELEG-052); die Bestellung steht hier fuer alle.
+    for belegart in ("purchase_order", "sales_order", "sales_delivery", "sales_invoice"):
+        screen = build_beleg_screen_definition(belegart)
+        assert screen["layout"]["sectionNavigation"] == "anchors", belegart
         _assert_ready(screen)
 
 
 
 def test_readiness_rejects_row_detail_without_label_or_duplicates() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
-    _table(screen, "positionen", "positionen")["rowDetail"]["fields"] = [
+    _table(screen, "positionen", "positionen")["rowDetail"] = {"fields": [
         {"key": "line_no", "label": ""},
         {"key": "unit", "label": "Einheit"},
         {"key": "unit", "label": "Einheit"},
-    ]
+    ]}
     passed, detail = _schema_gate_detail(screen)
     assert passed is False
     assert "table positionen rowDetail field requires key and label" in detail
@@ -71,7 +72,7 @@ def test_readiness_rejects_row_detail_without_label_or_duplicates() -> None:
 
 
 def test_readiness_rejects_row_detail_that_is_not_an_object() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     _table(screen, "positionen", "positionen")["rowDetail"] = ["line_no"]
     passed, detail = _schema_gate_detail(screen)
@@ -82,18 +83,17 @@ def test_readiness_rejects_row_detail_that_is_not_an_object() -> None:
 def test_documents_are_named_by_their_number() -> None:
     """Der h1 eines Belegs ist seine Nummer, nicht der Maskentyp."""
     expected = {
-        "einkauf/purchase-order": "bestellnummer",
+        "purchase_order": "beleg_nr",
     }
     for screen_id, identity_field in expected.items():
-        screen = get_screen_definition(screen_id)
-        assert screen is not None, screen_id
+        screen = build_beleg_screen_definition(screen_id)
         assert screen["identityField"] == identity_field, screen_id
         kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
         assert identity_field in {f["key"] for f in kopf["fields"]}, screen_id
 
 
 def test_readiness_rejects_identity_field_that_the_mask_does_not_show() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     screen["identityField"] = "belegnummer"
     passed, detail = _schema_gate_detail(screen)
@@ -108,7 +108,7 @@ def _schema_gate_detail(screen: dict) -> tuple[bool, str]:
 
 
 def test_readiness_rejects_unknown_section_navigation() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     screen["layout"]["sectionNavigation"] = "accordion"
     passed, detail = _schema_gate_detail(screen)
@@ -117,7 +117,7 @@ def test_readiness_rejects_unknown_section_navigation() -> None:
 
 
 def test_readiness_rejects_section_anchors_outside_document_floorplans() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     screen["layout"]["floorplan"] = "worklist"
     passed, detail = _schema_gate_detail(screen)
@@ -126,7 +126,7 @@ def test_readiness_rejects_section_anchors_outside_document_floorplans() -> None
 
 
 def test_readiness_rejects_section_anchors_with_column_split() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     screen["layout"]["floorplan"] = "objectPage"
     screen["layout"]["columnNavigation"] = "listDetail"
@@ -136,7 +136,7 @@ def test_readiness_rejects_section_anchors_with_column_split() -> None:
 
 
 def test_readiness_rejects_duplicate_shortcuts_and_unknown_zones() -> None:
-    screen = get_screen_definition("einkauf/purchase-order")
+    screen = build_beleg_screen_definition("purchase_order")
     assert screen is not None
     # Erst eine gueltige Aktion mit dem Kuerzel, dann die doppelte (bis 1b trug der alte Lieferscheindruck ctrl+p).
     screen["actions"].append({

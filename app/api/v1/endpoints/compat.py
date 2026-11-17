@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.akteur import gepruefter_akteur, gepruefter_akteur_aus_request
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.data_quality_enforcement import (
@@ -27,11 +27,11 @@ from app.core.database import get_db
 from app.core.uuid7 import uuid7
 from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
-from app.infrastructure.models import AuditLog, LkwAnnahmeQueue
-from app.documents.router_helpers import get_repository, list_from_store, get_from_store
-from app.domains.operations.models import Charge, Dokument, Rahmenvertrag, ZertifikatEintrag
+from app.infrastructure.models import LkwAnnahmeQueue
+from app.documents.router_helpers import get_repository, list_from_store
+from app.domains.operations.models import Charge, Dokument
 from app.domains.shared.events import IntegrationEvent, get_event_publisher
-from app.infrastructure.models import Article as ArticleModel, InventoryCount
+from app.infrastructure.models import Article as ArticleModel
 from app.infrastructure.eventbus.outbox import OutboxPublisher
 from app.integrations.crm_core_client import (
     create_case as crm_create_case,
@@ -43,7 +43,7 @@ from app.integrations.crm_core_client import (
     update_case as crm_update_case,
 )
 from app.routers.contracts_router import get_contract as get_contract_via_router
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import EntityNotFoundError, ValidationFailedError
 from app.services.einkauf_compat_service import EinkaufCompatService
 from app.services.inventory_movement_direction import (
     direction_sql,
@@ -54,7 +54,7 @@ from app.services.pos_compat_service import PosCompatService
 from app.services.inventory_compat_service import InventoryCompatService, FutterCompatService
 from app.services.annahme_service import AnnahmeService
 
-from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.compat_schemas import CsvImportResponse, PurchaseOrderListOut
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import CompatBridgeOut
@@ -382,22 +382,6 @@ async def po_list(
     return {"data": items, "page": page, "pageSize": pageSize, "total": total, "totalPages": total_pages}
 
 
-@router.get("/purchase-orders/statistics", response_model=CompatBridgeOut, summary="Statistics po")
-async def po_statistics(tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    # Steht vor /purchase-orders/{po_id}: dahinter war dieser Weg nie erreichbar
-    # ("statistics" wurde als Bestellnummer gesucht -> 404).
-    # Beide Quellen wie in der Liste; bis 07.10.2026 zaehlte die Statistik nur die
-    # Altbelege und verschwieg jede kanonische Bestellung.
-    docs = [*_list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id), *_bestellungen_als_compat(db, tenant_id)]
-    by_status: dict[str, int] = {}
-    total_value = 0.0
-    for d in docs:
-        st = str(d.get("status") or "ENTWURF")
-        by_status[st] = by_status.get(st, 0) + 1
-        total_value += float(d.get("totalAmount") or 0)
-    return {"totalOrders": len(docs), "totalValue": round(total_value, 2), "byStatus": by_status}
-
-
 @router.get("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Get po")
 async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
     docs = _list_docs(db, "purchase_order", limit=5000, tenant_id=tenant_id)
@@ -537,76 +521,6 @@ def _altbeleg_schreibgeschuetzt(po_id: str) -> HTTPException:
     )
 
 
-@router.post("/purchase-orders", response_model=PurchaseOrderOut, status_code=201, summary="Create po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_create(payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    return await _create_compat_purchase_order(db, tenant_id=tenant_id, payload=payload)
-
-
-@router.patch("/purchase-orders/{po_id}", response_model=PurchaseOrderOut, summary="Patch po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_patch(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    from app.services.procurement_service import ProcurementService
-
-    beleg = _bestellung_finden(db, tenant_id, po_id)
-    if beleg:
-        felder = {
-            "deliveryDate": "lieferdatum_wunsch",
-            "shippingAddress": "lieferadresse",
-            "paymentTerms": "zahlungsbedingung",
-            "contactPerson": "ansprechpartner",
-            "incoterms": "incoterms",
-            "currency": "waehrung",
-            "notes": "notiz",
-            "externalReference": "unsere_referenz",
-            "subject": "kommission",
-        }
-        daten = {ziel: payload[quelle] for quelle, ziel in felder.items() if quelle in payload}
-        if daten:
-            ProcurementService(db, tenant_id).update_bestellung(beleg["id"], daten)
-        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-        return _compat_zeile(db, tenant_id, beleg["id"])
-
-    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
-    raise _altbeleg_schreibgeschuetzt(po_id)
-
-
-@router.post("/purchase-orders/{po_id}/approve", response_model=PurchaseOrderOut, summary="Approve po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_approve(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    from app.core.exceptions import ValidationFailedError
-    from app.services.procurement_service import ProcurementService
-
-    beleg = _bestellung_finden(db, tenant_id, po_id)
-    if beleg:
-        try:
-            ProcurementService(db, tenant_id).freigebe_bestellung(beleg["id"])
-        except ValidationFailedError as fehler:
-            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
-        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-        return _compat_zeile(db, tenant_id, beleg["id"])
-
-    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
-    raise _altbeleg_schreibgeschuetzt(po_id)
-
-
-@router.post("/purchase-orders/{po_id}/cancel-with-reason", response_model=PurchaseOrderOut, summary="Cancel po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_cancel(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    from app.core.exceptions import ValidationFailedError
-    from app.services.procurement_service import ProcurementService
-
-    beleg = _bestellung_finden(db, tenant_id, po_id)
-    if beleg:
-        try:
-            ProcurementService(db, tenant_id).storniere_bestellung(
-                beleg["id"], payload.get("reason")
-            )
-        except ValidationFailedError as fehler:
-            raise HTTPException(status_code=422, detail=str(fehler)) from fehler
-        cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-        return _compat_zeile(db, tenant_id, beleg["id"])
-
-    await po_get(po_id, tenant_id, db)  # 404, wenn es auch keinen Altbeleg gibt
-    raise _altbeleg_schreibgeschuetzt(po_id)
-
-
 @router.get("/purchase-orders/{po_id}/changelog", response_model=list[CompatBridgeOut], summary="Changelog po")
 async def po_changelog(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> list[dict[str, Any]]:
     doc = await po_get(po_id, tenant_id, db)
@@ -644,20 +558,6 @@ async def einkauf_goods_receipts(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_goods_receipts()
-
-
-@router.post("/einkauf/goods-receipts", response_model=EinkaufDocOut, status_code=201, summary="Goods receipts create einkauf", dependencies=SCHREIBEN["EINKAUF"])
-async def einkauf_goods_receipts_create(
-    payload: dict[str, Any],
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict:
-    try:
-        result = await EinkaufCompatService(db, tenant_id).create_goods_receipt(payload)
-        db.commit()
-        return result
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/bestellvorschlaege", response_model=list[CompatBridgeOut], summary="Bestellvorschlaege einkauf")
@@ -891,48 +791,6 @@ async def einkauf_rechnungseingaenge_list(
     tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
 ) -> list[dict[str, Any]]:
     return EinkaufCompatService(db, tenant_id).list_rechnungseingaenge()
-
-
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/pruefen", summary="Rechnungseingang pruefen einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
-async def einkauf_rechnungseingang_pruefen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
-) -> dict[str, Any]:
-    try:
-        return EinkaufCompatService(db, tenant_id).pruefen_rechnung(rechnung_id, gepruefter_akteur(user))
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/freigeben", summary="Rechnungseingang freigeben einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
-async def einkauf_rechnungseingang_freigeben(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
-) -> dict[str, Any]:
-    try:
-        return EinkaufCompatService(db, tenant_id).freigeben_rechnung(rechnung_id, gepruefter_akteur(user))
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
-
-
-@router.post("/einkauf/rechnungseingaenge/{rechnung_id}/verbuchen", summary="Rechnungseingang verbuchen einkauf",
-    response_model=EinkaufDocOut, dependencies=SCHREIBEN["EINKAUF"])
-async def einkauf_rechnungseingang_verbuchen(
-    rechnung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
-    user: dict = Depends(get_current_user)
-) -> dict[str, Any]:
-    try:
-        return EinkaufCompatService(db, tenant_id).verbuchen_rechnung(rechnung_id, gepruefter_akteur(user))
-    except EntityNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc)) from exc
-    except ValidationFailedError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/einkauf/reports", response_model=EinkaufDocOut, summary="Reports einkauf")
@@ -2159,21 +2017,6 @@ async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str,
     db.commit()
     cache_delete_prefix(f"compat:procurement:{tenant_id}:")
     return item
-
-
-@router.post("/purchase-orders/{po_id}/communications", response_model=EinkaufDocOut, status_code=201, summary="Add communication po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_add_communication(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    return await _po_kommunikation(po_id, payload, tenant_id, db, "erfassen")
-
-
-@router.post("/purchase-orders/{po_id}/communications/email", response_model=EinkaufDocOut, status_code=201, summary="Send email po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_send_email(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db), nutzer: dict = Depends(get_current_user)) -> dict:
-    return await _po_kommunikation(po_id, payload, tenant_id, db, "per_mail_senden", nutzer)
-
-
-@router.post("/purchase-orders/{po_id}/communications/portal", response_model=EinkaufDocOut, status_code=201, summary="Send portal po", dependencies=SCHREIBEN["EINKAUF"])
-async def po_send_portal(po_id: str, payload: dict[str, Any], tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)) -> dict:
-    return await _po_kommunikation(po_id, payload, tenant_id, db, "im_portal_veroeffentlichen")
 
 
 @router.get("/einkauf/retouren/{retour_id}", response_model=EinkaufDocOut, summary="Retoure get einkauf")

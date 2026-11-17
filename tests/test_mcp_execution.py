@@ -1441,62 +1441,6 @@ def test_lead_qualify_execute_writes_with_idempotency(client):
     db.commit.assert_called()
 
 
-def test_bestellung_versenden_dry_run_and_guards(client):
-    http, db = _as_scopes(client, ["einkauf:write"])
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "id": "po-uuid", "bestellnummer": "EK-1", "status": "freigegeben",
-    }
-    ok = http.post("/mcp/tools/call", json={
-        "tool_name": "einkauf.bestellung.versenden",
-        "parameters": PO_SEND,
-    })
-    assert ok.status_code == 200
-    assert ok.json()["mode"] == "dryRun"
-    assert ok.json()["proposedChanges"]["bestellung_id"] == "po-uuid"
-    db.commit.assert_not_called()
-
-    assert http.post("/mcp/tools/call", json={
-        "tool_name": "einkauf.bestellung.versenden",
-        "parameters": {**PO_SEND, "tenant_id": "x"},
-    }).status_code == 422
-
-    http2, _ = _as_scopes(client, ["einkauf:read"])
-    assert http2.post("/mcp/tools/call", json={
-        "tool_name": "einkauf.bestellung.versenden", "parameters": PO_SEND,
-    }).status_code == 403
-
-
-def test_bestellung_versenden_execute_calls_service(client):
-    http, db = _as_scopes(client, ["einkauf:write"])
-    db.execute.return_value.mappings.return_value.first.return_value = {
-        "id": "po-uuid", "bestellnummer": "EK-1", "status": "freigegeben",
-    }
-    fake_svc = Mock()
-    fake_svc.versende_bestellung_svc.return_value = {
-        "bestellung_id": "po-uuid",
-        "bestellnummer": "EK-1",
-        "versand": {"status": "gesendet", "versand_art": "email"},
-    }
-    with patch("app.services.mcp_execution_service.ProcurementService", return_value=fake_svc), \
-         patch("app.services.mcp_execution_service.Session"), \
-         patch("app.services.mcp_execution_service._write_audit", return_value="audit-po"), \
-         patch("app.services.mcp_execution_service._store_execution"), \
-         patch("app.services.mcp_execution_service._advisory_lock"), \
-         patch("app.services.mcp_execution_service._replay_or_none", return_value=None):
-        response = http.post("/mcp/tools/call", json={
-            "tool_name": "einkauf.bestellung.versenden",
-            "parameters": PO_SEND,
-            "mode": "execute",
-            "idempotency_key": "po-once",
-        })
-    assert response.status_code == 200
-    body = response.json()
-    assert body["versand_status"] == "gesendet"
-    assert body["bestellnummer"] == "EK-1"
-    fake_svc.versende_bestellung_svc.assert_called_once()
-    db.commit.assert_called()
-
-
 ANGEBOT_BESTELLEN = {"angebot_id": "ang-1"}
 AVIS_WE = {"avis_id": "avis-1", "lager_id": "lager-1", "lieferschein_nr": "LS-99"}
 STORNO_MOV = {"movement_id": "mov-1", "begruendung": "Fehlbuchung"}
