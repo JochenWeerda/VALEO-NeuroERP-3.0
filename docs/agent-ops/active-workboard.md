@@ -21370,3 +21370,5 @@ Inhalt identisch zum abgenommenen Head14c2f81c5. Formale Codeowner-Sperre
 mit vorhandener Nutzer-/Administratorfreigabe uebersteuert, Schutzregeln
 unveraendert; keine technischen Gates umgangen. Separater main-Nachlauf
 bleibt auf aktuellem Mergecommit zu beobachten.
+
+RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung des vorhandenen optionalen Meta-Webhooks, WhatsAppWeb-Vorgabe erhalten), neue enge Tests und eigene QA. Keine Proplanta-/FAOSTAT-Freischaltung ohne echte Quelle, keine Runtime-Ausnahmen/Gates lockern, keine DB/Docker-Ressourcen anlegen. Gemeinsame OpenAPI/Inventare regeneriert nurLead. Keine konkurrierenden Builds/Tests.
