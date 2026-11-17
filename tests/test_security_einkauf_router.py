@@ -10,7 +10,7 @@ from app.api.v1.endpoints import einkauf_bestellvorschlag as endpoint
 
 @pytest.mark.asyncio
 # Die Bestellung aendert seit BELEG-052 Phase 3b nur noch DocFlow; hier bleibt ihr Leseweg.
-@pytest.mark.parametrize("kind,operation", [("lieferant", "get"), ("lieferant", "update"), ("bestellung", "get")])
+@pytest.mark.parametrize("kind,operation", [("lieferant", "get"), ("lieferant", "update")])
 async def test_missing_entity_lookup_keeps_id_and_context_tenant(kind, operation):
     db = MagicMock()
     db.query.return_value.filter.return_value.first.return_value = None

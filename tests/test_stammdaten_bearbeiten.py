@@ -33,7 +33,7 @@ BEARBEITER = f"bearb-{uuid.uuid4().hex[:8]}"
 
 TABELLEN = ("domain_crm.crm_action_audit_log", "public.outbox_events", "domain_ops.ops_bankkonten",
             "domain_shared.futtermittel_mischfutter", "public.crm_leads", "public.einkauf_auftragsbestaetigungen",
-            "domain_ops.reklamationen", "domain_einkauf.bestellungen",
+            "domain_ops.reklamationen",
             "domain_einkauf.lieferanten", "domain_inventory.articles", "domain_crm.customers",
             # Seit der Partnerbruecke (Stufe 1) haengt jede Kunden-/Lieferantenanlage an einem Geschaeftspartner.
             "domain_crm.business_partners")
@@ -56,9 +56,9 @@ def aufraeumen(engine):
     from sqlalchemy import text
 
     with engine.begin() as v:
-        # Positionen tragen keinen Mandanten; sie haengen an der Bestellung.
-        v.execute(text("DELETE FROM domain_einkauf.bestellung_positionen WHERE bestellung_id IN "
-                       "(SELECT id FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
+        # Bestellungen fuehrt DocFlow (BELEG-052 S3); Positionen vor dem Kopf.
+        for tabelle in ("domain_docflow.document_items", "domain_docflow.document_headers"):
+            v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
         for tabelle in TABELLEN:
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -452,15 +452,28 @@ def test_lieferant_wird_ueber_die_studio_maske_angelegt_und_bearbeitet(client, e
                        json={"_auditReason": "Maengel behoben"}).json()["success"] is True
 
 
+def docflow_bestellung(engine, lieferant: str, nummer: str, positionen=()) -> str:
+    """Freigegebene DocFlow-Bestellung (Status open) mit Positionen (Artikel, Menge, Preis)."""
+    kopf_id = str(uuid.uuid4())
+    ausfuehren(engine, "INSERT INTO domain_docflow.document_headers (id, tenant_id, doc_type, doc_number, status, "
+                       "supplier_id, currency, total_net, total_tax, total_gross, document_date, version, created_at, "
+                       "updated_at, bausteine) VALUES (:id, :h, 'purchase_order', :nr, 'open', :l, 'EUR', 0, 0, 0, NOW(), "
+                       "1, NOW(), NOW(), '{}'::jsonb)", id=kopf_id, h=HAUS_A, nr=nummer, l=lieferant)
+    for zeile_nr, (artikel, menge, preis) in enumerate(positionen, start=1):
+        ausfuehren(engine, "INSERT INTO domain_docflow.document_items (id, tenant_id, header_id, line_number, "
+                           "article_number, description, quantity, unit, unit_price) "
+                           "VALUES (:id, :h, :k, :n, :a, :a, :m, 'dt', :e)",
+                   id=str(uuid.uuid4()), h=HAUS_A, k=kopf_id, n=zeile_nr, a=artikel, m=menge, e=preis)
+    return kopf_id
+
+
 def test_auftragsbestaetigung_wird_zur_bestellung_erfasst(client, engine):
     """Bis 20.10.2026 gab es keinen Erfassungsweg; Lieferant und Bestellnummer kommen aus der Bestellung."""
     lieferant, bestellung = str(uuid.uuid4()), str(uuid.uuid4())
     nummer = f"B-{bestellung[:6]}"
     ausfuehren(engine, "INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
                        "VALUES (:id, :h, :nr, 'Muehle Nord')", id=lieferant, h=HAUS_A, nr=f"L-{lieferant[:6]}")
-    ausfuehren(engine, "INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                       "bestelldatum, waehrung) VALUES (:id, :h, :nr, :l, CURRENT_DATE, 'EUR')",
-               id=bestellung, h=HAUS_A, nr=nummer, l=lieferant)
+    docflow_bestellung(engine, lieferant, nummer)
     daten = {"bestellung": nummer, "ab_nummer": "AB-77", "lieferdatum": "2026-11-05", "gesamtbetrag": 1234.5,
              "lieferant_name": "vom Client erfunden"}
     angelegt = client.post("/api/v1/einkauf/auftragsbestaetigungen", json=daten, headers=kopf())
@@ -488,14 +501,7 @@ def test_ordrsp_legt_ab_an_und_gleicht_positionen_ab(client, engine):
     nummer = f"B-{bestellung[:6]}"
     ausfuehren(engine, "INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
                        "VALUES (:id, :h, :nr, 'Saatzucht Sued')", id=lieferant, h=HAUS_A, nr=f"L-{lieferant[:6]}")
-    ausfuehren(engine, "INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                       "bestelldatum, waehrung) VALUES (:id, :h, :nr, :l, CURRENT_DATE, 'EUR')",
-               id=bestellung, h=HAUS_A, nr=nummer, l=lieferant)
-    for pos, artikel, menge, preis in ((1, "WEIZEN", 100, 24.5), (2, "RAPS", 50, 51.0)):
-        ausfuehren(engine, "INSERT INTO domain_einkauf.bestellung_positionen (id, bestellung_id, pos_nr, "
-                           "artikel_nr, artikel_bezeichnung, menge, einheit, einzelpreis, tenant_id) "
-                           "VALUES (:id, :b, :p, :a, :a, :m, 'dt', :e, (SELECT tenant_id FROM domain_einkauf.bestellungen WHERE id = :b))",
-                   id=str(uuid.uuid4()), b=bestellung, p=pos, a=artikel, m=menge, e=preis)
+    docflow_bestellung(engine, lieferant, nummer, (("WEIZEN", 100, 24.5), ("RAPS", 50, 51.0)))
     nachricht = (f"UNH+1+ORDRSP:D:96A:UN'BGM+231+AB-EDI-1+4'DTM+137:20261020:102'RFF+ON:{nummer}'"
                  "LIN+1+5+WEIZEN:BP'QTY+21:100'PRI+AAA:24.50'LIN+2+3+RAPS:BP'QTY+21:40'PRI+AAA:51.00'UNT+11+1'")
     antwort = client.post("/api/v1/einkauf/auftragsbestaetigungen/edi-ordrsp", json={"nachricht": nachricht},

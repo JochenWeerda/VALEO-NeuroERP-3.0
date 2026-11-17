@@ -39,8 +39,8 @@ def k(monkeypatch):
     s.execute(sa.text("INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
                       "VALUES (:id, :t, :nr, 'Testmuehle')"), {"id": lieferant, "t": t, "nr": f"L-{t}"})
     lege_lieferanten_an(s, t, lieferant)
-    s.execute(sa.text("INSERT INTO domain_inventory.articles (id, article_number, name, tenant_id) "
-                      "VALUES (:id, 'WEI-S3', 'Weizen', :t)"), {"id": artikel, "t": t})
+    s.execute(sa.text("INSERT INTO domain_inventory.articles (id, article_number, name, tenant_id, is_active) "
+                      "VALUES (:id, 'WEI-S3', 'Weizen', :t, true)"), {"id": artikel, "t": t})
     try:
         yield {"db": s, "t": t, "lieferant": lieferant, "artikel": artikel}
     finally:

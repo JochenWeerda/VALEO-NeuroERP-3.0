@@ -195,9 +195,7 @@ def test_many_lines_use_one_validation_query_before_any_journal_write(
     [
         "app/services/sales_posting_service.py",
         "app/services/agrar_settlement_service.py",
-        "app/services/einkauf_compat_service.py",
         "app/services/harvest_acceptance_service.py",
-        "app/services/procurement_service.py",
         "app/api/v1/endpoints/asset_accounting.py",
         "app/api/v1/endpoints/genossenschaft.py",
         "app/api/v1/endpoints/logistics_freight.py",
