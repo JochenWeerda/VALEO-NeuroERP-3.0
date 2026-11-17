@@ -58403,7 +58403,20 @@
       "EinkaufKpisOut": {
         "additionalProperties": true,
         "description": "Response schema for einkauf kpis endpoints.",
-        "properties": {},
+        "properties": {
+          "offenes_bestellobligo_netto": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Offene Bestellmenge freigegebener Bestellungen zum Bestellpreis (Stichtag, netto)",
+            "title": "Offenes Bestellobligo Netto"
+          }
+        },
         "title": "EinkaufKpisOut",
         "type": "object"
       },
@@ -84082,6 +84095,133 @@
           }
         },
         "title": "IngredientPatch",
+        "type": "object"
+      },
+      "InnovationsStandOut": {
+        "additionalProperties": true,
+        "description": "Wie eine Artikelprobe laeuft — mit dem Grund fuer die Empfehlung.",
+        "properties": {
+          "abverkauf_pro_tag": {
+            "default": 0.0,
+            "title": "Abverkauf Pro Tag",
+            "type": "number"
+          },
+          "abverkaufsquote": {
+            "default": 0.0,
+            "title": "Abverkaufsquote",
+            "type": "number"
+          },
+          "artikel_bezeichnung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Bezeichnung"
+          },
+          "artikel_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Artikel Nr"
+          },
+          "bestelldatum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestelldatum"
+          },
+          "bestellnummer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bestellnummer"
+          },
+          "bestellung_id": {
+            "title": "Bestellung Id",
+            "type": "string"
+          },
+          "einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Einheit"
+          },
+          "empfehlung": {
+            "title": "Empfehlung",
+            "type": "string"
+          },
+          "erste_lieferung": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erste Lieferung"
+          },
+          "hinweis": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hinweis"
+          },
+          "stand": {
+            "title": "Stand",
+            "type": "string"
+          },
+          "tage_im_regal": {
+            "default": 0,
+            "title": "Tage Im Regal",
+            "type": "integer"
+          },
+          "testmenge": {
+            "default": 0.0,
+            "title": "Testmenge",
+            "type": "number"
+          },
+          "verkauft": {
+            "default": 0.0,
+            "title": "Verkauft",
+            "type": "number"
+          }
+        },
+        "required": [
+          "bestellung_id",
+          "stand",
+          "empfehlung"
+        ],
+        "title": "InnovationsStandOut",
         "type": "object"
       },
       "InstanceCreateRequest": {
@@ -280989,6 +281129,74 @@
         "summary": "Goods receipts einkauf",
         "tags": [
           "compat"
+        ]
+      }
+    },
+    "/api/v1/einkauf/innovationen": {
+      "get": {
+        "description": "Was wurde zur Probe bestellt, und was ist daraus geworden?\n\nGerechnet wird ab der ersten Lieferung, nicht ab der Bestellung: Solange\ndie Ware nicht da ist, kann sie sich nicht verkaufen. Die Empfehlung ist\nein Vorschlag mit Begruendung, keine Buchung — ob ein Artikel ins Sortiment\nkommt, entscheidet der Vertrieb.",
+        "operationId": "innovationen_api_v1_einkauf_innovationen_get",
+        "parameters": [
+          {
+            "description": "Bewertungsfenster in Tagen (Vorgabe 90)",
+            "in": "query",
+            "name": "fenster_tage",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 730,
+                  "minimum": 7,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Bewertungsfenster in Tagen (Vorgabe 90)",
+              "title": "Fenster Tage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InnovationsStandOut"
+                  },
+                  "title": "Response Innovationen Api V1 Einkauf Innovationen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Laufende Artikelproben",
+        "tags": [
+          "einkauf",
+          "bestellvorschlag",
+          "kontrakte",
+          "lager-konten",
+          "einkauf",
+          "bestellvorschlag"
         ]
       }
     },

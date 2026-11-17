@@ -191,10 +191,20 @@ async def delete_branch(
     db: Session = Depends(get_db),
 ):
     """Delete a branch."""
-    _get_branch_or_404(db, branch_id, tenant_id)
-    
-    # Die Pruefung gegen den Lieferschein-Altspeicher entfaellt (BELEG-052): DocFlow-Belege tragen noch keine
-    # Niederlassung (Kopfbaustein "organisation" steht aus); es gibt dort nichts, was die Niederlassung hielte.
+    zweig = dict(_get_branch_or_404(db, branch_id, tenant_id))
+
+    # Belege tragen die Niederlassung im Kopfbaustein organisation (BELEG-052), als Kennung oder
+    # Niederlassungsnummer. Eine Niederlassung mit Belegen bleibt stehen - sonst zeigten diese ins Leere.
+    belegt = db.execute(
+        text("""
+            SELECT COUNT(*) FROM domain_docflow.document_headers
+            WHERE tenant_id = :tenant_id AND deleted_at IS NULL
+              AND bausteine #>> '{organisation,niederlassung}' IN (:id, :kuerzel)
+        """),
+        {"tenant_id": tenant_id, "id": str(branch_id), "kuerzel": str(zweig["branch_number"] if zweig.get("branch_number") is not None else branch_id)},
+    ).scalar()
+    if belegt:
+        raise HTTPException(status_code=409, detail=f"Die Niederlassung steht auf {belegt} Beleg(en) und bleibt.")
     db.execute(
         text("""
             DELETE FROM domain_shared.branches 

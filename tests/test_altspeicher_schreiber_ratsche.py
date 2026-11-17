@@ -74,8 +74,8 @@ def test_der_lieferschein_altspeicher_hat_keinen_leser_mehr():
 
 LESEN_BESTELLUNG = re.compile(r"(FROM|JOIN)\s+domain_einkauf\.(bestellungen|bestellung_positionen)\b", re.I)
 ALTMODELL = re.compile(r"\bEinkaufBestellung(Position)?\b")
-# Fax-/EDI-Versand haengt noch am ORM-Objekt der Altbestellung (Fachrest: auf die DocFlow-Bestellung umhaengen).
-ALTMODELL_NUTZER = {"modules/einkauf/services/versand_service.py"}
+# Seit 17.11.2026 versendet auch Fax/EDI die DocFlow-Bestellung; das ORM-Modell nutzt niemand mehr.
+ALTMODELL_NUTZER: set[str] = set()
 
 
 def _dateien_mit(muster: re.Pattern[str]) -> list[str]:

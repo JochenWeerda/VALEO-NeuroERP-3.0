@@ -79,6 +79,23 @@ WHERE supplier_id IS NOT NULL GROUP BY supplier_id ORDER BY spend DESC, supplier
 LIMIT 10000
 """
 
+# Offenes Bestellobligo (netto): was freigegebene Bestellungen noch an Ware erwarten, zum Bestellpreis. Stichtagswert
+# ohne Zeitraum. Das Obligo ist ausserbilanziell (HGB) und wird deshalb nicht gebucht, sondern hier ausgewiesen.
+_OBLIGO_SQL = """
+SELECT COALESCE(SUM(GREATEST(i.quantity - COALESCE(g.menge, 0), 0) * i.unit_price
+                    * (1 - COALESCE(i.discount_percent, 0) / 100)), 0)
+FROM domain_docflow.document_headers h
+JOIN domain_docflow.document_items i ON i.header_id = h.id AND i.tenant_id = h.tenant_id
+LEFT JOIN LATERAL (
+    SELECT SUM(l.quantity_linked) AS menge
+    FROM domain_docflow.document_links l
+    JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+    WHERE l.tenant_id = h.tenant_id AND l.from_item_id = i.id AND l.relation_type = 'order_to_receipt'
+      AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')
+) g ON TRUE
+WHERE h.tenant_id = :tid AND h.doc_type = 'purchase_order' AND h.status = 'open' AND h.deleted_at IS NULL
+"""
+
 
 @router.get("/kpis", summary="Kpis abrufen",
     response_model=EinkaufKpisOut
@@ -118,6 +135,8 @@ def get_kpis(
         date_params,
     ).scalar()
     fill_rate: Optional[float] = float(row) if row is not None else None
+
+    offenes_obligo = float(db.execute(text(_OBLIGO_SQL), {"tid": tenant_id}).scalar() or 0)
 
     # ── Price Variance ────────────────────────────────────────────────────
     price_variance: Optional[float] = None
@@ -168,6 +187,7 @@ def get_kpis(
         "avg_lead_time_days": avg_lead_time_days,
         "top_5_suppliers_by_spend": top_5_suppliers,
         "abc_analysis": abc_analysis,
+        "offenes_bestellobligo_netto": offenes_obligo,
     }
 
 

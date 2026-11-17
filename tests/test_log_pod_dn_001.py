@@ -28,7 +28,7 @@ class TestLogPodDnBelegbruch:
     def _call_save_pod(self, db, dn_ref: str | None = "LS-2026-001"):
         from app.api.v1.endpoints.logistics_tours import save_pod
 
-        body = MagicMock()
+        body = MagicMock(recipient_name="Hofstelle", delivered_at="2026-11-17T10:00:00")
         body.model_dump.return_value = {"signature": "ok"}
 
         stop_row = _make_stop_row(dn_ref)
@@ -55,6 +55,8 @@ class TestLogPodDnBelegbruch:
         all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
         assert not [s for s in all_sqls if "delivery_notes" in s]
         assert ergebnis["delivery_note_ref"] == "LS-2026-001"
+        # Der Nachweis steht im Belegverlauf des DocFlow-Lieferscheins (Fachrest S1, 17.11.2026).
+        assert [s for s in all_sqls if "document_command_log" in s and "proof_of_delivery" in s]
 
     def test_kein_update_ohne_delivery_note_ref(self):
         """Wenn Stopp kein delivery_note_ref hat → kein delivery_notes UPDATE."""

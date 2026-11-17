@@ -773,14 +773,14 @@ def save_pod(
         if geaendert != 1:
             db.rollback()
             raise HTTPException(status_code=404, detail=f"Stopp {stop_id} nicht gefunden")
-        db.commit()
         row = db.execute(
             text("SELECT * FROM domain_logistics.tour_stops WHERE id = :stop_id AND tenant_id = :tenant_id"),
             {"stop_id": stop_id, "tenant_id": tenant_id},
         ).mappings().first()
-
-        # Der Lieferschein ist DocFlow-Beleg (BELEG-052). Sein Stand "ausgeliefert" folgt der bestaetigten Pickliste
-        # (Bestand und Beleg in einer Transaktion); der Zustellnachweis steht am Tourstopp und aendert ihn nicht.
+        lieferschein = (_lookup_sales_delivery_note(db, str(row["delivery_note_ref"]), tenant_id)
+                        if row and row.get("delivery_note_ref") else None)
+        command_handlers.zustellnachweis_am_lieferschein(db, tenant_id, lieferschein, tour_id, stop_id, body)
+        db.commit()
 
         return dict(row)
     except HTTPException:

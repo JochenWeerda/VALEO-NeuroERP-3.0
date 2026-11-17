@@ -107,10 +107,16 @@ def _bestellpositionen(db: Session, tenant_id: str, bestellung: dict[str, Any]) 
     if bestellung.get("herkunft") != "docflow":
         return None
     zeilen = db.execute(
+        # Die Artikelnummer des Lieferanten kommt aus dem Artikelstamm (Lieferanten-Artikel, sonst die am Artikel).
         text("SELECT i.line_number AS pos_nr, i.article_number AS artikel_nr, "
-             "i.metadata ->> 'lieferanten_artnr' AS lieferanten_artnr, i.quantity AS menge, "
-             "i.unit_price AS einzelpreis, NULL::date AS lieferdatum "
+             "COALESCE((SELECT s.supplier_article_number FROM domain_inventory.article_suppliers s "
+             "          WHERE s.article_id = a.id AND s.tenant_id = i.tenant_id AND s.partner_id = h.supplier_id "
+             "          AND NULLIF(s.supplier_article_number, '') IS NOT NULL LIMIT 1), "
+             "         NULLIF(a.lieferanten_artikelnummer, '')) AS lieferanten_artnr, "
+             "i.quantity AS menge, i.unit_price AS einzelpreis, NULL::date AS lieferdatum "
              "FROM domain_docflow.document_items i "
+             "JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id "
+             "LEFT JOIN domain_inventory.articles a ON a.tenant_id = i.tenant_id AND a.article_number = i.article_number "
              "WHERE i.header_id = :id AND i.tenant_id = :tid ORDER BY i.line_number LIMIT 5000"),
         {"id": str(bestellung["id"]), "tid": tenant_id},
     ).mappings().fetchmany(5000)  # eine Bestellung, harte Obergrenze

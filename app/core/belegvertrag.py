@@ -64,19 +64,32 @@ BAUSTEIN_FELDER: dict[str, tuple[tuple[str, str, str], ...]] = {
     "referenzen": (("eigene_referenz", "Eigene Referenz", "text"), ("fremde_referenz", "Fremde Referenz", "text")),
     # Ziellager des Wareneingangs (Kennung oder Lagercode): die Freigabe bucht den Zugang dorthin.
     "lager": (("lager", "Lager", "text"),),
+    # Wer bearbeitet, traegt das System aus der Anmeldung ein - kein Eingabefeld fuer den eigenen Namen.
+    "organisation": (("niederlassung", "Niederlassung (Nummer)", "text"), ("kostenstelle", "Kostenstelle", "text"),
+                     ("kommission", "Kommission", "text")),
+    # Direktlieferung = Bestellfall plus Kundenanschrift im Baustein Lieferung; Innovation = Probebestellung eines
+    # neuen Artikels, die Nachschau (GET /einkauf/innovationen) bewertet den Abverkauf ab der ersten Lieferung.
+    "bestellfall": (("bestellfall", "Bestellfall", "select"), ("hinweis", "Hinweis zum Bestellfall", "text")),
+}
+
+# Auswahlwerte der Bausteinfelder vom Typ select: (Wert, Anzeige).
+BAUSTEIN_AUSWAHL: dict[tuple[str, str], tuple[tuple[str, str], ...]] = {
+    ("bestellfall", "bestellfall"): (("bestand_abgleich", "Lagerbestand auffuellen"),
+                                     ("direktlieferung", "Direktlieferung an den Kunden"),
+                                     ("innovation", "Probebestellung neuer Artikel")),
 }
 
 # Kopfbausteine je Belegart (Reihenfolge = Reihenfolge in der Maske).
 KOPFBAUSTEINE: dict[str, tuple[str, ...]] = {
-    "sales_offer": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
-    "sales_order": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
-    "sales_delivery": ("texte", "kontakt", "lieferung", "referenzen"),
-    "sales_invoice": ("texte", "zahlung", "referenzen"),
-    "sales_credit_memo": ("texte", "referenzen"),
-    "purchase_order": ("texte", "kontakt", "lieferung", "zahlung", "referenzen"),
-    "goods_receipt": ("lager", "texte", "lieferung", "referenzen"),
-    "purchase_invoice": ("texte", "zahlung", "referenzen"),
-    "purchase_credit_memo": ("texte", "referenzen"),
+    "sales_offer": ("organisation", "texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "sales_order": ("organisation", "texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "sales_delivery": ("organisation", "texte", "kontakt", "lieferung", "referenzen"),
+    "sales_invoice": ("organisation", "texte", "zahlung", "referenzen"),
+    "sales_credit_memo": ("organisation", "texte", "referenzen"),
+    "purchase_order": ("organisation", "bestellfall", "texte", "kontakt", "lieferung", "zahlung", "referenzen"),
+    "goods_receipt": ("organisation", "lager", "texte", "lieferung", "referenzen"),
+    "purchase_invoice": ("organisation", "texte", "zahlung", "referenzen"),
+    "purchase_credit_memo": ("organisation", "texte", "referenzen"),
 }
 
 TRENNER = "__"
@@ -99,6 +112,10 @@ def pruefe_kopfbausteine(belegart: str, werte: dict[str, Any] | None) -> dict[st
         if fremd:
             raise ValueError(f"Baustein {name} kennt {', '.join(sorted(fremd))} nicht.")
         sauber = {k: v for k, v in inhalt.items() if v not in (None, "")}
+        for feld, wert in sauber.items():
+            auswahl = BAUSTEIN_AUSWAHL.get((name, feld))
+            if auswahl and wert not in {w for w, _a in auswahl}:
+                raise ValueError(f"{name}.{feld}: {wert} ist kein zulaessiger Wert.")
         if sauber:
             ergebnis[name] = sauber
     return ergebnis

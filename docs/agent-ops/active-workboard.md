@@ -21098,6 +21098,23 @@ Dateibesitz: die genannten Module, tests/procurement_identity_fixture.py (Belege
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offene Fachreste: (1) Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie) - ERS greift nur bei Rechnungsueberzahlung. (2) Bestellfall (Innovation/Direktlieferung) hat in DocFlow keinen Baustein mit Feldern; Innovations-Nachschau und Direktlieferung aus dem Auftrag entfallen bis dahin. (3) Fax-/EDI-Versand (modules/einkauf/services/versand_service.py) haengt am ORM-Altobjekt und hat keinen Aufrufer mehr - auf die DocFlow-Bestellung umhaengen. (4) Lieferanten-Artikelnummer je Position (Baustein einkauf) ohne Felder; ORDRSP gleicht ueber metadata.lieferanten_artnr ab. (5) Die Obligo-Buchung (5100) gab es nur an der Freigabe der Altbestellung (ohne Aufrufer seit 3b); die DocFlow-Freigabe bucht kein Obligo - fachlich klaeren (Obligo ist ausserbilanziell, eher Auswertung als Journal). (6) S4-Ratsche Uebergangssicht Auftraege 16 -> 15 Leser (Direktlieferung entfallen).
 
+## BELEG-052-FACHRESTE-20261117 — in Arbeit, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S1-S3 (PR #152). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: die offenen Fachreste aus 3B, S1, S2 und S3 loesen (Entscheidungen nach "was nicht einfach laeuft, laeuft einfach nicht"):
+(1) Ueberlieferung: Der Wareneingang aus der Bestellung nimmt mehr als die Restmenge auf (22 t auf 20 t); Abgleich zeigt "ueberliefert", ERS schreibt die Mehrmenge gut. Alle anderen Folgebelege bleiben begrenzt.
+(2) Kopfbaustein organisation (Niederlassung als Nummer, Kostenstelle, Kommission) an allen Belegarten; Bearbeiter kein Feld (kommt aus der Anmeldung). Die Niederlassung mit Belegen ist nicht loeschbar (409).
+(3) Kopfbaustein bestellfall an der Bestellung (Auswahl Lagerbestand/Direktlieferung/Innovation, Hinweis; Auswahl serverseitig geprueft). Direktlieferung = Bestellfall + Kundenanschrift im Baustein Lieferung, keine eigene Funktion. Innovations-Nachschau GET /einkauf/innovationen liest DocFlow-Probebestellungen.
+(4) Versandwege der Bestellung an der Belegaktion versenden: E-Mail (wie bisher, jetzt auch im Reiter Kommunikation), Fax, EDI (ORDERS), Post, Lieferantenportal; nur was ankam, gilt als versandt. versand_service liest die DocFlow-Bestellung - das ORM-Altmodell nutzt niemand mehr (Ratsche auf null).
+(5) Lieferanten-Artikelnummer: aus dem Artikelstamm (Lieferanten-Artikel, sonst am Artikel) statt eines Positionsfelds.
+(6) Bestellobligo: keine Journalbuchung (ausserbilanziell nach HGB); Kennzahl offenes_bestellobligo_netto in den Einkaufs-KPIs.
+(7) Freigabeentscheidung an der Belegmaske dangerLevel moderate.
+(8) Zustellnachweis am Tourstopp steht im Belegverlauf des DocFlow-Lieferscheins; der Stand "ausgeliefert" folgt weiter der Pickliste.
+(9) Frontend-Pilotregister ohne Bestellung, Lieferschein, Eingangsrechnung; kuratierte Listenrouten fuer alle Beleglisten (Platzhalter /belege/:belegart weg).
+Belegmasken-Release 1.13.0.
+Dateibesitz: die genannten Module, tests/test_beleg_reste_docflow.py (neu), angepasste Tests, Projektionen.
+Abnahme: neue Tests gegen echtes Schema gruen; vollstaendige Pruefkette; CI des PR.
+Bewusst nicht hier: Zusammenfuehrung des Fibu-Speichers /finance/ap/invoices mit der DocFlow-Eingangsrechnung (M3 Fibu). Ladegewicht nur aus Gewichtseinheiten und ESG-Kennzeichen bleiben wie beschrieben (kein Fehler).
+
 ## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
 
 Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften

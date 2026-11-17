@@ -37,6 +37,9 @@ TRANSITIONS: dict[str, dict[str, str]] = {
     "purchase_invoice": {"purchase_credit_memo": "purchase_invoice_to_credit_memo"},
 }
 
+# Folgebelege, die mehr als die Restmenge aufnehmen duerfen (BELEG-052: Ueberlieferung im Wareneingang).
+UEBERLIEFERUNG_ERLAUBT: frozenset[str] = frozenset({"order_to_receipt"})
+
 # Einkaufsbelege nehmen Vorsteuerschluessel; alles andere Umsatzsteuerschluessel.
 EINKAUF_TYPES: frozenset[str] = frozenset({"purchase_order", "goods_receipt", "purchase_invoice", "purchase_credit_memo"})
 # Rechnung aus dem Auftrag direkt oder aus dessen Lieferungen — nie beides (sonst waere die Menge doppelt fakturiert).
@@ -950,7 +953,9 @@ class DocflowService:
                 target_qty = Decimal(str(raw))
                 if target_qty < 0:
                     raise ValidationFailedError("Negative quantity in partial conversion")
-                if target_qty > rest:
+                # Ueberlieferung: Der Wareneingang nimmt auf, was tatsaechlich kam (22 t auf 20 t bestellt). Der Abgleich
+                # zeigt die Mehrmenge als ueberliefert, ERS schreibt sie gut. Alle anderen Folgebelege bleiben begrenzt.
+                if target_qty > rest and relation_type not in UEBERLIEFERUNG_ERLAUBT:
                     raise ValidationFailedError(
                         f"Position {item.get('line_number')}: Menge {_qty(target_qty).normalize():f} übersteigt die "
                         f"Restmenge {_qty(rest).normalize():f} (Beleg {_qty(src_qty).normalize():f}, bereits umgewandelt "

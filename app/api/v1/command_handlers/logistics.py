@@ -232,3 +232,21 @@ def action_tour_anlegen(request: Request, body: dict[str, Any], db: Session, ten
     )
 
 
+def zustellnachweis_am_lieferschein(db: Session, tenant_id: str, lieferschein: Optional[Dict[str, Any]],
+                                    tour_id: str, stop_id: str, nachweis: Any) -> None:
+    """Zustellnachweis in den Belegverlauf des DocFlow-Lieferscheins (BELEG-052), in der Transaktion des Stopps.
+
+    Der Stand "ausgeliefert" folgt der bestaetigten Pickliste (Bestand und Beleg zusammen); der Nachweis aendert ihn
+    nicht, er belegt die Uebergabe am Beleg. Ohne zugeordneten Lieferschein gibt es nichts einzutragen.
+    """
+    import json
+
+    if not lieferschein:
+        return
+    db.execute(
+        text("INSERT INTO domain_docflow.document_command_log (tenant_id, header_id, command, actor, payload) "
+             "VALUES (:t, :h, 'proof_of_delivery', 'logistik', CAST(:p AS jsonb))"),
+        {"t": tenant_id, "h": str(lieferschein["id"]),
+         "p": json.dumps({"tour_id": tour_id, "stop_id": stop_id, "empfaenger": nachweis.recipient_name,
+                          "zugestellt_am": nachweis.delivered_at})},
+    )
