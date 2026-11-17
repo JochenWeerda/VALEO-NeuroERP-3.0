@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-16",
+  "generatedAt": "2026-11-17",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -27228,5 +27228,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 144
+  "event_count": 141
 }

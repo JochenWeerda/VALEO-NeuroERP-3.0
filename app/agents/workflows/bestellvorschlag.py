@@ -227,7 +227,7 @@ def _persist_purchase_order(
     correlation_id: str,
     ai_recommendations: list[str],
 ) -> str:
-    """Bestellentwurf in DocFlow (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung).
+    """Bestellentwurf in DocFlow (BELEG-052: DocFlow einziger Belegspeicher; vorher das ORM-Modell der Altbestellung).
 
     Die Menge steht in der Einheit des Preises (``beleg_anlage.position_in_preiseinheit``); Steuer erst mit
     Schluessel. Wiederholungsschutz ueber die Korrelation des Workflows.

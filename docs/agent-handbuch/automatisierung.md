@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-16
+last_reviewed: 2026-11-17
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -144,12 +144,9 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
-| `goods_receipt.created` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.edi.message.ack` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.edi.message.created` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.return.created` | outbox | `app/services/einkauf_compat_service.py` |
-| `purchase_order.communication.sent` | outbox | `app/api/v1/endpoints/compat.py` |
-| `purchase_order.created` | outbox | `app/api/v1/endpoints/compat.py` |
 | `service_entry_sheet.created` | outbox | `app/services/einkauf_compat_service.py` |
 
 ### Finanzbuchhaltung

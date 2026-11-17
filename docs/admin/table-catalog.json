@@ -15708,6 +15708,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/logistics_tours.py",
             "app/services/agent_pruefagenten.py",
             "app/services/docflow_belegadapter.py",
@@ -15715,6 +15716,7 @@
             "app/services/docflow_service.py",
             "app/services/gutschrift_docflow.py",
             "app/services/o2c_chain_service.py",
+            "app/services/procurement_match_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py"
           ],
@@ -15872,8 +15874,11 @@
             "app/api/v1/endpoints/admin_pos.py",
             "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/belege.py",
+            "app/api/v1/endpoints/compat.py",
+            "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/api/v1/endpoints/logistics_tours.py",
+            "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/api/v1/endpoints/sales_reports.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/core/dms_ocr_contracts.py",
@@ -15881,6 +15886,7 @@
             "app/services/agent_pruefagenten.py",
             "app/services/beleg_erechnung.py",
             "app/services/beleg_liste.py",
+            "app/services/bestell_kommunikation_service.py",
             "app/services/docflow_artifact_service.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
@@ -15894,8 +15900,10 @@
             "app/services/gutschrift_docflow.py",
             "app/services/kontrollkorb.py",
             "app/services/logistics_disposition_service.py",
+            "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/o2c_chain_service.py",
+            "app/services/procurement_match_service.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
@@ -16050,6 +16058,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/articles.py",
+            "app/api/v1/endpoints/einkauf_ab_erfassung.py",
+            "app/api/v1/endpoints/einkauf_kpis.py",
             "app/api/v1/endpoints/gobd_archiv.py",
             "app/api/v1/endpoints/sustainability.py",
             "app/core/dms_ocr_contracts.py",
@@ -16058,6 +16068,7 @@
             "app/services/docflow_update_command.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mcp_execution_service.py",
+            "app/services/procurement_match_service.py",
             "app/services/sales_match_service.py",
             "app/services/warehouse_service.py"
           ],
@@ -16155,6 +16166,8 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/articles.py",
+            "app/api/v1/endpoints/einkauf_kpis.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
             "app/services/docflow_freigabe.py",
@@ -16162,6 +16175,7 @@
             "app/services/docflow_update_command.py",
             "app/services/document_control_projection.py",
             "app/services/mcp_execution_service.py",
+            "app/services/procurement_match_service.py",
             "app/services/sales_match_service.py"
           ],
           "written_by": [
@@ -17846,9 +17860,6 @@
           ],
           "read_by": [
             "app/services/bestell_kommunikation_service.py"
-          ],
-          "written_by": [
-            "app/services/bestell_kommunikation_service.py"
           ]
         },
         "bestellung_positionen": {
@@ -18044,16 +18055,7 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/articles.py",
-            "app/api/v1/endpoints/einkauf_ab_erfassung.py",
-            "app/api/v1/endpoints/einkauf_kpis.py",
-            "app/infrastructure/models/einkauf_models.py",
-            "app/services/einkauf_compat_service.py",
-            "app/services/procurement_match_service.py",
-            "app/services/procurement_service.py"
-          ],
-          "written_by": [
-            "app/services/einkauf_compat_service.py"
+            "app/infrastructure/models/einkauf_models.py"
           ]
         },
         "bestellungen": {
@@ -18437,24 +18439,13 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/articles.py",
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/einkauf_ab_erfassung.py",
             "app/api/v1/endpoints/einkauf_kpis.py",
-            "app/api/v1/endpoints/purchase_invoice_verification.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/services/beleg_anlage.py",
-            "app/services/bestell_kommunikation_service.py",
             "app/services/docflow_lagerzugang.py",
-            "app/services/einkauf_compat_service.py",
-            "app/services/mask_rollout_summary_service.py",
-            "app/services/procurement_match_service.py",
-            "app/services/procurement_service.py",
             "app/services/rfq_service.py",
             "app/services/wareneingang_avis_service.py"
-          ],
-          "written_by": [
-            "app/services/einkauf_compat_service.py"
           ]
         },
         "bestellvorschlaege": {
@@ -19619,7 +19610,6 @@
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/services/beleg_liste.py",
-            "app/services/bestell_kommunikation_service.py",
             "app/services/customer_reference.py",
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_creation_context.py",
@@ -30992,7 +30982,6 @@
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/preisfindung_service.py",
-            "app/services/procurement_service.py",
             "app/services/warehouse_service.py",
             "app/services/whatsapp_intake_service.py"
           ],
@@ -33343,8 +33332,7 @@
             "app/services/inventory_document_reference.py",
             "app/services/inventory_movement_direction.py",
             "app/services/inventory_stock_balance.py",
-            "app/services/mcp_execution_service.py",
-            "app/services/procurement_service.py"
+            "app/services/mcp_execution_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",

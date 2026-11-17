@@ -103,13 +103,15 @@ class OrdrspErgebnis(AuftragsbestaetigungAngelegt):
 
 
 def _bestellpositionen(db: Session, tenant_id: str, bestellung: dict[str, Any]) -> Optional[list[dict[str, Any]]]:
-    """Positionen der Bestellung aus dem Einkaufsspeicher; ``None``, wenn die Bestellung keinen hat."""
-    if bestellung.get("herkunft") != "einkauf":
+    """Positionen der DocFlow-Bestellung (BELEG-052 S3); ``None`` fuer einen Altbeleg aus dem Dokumentspeicher."""
+    if bestellung.get("herkunft") != "docflow":
         return None
     zeilen = db.execute(
-        text("SELECT p.pos_nr, p.artikel_nr, p.lieferanten_artnr, p.menge, p.einzelpreis, p.lieferdatum "
-             "FROM domain_einkauf.bestellung_positionen p JOIN domain_einkauf.bestellungen b ON b.id = p.bestellung_id "
-             "WHERE b.id::text = :id AND b.tenant_id = :tid ORDER BY p.pos_nr LIMIT 5000"),
+        text("SELECT i.line_number AS pos_nr, i.article_number AS artikel_nr, "
+             "i.metadata ->> 'lieferanten_artnr' AS lieferanten_artnr, i.quantity AS menge, "
+             "i.unit_price AS einzelpreis, NULL::date AS lieferdatum "
+             "FROM domain_docflow.document_items i "
+             "WHERE i.header_id = :id AND i.tenant_id = :tid ORDER BY i.line_number LIMIT 5000"),
         {"id": str(bestellung["id"]), "tid": tenant_id},
     ).mappings().fetchmany(5000)  # eine Bestellung, harte Obergrenze
     return [dict(z) for z in zeilen]
@@ -133,7 +135,7 @@ async def ab_aus_ordrsp(eingang: OrdrspEingang, db: Session = Depends(get_db),
     abweichungen = abgleich(positionen, antwort) if positionen is not None else []
     text_abw = abweichungstext(abweichungen)
     if positionen is None:
-        text_abw = "Positionsabgleich nicht moeglich: Bestellung ohne Positionsspeicher im Einkauf."
+        text_abw = "Positionsabgleich nicht moeglich: Altbeleg ohne DocFlow-Positionen."
     if antwort.funktion == "abgelehnt":
         text_abw = "\n".join(filter(None, ["Bestellung vom Lieferanten abgelehnt.", text_abw]))
     kennung = _lege_an(db, tenant_id, bestellung, antwort.ab_nummer, datum=antwort.datum,

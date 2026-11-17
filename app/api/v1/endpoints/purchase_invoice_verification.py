@@ -67,61 +67,30 @@ def _ensure_schema(db: Session) -> None:
         )
 
 
+def _belegbetrag(db: Session, doc_type: str, beleg_id: str, tenant_id: str) -> Optional[float]:
+    """Nettobetrag eines DocFlow-Belegs (BELEG-052 S3).
+
+    Bis 16.11.2026 probierte jede Stufe drei Tabellen nach einer Spalte ``gesamtbetrag``, die keine davon hatte; der
+    Abgleich blieb immer OFFEN.
+    """
+    betrag = db.execute(
+        text("SELECT total_net FROM domain_docflow.document_headers "
+             "WHERE id = :id AND tenant_id = :tid AND doc_type = :art AND deleted_at IS NULL LIMIT 1"),
+        {"id": beleg_id, "tid": tenant_id, "art": doc_type},
+    ).scalar()
+    return float(betrag) if betrag is not None else None
+
+
 def _fetch_po_amount(db: Session, po_id: str, tenant_id: str) -> Optional[float]:
-    """Betrag aus Bestellung lesen (verschiedene mögliche Tabellen)."""
-    for table in [
-        "domain_einkauf.bestellungen",
-        "public.purchase_orders",
-        "public.einkauf_bestellungen",
-    ]:
-        try:
-            row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-                {"id": po_id, "tid": tenant_id},
-            ).fetchone()
-            if row:
-                return float(row[0])
-        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
-            pass
-    return None
+    return _belegbetrag(db, "purchase_order", po_id, tenant_id)
 
 
 def _fetch_gr_amount(db: Session, gr_id: str, tenant_id: str) -> Optional[float]:
-    """Betrag aus Wareneingang lesen."""
-    for table in [
-        "domain_einkauf.wareneingaenge",
-        "public.goods_receipts",
-        "public.einkauf_wareneingaenge",
-    ]:
-        try:
-            row = db.execute(
-                text(f"SELECT gesamtbetrag FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-                {"id": gr_id, "tid": tenant_id},
-            ).fetchone()
-            if row:
-                return float(row[0])
-        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
-            pass
-    return None
+    return _belegbetrag(db, "goods_receipt", gr_id, tenant_id)
 
 
 def _fetch_invoice_amount(db: Session, invoice_id: str, tenant_id: str) -> Optional[float]:
-    """Betrag aus Eingangsrechnung lesen."""
-    for col, table in [
-        ("gesamtbetrag", "public.ap_invoices"),
-        ("amount",       "public.ap_invoices"),
-        ("total_amount", "public.ap_invoices"),
-    ]:
-        try:
-            row = db.execute(
-                text(f"SELECT {col} FROM {table} WHERE id = :id AND tenant_id = :tid LIMIT 1"),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-                {"id": invoice_id, "tid": tenant_id},
-            ).fetchone()
-            if row:
-                return float(row[0])
-        except Exception:  # noqa: BLE001 — Tabelle nicht gefunden; gibt None zurück
-            pass
-    return None
+    return _belegbetrag(db, "purchase_invoice", invoice_id, tenant_id)
 
 
 def _compute_match_status(

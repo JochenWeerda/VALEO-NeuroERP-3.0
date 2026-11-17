@@ -644,13 +644,24 @@ async def get_article_position_context(
         rows = db.execute(
             text(
                 """
-                SELECT b.bestellnummer, bp.menge, b.liefertermin
-                FROM domain_einkauf.bestellung_positionen bp
-                JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
-                WHERE bp.artikel_id = :article_id
-                  AND b.tenant_id = :tenant_id
-                  AND b.status NOT IN ('abgeschlossen', 'storniert')
-                ORDER BY b.liefertermin ASC NULLS LAST
+                -- DocFlow ist der Belegspeicher (BELEG-052): offen ist, was noch in keinen Wareneingang ging.
+                SELECT h.doc_number,
+                       i.quantity - COALESCE((
+                           SELECT SUM(l.quantity_linked) FROM domain_docflow.document_links l
+                           JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id
+                           WHERE l.tenant_id = i.tenant_id AND l.from_item_id = i.id
+                             AND l.relation_type = 'order_to_receipt'
+                             AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed')), 0) AS offen,
+                       h.bausteine #>> '{lieferung,liefertermin}' AS liefertermin
+                FROM domain_docflow.document_items i
+                JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id
+                JOIN domain_inventory.articles a ON a.tenant_id = i.tenant_id AND a.article_number = i.article_number
+                WHERE a.id::text = :article_id
+                  AND h.tenant_id = :tenant_id
+                  AND h.doc_type = 'purchase_order'
+                  AND h.status = 'open'
+                  AND h.deleted_at IS NULL
+                ORDER BY liefertermin ASC NULLS LAST
                 """
             ),
             {"article_id": article_id, "tenant_id": effective_tenant},
@@ -659,14 +670,10 @@ async def get_article_position_context(
         total_incoming_qty = 0.0
         for row in rows:
             qty = float(row[1] or 0)
+            if qty <= 0:
+                continue  # voll geliefert
             total_incoming_qty += qty
-            orders_list.append(
-                {
-                    "order_number": row[0],
-                    "quantity": qty,
-                    "expected_date": row[2].isoformat() if row[2] else None,
-                }
-            )
+            orders_list.append({"order_number": row[0], "quantity": qty, "expected_date": row[2]})
         incoming_orders = {"total_quantity": total_incoming_qty, "orders": orders_list}
     except Exception:
         pass  # table may not exist
@@ -771,22 +778,21 @@ async def get_article_position_context(
         row = db.execute(
             text(
                 """
-                SELECT AVG(bp.einzelpreis) AS avg_price,
-                       (SELECT bp2.einzelpreis
-                        FROM domain_einkauf.bestellung_positionen bp2
-                        JOIN domain_einkauf.bestellungen b2 ON b2.id = bp2.bestellung_id
-                        WHERE bp2.artikel_id = :article_id AND b2.tenant_id = :tenant_id
-                        ORDER BY b2.bestelldatum DESC LIMIT 1) AS last_price,
-                       (SELECT b2.bestelldatum
-                        FROM domain_einkauf.bestellung_positionen bp2
-                        JOIN domain_einkauf.bestellungen b2 ON b2.id = bp2.bestellung_id
-                        WHERE bp2.artikel_id = :article_id AND b2.tenant_id = :tenant_id
-                        ORDER BY b2.bestelldatum DESC LIMIT 1) AS last_date
-                FROM domain_einkauf.bestellung_positionen bp
-                JOIN domain_einkauf.bestellungen b ON b.id = bp.bestellung_id
-                WHERE bp.artikel_id = :article_id
-                  AND b.tenant_id = :tenant_id
-                  AND b.bestelldatum >= NOW() - INTERVAL '90 days'
+                -- DocFlow (BELEG-052): Einkaufspreise aus freigegebenen Bestellungen.
+                WITH bestellt AS (
+                    SELECT i.unit_price, h.document_date
+                    FROM domain_docflow.document_items i
+                    JOIN domain_docflow.document_headers h ON h.id = i.header_id AND h.tenant_id = i.tenant_id
+                    JOIN domain_inventory.articles a ON a.tenant_id = i.tenant_id AND a.article_number = i.article_number
+                    WHERE a.id::text = :article_id
+                      AND h.tenant_id = :tenant_id
+                      AND h.doc_type = 'purchase_order'
+                      AND h.status NOT IN ('draft', 'cancelled', 'reversed')
+                      AND h.deleted_at IS NULL
+                )
+                SELECT (SELECT AVG(unit_price) FROM bestellt WHERE document_date >= NOW() - INTERVAL '90 days'),
+                       (SELECT unit_price FROM bestellt ORDER BY document_date DESC LIMIT 1),
+                       (SELECT document_date FROM bestellt ORDER BY document_date DESC LIMIT 1)
                 """
             ),
             {"article_id": article_id, "tenant_id": effective_tenant},

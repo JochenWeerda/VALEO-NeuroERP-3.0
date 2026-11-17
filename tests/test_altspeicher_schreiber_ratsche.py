@@ -18,16 +18,14 @@ ALTSPEICHER = (
     "domain_sales.delivery_notes", "domain_sales.delivery_note_positions", "domain_sales.sales_delivery_notes",
     "domain_sales.sales_invoices", "domain_sales.sales_invoice_lines",
     "domain_sales.sales_credit_notes", "domain_sales.sales_credit_note_lines",
-    "domain_einkauf.bestellungen", "domain_einkauf.bestellpositionen",
+    "domain_einkauf.bestellungen", "domain_einkauf.bestellung_positionen",
 )
 SCHREIBEN = re.compile(
     r"(INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+(" + "|".join(re.escape(t) for t in ALTSPEICHER) + r")\b", re.I)
 
-# Stand 15.11.2026 - nur streichen, nie ergaenzen.
-SCHREIBER = {
-    # Auftragsbestaetigung des Lieferanten schreibt den Status der Altbestellung fort (Schnitt S3).
-    "app/services/einkauf_compat_service.py": {"domain_einkauf.bestellungen"},
-}
+# Stand 16.11.2026 (Schnitt S3: der letzte Schreiber, der tote Wareneingang im Compat-Dienst, ist entfernt).
+# Nur streichen, nie ergaenzen.
+SCHREIBER: dict[str, set[str]] = {}
 
 
 def _schreiber() -> dict[str, set[str]]:
@@ -72,3 +70,41 @@ def test_der_lieferschein_altspeicher_hat_keinen_leser_mehr():
             if LESEN_LIEFERSCHEIN.search(pfad.read_text(encoding="utf-8", errors="ignore")):
                 leser.append(pfad.relative_to(WURZEL).as_posix())
     assert leser == [], f"Leser des Lieferschein-Altspeichers - DocFlow lesen: {leser}"
+
+
+LESEN_BESTELLUNG = re.compile(r"(FROM|JOIN)\s+domain_einkauf\.(bestellungen|bestellung_positionen)\b", re.I)
+ALTMODELL = re.compile(r"\bEinkaufBestellung(Position)?\b")
+# Fax-/EDI-Versand haengt noch am ORM-Objekt der Altbestellung (Fachrest: auf die DocFlow-Bestellung umhaengen).
+ALTMODELL_NUTZER = {"modules/einkauf/services/versand_service.py"}
+
+
+def _dateien_mit(muster: re.Pattern[str]) -> list[str]:
+    treffer = []
+    for ordner in ("app", "modules"):
+        for pfad in (WURZEL / ordner).rglob("*.py"):
+            if muster.search(pfad.read_text(encoding="utf-8", errors="ignore")):
+                treffer.append(pfad.relative_to(WURZEL).as_posix())
+    return sorted(treffer)
+
+
+def test_der_bestell_altspeicher_hat_keinen_leser_mehr():
+    """Seit Schnitt S3 (16.11.2026) lesen alle die DocFlow-Bestellung; der Altspeicher faellt mit S5 weg."""
+    leser = _dateien_mit(LESEN_BESTELLUNG)
+    assert leser == [], f"Leser des Bestell-Altspeichers - DocFlow lesen: {leser}"
+
+
+def test_das_orm_modell_der_altbestellung_nutzt_niemand_neu():
+    nutzer = set(_dateien_mit(ALTMODELL)) - {"app/infrastructure/models/einkauf_models.py",
+                                             "app/infrastructure/models/__init__.py"}
+    assert nutzer <= ALTMODELL_NUTZER, f"Neue Nutzer des Altmodells - DocFlow benutzen: {nutzer - ALTMODELL_NUTZER}"
+    assert nutzer == ALTMODELL_NUTZER, f"Nutzer entfallen - aus ALTMODELL_NUTZER streichen: {ALTMODELL_NUTZER - nutzer}"
+
+
+def test_die_muster_treffen_was_sie_sollen():
+    """Ein Muster, das nie trifft, laesst jede Ratsche gruen (Backspace statt Wortgrenze, 2026-10)."""
+    assert LESEN_BESTELLUNG.search("SELECT 1 FROM domain_einkauf.bestellungen b")
+    assert LESEN_BESTELLUNG.search("join domain_einkauf.bestellung_positionen p ON")
+    assert not LESEN_BESTELLUNG.search("FROM domain_einkauf.bestellung_kommunikation k")
+    assert ALTMODELL.search("x: EinkaufBestellung = y") and not ALTMODELL.search("EinkaufBestellvorschlag")
+    assert SCHREIBEN.search("UPDATE domain_einkauf.bestellungen SET")
+    assert LESEN_LIEFERSCHEIN.search("FROM domain_sales.delivery_notes d")
