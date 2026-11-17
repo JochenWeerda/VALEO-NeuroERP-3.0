@@ -13,13 +13,13 @@ vi.mock('@/pages/workflow/mask-rollout/UniversalMaskRolloutPilotPage', () => ({
 }))
 
 vi.mock('@/app/routing/typed-router', () => ({
-  useParams: () => ({ screenId: 'finance__ap-invoice', entityId: 'INV-001' }),
+  useParams: () => ({ screenId: 'finance__ar-open-item', entityId: 'OP-001' }),
   Navigate: ({ to }: { to: string }) => <div data-testid="navigate">{to}</div>,
 }))
 
 describe('MaskRolloutRoute', () => {
   it('normalizes screenId and renders pilot page', async () => {
     render(<MaskRolloutRoute />)
-    expect(await screen.findByTestId('rollout-pilot')).toHaveTextContent('finance/ap-invoice:INV-001')
+    expect(await screen.findByTestId('rollout-pilot')).toHaveTextContent('finance/ar-open-item:OP-001')
   })
 })

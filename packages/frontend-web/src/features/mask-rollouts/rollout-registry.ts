@@ -12,15 +12,13 @@ export type RolloutPilotSpec = {
 export const ENABLE_UNIVERSAL_MASK_ROLLOUTS =
   import.meta.env.VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS === 'true'
 
+// Bestellung, Lieferschein und Eingangsrechnung sind Belegmasken (DocFlow, BELEG-052) - kein Pilot mehr.
 export const ROLLOUT_PILOT_SPECS: RolloutPilotSpec[] = [
   { screenId: 'lager/stock-movement', domain: 'lager', title: 'Lagerbewegung', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'lager/article-stock', domain: 'lager', title: 'Artikelbestand', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
-  { screenId: 'finance/ap-invoice', domain: 'finance', title: 'Eingangsrechnung', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'finance/ar-open-item', domain: 'finance', title: 'OP Debitor', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
-  { screenId: 'einkauf/purchase-order', domain: 'einkauf', title: 'Bestellung', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'einkauf/supplier', domain: 'einkauf', title: 'Lieferant', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'crm/opportunity', domain: 'crm', title: 'Opportunity', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
-  { screenId: 'sales/delivery-note', domain: 'sales', title: 'Lieferschein', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'agrar/harvest-settlement', domain: 'agrar', title: 'Ernte-Abrechnung', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
   { screenId: 'finance/payment-run', domain: 'finance', title: 'Zahlungslauf', envFlag: 'VITE_ENABLE_UNIVERSAL_MASK_ROLLOUTS' },
 ]

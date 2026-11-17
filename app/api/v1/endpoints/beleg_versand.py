@@ -46,6 +46,23 @@ def partner_email(db: Session, tenant_id: str, rolle: str, kennung: Optional[str
         return db.execute(text(sql), {"t": tenant_id, "p": str(kennung)}).scalar()
 
 
+def _versand_bestellung(session: Session, tid: str, eid: str, titel: str, payload: dict, nutzer: Any) -> str:
+    """Fax, EDI, Post oder Portal an der Bestellung; nur was beim Lieferanten ankam, gilt als versandt."""
+    from modules.einkauf.services.versand_service import versende_docflow_bestellung
+
+    kanal = str(payload.get("kanal")).strip().lower()
+    ergebnis = versende_docflow_bestellung(session, tid, eid, kanal=kanal,
+                                           empfaenger=str(payload.get("empfaenger") or "").strip() or None,
+                                           nutzer=nutzer if isinstance(nutzer, dict) else None)
+    if ergebnis["status"] == "veroeffentlicht":
+        return f"{titel} im Lieferantenportal veroeffentlicht."
+    if ergebnis["status"] == "manuell":
+        return f"{titel}: Postversand eingetragen."
+    if ergebnis["status"] != "gesendet":
+        raise ValueError(ergebnis.get("fehler") or ergebnis.get("hinweis") or f"{kanal} ist nicht eingerichtet.")
+    return f"{titel} per {kanal.upper()} an {ergebnis.get('empfaenger')} versandt."
+
+
 @router.post("/belege/{belegart}/{entity_id}/actions/versenden", response_model=MaskActionResult,
              summary="Beleg als PDF per E-Mail an den Partner senden", dependencies=SCHREIBEN["BELEGE"])
 async def beleg_versenden(belegart: str, entity_id: str, body: dict[str, Any] = Body(default_factory=dict),
@@ -67,6 +84,9 @@ async def beleg_versenden(belegart: str, entity_id: str, body: dict[str, Any] = 
             return eigen
         return partner_email(session, tid, variante.partnerrolle, beleg.partner.nummer if beleg.partner else None)
 
+    def _kanal(payload: dict) -> str:
+        return str(payload.get("kanal") or "email").strip().lower()
+
     def pruefen(session: Session, payload: dict, eid: str, tid: str) -> list[dict]:
         try:
             beleg = _beleg(session, eid, tid)
@@ -75,6 +95,13 @@ async def beleg_versenden(belegart: str, entity_id: str, body: dict[str, Any] = 
         if beleg.status not in VERSENDBAR:
             return [{"field": "_entity", "message": f"Beleg im Stand {beleg.status} wird nicht versandt.",
                      "severity": "blocking"}]
+        if _kanal(payload) != "email":
+            from modules.einkauf.services.versand_service import VERSANDKANAELE
+
+            if belegart != "purchase_order" or _kanal(payload) not in VERSANDKANAELE:
+                return [{"field": "kanal", "message": "Fax, EDI, Post und Portal gibt es nur fuer die Bestellung.",
+                         "severity": "blocking"}]
+            return []
         empfaenger = _empfaenger(session, beleg, payload, tid)
         if not empfaenger or "@" not in empfaenger:
             return [{"field": "empfaenger", "message": "Keine E-Mail-Adresse beim Partner hinterlegt.",
@@ -86,13 +113,21 @@ async def beleg_versenden(belegart: str, entity_id: str, body: dict[str, Any] = 
         from app.services.mail_versand import sende_mail
 
         beleg = _beleg(session, eid, tid)
-        empfaenger = _empfaenger(session, beleg, payload, tid) or ""
         titel = f"{variante.bezeichnung} {beleg.beleg_nr}"
+        if _kanal(payload) != "email":
+            return _versand_bestellung(session, tid, eid, titel, payload, nutzer)
+        empfaenger = _empfaenger(session, beleg, payload, tid) or ""
         nachricht = str(payload.get("nachricht") or "").strip() or f"Anbei {titel}."
         sende_mail(empfaenger, titel, nachricht, db=session, tenant_id=tid,
                    verwendung="einkauf" if variante.richtung == "einkauf" else "verkauf", nutzer=nutzer,
                    anhaenge=[(f"{belegart}_{beleg.beleg_nr}.pdf".replace("/", "-"), beleg_pdf(beleg),
                               "application/pdf")])
+        if belegart == "purchase_order":
+            from modules.einkauf.services.versand_service import _kommunikation_eintragen, bestellung_aus_docflow
+
+            _kommunikation_eintragen(session, bestellung_aus_docflow(session, tid, eid),
+                                     {"status": "gesendet", "versand_art": "email", "empfaenger": empfaenger,
+                                      "betreff": titel}, nutzer if isinstance(nutzer, dict) else None)
         return f"{titel} an {empfaenger} versandt."
 
     return await run_delegated_mask_action(

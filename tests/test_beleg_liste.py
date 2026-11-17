@@ -198,6 +198,26 @@ def test_die_bestellung_geht_ueber_das_einkaufspostfach(versand_app, satz):
     assert kw["verwendung"] == "einkauf" and kw["anhaenge"][0][1].startswith(b"%PDF")
 
 
+def test_die_bestellung_geht_per_post_und_portal_nicht_der_lieferschein(versand_app, satz):
+    """Versandwege der Bestellung (Fachrest 3B): Post wird eingetragen, Fax ohne Faxdienst gilt nicht als versandt."""
+    client, gesendet = versand_app
+    beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
+    vorher = len(gesendet)
+    post = client.post(f"/belege/purchase_order/{beleg['id']}/actions/versenden",
+                       json={"kanal": "post", "_idempotencyKey": str(uuid.uuid4())}).json()
+    if not post["success"] and "Stand" in (post.get("error") or ""):
+        pytest.skip(f"Referenzbeleg nicht versendbar: {post['error']}")
+    assert post["success"] is True and "Postversand" in post["summary"], post
+    fax = client.post(f"/belege/purchase_order/{beleg['id']}/actions/versenden",
+                      json={"kanal": "fax", "empfaenger": "+49441000", "_idempotencyKey": str(uuid.uuid4())}).json()
+    assert fax["success"] is False
+    assert len(gesendet) == vorher  # kein Mailversand
+    angebot = next(b for b in satz["belege"] if b["doc_type"] == "sales_offer")
+    falsch = client.post(f"/belege/sales_offer/{angebot['id']}/actions/versenden",
+                         json={"kanal": "fax", "_idempotencyKey": str(uuid.uuid4())}).json()
+    assert falsch["success"] is False
+
+
 def test_trockenlauf_versendet_nichts(versand_app, satz):
     client, gesendet = versand_app
     beleg = next(b for b in satz["belege"] if b["doc_type"] == "purchase_order")
