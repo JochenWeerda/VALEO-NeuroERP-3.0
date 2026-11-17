@@ -1371,12 +1371,13 @@ def build_einkauf_bestellung_freigabe_screen_definition() -> dict[str, Any]:
         business_purpose="Bestellfreigabe als Read-Model-Cockpit.",
         example_prompts=["Zeige Bestellfreigabe.", "Was ist der aktuelle Stand?"],
         test_id="einkauf-bestellung-freigabe",
+        # BELEG-052 S3: Kennzahlen der DocFlow-Bestellung; freigegeben wird am Beleg (Belegliste Bestellung).
         summary=[
-            {"key": "total", "label": "Anzahl", "tone": "neutral"},
-            {"key": "open", "label": "Offen", "tone": "warning"},
+            {"key": "offen", "label": "Offene Bestellungen", "tone": "warning"},
+            {"key": "volumen", "label": "Bestellvolumen", "tone": "neutral"},
         ],
-        data_sources=[cockpit_entity_source("/api/v1/einkauf/bestellungen")],
-        tiles=[cockpit_nav_tile("overview", "Uebersicht", target_route="/einkauf/bestellung-freigabe")],
+        data_sources=[cockpit_entity_source("/api/v1/belege/purchase_order/kennzahlen")],
+        tiles=[cockpit_nav_tile("bestellungen", "Bestellungen", target_screen_id="beleg-liste/purchase-order")],
         table_profile="financial",
         actions=[cockpit_refresh_action(permission="procurement.approve")],
         context_rail="combined",

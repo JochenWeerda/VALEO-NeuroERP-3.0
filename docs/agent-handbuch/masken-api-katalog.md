@@ -12964,7 +12964,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/einkauf/bestellungen`
+- `entity` → `/api/v1/belege/purchase_order/kennzahlen`
 
 **MCP-Tools (Domäne):**
 
@@ -13000,7 +13000,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/einkauf/bestellungen`
+- `list` → `/api/v1/belege/purchase_order`
 
 **MCP-Tools (Domäne):**
 
@@ -13035,7 +13035,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/einkauf/bestellungen`
+- `list` → `/api/v1/belege/purchase_order`
 
 **MCP-Tools (Domäne):**
 
