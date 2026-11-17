@@ -21384,3 +21384,18 @@ CUSTOMER-MASTER Dateinamen praezisiert: profile_backend besitzt neue app/service
 CUSTOMER-MASTER PostgreSQL-Abnahme: valeo_probe frei, Revision psm_register_entfernt_20261104; valeo_agent ist NOSUPERUSER/NOBYPASSRLS, hat dort aber noch keine Datenrechte auf domain_shared/domain_crm/public. Lead beansprucht enges Rechtefenster nur mit bestehendem scripts/provision_db_roles.py --data-only fuer diese drei Schemas und valeo_agent: erst Plan und transaktionaler Rollback-Probelauf, danach Datenrechte anwenden. Keine Eigentumsuebertragung, keine CREATE-/BYPASSRLS-Rechte, kein Passwortwechsel, keine Migration/Reset/neue Ressource. Grund: vorgeschriebene eingeschraenkte Agentenrolle statt Superuser-Fachtests.
 
 CUSTOMER-MASTER Launcher-Korrektur: Lead besitzt packages/frontend-web/src/pages/crm/kunden-karte.tsx und engen Navigationstest. Die vorhandene NativeListPage referenziert eine nicht registrierte Definition crm/kunden-karte; fuer die Kundenauswahl wird die bestehende crm/kunden-liste mit derselben Kundenakte verwendet. Keine geografische Karte oder zusaetzliche Stammdatenquelle vortaeuschen.
+
+
+CUSTOMER-MASTER Zwischenstand 17.11: Kopfkatalog und sichere native Pflege
+implementiert; 144 sichtbare Attribute/102 Eingaben, SQL-Roundtrip als valeo_agent
+und sieben Runtime-Vertraege gruen, zentrale Dialogtests8/8 und volle tsc gruen.
+OpenAPI/Registry/Kataloge/Agent-Handbuch nachgezogen. Vollstaendige Untertabellen-
+und Browserabnahme weiterhin in Arbeit; keine pauschale 180-Felder-Freigabe.
+Alias/BP-only-Resolver wird vor Abschluss gegen vorhandene Lookupvertraege
+nachgeprueft. QA/Handshake/Open-Gaps enthalten Grenzen und naechste Abnahmen.
+RUNTIME-FIVE-503: Webhookparameter korrekt400, Proplanta gleiche echteClientinstanz;
+externe Konfiguration/FAOSTAT403/Image-Evidence bleiben getrennte offene Nachweise.
+MAIN-SONAR Nachlauf44021259183: alle anderenJobs gruen, nur NewCoverage71,2<80
+rot. Sicherheits-/Bug-/Wartbarkeitskriterien A. Keine Schwelle abgesenkt.
+
+CUSTOMER-MASTER Pruefquellen-Korrektur vor Edit: Lead besitzt scripts/check_field_contracts.py und neuen engen Regressionstest. _spec importiert derzeit app.main (authfreie Testanwendung), waehrend kanonische API aus main:app exportiert wird. Pruefung soll die versionierte Produktions-OpenAPI lesen; deren Aktualitaet bleibt durch generate_openapi --check abgesichert. Kein erneuter schwerer Appimport, keine Schwellen-/Ausnahmenaenderung. Global199 Befunde noch nicht als Basis-/Neubefunde klassifiziert.
