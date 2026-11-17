@@ -19,6 +19,14 @@ Raw audits remain visible. Exact installed-source, patch, manifest and lock
 hashes and an expiring review are required by check_npm_backport_audit.cjs.
 See ../../../docs/quality-assurance/node-high-backports-20261008.md.
 
+## picomatch 4.0.7
+
+Local source repair for GHSA-fc5q-39xc-vjpf (no vendor release at the 2026-11-17 review; upstream PR #194 covers
+only mixed `?*` branches). A repeated extglob whose branch nests an unbounded `*` next to other content is treated as
+risky and compiled literally, like picomatch's other risky forms. Runtime contract:
+`node --test scripts/verify_picomatch_security.cjs`. See
+../../../docs/quality-assurance/picomatch-redos-backport-20261117.md.
+
 ## Removed patches
 
 The stream-json 1.9.1 and Artillery 2.0.33 patches were removed on 2026-10-25

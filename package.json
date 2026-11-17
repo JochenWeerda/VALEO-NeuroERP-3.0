@@ -40,7 +40,7 @@
       "node-forge": "1.4.3",
       "nodemailer": "10.1.7",
       "path-to-regexp": "^0.1.13",
-      "picomatch": "^4.0.4",
+      "picomatch": "4.0.7",
       "protobufjs": "^7.6.5",
       "semver": "^7.7.4",
       "shell-quote": "1.11.0",
@@ -108,7 +108,8 @@
     },
     "patchedDependencies": {
       "braces@3.0.3": "config/security/npm-patches/braces@3.0.3.patch",
-      "deepmerge@4.3.1": "config/security/npm-patches/deepmerge@4.3.1.patch"
+      "deepmerge@4.3.1": "config/security/npm-patches/deepmerge@4.3.1.patch",
+      "picomatch@4.0.7": "config/security/npm-patches/picomatch@4.0.7.patch"
     }
   },
   "scripts": {

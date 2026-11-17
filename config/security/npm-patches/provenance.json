@@ -15,6 +15,14 @@
       "source_tarball_integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
       "license": "MIT",
       "backport": "Local source repair; no vendor release; review and installed hashes in npm-backport-reviews.json"
+    },
+    {
+      "patch": "picomatch@4.0.7.patch",
+      "sha256": "82cf35a688405a9f6442d083fa202287bf2b5f8f6f293a559f203596c491aac3",
+      "source": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+      "source_tarball_integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "license": "MIT",
+      "backport": "Local source repair; upstream PR micromatch/picomatch#194 covers only mixed ?* branches and leaves +(*a) exponential; review and installed hashes in npm-backport-reviews.json"
     }
   ]
 }

@@ -1,0 +1,89 @@
+diff --git a/lib/parse.js b/lib/parse.js
+--- a/lib/parse.js
++++ b/lib/parse.js
+@@ -284,6 +284,73 @@
+   return depth;
+ };
+ 
++/**
++ * GHSA-fc5q-39xc-vjpf (local source repair, VALEO 2026-11-17): true when a branch
++ * of a repeated extglob carries an unbounded top-level `*` next to any other
++ * top-level content, e.g. `*a`, `a*`, `?*a`. Inside `+(...)`/`*(...)` that nests
++ * the star's `[^/]*?` inside the outer repeat (`(?:[^/]*?a)+`), which backtracks
++ * exponentially on a near miss. Wildcards inside brackets or a nested extglob
++ * are not top level; a branch that is only stars (`+(*)`) stays as it is.
++ */
++
++const hasUnboundedStarWithContent = branch => {
++  let escaped = false;
++  let bracket = 0;
++  let paren = 0;
++  let star = false;
++  let other = false;
++
++  for (let i = 0; i < branch.length; i++) {
++    const ch = branch[i];
++
++    if (escaped === true) {
++      escaped = false;
++      other = true;
++      continue;
++    }
++
++    if (ch === '\\') {
++      escaped = true;
++      continue;
++    }
++
++    if (ch === '[') {
++      if (bracket === 0 && paren === 0) other = true;
++      bracket++;
++      continue;
++    }
++
++    if (ch === ']' && bracket > 0) {
++      bracket--;
++      continue;
++    }
++
++    if (ch === '(') {
++      if (bracket === 0 && paren === 0) other = true;
++      paren++;
++      continue;
++    }
++
++    if (ch === ')' && paren > 0) {
++      paren--;
++      continue;
++    }
++
++    if (bracket > 0 || paren > 0) {
++      continue;
++    }
++
++    if (ch === '*' && branch[i + 1] !== '(') {
++      star = true;
++      continue;
++    }
++
++    other = true;
++  }
++
++  return star === true && other === true;
++};
++
+ const analyzeRepeatedExtglob = (body, options) => {
+   if (options.maxExtglobRecursion === false) {
+     return { risky: false };
+@@ -295,6 +362,11 @@
+       : constants.DEFAULT_MAX_EXTGLOB_RECURSION;
+ 
+   const branches = splitTopLevel(body).map(branch => branch.trim());
++
++  // GHSA-fc5q-39xc-vjpf: checked for every branch count - one branch is enough.
++  if (branches.some(hasUnboundedStarWithContent)) {
++    return { risky: true };
++  }
+ 
+   if (branches.length > 1) {
+     if (

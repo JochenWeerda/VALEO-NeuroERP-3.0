@@ -41,6 +41,24 @@
       },
       "lock_sha256": "e266b17bb4b5b8886ef8278c75b7d0a2997288fa90231c9a0c7c1fda08e3a270",
       "manifest_sha256": "db154b9d3f4321e4328225d84faf63872ce0333c95ddb2e38e2fee1f2f682278"
+    },
+    {
+      "package": "picomatch",
+      "version": "4.0.7",
+      "advisory": "GHSA-fc5q-39xc-vjpf",
+      "patch": "config/security/npm-patches/picomatch@4.0.7.patch",
+      "patch_sha256": "82cf35a688405a9f6442d083fa202287bf2b5f8f6f293a559f203596c491aac3",
+      "original_integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "license": "MIT",
+      "reviewed_on": "2026-11-17",
+      "review_by": "2027-01-15",
+      "owner": "Claude-Code-runtime-security",
+      "source": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
+      "installed_sha256": {
+        "lib/parse.js": "f6305d24c0da8f10e2ba5eff49ab1d6cc78f6547c4930167c9070363ec168b97"
+      },
+      "lock_sha256": "961e54bff06bf6284c82feaec682f773700ff0f9f2b3050e819ff50b15cdc0fd",
+      "manifest_sha256": "3c447e258c6e4ea499a27b46400c7a01dc4ed10ad1ee1019cfd23f74edfa0775"
     }
   ]
 }
