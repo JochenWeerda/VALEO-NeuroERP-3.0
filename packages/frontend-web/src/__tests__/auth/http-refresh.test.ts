@@ -4,7 +4,7 @@ import { apiClient } from '@/lib/api-client'
 import { api } from '@/lib/axios'
 
 const fixture = vi.hoisted(() => ({ fresh: vi.fn(), clear: vi.fn() }))
-vi.mock('@/lib/auth', () => ({ auth: { getFreshAccessToken: fixture.fresh, clearTokens: fixture.clear }, handleUnauthorized: fixture.clear }))
+vi.mock('@/lib/auth', () => ({ auth: { getFreshAccessToken: fixture.fresh, clearTokens: fixture.clear, getUser: () => null, getAccessToken: () => null }, handleUnauthorized: fixture.clear }))
 const token = `e30.${btoa(JSON.stringify({ tenant_id: 'synthetic-tenant' }))}.fixture`
 
 beforeEach(() => { fixture.fresh.mockReset() })
@@ -25,6 +25,7 @@ describe.each(['canonical', 'traced'] as const)('%s HTTP client renewal', client
     await request
     expect(transported!.headers.get('Authorization')).toBe(`Bearer ${token}`)
     expect(transported!.headers.get('X-Tenant-ID')).toBe('synthetic-tenant')
+    expect(transported!.headers.get('X-Kundenkonto')).toBeUndefined()
   })
 
   it('does not invent authentication after failed renewal', async () => {

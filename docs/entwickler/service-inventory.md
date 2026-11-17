@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-15
+last_reviewed: 2026-11-16
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -270,6 +270,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `portal_interessent_service` | — |
 | `portal_lohndienst_service` | — |
 | `portal_preisspiegel_service` | — |
+| `portal_tenant_directory` | Read-only directory of the authenticated person's own portal trade partners. |
 | `pos_accounting_service` | — |
 | `pos_compat_service` | Service layer for compat POS domain routes. |
 | `pos_fiscal_document_service` | — |
@@ -297,6 +298,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `recent_documents_service` | Tenant- and user-scoped recent document projection. |
 | `report_print_service` | Report and print contracts for traceability, weighing tickets and labels. |
 | `rfq_service` | RFQ-Service (Anfrage → Angebot → Zuschlag → Bestellung). |
+| `rohware_formula` | Bounded arithmetic for Rohware preview formulas; never executes Python code. |
+| `rohware_schema_service` | Rohware settlement schema: one tenant-bound catalog and lifecycle. |
 | `sales_credit_service` | Kreditlimit-Prüfung & Rechnungs-/Billing-Status im O2C-Kontext (DOM-SALES-004.3). |
 | `sales_invoice_mask` | Die Rechnungsmaske als Daten — Kopf, Positionen und Herkunft fuer den Builder. |
 | `sales_match_service` | Auftrag-↔-Lieferschein-Positions-Match (DOM-SALES-004.2). |

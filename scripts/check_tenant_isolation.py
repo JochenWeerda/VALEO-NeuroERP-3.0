@@ -6,6 +6,7 @@ Every endpoint file must be classified as one of:
   - tenant-isolated   : queries are filtered by tenant_id
   - shared-data       : model has no tenant_id column; deliberate design (e.g. physical infrastructure)
   - system-endpoint   : stateless / infrastructure / no DB tenant data (health, parsers, ...)
+  - identity-membership: authenticated own memberships across tenants; explicit reviewed service boundary
   - gap-tracked       : tenant_id column exists on the model but endpoint does not yet filter;
                         tracked as a known gap with a GitHub issue reference
 
@@ -92,6 +93,17 @@ GAP_TRACKED: dict[str, str] = {
     # "example.py": "GitHub #123 — add tenant filter to sales_orders query",
 }
 
+# These routes intentionally discover the verified person's OWN memberships,
+# not business records of a caller-selected tenant. They are neither stateless
+# system endpoints nor shared public data. Every addition needs its own review.
+IDENTITY_MEMBERSHIP_ENDPOINTS: dict[str, str] = {
+    "portal_handelspartner.py": (
+        "app/services/portal_tenant_directory.py: verified subject, active customer/tenant joins, "
+        "mandatory read-only valeo_system; tests/test_portal_tenant_directory_postgres.py; "
+        "docs/quality-assurance/portal-tenant-directory-20261116.md"
+    ),
+}
+
 
 def _has_tenant_id(content: str) -> bool:
     return bool(re.search(r"tenant_id", content))
@@ -115,6 +127,8 @@ def main() -> int:
             classified.append((fname, "shared-data"))
         elif fname in GAP_TRACKED:
             classified.append((fname, f"gap [{GAP_TRACKED[fname]}]"))
+        elif fname in IDENTITY_MEMBERSHIP_ENDPOINTS:
+            classified.append((fname, "identity-membership"))
         elif _has_tenant_id(content):
             classified.append((fname, "tenant-isolated"))
         else:
@@ -130,7 +144,7 @@ def main() -> int:
             print(f"  {v}")
         print()
         print("Action: add the file to SHARED_DATA, SYSTEM_ENDPOINTS,")
-        print("GAP_TRACKED, or add tenant_id filtering to the endpoint.")
+        print("GAP_TRACKED, explicitly reviewed IDENTITY_MEMBERSHIP_ENDPOINTS, or add tenant_id filtering.")
         return 1
 
     # Summary

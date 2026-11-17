@@ -22,3 +22,7 @@ Ein angemeldeter Agent erhaelt dadurch keine pauschalen Fachrechte.
 [operativer Identitaetsentwurf](../../security/central-identity-agent-management-proposal.md)
 benennen Entscheidung und Liefergrenzen. Gesamtlieferstatus:
 [Process Kernel STATUS](../../process-kernel/STATUS.md).
+
+Das [Agrarportal-Handelspartnerverzeichnis](../../agrarportal-tenant-selection-20261116.md)
+verwendet dieselbe Identitaetsgrenze und eine strikt lesende Systemsession.
+Die erste Phase ermittelt eigene Mitgliedschaften; sie stellt keinen neuen Mandantenkontext aus.

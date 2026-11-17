@@ -14,6 +14,14 @@ import { loadNavSections } from '@/app/navigation/nav-runtime'
 const mcp = { businessDomain: 'logistics', scope: 'logistics:read' }
 
 describe('launchpad-spaces', () => {
+  it('binds farmer services to existing customer portal routes only', () => {
+    const spaces = resolveLaunchpadSpaces([{ id: 'kundenportal', label: 'Agrarportal', icon: Truck, path: '/portal', mcp }], 'de')
+    const portal = spaces.find(space => space.id === 'agrarportal')!
+    expect(portal.pages[0].tiles.map(tile => tile.path)).toEqual([
+      '/portal', '/portal/shop', '/portal/bestellungen', '/portal/dokumente', '/portal/rationsoptimierung', '/portal/feldbuch',
+    ])
+  })
+
   it('blendet Flow-Spine-Prozessräume aus dem Launchpad aus', () => {
     expect(isLaunchpadHiddenNavId('workflow-flow-spine-order-to-cash')).toBe(true)
     expect(isLaunchpadHiddenNavId('warteschlange')).toBe(false)
@@ -98,12 +106,12 @@ describe('launchpad-spaces', () => {
     expect(handel.has('kunden') && finanzen.has('kunden') && logistik.has('kunden')).toBe(true)
   })
 
-  it('löst echte Nav-Pfade für die sechs Arbeitswelten auf', async () => {
+  it('löst echte Nav-Pfade für Arbeitswelten und Agrarportal auf', async () => {
     const sections = await loadNavSections()
     const spaces = resolveLaunchpadSpaces(sections, 'de')
     const ids = spaces.map((space) => space.id)
 
-    expect(ids).toEqual(['handel', 'ernte', 'logistik', 'betriebsmittel', 'finanzen', 'steuerung'])
+    expect(ids).toEqual(['agrarportal', 'handel', 'ernte', 'logistik', 'betriebsmittel', 'finanzen', 'steuerung'])
     expect(spaces.flatMap((space) => space.pages).every((page) => page.tiles.length > 0 && page.tiles.length <= 10)).toBe(true)
     const kunden = spaces.find((space) => space.id === 'handel')?.pages.find((page) => page.id === 'kunden')
     expect(kunden?.tiles.map((tile) => tile.id)).toEqual(['kunden', 'kundenakte', 'kunden-karte'])

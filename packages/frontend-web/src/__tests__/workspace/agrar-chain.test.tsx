@@ -312,7 +312,7 @@ describe('AgrarChainWidget', () => {
       </MemoryRouter>,
     )
     expect(screen.getByTestId('workspace-agrar-chain')).toHaveAttribute('data-chain-status', 'pending')
-    expect(await screen.findByText('keine Kette')).toBeInTheDocument()
+    expect(await screen.findByText('Keine offenen Agrarvorgänge.')).toBeInTheDocument()
     expect(apiClient.get).toHaveBeenCalledWith(OPEN_KONTRAKTE_PATH, { params: OPEN_KONTRAKTE_PARAMS })
     expect(apiClient.get).toHaveBeenCalledWith(AGRAR_CONTRACTS_PATH, { params: AGRAR_CONTRACTS_PARAMS })
     expect(

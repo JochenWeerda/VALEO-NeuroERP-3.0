@@ -214,6 +214,7 @@ domains:
       - silo_rule_
       - supply_chain_
       - rations_
+      - rohware_
       - qs_charge_
       - geo_pipeline
       - webshop_integration_

@@ -5,7 +5,6 @@ import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { LAUNCHPAD_OVERLAY_STORAGE_KEY } from '@/app/navigation/launchpad-personalization'
 import {
-  ABRUFE_AUTH_ERROR,
   DISPOSITIONEN_PATH,
   KONTRAKTE_LIST_ENDPOINT,
 } from '@/components/mask-builder/specialized/load-abrufe'
@@ -120,16 +119,14 @@ function renderLayer(): ReturnType<typeof render> & { queryClient: QueryClient }
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return {
-    ...render(
+  const view = render(
       <MemoryRouter>
         <QueryClientProvider client={queryClient}>
-          <AdaptiveWorkspaceLayer />
+          <AdaptiveWorkspaceLayer mode="workspace" />
         </QueryClientProvider>
       </MemoryRouter>,
-    ),
-    queryClient,
-  }
+    )
+  return { ...view, queryClient }
 }
 
 describe('signalFromOpenAbrufe', () => {
@@ -222,7 +219,7 @@ describe('offene Abrufe in der Rangliste', () => {
 
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
 
     const row = within(work).getByRole('link', { name: 'Nicht disponierte LKW-Auftraege' }).closest('li')
     expect(row).toHaveAttribute('data-fachaktion-id', OPEN_ABRUF_ACTION_ID)
@@ -231,9 +228,8 @@ describe('offene Abrufe in der Rangliste', () => {
       'href',
       EXISTING_ROUTE,
     )
-    expect(row).toHaveTextContent('signal:open-task')
-    expect(row).toHaveTextContent('count:2')
-    expect(row).not.toHaveTextContent('pinned')
+    expect(row).toHaveTextContent('Für Ihren aktuellen Arbeitsbereich empfohlen')
+    expect(row).not.toHaveTextContent('Angehefteter Einstieg')
     expect(work.querySelectorAll('[data-catalog-id="logistik.undispatched_vehicles.list"]')).toHaveLength(1)
     expect(work.querySelector('[data-fachaktion-id="abruf-1"]')).toBeNull()
     expect(work.querySelector('[data-fachaktion-id="abruf-2"]')).toBeNull()
@@ -244,11 +240,7 @@ describe('offene Abrufe in der Rangliste', () => {
     expect(apiClient.post).not.toHaveBeenCalled()
   })
 
-  it.each([
-    [401, ABRUFE_AUTH_ERROR],
-    [403, ABRUFE_AUTH_ERROR],
-    [503, 'Abrufe nicht lesbar: Dienst oder Schema nicht bereit.'],
-  ] as const)('zeigt bei HTTP %s ehrlichen Hinweis und kein Fake-Signal', async (status, message) => {
+  it.each([401, 403, 503])('zeigt bei HTTP %s ehrlichen Hinweis und kein Fake-Signal', async (status) => {
     vi.mocked(apiClient.get).mockImplementation(async (path: string, config) => {
       const url = String(path)
       const params = (config as { params?: Record<string, unknown> } | undefined)?.params
@@ -272,7 +264,7 @@ describe('offene Abrufe in der Rangliste', () => {
       )
     })
     expect(screen.queryByRole('link', { name: 'Nicht disponierte LKW-Auftraege' })).not.toBeInTheDocument()
-    expect(await screen.findByTestId('workspace-abrufe-error')).toHaveTextContent(message)
+    expect(await screen.findByTestId('workspace-abrufe-error')).toHaveTextContent('Ein Teil der Aufgaben ist derzeit nicht verfügbar. Prüfen Sie den Zugriff im Dispositionsbereich.')
     denied.unmount()
 
     vi.mocked(apiClient.get).mockClear()
@@ -317,7 +309,7 @@ describe('offene Abrufe in der Rangliste', () => {
     })
 
     renderLayer()
-    expect(await screen.findByTestId('workspace-abrufe-error')).toHaveTextContent(ABRUFE_AUTH_ERROR)
+    expect(await screen.findByTestId('workspace-abrufe-error')).toHaveTextContent('Ein Teil der Aufgaben ist derzeit nicht verfügbar. Prüfen Sie den Zugriff im Dispositionsbereich.')
     expect(screen.queryByRole('link', { name: 'Nicht disponierte LKW-Auftraege' })).not.toBeInTheDocument()
     // Ranking-Query bleibt disabled; die eingebettete Dispo-Tafel darf weiter laden (Board schon ehrlich).
     expect(apiClient.post).not.toHaveBeenCalled()
@@ -356,7 +348,7 @@ describe('offene Abrufe in der Rangliste', () => {
     const work = screen.getByTestId('workspace-work-items')
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
     expect(work).not.toHaveTextContent('count:2')
     expect(work.querySelector('[data-fachaktion-id="abruf-1"]')).toBeNull()
     expect(screen.queryByTestId('workspace-disposition-entry')).not.toBeInTheDocument()
@@ -420,9 +412,9 @@ describe('offene Abrufe in der Rangliste', () => {
       expect(within(work).getByRole('link', { name: 'Nicht disponierte LKW-Auftraege' })).toBeInTheDocument()
     })
     const row = within(work).getByRole('link', { name: 'Nicht disponierte LKW-Auftraege' }).closest('li')
-    expect(row).toHaveTextContent('count:2')
+    expect(row).toHaveTextContent('Für Ihren aktuellen Arbeitsbereich empfohlen')
     const items = within(work).getAllByRole('listitem')
     expect(items[0]).toHaveAttribute('data-fachaktion-id', 'workspace.document-inbox')
-    expect(items[0]).toHaveTextContent('pinned')
+    expect(items[0]).toHaveTextContent('Angehefteter Einstieg')
   })
 })

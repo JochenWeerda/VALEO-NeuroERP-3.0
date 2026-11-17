@@ -13709,6 +13709,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/portal_intelligence_service.py",
             "app/services/portal_lohndienst_service.py",
+            "app/services/portal_tenant_directory.py",
             "app/services/sales_credit_service.py",
             "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
@@ -21050,6 +21051,7 @@
             "app/api/v1/endpoints/bank_accounts.py",
             "app/api/v1/endpoints/bank_reconciliation.py",
             "app/api/v1/endpoints/booking_templates.py",
+            "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/bulk_journal_import.py",
             "app/api/v1/endpoints/chart_of_accounts.py",
             "app/api/v1/endpoints/compat.py",
@@ -24484,6 +24486,122 @@
             "app/services/billing_batch_service.py"
           ]
         },
+        "budget_lines": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "plan_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "account_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "kostenstelle_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "period_month",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "budgeted_amount",
+              "nullable": false,
+              "type": "numeric"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "account_id",
+              "references": "domain_erp.chart_of_accounts.id"
+            },
+            {
+              "column": "kostenstelle_id",
+              "references": "domain_finance.kostenstellen.id"
+            },
+            {
+              "column": "plan_id",
+              "references": "domain_finance.budget_plans.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_erp.chart_of_accounts.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_finance.budget_plans.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_finance.kostenstellen.tenant_id"
+            }
+          ],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/budget_planning.py"
+          ]
+        },
+        "budget_plans": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "plan_year",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "plan_name",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "character varying"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "finance",
+          "ownership_reason": "Custodian domain_finance / Domain finance.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/budget_planning.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/budget_planning.py"
+          ]
+        },
         "dispute_records": {
           "columns": [
             {
@@ -25164,6 +25282,7 @@
             "id"
           ],
           "read_by": [
+            "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/kostenrechnung.py",
             "app/finance/models.py",
             "app/services/personal_organisation_service.py"
@@ -46072,7 +46191,8 @@
           "read_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py",
             "app/api/v1/endpoints/portal_lohndienst.py",
-            "app/auth/portal_kunde.py"
+            "app/auth/portal_kunde.py",
+            "app/services/portal_tenant_directory.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/portal_kundenzugaenge.py"
@@ -59332,12 +59452,45 @@
               "name": "created_at",
               "nullable": false,
               "type": "timestamp without time zone"
+            },
+            {
+              "name": "gueltig_ab",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "gueltig_bis",
+              "nullable": true,
+              "type": "date"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp without time zone"
             }
           ],
           "foreign_keys": [
             {
               "column": "gruppe_id",
               "references": "domain_shared.rohwarengruppen.id"
+            },
+            {
+              "column": "gruppe_id",
+              "references": "domain_shared.rohwarengruppen.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.rohwarengruppen.tenant_id"
             }
           ],
           "owner_domain": "platform",
@@ -59347,10 +59500,13 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/rohwarengruppen.py"
+            "app/api/v1/endpoints/rohware_schema.py",
+            "app/api/v1/endpoints/rohwarengruppen.py",
+            "app/services/rohware_schema_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/rohwarengruppen.py"
+            "app/api/v1/endpoints/rohware_schema.py",
+            "app/services/rohware_schema_service.py"
           ]
         },
         "rohware_analysewert_korrektur_zeilen": {
@@ -59751,6 +59907,78 @@
             "app/api/v1/endpoints/rohwarengruppen.py"
           ]
         },
+        "rohware_schema_lines": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "schema_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "positions_typ",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "bezeichnung",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "berechnungsformel",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "einheit",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "sort_order",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp without time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "schema_id",
+              "references": "domain_shared.rohware_abrechnungsschemata.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.rohware_abrechnungsschemata.tenant_id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/rohware_schema.py",
+            "app/services/rohware_schema_service.py"
+          ],
+          "written_by": [
+            "app/api/v1/endpoints/rohware_schema.py"
+          ]
+        },
         "rohware_za_staffel_zeilen": {
           "columns": [
             {
@@ -59955,7 +60183,9 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/rohwarengruppen.py"
+            "app/api/v1/endpoints/rohware_schema.py",
+            "app/api/v1/endpoints/rohwarengruppen.py",
+            "app/services/rohware_schema_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
@@ -60643,6 +60873,7 @@
             "app/services/connector_config.py",
             "app/services/finance_read_model_service.py",
             "app/services/llm_gateway.py",
+            "app/services/portal_tenant_directory.py",
             "app/services/studio_entity_commands.py",
             "app/services/studio_entity_simulation.py",
             "app/services/studio_migration.py",

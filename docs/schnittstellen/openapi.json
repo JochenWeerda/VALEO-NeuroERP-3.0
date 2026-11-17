@@ -28749,14 +28749,20 @@
       "BudgetPlanCreate": {
         "properties": {
           "plan_name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": ".*\\S.*",
             "title": "Plan Name",
             "type": "string"
           },
           "plan_year": {
+            "maximum": 9999.0,
+            "minimum": 1.0,
             "title": "Plan Year",
             "type": "integer"
           },
           "status": {
+            "const": "ENTWURF",
             "default": "ENTWURF",
             "title": "Status",
             "type": "string"
@@ -123993,6 +123999,67 @@
           }
         },
         "title": "PortalFeldbuchZeile",
+        "type": "object"
+      },
+      "PortalHandelspartner": {
+        "properties": {
+          "active": {
+            "description": "Entspricht dem bereits verifizierten Token-Mandanten",
+            "title": "Active",
+            "type": "boolean"
+          },
+          "customer_count": {
+            "description": "Anzahl eigener aktiver Kundenkonten dort",
+            "minimum": 1.0,
+            "title": "Customer Count",
+            "type": "integer"
+          },
+          "id": {
+            "description": "Berechtigter Handelsmandant aus eigener Zuordnung",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name des berechtigten Handelspartners",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "customer_count",
+          "active"
+        ],
+        "title": "PortalHandelspartner",
+        "type": "object"
+      },
+      "PortalHandelspartnerVerzeichnis": {
+        "properties": {
+          "context_switch_available": {
+            "const": false,
+            "default": false,
+            "title": "Context Switch Available",
+            "type": "boolean"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/PortalHandelspartner"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "stage": {
+            "const": "discovery_only",
+            "default": "discovery_only",
+            "title": "Stage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "PortalHandelspartnerVerzeichnis",
         "type": "object"
       },
       "PortalInteressentListOut": {
@@ -295535,6 +295602,31 @@
     "/api/v1/finance/budgets": {
       "get": {
         "operationId": "list_budget_plans_api_v1_finance_budgets_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -295545,6 +295637,16 @@
               }
             },
             "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
           }
         },
         "security": [
@@ -361332,6 +361434,40 @@
         ]
       }
     },
+    "/api/v1/portal/handelspartner": {
+      "get": {
+        "description": "Liefert ausschliesslich Metadaten eigener gueltiger Portal-Zuordnungen. Waehlt keinen Mandanten, erweitert keine Rolle und gibt keine Geschaeftsdaten zurueck. Ein fremder Subject- oder Tenant-Selektor ist kein Eingabeparameter. Ohne gepruefte System-Leseverbindung bleibt der Weg gesperrt.",
+        "operationId": "meine_handelspartner_api_v1_portal_handelspartner_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PortalHandelspartnerVerzeichnis"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "403": {
+            "description": "Gepruefte Identitaet fehlt"
+          },
+          "503": {
+            "description": "Sicheres Zuordnungsverzeichnis nicht verfuegbar"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Eigene freigegebene Handelspartner ermitteln",
+        "tags": [
+          "portal",
+          "identity"
+        ]
+      }
+    },
     "/api/v1/portal/interessenten": {
       "get": {
         "operationId": "list_interessenten_api_v1_portal_interessenten_get",
@@ -388221,15 +388357,6 @@
               "title": "Nur Aktive",
               "type": "boolean"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -388270,17 +388397,6 @@
       },
       "post": {
         "operationId": "create_rohwarengruppe_api_v1_rohware_gruppen_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -388359,15 +388475,6 @@
               ],
               "title": "Schema Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -388408,17 +388515,6 @@
       },
       "post": {
         "operationId": "create_qualitaet_api_v1_rohware_gruppen_qualitaeten_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -388481,15 +388577,6 @@
               ],
               "title": "Gruppe Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -388530,17 +388617,6 @@
       },
       "post": {
         "operationId": "create_schema_api_v1_rohware_gruppen_schemata_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -388603,15 +388679,6 @@
               ],
               "title": "Gruppe Id"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -388652,17 +388719,6 @@
       },
       "post": {
         "operationId": "create_staffel_api_v1_rohware_gruppen_staffeln_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -388735,15 +388791,6 @@
               ],
               "title": "Analysewert"
             }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
           }
         ],
         "responses": {
@@ -388779,6 +388826,57 @@
         ]
       }
     },
+    "/api/v1/rohware/gruppen/{gruppe_id}/schemata": {
+      "get": {
+        "operationId": "list_gruppe_schemata_api_v1_rohware_gruppen__gruppe_id__schemata_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_id",
+            "required": true,
+            "schema": {
+              "title": "Gruppe Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AbrechnungsschemaOut"
+                  },
+                  "title": "Response List Gruppe Schemata Api V1 Rohware Gruppen  Gruppe Id  Schemata Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Schemata einer Rohwarengruppe auflisten",
+        "tags": [
+          "Rohware - Gruppen & Abrechnungsschemata"
+        ]
+      }
+    },
     "/api/v1/rohware/gruppen/{gruppe_nr}": {
       "delete": {
         "operationId": "delete_rohwarengruppe_api_v1_rohware_gruppen__gruppe_nr__delete",
@@ -388789,15 +388887,6 @@
             "required": true,
             "schema": {
               "title": "Gruppe Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "X-Tenant-ID",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
               "type": "string"
             }
           }
@@ -388895,22 +388984,6 @@
               "minimum": 1,
               "title": "Limit",
               "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "tenant_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Tenant Id"
             }
           }
         ],

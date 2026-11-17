@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WORKSPACE_COMPOSITION_FIXTURE } from '@/studio/workspace-composition.fixture'
@@ -106,7 +106,7 @@ function memoryStorage(seed: Record<string, string> = {}): Storage {
 function slotKinds(): string[] {
   const root = screen.queryByTestId('workspace-specialist-slots')
   if (!root) return []
-  return [...root.querySelectorAll('[data-specialized-kind]')].map(
+  return [...root.querySelectorAll(':scope > [data-specialized-kind]')].map(
     (node) => node.getAttribute('data-specialized-kind') ?? '',
   )
 }
@@ -118,7 +118,7 @@ function renderHomeLayer(): void {
   render(
     <MemoryRouter>
       <QueryClientProvider client={queryClient}>
-        <AdaptiveWorkspaceLayer />
+        <AdaptiveWorkspaceLayer mode="workspace" />
       </QueryClientProvider>
     </MemoryRouter>,
   )
@@ -226,6 +226,9 @@ describe('Home Composition Session', () => {
     expect(host).toHaveAttribute('data-host-variant', 'embedded')
     expect(host).toHaveAttribute('data-composition-id', WORKSPACE_COMPOSITION_FIXTURE.id)
     expect(slotKinds()).toEqual(['disposition_board', 'inbox'])
+    expect(screen.queryByTestId('adaptive-workspace-inbox')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Document-Inbox' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Dispo-Tafel' }))
     expect(screen.getByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-disposition-entry')).toBeInTheDocument()
     expect(screen.getByTestId('disposition-board')).toBeInTheDocument()
@@ -257,6 +260,7 @@ describe('Home Composition Session', () => {
       setSpecializedKindEnabled(WORKSPACE_COMPOSITION_FIXTURE, 'disposition_board', false),
     )
     renderHomeLayer()
+    fireEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(slotKinds()).toEqual(['inbox'])
     expect(screen.queryByTestId('workspace-disposition-entry')).not.toBeInTheDocument()
@@ -323,6 +327,7 @@ describe('Home Composition Session', () => {
   it('faellt bei kaputtem JSON auf Fixture-Host Dispo-dann-Inbox zurueck', async () => {
     sessionStorage.setItem(WORKSPACE_COMPOSITION_STORAGE_KEY, '{kaputt')
     expect(() => renderHomeLayer()).not.toThrow()
+    fireEvent.click(await screen.findByRole('button', { name: 'Document-Inbox' }))
     expect(await screen.findByTestId('adaptive-workspace-inbox')).toBeInTheDocument()
     expect(slotKinds()).toEqual(['disposition_board', 'inbox'])
     expect(screen.getByTestId('workspace-composition-host')).toHaveAttribute(
