@@ -61,7 +61,6 @@ def engine():
         v.execute(text("DELETE FROM domain_shared.mailkonten WHERE tenant_id = ANY(:h) AND zugang_von IS NOT NULL"), h)
         v.execute(text("DELETE FROM domain_shared.mailkonten WHERE tenant_id = ANY(:h)"), h)
         v.execute(text("DELETE FROM domain_einkauf.bestellung_kommunikation WHERE tenant_id = ANY(:h)"), h)
-        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), h)
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE id = :i"), {"i": LIEFERANT})
         v.execute(text("DELETE FROM public.outbox_events WHERE tenant_id = ANY(:h)"), h)
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = ANY(:h)"), h)

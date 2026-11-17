@@ -21122,6 +21122,13 @@ Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandanteng
 Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
 Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
 
+## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — in Arbeit, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S4. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: DocFlow ist der einzige Belegspeicher. Migration beleg_altspeicher_entfernen_20261117 entfernt die Sichten domain_crm.sales_orders/_items und die Tabellen der alten Speicher (Lieferschein, Quittung, Rechnung, Gutschrift, Bestellung, Auftrags-Ursprungsdaten) - Inhalt laut Nutzerentscheidung 10.11.2026 Testdaten; haelt an bei gebuchten Altrechnungen/-gutschriften bestehender Mandanten. Rueckweg legt die Speicher leer wieder an (DDL per pg_dump aus frischer DB, beleg_altspeicher_entfernen_20261117.sql).
+Mit entfernt: ORM-Modelle (sales_invoice_models, EinkaufBestellung/-Position), Freigabe-Subjekte sales_credit_note und finance_sales_invoice (ohne Aufrufer), Demo-Seeds Verkauf/Logistik, Tabellenzuordnung, Tabellenkatalog (707 -> 696), Indizes in migrations/sql/erp/006.
+Pruefung: Migration frisch (valeo_s5_test per pruefstand_db.py, alembic downgrade -1/upgrade head) und gewachsen (valeo_neuro_erp, zurueckgerollte Transaktion: up/down/up). Gestaffelter Lauf 170 Testdateien auf dem frischen S5-Stand; rot nur bekannte Umgebungsfaelle (valeo_probe-gebunden, POS-Retoure-Grant, Studio-Release-SQL, Portal-Verzeichnis auch ohne S5).
+Dateibesitz: Migration + SQL, die genannten Module, angepasste Tests, Projektionen.
+
 ## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
 
 Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften

@@ -28,8 +28,6 @@ ARTEN: dict[str, str] = {
 VORGAENGE: dict[str, str] = {
     "docflow_document": "Beleg",
     "finance_ap_invoice": "Finanzrechnung",
-    "sales_credit_note": "Verkaufsgutschrift",
-    "finance_sales_invoice": "Ausgangsrechnung",
     "journal_entry": "Hauptbuchbuchung",
     "payment_run": "Zahlungslauf",
     "journal_import": "Massenimport",

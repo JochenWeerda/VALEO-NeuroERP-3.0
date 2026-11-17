@@ -49,9 +49,6 @@ AUFRAEUMEN = (
     "DELETE FROM domain_docflow.document_items WHERE tenant_id = :t",
     # Archivstuecke des alten Rechnungswegs lassen sich nicht loeschen; ihr Kopf bleibt stehen.
     "DELETE FROM domain_docflow.document_headers WHERE tenant_id = :t AND source_system <> 'gobd_artifact'",
-    "DELETE FROM domain_sales.sales_credit_note_lines WHERE credit_note_id IN "
-    "(SELECT id FROM domain_sales.sales_credit_notes WHERE tenant_id = :t)",
-    "DELETE FROM domain_sales.sales_credit_notes WHERE tenant_id = :t",
     "DELETE FROM documents WHERE CAST(data AS jsonb)->>'tenantId' = :t",
     "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
     "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
@@ -230,7 +227,7 @@ def test_auch_der_kernel_bucht_routine_und_sperrt_die_dublette(haus, monkeypatch
 
 def test_der_gemeinsame_weg_kennt_jeden_bereich_und_nur_den_eigenen_mandanten(haus):
     engine_fuer("docflow_document", None, "x")
-    assert set(SUBJEKTE) == {"docflow_document", "finance_ap_invoice", "sales_credit_note", "finance_sales_invoice",
+    assert set(SUBJEKTE) == {"docflow_document", "finance_ap_invoice",
                              "journal_entry", "payment_run", "journal_import", "einkauf_credit_memo",
                              "einkauf_debit_memo"}
     nummer = _eingangsrechnung(haus, ANNA)

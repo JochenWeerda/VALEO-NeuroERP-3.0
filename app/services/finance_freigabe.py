@@ -98,72 +98,6 @@ class EingangsrechnungFreigabe(FreigabeEngine):
         return befunde
 
 
-class VerkaufsgutschriftFreigabe(FreigabeEngine):
-    """Verkaufsgutschrift (``domain_sales.sales_credit_notes``)."""
-
-    SUBJEKT = "sales_credit_note"
-
-    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
-        zeile = self.db.execute(
-            text(
-                "SELECT id, credit_note_number, customer_id, invoice_reference, total_amount, net_amount, tax_amount, "
-                "status, correction_type, currency FROM domain_sales.sales_credit_notes WHERE id = :id AND tenant_id = :t"
-            ),
-            {"id": subject_id, "t": self.tenant_id},
-        ).mappings().first()
-        if not zeile:
-            raise EntityNotFoundError("SalesCreditNote", subject_id)
-        rechnung = (zeile["invoice_reference"] or "").strip()
-        # Stueckelung: alle Gutschriften zur selben Rechnung zaehlen zusammen.
-        gesamt = self.db.execute(
-            text(
-                "SELECT COALESCE(SUM(total_amount), 0) FROM domain_sales.sales_credit_notes "
-                "WHERE tenant_id = :t AND invoice_reference = :r AND status NOT IN ('cancelled', 'storniert')"
-            ),
-            {"t": self.tenant_id, "r": rechnung},
-        ).scalar() if rechnung else None
-        stand = str(zeile["status"] or "")
-        return Vorgang(
-            subject_id=str(zeile["id"]), belegart="sales_credit_memo", brutto=_d(zeile["total_amount"]),
-            gebucht=stand == "posted", beendet=stand in ("cancelled", "storniert"),
-            inhalt={
-                "nummer": zeile["credit_note_number"], "kunde": zeile["customer_id"], "rechnung": rechnung,
-                "summen": [str(_d(zeile[k])) for k in ("net_amount", "tax_amount", "total_amount")],
-                "art": zeile["correction_type"], "waehrung": zeile["currency"],
-            },
-            brutto_des_vorgangs=_d(gesamt) if gesamt is not None else None,
-            befunde=[Befund(
-                "gutschrift_ohne_bezug", "kritisch",
-                f"Gutschrift über {self.grenze('sales_credit_memo')} EUR ohne Bezugsrechnung (Forderungsverzicht ohne Beleg).",
-            )] if not rechnung and _d(zeile["total_amount"]) > (self.grenze("sales_credit_memo") or Decimal("0")) else [],
-        )
-
-
-class AusgangsrechnungStornoFreigabe(FreigabeEngine):
-    """Storno einer Ausgangsrechnung des alten Rechnungswegs — der Vorgang ist ihre Buchung im Mandanten.
-
-    Der Dokumentspeicher dieses Wegs kennt keinen Mandanten; die Buchung schon. Gibt es im Mandanten keine Buchung
-    zu der Nummer, gibt es hier auch keinen Vorgang.
-    """
-
-    SUBJEKT = "finance_sales_invoice"
-
-    def vorgang(self, subject_id: str, aktion: str) -> Vorgang:
-        zeile = self.db.execute(
-            text(
-                "SELECT id, status, total_debit FROM domain_erp.journal_entries WHERE tenant_id = :t "
-                "AND source = 'sales_invoice' AND (document_number = :nr OR reference = :nr) ORDER BY created_at LIMIT 1"
-            ),
-            {"t": self.tenant_id, "nr": subject_id},
-        ).first()
-        if not zeile:
-            raise EntityNotFoundError("SalesInvoicePosting", subject_id)
-        return Vorgang(
-            subject_id=subject_id, belegart="sales_invoice", brutto=_d(zeile[2]), gebucht=str(zeile[1]) == "posted",
-            beendet=str(zeile[1]) == "reversed", inhalt={"buchung": str(zeile[0]), "nummer": subject_id, "betrag": str(_d(zeile[2]))},
-        )
-
-
 def gehoert_docflow(db: Session, tenant_id: str, nummer: str) -> bool:
     """Ob eine Rechnungsnummer ein DocFlow-Beleg des Mandanten ist — dann wird sie nur dort gebucht und storniert."""
     return bool(db.execute(
@@ -196,28 +130,6 @@ def verlange_oder_409(engine: FreigabeEngine, vorgang: Vorgang, aktion: str, akt
         engine.verlange_fuer(vorgang, aktion, akteur)
     except ConflictError as fehlt:
         raise HTTPException(status_code=409, detail=str(fehlt.detail)) from fehlt
-
-
-def verlange_gutschrift(db: Session, tenant_id: str, gutschrift_id: str, akteur: Optional[str] = None) -> None:
-    """Vor dem Buchen einer Verkaufsgutschrift: die Freigabe einer zweiten Person, sonst 409."""
-    engine = VerkaufsgutschriftFreigabe(db, tenant_id)
-    verlange_oder_409(engine, engine.vorgang(gutschrift_id, "post"), "post", akteur)
-
-
-def verlange_storno_ausgangsrechnung(db: Session, tenant_id: str, nummer: str, akteur: Optional[str] = None) -> None:
-    """Vor dem Storno ueber den alten Rechnungsweg.
-
-    Eine DocFlow-Rechnung wird nur ueber DocFlow storniert: Der alte Weg fand ihre Buchung ueber die Nummer und
-    haette sie ohne Beleg, Statushistorie und Freigabe zurueckgenommen. Jede andere gebuchte Rechnung braucht die
-    Freigabe einer zweiten Person mit erhoehter Berechtigung.
-    """
-    if gehoert_docflow(db, tenant_id, nummer):
-        raise HTTPException(
-            status_code=409,
-            detail=f"Rechnung {nummer} ist ein DocFlow-Beleg und wird über den Belegweg storniert.",
-        )
-    engine = AusgangsrechnungStornoFreigabe(db, tenant_id)
-    verlange_oder_409(engine, engine.vorgang(nummer, "reverse"), "reverse", akteur)
 
 
 _FINANZ_LESEN = frozenset({"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"})
@@ -508,8 +420,9 @@ def engine_fuer(subject_type: str, db: Session, tenant_id: str) -> FreigabeEngin
     if not SUBJEKTE:
         from app.services.docflow_freigabe import DocflowFreigabe
 
-        for klasse in (DocflowFreigabe, EingangsrechnungFreigabe, VerkaufsgutschriftFreigabe,
-                       AusgangsrechnungStornoFreigabe, HauptbuchFreigabe, ZahlungslaufFreigabe,
+        # Verkaufsgutschrift und Storno der Altrechnung entfallen mit ihren Speichern (BELEG-052 S5); DocFlow-Belege
+        # laufen ueber DocflowFreigabe.
+        for klasse in (DocflowFreigabe, EingangsrechnungFreigabe, HauptbuchFreigabe, ZahlungslaufFreigabe,
                        BuchungsimportFreigabe, EinkaufsgutschriftFreigabe, EinkaufsbelastungFreigabe):
             SUBJEKTE[klasse.SUBJEKT] = klasse
     klasse = SUBJEKTE.get(subject_type)

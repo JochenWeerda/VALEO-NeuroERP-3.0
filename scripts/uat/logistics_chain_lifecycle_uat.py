@@ -4,7 +4,7 @@ Prüft die öffentliche API entlang **Lieferschein-Ref → Tour mit Hints → Fr
 → Supply-Chain Traceability (Read) → Tour-Storno**. Räumt erzeugte Zeilen per SQL auf.
 
 Mutiert nur mit ``--execute``. Voraussetzung: Backend :8000, Schema ``domain_logistics``,
-optional Verkaufs-Seed mit ``DEMO-LS-001`` (``scripts/seed_demo_sales.py``).
+optional ein DocFlow-Lieferschein ``DEMO-LS-001`` (Belegmaske Lieferschein).
 Ohne ``DEMO-LS-001``: Dry-run und ``--execute`` führen nur noch Reads aus
 (Traceability-Tickets, Tourenliste) und beenden mit ``status: skipped (no DEMO-LS-001)``.
 """
@@ -123,7 +123,7 @@ def run(execute: bool) -> dict[str, Any]:
         expected={200, 404},
     )
     if not isinstance(ls, dict) or ls.get("delivery_note_number") != "DEMO-LS-001":
-        print("\n  (skip) DEMO-LS-001 nicht gefunden — seed_demo_sales.py ausführen für volle Kette.")
+        print("\n  (skip) DEMO-LS-001 nicht gefunden — Lieferschein in der Belegmaske anlegen fuer die volle Kette.")
         if not execute:
             return {"status": "passed (read-only, no spine)", **evidence}
         return {"status": "skipped (no DEMO-LS-001)", **evidence}
