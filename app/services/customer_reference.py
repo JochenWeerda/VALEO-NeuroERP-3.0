@@ -44,6 +44,8 @@ class _ReferenceTable:
     id_column: str
     name_column: str | None
     number_column: str | None
+    #: Zusaetzliche feste Bedingung (Code, keine Eingabe), z. B. die Belegart in DocFlow.
+    filter_sql: str = ""
 
 
 # Identifiers are fixed here, never taken from the caller, so the f-string SQL below stays safe.
@@ -55,7 +57,8 @@ _REFERENCE_TABLES: dict[str, _ReferenceTable] = {
     "einkauf_contract": _ReferenceTable("domain_einkauf.kontrakte", "id", "bezeichnung", "kontraktnummer"),
     "agrar_contract": _ReferenceTable("domain_inventory.agrar_contracts", "id", None, "contract_number"),
     "article": _ReferenceTable("domain_inventory.articles", "id", "name", "article_number"),
-    "sales_order": _ReferenceTable("domain_crm.sales_orders", "id", None, "order_number"),
+    "sales_order": _ReferenceTable("domain_docflow.document_headers", "id", None, "doc_number",
+                                   "doc_type = 'sales_order' AND deleted_at IS NULL"),
     "harvest_campaign": _ReferenceTable("domain_agrar.ernte_kampagnen", "kampagne_id", "bezeichnung", None),
 }
 
@@ -101,12 +104,13 @@ def resolve_reference(db: Session, tenant_id: str, kind: str, reference: object 
     name_sql = f"{spec.name_column}::text" if spec.name_column else "NULL"
     number_sql = f"{spec.number_column}::text" if spec.number_column else "NULL"
     match_number = f" OR {spec.number_column}::text = :ref" if spec.number_column else ""
+    filter_sql = f" AND {spec.filter_sql}" if spec.filter_sql else ""
     row = db.execute(
         text(
             f"""
             SELECT {name_sql} AS name, {number_sql} AS number
             FROM {spec.table}
-            WHERE tenant_id::text = :tid AND ({spec.id_column}::text = :ref{match_number})
+            WHERE tenant_id::text = :tid AND ({spec.id_column}::text = :ref{match_number}){filter_sql}
             ORDER BY ({spec.id_column}::text = :ref) DESC
             LIMIT 1
             """  # nosec B608  # Tabelle und Spalten kommen aus _REFERENCE_TABLES, die Werte sind gebunden

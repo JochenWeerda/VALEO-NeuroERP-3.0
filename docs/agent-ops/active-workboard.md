@@ -21115,6 +21115,13 @@ Dateibesitz: die genannten Module, tests/test_beleg_reste_docflow.py (neu), ange
 Abnahme: neue Tests gegen echtes Schema gruen; vollstaendige Pruefkette; CI des PR.
 Bewusst nicht hier: Zusammenfuehrung des Fibu-Speichers /finance/ap/invoices mit der DocFlow-Eingangsrechnung (M3 Fibu). Ladegewicht nur aus Gewichtseinheiten und ESG-Kennzeichen bleiben wie beschrieben (kein Fehler).
 
+## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — in Arbeit, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge der Fachreste. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: kein Leser der Uebergangssicht domain_crm.sales_orders / sales_order_items mehr (Ratsche 15 -> 0). Kreditlimit, Kreditpruefung, Kunden-360 (Kopf, Liste, Register), KIM-Belege, Verkaufsberichte, Management-Dashboard, MCP-Kundensicht, Bestellvorschlag (offene Menge je Position nach Teillieferung), Ist-Aggregation, Pickliste, Referenzaufloesung lesen DocFlow direkt. Was die Sicht rechnete (offene Menge, Liefertermin), steht einmal in app/services/auftrag_lesewege.py.
+Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandantengebunden); Verkaufsberichte zaehlten geloeschte Entwuerfe mit (jetzt nicht mehr); Kundennamen kommen aus dem Kundenstamm statt aus dem Betreff.
+Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
+Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
+
 ## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
 
 Meilenstein M0/M2: vor Aktivierung der Rohware-Schemata ausschliesslich geprueften

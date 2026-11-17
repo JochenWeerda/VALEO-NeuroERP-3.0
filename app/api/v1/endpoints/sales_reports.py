@@ -70,9 +70,10 @@ async def get_sales_summary(
     try:
         orders = db.execute(
             text("""
-                SELECT COUNT(*), COALESCE(SUM(total_amount), 0)
-                FROM domain_crm.sales_orders
-                WHERE tenant_id = :tid AND created_at >= :from AND created_at <= :to
+                SELECT COUNT(*), COALESCE(SUM(total_gross), 0)
+                FROM domain_docflow.document_headers
+                WHERE tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL
+                  AND created_at >= :from AND created_at <= :to
             """),
             {"tid": tenant_id, "from": period_from, "to": period_to},
         ).fetchone()
@@ -126,10 +127,12 @@ async def get_top_customers(
     try:
         rows = db.execute(
             text("""
-                SELECT so.customer_id, MAX(so.subject) AS customer_name,
-                       COUNT(*) AS order_count, COALESCE(SUM(so.total_amount), 0) AS total
-                FROM domain_crm.sales_orders so
-                WHERE so.tenant_id = :tid AND so.created_at >= :from AND so.created_at <= :to
+                SELECT so.customer_id, MAX(c.company_name) AS customer_name,
+                       COUNT(*) AS order_count, COALESCE(SUM(so.total_gross), 0) AS total
+                FROM domain_docflow.document_headers so
+                LEFT JOIN domain_crm.customers c ON c.id = so.customer_id AND c.tenant_id = so.tenant_id
+                WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
+                  AND so.created_at >= :from AND so.created_at <= :to
                 GROUP BY so.customer_id
                 ORDER BY total DESC
                 LIMIT :lim
@@ -162,9 +165,10 @@ async def get_top_articles(
                 SELECT soi.article_number, MAX(soi.description) AS article_name,
                        SUM(soi.quantity) AS total_qty,
                        SUM(soi.quantity * soi.unit_price * (1 - soi.discount_percent / 100)) AS total_rev
-                FROM domain_crm.sales_order_items soi
-                JOIN domain_crm.sales_orders so ON so.id = soi.order_id
-                WHERE so.tenant_id = :tid AND so.created_at >= :from AND so.created_at <= :to
+                FROM domain_docflow.document_items soi
+                JOIN domain_docflow.document_headers so ON so.id = soi.header_id AND so.tenant_id = soi.tenant_id
+                WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
+                  AND so.created_at >= :from AND so.created_at <= :to
                 GROUP BY soi.article_number
                 ORDER BY total_rev DESC
                 LIMIT :lim
@@ -202,9 +206,9 @@ async def get_monthly_revenue(
             text("""
                 SELECT TO_CHAR(created_at, 'YYYY-MM') AS month,
                        COUNT(*) AS order_count,
-                       COALESCE(SUM(total_amount), 0) AS revenue
-                FROM domain_crm.sales_orders
-                WHERE tenant_id = :tid
+                       COALESCE(SUM(total_gross), 0) AS revenue
+                FROM domain_docflow.document_headers
+                WHERE tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL
                   AND created_at >= :from AND created_at <= :to
                 GROUP BY TO_CHAR(created_at, 'YYYY-MM')
                 ORDER BY month
@@ -233,9 +237,9 @@ async def get_sales_pipeline_kpi(
     try:
         orders = db.execute(
             text("""
-                SELECT COUNT(*), COALESCE(SUM(total_amount), 0)
-                FROM domain_crm.sales_orders
-                WHERE tenant_id = :tid AND status = 'open'
+                SELECT COUNT(*), COALESCE(SUM(total_gross), 0)
+                FROM domain_docflow.document_headers
+                WHERE tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL AND status = 'open'
             """),
             {"tid": tenant_id},
         ).fetchone()

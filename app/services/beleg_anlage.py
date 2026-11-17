@@ -1,7 +1,7 @@
 """Belege aus Fachwegen anlegen: immer in DocFlow (BELEG-052 Stufe 3, Nutzerentscheidung 08.11.2026).
 
 Fachwege, die bisher direkt in einen Eigenspeicher schrieben (RFQ-Zuschlag -> ``domain_einkauf.bestellungen``,
-Webshop -> ``domain_crm.sales_orders``, Sammellieferschein -> ``domain_sales.delivery_notes`` ...), legen ihren Beleg
+Webshop -> Auftrags-Eigenspeicher im CRM, Sammellieferschein -> ``domain_sales.delivery_notes`` ...), legen ihren Beleg
 hier an: als DocFlow-Entwurf der passenden Belegart, mit Herkunft (``source_system``/``source_ref``) und
 Wiederholungsschutz. Freigeben, Umwandeln und Buchen laufen danach wie bei jedem Beleg ueber die Belegmaske.
 

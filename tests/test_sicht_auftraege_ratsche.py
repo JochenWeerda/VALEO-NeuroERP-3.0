@@ -21,24 +21,8 @@ SCHREIBEN = re.compile(r"(INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+domain_crm\.sale
 ALTER_STAND = re.compile(
     r"'(bestaetigt|geliefert|in_delivery|in_lieferung|ENTWURF|entwurf|abgeschlossen|storniert|invoiced|delivered)'")
 
-# Stand 09.11.2026 - nur streichen, nie ergaenzen.
-LESER = frozenset({
-    "app/api/v1/endpoints/compat.py",
-    "app/api/v1/endpoints/credit_management.py",
-    "app/api/v1/endpoints/crm_360.py",
-    "app/api/v1/endpoints/crm_360_reads.py",
-    "app/api/v1/endpoints/crm_kim.py",
-    "app/api/v1/endpoints/pick_lists.py",
-    "app/api/v1/endpoints/sales_order_commands.py",
-    "app/api/v1/endpoints/sales_reports.py",
-    "app/services/beleg_anlage.py",
-    "app/services/customer_reference.py",
-    "app/services/ist_aggregation_service.py",
-    "app/services/mcp_execution_service.py",
-    "app/services/sales_credit_service.py",
-    "app/services/webshop_integration_service.py",
-    "modules/einkauf/services/bestellvorschlag_service.py",
-})
+# Seit Schnitt S4 (17.11.2026) liest niemand mehr die Sicht; sie faellt mit S5 (Migration).
+LESER: frozenset[str] = frozenset()
 
 
 def _quellen():
@@ -69,3 +53,9 @@ def test_leser_vergleichen_nur_docflow_staende():
             for alt in ALTER_STAND.findall(fenster[:ende]):
                 treffer.append(f"{name}:{text[:m.start()].count(chr(10)) + 1} '{alt}'")
     assert treffer == [], treffer
+
+
+def test_das_muster_trifft_die_sicht():
+    """Ein Muster, das nie trifft, laesst die Ratsche gruen (Backspace statt Wortgrenze, 2026-10)."""
+    assert SICHT.search("FROM domain_crm.sales_orders so") and SICHT.search("JOIN domain_crm.sales_order_items i")
+    assert not SICHT.search("FROM domain_crm.sales_orders_vor_docflow")
