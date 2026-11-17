@@ -21,3 +21,5 @@ version: 1.0.0
 | [ADR-056](../../../adr/adr-056-vendor-neutral-erp-habit-contract.md) | Herstellerneutraler ERP-Gewohnheitsvertrag | CRM-/Sales-Masken |
 
 Neue **Significant** CRM-Entscheidungen → ADR Proposed + Human Review gemäß [architecture-protocol.md](../../agents/architecture-protocol.md).
+
+Proposed 17.11.2026: [Kundenprofil innerhalb des Partneraggregats](../../../adr/adr-customer-master-profile-20261117.md), einschliesslich Feldkatalog, Teilmutation und verbleibender Kanal-/Untertabellenabnahmen.

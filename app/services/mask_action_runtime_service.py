@@ -138,6 +138,7 @@ def wiederholter_auftrag(
     idempotency_key: Any,
     mode: str,
     entity_id: str | None = None,
+    request_fingerprint: str | None = None,
 ) -> MaskActionResult | None:
     """Die Antwort auf einen Schluessel, der schon gelaufen ist — sonst ``None``.
 
@@ -155,12 +156,28 @@ def wiederholter_auftrag(
     )
     if frueher is None:
         return None
+    gespeicherter_fingerprint = None
+    if request_fingerprint is not None:
+        zeile = db.execute(
+            text("SELECT payload::jsonb->>'request_fingerprint' AS request_fingerprint FROM public.outbox_events "
+                 "WHERE tenant_id = :t AND aggregate_id = :e AND payload::jsonb->>'audit_entry_id' = :a "
+                 "LIMIT 1"),
+            {"t": tenant_id, "e": str(frueher["entity_id"]), "a": str(frueher["id"])},
+        ).mappings().first()
+        gespeicherter_fingerprint = zeile["request_fingerprint"] if zeile else None
     db.rollback()
     if entity_id is not None and str(frueher["entity_id"]) != str(entity_id):
         return MaskActionResult(
             actionKey=action_key, mode=mode, success=False,
             error="Dieser Idempotenzschluessel gehoert zu einem frueheren Auftrag fuer ein anderes Objekt; "
                   "nichts ausgefuehrt.",
+            validationErrors=[{"field": "_idempotencyKey", "message": "Schluessel bereits verwendet",
+                               "severity": "blocking"}],
+        )
+    if request_fingerprint is not None and gespeicherter_fingerprint != request_fingerprint:
+        return MaskActionResult(
+            actionKey=action_key, mode=mode, success=False,
+            error="Dieser Idempotenzschluessel gehoert zu einem anderen Auftrag; nichts ausgefuehrt.",
             validationErrors=[{"field": "_idempotencyKey", "message": "Schluessel bereits verwendet",
                                "severity": "blocking"}],
         )
@@ -229,6 +246,8 @@ async def run_delegated_mask_action(
     delegate_fn: DelegateFn,
     outbox_event_type: str,
     require_audit_reason: bool = False,
+    performed_by: str | None = None,
+    request_fingerprint: str | None = None,
 ) -> MaskActionResult:
     """Eine Mask-Aktion, die an den **echten Fachweg** delegiert.
 
@@ -269,6 +288,7 @@ async def run_delegated_mask_action(
             wiederholt = wiederholter_auftrag(
                 db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
                 idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+                **({"request_fingerprint": request_fingerprint} if request_fingerprint is not None else {}),
             )
         except Exception as exc:  # noqa: BLE001 — kein Erfolg ohne gepruefte Wiederholung
             db.rollback()
@@ -305,6 +325,7 @@ async def run_delegated_mask_action(
         wiederholt = wiederholter_auftrag(
             db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
             idempotency_key=idempotency_key, mode=mode, entity_id=entity_id,
+            **({"request_fingerprint": request_fingerprint} if request_fingerprint is not None else {}),
         )
         if wiederholt is not None:
             return wiederholt
@@ -312,12 +333,15 @@ async def run_delegated_mask_action(
             db, tenant_id=tenant_id, action_key=action_key, entity_type=entity_type,
             entity_id=entity_id, audit_reason=audit_reason, idempotency_key=idempotency_key,
             summary=f"{action_key} angestossen",
+            **({"performed_by": performed_by} if performed_by is not None else {}),
         )
         outbox_id = _write_outbox(
             db, tenant_id=tenant_id, event_type=outbox_event_type, aggregate_id=entity_id,
             payload={
                 "action_key": action_key, "entity_type": entity_type, "entity_id": entity_id,
                 "tenant_id": tenant_id, "audit_entry_id": audit_id, "payload": payload,
+                **({"performed_by": performed_by} if performed_by is not None else {}),
+                **({"request_fingerprint": request_fingerprint} if request_fingerprint is not None else {}),
             },
         )
         # Ein Fachweg darf seinen Savepoint committen, nie die aeussere Einheit.

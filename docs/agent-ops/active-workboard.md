@@ -21399,3 +21399,5 @@ MAIN-SONAR Nachlauf44021259183: alle anderenJobs gruen, nur NewCoverage71,2<80
 rot. Sicherheits-/Bug-/Wartbarkeitskriterien A. Keine Schwelle abgesenkt.
 
 CUSTOMER-MASTER Pruefquellen-Korrektur vor Edit: Lead besitzt scripts/check_field_contracts.py und neuen engen Regressionstest. _spec importiert derzeit app.main (authfreie Testanwendung), waehrend kanonische API aus main:app exportiert wird. Pruefung soll die versionierte Produktions-OpenAPI lesen; deren Aktualitaet bleibt durch generate_openapi --check abgesichert. Kein erneuter schwerer Appimport, keine Schwellen-/Ausnahmenaenderung. Global199 Befunde noch nicht als Basis-/Neubefunde klassifiziert.
+
+CUSTOMER-MASTER Meilenstein: finale88 Backend-Vertraege, PostgreSQL1/1, zentraleDialoge8/8 und tsc gruen. Produktions-OpenAPI exportiert/geprueft, 3731/3731 Routen mit Summary/Antwortmodell; Doku-Drift0, Tenant-Audit und Godfile-Ratsche gruen. Globale Feldpruefung54 bleibt rot; Kundenprofil0. Versionierte Schnittstellen-/Registry-/MCP-/Handbuchgeneratoren synchronisiert. Bereit fuer Branch-Push/PR-CI, keine Gesamtfreigabe oder bereits erfolgte lokale Bereitstellung behauptet.

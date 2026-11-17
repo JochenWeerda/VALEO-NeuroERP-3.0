@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-16
+last_reviewed: 2026-11-17
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -129,6 +129,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 
 | Event-ID | Kanal | Quelle |
 |---|---|---|
+| `crm.customer.master_profile.updated` | outbox | `app/api/v1/endpoints/customer_master_profile.py` |
 | `crm.customer.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
 | `crm.lead.qualified` | outbox | `app/api/v1/endpoints/leads.py` |
 | `crm.lead.updated` | outbox | `app/api/v1/endpoints/stammdaten_bearbeiten.py` |
