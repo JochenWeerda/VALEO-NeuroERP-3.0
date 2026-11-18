@@ -40,7 +40,7 @@ overrides:
   node-forge: 1.4.3
   nodemailer: 10.1.7
   path-to-regexp: ^0.1.13
-  picomatch: 4.0.7
+  picomatch: 4.0.4
   protobufjs: ^7.6.5
   semver: ^7.7.4
   shell-quote: 1.11.0
@@ -107,9 +107,9 @@ patchedDependencies:
   deepmerge@4.3.1:
     hash: fk7gcgarxyfhq3atemxq6wo5ii
     path: config/security/npm-patches/deepmerge@4.3.1.patch
-  picomatch@4.0.7:
-    hash: nivlo6x4dtn73s3zoi3xs5usjy
-    path: config/security/npm-patches/picomatch@4.0.7.patch
+  picomatch@4.0.4:
+    hash: r7g3qysqsspw4qrtnvb7lcnmdq
+    path: config/security/npm-patches/picomatch@4.0.4.patch
 
 importers:
 
@@ -10482,7 +10482,7 @@ packages:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
     engines: {node: '>=12.0.0'}
     peerDependencies:
-      picomatch: 4.0.7
+      picomatch: 4.0.4
     peerDependenciesMeta:
       picomatch:
         optional: true
@@ -12990,8 +12990,8 @@ packages:
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
-  picomatch@4.0.7:
-    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
+  picomatch@4.0.4:
+    resolution: {integrity: sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==}
     engines: {node: '>=12'}
 
   pidtree@0.6.0:
@@ -20181,7 +20181,7 @@ snapshots:
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   '@rollup/wasm-node@4.59.0':
     dependencies:
@@ -22395,7 +22395,7 @@ snapshots:
   anymatch@3.1.3:
     dependencies:
       normalize-path: 3.0.0
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   anynum@1.0.1: {}
 
@@ -24909,9 +24909,9 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
-  fdir@6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)):
+  fdir@6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)):
     optionalDependencies:
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   fecha@4.2.3: {}
 
@@ -26382,7 +26382,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   jest-util@29.7.0:
     dependencies:
@@ -26391,7 +26391,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 3.9.0
       graceful-fs: 4.2.11
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   jest-util@30.2.0:
     dependencies:
@@ -26400,7 +26400,7 @@ snapshots:
       chalk: 4.1.2
       ci-info: 4.4.0
       graceful-fs: 4.2.11
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
     optional: true
 
   jest-validate@26.6.2:
@@ -27491,7 +27491,7 @@ snapshots:
   micromatch@4.0.8:
     dependencies:
       braces: 3.0.3(patch_hash=tf7mioebotwwnxnvjextir2bz4)
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   mime-db@1.52.0: {}
 
@@ -28127,7 +28127,7 @@ snapshots:
 
   picocolors@1.1.1: {}
 
-  picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy): {}
+  picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq): {}
 
   pidtree@0.6.0: {}
 
@@ -28834,7 +28834,7 @@ snapshots:
 
   readdirp@3.6.0:
     dependencies:
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   readdirp@4.1.2: {}
 
@@ -30060,13 +30060,13 @@ snapshots:
 
   tinyglobby@0.2.15:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   tinyglobby@0.2.17:
     dependencies:
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
 
   tinyqueue@3.0.0: {}
 
@@ -30710,8 +30710,8 @@ snapshots:
   vite@6.4.5(@types/node@20.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.9.0):
     dependencies:
       esbuild: 0.25.10
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       postcss: 8.5.28
       rollup: '@rollup/wasm-node@4.59.0'
       tinyglobby: 0.2.17
@@ -30727,8 +30727,8 @@ snapshots:
   vite@6.4.5(@types/node@20.19.17)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       esbuild: 0.25.10
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       postcss: 8.5.28
       rollup: '@rollup/wasm-node@4.59.0'
       tinyglobby: 0.2.17
@@ -30744,8 +30744,8 @@ snapshots:
   vite@6.4.5(@types/node@22.19.21)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.22.4)(yaml@2.9.0):
     dependencies:
       esbuild: 0.25.10
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       postcss: 8.5.28
       rollup: '@rollup/wasm-node@4.59.0'
       tinyglobby: 0.2.17
@@ -30761,8 +30761,8 @@ snapshots:
   vite@6.4.5(@types/node@24.6.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.44.1)(tsx@4.20.6)(yaml@2.9.0):
     dependencies:
       esbuild: 0.25.10
-      fdir: 6.5.0(picomatch@4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy))
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      fdir: 6.5.0(picomatch@4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq))
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       postcss: 8.5.28
       rollup: '@rollup/wasm-node@4.59.0'
       tinyglobby: 0.2.17
@@ -30789,7 +30789,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.2.1
       pathe: 2.0.3
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       std-env: 4.2.0
       tinybench: 2.9.0
       tinyexec: 1.0.2
@@ -30820,7 +30820,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.2.1
       pathe: 2.0.3
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       std-env: 4.2.0
       tinybench: 2.9.0
       tinyexec: 1.0.2
@@ -30851,7 +30851,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.2.1
       pathe: 2.0.3
-      picomatch: 4.0.7(patch_hash=nivlo6x4dtn73s3zoi3xs5usjy)
+      picomatch: 4.0.4(patch_hash=r7g3qysqsspw4qrtnvb7lcnmdq)
       std-env: 4.2.0
       tinybench: 2.9.0
       tinyexec: 1.0.2

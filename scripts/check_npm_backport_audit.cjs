@@ -8,7 +8,7 @@ const ROOT = path.resolve(__dirname, '..');
 const ALLOWED = {
   'GHSA-gcqx-w48m-w2h4': { name: 'deepmerge', version: '4.3.1', files: ['index.js', 'dist/cjs.js', 'dist/umd.js'] },
   'GHSA-vfj7-8cjw-p6xm': { name: 'braces', version: '3.0.3', files: ['lib/compile.js', 'lib/expand.js', 'lib/stringify.js', 'lib/parse.js'] },
-  'GHSA-fc5q-39xc-vjpf': { name: 'picomatch', version: '4.0.7', files: ['lib/parse.js'] },
+  'GHSA-fc5q-39xc-vjpf': { name: 'picomatch', version: '4.0.4', files: ['lib/parse.js'] },
 };
 function hash(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex');

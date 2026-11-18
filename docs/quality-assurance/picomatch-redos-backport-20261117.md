@@ -19,8 +19,10 @@ nach Minuten ab. Eine Herstellerversion gibt es nicht; der offene Upstream-PR mi
 Zweige, die `?` und `*` mischen, und laesst `+(*a)` exponentiell (nachgemessen).
 
 ## Korrektur
-- `picomatch` auf 4.0.7 gehoben (Override, exakt) und per `pnpm patchedDependencies` gepatcht
-  (`config/security/npm-patches/picomatch@4.0.7.patch`, nur `lib/parse.js`).
+- `picomatch` bleibt auf der eingesetzten Version 4.0.4 (Override exakt gepinnt) und wird per
+  `pnpm patchedDependencies` gepatcht (`config/security/npm-patches/picomatch@4.0.4.patch`, nur `lib/parse.js`).
+  Ein Wechsel auf 4.0.7 braechte keinen Sicherheitsgewinn (gleicher Befund) und liesse GitHubs Dependency Review eine
+  "neu eingefuehrte" verwundbare Version melden; der Audit meldet fuer 4.0.4 nur diesen einen Befund.
 - `analyzeRepeatedExtglob` erkennt einen Zweig mit freiem `*` neben weiterem Inhalt als riskant - fuer jede Zahl von
   Zweigen. Ein riskantes Muster behandelt picomatch dann wie bisher fuer seine anderen riskanten Formen: als Literal.
   Reine Sterne (`+(*)`), Sternfolgen (`+(*(a)|*(b))`), `@(...)`/`!(...)` und alle gewoehnlichen Globs bleiben, wie
@@ -30,9 +32,10 @@ Zweige, die `?` und `*` mischen, und laesst `+(*a)` exponentiell (nachgemessen).
 
 ## Nachweis
 - Laufzeitvertrag `scripts/verify_picomatch_security.cjs` (im Gate `check_npm_backport_audit.cjs`): sechs feindliche
-  Muster unter 250 ms, Literal-Verhalten, gewoehnliche Globs unveraendert. Negativkontrolle gegen 4.0.7 ohne Patch:
+  Muster unter 250 ms, Literal-Verhalten, gewoehnliche Globs unveraendert. Negativkontrolle gegen 4.0.4 ohne Patch:
   der Lauf blockiert bis zum Abbruch.
-- Upstream-Testsuite 4.0.7 gegen die gepatchte `lib/parse.js`: 1981 von 1983 gruen (die zwei oben genannten).
+- Upstream-Testsuite 4.0.4 gegen die gepatchte `lib/parse.js`: 1973 von 1975 gruen (die zwei oben genannten; auf 4.0.7
+  entsprechend 1981/1983).
 - Gate: exakte Hashes von Patch, `package.json`, `pnpm-lock.yaml` und installierter `lib/parse.js` (per echtem
   `pnpm install` nachgeprueft) in `config/security/npm-backport-reviews.json`; Review bis 2027-01-15, danach blockiert
   der Befund wieder. Selbsttests `scripts/test_npm_backport_audit.cjs` 22/22.

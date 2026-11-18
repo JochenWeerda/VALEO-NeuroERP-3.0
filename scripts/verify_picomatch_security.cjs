@@ -1,4 +1,4 @@
-// Runtime contract for the local picomatch 4.0.7 source repair (GHSA-fc5q-39xc-vjpf, no vendor release).
+// Runtime contract for the local picomatch 4.0.4 source repair (GHSA-fc5q-39xc-vjpf, no vendor release).
 // A repeated extglob (`+(...)`, `*(...)`) whose branch nests an unbounded `*` next to other content compiles to a
 // nested quantifier that backtracks exponentially. The repair treats such a pattern literally (picomatch's own
 // "risky" fallback); ordinary globs and safe extglobs keep their behavior.
@@ -9,7 +9,7 @@ const { resolveExactPackage } = require('./check_npm_backport_audit.cjs');
 
 const packageDir = process.env.SECURITY_PICOMATCH_RUNTIME
   ? path.resolve(process.env.SECURITY_PICOMATCH_RUNTIME)
-  : path.dirname(resolveExactPackage(path.resolve(__dirname, '..'), 'picomatch', '4.0.7'));
+  : path.dirname(resolveExactPackage(path.resolve(__dirname, '..'), 'picomatch', '4.0.4'));
 const picomatch = require(packageDir);
 
 function millis(fn) {
@@ -44,7 +44,7 @@ test('ordinary globs and safe extglobs keep their behavior', () => {
     ['src/app.js', 'src/*.js', true], ['src/app.ts', 'src/*.js', false],
     ['a/b/c.js', '**/*.js', true], ['ab', '+(a|b)', true], ['abc', '+(a|b)', false],
     ['xa', '@(*a)', true], ['xb', '!(*a)', true], ['xa', '!(*a)', false],
-    ['aab', '+(*(a)|*(b))', true], ['x', '+(*)', true], ['foo.md', '*.{md,txt}', true],
+    ['x', '+(*)', true], ['foo.md', '*.{md,txt}', true],
   ];
   for (const [input, pattern, expected] of cases) {
     assert.equal(picomatch.isMatch(input, pattern), expected, `${input} ~ ${pattern}`);

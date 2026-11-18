@@ -17,10 +17,10 @@
       "backport": "Local source repair; no vendor release; review and installed hashes in npm-backport-reviews.json"
     },
     {
-      "patch": "picomatch@4.0.7.patch",
-      "sha256": "82cf35a688405a9f6442d083fa202287bf2b5f8f6f293a559f203596c491aac3",
+      "patch": "picomatch@4.0.4.patch",
+      "sha256": "f550c3a60954bb3947b0c661f7bb60ed2d4c192376b29cc5db9f3ac4e85d9574",
       "source": "https://github.com/advisories/GHSA-fc5q-39xc-vjpf",
-      "source_tarball_integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==",
+      "source_tarball_integrity": "sha512-QP88BAKvMam/3NxH6vj2o21R6MjxZUAd6nlwAS/pnGvN9IVLocLHxGYIzFhg6fUQ+5th6P4dv4eW9jX3DSIj7A==",
       "license": "MIT",
       "backport": "Local source repair; upstream PR micromatch/picomatch#194 covers only mixed ?* branches and leaves +(*a) exponential; review and installed hashes in npm-backport-reviews.json"
     }

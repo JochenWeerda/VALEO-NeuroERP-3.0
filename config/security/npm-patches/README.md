@@ -19,7 +19,7 @@ Raw audits remain visible. Exact installed-source, patch, manifest and lock
 hashes and an expiring review are required by check_npm_backport_audit.cjs.
 See ../../../docs/quality-assurance/node-high-backports-20261008.md.
 
-## picomatch 4.0.7
+## picomatch 4.0.4
 
 Local source repair for GHSA-fc5q-39xc-vjpf (no vendor release at the 2026-11-17 review; upstream PR #194 covers
 only mixed `?*` branches). A repeated extglob whose branch nests an unbounded `*` next to other content is treated as
