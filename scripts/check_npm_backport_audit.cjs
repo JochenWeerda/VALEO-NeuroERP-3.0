@@ -8,6 +8,7 @@ const ROOT = path.resolve(__dirname, '..');
 const ALLOWED = {
   'GHSA-gcqx-w48m-w2h4': { name: 'deepmerge', version: '4.3.1', files: ['index.js', 'dist/cjs.js', 'dist/umd.js'] },
   'GHSA-vfj7-8cjw-p6xm': { name: 'braces', version: '3.0.3', files: ['lib/compile.js', 'lib/expand.js', 'lib/stringify.js', 'lib/parse.js'] },
+  'GHSA-fc5q-39xc-vjpf': { name: 'picomatch', version: '4.0.4', files: ['lib/parse.js'] },
 };
 function hash(file) {
   return crypto.createHash('sha256').update(fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n')).digest('hex');
@@ -108,7 +109,7 @@ if (require.main === module) {
     if (exitText === '0' && Object.keys(report.advisories || {}).length) throw new Error('Scanner exit contradicts report');
     if (exitText === '1' && !Object.keys(report.advisories || {}).length) throw new Error('Scanner failure without findings');
     result = assess(report);
-    const env = { ...process.env }; delete env.SECURITY_DEEPMERGE_RUNTIME; delete env.SECURITY_QS_RUNTIME; delete env.SECURITY_HIGH_RUNTIME; delete env.SECURITY_FOLLOW_REDIRECTS_RUNTIME; delete env.SECURITY_VITE_RUNTIME; delete env.SECURITY_MARKDOWN_RUNTIME; delete env.SECURITY_FASTIFY_RUNTIME;
+    const env = { ...process.env }; delete env.SECURITY_DEEPMERGE_RUNTIME; delete env.SECURITY_QS_RUNTIME; delete env.SECURITY_HIGH_RUNTIME; delete env.SECURITY_FOLLOW_REDIRECTS_RUNTIME; delete env.SECURITY_VITE_RUNTIME; delete env.SECURITY_MARKDOWN_RUNTIME; delete env.SECURITY_FASTIFY_RUNTIME; delete env.SECURITY_PICOMATCH_RUNTIME;
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_node_high_backports.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_fastify_headers.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_follow_redirects.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
@@ -116,6 +117,7 @@ if (require.main === module) {
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_markdown_security.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_qs_security_release.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_deepmerge_security.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
+    execFileSync(process.execPath, ['--test', path.join(__dirname, 'verify_picomatch_security.cjs')], { cwd: ROOT, env, stdio: 'inherit' });
     result.runtime_contracts = 'passed';
   } catch (error) { result = { release_allowed: false, error: error.message }; }
   fs.writeFileSync(output, JSON.stringify(result, null, 2) + '\n');
