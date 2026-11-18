@@ -21121,14 +21121,14 @@ Dateibesitz: die genannten Module, tests/test_beleg_reste_docflow.py (neu), ange
 Abnahme: neue Tests gegen echtes Schema gruen; vollstaendige Pruefkette; CI des PR.
 Bewusst nicht hier: Zusammenfuehrung des Fibu-Speichers /finance/ap/invoices mit der DocFlow-Eingangsrechnung (M3 Fibu). Ladegewicht nur aus Gewichtseinheiten und ESG-Kennzeichen bleiben wie beschrieben (kein Fehler).
 
-## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — zur Abnahme, Claude Code (M1)
+## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — abgeschlossen (PR #155 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge der Fachreste. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Leser der Uebergangssicht domain_crm.sales_orders / sales_order_items mehr (Ratsche 15 -> 0). Kreditlimit, Kreditpruefung, Kunden-360 (Kopf, Liste, Register), KIM-Belege, Verkaufsberichte, Management-Dashboard, MCP-Kundensicht, Bestellvorschlag (offene Menge je Position nach Teillieferung), Ist-Aggregation, Pickliste, Referenzaufloesung lesen DocFlow direkt. Was die Sicht rechnete (offene Menge, Liefertermin), steht einmal in app/services/auftrag_lesewege.py.
 Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandantengebunden); Verkaufsberichte zaehlten geloeschte Entwuerfe mit (jetzt nicht mehr); Kundennamen kommen aus dem Kundenstamm statt aus dem Betreff.
 Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
 Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
 
-## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — in Arbeit, Claude Code (M1)
+## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — zur Abnahme, Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S4. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: DocFlow ist der einzige Belegspeicher. Migration beleg_altspeicher_entfernen_20261117 entfernt die Sichten domain_crm.sales_orders/_items und die Tabellen der alten Speicher (Lieferschein, Quittung, Rechnung, Gutschrift, Bestellung, Auftrags-Ursprungsdaten) - Inhalt laut Nutzerentscheidung 10.11.2026 Testdaten; haelt an bei gebuchten Altrechnungen/-gutschriften bestehender Mandanten. Rueckweg legt die Speicher leer wieder an (DDL per pg_dump aus frischer DB, beleg_altspeicher_entfernen_20261117.sql).
 Mit entfernt: ORM-Modelle (sales_invoice_models, EinkaufBestellung/-Position), Freigabe-Subjekte sales_credit_note und finance_sales_invoice (ohne Aufrufer), Demo-Seeds Verkauf/Logistik, Tabellenzuordnung, Tabellenkatalog (707 -> 696), Indizes in migrations/sql/erp/006.
