@@ -2628,9 +2628,9 @@ async def management_dashboard(
     try:
         sales_row = db.execute(text("""
             SELECT COUNT(*) AS cnt,
-                   COALESCE(SUM(total_amount), 0) AS revenue
-            FROM domain_crm.sales_orders
-            WHERE tenant_id = :tid
+                   COALESCE(SUM(total_gross), 0) AS revenue
+            FROM domain_docflow.document_headers
+            WHERE tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL
               AND created_at >= date_trunc('month', CURRENT_DATE)
         """), {"tid": tenant_id}).fetchone()
         umsatz = float(sales_row.revenue) if sales_row else 0
@@ -2646,22 +2646,20 @@ async def management_dashboard(
         offene_posten = float(oi_row.total) if oi_row else 0
 
         top_products = db.execute(text("""
-            -- Die Auftragsposition heisst `sales_order_items`, ihr Betrag
-            -- `line_total`, und sie fuehrt die **Artikelnummer**, keine
-            -- Artikel-ID. Der Join ging deshalb dreifach ins Leere; die
-            -- Auswertung blieb leer und sah aus wie „kein Umsatz".
-            SELECT a.name, COALESCE(SUM(soi.line_total), 0) AS umsatz
-            FROM domain_crm.sales_order_items soi
-            JOIN domain_inventory.articles a ON a.article_number = soi.article_number
-            JOIN domain_crm.sales_orders so ON so.id = soi.order_id AND so.tenant_id = :tid
+            -- Auftragspositionen aus DocFlow (BELEG-052); verbunden wird ueber die Artikelnummer.
+            SELECT a.name, COALESCE(SUM(soi.line_total_net), 0) AS umsatz
+            FROM domain_docflow.document_items soi
+            JOIN domain_docflow.document_headers so ON so.id = soi.header_id AND so.tenant_id = soi.tenant_id
+            JOIN domain_inventory.articles a ON a.article_number = soi.article_number AND a.tenant_id = so.tenant_id
+            WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
             GROUP BY a.name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
 
         top_customers = db.execute(text("""
-            SELECT c.company_name AS name, COALESCE(SUM(so.total_amount), 0) AS umsatz
-            FROM domain_crm.sales_orders so
-            JOIN domain_crm.customers c ON c.id = so.customer_id
-            WHERE so.tenant_id = :tid
+            SELECT c.company_name AS name, COALESCE(SUM(so.total_gross), 0) AS umsatz
+            FROM domain_docflow.document_headers so
+            JOIN domain_crm.customers c ON c.id = so.customer_id AND c.tenant_id = so.tenant_id
+            WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
             GROUP BY c.company_name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
     except Exception:

@@ -655,12 +655,13 @@ def list_documents(
     rows = _safe(
         db,
         """
-        SELECT id, order_number, status, total_amount, created_at
-        FROM domain_crm.sales_orders
-        WHERE customer_id = :cid AND deleted_at IS NULL
+        SELECT id, doc_number AS order_number, CASE status WHEN 'reversed' THEN 'cancelled' ELSE status END AS status,
+               total_gross AS total_amount, created_at
+        FROM domain_docflow.document_headers
+        WHERE customer_id = :cid AND tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL
         ORDER BY created_at DESC LIMIT 50
         """,
-        {"cid": cid},
+        {"cid": cid, "tid": tenant_id},
     )
     out = []
     for r in rows:

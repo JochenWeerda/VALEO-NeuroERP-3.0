@@ -453,7 +453,7 @@ def _summary360_execute(sql, params=None):
     sql_s = str(sql)
     if "FROM domain_crm.customers" in sql_s and "FOR SHARE" in sql_s:
         result.mappings.return_value.first.return_value = SUMMARY_CUSTOMER
-    elif "sales_orders" in sql_s:
+    elif "doc_type = 'sales_order'" in sql_s:  # offene Auftraege aus DocFlow (BELEG-052 S4)
         result.mappings.return_value.first.return_value = {"offene_auftraege": 2}
     elif "offene_posten" in sql_s:
         result.mappings.return_value.first.return_value = {"op_saldo_eur": 150.5}

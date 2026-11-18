@@ -30,7 +30,8 @@ def _own_pick_list(db: Session, pl_id: str, tenant_id: str) -> PickList:
 def _own_order(db: Session, order_id: str, tenant_id: str) -> None:
     """Ein verknuepfter Auftrag muss dem eigenen Mandanten gehoeren."""
     found = db.execute(
-        text("SELECT 1 FROM domain_crm.sales_orders WHERE id = :oid AND tenant_id = :tid"),
+        text("SELECT 1 FROM domain_docflow.document_headers WHERE id = :oid AND tenant_id = :tid "
+             "AND doc_type = 'sales_order' AND deleted_at IS NULL"),
         {"oid": order_id, "tid": tenant_id},
     ).first()
     if not found:
@@ -125,7 +126,7 @@ async def book_pick_list_order(
     if payload.order_id:
         obj.order_id = payload.order_id
     # Den Auftragsstand setzt hier niemand mehr: Der Auftrag ist DocFlow-Beleg (BELEG-052), sein Stand folgt aus
-    # den Folgebelegen (domain_crm.sales_orders ist seither eine Sicht).
+    # den Folgebelegen.
     db.commit()
 
     db.refresh(obj)

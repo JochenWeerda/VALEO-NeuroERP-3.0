@@ -113,12 +113,12 @@ def _fetch_customer_tab_items(
             db,
             """
             SELECT id::text AS id,
-                   order_number,
-                   status,
-                   COALESCE(total_amount, 0)::float AS total_amount,
+                   doc_number AS order_number,
+                   CASE status WHEN 'reversed' THEN 'cancelled' ELSE status END AS status,
+                   COALESCE(total_gross, 0)::float AS total_amount,
                    created_at::text AS created_at
-            FROM domain_crm.sales_orders
-            WHERE (
+            FROM domain_docflow.document_headers
+            WHERE doc_type = 'sales_order' AND (
                     customer_id::text = :cid
                  OR (:nr IS NOT NULL AND customer_id::text = :nr)
                   )
