@@ -21098,6 +21098,12 @@ Dateibesitz: die genannten Module, tests/procurement_identity_fixture.py (Belege
 Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
 Offene Fachreste: (1) Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie) - ERS greift nur bei Rechnungsueberzahlung. (2) Bestellfall (Innovation/Direktlieferung) hat in DocFlow keinen Baustein mit Feldern; Innovations-Nachschau und Direktlieferung aus dem Auftrag entfallen bis dahin. (3) Fax-/EDI-Versand (modules/einkauf/services/versand_service.py) haengt am ORM-Altobjekt und hat keinen Aufrufer mehr - auf die DocFlow-Bestellung umhaengen. (4) Lieferanten-Artikelnummer je Position (Baustein einkauf) ohne Felder; ORDRSP gleicht ueber metadata.lieferanten_artnr ab. (5) Die Obligo-Buchung (5100) gab es nur an der Freigabe der Altbestellung (ohne Aufrufer seit 3b); die DocFlow-Freigabe bucht kein Obligo - fachlich klaeren (Obligo ist ausserbilanziell, eher Auswertung als Journal). (6) S4-Ratsche Uebergangssicht Auftraege 16 -> 15 Leser (Direktlieferung entfallen).
 
+## SEC-PICOMATCH-REDOS-20261117 — abgeschlossen (PR #156 gemergt), Claude Code (M0)
+Owner: Claude Code (Nutzerauftrag 17.11.2026; Sicherheitsbahn sonst Codex). Meilenstein: M0 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: neuer Befund GHSA-fc5q-39xc-vjpf (picomatch <= 4.0.7, high, ReDoS) blockierte Dependency-Scan und Audit jedes PR. picomatch bleibt 4.0.4 (exakt gepinnt) mit lokaler Quellkorrektur (pnpm patchedDependencies; 4.0.7 haette Dependency Review als neu eingefuehrte verwundbare Version gemeldet), Gate-Freigabe mit exakten Hashes und Review bis 2027-01-15, Laufzeitvertrag scripts/verify_picomatch_security.cjs. Details: docs/quality-assurance/picomatch-redos-backport-20261117.md.
+Dateibesitz: package.json (Override, patchedDependencies), pnpm-lock.yaml (nur picomatch), config/security/*, scripts/check_npm_backport_audit.cjs, scripts/verify_picomatch_security.cjs.
+Abnahme: Selbsttests Gate 22/22, Laufzeitvertrag 9/9 mit Negativkontrolle, Upstream-Suite 4.0.4 1973/1975 (zwei bewusst geaenderte anfaellige Muster); CI des PR.
+
 ## BELEG-052-FACHRESTE-20261117 — abgeschlossen (PR #154 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S1-S3 (PR #152). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: die offenen Fachreste aus 3B, S1, S2 und S3 loesen (Entscheidungen nach "was nicht einfach laeuft, laeuft einfach nicht"):
