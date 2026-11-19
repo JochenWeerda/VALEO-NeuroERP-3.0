@@ -17,12 +17,10 @@ WURZEL = Path(__file__).resolve().parents[1]
 SCHREIBEN = re.compile(
     r"(INSERT\s+INTO|UPDATE|DELETE\s+FROM)\s+\"?(?:\w+\"?\.\"?)?(journal_entries|journal_entry_lines)\b", re.I)
 
-# Stand 19.11.2026: Abgrenzung bucht ueber den Dienst; Lagergeld, Periodenabschluss und der manuelle OP-Ausgleich
-# schreiben kein Journal mehr.
-# Nur streichen, nie ergaenzen.
-SCHREIBER: dict[str, set[str]] = {
-    "app/api/v1/endpoints/compat.py": {"journal_entries", "journal_entry_lines"},
-}
+# Stand 19.11.2026: kein Rohschreiber mehr. Abgrenzung, Buchungsvorlagen, Massenimport, Konnektoren und der
+# POS-Tagesabschluss buchen ueber den Dienst; Lagergeld, Periodenabschluss, manueller OP-Ausgleich, Bestandskorrektur
+# und Inventur schreiben kein Journal mehr. Die Liste bleibt leer.
+SCHREIBER: dict[str, set[str]] = {}
 
 
 def _schreiber() -> dict[str, set[str]]:
