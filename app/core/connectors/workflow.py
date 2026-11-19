@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import date
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 from uuid import uuid4
@@ -19,7 +20,9 @@ from app.core.connectors.asset_ledger_parser import AssetLedgerParser
 from app.core.data_quality_enforcement import DQValidationException
 from app.core.gobd_artifact import sha256_hex
 from app.core import finance_periods
+from app.core.exceptions import DomainError
 from app.core.fibu_audit import log_fibu_audit
+from app.services.finance_transaction_service import FinanceTransactionService
 
 logger = logging.getLogger(__name__)
 
@@ -291,6 +294,7 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
         by_doc[key].append((item_id, payload))
 
     belege = _plane_belege(db, run_id, tenant_id, by_doc)
+    buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
 
     journal_entry_ids: List[str] = []
     for beleg in belege:
@@ -299,59 +303,21 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
         document_no = beleg["document_no"]
         text_desc = beleg["text"]
         all_lines = beleg["lines"]
-        total_debit = beleg["debit"]
-        total_credit = beleg["credit"]
 
-        entry_id = str(uuid4())
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, period, description, reference, source, total_debit, total_credit, status, created_at, updated_at)
-                VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :period, :description, :reference, 'connector', :total_debit, :total_credit, 'posted', NOW(), NOW())
-            """),
-            {
-                "id": entry_id,
-                "tenant_id": tenant_id,
-                "entry_number": document_no,
-                "entry_date": booking_date,
-                "posting_date": booking_date,
-                "period": beleg["period"],
-                "description": text_desc[:255] if text_desc else "Connector Import",
-                "reference": run_id,
-                "total_debit": total_debit,
-                "total_credit": total_credit,
-            },
-        )
-
-        # Kontonummer → account_id (chart_of_accounts)
-        for line_no, ln in enumerate(all_lines, start=1):
-            account_id = beleg["accounts"][ln.get("account", "")]
-            line_id = f"{entry_id}-L{line_no}"
-            debit = Decimal(ln.get("amount", 0)) if ln.get("dc") == "D" else Decimal("0")
-            credit = Decimal(ln.get("amount", 0)) if ln.get("dc") == "C" else Decimal("0")
-            db.execute(
-                text("""
-                    INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
-                """),
-                {
-                    "id": line_id,
-                    "tenant_id": tenant_id,
-                    "journal_entry_id": entry_id,
-                    "account_id": account_id,
-                    "debit": debit,
-                    "credit": credit,
-                    "line_number": line_no,
-                    "description": text_desc[:200] if text_desc else None,
-                },
-            )
+        # Gebucht wird ueber den kanonischen Buchungsdienst (Sequenz, Hash, Periodensperre, eigene Konten); vorher
+        # gingen Kopf und Zeilen roh ins Journal.
+        try:
+            eintrag = _buche_beleg(buchung, run_id, document_no, text_desc, booking_date, all_lines, beleg["accounts"])
+        except DomainError as fehler:
+            db.rollback()
+            raise ValueError(f"Lauf nicht gebucht: Beleg {document_no}: {fehler}") from fehler
+        entry_id = str(eintrag.id)
 
         journal_entry_ids.append(entry_id)
         log_fibu_audit(
             db, tenant_id, "create", "journal_entry", entry_id,
             {"source": "connector", "reference": run_id, "entry_number": document_no},
-            request=request,
+            request=request, commit=False,  # frueher committete jeder Eintrag den Lauf halb
         )
         for item_id, _ in group:
             db.execute(
@@ -370,6 +336,29 @@ def post_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -> N
     )
     db.commit()
     log_fibu_audit(db, tenant_id, "post", "connector_run", run_id, {"journal_entries": len(journal_entry_ids), "source_system": source_system}, request=request)
+
+
+def _buche_beleg(buchung: FinanceTransactionService, run_id: str, document_no: str, text_desc: str,
+                 booking_date: Any, all_lines: List[Dict[str, Any]], accounts: Dict[str, str]):
+    """Ein Beleg des Laufs: anlegen und buchen ueber den Buchungsdienst."""
+    eintrag = buchung.create(
+        entry_number=document_no,
+        description=(text_desc or "Connector Import")[:200],
+        entry_date=date.fromisoformat(str(booking_date)[:10]),
+        lines=[
+            {
+                "account_id": accounts[ln.get("account", "")],
+                "debit_amount": Decimal(str(ln.get("amount", 0))) if ln.get("dc") == "D" else Decimal("0"),
+                "credit_amount": Decimal(str(ln.get("amount", 0))) if ln.get("dc") == "C" else Decimal("0"),
+                "description": (text_desc or "")[:200],
+            }
+            for ln in all_lines
+        ],
+        reference=run_id,
+        source="connector",
+    )
+    buchung.post(str(eintrag.id))
+    return eintrag
 
 
 def _plane_belege(db: Session, run_id: str, tenant_id: str, by_doc: Dict[str, List[tuple]]) -> List[Dict[str, Any]]:
@@ -460,61 +449,21 @@ def reverse_run(db: Session, run_id: str, tenant_id: str, request: Any = None) -
     ).fetchall()
     entry_ids = sorted({r[0] for r in items if r[0]})
 
-    perioden = db.execute(
-        text("SELECT DISTINCT period FROM domain_erp.journal_entries WHERE tenant_id = :tid AND id = ANY(:ids)"),
-        {"tid": tenant_id, "ids": entry_ids},
-    ).scalars().all() if entry_ids else []
-    for period in sorted(p for p in perioden if p):
-        gesperrt = finance_periods.gesperrter_zustand(db, tenant_id, period, sperren=True)
-        if gesperrt:
-            raise ValueError(f"Storno nicht gebucht: {finance_periods.meldung(period, gesperrt)}")
-
-    for entry_id in entry_ids:
-        # Gegenbuchung: gleiche Zeilen, Soll/Haben getauscht (Spalten: debit, credit wie journal_entry_lines)
-        lines = db.execute(
-            text("""
-                SELECT account_id, debit, credit, description FROM domain_erp.journal_entry_lines
-                WHERE journal_entry_id = :eid AND tenant_id = :tid
-            """),
-            {"eid": entry_id, "tid": tenant_id},
-        ).fetchall()
-        if not lines:
-            continue
-        rev_id = str(uuid4())
-        _total_d = sum(Decimal(str(line_item[1])) for line_item in lines)  # noqa: F841
-        _total_c = sum(Decimal(str(line_item[2])) for line_item in lines)  # noqa: F841
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, period, description, reference, source, total_debit, total_credit, status, reversed_entry_id, created_at, updated_at)
-                SELECT :rev_id, tenant_id, 'STORNO-' || entry_number, entry_date, posting_date, period, 'Storno: ' || description, :run_id, 'connector', total_credit, total_debit, 'posted', id, NOW(), NOW()
-                FROM domain_erp.journal_entries WHERE id = :eid AND tenant_id = :tid
-            """),
-            {"rev_id": rev_id, "run_id": run_id, "eid": entry_id, "tid": tenant_id},
-        )
-        for line_no, (acc_id, deb, cred, desc) in enumerate(lines, start=1):
-            db.execute(
-                text("""
-                    INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit, :line_number, :description, NOW())
-                """),
-                {
-                    "id": f"{rev_id}-L{line_no}",
-                    "tenant_id": tenant_id,
-                    "journal_entry_id": rev_id,
-                    "account_id": acc_id,
-                    "debit": cred,
-                    "credit": deb,
-                    "line_number": line_no,
-                    "description": desc,
-                },
+    # Gegenbuchung ueber den Buchungsdienst: gespiegelte Zeilen, Sequenz und Hash, Original als storniert markiert,
+    # gebucht in die laufende offene Periode (GoBD: Korrektur statt Aenderung, auch wenn die Ursprungsperiode
+    # geschlossen ist). Vorher roh und nur in der Ursprungsperiode.
+    buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+    try:
+        for entry_id in entry_ids:
+            _original, storno = buchung.reverse(entry_id, reason=f"Konnektorlauf {run_id} storniert")
+            log_fibu_audit(
+                db, tenant_id, "create", "journal_entry", str(storno.id),
+                {"source": "connector", "reference": run_id, "reversed_entry_id": entry_id},
+                request=request, commit=False,
             )
-        log_fibu_audit(
-            db, tenant_id, "create", "journal_entry", rev_id,
-            {"source": "connector", "reference": run_id, "reversed_entry_id": entry_id},
-            request=request,
-        )
+    except DomainError as fehler:
+        db.rollback()
+        raise ValueError(f"Storno nicht gebucht: {fehler}") from fehler
 
     db.execute(
         text("UPDATE domain_erp.fibu_connector_runs SET status = 'REVERSED' WHERE id = :id AND tenant_id = :tid"),

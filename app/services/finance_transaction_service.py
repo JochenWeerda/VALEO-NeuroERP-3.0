@@ -504,6 +504,7 @@ class FinanceTransactionService:
                     credit_amount=ln.debit,
                     line_number=line_number,
                     description=ln.description,
+                    **{feld: getattr(ln, feld) for feld in self.ZEILEN_ZUSAETZE if getattr(ln, feld, None) is not None},
                 )
             )
 
