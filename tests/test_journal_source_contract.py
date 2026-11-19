@@ -93,8 +93,8 @@ class TestLeseweg:
         assert entry.source == "produktion_mischfutter"
 
     def test_leere_herkunft_bricht_das_lesen_nicht(self):
-        """Die Spalte ist nullable; storage_fees und finance_closing_service
-        schreiben sie gar nicht."""
+        """Die Spalte ist nullable; Altbuchungen frueherer Rohschreiber
+        (Lagergeld, Periodenabschluss) tragen keine Herkunft."""
         entry = JournalEntry.model_validate(_gespeicherte_zeile(None))
         assert entry.source is None
 

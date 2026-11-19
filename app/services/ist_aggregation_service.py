@@ -4,7 +4,7 @@ Füllt public.kunden_produktgruppen_bezug (die Ist-Seite) aus den realen
 Verkaufsbelegen statt aus modellierten Seeds. Zwei Beleg-Quellen werden
 unioniert (jede wird übersprungen, wenn die Tabelle fehlt):
 
-- ``domain_crm.sales_orders`` + ``sales_order_items`` (Auftrag/Angebot-Folge)
+- DocFlow-Verkaufsauftraege (``domain_docflow.document_headers``/``document_items``, BELEG-052)
 - ``domain_portal.customer_orders`` + ``customer_order_items`` (Webshop/Portal)
 
 Zwei Brücken lösen die in der Architektur bekannten Medienbrüche auf:
@@ -30,6 +30,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional
 
+from app.services.auftrag_lesewege import liefertermin_sql
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -129,18 +130,18 @@ class OrderSource:
 DEFAULT_SOURCES: list[OrderSource] = [
     OrderSource(
         name="crm_sales_orders",
-        header_table="domain_crm.sales_orders",
-        item_table="domain_crm.sales_order_items",
-        join_key="order_id",
+        header_table="domain_docflow.document_headers",
+        item_table="domain_docflow.document_items",
+        join_key="header_id",
         customer_ref_col="customer_id",
-        date_expr="COALESCE(h.delivery_date, h.created_at)",
+        date_expr=f"COALESCE({liefertermin_sql('h')}::timestamptz, h.created_at)",
         qty_col="i.quantity",
-        amount_col="i.line_total",
+        amount_col="i.line_total_net",
         article_col="i.article_number",
         item_text_col="i.description",
-        ek_expr="i.ek_price",
-        extra_where="h.deleted_at IS NULL AND COALESCE(h.status,'') NOT ILIKE 'storn%' "
-                    "AND COALESCE(h.status,'') NOT ILIKE 'cancel%'",
+        ek_expr=None,  # der Auftrag fuehrt keinen Einstandspreis (die Sicht lieferte NULL)
+        extra_where="h.doc_type = 'sales_order' AND h.deleted_at IS NULL "
+                    "AND h.status NOT IN ('cancelled', 'reversed')",
     ),
     OrderSource(
         name="portal_customer_orders",

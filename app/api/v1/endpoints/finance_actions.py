@@ -311,7 +311,7 @@ async def run_closing(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Vollständiger Periodenabschluss: Salden berechnen, Abschluss-Buchung anlegen, Periode sperren."""
+    """Vollständiger Periodenabschluss: Salden berechnen, Periode sperren (keine Abschlussbuchung, s. FinanceClosingService.run)."""
     from app.services.finance_closing_service import FinanceClosingService, ClosingError
     period = body.period if body else datetime.now(timezone.utc).strftime("%Y-%m")
     closing_type = body.closing_type if body else "monthly"

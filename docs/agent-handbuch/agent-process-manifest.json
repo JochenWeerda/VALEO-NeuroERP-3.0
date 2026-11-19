@@ -9737,7 +9737,7 @@
       "agent_contract_url": "/api/v1/masks/crm/customer-360/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/customer-360/screen-definition",
       "readiness_url": "/api/v1/masks/crm/customer-360/readiness",
-      "risk_summary": "medium",
+      "risk_summary": "low",
       "actions": [
         {
           "key": "bearbeiten",
@@ -9826,22 +9826,11 @@
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
-        },
-        {
-          "key": "stammdaten_pflegen",
-          "label": "Weitere Stammdaten pflegen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "partner_iban",
-        "partner_bic",
+        "iban",
+        "bic",
         "kreditlimit",
         "zahlungsbedingungen",
         "notizen"
@@ -10502,7 +10491,7 @@
       "agent_contract_url": "/api/v1/masks/crm/kunden-cockpit/agent-contract",
       "screen_definition_url": "/api/v1/masks/crm/kunden-cockpit/screen-definition",
       "readiness_url": "/api/v1/masks/crm/kunden-cockpit/readiness",
-      "risk_summary": "medium",
+      "risk_summary": "low",
       "actions": [
         {
           "key": "bearbeiten",
@@ -10591,22 +10580,11 @@
           "commandEndpoint": "/api/v1/crm/customers/{entity_id}/actions/preis_anlegen",
           "method": "POST",
           "stubReason": null
-        },
-        {
-          "key": "stammdaten_pflegen",
-          "label": "Weitere Stammdaten pflegen",
-          "dangerLevel": "moderate",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "crm.customer.update",
-          "commandEndpoint": "/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten",
-          "method": "POST",
-          "stubReason": null
         }
       ],
       "sensitive_fields": [
-        "partner_iban",
-        "partner_bic",
+        "iban",
+        "bic",
         "kreditlimit",
         "zahlungsbedingungen",
         "notizen"
@@ -27250,5 +27228,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 145
+  "event_count": 141
 }

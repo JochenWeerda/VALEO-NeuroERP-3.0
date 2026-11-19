@@ -121,9 +121,9 @@ def get_credit_status_data(db: Session, customer_id: str, tenant_id: str) -> Cre
     open_orders = db.execute(
         text(
             """
-            SELECT COALESCE(SUM(total_amount), 0)
-            FROM domain_crm.sales_orders
-            WHERE customer_id = :cid AND tenant_id = :tid
+            SELECT COALESCE(SUM(total_gross), 0)
+            FROM domain_docflow.document_headers
+            WHERE customer_id = :cid AND tenant_id = :tid AND doc_type = 'sales_order'
               AND status NOT IN ('cancelled', 'completed', 'reversed')
               AND deleted_at IS NULL
             """

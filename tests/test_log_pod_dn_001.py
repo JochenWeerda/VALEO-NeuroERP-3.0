@@ -1,9 +1,8 @@
-"""LOG-POD-DN-001 — POD ABGELIEFERT → delivery_notes.status = 'delivered'."""
+"""LOG-POD-DN-001 — Zustellnachweis am Tourstopp; der Lieferschein-Altspeicher wird nicht mehr fortgeschrieben."""
 from __future__ import annotations
 
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
-import pytest
 
 
 TENANT = "00000000-0000-0000-0000-000000000001"
@@ -29,7 +28,7 @@ class TestLogPodDnBelegbruch:
     def _call_save_pod(self, db, dn_ref: str | None = "LS-2026-001"):
         from app.api.v1.endpoints.logistics_tours import save_pod
 
-        body = MagicMock()
+        body = MagicMock(recipient_name="Hofstelle", delivered_at="2026-11-17T10:00:00")
         body.model_dump.return_value = {"signature": "ok"}
 
         stop_row = _make_stop_row(dn_ref)
@@ -48,14 +47,16 @@ class TestLogPodDnBelegbruch:
             db=db,
         )
 
-    def test_lieferschein_wird_auf_delivered_gesetzt(self):
-        """Wenn Stopp delivery_note_ref hat → delivery_notes UPDATE ausgeführt."""
+    def test_zustellnachweis_schreibt_keinen_lieferschein_altspeicher(self):
+        """Der Lieferschein ist DocFlow-Beleg (BELEG-052); sein Stand folgt der Pickliste, nicht dem Tourstopp."""
         db = MagicMock()
-        self._call_save_pod(db, dn_ref="LS-2026-001")
+        ergebnis = self._call_save_pod(db, dn_ref="LS-2026-001")
 
         all_sqls = [str(c.args[0]) for c in db.execute.call_args_list]
-        dn_updates = [s for s in all_sqls if "delivery_notes" in s and "delivered" in s]
-        assert len(dn_updates) > 0, "delivery_notes UPDATE wurde nicht ausgeführt"
+        assert not [s for s in all_sqls if "delivery_notes" in s]
+        assert ergebnis["delivery_note_ref"] == "LS-2026-001"
+        # Der Nachweis steht im Belegverlauf des DocFlow-Lieferscheins (Fachrest S1, 17.11.2026).
+        assert [s for s in all_sqls if "document_command_log" in s and "proof_of_delivery" in s]
 
     def test_kein_update_ohne_delivery_note_ref(self):
         """Wenn Stopp kein delivery_note_ref hat → kein delivery_notes UPDATE."""

@@ -3396,8 +3396,8 @@ def _customer_summary360(db: Session, request: ToolExecutionRequest, actor: str,
 
         offene_auftraege = int(_scalar_or_default(db, """
             SELECT COUNT(*)::int AS offene_auftraege
-            FROM domain_crm.sales_orders
-            WHERE (
+            FROM domain_docflow.document_headers
+            WHERE doc_type = 'sales_order' AND (
                     customer_id::text = :cid
                  OR (:nr IS NOT NULL AND customer_id::text = :nr)
                   )

@@ -47,7 +47,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import Response
-from pydantic import BaseModel, ConfigDict, ConfigDict as _ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, ConfigDict as _ConfigDict
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -59,7 +59,7 @@ from app.api.v1.schemas.bestellvorschlag_schemas import GespeicherterVorschlagOu
 from app.services.procurement_service import ProcurementService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.mask_entity_contracts import EinkaufBestellungOut, EinkaufLieferantOut
+from app.api.v1.schemas.mask_entity_contracts import EinkaufLieferantOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -284,37 +284,6 @@ async def innovationen(
     kommt, entscheidet der Vertrieb.
     """
     return _svc(db, tenant_id).innovationen_bewerten(fenster_tage)
-
-
-class BestellungAusAuftragIn(BaseModel):
-    """Was die Direktlieferung wissen muss."""
-
-    auftrag_id: str = Field(..., description="Verkaufsauftrag, aus dem bestellt wird")
-    ueberschlag_lager: bool = Field(
-        False,
-        description=(
-            "Laeuft die Ware ueber den eigenen Hof? Dann deckt der Bestand einen Teil "
-            "und die Lieferadresse bleibt die eigene. Ohne Ueberschlag geht die volle "
-            "Menge direkt zum Kunden."
-        ),
-    )
-    lieferant_id: Optional[str] = None
-    lieferdatum: Optional[date] = None
-
-
-class BestellungAusAuftragOut(BaseSchema):
-    """Was dabei herauskam."""
-
-    model_config = ConfigDict(extra="allow")
-
-    id: str
-    bestellnummer: Optional[str] = None
-    status: Optional[str] = None
-    aus_auftrag: Optional[str] = None
-    uebersprungen: list[str] = Field(
-        default_factory=list,
-        description="Positionen, die der Bestand bereits deckt — sie entstehen nicht.",
-    )
 
 
 class BedarfsVorschlagOut(BaseSchema):
@@ -695,40 +664,6 @@ async def add_kontrakt_position(
         return _svc(db, tenant_id).add_kontrakt_position(kontrakt_id, data.model_dump())
     except EntityNotFoundError:
         raise HTTPException(404, "Kontrakt nicht gefunden")
-
-
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-# Bestellungen CRUD
-# â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
-@router.get("/einkauf/bestellungen", summary="Bestellungen auflisten",
-    response_model=list[BestellvorschlagOut]
-)
-async def list_bestellungen(
-    lieferant_id: Optional[str] = Query(None),
-    status: Optional[str] = Query(None),
-    von: Optional[date] = Query(None),
-    bis: Optional[date] = Query(None),
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> list[dict[str, Any]]:
-    return _svc(db, tenant_id).list_bestellungen(lieferant_id, status, von, bis)
-
-
-@router.get("/einkauf/bestellungen/{bestellung_id}", summary="Bestellung abrufen",
-    response_model=EinkaufBestellungOut
-)
-async def get_bestellung(
-    bestellung_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-) -> dict[str, Any]:
-    try:
-        return _svc(db, tenant_id).get_bestellung(bestellung_id)
-    except EntityNotFoundError:
-        raise HTTPException(404, "Bestellung nicht gefunden")
-
-
 
 
 # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

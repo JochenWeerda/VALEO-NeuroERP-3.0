@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-17
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-17T15:45:09Z'
+generated_at: '2026-11-17T14:07:41Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -810,7 +810,6 @@ domains:
     - crm_opportunity_reference
     - crm_ownership_service
     - crm_segment_service
-    - customer_master_profile_service
     - customer_reference
     - customer_sales_eligibility
     - customer_service
@@ -842,7 +841,6 @@ domains:
     - sales_offer_import
     - sales_posting_service
     - sales_preisabweichung_service
-    - sales_storno_service
     - semantic_e2e_chain_service
     - whatsapp_agent_service
     - whatsapp_intake_service
@@ -882,7 +880,6 @@ domains:
     - crm_reports
     - crm_segments
     - customer_extensions
-    - customer_master_profile
     - customers
     - debtors
     - dunning
@@ -912,7 +909,6 @@ domains:
     - sales_order_commands
     - sales_reports
     - sales_shipping_ext
-    - sales_storno
     - vertreterprovisionen
     - vertreterprovisionen_kommandos
     - vertreterstamm
@@ -941,7 +937,6 @@ domains:
     - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     - docs/adr/adr-crm-activity-canonical-20261029.md
-    - docs/adr/adr-customer-master-profile-20261117.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -1055,6 +1050,7 @@ domains:
     - archive_service
     - atlas_customs_service
     - audit_hardening
+    - auftrag_lesewege
     - beleg_anlage
     - beleg_druck
     - beleg_erechnung
@@ -2393,10 +2389,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 348
-  backend_services_mapped: 348
-  backend_endpoints_total: 477
-  backend_endpoints_mapped: 477
+  backend_services_total: 347
+  backend_services_mapped: 347
+  backend_endpoints_total: 475
+  backend_endpoints_mapped: 475
 unmapped:
   frontend_routes: []
   backend_services: []

@@ -27,14 +27,8 @@ WEGE = [
     ("GET", "", "read"),
     ("GET", "/posten", "read"),
     ("GET", "/posten/settlements", "read"),
-    ("POST", "", "write"),
-    ("PUT", "/posten", "write"),
-    ("PATCH", "/posten", "write"),
-    ("POST", "/batch-settle", "write"),
-    ("POST", "/posten/settle", "write"),
-    ("POST", "/posten/reverse-settlement", "write"),
+    # Anlegen/Aendern/Loeschen/Ausgleich/Storno entfernt 19.11.2026: OPs entstehen aus der Belegbuchung.
     ("POST", "/posten/actions/mahnen", "write"),
-    ("DELETE", "/posten", "admin"),
 ]
 FINANZ_LESEN = {"FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin"}
 ERLAUBT = {

@@ -21009,7 +21009,7 @@ Ziel: Einkaufszugaenge auf DocFlow. Frontend (Dashboard, Anlieferavis, KI-Freiga
 Dateibesitz: app/services/docflow_lagerzugang.py, zugehoerige Endpunkte/Kommandos, tests/test_einkauf_lesewege_docflow.py, genannte Frontend-Seiten, Projektionen.
 Abnahme: gestaffelter Testsatz auf frischer Datenbank gruen; Baseline-Integritaet, Familienversionen, Doc-Generatoren, Docs-Governance gruen; CI des PR.
 
-## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — zur Abnahme, Claude Code (M1)
+## BELEG-052-EINKAUF-ALTWEG-3B-20261110 — abgeschlossen (PR #146 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von 3a. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: Einkaufs-Altwege entfernt, DocFlow fuehrt die Bestellung. Entfernt: Schreibrouten /purchase-orders (Compat), Eingangslieferschein-Wege, einkauf_bestellung_kommandos, purchase_order_service, command_handlers/procurement, MCP einkauf.bestellung.speichern/versenden, ScreenDefinitions einkauf/purchase-order und finance/ap-invoice. Neu: Angebot/Anfrage legen DocFlow-Entwuerfe an; GET /belege/{art}/kennzahlen speist die Cockpits. Keine neue .py ausserhalb tests/.
 Dateibesitz: die genannten entfernten Module und Masken, app/core/screen_definitions_cockpit.py (Einkauf-Cockpit), config/adaptive_workspace_fachaktionen.yaml (Eingangsrechnung zeigt auf die Belegliste), scripts/agent_handbuch_sources.py, zugehoerige Tests und Projektionen.
@@ -21075,6 +21075,58 @@ beziehungsweise Kundenakte weiter. Auth-/Backend-Setup ist ebenfalls unvollstaen
 eine reine Setup-Korrektur allein ersetzt deshalb die veralteten Fachvertraege
 nicht. Gueltige alte Erwartungen muessen auf die nativen Aktionen uebertragen
 werden, kein pauschales Skippen oder Austausch durch blosses Seitenoeffnen.
+
+## BELEG-052-LS-SCHREIBER-S1-20261115 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3 nach Merge von 3b (PR #146). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: niemand schreibt mehr in den Lieferschein-Altspeicher domain_sales.delivery_notes. Entfernt: alter Lieferschein-Storno (Router sales_storno, sales_storno_service, Frontend-Client lib/api/sales-storno.ts, UAT-Skript sales_o2c_lifecycle_uat.py) - kein Aufrufer in den Masken, DocFlow storniert selbst. Pickliste, Retoure und Zustellnachweis schreiben den Altspeicher nicht mehr fort. Neue Ratsche tests/test_altspeicher_schreiber_ratsche.py (Schreiber in Alt-Belegspeicher: nur noch einkauf_compat_service -> domain_einkauf.bestellungen).
+Dateibesitz: die genannten Module, app/services/warehouse_service.py (alter Zweig), app/api/v1/endpoints/sales_credit_notes.py, logistics_tours.py (Zustellnachweis), zugehoerige Tests und Projektionen. Keine neue .py ausserhalb tests/.
+Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
+Offener Fachrest: Der Zustellnachweis am Tourstopp aendert den Lieferschein-Stand nicht mehr (frueher: Altspeicher auf delivered). Ob der Nachweis den DocFlow-Lieferschein abschliessen soll, gehoert zur Referenzkette Tour/Kommissionierung (M4).
+
+## BELEG-052-LS-LESER-S2-20261115 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: kein Leser des Lieferschein-Altspeichers mehr. Belegkette (o2c_chain_service), Positionsabgleich (sales_match_service), Abrechnungsstand (sales_credit_service), letzter Kundenpreis (articles), Tour-Aufloesung und Ladegewicht (logistics_tours, logistics_disposition_service), Verkaufsbericht, ESG-Datenquelle und Pickliste (warehouse_service) lesen DocFlow und seine Belegverknuepfungen. DocFlow laedt nichts mehr aus dem Altspeicher nach. Fachlicher Befund: Der Altspeicher war leer, diese Stellen sahen bis dahin keinen DocFlow-Lieferschein (jeder Auftrag "ohne Lieferschein und Rechnung"); der Positionsabgleich rechnet jetzt mit der je Position umgewandelten Menge statt ueber die Artikelnummer.
+Dateibesitz: die genannten Module, tests/test_o2c_kette_docflow.py (neu), tests/test_altspeicher_schreiber_ratsche.py (Leser-Ratsche), angepasste Tests, Projektionen.
+Abnahme: neue Tests gegen echtes Schema (Kette, Teil-Lieferung, Storno, fremder Mandant) gruen; vollstaendige Pruefkette; CI des PR. Ratsche Uebergangssicht der Auftraege 18 -> 16 Leser.
+Offene Fachreste: (1) Niederlassung am Beleg fehlt (Kopfbaustein organisation) - die Loeschpruefung der Niederlassung gegen Lieferscheine ist deshalb entfallen. (2) Ladegewicht nur aus Positionen mit Gewichtseinheit. (3) ESG-Bericht nutzt die Lieferscheine weiter nur als Kennzeichen "echte Daten vorhanden".
+
+## BELEG-052-BESTELL-LESER-S3-20261116 — abgeschlossen (PR #152 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: zur Abnahme; ein PR fuer S1-S3. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: kein Schreiber und kein Leser des Bestell-Altspeichers domain_einkauf.bestellungen/bestellung_positionen mehr. Entfernt (ohne Aufrufer): toter Wareneingang im Compat-Dienst (letzter Schreiber, inkl. Fortschreibung der Liefermengen), ORM-Bestellverwaltung in procurement_service (Liste/Anlage/Aenderung/Freigabe/Obligo/Storno/Versand, Direktlieferung aus Auftrag, Innovations-Nachschau), Lese-Routen GET /einkauf/bestellungen und /{id} (Nutzerentscheidung 10.11.), GET /einkauf/innovationen, Compat-Anlage und Kommunikations-Schreibwege. Auf DocFlow umgestellt: Beschaffungsabgleich/3-Wege-Match (geliefert = je Position umgewandelte Menge, Rechnung aus DocFlow vor E-Rechnungs-Postfach), Compat-Bestellliste, Artikelkontext (offene Bestellmenge, Einkaufspreise), Einkaufs-KPIs, ORDRSP-Positionsabgleich, Rechnungspruefung (Betraege), Lieferanten-Reiter Bestellungen, Portal-Liste veroeffentlichter Bestellungen. Ratsche: kein Leser, kein Schreiber, ORM-Altmodell nur noch im Fax/EDI-Versand; Muster mit Selbsttest.
+Fachlicher Befund: Einkaufs-KPIs und Rechnungspruefung fragten Spalten ab, die es nie gab (actual_delivery_date, gesamtbetrag) und lieferten still None/OFFEN.
+Dateibesitz: die genannten Module, tests/procurement_identity_fixture.py (Belege per DocFlow-Kommando), angepasste/entfernte Tests, Projektionen und Baselines.
+Abnahme: betroffene Tests gruen auf frischer Datenbank; vollstaendige Pruefkette; CI des PR.
+Offene Fachreste: (1) Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie) - ERS greift nur bei Rechnungsueberzahlung. (2) Bestellfall (Innovation/Direktlieferung) hat in DocFlow keinen Baustein mit Feldern; Innovations-Nachschau und Direktlieferung aus dem Auftrag entfallen bis dahin. (3) Fax-/EDI-Versand (modules/einkauf/services/versand_service.py) haengt am ORM-Altobjekt und hat keinen Aufrufer mehr - auf die DocFlow-Bestellung umhaengen. (4) Lieferanten-Artikelnummer je Position (Baustein einkauf) ohne Felder; ORDRSP gleicht ueber metadata.lieferanten_artnr ab. (5) Die Obligo-Buchung (5100) gab es nur an der Freigabe der Altbestellung (ohne Aufrufer seit 3b); die DocFlow-Freigabe bucht kein Obligo - fachlich klaeren (Obligo ist ausserbilanziell, eher Auswertung als Journal). (6) S4-Ratsche Uebergangssicht Auftraege 16 -> 15 Leser (Direktlieferung entfallen).
+
+## SEC-PICOMATCH-REDOS-20261117 — abgeschlossen (PR #156 gemergt), Claude Code (M0)
+Owner: Claude Code (Nutzerauftrag 17.11.2026; Sicherheitsbahn sonst Codex). Meilenstein: M0 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: neuer Befund GHSA-fc5q-39xc-vjpf (picomatch <= 4.0.7, high, ReDoS) blockierte Dependency-Scan und Audit jedes PR. picomatch bleibt 4.0.4 (exakt gepinnt) mit lokaler Quellkorrektur (pnpm patchedDependencies; 4.0.7 haette Dependency Review als neu eingefuehrte verwundbare Version gemeldet), Gate-Freigabe mit exakten Hashes und Review bis 2027-01-15, Laufzeitvertrag scripts/verify_picomatch_security.cjs. Details: docs/quality-assurance/picomatch-redos-backport-20261117.md.
+Dateibesitz: package.json (Override, patchedDependencies), pnpm-lock.yaml (nur picomatch), config/security/*, scripts/check_npm_backport_audit.cjs, scripts/verify_picomatch_security.cjs.
+Abnahme: Selbsttests Gate 22/22, Laufzeitvertrag 9/9 mit Negativkontrolle, Upstream-Suite 4.0.4 1973/1975 (zwei bewusst geaenderte anfaellige Muster); CI des PR.
+
+## BELEG-052-FACHRESTE-20261117 — abgeschlossen (PR #154 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S1-S3 (PR #152). Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: die offenen Fachreste aus 3B, S1, S2 und S3 loesen (Entscheidungen nach "was nicht einfach laeuft, laeuft einfach nicht"):
+(1) Ueberlieferung: Der Wareneingang aus der Bestellung nimmt mehr als die Restmenge auf (22 t auf 20 t); Abgleich zeigt "ueberliefert", ERS schreibt die Mehrmenge gut. Alle anderen Folgebelege bleiben begrenzt.
+(2) Kopfbaustein organisation (Niederlassung als Nummer, Kostenstelle, Kommission) an allen Belegarten; Bearbeiter kein Feld (kommt aus der Anmeldung). Die Niederlassung mit Belegen ist nicht loeschbar (409).
+(3) Kopfbaustein bestellfall an der Bestellung (Auswahl Lagerbestand/Direktlieferung/Innovation, Hinweis; Auswahl serverseitig geprueft). Direktlieferung = Bestellfall + Kundenanschrift im Baustein Lieferung, keine eigene Funktion. Innovations-Nachschau GET /einkauf/innovationen liest DocFlow-Probebestellungen.
+(4) Versandwege der Bestellung an der Belegaktion versenden: E-Mail (wie bisher, jetzt auch im Reiter Kommunikation), Fax, EDI (ORDERS), Post, Lieferantenportal; nur was ankam, gilt als versandt. versand_service liest die DocFlow-Bestellung - das ORM-Altmodell nutzt niemand mehr (Ratsche auf null).
+(5) Lieferanten-Artikelnummer: aus dem Artikelstamm (Lieferanten-Artikel, sonst am Artikel) statt eines Positionsfelds.
+(6) Bestellobligo: keine Journalbuchung (ausserbilanziell nach HGB); Kennzahl offenes_bestellobligo_netto in den Einkaufs-KPIs.
+(7) Freigabeentscheidung an der Belegmaske dangerLevel moderate.
+(8) Zustellnachweis am Tourstopp steht im Belegverlauf des DocFlow-Lieferscheins; der Stand "ausgeliefert" folgt weiter der Pickliste.
+(9) Frontend-Pilotregister ohne Bestellung, Lieferschein, Eingangsrechnung; kuratierte Listenrouten fuer alle Beleglisten (Platzhalter /belege/:belegart weg).
+Belegmasken-Release 1.13.0.
+Dateibesitz: die genannten Module, tests/test_beleg_reste_docflow.py (neu), angepasste Tests, Projektionen.
+Abnahme: neue Tests gegen echtes Schema gruen; vollstaendige Pruefkette; CI des PR.
+Bewusst nicht hier: Zusammenfuehrung des Fibu-Speichers /finance/ap/invoices mit der DocFlow-Eingangsrechnung (M3 Fibu). Ladegewicht nur aus Gewichtseinheiten und ESG-Kennzeichen bleiben wie beschrieben (kein Fehler).
+
+## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge der Fachreste. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: kein Leser der Uebergangssicht domain_crm.sales_orders / sales_order_items mehr (Ratsche 15 -> 0). Kreditlimit, Kreditpruefung, Kunden-360 (Kopf, Liste, Register), KIM-Belege, Verkaufsberichte, Management-Dashboard, MCP-Kundensicht, Bestellvorschlag (offene Menge je Position nach Teillieferung), Ist-Aggregation, Pickliste, Referenzaufloesung lesen DocFlow direkt. Was die Sicht rechnete (offene Menge, Liefertermin), steht einmal in app/services/auftrag_lesewege.py.
+Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandantengebunden); Verkaufsberichte zaehlten geloeschte Entwuerfe mit (jetzt nicht mehr); Kundennamen kommen aus dem Kundenstamm statt aus dem Betreff.
+Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
+Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
 
 ## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
 
@@ -21410,3 +21462,10 @@ CUSTOMER-MASTER Pruefquellen-Korrektur vor Edit: Lead besitzt scripts/check_fiel
 CUSTOMER-MASTER Meilenstein: finale88 Backend-Vertraege, PostgreSQL1/1, zentraleDialoge8/8 und tsc gruen. Produktions-OpenAPI exportiert/geprueft, 3731/3731 Routen mit Summary/Antwortmodell; Doku-Drift0, Tenant-Audit und Godfile-Ratsche gruen. Globale Feldpruefung54 bleibt rot; Kundenprofil0. Versionierte Schnittstellen-/Registry-/MCP-/Handbuchgeneratoren synchronisiert. Bereit fuer Branch-Push/PR-CI, keine Gesamtfreigabe oder bereits erfolgte lokale Bereitstellung behauptet.
 
 CUSTOMER-MASTER Integration17.11: PR153 konfliktfrei gegen nachgezogenes main8575b4df9 (ClaudePR146) zusammengefuehrt. Sechs generierte Konflikte aus beiden Quellen neu erzeugt; keine fachliche Fremdaenderung verworfen. Danach88 gezielte Vertraege erneutgruen, 3697/3697 API-Routen dokumentiert/typisiert, aktuelle12-Godfile-Ratsche und MCP-/Code-Inventare gruen. Gemeinsame GitHub-Abnahme folgt auf Mergecommit; main-Sonar-Abdeckung und54 Batch15-Felder bleiben getrenntoffen.
+
+## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
+Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
+Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tagesabschluss. Ohne Journal: Periodenabschluss (Scheinkopf), Lagergeld (keine USt/OP), Bestandskorrektur/Inventur (Menge als Betrag), manueller OP-Ausgleich. Offene Posten lesen das Nebenbuch domain_erp statt des leeren public.offene_posten.
+Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
+Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.

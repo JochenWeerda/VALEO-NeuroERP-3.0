@@ -36,10 +36,11 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
-from app.infrastructure.models.einkauf_models import (
-    EinkaufBestellung,
-    EinkaufLieferant,
-)
+from app.infrastructure.models.einkauf_models import EinkaufLieferant
+
+# Die Bestellung ist die DocFlow-Bestellung (BELEG-052), als Lesesicht mit den Feldern, die Vorlage, Fax und EDI
+# brauchen (``bestellung_aus_docflow``). Bis 17.11.2026 war es das ORM-Objekt der Altbestellung.
+Bestellung = Any
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -64,7 +65,7 @@ _VALEO_SENDER_ID   = os.getenv("VALEO_EDI_SENDER_ID", "4260000000001")  # GLN
 # E-Mail-Versand
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _render_bestellung_html(bestellung: EinkaufBestellung) -> str:
+def _render_bestellung_html(bestellung: Bestellung) -> str:
     """Einfaches HTML-Template für Bestellungs-E-Mail."""
     positionen_html = "".join(
         f"<tr><td>{p.pos_nr}</td><td>{p.artikel_nr}</td><td>{p.artikel_bezeichnung}</td>"
@@ -137,7 +138,7 @@ Bei Rückfragen stehen wir Ihnen gern zur Verfügung.</p>
 
 def versende_email(
     db: Session,
-    bestellung: EinkaufBestellung,
+    bestellung: Bestellung,
     *,
     empfaenger_override: str | None = None,
     anhang_pdf: bytes | None = None,
@@ -172,7 +173,7 @@ def versende_email(
 
 def versende_fax(
     db: Session,
-    bestellung: EinkaufBestellung,
+    bestellung: Bestellung,
     *,
     faxnummer_override: str | None = None,
     pdf_content: bytes | None = None,
@@ -247,7 +248,7 @@ def versende_fax(
 # EDI-Versand (EDIFACT ORDERS D97A)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def _generate_edifact_orders(bestellung: EinkaufBestellung, *, receiver_id: str) -> str:
+def _generate_edifact_orders(bestellung: Bestellung, *, receiver_id: str) -> str:
     """
     Generiert eine EDIFACT ORDERS D97A Nachricht für die Bestellung.
     Vereinfachtes Format — für volle Kompatibilität muss das exakte
@@ -301,7 +302,7 @@ def _generate_edifact_orders(bestellung: EinkaufBestellung, *, receiver_id: str)
 
 def versende_edi(
     db: Session,
-    bestellung: EinkaufBestellung,
+    bestellung: Bestellung,
 ) -> dict[str, Any]:
     """
     Versendet eine Bestellung per EDI (EDIFACT ORDERS D97A).
@@ -391,7 +392,7 @@ def versende_edi(
 
 def versende_bestellung(
     db: Session,
-    bestellung: EinkaufBestellung,
+    bestellung: Bestellung,
     *,
     versand_art: str = "email",
     empfaenger_override: str | None = None,
@@ -424,20 +425,15 @@ def versende_bestellung(
             "fehler":      None,
         }
 
-    # Status der Bestellung aktualisieren
+    # Der Belegstand gehoert DocFlow; der Versand steht im Reiter Kommunikation.
     if result["status"] in ("gesendet", "manuell"):
-        bestellung.versand_art = versand_art
-        bestellung.versandt_am = datetime.now()
-        if bestellung.status == "entwurf":
-            bestellung.status = "versandt"
-        db.flush()
         _kommunikation_eintragen(db, bestellung, result, nutzer)
 
     return result
 
 
-def _kommunikation_eintragen(db: Session, bestellung: EinkaufBestellung, result: dict[str, Any],
-                             nutzer: dict | None) -> None:
+def _kommunikation_eintragen(db: Session, bestellung: Bestellung, result: dict[str, Any],
+                             nutzer: dict | None, *, status: str | None = None) -> None:
     """Der Versand erscheint im Reiter Kommunikation der Bestellmaske."""
     import uuid
 
@@ -450,5 +446,68 @@ def _kommunikation_eintragen(db: Session, bestellung: EinkaufBestellung, result:
     ), {"id": str(uuid.uuid4()), "t": str(bestellung.tenant_id), "b": str(bestellung.id),
         "k": result.get("versand_art"), "e": result.get("empfaenger"),
         "betreff": result.get("betreff") or f"Bestellung {bestellung.bestellnummer}",
-        "s": "versendet" if result["status"] == "gesendet" else "erfasst",
+        "s": status or ("versendet" if result["status"] == "gesendet" else "erfasst"),
         "versendet": result["status"] == "gesendet", "von": (nutzer or {}).get("sub")})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# DocFlow-Bestellung
+# ─────────────────────────────────────────────────────────────────────────────
+
+VERSANDKANAELE = ("email", "fax", "edi", "post", "portal")
+
+
+def bestellung_aus_docflow(db: Session, tenant_id: str, beleg_id: str) -> Any:
+    """Die DocFlow-Bestellung mit Positionen und Lieferantenstamm, in der Form, die Vorlage, Fax und EDI lesen."""
+    from types import SimpleNamespace
+
+    from sqlalchemy import text
+
+    kopf = db.execute(text(
+        "SELECT id, tenant_id, doc_number, document_date, supplier_id, total_net, status, "
+        "bausteine #>> '{lieferung,liefertermin}' AS liefertermin, bausteine #>> '{texte,fusstext}' AS fusstext, "
+        "bausteine #>> '{referenzen,eigene_referenz}' AS eigene, bausteine #>> '{referenzen,fremde_referenz}' AS fremde "
+        "FROM domain_docflow.document_headers "
+        "WHERE id = :id AND tenant_id = :t AND doc_type = 'purchase_order' AND deleted_at IS NULL"
+    ), {"id": beleg_id, "t": tenant_id}).mappings().first()
+    if not kopf:
+        raise LookupError("Bestellung nicht gefunden")
+    zeilen = db.execute(text(
+        "SELECT line_number, article_number, description, quantity, unit, unit_price, line_total_net "
+        "FROM domain_docflow.document_items WHERE header_id = :id AND tenant_id = :t ORDER BY line_number LIMIT 5000"
+    ), {"id": beleg_id, "t": tenant_id}).mappings().all()
+    # Der Beleg fuehrt den Lieferanten als Kennung oder Lieferantennummer (wie partner_email beim Mailversand).
+    lieferant_id = db.execute(text(
+        "SELECT id FROM domain_einkauf.lieferanten WHERE tenant_id = :t AND (id::text = :s OR lieferantennummer = :s) "
+        "LIMIT 1"), {"t": tenant_id, "s": str(kopf["supplier_id"] or "")}).scalar()
+    lieferant = db.get(EinkaufLieferant, lieferant_id) if lieferant_id else None
+    termin = kopf["liefertermin"]
+    return SimpleNamespace(
+        id=kopf["id"], tenant_id=kopf["tenant_id"], bestellnummer=kopf["doc_number"], status=kopf["status"],
+        bestelldatum=kopf["document_date"], netto_summe=kopf["total_net"], lieferant_id=kopf["supplier_id"],
+        lieferant=lieferant, freitext_fuss=kopf["fusstext"], unsere_referenz=kopf["eigene"],
+        ihre_referenz=kopf["fremde"],
+        lieferdatum_wunsch=datetime.fromisoformat(termin[:10]) if termin and len(termin) >= 10 else None,
+        positionen=[SimpleNamespace(pos_nr=z["line_number"], artikel_nr=z["article_number"],
+                                    artikel_bezeichnung=z["description"] or z["article_number"], menge=z["quantity"],
+                                    einheit=z["unit"] or "", einzelpreis=z["unit_price"], preis_einheit="",
+                                    netto_betrag=z["line_total_net"]) for z in zeilen],
+    )
+
+
+def versende_docflow_bestellung(db: Session, tenant_id: str, beleg_id: str, *, kanal: str,
+                                empfaenger: str | None = None, nutzer: dict | None = None) -> dict[str, Any]:
+    """Versand ueber Fax, EDI, Post oder Veroeffentlichung im Lieferantenportal; Eintrag im Reiter Kommunikation.
+
+    Was nicht beim Lieferanten ankam (``fehler``, ``nicht_eingerichtet``), wird nicht als versandt eingetragen.
+    """
+    if kanal not in VERSANDKANAELE:
+        raise ValueError(f"Versandweg {kanal} gibt es nicht ({', '.join(VERSANDKANAELE)}).")
+    bestellung = bestellung_aus_docflow(db, tenant_id, beleg_id)
+    if kanal == "portal":
+        ergebnis = {"status": "veroeffentlicht", "versand_art": "portal", "empfaenger": None,
+                    "betreff": f"Bestellung {bestellung.bestellnummer}", "zeitstempel": datetime.now().isoformat(),
+                    "fehler": None}
+        _kommunikation_eintragen(db, bestellung, {**ergebnis, "status": "gesendet"}, nutzer, status="veroeffentlicht")
+        return ergebnis
+    return versende_bestellung(db, bestellung, versand_art=kanal, empfaenger_override=empfaenger, nutzer=nutzer)

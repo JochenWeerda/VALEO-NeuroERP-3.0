@@ -17,14 +17,13 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.akteur import gepruefter_akteur_aus_request
-from app.core.cache import cache_delete_prefix, cache_get_json, cache_set_json
+from app.core.cache import cache_get_json, cache_set_json
 from app.core.config import settings
 from app.core.data_quality_enforcement import (
     evaluate_article_datensatz,
     evaluate_customer_datensatz,
 )
 from app.core.database import get_db
-from app.core.uuid7 import uuid7
 from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import LkwAnnahmeQueue
@@ -282,67 +281,53 @@ async def crm_suppliers(
 
 
 def _bestellungen_als_compat(db: Session, tenant_id: str) -> list[dict[str, Any]]:
-    """Die Bestellungen aus ``domain_einkauf`` in der Form der Compat-Liste.
+    """Die Bestellungen aus DocFlow, dem einzigen Belegspeicher (BELEG-052), in der Form der Compat-Liste.
 
-    Es gibt zwei Bestellwelten: Diese Compat-Schnittstelle legt Dokumente in
-    einem generischen Dokumentenspeicher ab, die fuehrende Maske
-    (``einkauf/purchase-order``) schreibt nach ``domain_einkauf.bestellungen``.
-    Wer die Liste aufrief, sah deshalb nur die eine Haelfte — und gerade die
-    Bestellungen, die aus einem Verkaufsauftrag entstanden sind, fehlten
-    vollstaendig.
-
-    Zusammengelegt sind die beiden Speicher damit nicht; das ist ein eigener
-    Schritt mit Migration und einem Nummernkreis. Was hier passiert, ist das
-    Noetige: **Lesen zeigt beides.** Doppelt kann nichts erscheinen, weil ein
-    Beleg immer nur in einem der beiden Speicher entsteht.
+    Bis 16.11.2026 las die Liste ``domain_einkauf.bestellungen``; dort entsteht seit Phase 3b keine Bestellung mehr.
     """
     zeilen = db.execute(
         text(
             """
-            SELECT b.id::text AS id, b.bestellnummer, b.status, b.bestelldatum,
-                   b.lieferdatum_wunsch, b.lieferant_id::text AS lieferant_id,
-                   b.netto_summe, b.brutto_summe, b.waehrung, b.incoterms,
-                   b.lieferadresse, b.notiz, b.bestellfall, b.kommission,
-                   b.created_at, b.updated_at,
+            SELECT b.id::text AS id, b.doc_number, b.status, b.document_date, b.supplier_id,
+                   b.total_net, b.total_gross, b.currency, b.created_at, b.updated_at,
+                   b.bausteine #>> '{lieferung,liefertermin}' AS liefertermin,
+                   b.bausteine #>> '{lieferung,incoterm}' AS incoterm,
+                   b.bausteine #>> '{lieferung,lieferadresse}' AS lieferadresse,
+                   b.bausteine #>> '{texte,betreff}' AS betreff,
+                   b.bausteine #>> '{texte,notiz}' AS notiz,
                    l.firmenname AS lieferant_name
-            FROM domain_einkauf.bestellungen b
-            LEFT JOIN domain_einkauf.lieferanten l ON l.id = b.lieferant_id
-            WHERE b.tenant_id = :tid
-            ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC
+            FROM domain_docflow.document_headers b
+            LEFT JOIN domain_einkauf.lieferanten l ON l.id::text = b.supplier_id AND l.tenant_id = b.tenant_id
+            WHERE b.tenant_id = :tid AND b.doc_type = 'purchase_order' AND b.deleted_at IS NULL
+            ORDER BY b.document_date DESC NULLS LAST, b.created_at DESC
             LIMIT 5000
             """
         ),
         {"tid": tenant_id},
     ).mappings().all()
-
-    ergebnis: list[dict[str, Any]] = []
-    for z in zeilen:
-        ergebnis.append({
+    return [
+        {
             "id": z["id"],
-            "purchaseOrderNumber": z["bestellnummer"],
-            "supplierId": z["lieferant_id"],
+            "purchaseOrderNumber": z["doc_number"],
+            "supplierId": z["supplier_id"],
             "supplierName": z["lieferant_name"],
-            "subject": z["kommission"] or z["bestellfall"] or "",
+            "subject": z["betreff"] or "",
             "description": z["notiz"] or "",
             "status": (z["status"] or "").upper(),
-            "orderDate": z["bestelldatum"].isoformat() if z["bestelldatum"] else None,
-            "deliveryDate": (
-                z["lieferdatum_wunsch"].isoformat() if z["lieferdatum_wunsch"] else None
-            ),
-            "currency": z["waehrung"] or "EUR",
-            "incoterms": z["incoterms"],
+            "orderDate": z["document_date"].isoformat() if z["document_date"] else None,
+            "deliveryDate": z["liefertermin"],
+            "currency": z["currency"] or "EUR",
+            "incoterms": z["incoterm"],
             "shippingAddress": z["lieferadresse"],
-            "subtotal": float(z["netto_summe"] or 0),
-            "totalAmount": float(z["brutto_summe"] or 0),
+            "subtotal": float(z["total_net"] or 0),
+            "totalAmount": float(z["total_gross"] or 0),
             "createdAt": z["created_at"].isoformat() if z["created_at"] else None,
             "updatedAt": z["updated_at"].isoformat() if z["updated_at"] else None,
             "tenantId": tenant_id,
-            # Damit sichtbar bleibt, woher der Beleg kommt, solange es zwei
-            # Speicher gibt.
-            "herkunft": "einkauf",
-            "bestellfall": z["bestellfall"],
-        })
-    return ergebnis
+            "herkunft": "docflow",
+        }
+        for z in zeilen
+    ]
 
 
 @router.get("/purchase-orders", response_model=PurchaseOrderListOut, summary="List po")
@@ -392,133 +377,18 @@ async def po_get(po_id: str, tenant_id: str = Depends(get_tenant_id), db: Sessio
     raise HTTPException(status_code=404, detail="Purchase order not found")
 
 
-def _lieferant_aufloesen(db: Session, tenant_id: str, roh: Any) -> str | None:
-    """Den Lieferanten finden — ueber Id, Nummer oder Namen.
-
-    Der Dokumentenspeicher nahm als ``supplierId`` alles entgegen, auch einen
-    blossen Namen ("Stroetmann"). Der fuehrende Beleg verlangt einen echten
-    Stammsatz, und das zu Recht: Ohne ihn gibt es keine Anschrift, keine
-    Zahlungsbedingung und keine Auswertung je Lieferant.
-
-    Erfunden wird hier nichts. Wer nicht gefunden wird, fuehrt zu einer klaren
-    Absage statt zu einem Stammsatz, den niemand gepflegt hat.
-    """
-    wert = str(roh or "").strip()
-    if not wert:
-        return None
-    return db.execute(
-        text(
-            "SELECT id::text FROM domain_einkauf.lieferanten "
-            "WHERE tenant_id = :t AND (id::text = :s OR lieferantennummer = :s "
-            "      OR lower(firmenname) = lower(:s)) LIMIT 1"
-        ),
-        {"t": tenant_id, "s": wert},
-    ).scalar()
-
-
 def _bestellung_finden(db: Session, tenant_id: str, kennung: str) -> dict[str, Any] | None:
-    """Einen Beleg ueber Id **oder** Bestellnummer finden."""
+    """Eine DocFlow-Bestellung ueber Kennung **oder** Bestellnummer finden."""
     zeile = db.execute(
         text(
-            "SELECT id::text AS id, bestellnummer, status "
-            "FROM domain_einkauf.bestellungen "
-            "WHERE tenant_id = :t AND (id::text = :k OR bestellnummer = :k) LIMIT 1"
+            "SELECT id::text AS id, doc_number AS bestellnummer, status "
+            "FROM domain_docflow.document_headers "
+            "WHERE tenant_id = :t AND doc_type = 'purchase_order' AND deleted_at IS NULL "
+            "AND (id::text = :k OR doc_number = :k) LIMIT 1"
         ),
         {"t": tenant_id, "k": str(kennung)},
     ).mappings().first()
     return dict(zeile) if zeile else None
-
-
-def _compat_zeile(db: Session, tenant_id: str, bestell_id: str) -> dict[str, Any]:
-    """Einen Beleg in der Form zurueckgeben, die die Compat-Aufrufer kennen."""
-    for zeile in _bestellungen_als_compat(db, tenant_id):
-        if zeile["id"] == bestell_id:
-            return zeile
-    raise HTTPException(status_code=404, detail="Purchase order not found")
-
-
-async def _create_compat_purchase_order(
-    db: Session,
-    *,
-    tenant_id: str,
-    payload: dict[str, Any],
-) -> dict[str, Any]:
-    # Angelegt wird jetzt im fuehrenden Bestand (domain_einkauf.bestellungen,
-    # Nummernkreis EK-), nicht mehr als Dokument. Sonst waechst die alte Welt
-    # weiter, waehrend beide Masken schon richtig lesen.
-    from app.services.procurement_service import ProcurementService
-
-    lieferant_id = _lieferant_aufloesen(db, tenant_id, payload.get("supplierId"))
-    if not lieferant_id:
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                f"Lieferant '{payload.get('supplierId')}' ist im Lieferantenstamm nicht "
-                f"zu finden — weder als Id noch als Nummer noch als Name. "
-                f"Ohne Stammsatz keine Bestellung."
-            ),
-        )
-
-    positionen = []
-    for nr, position in enumerate(payload.get("items", []) or [], start=1):
-        bezeichnung = position.get("description") or f"Position {nr}"
-        positionen.append({
-            "artikel_nr": position.get("articleNumber") or bezeichnung[:50],
-            "artikel_bezeichnung": bezeichnung,
-            "menge": float(position.get("quantity") or 0),
-            "einheit": position.get("unit") or "Stk",
-            "einzelpreis": float(position.get("unitPrice") or 0),
-            "rabatt_prozent": float(position.get("discountPercent") or 0),
-        })
-
-    dienst = ProcurementService(db, tenant_id)
-    angelegt = dienst.create_bestellung({
-        "lieferant_id": lieferant_id,
-        "bestelldatum": payload.get("orderDate"),
-        "lieferdatum_wunsch": payload.get("deliveryDate"),
-        "waehrung": payload.get("currency") or "EUR",
-        "incoterms": payload.get("incoterms"),
-        "lieferadresse": payload.get("shippingAddress"),
-        "zahlungsbedingung": payload.get("paymentTerms"),
-        "ansprechpartner": payload.get("contactPerson"),
-        "unsere_referenz": payload.get("externalReference"),
-        "notiz": payload.get("notes") or payload.get("description"),
-        "kommission": payload.get("subject"),
-        "positionen": positionen,
-    })
-
-    await _enqueue_event(
-        db,
-        event_type="purchase_order.created",
-        aggregate_id=angelegt["id"],
-        payload={
-            "purchaseOrderNumber": angelegt.get("bestellnummer"),
-            "supplierId": lieferant_id,
-            "status": angelegt.get("status"),
-            "createdAt": _now_iso(),
-        },
-        tenant_id=tenant_id,
-    )
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return _compat_zeile(db, tenant_id, angelegt["id"])
-
-
-def _altbeleg_schreibgeschuetzt(po_id: str) -> HTTPException:
-    """Bestellungen aus dem frueheren Dokumentspeicher werden nicht mehr fortgeschrieben.
-
-    Bis 07.10.2026 aenderten, gaben frei und stornierten diese Wege Altbelege im
-    Dokumentspeicher — mit ``approvedBy = "system"`` statt eines Freigebers, ohne
-    Rolle und ausserhalb der kanonischen Bestellung, die Wareneingang, Abgleich und
-    Rechnungspruefung lesen. Angelegt wird seit 25.09.2026 nur noch kanonisch;
-    ein Altbeleg bleibt lesbar und wird bei Bedarf als Bestellung neu erfasst.
-    """
-    return HTTPException(
-        status_code=409,
-        detail=(
-            f"Bestellung {po_id} stammt aus dem frueheren Dokumentspeicher und ist "
-            "schreibgeschuetzt. Bitte als Bestellung neu erfassen (Einkauf > Bestellungen)."
-        ),
-    )
 
 
 @router.get("/purchase-orders/{po_id}/changelog", response_model=list[CompatBridgeOut], summary="Changelog po")
@@ -1991,34 +1861,6 @@ async def po_communications(po_id: str, tenant_id: str = Depends(get_tenant_id),
     return _find_po_by_id(db, po_id, tenant_id=tenant_id).get("communications", [])  # Altbeleg, nur lesend
 
 
-async def _po_kommunikation(po_id: str, payload: dict[str, Any], tenant_id: str, db: Session, weg: str, nutzer: Optional[dict] = None) -> dict:
-    """Kommunikation am fuehrenden Beleg; siehe ``bestell_kommunikation_service`` (bis 08.10.2026:
-    Dokumentspeicher, nur Altbelege, "sent"/"published" ohne Versand)."""
-    from app.services import bestell_kommunikation_service as komm
-    from app.services.mail_versand import MailVersandFehler, MailVersandNichtEingerichtet, MailVersandVerweigert
-
-    beleg = _bestellung_finden(db, tenant_id, po_id)
-    if not beleg:
-        _find_po_by_id(db, po_id, tenant_id=tenant_id)  # 404, wenn es auch keinen Altbeleg gibt
-        raise _altbeleg_schreibgeschuetzt(po_id)
-    try:
-        item = getattr(komm, weg)(db, tenant_id, beleg, payload, nutzer=nutzer)
-    except MailVersandNichtEingerichtet as fehler:
-        db.rollback()
-        raise HTTPException(status_code=503, detail=str(fehler)) from fehler
-    except MailVersandFehler as fehler:
-        db.rollback()
-        raise HTTPException(status_code=403 if isinstance(fehler, MailVersandVerweigert) else 502, detail=str(fehler)) from fehler
-    except ValueError as fehler:
-        db.rollback()
-        raise HTTPException(status_code=422, detail=str(fehler)) from fehler
-    await _enqueue_event(db, event_type="purchase_order.communication.sent", aggregate_id=beleg["id"], tenant_id=tenant_id,
-                         payload={"purchaseOrderNumber": beleg["bestellnummer"], "channel": item["channel"], "status": item["status"]})
-    db.commit()
-    cache_delete_prefix(f"compat:procurement:{tenant_id}:")
-    return item
-
-
 @router.get("/einkauf/retouren/{retour_id}", response_model=EinkaufDocOut, summary="Retoure get einkauf")
 async def einkauf_retoure_get(
     retour_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db)
@@ -2478,44 +2320,6 @@ class TagesabschlussOut(BaseModel):
     belegnummer: str
 
 
-def _ensure_chart_account(
-    db: Session,
-    tenant_id: str,
-    account_number: str,
-    _legacy_account_name: str | None = None,
-) -> str:
-    """Hole oder erstelle Kontenplan-Eintrag, return chart_of_accounts.id."""
-    from app.services.pos_accounting_service import ACCOUNT_DEFINITIONS
-
-    definition = ACCOUNT_DEFINITIONS[account_number]
-    row = db.execute(
-        text("""
-            SELECT id FROM domain_erp.chart_of_accounts
-            WHERE tenant_id = :tid AND account_number = :num LIMIT 1
-        """),
-        {"tid": tenant_id, "num": account_number},
-    ).fetchone()
-    if row:
-        return str(row[0])
-    acc_id = uuid7()
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.chart_of_accounts
-            (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
-            VALUES (:id, :tid, :num, :name, :account_type, :category, TRUE, NOW(), NOW())
-        """),
-        {
-            "id": acc_id,
-            "tid": tenant_id,
-            "num": account_number,
-            "name": definition.name,
-            "account_type": definition.account_type,
-            "category": definition.category,
-        },
-    )
-    return acc_id
-
-
 @router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
@@ -2545,6 +2349,20 @@ async def create_tagesabschluss(
             status_code=422,
             detail="Gemeldeter Umsatz stimmt nicht mit den Zahlungsarten ueberein",
         )
+
+    # Buchbarkeit vor dem fiskalischen Abschluss pruefen: Ist der TSE-Abschluss signiert, darf die Buchung nicht
+    # mehr an einem fehlenden Konto oder einer gesperrten Periode scheitern. Konten legt der Abschluss nicht mehr
+    # selbst an (bis 19.11.2026 tat er das und schrieb Kopf und Zeilen roh ins Journal).
+    from app.core.exceptions import DomainError
+    from app.services.finance_transaction_service import FinanceTransactionService
+
+    buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+    try:
+        buchung.check_period_open(payload.datum.strftime("%Y-%m"))
+        kassenkonten = {line.account_number: buchung.account_id_for_number(line.account_number)
+                        for line in accounting_lines}
+    except DomainError as exc:
+        raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht buchbar: {exc}") from exc
 
     fiscal = FiscalizationService(db, tenant_id)
     try:
@@ -2620,60 +2438,22 @@ async def create_tagesabschluss(
         },
     )
 
-    # Verdrahtung zur FiBu: Journal-Eintrag erstellen (SKR03)
-    period = payload.datum.strftime("%Y-%m")
-
+    # Verdrahtung zur FiBu ueber den kanonischen Buchungsdienst (Sequenz, Hash, Periodensperre).
     if accounting_lines:
-        entry_id = uuid7()
-        desc = f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"
-
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, description,
-                 source, reference, period, status, total_debit, total_credit, created_at, updated_at)
-                VALUES (:id, :tid, :entry_number, :edate, :pdate, :desc,
-                        'POS', :ref, :period, 'posted', :total_d, :total_c, NOW(), NOW())
-            """),
-            {
-                "id": entry_id,
-                "tid": tenant_id,
-                "entry_number": belegnummer,
-                "edate": payload.datum,
-                "pdate": payload.datum,
-                "desc": desc,
-                "ref": belegnummer,
-                "period": period,
-                "total_d": sum((line.debit for line in accounting_lines), Decimal("0.00")),
-                "total_c": sum((line.credit for line in accounting_lines), Decimal("0.00")),
-            },
-        )
-
-        account_ids = {
-            line.account_number: _ensure_chart_account(
-                db, tenant_id, line.account_number, line.description
+        try:
+            eintrag = buchung.create(
+                entry_number=belegnummer,
+                description=f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"[:200],
+                entry_date=payload.datum,
+                lines=[{"account_id": kassenkonten[line.account_number], "debit_amount": line.debit,
+                        "credit_amount": line.credit, "description": line.description} for line in accounting_lines],
+                reference=belegnummer,
+                source="POS",
             )
-            for line in accounting_lines
-        }
-        for ln, line in enumerate(accounting_lines, start=1):
-            line_id = f"{entry_id}-L{ln}"
-            db.execute(
-                text("""
-                    INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :tid, :je_id, :acc_id, :debit, :credit, :ln, :desc, NOW())
-                """),
-                {
-                    "id": line_id,
-                    "tid": tenant_id,
-                    "je_id": entry_id,
-                    "acc_id": account_ids[line.account_number],
-                    "debit": line.debit,
-                    "credit": line.credit,
-                    "ln": ln,
-                    "desc": line.description,
-                },
-            )
+            buchung.post(str(eintrag.id))
+        except DomainError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht gebucht: {exc}") from exc
 
     db.commit()
 
@@ -2785,9 +2565,9 @@ async def management_dashboard(
     try:
         sales_row = db.execute(text("""
             SELECT COUNT(*) AS cnt,
-                   COALESCE(SUM(total_amount), 0) AS revenue
-            FROM domain_crm.sales_orders
-            WHERE tenant_id = :tid
+                   COALESCE(SUM(total_gross), 0) AS revenue
+            FROM domain_docflow.document_headers
+            WHERE tenant_id = :tid AND doc_type = 'sales_order' AND deleted_at IS NULL
               AND created_at >= date_trunc('month', CURRENT_DATE)
         """), {"tid": tenant_id}).fetchone()
         umsatz = float(sales_row.revenue) if sales_row else 0
@@ -2803,22 +2583,20 @@ async def management_dashboard(
         offene_posten = float(oi_row.total) if oi_row else 0
 
         top_products = db.execute(text("""
-            -- Die Auftragsposition heisst `sales_order_items`, ihr Betrag
-            -- `line_total`, und sie fuehrt die **Artikelnummer**, keine
-            -- Artikel-ID. Der Join ging deshalb dreifach ins Leere; die
-            -- Auswertung blieb leer und sah aus wie „kein Umsatz".
-            SELECT a.name, COALESCE(SUM(soi.line_total), 0) AS umsatz
-            FROM domain_crm.sales_order_items soi
-            JOIN domain_inventory.articles a ON a.article_number = soi.article_number
-            JOIN domain_crm.sales_orders so ON so.id = soi.order_id AND so.tenant_id = :tid
+            -- Auftragspositionen aus DocFlow (BELEG-052); verbunden wird ueber die Artikelnummer.
+            SELECT a.name, COALESCE(SUM(soi.line_total_net), 0) AS umsatz
+            FROM domain_docflow.document_items soi
+            JOIN domain_docflow.document_headers so ON so.id = soi.header_id AND so.tenant_id = soi.tenant_id
+            JOIN domain_inventory.articles a ON a.article_number = soi.article_number AND a.tenant_id = so.tenant_id
+            WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
             GROUP BY a.name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
 
         top_customers = db.execute(text("""
-            SELECT c.company_name AS name, COALESCE(SUM(so.total_amount), 0) AS umsatz
-            FROM domain_crm.sales_orders so
-            JOIN domain_crm.customers c ON c.id = so.customer_id
-            WHERE so.tenant_id = :tid
+            SELECT c.company_name AS name, COALESCE(SUM(so.total_gross), 0) AS umsatz
+            FROM domain_docflow.document_headers so
+            JOIN domain_crm.customers c ON c.id = so.customer_id AND c.tenant_id = so.tenant_id
+            WHERE so.tenant_id = :tid AND so.doc_type = 'sales_order' AND so.deleted_at IS NULL
             GROUP BY c.company_name ORDER BY umsatz DESC LIMIT 5
         """), {"tid": tenant_id}).fetchall()
     except Exception:

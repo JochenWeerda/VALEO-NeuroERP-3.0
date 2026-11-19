@@ -166,39 +166,38 @@ class TestErs:
 # ─────────────────────────────────────────────────────────────────────────────
 
 class TestEinkaufKpis:
+    @staticmethod
+    def _leeres_docflow():
+        db = MagicMock()
+        ergebnis = db.execute.return_value
+        ergebnis.one.return_value = (None, None)
+        ergebnis.scalar.return_value = None
+        ergebnis.fetchmany.return_value = []
+        return db
+
     def test_kpis_returns_required_fields(self):
-        """KPI-Endpoint liefert alle Pflichtfelder — auch wenn DB leer/fehlt."""
+        """Ohne Bestellungen in DocFlow: alle Pflichtfelder, Kennzahlen leer."""
         from app.api.v1.endpoints.einkauf_kpis import get_kpis
 
-        db = MagicMock()
-        # Alle DB-Aufrufe schlagen fehl → try/except → None-Werte
-        db.execute.side_effect = Exception("Tabelle nicht vorhanden")
-
-        result = get_kpis(
-            date_from="2026-01-01",
-            date_to="2026-12-31",
-            db=db,
-            tenant_id="tenant-1",
-        )
-
-        required_keys = {
-            "on_time_delivery_rate",
-            "fill_rate",
-            "price_variance",
-            "avg_lead_time_days",
-            "top_5_suppliers_by_spend",
-            "abc_analysis",
-        }
-        assert required_keys.issubset(result.keys())
+        result = get_kpis(date_from="2026-01-01", date_to="2026-12-31", db=self._leeres_docflow(), tenant_id="tenant-1")
+        assert result["on_time_delivery_rate"] is None and result["fill_rate"] is None
+        assert result["avg_lead_time_days"] is None and result["price_variance"] is None
+        assert result["top_5_suppliers_by_spend"] == [] and result["abc_analysis"] == {}
 
     def test_kpis_with_no_dates(self):
-        """KPI-Endpoint ohne Datumsangaben → Standardwerte."""
+        """Ohne Datumsangaben gilt der ganze Zeitraum."""
+        from app.api.v1.endpoints.einkauf_kpis import get_kpis
+
+        db = self._leeres_docflow()
+        get_kpis(date_from=None, date_to=None, db=db, tenant_id="t1")
+        params = db.execute.call_args_list[0].args[1]
+        assert (params["date_from"], params["date_to"]) == ("1900-01-01", "2999-12-31")
+
+    def test_kpis_verschweigen_keinen_datenbankfehler(self):
+        """Bis 16.11.2026 lieferte jeder Fehler still None - so blieben Abfragen auf nie vorhandene Spalten unbemerkt."""
         from app.api.v1.endpoints.einkauf_kpis import get_kpis
 
         db = MagicMock()
-        db.execute.side_effect = Exception("Keine Daten")
-
-        result = get_kpis(date_from=None, date_to=None, db=db, tenant_id="t1")
-        assert "top_5_suppliers_by_spend" in result
-        assert isinstance(result["top_5_suppliers_by_spend"], list)
-        assert isinstance(result["abc_analysis"], dict)
+        db.execute.side_effect = RuntimeError("Spalte fehlt")
+        with pytest.raises(RuntimeError):
+            get_kpis(date_from=None, date_to=None, db=db, tenant_id="t1")

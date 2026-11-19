@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-17
+last_reviewed: 2026-11-19
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -49,12 +49,13 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `articles_service` | Helper functions for the Articles domain. |
 | `atlas_customs_service` | ATLAS Zollausfuhr Service — Implementierung nach Zollkodex der Union (UZK). |
 | `audit_hardening` | Audit Hardening Service — NC-D1/D2 |
+| `auftrag_lesewege` | SQL-Bausteine fuer Leser des Verkaufsauftrags in DocFlow (BELEG-052 S4). |
 | `bedarfsdeckung_service` | Bedarfsdeckungs-Cockpit (Durchdringungs-CRM) — „Die Lücke ist das Vertriebsobjekt". |
 | `beleg_anlage` | Belege aus Fachwegen anlegen: immer in DocFlow (BELEG-052 Stufe 3, Nutzerentscheidung 08.11.2026). |
 | `beleg_druck` | Belegdruck: ein PDF je DocFlow-Beleg aus dem Belegvertrag (BELEG-052 Stufe 2b, 09.11.2026). |
 | `beleg_erechnung` | E-Rechnung (XRechnung 3.0, UBL 2.1) aus dem DocFlow-Beleg (BELEG-052 Phase 2, 10.11.2026). |
 | `beleg_liste` | Belegliste aus DocFlow: eine Quelle fuer Maske (Familie ``beleg-liste``), CLI, MCP (``beleg_suchen``) und REST. |
-| `bestell_kommunikation_service` | Kommunikation zu einer Bestellung — wirklich versendet, am fuehrenden Beleg. |
+| `bestell_kommunikation_service` | Kommunikation zu einer Bestellung (Reiter "Kommunikation") - nur noch lesend. |
 | `bewerbung_einwilligung_service` | Erteilen und Widerrufen der Aufbewahrungs-Einwilligung. |
 | `bewerbung_loeschlauf_service` | Der Loeschlauf fuer Bewerberdaten. |
 | `bewerbung_service` | Bewerbungspipeline — ein Woerterbuch mit Uebergaengen und ein ehrlicher Fehler. |
@@ -101,7 +102,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
 | `crm_segment_service` | Canonical, tenant-scoped CRM segment data and bounded membership evaluation. |
-| `customer_master_profile_service` | Tenant-scoped customer master profile; mutations stay within the caller's transaction. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
@@ -307,7 +307,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `sales_offer_import` | Atomic, idempotent import of explicitly specified sales offers. |
 | `sales_posting_service` | Service for creating FIBU journal entries along the Auftrag → Lieferschein → Rechnung chain. |
 | `sales_preisabweichung_service` | DOM-SALES-004.4 — Preisabweichungs-Prüfung + Eskalation/Freigabe Service. |
-| `sales_storno_service` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4) — durchgängig. |
 | `schaden_service` | Schadenmeldungen und Versicherungsvertraege — eine Meldung, die es gibt. |
 | `scheduler_service` | Scheduler Service |
 | `secrets_vault` | Secrets Vault Service — NC-15 |

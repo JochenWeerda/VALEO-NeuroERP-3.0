@@ -68,27 +68,40 @@ class SalesCreditService:
 
     def _exposure(self, customer_id: str, exclude_order: Optional[str] = None) -> float:
         return float(self.db.execute(
-            text("SELECT COALESCE(SUM(total_amount),0) FROM domain_crm.sales_orders "
-                 "WHERE customer_id = :cid AND tenant_id = :t AND deleted_at IS NULL "
+            text("SELECT COALESCE(SUM(total_gross),0) FROM domain_docflow.document_headers "
+                 "WHERE customer_id = :cid AND tenant_id = :t AND doc_type = 'sales_order' AND deleted_at IS NULL "
                  "AND status NOT IN ('cancelled','completed','reversed') "
-                 "AND (:ex IS NULL OR order_number <> :ex)"),
+                 "AND (:ex IS NULL OR doc_number <> :ex)"),
             {"cid": customer_id, "t": self.tenant_id, "ex": exclude_order},
         ).scalar() or 0.0)
 
     def _order(self, ref: str) -> Optional[dict]:
         r = self.db.execute(
-            text("SELECT id, order_number, customer_id, customer_name, status, total_amount "
-                 "FROM domain_crm.sales_orders WHERE tenant_id = :t "
-                 "AND (id::text = :v OR order_number = :v) AND deleted_at IS NULL LIMIT 1"),
+            text("SELECT h.id, h.doc_number AS order_number, h.customer_id, c.company_name AS customer_name, "
+                 "CASE h.status WHEN 'reversed' THEN 'cancelled' ELSE h.status END AS status, "
+                 "h.total_gross AS total_amount "
+                 "FROM domain_docflow.document_headers h "
+                 "LEFT JOIN domain_crm.customers c ON c.id = h.customer_id AND c.tenant_id = h.tenant_id "
+                 "WHERE h.tenant_id = :t AND h.doc_type = 'sales_order' "
+                 "AND (h.id = :v OR h.doc_number = :v) AND h.deleted_at IS NULL LIMIT 1"),
             {"t": self.tenant_id, "v": ref},
         ).mappings().first()
         return dict(r) if r else None
 
     def _billing(self, order_id: str) -> list[dict]:
         rows = self.db.execute(
-            text("SELECT delivery_note_number, invoice_number, status, delivery_date "
-                 "FROM domain_sales.delivery_notes WHERE sales_order_id::text = :oid AND tenant_id = :t "
-                 "ORDER BY delivery_date"),
+            # Lieferscheine und ihre Rechnung aus DocFlow (BELEG-052); stornierte zaehlen nicht.
+            text(
+                "SELECT d.doc_number AS delivery_note_number, d.document_date AS delivery_date, d.status, "
+                "(SELECT r.doc_number FROM domain_docflow.document_header_links kr   JOIN "
+                "domain_docflow.document_headers r ON r.id = kr.to_header_id AND r.tenant_id = kr.tenant_id   "
+                "WHERE kr.tenant_id = d.tenant_id AND kr.from_header_id = d.id   AND kr.relation_type = "
+                "'delivery_to_invoice' AND r.deleted_at IS NULL   AND r.status NOT IN ('cancelled', 'reversed') "
+                "ORDER BY kr.created_at LIMIT 1) AS invoice_number FROM domain_docflow.document_header_links k "
+                "JOIN domain_docflow.document_headers d ON d.id = k.to_header_id AND d.tenant_id = k.tenant_id "
+                "WHERE k.tenant_id = :t AND k.from_header_id = :oid AND k.relation_type = 'order_to_delivery' "
+                "AND d.deleted_at IS NULL AND d.status NOT IN ('cancelled', 'reversed') ORDER BY d.document_date"
+            ),
             {"oid": order_id, "t": self.tenant_id},
         ).mappings().all()
         return [{"lieferschein": r["delivery_note_number"], "rechnung": r["invoice_number"],
@@ -127,10 +140,11 @@ class SalesCreditService:
         rows = self.db.execute(
             text(
                 """
-                SELECT o.customer_id, MAX(o.customer_name) AS kunde,
-                       COALESCE(SUM(o.total_amount),0) AS exposure, count(*) AS auftraege
-                FROM domain_crm.sales_orders o
-                WHERE o.tenant_id = :t AND o.deleted_at IS NULL
+                SELECT o.customer_id, MAX(c.company_name) AS kunde,
+                       COALESCE(SUM(o.total_gross),0) AS exposure, count(*) AS auftraege
+                FROM domain_docflow.document_headers o
+                LEFT JOIN domain_crm.customers c ON c.id = o.customer_id AND c.tenant_id = o.tenant_id
+                WHERE o.tenant_id = :t AND o.doc_type = 'sales_order' AND o.deleted_at IS NULL
                   AND o.status NOT IN ('cancelled','completed','reversed')
                 GROUP BY o.customer_id ORDER BY exposure DESC LIMIT :lim
                 """

@@ -89,3 +89,17 @@ def test_options_unbekannt_oder_ungueltige_relation():
         svc.conversion_options('auftrag', 'purchase_order')
     svc.fetch_items.assert_not_called()
     db.execute.assert_not_called()
+
+
+def test_wareneingang_nimmt_die_ueberlieferung_auf_die_rechnung_nicht():
+    """Ueberlieferung (22 t auf 20 t): der Wareneingang erfasst, was kam; jeder andere Folgebeleg bleibt begrenzt."""
+    svc, db = service()
+    svc.bootstrap_doc.return_value = {'doc_type': 'purchase_order', 'version': 1}
+    eingang = DocflowConvertRequest(target_doc_type='goods_receipt', idempotency_key='test-key-002',
+                                    quantities_by_source_item_id={'owned': 11}, dry_run=True)
+    assert svc.convert('bestellung', eingang)['payload']['total_net'] == 22.0
+    rechnung = DocflowConvertRequest(target_doc_type='purchase_invoice', idempotency_key='test-key-003',
+                                     quantities_by_source_item_id={'owned': 11}, dry_run=True)
+    with pytest.raises(ValidationFailedError, match='Restmenge'):
+        svc.convert('bestellung', rechnung)
+    db.execute.assert_not_called()

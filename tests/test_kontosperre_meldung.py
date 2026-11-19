@@ -126,40 +126,20 @@ def _korrektur_weg() -> str:
         if getattr(r, "name", "") == "create_bestandskorrektur")
 
 
-def test_bestandskorrektur_meldet_die_sperre_statt_erfolg(lage, anwendung):
-    """Vorher: 200/201 mit Korrekturnummer, aber weder Bewegung noch Buchung in der Datenbank."""
-    antwort = anwendung.post("/lager" + _korrektur_weg(), json={
-        "article_id": f"ks-{lage['lauf']}-art", "warehouse_id": f"ks-{lage['lauf']}-lag",
-        "menge": 2.5, "grund": "messdifferenz"})
-    assert antwort.status_code == 409, antwort.text
-    assert "1500 ist fuer Buchungen gesperrt" in str(antwort.json()["detail"])
-    with SessionLocal() as db:
-        bewegungen = db.execute(text(
-            "SELECT count(*) FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t"),
-            {"t": lage["mandant"]}).scalar()
-    assert bewegungen == 0
-
-
-def test_bestandskorrektur_wird_gespeichert_wenn_das_konto_offen_ist(lage, anwendung):
-    """Bis 12.10.2026 meldete der Weg „gebucht“ und speicherte nichts: Eine verschluckte Vorabfrage
-    auf eine Spalte, die es nicht gibt, hatte die Transaktion schon abgebrochen."""
-    with SessionLocal() as db:
-        db.execute(text("UPDATE domain_erp.chart_of_accounts SET posting_blocked = false WHERE id = :k"),
-                   {"k": lage["konto"]})
-        db.commit()
+def test_bestandskorrektur_speichert_den_bestand_ohne_buchung(lage, anwendung):
+    """Die Korrektur bucht nicht mehr ins Hauptbuch, solange die Bestandsbewertung fehlt (bis 19.11.2026 ging die
+    Menge als Eurobetrag ins Journal). Eine Kontosperre auf 1500 haelt den Bestand deshalb nicht mehr auf; frueher
+    meldete der Weg 201 und speicherte nichts (12.10.2026)."""
     antwort = anwendung.post("/lager" + _korrektur_weg(), json={
         "article_id": f"ks-{lage['lauf']}-art", "warehouse_id": f"ks-{lage['lauf']}-lag",
         "menge": 2.5, "grund": "messdifferenz"})
     assert antwort.status_code == 201, antwort.text
-    assert antwort.json()["journal_entry_id"]
+    assert antwort.json()["journal_entry_id"] is None
     with SessionLocal() as db:
         bewegungen = db.execute(text(
             "SELECT count(*) FROM domain_inventory.inventory_stock_movements WHERE id = :id"),
             {"id": antwort.json()["movement_id"]}).scalar()
-        zeilen = db.execute(text(
-            "SELECT count(*) FROM domain_erp.journal_entry_lines WHERE journal_entry_id = :je"),
-            {"je": antwort.json()["journal_entry_id"]}).scalar()
-    assert (bewegungen, zeilen) == (1, 2)
+    assert bewegungen == 1
 
 
 def test_kontenzuordnung_der_warengruppe_wird_gefunden(lage):

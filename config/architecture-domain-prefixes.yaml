@@ -379,6 +379,7 @@ domains:
       - beleg_liste
       - beleg_druck
       - beleg_anlage
+      - auftrag_lesewege
       - beleg_erechnung
       - gutschrift_docflow
       - doc_nachweisraum_

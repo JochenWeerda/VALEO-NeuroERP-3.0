@@ -1,7 +1,7 @@
 """Lieferschein-Status und Preisabweichung (DOM-SALES-004) unter ``/sales/orders``; Bearbeiter aus dem Token.
 
-Auftragsstorno und AB-Statuswechsel liefen hier auf den Eigenspeichern ``domain_crm.sales_orders`` und
-``domain_sales.sales_orders``. Seit BELEG-052 (09.11.2026) ist DocFlow der einzige Belegspeicher: Der Auftrag wird in
+Auftragsstorno und AB-Statuswechsel liefen hier auf den Eigenspeichern des Verkaufsauftrags (CRM- und
+Sales-Schema). Seit BELEG-052 (09.11.2026) ist DocFlow der einzige Belegspeicher: Der Auftrag wird in
 der Belegmaske storniert (``/api/v1/belege/sales_order/{id}/actions/stornieren``).
 """
 from __future__ import annotations

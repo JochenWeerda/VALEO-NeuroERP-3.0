@@ -18,15 +18,13 @@ class _Result:
 
 
 class _Session:
-    def __init__(self, schema):
-        self.schema = schema
+    def __init__(self, columns=(("id",), ("tenant_id",))):
+        self.columns = list(columns)
         self.calls = []
 
     def execute(self, statement, params=None):
         self.calls.append((str(statement), params))
-        if len(self.calls) == 1:
-            return _Result(scalar=self.schema)
-        return _Result(rows=[("id",), ("tenant_id",)])
+        return _Result(rows=self.columns)
 
 
 def _open_item(due_date: date, open_amount: Decimal):
@@ -65,26 +63,23 @@ def test_overdue_uses_business_timezone_boundary_and_keeps_due_day_open(monkeypa
     assert _open_item(date(2031, 2, 28), Decimal("0.00")).ueberfaellig is False
 
 
-@pytest.mark.parametrize("schema", ["public", "domain_erp"])
-def test_open_item_relation_accepts_only_canonical_schemas(schema):
+def test_open_item_relation_is_the_subsidiary_ledger_not_the_search_path():
+    """Der Suchpfad traf den verwaisten Speicher public.offene_posten; gelesen wird das Nebenbuch domain_erp."""
     from app.services.open_item_read_source import _get_open_items_relation
 
-    db = _Session(schema)
+    db = _Session()
     relation, columns = _get_open_items_relation(db)
 
-    assert relation == f"{schema}.offene_posten"
+    assert relation == "domain_erp.offene_posten"
     assert columns == {"id", "tenant_id"}
-    assert db.calls[1][1] == {"table_schema": schema}
+    assert db.calls == [(db.calls[0][0], {"table_schema": "domain_erp"})]
+    assert "to_regclass" not in db.calls[0][0]
 
 
-def test_open_item_relation_rejects_injected_schema_before_identifier_sql():
+def test_open_item_relation_without_table_is_unavailable_not_empty():
     from app.services.open_item_read_source import _get_open_items_relation
 
-    injected_schema = "public; DROP SCHEMA domain_erp CASCADE; --"
-    db = _Session(injected_schema)
-
     with pytest.raises(HTTPException) as exc_info:
-        _get_open_items_relation(db)
+        _get_open_items_relation(_Session(columns=()))
 
     assert exc_info.value.status_code == 503
-    assert len(db.calls) == 1

@@ -5,13 +5,11 @@ DOM-INV-004: Lot-Trace (.2), Inventur-Differenzbeleg (.3), Korrektur-Storno (.4)
 """
 
 from datetime import date
-from decimal import Decimal
 from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from app.core.exceptions import kontosperre_meldung
 from app.core.tenant import get_tenant_id
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -22,7 +20,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.inventory_operations_schemas import InventoryOperationsOut
 from app.services.inventory_movement_direction import direction_sql, signed_quantity
 from app.services.inventory_stock_balance import current_stock
@@ -108,37 +105,6 @@ class MhdAbschreibungIn(BaseModel):
 
 # ── GL Posting Helper ──────────────────────────────────────────
 
-def _ensure_account(db, tenant_id: str, account_number: str, account_name: str, account_type: str, category: str) -> str:
-    """Ensure a chart_of_accounts entry exists, return its id."""
-    existing = db.execute(
-        text("""
-            SELECT id FROM domain_erp.chart_of_accounts
-            WHERE tenant_id = :tenant_id AND account_number = :account_number
-            LIMIT 1
-        """),
-        {"tenant_id": tenant_id, "account_number": account_number},
-    ).mappings().first()
-    if existing:
-        return str(existing["id"])
-    account_id = str(uuid4())
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.chart_of_accounts
-            (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
-            VALUES (:id, :tenant_id, :account_number, :account_name, :account_type, :category, TRUE, NOW(), NOW())
-        """),
-        {
-            "id": account_id,
-            "tenant_id": tenant_id,
-            "account_number": account_number,
-            "account_name": account_name,
-            "account_type": account_type,
-            "category": category,
-        },
-    )
-    return account_id
-
-
 def _get_account_mapping(db, tenant_id: str, article_id: str):
     """Look up LagerKontenzuordnung for the article's group; fall back to SKR03 defaults."""
     try:
@@ -168,89 +134,18 @@ def _get_account_mapping(db, tenant_id: str, article_id: str):
     return DEFAULT_ACCOUNTS
 
 
-def _post_inventory_journal(
-    db,
-    *,
-    tenant_id: str,
-    posting_date: date,
-    document_type: str,
-    document_number: str,
-    description: str,
-    debit_account: str,
-    debit_account_name: str,
-    credit_account: str,
-    credit_account_name: str,
-    amount: Decimal,
-    reference: str,
-) -> str:
-    """Post a balanced journal entry for an inventory operation."""
-    entry_id = str(uuid4())
-    amount_rounded = amount.quantize(Decimal("0.01"))
+def melde_fehlende_bewertung(vorgang: str, beleg: str) -> None:
+    """Meldet die fehlende Bestandsbewertung; erzeugt nie eine Buchung mit Ersatzwert.
 
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.journal_entries
-            (id, tenant_id, entry_number, entry_date, posting_date, document_type, document_number,
-             reference, description, total_debit, total_credit, status, posted_at, created_at, updated_at)
-            VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :document_type, :document_number,
-                    :reference, :description, :total_debit, :total_credit, :status, NOW(), NOW(), NOW())
-        """),
-        {
-            "id": entry_id,
-            "tenant_id": tenant_id,
-            "entry_number": document_number,
-            "entry_date": posting_date,
-            "posting_date": posting_date,
-            "document_type": document_type,
-            "document_number": document_number,
-            "reference": reference,
-            "description": description,
-            "status": "posted",
-            "total_debit": amount_rounded,
-            "total_credit": amount_rounded,
-        },
-    )
+    Bis 19.11.2026 buchte die Bestandskorrektur (und die Inventur) die **Menge** in Tonnen als Eurobetrag ins Journal
+    und legte fehlende Konten selbst an. Eine Bestandsbuchung braucht den Wert der Menge (Bewertungsmodell, M3/M4);
+    bis dahin bleibt die Bestandsaenderung operativ gebucht und das Hauptbuch unberuehrt (wie Produktion,
+    JOURNAL-AMOUNT-INTEGRITY).
+    """
+    from app.core.metrics import critical_data_path_errors_total
 
-    debit_account_id = _ensure_account(db, tenant_id, debit_account, debit_account_name, "expense", "inventory_correction")
-    credit_account_id = _ensure_account(db, tenant_id, credit_account, credit_account_name, "asset", "inventory")
-
-    # Debit line
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.journal_entry_lines
-            (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, 1, NOW())
-        """),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "journal_entry_id": entry_id,
-            "account_id": debit_account_id,
-            "debit": amount_rounded,
-            "credit": Decimal("0.00"),
-            "description": description,
-        },
-    )
-
-    # Credit line
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.journal_entry_lines
-            (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, 2, NOW())
-        """),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "journal_entry_id": entry_id,
-            "account_id": credit_account_id,
-            "debit": Decimal("0.00"),
-            "credit": amount_rounded,
-            "description": description,
-        },
-    )
-
-    return entry_id
+    critical_data_path_errors_total.labels(endpoint=vorgang, error_type="valuation_missing").inc()
+    logger.error("Keine FiBu-Buchung fuer %s: verifizierte Bestandsbewertung fehlt", beleg)
 
 
 # ── Routes ──────────────────────────────────────────────────────
@@ -323,68 +218,9 @@ async def create_bestandskorrektur(
             {"delta": payload.menge, "article_id": payload.article_id},
         )
 
-    # GL posting
+    # Keine Buchung ohne Bewertung (s. melde_fehlende_bewertung).
     journal_entry_id = None
-    try:
-        accounts = _get_account_mapping(db, tid, payload.article_id)
-        amount = Decimal(str(abs(payload.menge)))
-        if payload.menge < 0:
-            # Abgang: DEBIT Bestandsveränderung/Schwund, CREDIT Bestandskonto
-            debit_konto = DEFAULT_ACCOUNTS["schwund_konto"] if payload.grund == "schwund" else DEFAULT_ACCOUNTS["bestandsveraenderung"]
-            debit_name = "Lagerschwund" if payload.grund == "schwund" else "Bestandsveränderungen"
-            journal_entry_id = _post_inventory_journal(
-                db,
-                tenant_id=tid,
-                posting_date=posting_date,
-                document_type="stock_correction",
-                document_number=ref_number,
-                description=f"Bestandskorrektur ({REASON_CODES[payload.grund]})",
-                debit_account=debit_konto,
-                debit_account_name=debit_name,
-                credit_account=accounts["bestandskonto"],
-                credit_account_name="Warenbestand",
-                amount=amount,
-                reference=ref_number,
-            )
-        else:
-            # Zugang: DEBIT Bestandskonto, CREDIT Bestandsveränderung
-            journal_entry_id = _post_inventory_journal(
-                db,
-                tenant_id=tid,
-                posting_date=posting_date,
-                document_type="stock_correction",
-                document_number=ref_number,
-                description=f"Bestandskorrektur Zugang ({REASON_CODES[payload.grund]})",
-                debit_account=accounts["bestandskonto"],
-                debit_account_name="Warenbestand",
-                credit_account=DEFAULT_ACCOUNTS["bestandsveraenderung"],
-                credit_account_name="Bestandsveränderungen",
-                amount=amount,
-                reference=ref_number,
-            )
-    except Exception as exc:
-        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
-        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
-        sperre = kontosperre_meldung(exc)
-        if sperre:
-            db.rollback()
-            raise HTTPException(status_code=409, detail=sperre) from exc
-        # Auch jeder andere Fehler der Buchung verwirft die Bestandskorrektur; gemeldet wird er
-        # als Fehler, nicht als Erfolg.
-        from app.core.metrics import critical_data_path_errors_total
-
-        critical_data_path_errors_total.labels(
-            endpoint="inventory_operations_gl", error_type="posting_failed"
-        ).inc()
-        logger.error(
-            "GL-Buchung fuer Bestandskorrektur %s fehlgeschlagen: %s",
-            ref_number, exc, exc_info=True,
-        )
-        db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="Bestandskorrektur nicht gebucht: Die Buchung im Hauptbuch ist fehlgeschlagen.",
-        ) from exc
+    melde_fehlende_bewertung("inventory_operations_gl", ref_number)
 
     db.commit()
 
@@ -412,7 +248,7 @@ async def create_schwund(
 ):
     """Lagerschwund buchen — Kurzform für Bestandskorrektur mit Grund 'schwund'.
 
-    Bucht automatisch: DEBIT 5810 Lagerschwund, CREDIT 1500 Warenbestand.
+    Die Hauptbuchbuchung folgt erst mit der Bestandsbewertung (s. melde_fehlende_bewertung).
     """
     korrektur = BestandskorrekturIn(
         article_id=payload.article_id,
@@ -434,7 +270,7 @@ async def create_mhd_abschreibung(
 ):
     """MHD-Abschreibung — Charge mit abgelaufenem Haltbarkeitsdatum ausbuchen.
 
-    Bucht automatisch: DEBIT 5800 Bestandsveränderungen, CREDIT 1500 Warenbestand.
+    Die Hauptbuchbuchung folgt erst mit der Bestandsbewertung (s. melde_fehlende_bewertung).
     Aktualisiert ggf. die Chargen-Menge auf 0.
     """
     posting_date = payload.buchungsdatum or date.today()
@@ -566,7 +402,6 @@ async def get_korrektur(
 # ---------------------------------------------------------------------------
 
 from pydantic import Field as _Field
-from typing import List as _List
 
 
 class LotCreateIn(BaseModel):
