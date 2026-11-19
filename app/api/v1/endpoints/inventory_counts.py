@@ -13,7 +13,6 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import kontosperre_meldung
 from ....core.database import get_db
 from ....core.tenant import get_tenant_id
 from ....infrastructure.models import InventoryCount, InventoryCountLine
@@ -323,57 +322,12 @@ async def post_inventory_count(
         else:
             total_negative += Decimal(str(abs(diff)))
 
-    # Aggregate GL posting
+    # Keine Buchung ohne Bewertung: frueher ging die Netto-Differenz in Tonnen als Eurobetrag ins Journal.
     journal_entry_id = None
-    try:
-        net = total_positive - total_negative
-        amount = Decimal(str(abs(float(net)))).quantize(Decimal("0.01"))
-        if amount > 0:
-            from .inventory_operations import _post_inventory_journal
-            if net > 0:
-                journal_entry_id = _post_inventory_journal(
-                    db,
-                    tenant_id=tid,
-                    posting_date=posting_date,
-                    document_type="inventory_count",
-                    document_number=f"INVENTUR-{count_id[:8].upper()}",
-                    description=f"Inventur-Buchung — Netto-Zugang {amount} t",
-                    debit_account="1500",
-                    debit_account_name="Warenbestand",
-                    credit_account="5800",
-                    credit_account_name="Bestandsveränderungen",
-                    amount=amount,
-                    reference=f"INVENTUR-{count_id[:8].upper()}",
-                )
-            else:
-                journal_entry_id = _post_inventory_journal(
-                    db,
-                    tenant_id=tid,
-                    posting_date=posting_date,
-                    document_type="inventory_count",
-                    document_number=f"INVENTUR-{count_id[:8].upper()}",
-                    description=f"Inventur-Buchung — Netto-Abgang {amount} t",
-                    debit_account="5800",
-                    debit_account_name="Bestandsveränderungen",
-                    credit_account="1500",
-                    credit_account_name="Warenbestand",
-                    amount=amount,
-                    reference=f"INVENTUR-{count_id[:8].upper()}",
-                )
-    except Exception as e:  # noqa: BLE001
-        # Bestand und Buchung teilen eine Transaktion: Lehnt die Kontosperre die Buchungszeile ab,
-        # ist auch die Bestandsaenderung verloren. Das wird gesagt statt als Erfolg gemeldet.
-        sperre = kontosperre_meldung(e)
-        if sperre:
-            db.rollback()
-            raise HTTPException(status_code=409, detail=sperre) from e
-        # Auch jeder andere Fehler der Buchung verwirft die Bestandsaenderungen der Inventur.
-        logger.error("Journal-Buchungen für Inventur konnten nicht erstellt werden: %s", e, exc_info=True)
-        db.rollback()
-        raise HTTPException(
-            status_code=500,
-            detail="Inventur nicht verbucht: Die Buchung im Hauptbuch ist fehlgeschlagen.",
-        ) from e
+    if total_positive != total_negative:
+        from .inventory_operations import melde_fehlende_bewertung
+
+        melde_fehlende_bewertung("inventory_counts_gl", f"INVENTUR-{count_id[:8].upper()}")
 
     # Update count status
     count.status = "posted"
