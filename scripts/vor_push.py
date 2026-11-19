@@ -267,8 +267,10 @@ def betroffene_tests(base: str) -> list[str]:
     for tabelle in sorted(ENTFERNTE_TABELLEN):
         # schema.name oder f"{SCHEMA}.name": der Name nach einem Punkt, als ganzes Wort
         name = tabelle.split(".", 1)[1]
-        for treffer in _git("grep", "-l", "-w", "-F", f".{name}", "--", "tests/*.py", "tests/**/*.py").split():
-            tests.add(treffer)
+        genau = re.compile(r"\." + re.escape(name) + r"\b")
+        for treffer in _git("grep", "-l", "-F", f".{name}", "--", "tests/*.py", "tests/**/*.py").split():
+            if genau.search((REPO / treffer).read_text(encoding="utf-8", errors="ignore")):
+                tests.add(treffer)
     tests.update(p for p in IMMER if (REPO / p).exists())
     tests.update(str(p.relative_to(REPO)).replace("\\", "/") for p in (REPO / "tests").glob("*ratsche*.py"))
     return sorted(t for t in tests if (REPO / t).exists() and "/fixtures/" not in t)
