@@ -34,9 +34,12 @@ BLOCK = 6  # Testdateien je pytest-Prozess (mehr legte Docker Desktop lahm)
 REGISTER: list[tuple[str, list[str], str]] = [
     ("Baseline-Integritaet", ["python", "scripts/check_baseline_integrity.py", "--base", "{base}"], "-"),
     ("Improvement-Pipelines (Godfiles, Paginierung, ...)", ["python", "scripts/run_improvement_pipelines.py"],
-     "python scripts/check_file_size.py --update-baseline; python scripts/check_pagination.py --update-baseline"),
+     "python scripts/check_file_size.py --update-baseline; python scripts/check_pagination.py --update-baseline "
+     "(Ratschen nur senken: nach Entfernen von Code)"),
     ("Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)",
-     ["bash", "scripts/check_all_doc_generators.sh", "--check"], "bash scripts/check_all_doc_generators.sh"),
+     ["bash", "scripts/check_all_doc_generators.sh", "--check"],
+     "python scripts/generate_openapi.py; python scripts/generate_code_inventories.py; "
+     "bash scripts/check_all_doc_generators.sh  (das Sammelskript schreibt OpenAPI und Inventare nicht)"),
     ("Tabellenkatalog (Lineage)", ["python", "scripts/tabellenkatalog_lineage.py", "--check"],
      "python scripts/tabellenkatalog_lineage.py"),
     ("RLS-Inventar (frisches Schema)", ["python", "scripts/rls_inventory.py", "--check"], "python scripts/rls_inventory.py"),
