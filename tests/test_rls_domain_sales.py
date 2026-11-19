@@ -1,9 +1,11 @@
-"""RLS-Domain Sales: Angebote, Lieferscheine, Gutschriften und Positionen als valeo_app.
+"""RLS-Domain Sales: Angebote und ihre Positionen als valeo_app.
 
 Pruefhilfe und Rahmen: tests/rls_domain_support.py (valeo_probe, zurueckgerollt).
 
 Auftraege sind seit BELEG-052 (``docflow_auftraege_uebernahme_20261109``) DocFlow-Belege; ``domain_crm.sales_orders``
-ist eine Sicht mit ``security_invoker`` - ihre Mandantentrennung ist die von DocFlow (``test_rls_domain_docflow``).
+war eine Sicht mit ``security_invoker``. Seit S5 (``beleg_altspeicher_entfernen_20261117``) gibt es die alten
+Speicher fuer Lieferschein, Gutschrift und Quittung nicht mehr; ihre Mandantentrennung ist die von DocFlow
+(``test_rls_domain_docflow``).
 """
 
 from __future__ import annotations
@@ -22,21 +24,17 @@ from rls_domain_support import A, B, SYSTEM
 pytestmark = pytest.mark.integration
 
 OFFERS, OFFER_ITEMS = "domain_crm.sales_offers", "domain_crm.sales_offer_items"
-ORDERS = "domain_crm.sales_orders"  # Sicht auf DocFlow
 DOCFLOW = "domain_docflow.document_headers"
-NOTES, NOTE_POSITIONS = "domain_sales.delivery_notes", "domain_sales.delivery_note_positions"
-CREDITS, CREDIT_LINES = "domain_sales.sales_credit_notes", "domain_sales.sales_credit_note_lines"
-RECEIPTS = "domain_sales.sales_delivery_notes"
+ORDERS = DOCFLOW  # Auftraege sind DocFlow-Belege (doc_type sales_order)
 PICK_LISTS = "domain_inventory.pick_lists"
 CUSTOMERS = "domain_crm.customers"
-HEADS = (OFFERS, NOTES, CREDITS, RECEIPTS)
-CHILDREN = {NOTE_POSITIONS: ("delivery_note_id", NOTES),
-            CREDIT_LINES: ("credit_note_id", CREDITS), OFFER_ITEMS: ("offer_id", OFFERS)}
-ISOLATED = HEADS + (NOTE_POSITIONS, CREDIT_LINES)
+HEADS = (OFFERS,)
+CHILDREN = {OFFER_ITEMS: ("offer_id", OFFERS)}
+ISOLATED = HEADS
 
 
 def _head_values(head: str, rows: dict, tenant: str) -> dict:
-    if head in (OFFERS, CREDITS):
+    if head == OFFERS:
         return {"customer_id": rows["customer", tenant]}
     return {}
 
@@ -44,10 +42,7 @@ def _head_values(head: str, rows: dict, tenant: str) -> dict:
 def _child_values(child: str, parent_id: str, n: int) -> dict:
     column, _ = CHILDREN[child]
     values = {column: parent_id}
-    if child in (OFFER_ITEMS, CREDIT_LINES):
-        values["line_number"] = 100 + n
-    if child == NOTE_POSITIONS:
-        values["pos_nr"] = 100 + n
+    values["line_number"] = 100 + n
     return values
 
 
@@ -111,24 +106,15 @@ def test_keine_position_unter_fremdem_kopf(db, child):
     with tenant_scope(A, "test"):
         message = support.rejected_insert_with(conn, child, A, **_child_values(child, foreign, 2))
         assert f"fk_{child.split('.')[1]}_{column}_tenant" in message, message
-        extra = {OFFER_ITEMS: ", line_number = 999",
-                 CREDIT_LINES: ", line_number = 999", NOTE_POSITIONS: ", pos_nr = 999"}[child]
+        extra = ", line_number = 999"
         message = support.rejected(conn, f"UPDATE {child} SET {column} = :p{extra} WHERE id = :i",
                                    {"p": foreign, "i": rows[child, A]})
         assert f"fk_{child.split('.')[1]}_{column}_tenant" in message, message
 
 
-def test_position_erbt_den_mandanten_vom_kontext(db):
-    conn, rows = db
-    with tenant_scope(A, "test"):
-        conn.execute(sa.text(f"INSERT INTO {NOTE_POSITIONS} (id, delivery_note_id, pos_nr, menge) "
-                             "VALUES ('rls-sales-pos', :n, 900, 1)"), {"n": rows[NOTES, A]})
-        assert conn.execute(sa.text(f"SELECT tenant_id FROM {NOTE_POSITIONS} WHERE id = 'rls-sales-pos'")).scalar() == A
-
-
 def test_kopf_mit_positionen_behaelt_seinen_mandanten(db):
     conn, rows = db
-    for head in (NOTES, CREDITS, OFFERS):
+    for head in (OFFERS,):
         message = support.as_owner_rejected(conn, f"UPDATE {head} SET tenant_id = :b WHERE id = :i",
                                             {"b": B, "i": rows[head, A]})
         assert "_tenant" in message, (head, message)
@@ -136,8 +122,8 @@ def test_kopf_mit_positionen_behaelt_seinen_mandanten(db):
 
 def test_kontextwechsel_savepoint_hintergrund_pool(db):
     conn, rows = db
-    support.assert_context_switch_and_savepoint(conn, NOTES, rows[NOTES, A], rows[NOTES, B])
-    support.assert_background_needs_explicit_context(conn, NOTES, rows[NOTES, A], rows[NOTES, B])
+    support.assert_context_switch_and_savepoint(conn, OFFERS, rows[OFFERS, A], rows[OFFERS, B])
+    support.assert_background_needs_explicit_context(conn, OFFERS, rows[OFFERS, A], rows[OFFERS, B])
     support.assert_pool_reuse_keeps_no_tenant()
 
 

@@ -91,11 +91,10 @@ LINKS = (
     _l("stock_corrections", "warehouse_id", WAREHOUSES),
     _l("charge_lineage_links", "source_movement_id", MOVEMENTS),
     _l("charge_lineage_links", "target_movement_id", MOVEMENTS),
-    _l("domain_sales.delivery_note_positions", "artikel_id", ARTICLES),
 )
 CHILDREN = tuple(dict.fromkeys(child for child, _, _ in LINKS))
 # Eltern, deren Pflicht-Eltern seed_row selbst anlegt (FK-Pruefungen umgehen RLS, aber valeo_app braucht Rechte).
-AUXILIARY = ("domain_crm.customers", "domain_shared.branches", "domain_sales.delivery_notes",
+AUXILIARY = ("domain_crm.customers", "domain_shared.branches",
              f"{INV}.pick_lists", f"{INV}.warehouse_transfers", f"{INV}.stock_corrections", f"{INV}.weighing_tickets",
              f"{INV}.agrar_contracts", "domain_finance.self_billing_invoices", "domain_shared.users",
              "domain_agrar.nutrient_compositions", f"{INV}.inventory_movement_types")
@@ -205,7 +204,6 @@ def test_eltern_mit_verweisen_behaelt_seinen_mandanten(db):
 
 
 SET_NULL = ((f"{INV}.daily_prices", "article_id", ARTICLES), (f"{INV}.lkw_annahme_queue", "article_id", ARTICLES),
-            ("domain_sales.delivery_note_positions", "artikel_id", ARTICLES),
             (f"{INV}.charge_lineage_links", "source_movement_id", MOVEMENTS))
 
 

@@ -47,7 +47,9 @@ def engine():
                       {"id": haus, "n": f"Pruefbetrieb {haus}"})
     yield motor
     with motor.begin() as v:
-        for tabelle in ("domain_crm.sales_orders", "domain_crm.customers", "domain_shared.webshop_bestellungen",
+        # Die Webshop-Auftraege sind DocFlow-Entwuerfe (vorher ueber die Sicht domain_crm.sales_orders geloescht).
+        for tabelle in ("domain_docflow.document_items", "domain_docflow.document_headers",
+                        "domain_crm.customers", "domain_shared.webshop_bestellungen",
                         "domain_shared.webshop_sync_log", "domain_shared.webshop_configs"):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -121,7 +123,8 @@ def test_verarbeiten_ohne_zugeordneten_kunden_legt_keinen_auftrag_an(engine, cli
     antwort = client.post("/api/v1/webshop/bestellungen/WS-OHNE/verarbeiten", headers=kopf).json()
     assert antwort["verarbeitet"] is False and "KUNDE_NICHT_ZUGEORDNET" in antwort["blockers"]
     with engine.connect() as v:
-        assert v.execute(text("SELECT count(*) FROM domain_crm.sales_orders WHERE tenant_id = :h"),
+        assert v.execute(text("SELECT count(*) FROM domain_docflow.document_headers WHERE tenant_id = :h "
+                              "AND doc_type = 'sales_order'"),
                          {"h": HAUS_A}).scalar() == 0
 
 
