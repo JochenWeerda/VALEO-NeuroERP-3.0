@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Lineage des Tabellenkatalogs ohne Datenbank neu rechnen.
+"""Lineage des Tabellenkatalogs ohne Datenbank neu rechnen (samt gleichnamiger Tabellen ueber Schemata).
 
 Der Katalog (``docs/admin/table-catalog.json|md``) fuehrt je Tabelle, welcher Code sie liest und schreibt
 (``read_by``/``written_by``/``screens``). Wer SQL mit Tabellennamen in eine andere Datei verschiebt oder entfernt,
@@ -37,6 +37,9 @@ def neu_berechnet() -> tuple[str, str, str, str]:
     payload.pop("lineage_failures", None)
     lineage, fehler = collect_lineage(catalog_tables=tabellen)
     attach_lineage(payload, lineage)
+    # Auch die Liste gleichnamiger Tabellen aus den Schemata neu rechnen: Nach dem Entfernen einer Tabelle blieb sie
+    # sonst stehen (19.11.2026, S5: delivery_notes in domain_erp und domain_sales).
+    payload["same_name_across_schemas"] = katalog._same_name_across_schemas(payload)
     if fehler:
         payload["lineage_failures"] = fehler
     heute = re.search(r"^last_reviewed: (\S+)", alt_md, re.M).group(1)

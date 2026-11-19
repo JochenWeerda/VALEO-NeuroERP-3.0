@@ -29,6 +29,7 @@ REPO = Path(os.environ.get("VOR_PUSH_REPO") or Path(__file__).resolve().parents[
 HIER = Path(__file__).resolve().parent
 VORGABE_PRUEFSTAND = "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"
 BLOCK = 6  # Testdateien je pytest-Prozess (mehr legte Docker Desktop lahm)
+RUECKWEG: str | None = None  # Revision, auf die der Pruefstand nach voruebergehend eingespielten Branch-Migrationen zurueckgeht
 
 #: Register und Verzeichnisse: (Name, Pruefbefehl, Befehl zum Neuerzeugen)
 REGISTER: list[tuple[str, list[str], str]] = [
@@ -128,6 +129,8 @@ def _laufe(befehl: list[str], titel: str) -> bool:
 def pruefe_pruefstand(url: str, base: str) -> bool:
     """valeo_probe so herrichten wie die CI ihre Datenbank: Migrationen, Seed, getrennte Rollen.
 
+    Rollen mit --eigentum wie im Betrieb: sonst migriert Alembic als valeo_owner gegen Objekte von valeo_dev und
+    scheitert ("must be owner").
     Nur Alembic (pruefstand_db.py) reichte nicht: Ohne Seed fehlten die Bestandszeilen, ohne provision_db_roles die
     Rechte der App-Rolle - Tests waren lokal rot oder still uebersprungen, in CI gruen (19.11.2026: Inventur- und
     POS-Retoure-Tests, galten lange als "Umgebung"). Bewusst OHNE create_all: RLS-Inventar und Schemavertraege gelten
@@ -141,12 +144,20 @@ def pruefe_pruefstand(url: str, base: str) -> bool:
         return False
     py = sys.executable
     if eigene:
-        # Eine ungemergte Migration wird nie auf den Pruefstand gestempelt; sie wird in einer zurueckgerollten
-        # Transaktion geprueft. Hier deshalb kein Neuaufbau, nur die Rollen nachziehen.
-        print(f"  Branch bringt eigene Migrationen mit ({len(eigene)}); Pruefstand {sorted(stand)} bleibt "
-              f"(Kopf des Branches {sorted(koepfe)}). Migration in zurueckgerollter Transaktion pruefen;")
-        print("  steht der Pruefstand hinter der Basis, ihn aus einem Baum auf der Basis neu aufbauen.")
-        return _laufe([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden"], "Rollen und Rechte")
+        # Die CI prueft den Branch MIT seiner Migration. Ohne sie meldeten DB-gestuetzte Register und Tests den alten
+        # Schemastand (19.11.2026, S5: entfernte Tabellen "gefunden"). Deshalb fuer die Dauer der Pruefung einspielen
+        # und danach auf den vorherigen Stand zurueck (main() -> stelle_pruefstand_zurueck). Scheitert der Rueckweg,
+        # baut der naechste Lauf aus main den Pruefstand neu (unbekannte Revision != Kopf).
+        global RUECKWEG
+        if len(stand) != 1:
+            print(f"  Pruefstand hat mehrere Revisionen {sorted(stand)}; ohne eindeutigen Rueckweg kein Einspielen.")
+            return False
+        print(f"  Branch bringt eigene Migrationen mit ({len(eigene)}): fuer die Pruefung auf {sorted(koepfe)}, "
+              f"danach zurueck auf {sorted(stand)}.")
+        RUECKWEG = next(iter(stand))
+        if not _laufe([py, "-m", "alembic", "upgrade", "head"], "Branch-Migrationen voruebergehend einspielen"):
+            return False
+        return _laufe([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"], "Rollen und Rechte")
     neu_aufgebaut = stand != koepfe
     if neu_aufgebaut:
         print(f"  Pruefstand {sorted(stand)} != Kopf {sorted(koepfe)}: wird unter demselben Namen neu aufgebaut.")
@@ -158,7 +169,7 @@ def pruefe_pruefstand(url: str, base: str) -> bool:
     # Seed einmal nach dem Aufbau; Merkmal "schon wie CI": die App-Rolle hat Rechte.
     if neu_aufgebaut or not _wie_ci(url):
         schritte.append(([py, "-m", "app.seeds.inventory_seed"], "Bestands-Seed"))
-    schritte.append(([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden"], "Rollen und Rechte"))
+    schritte.append(([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"], "Rollen und Rechte"))
     return all([_laufe(befehl, titel) for befehl, titel in schritte])
 
 
@@ -257,6 +268,15 @@ def pruefe_tests(dateien: list[str]) -> list[str]:
     return rot
 
 
+def stelle_pruefstand_zurueck() -> None:
+    if RUECKWEG is None:
+        return
+    _kopf("Pruefstand zurueck auf die Basis")
+    if not _laufe([sys.executable, "-m", "alembic", "downgrade", RUECKWEG], f"Downgrade auf {RUECKWEG}"):
+        print("  Rueckweg gescheitert: der naechste Lauf auf main baut valeo_probe neu auf "
+              "(oder sofort: python scripts/pruefstand_db.py in einem Baum auf main).")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--base", default="origin/main")
@@ -266,9 +286,12 @@ def main() -> int:
         strom.reconfigure(errors="replace")
 
     url = _pruefstand_umgebung()
-    stand_ok = pruefe_pruefstand(url, args.base)
-    register_rot = pruefe_register(args.base)
-    tests_rot = [] if args.ohne_tests else pruefe_tests(betroffene_tests(args.base))
+    try:
+        stand_ok = pruefe_pruefstand(url, args.base)
+        register_rot = pruefe_register(args.base)
+        tests_rot = [] if args.ohne_tests else pruefe_tests(betroffene_tests(args.base))
+    finally:
+        stelle_pruefstand_zurueck()
 
     _kopf("Ergebnis")
     if stand_ok and not register_rot and not tests_rot:
