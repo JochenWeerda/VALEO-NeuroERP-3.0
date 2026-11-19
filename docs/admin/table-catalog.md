@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 707 Tabellen, 9365 Spalten.**
+**31 Schemas, 696 Tabellen, 9105 Spalten.**
 
 ## Schemas
 
@@ -28,11 +28,11 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_compliance` | `dms-compliance` | 15 | 188 |
 | `domain_contracts` | `agrar` | 3 | 30 |
 | `domain_controlling` | `finance` | 9 | 88 |
-| `domain_crm` | `crm` | 48 | 858 |
+| `domain_crm` | `crm` | 46 | 819 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
 | `domain_docflow` | `dms-compliance` | 27 | 350 |
 | `domain_docs` | `platform` | 2 | 25 |
-| `domain_einkauf` | `procurement` | 21 | 393 |
+| `domain_einkauf` | `procurement` | 19 | 291 |
 | `domain_erp` | `finance` | 46 | 601 |
 | `domain_finance` | `finance` | 23 | 249 |
 | `domain_futtermittel` | `agrar` | 8 | 83 |
@@ -51,7 +51,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_pricing` | `finance` | 5 | 49 |
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
-| `domain_sales` | `crm` | 13 | 175 |
+| `domain_sales` | `crm` | 6 | 56 |
 | `domain_shared` | `platform` | 164 | 1967 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
@@ -62,7 +62,6 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 ## Gleicher Tabellenname in mehreren Schemas
 
 - `business_partners` in `domain_crm`, `domain_erp`
-- `delivery_notes` in `domain_erp`, `domain_sales`
 - `harvest_acceptances` in `domain_agrar`, `domain_inventory`
 - `open_items` in `domain_erp`, `domain_shared`
 - `policy_rules` in `domain_erp`, `domain_shared`
@@ -256,8 +255,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_docs.doc_allocations` | `app/domains/documents/allocation_models.py`, `app/services/sales_invoice_mask.py` | — | — |
 | `domain_einkauf.artikel_lager_parameter` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.bestellung_kommunikation` | `app/services/bestell_kommunikation_service.py` | — | — |
-| `domain_einkauf.bestellung_positionen` | `app/infrastructure/models/einkauf_models.py` | — | — |
-| `domain_einkauf.bestellungen` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/einkauf_kpis.py`, `app/infrastructure/models/einkauf_models.py`, `app/services/beleg_anlage.py`, `app/services/docflow_lagerzugang.py`, `app/services/rfq_service.py`, `app/services/wareneingang_avis_service.py` | — | — |
 | `domain_einkauf.bestellvorschlaege` | `app/api/v1/endpoints/einkauf_bestellvorschlag_kommandos.py`, `app/infrastructure/models/einkauf_models.py`, `app/workers/low_stock_agent.py` | `app/workers/low_stock_agent.py` | — |
 | `domain_einkauf.bestellvorschlag_positionen` | `app/infrastructure/models/einkauf_models.py` | — | — |
 | `domain_einkauf.ers_invoices` | `app/api/v1/endpoints/ers_settlement.py` | `app/api/v1/endpoints/ers_settlement.py` | — |
@@ -579,10 +576,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_reporting.query_definitions` | `app/services/query_center_service.py` | `app/services/query_center_service.py` | — |
 | `domain_sales.blanket_order_releases` | `app/api/v1/endpoints/sales_blanket_orders.py` | `app/api/v1/endpoints/sales_blanket_orders.py` | — |
 | `domain_sales.blanket_orders` | `app/api/v1/endpoints/sales_blanket_orders.py` | `app/api/v1/endpoints/sales_blanket_orders.py` | — |
-| `domain_sales.delivery_notes` | `app/services/beleg_anlage.py`, `app/services/document_control_projection.py` | — | — |
-| `domain_sales.sales_credit_notes` | `app/services/finance_freigabe.py`, `app/services/gutschrift_docflow.py`, `app/services/mcp_execution_service.py` | — | — |
-| `domain_sales.sales_invoice_lines` | `app/domains/documents/sales_invoice_models.py` | — | — |
-| `domain_sales.sales_invoices` | `app/api/v1/endpoints/credit_management.py`, `app/domains/documents/sales_invoice_models.py` | — | — |
 | `domain_sales.sales_preisabweichungen` | `app/services/sales_preisabweichung_service.py` | `app/services/sales_preisabweichung_service.py` | — |
 | `domain_sales.sales_returns` | `app/api/v1/endpoints/sales_credit_notes.py` | `app/api/v1/endpoints/sales_credit_notes.py` | — |
 | `domain_shared.admin_connector_configs` | `app/api/v1/endpoints/admin_mobile.py` | `app/api/v1/endpoints/admin_mobile.py` | — |
@@ -934,8 +927,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `partner_rueckfuellung_protokoll` | `crm` | native | `quelle`, `satz_id` | quelle, satz_id, tenant_id, partner_id, partner_neu, zugeordnet_am |
 | `sales_offer_items` | `crm` | legacy | `id` | id, tenant_id, offer_id, line_number, article_number, description, quantity, unit, unit_price, ek_price, discount_percent, line_total, created_at, updated_at |
 | `sales_offers` | `crm` | legacy | `id` | id, tenant_id, customer_inquiry_id, customer_id, offer_number, subject, description, total_amount, currency, valid_until, status, contact_person, delivery_date, payment_terms, notes, created_at, updated_at, deleted_at, version, printed_at, print_count, posted_at, customer_name, is_pauschale |
-| `sales_order_items_vor_docflow` | `crm` | legacy | `id` | id, tenant_id, order_id, line_number, article_number, description, quantity, unit_price, discount_percent, line_total, created_at, updated_at, ek_price, unit |
-| `sales_orders_vor_docflow` | `crm` | legacy | `id` | id, tenant_id, sales_offer_id, customer_id, order_number, subject, description, total_amount, currency, status, contact_person, delivery_date, delivery_address, payment_terms, notes, created_at, updated_at, deleted_at, version, shipping_method, customer_name, printed_at, print_count, posted_at, is_pauschale |
 | `supplier_tax_profiles` | `crm` | native | `id` | id, supplier_id, taxation_type, vat_id, valid_from, valid_to, notes, tenant_id, created_at, created_by, updated_at, updated_by |
 
 ## `domain_dev_mock`
@@ -989,8 +980,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 |---|---|---|---|---|
 | `artikel_lager_parameter` | `procurement` | native | `id` | id, tenant_id, article_id, warehouse_id, niederlassung_id, mindestbestand, maximalbestand, meldebestand, soll_bestand, std_lieferant_id, std_bestellmenge, std_einheit, wiederbeschaffungs_tage, durchschnitt_verbrauch_tag, reichweite_tage, aktiv, notiz, created_at, updated_at, updated_by |
 | `bestellung_kommunikation` | `procurement` | native | `id` | id, tenant_id, bestellung_id, kanal, empfaenger, versendet_am, status, betreff, nachricht, erfasst_am, erfasst_von |
-| `bestellung_positionen` | `procurement` | native | `id` | id, bestellung_id, pos_nr, article_id, artikel_nr, artikel_bezeichnung, lieferanten_artnr, menge, menge_geliefert, menge_offen, einheit, einzelpreis, preis_einheit, rabatt_prozent, netto_betrag, mwst_satz, mwst_betrag, brutto_betrag, kontrakt_pos_id, lieferdatum, lagerort, notiz, status, gebinde_menge, gebinde_einheit, gebinde_schluessel, gewicht_kg, kontrakt_nr, lagerhalle, lagerfach, mindestmenge, maximalmenge, tenant_id |
-| `bestellungen` | `procurement` | native | `id` | id, tenant_id, bestellnummer, lieferant_id, vorschlag_id, niederlassung_id, bestelldatum, lieferdatum_wunsch, lieferdatum_zugesagt, lieferdatum_ist, status, versand_art, versandt_am, versandt_von, netto_summe, mwst_betrag, brutto_summe, waehrung, zahlungsziel_tage, skonto_prozent, skonto_frist_tage, unsere_referenz, ihre_referenz, kontrakt_id, freitext_kopf, freitext_fuss, notiz, anhang_ids, erstellt_von, created_at, updated_at, bestellfall, ansprechpartner, kreditor_konto, lieferant_nr, kostenstelle, kommission, ladetermin, ladetermin_ab, lade_datum, incoterms, lieferadresse, zahlungsbedingung, skonto1_tage, skonto1_prozent, skonto2_tage, skonto2_prozent, netto_tage, fremdwaehrung, umrechnungsfaktor, anfrage_nr, angebot_nr, auftrag_nr, abverkauf_horizont, bedarfsmenge, mindestbestellmenge, maximalbestellmenge, artikelgruppe, lagerplatz_opt, fracht_opt, opportunitaetskostensatz, palettenstellplatz_kosten, lagerkosten_satz, verkaufsbeleg_id, kunden_id, direktlieferung, ueberschlag_lager, neuer_artikel, innovationshinweis |
 | `bestellvorschlaege` | `procurement` | native | `id` | id, tenant_id, vorschlag_typ, bezeichnung, datum, niederlassung_id, parameter, status, erstellt_von, freigegeben_von, freigegeben_am, notiz, created_at, updated_at |
 | `bestellvorschlag_positionen` | `procurement` | native | `id` | id, vorschlag_id, pos_nr, article_id, artikel_nr, artikel_bezeichnung, artikel_gruppe, einheit, ist_bestand, offene_auftraege, bedarf, vorschlag_menge, bestell_menge, lieferant_id, lieferant_name, kontrakt_id, letzter_preis, preis_einheit, letzter_kauf_datum, status, tenant_id |
 | `ers_invoices` | `procurement` | native | `id` | id, gr_id, supplier_id, amount, status, auto_created_at, tenant_id |
@@ -1422,14 +1411,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 |---|---|---|---|---|
 | `blanket_order_releases` | `crm` | native | `id` | id, tenant_id, blanket_order_id, release_quantity, release_date, sales_order_ref, status |
 | `blanket_orders` | `crm` | native | `id` | id, tenant_id, customer_id, article_id, total_quantity, unit_price, valid_from, valid_to, status, created_at |
-| `delivery_note_positions` | `crm` | native | `id` | id, delivery_note_id, pos_nr, artikel_id, artikel_nr, bezeichnung, bezeichnung2, menge, einheit, listenpreis, rabatt, art, netto_preis, netto_betrag, niederlassung, lagerhalle, lagerfach, charge, serien_nr, erloskonto, mwst_prozent, kontrakt_nr, skontierf, fremdware, created_at, updated_at, gef_punkt, na_bio, muster_nr, strecke, zus_beleg, anerken, tenant_id |
-| `delivery_notes` | `crm` | native | `id` | id, tenant_id, delivery_note_number, customer_id, branch_id, sales_rep_id, operator_id, delivery_date, delivery_time, cost_center_id, truck_number, is_credit_note, is_self_pickup, is_early_payment, reference_invoice_number, status, is_printed, is_delivered, invoice_number, totals, created_at, updated_at, created_by, updated_by, sales_order_id, storno_grund |
 | `sales_ab_status_log` | `crm` | prefix | `id` | id, auftrag_id, tenant_id, old_status, new_status, operator, reason, created_at |
-| `sales_credit_note_lines` | `crm` | prefix | `id` | id, credit_note_id, line_number, article_number, description, quantity, unit_price, tax_rate, line_total, tax_code, tenant_id |
-| `sales_credit_notes` | `crm` | prefix | `id` | id, tenant_id, credit_note_number, customer_id, customer_name, invoice_reference, reason, total_amount, currency, status, notes, created_at, updated_at, net_amount, tax_amount, correction_type |
-| `sales_delivery_notes` | `crm` | prefix | `id` | id, tenant_id, quittiert_am, quittiert_von |
-| `sales_invoice_lines` | `crm` | prefix | `id` | id, tenant_id, invoice_id, line_no, article_id, article_number, description, quantity, unit, unit_price, net_amount, vat_rate, created_at, updated_at |
-| `sales_invoices` | `crm` | prefix | `id` | id, tenant_id, invoice_number, customer_id, invoice_date, due_date, currency, status, net_amount, vat_amount, gross_amount, note, created_by, created_at, updated_at |
 | `sales_lieferschein_close_log` | `crm` | prefix | `id` | id, lieferschein_id, tenant_id, aktion, operator, zeitstempel, created_at |
 | `sales_preisabweichungen` | `crm` | prefix | `id` | id, auftrag_id, tenant_id, artikel_id, angebots_preis, rechnungs_preis, abweichung_pct, status, freigabe_operator, freigabe_grund, created_at |
 | `sales_returns` | `crm` | prefix | `id` | id, tenant_id, return_number, customer_id, customer_name, delivery_note_reference, invoice_reference, reason, return_type, status, notes, created_at, updated_at |

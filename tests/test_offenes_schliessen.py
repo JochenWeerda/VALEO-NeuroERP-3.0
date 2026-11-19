@@ -59,7 +59,6 @@ def engine():
     with motor.begin() as v:
         h = {"h": [HAUS_A, HAUS_B]}
         v.execute(text("DELETE FROM domain_einkauf.bestellung_kommunikation WHERE tenant_id = ANY(:h)"), h)
-        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), h)
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE id = :i"), {"i": LIEFERANT})
         v.execute(text("DELETE FROM domain_ops.ops_bankkonten WHERE tenant_id = ANY(:h)"), h)
         v.execute(text("DELETE FROM public.outbox_events WHERE tenant_id = ANY(:h)"), h)
@@ -190,17 +189,6 @@ class TestNewsletter:
         daten = antwort.json()
         assert (daten["versendet"], daten["empfaenger_ungueltig"], daten["status"]) == (2, 1, "versendet")
         assert len(smtp.nachrichten) == 2
-
-
-def bestellung(engine, status: str = "versendet") -> tuple[str, str]:
-    from sqlalchemy import text
-
-    kennung, nummer = str(uuid.uuid4()), f"EK-{uuid.uuid4().hex[:8]}"
-    with engine.begin() as v:
-        v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                       " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, :s)"),
-                  {"i": kennung, "h": HAUS_A, "n": nummer, "l": LIEFERANT, "s": status})
-    return kennung, nummer
 
 
 def eintraege(engine, kennung: str) -> list[tuple]:

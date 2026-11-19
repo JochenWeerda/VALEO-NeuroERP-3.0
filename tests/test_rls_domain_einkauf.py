@@ -15,7 +15,8 @@ from app.core.tenant_context import tenant_scope
 from rls_domain_support import A, B, SYSTEM
 
 EK = "domain_einkauf"
-ORDERS, SUPPLIERS, CONTRACTS = f"{EK}.bestellungen", f"{EK}.lieferanten", f"{EK}.kontrakte"
+# Bestellungen fuehrt DocFlow; domain_einkauf.bestellungen/-positionen entfallen mit BELEG-052 S5.
+SUPPLIERS, CONTRACTS = f"{EK}.lieferanten", f"{EK}.kontrakte"
 PROPOSALS, CONTRACT_POSITIONS, RFQS = f"{EK}.bestellvorschlaege", f"{EK}.kontrakt_positionen", f"{EK}.rfq_requests"
 INVOICES, RECEIPTS = "public.einkauf_rechnungseingaenge", "public.einkauf_wareneingaenge"
 REQUESTS, OFFERS = "public.einkauf_anfragen", "public.einkauf_angebote"
@@ -23,16 +24,16 @@ DELIVERY_NOTES, PAYMENT_RUNS = "public.einkauf_lieferscheine", "public.einkauf_z
 PROC_ORDERS = "domain_procurement.proc_purchase_orders"
 
 ISOLATED = (
-    ORDERS, SUPPLIERS, f"{EK}.ers_invoices", f"{EK}.ers_suppliers", f"{EK}.invoice_verification",
+    SUPPLIERS, f"{EK}.ers_invoices", f"{EK}.ers_suppliers", f"{EK}.invoice_verification",
     PROC_ORDERS, DELIVERY_NOTES, "public.zahlungslauf_kreditoren",
-    f"{EK}.bestellung_positionen", f"{EK}.bestellvorschlag_positionen", CONTRACT_POSITIONS,
+    f"{EK}.bestellvorschlag_positionen", CONTRACT_POSITIONS,
     "public.einkauf_anfragen_positionen", "public.einkauf_angebote_positionen",
     "public.einkauf_lieferschein_positionen", "public.einkauf_zahlungslauf_posten",
     INVOICES, "public.einkauf_rechnungseingang_positionen", RECEIPTS, "public.einkauf_wareneingang_positionen",
     "public.einkauf_abgleich_ergebnisse",
 )
 NEW_TENANT_COLUMN = (
-    f"{EK}.bestellung_positionen", f"{EK}.bestellvorschlag_positionen", CONTRACT_POSITIONS,
+    f"{EK}.bestellvorschlag_positionen", CONTRACT_POSITIONS,
     "public.einkauf_anfragen_positionen", "public.einkauf_angebote_positionen",
     "public.einkauf_lieferschein_positionen", "public.einkauf_zahlungslauf_posten",
     "public.einkauf_rechnungseingang_positionen", "public.einkauf_wareneingang_positionen",
@@ -41,12 +42,11 @@ NEW_TENANT_HEADS = (INVOICES, RECEIPTS, "public.einkauf_abgleich_ergebnisse")
 DEFAULT_TO_CONTEXT = tuple(f"public.einkauf_{name}" for name in (
     "angebote", "anlieferavis", "auftragsbestaetigungen", "warengruppen", "zahlungslaeufe"))
 # Eltern in der Reihenfolge, in der sie angelegt werden (spaetere verweisen auf fruehere).
-PARENTS = (SUPPLIERS, CONTRACTS, PROPOSALS, ORDERS, CONTRACT_POSITIONS, RFQS, REQUESTS, OFFERS,
+PARENTS = (SUPPLIERS, CONTRACTS, PROPOSALS, CONTRACT_POSITIONS, RFQS, REQUESTS, OFFERS,
            DELIVERY_NOTES, PAYMENT_RUNS, INVOICES, RECEIPTS)
 
 # (Kind, Spalte, Eltern); P5-Tabellen behalten ihre Policies und bekommen nur den Schluessel.
 LINKS = (
-    (f"{EK}.bestellung_positionen", "bestellung_id", ORDERS),
     (f"{EK}.bestellvorschlag_positionen", "vorschlag_id", PROPOSALS),
     (CONTRACT_POSITIONS, "kontrakt_id", CONTRACTS),
     ("public.einkauf_anfragen_positionen", "anfrage_id", REQUESTS),
@@ -55,8 +55,6 @@ LINKS = (
     ("public.einkauf_zahlungslauf_posten", "zahlungslauf_id", PAYMENT_RUNS),
     ("public.einkauf_rechnungseingang_positionen", "rechnungseingang_id", INVOICES),
     ("public.einkauf_wareneingang_positionen", "wareneingang_id", RECEIPTS),
-    (f"{EK}.bestellung_positionen", "kontrakt_pos_id", CONTRACT_POSITIONS),
-    (ORDERS, "kontrakt_id", CONTRACTS), (ORDERS, "lieferant_id", SUPPLIERS), (ORDERS, "vorschlag_id", PROPOSALS),
     (f"{EK}.bestellvorschlag_positionen", "kontrakt_id", CONTRACTS),
     (f"{EK}.bestellvorschlag_positionen", "lieferant_id", SUPPLIERS),
     (CONTRACTS, "lieferant_id", SUPPLIERS),
@@ -178,7 +176,7 @@ def test_eltern_mit_verweisen_behaelt_seinen_mandanten(db):
 
 def test_kontextwechsel_savepoint_hintergrund_pool(db):
     conn, rows = db
-    support.assert_context_switch_and_savepoint(conn, ORDERS, rows[ORDERS, A], rows[ORDERS, B])
+    support.assert_context_switch_and_savepoint(conn, SUPPLIERS, rows[SUPPLIERS, A], rows[SUPPLIERS, B])
     support.assert_background_needs_explicit_context(conn, INVOICES, rows[INVOICES, A], rows[INVOICES, B])
     support.assert_pool_reuse_keeps_no_tenant()
 

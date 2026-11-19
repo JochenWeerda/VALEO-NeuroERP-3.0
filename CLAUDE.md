@@ -177,6 +177,14 @@ braucht **beide** — Schema frisch, Daten gewachsen.
 
 Runbook: `docs/quality-assurance/pruefstand-datenbank.md`.
 
+### Vor jedem Push: `python scripts/vor_push.py` (verbindlich)
+
+Ein Lauf richtet `valeo_probe` wie die CI her (Migrationen, Seed, getrennte Rollen; nie eine weitere Test-DB),
+prueft alle Register und Verzeichnisse (OpenAPI, Doc-Generatoren, Tabellenkatalog-Lineage, RLS-Inventar und -Matrix,
+Pflichtstruktur, Masken-/Familien-/Studio-Versionen, Baseline, Improvement-Pipelines, Docs-Governance) und faehrt die
+betroffenen Tests gestaffelt; ein Skip mangels Datenbank zaehlt als Fehler. Neue Rotursache aus CI -> Pruefung in
+`scripts/vor_push.py` ergaenzen, nicht in eine Liste schreiben.
+
 ## Error Handling Invariant
 
 - No empty catch blocks.

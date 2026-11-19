@@ -20,7 +20,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 REQUIRED_STRUCTURE: dict[str, tuple[str, ...]] = {
     "domain_shared": ("tenants", "users", "audit_logs"),
-    "domain_crm": ("business_partners", "customers", "sales_orders"),
+    "domain_crm": ("business_partners", "customers"),
     "domain_erp": (
         "journal_entries",
         "journal_entry_lines",
@@ -37,10 +37,11 @@ REQUIRED_STRUCTURE: dict[str, tuple[str, ...]] = {
         "inventory_counts",
         "lkw_annahme_queue",
     ),
-    "domain_einkauf": ("bestellungen", "lieferanten", "kontrakte"),
+    "domain_einkauf": ("lieferanten", "kontrakte"),
     "domain_ops": ("ops_wiegungen", "ops_chargen", "ops_labor_proben"),
     "domain_finance": ("aufbewahrungsfristen", "self_billing_invoices", "dispute_records"),
-    "domain_sales": ("delivery_notes", "sales_credit_notes", "sales_returns"),
+    "domain_sales": ("sales_returns",),
+    # Auftrag, Lieferschein, Rechnung, Gutschrift und Bestellung fuehrt DocFlow (BELEG-052 S5, 17.11.2026).
     "domain_docflow": ("document_headers", "document_items", "document_artifacts"),
     "domain_agrar": ("agrar_saatgut", "agrar_duenger", "nutrient_compositions"),
     "domain_controlling": ("kpi_definitions", "kpi_timeseries", "dashboard_configs"),

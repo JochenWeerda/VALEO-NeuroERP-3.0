@@ -21121,12 +21121,19 @@ Dateibesitz: die genannten Module, tests/test_beleg_reste_docflow.py (neu), ange
 Abnahme: neue Tests gegen echtes Schema gruen; vollstaendige Pruefkette; CI des PR.
 Bewusst nicht hier: Zusammenfuehrung des Fibu-Speichers /finance/ap/invoices mit der DocFlow-Eingangsrechnung (M3 Fibu). Ladegewicht nur aus Gewichtseinheiten und ESG-Kennzeichen bleiben wie beschrieben (kein Fehler).
 
-## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — zur Abnahme, Claude Code (M1)
+## BELEG-052-SICHT-AUFTRAEGE-S4-20261117 — abgeschlossen (PR #155 gemergt), Claude Code (M1)
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge der Fachreste. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: kein Leser der Uebergangssicht domain_crm.sales_orders / sales_order_items mehr (Ratsche 15 -> 0). Kreditlimit, Kreditpruefung, Kunden-360 (Kopf, Liste, Register), KIM-Belege, Verkaufsberichte, Management-Dashboard, MCP-Kundensicht, Bestellvorschlag (offene Menge je Position nach Teillieferung), Ist-Aggregation, Pickliste, Referenzaufloesung lesen DocFlow direkt. Was die Sicht rechnete (offene Menge, Liefertermin), steht einmal in app/services/auftrag_lesewege.py.
 Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandantengebunden); Verkaufsberichte zaehlten geloeschte Entwuerfe mit (jetzt nicht mehr); Kundennamen kommen aus dem Kundenstamm statt aus dem Betreff.
 Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
 Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
+
+## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — zur Abnahme, Claude Code (M1)
+Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S4. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+Ziel: DocFlow ist der einzige Belegspeicher. Migration beleg_altspeicher_entfernen_20261117 entfernt die Sichten domain_crm.sales_orders/_items und die Tabellen der alten Speicher (Lieferschein, Quittung, Rechnung, Gutschrift, Bestellung, Auftrags-Ursprungsdaten) - Inhalt laut Nutzerentscheidung 10.11.2026 Testdaten; haelt an bei gebuchten Altrechnungen/-gutschriften bestehender Mandanten. Rueckweg legt die Speicher leer wieder an (DDL per pg_dump aus frischer DB, beleg_altspeicher_entfernen_20261117.sql).
+Mit entfernt: ORM-Modelle (sales_invoice_models, EinkaufBestellung/-Position), Freigabe-Subjekte sales_credit_note und finance_sales_invoice (ohne Aufrufer), Demo-Seeds Verkauf/Logistik, Tabellenzuordnung, Tabellenkatalog (707 -> 696), Indizes in migrations/sql/erp/006.
+Pruefung: Migration frisch (valeo_s5_test per pruefstand_db.py, alembic downgrade -1/upgrade head) und gewachsen (valeo_neuro_erp, zurueckgerollte Transaktion: up/down/up). Gestaffelter Lauf 170 Testdateien auf dem frischen S5-Stand; rot nur bekannte Umgebungsfaelle (valeo_probe-gebunden, POS-Retoure-Grant, Studio-Release-SQL, Portal-Verzeichnis auch ohne S5).
+Dateibesitz: Migration + SQL, die genannten Module, angepasste Tests, Projektionen.
 
 ## M0-ROHWARE-TENANT-20261115 — reserviert, Codex
 
@@ -21400,6 +21407,12 @@ MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) bet
 MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
+
+## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
+Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
+Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
+Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
+Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
 
 ## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).

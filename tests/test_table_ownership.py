@@ -44,8 +44,9 @@ def test_legacy_agrar_contracts_bleibt_benannt() -> None:
     assert "Inventory" in verdict["reason"]
 
 
-def test_sales_orders_im_crm_ist_legacy_kein_prefix_fehler() -> None:
-    verdict = classify_table("domain_crm", "sales_orders")
+def test_sales_offers_im_crm_ist_legacy_kein_prefix_fehler() -> None:
+    # Auftraege sind seit BELEG-052 S5 nur noch DocFlow; das Angebot liegt weiter historisch im CRM-Schema.
+    verdict = classify_table("domain_crm", "sales_offers")
     assert verdict["ok"] is True
     assert verdict["placement"] == "legacy"
 
@@ -60,7 +61,7 @@ def test_evaluate_zaehlt_legacy() -> None:
     locations = {
         ("domain_crm", "customers"),
         ("domain_crm", "business_partners"),
-        ("domain_crm", "sales_orders"),
+        ("domain_crm", "sales_offers"),
         ("domain_shared", "tenants"),
         ("domain_shared", "users"),
         ("domain_shared", "audit_logs"),
@@ -70,10 +71,7 @@ def test_evaluate_zaehlt_legacy() -> None:
         ("domain_inventory", "articles"),
         ("domain_inventory", "inventory_stock_movements"),
         ("domain_inventory", "inventory_counts"),
-        ("domain_einkauf", "bestellungen"),
         ("domain_einkauf", "lieferanten"),
-        ("domain_sales", "delivery_notes"),
-        ("domain_sales", "sales_credit_notes"),
         ("domain_sales", "sales_returns"),
         ("domain_ops", "ops_wiegungen"),
         ("domain_ops", "ops_chargen"),
@@ -89,7 +87,7 @@ def test_evaluate_zaehlt_legacy() -> None:
     failures, notes, classified = evaluate(locations)
     assert failures == []
     assert classified == len(locations)
-    assert any("sales_orders" in note for note in notes)
+    assert any("sales_offers" in note for note in notes)
 
 
 def test_alle_index_domains_haben_schemas() -> None:

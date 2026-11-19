@@ -59,7 +59,6 @@ LINKS = (
     (f"{SH}.feeding_feed_analysis_findings", "analysis_id", ANALYSES),
     (f"{SH}.feeding_feed_analysis_revisions", "analysis_id", ANALYSES),
     (f"{SH}.feeding_feed_analysis_values", "analysis_id", ANALYSES),
-    ("domain_sales.delivery_notes", "branch_id", BRANCHES),
     ("domain_inventory.harvest_acceptances", "branch_id", BRANCHES),
     ("domain_agrar.feeding_feed_products", "feed_id", SINGLE_FEED),
     ("domain_agrar.feeding_feed_reference_values", "feed_id", SINGLE_FEED),

@@ -29,7 +29,6 @@ AUFRAEUMEN = (
     "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
     "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
     "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
-    "DELETE FROM domain_sales.sales_credit_notes WHERE tenant_id = :t",
     "DELETE FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
     "DELETE FROM domain_inventory.inventory_count_lines WHERE tenant_id = :t",
     "DELETE FROM domain_inventory.inventory_counts WHERE tenant_id = :t",
