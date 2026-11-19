@@ -154,10 +154,13 @@ def pruefe_pruefstand(url: str, base: str) -> bool:
             return False
         print(f"  Branch bringt eigene Migrationen mit ({len(eigene)}): fuer die Pruefung auf {sorted(koepfe)}, "
               f"danach zurueck auf {sorted(stand)}.")
+        rollen = [py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"]
+        if not _laufe(rollen, "Rollen und Eigentum (vor dem Einspielen)"):
+            return False
         RUECKWEG = next(iter(stand))
         if not _laufe([py, "-m", "alembic", "upgrade", "head"], "Branch-Migrationen voruebergehend einspielen"):
             return False
-        return _laufe([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"], "Rollen und Rechte")
+        return _laufe(rollen, "Rechte auf neue Objekte")
     neu_aufgebaut = stand != koepfe
     if neu_aufgebaut:
         print(f"  Pruefstand {sorted(stand)} != Kopf {sorted(koepfe)}: wird unter demselben Namen neu aufgebaut.")
