@@ -16,12 +16,17 @@ def test_debtor_source_summary_and_three_channel_money(channels,monkeypatch):
     client.app.include_router(mask_rollout_summaries.router,prefix="/api/v1")
     install_tenant_bindings(client.app,public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
     marker="SYNTH-OP-"+uuid4().hex[:10]
-    writer=_headers(channels,role="FINANCE_BEARBEITEN")
+    # OPs entstehen aus der Belegbuchung (der manuelle Anlageweg ist seit 19.11.2026 entfernt): direkt ins Nebenbuch.
     ids=[]
     for index,(kind,status,amount,stage) in enumerate([("debitoren","offen","0.10",0),("debitoren","teilweise","0.20",1),("kreditoren","offen","999.00",0),("debitoren","geschlossen","0.00",0)]):
-        response=client.post("/api/v1/finance/open-items",headers=writer,json={"konto_typ":kind,"op_status":status,"rechnungsnr":marker+str(index),"rechnungsdatum":date.today().isoformat(),"faelligkeit":(date.today()-timedelta(days=1)).isoformat(),"op_betrag":"10.00","offen":amount,"kunde_name":marker,"konto_nr":"SYNTH-D-1","mahn_stufe":stage,"waehrung":"EUR"})
-        assert response.status_code==201,response.text
-        ids.append(response.json()["id"])
+        ids.append(str(uuid4()))
+        db.execute(text("""INSERT INTO domain_erp.offene_posten
+            (id,tenant_id,konto_typ,op_status,rechnungsnr,rechnungsdatum,datum,faelligkeit,betrag,offen,kunde_name,
+             dunning_level,waehrung,created_at,updated_at)
+            VALUES (:id,:t,:k,:s,:nr,:heute,:heute,:faellig,10.00,:offen,:name,:stufe,'EUR',NOW(),NOW())"""),
+            {"id":ids[-1],"t":tenant,"k":kind,"s":status,"nr":marker+str(index),"heute":date.today(),
+             "faellig":date.today()-timedelta(days=1),"offen":amount,"name":marker,"stufe":stage})
+    db.flush()
     reader=_headers(channels,role="FINANCE_LESEN")
     direct=client.get("/api/v1/finance/open-items",headers=reader,params={"konto_typ":"debitoren","only_open":True,"search":marker,"limit":1,"offset":1})
     assert direct.status_code==200,direct.text

@@ -57,8 +57,6 @@ class _ReadDB:
         sql = str(statement)
         bound = dict(params or {})
         self.calls.append((sql, bound))
-        if "FROM pg_class" in sql:
-            return _Result(scalar="domain_erp")
         if "FROM information_schema.columns" in sql:
             return _Result(rows=[(name,) for name in {
                 "rechnungsnr", "offen", "faelligkeit", "op_status",
