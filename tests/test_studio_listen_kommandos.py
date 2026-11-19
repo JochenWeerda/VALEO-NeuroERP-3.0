@@ -506,8 +506,9 @@ def test_buchungsvorlage_anwenden_erzeugt_einen_ausgeglichenen_entwurf_im_mandan
 
     with engine.begin() as v:
         for nummer, typ in (("4210", "expense"), ("1200", "asset")):
+            # aktiv: gebucht wird nur auf eigene aktive Konten (Buchungsdienst)
             v.execute(text("INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, "
-                           "account_type) VALUES (:i, :h, :n, :n, :t)"),
+                           "account_type, is_active) VALUES (:i, :h, :n, :n, :t, TRUE)"),
                       {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "t": typ})
     vorlage = client.post("/api/v1/finance/booking-templates", headers={"X-Tenant-ID": HAUS_A}, json={
         "name": "Miete", "category": "GENERAL", "default_amount": "1200.00", "lines": [

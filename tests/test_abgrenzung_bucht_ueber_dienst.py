@@ -84,11 +84,13 @@ def test_die_abgrenzung_bucht_soll_und_haben_mit_stempel(k):
     antwort = _buche(k, kennung)
 
     kopf = k["db"].execute(sa.text(
-        "SELECT status, source, reference, posting_date, total_debit, total_credit, sequence_number, hash_current "
+        "SELECT status, source, reference, posting_date, period, total_debit, total_credit, sequence_number, hash_current "
         "FROM domain_erp.journal_entries WHERE id = :id"), {"id": antwort["journal_entry_id"]}).mappings().one()
     assert kopf["status"] == "posted" and kopf["source"] == "accrual_provision"
     assert kopf["reference"] == f"ABGR-{kennung}"
     assert kopf["posting_date"] == date(2026, 10, 31)  # Stichtag Periodenende
+    # Die Periode setzt der Dienst; ohne sie fehlte die Buchung in UStVA und Abschluss (bis 19.11.2026).
+    assert kopf["period"] == "2026-10"
     assert kopf["total_debit"] == kopf["total_credit"] == Decimal("1200.50")
     assert kopf["sequence_number"] is not None and kopf["hash_current"]
 

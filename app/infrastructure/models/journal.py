@@ -57,6 +57,9 @@ class JournalEntry(Base):
     source = Column(String(50), nullable=True)
     currency = Column(String(3).evaluates_none(), nullable=True, default="EUR")
     document_type = Column(String(30), nullable=True)  # RE, GU, AB etc. (GoBD Belegart)
+    # Buchungsperiode JJJJ-MM. UStVA und Periodenabschluss filtern auf sie; bis 19.11.2026 kannte das ORM die
+    # Spalte nicht, und jede Buchung ueber den Buchungsdienst blieb ohne Periode (unsichtbar fuer die UStVA).
+    period = Column(String(7), nullable=True)
     status = Column(String(20), default="draft")
     total_debit = Column(DECIMAL(15, 2), default=0)
     total_credit = Column(DECIMAL(15, 2), default=0)

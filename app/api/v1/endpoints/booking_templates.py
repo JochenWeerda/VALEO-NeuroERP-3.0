@@ -367,6 +367,9 @@ async def apply_booking_template(
         # Sequenz und Hash). Bis 19.11.2026 schrieb dieser Weg Kopf und Zeilen roh, mit Konten auch des gemeinsamen
         # Kontenrahmens ("system") und ohne Periodenpruefung. Die Vorlage nennt Kontonummern; gebucht wird auf das
         # eigene Konto des Mandanten mit dieser Nummer.
+        # Belegbezug: der angegebene Beleg, sonst die Vorlage selbst (die Studio-Zeilenaktion schickt nur das Datum).
+        # Es entsteht ein Entwurf; den Bezug kann die Buchhaltung vor dem Buchen auf den Beleg setzen.
+        bezug = (request.reference or f"VORLAGE-{template_id}")[:50]
         buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
         try:
             zeilen = [
@@ -376,7 +379,7 @@ async def apply_booking_template(
                     "credit_amount": _betrag(line.credit_percentage, line.fixed_credit),
                     "description": (_ersetze(line.description_template) if line.description_template else description)[:200],
                     "tax_code": line.tax_code, "cost_center": line.cost_center, "profit_center": line.profit_center,
-                    "reference": request.reference,
+                    "reference": bezug,
                 }
                 for line in sorted(template.lines, key=lambda zeile: zeile.line_number)
             ]
@@ -385,7 +388,7 @@ async def apply_booking_template(
                 description=description[:200],
                 entry_date=request.entry_date,
                 lines=zeilen,
-                reference=request.reference,
+                reference=bezug,
                 source="booking_template",
                 currency=template.currency,
             )
