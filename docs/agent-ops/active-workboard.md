@@ -21400,3 +21400,9 @@ MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) bet
 MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
+
+## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
+Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
+Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
+Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
+Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
