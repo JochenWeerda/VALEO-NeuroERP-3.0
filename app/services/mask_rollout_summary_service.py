@@ -266,20 +266,6 @@ class MaskRolloutSummaryService:
 
         return build_tab_page(tab_key=tab_key, table_key=tab_key, items=[], page=page, limit=limit, q=q, sort=sort, sort_dir=sort_dir, screen_id=spec.screen_id, filter_plan=filter_plan)
 
-    def _resolve_op_schema(self) -> str:
-        row = self.db.execute(
-            text(
-                """
-                SELECT table_schema
-                FROM information_schema.tables
-                WHERE table_name = 'offene_posten'
-                ORDER BY CASE WHEN table_schema = 'domain_erp' THEN 0 ELSE 1 END
-                LIMIT 1
-                """
-            )
-        ).first()
-        return row[0] if row else "domain_erp"
-
     def _ar_open_item_summary(self, spec: MaskRolloutSpec, entity_id: str) -> dict[str, Any]:
         from app.services.open_item_read_source import _get_open_items_relation, _expr
         relation, columns = _get_open_items_relation(self.db)
@@ -288,7 +274,8 @@ class MaskRolloutSummaryService:
                   "faellig_am": _expr(columns, "faelligkeit", "faellig_am"),
                   "status": _expr(columns, "op_status", "status")}
         select = ", ".join(f"{expression} AS {name}" for name, expression in fields.items())
-        row = self.db.execute(text(f"SELECT id, konto_nr, konto_name, konto_typ, {select} FROM {relation} WHERE tenant_id=:tenant_id AND id=:op_id"),  # nosec B608  # reviewed-safe: relation is allowlisted and column expressions/aliases are fixed; values are bound
+        kopf = ", ".join(f"{_expr(columns, name)} AS {name}" for name in ("konto_nr", "konto_name", "konto_typ"))
+        row = self.db.execute(text(f"SELECT id, {kopf}, {select} FROM {relation} WHERE tenant_id=:tenant_id AND id=:op_id"),  # nosec B608  # reviewed-safe: relation is allowlisted and column expressions/aliases are fixed; values are bound
                               {"tenant_id": self.tenant_id, "op_id": entity_id}).mappings().first()
         if not row:
             raise HTTPException(status_code=404, detail="Open item not found")

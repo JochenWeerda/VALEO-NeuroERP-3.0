@@ -3,19 +3,22 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
 
-_ALLOWED_OPEN_ITEM_SCHEMAS = frozenset({"public", "domain_erp"})
+OPEN_ITEM_SCHEMA = "domain_erp"
 
 
 def _get_open_items_relation(db: Session) -> tuple[str, set[str]]:
-    schema = str(db.execute(text("""SELECT n.nspname FROM pg_class c
-        JOIN pg_namespace n ON n.oid=c.relnamespace
-        WHERE c.oid=to_regclass('offene_posten')""")).scalar() or "public")
-    if schema not in _ALLOWED_OPEN_ITEM_SCHEMAS:
-        raise HTTPException(status_code=503, detail="Open-item source schema is not allowed")
+    """Das Nebenbuch der offenen Posten: ``domain_erp.offene_posten``.
+
+    Bis 19.11.2026 loeste ``to_regclass('offene_posten')`` die Tabelle ueber den Suchpfad auf (``"$user", public``)
+    und traf den verwaisten Speicher ``public.offene_posten`` aus der ersten Finanzmigration - leer, waehrend alle
+    Rechnungsbuchungen, der Bankabgleich und das Mahnwesen ``domain_erp`` schreiben. Die OP-Listen blieben leer.
+    """
     rows = db.execute(text("""SELECT column_name FROM information_schema.columns
         WHERE table_name='offene_posten' AND table_schema=:table_schema"""),
-        {"table_schema":schema}).fetchall()
-    return f"{schema}.offene_posten", {str(row[0]) for row in rows}
+        {"table_schema": OPEN_ITEM_SCHEMA}).fetchall()
+    if not rows:
+        raise HTTPException(status_code=503, detail="Nebenbuch der offenen Posten nicht verfuegbar")
+    return f"{OPEN_ITEM_SCHEMA}.offene_posten", {str(row[0]) for row in rows}
 
 
 def _expr(cols: set[str], primary: str, fallback: str | None = None, default_sql: str = "NULL") -> str:

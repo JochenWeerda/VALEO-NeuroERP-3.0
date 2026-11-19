@@ -1,11 +1,10 @@
 """FIN-ABSCHLUSS-STUBS-001 — GoBD-taugliche Periodenabschluss-Fachlogik.
 
 Ergänzt FinancePeriodService (public.finance_accounting_periods) um
-echte Salden aus domain_erp.journal_entries und Abschluss-Buchungslogik.
+echte Salden aus domain_erp.journal_entries und die Sperre als Abschluss.
 """
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -46,7 +45,6 @@ class ClosingRunResult:
     period: str
     closing_type: str
     entry_count: int
-    closing_entry_id: Optional[str]
     status: str
     message: str
 
@@ -160,46 +158,15 @@ class FinanceClosingService:
     # ── Run ───────────────────────────────────────────────────────────────────
 
     def run(self, period: str, closing_type: str = "monthly", actor: str = "system") -> ClosingRunResult:
-        """
-        Vollständiger Periodenabschluss:
-        1. Salden berechnen
-        2. Sammel-Abschluss-Buchung anlegen (closing_type = monthly/annual)
-        3. Periode sperren
+        """Periodenabschluss: Salden berechnen, dann die Periode sperren.
+
+        Eine Abschlussbuchung entsteht hier nicht. Der fruehere Weg legte einen Journalkopf ohne Zeilen mit dem
+        Status ``closing`` und den Spalten ``closing_type``/``created_by`` an, die es in keiner Datenbank gibt. Der
+        INSERT scheiterte immer; das ``except`` verschluckte den Fehler, doch PostgreSQL hatte die Transaktion schon
+        abgebrochen, und Sperre und Commit scheiterten danach. Ein Kopf ohne Zeilen bucht ohnehin nichts. Der
+        Monatsabschluss ist die Sperre; Saldenvortrag und Jahresabschlussbuchung sind eigene Fachaktionen (M3).
         """
         calc = self.calculate(period, closing_type)
-
-        # Abschluss-Buchung erzeugen (GoBD: Beleg für den Abschluss)
-        closing_entry_id = str(uuid.uuid4())
-        now = datetime.now(timezone.utc)
-        try:
-            self.db.execute(
-                text("""
-                    INSERT INTO domain_erp.journal_entries
-                        (id, tenant_id, entry_number, entry_date, period,
-                         description, status, closing_type, created_at, created_by)
-                    VALUES
-                        (:id, :tid, :nr, :dt, :period,
-                         :desc, 'closing', :ctype, :now, :actor)
-                    ON CONFLICT (id) DO NOTHING
-                """),
-                {
-                    "id": closing_entry_id,
-                    "tid": self.tenant_id,
-                    "nr": f"ABSCHL-{period}-{closing_entry_id[:8].upper()}",
-                    "dt": now.date(),
-                    "period": period,
-                    "desc": f"Periodenabschluss {closing_type} {period}",
-                    "ctype": closing_type,
-                    "now": now,
-                    "actor": actor,
-                },
-            )
-            self.db.flush()
-        except Exception:
-            # journal_entries-Schema kann ggf. closing_type/created_by-Spalten noch nicht haben;
-            # Abschluss-Sperre trotzdem durchführen, Eintrag als optional behandeln.
-            closing_entry_id = None
-
         lock_result = self.lock(period, actor=actor, force=True)
         self.db.commit()
 
@@ -207,7 +174,6 @@ class FinanceClosingService:
             period=period,
             closing_type=closing_type,
             entry_count=calc.entry_count,
-            closing_entry_id=closing_entry_id,
             status=lock_result.status,
             message=f"Abschluss {closing_type} für Periode {period} abgeschlossen. "
                     f"{calc.entry_count} Buchungen, Saldo {calc.balance:+.2f} €.",

@@ -21400,3 +21400,10 @@ MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) bet
 MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
+
+## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
+Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
+Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tagesabschluss. Ohne Journal: Periodenabschluss (Scheinkopf), Lagergeld (keine USt/OP), Bestandskorrektur/Inventur (Menge als Betrag), manueller OP-Ausgleich. Offene Posten lesen das Nebenbuch domain_erp statt des leeren public.offene_posten.
+Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
+Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.
