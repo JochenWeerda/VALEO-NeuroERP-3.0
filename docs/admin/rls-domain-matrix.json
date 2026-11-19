@@ -1558,7 +1558,6 @@
     "app/api/v1/endpoints/inventory_operations.py",
     "app/communication/crisis_plan.py",
     "app/core/repository.py",
-    "app/domains/inventory/api/storage_fees.py",
     "app/finance/steuerschluessel.py",
     "app/infrastructure/repositories/implementations.py",
     "app/infrastructure/repositories/interfaces.py",
@@ -1570,7 +1569,7 @@
     "dienst": 2,
     "kopfzeile": 2,
     "nutzlast": 2,
-    "token": 11
+    "token": 10
    },
    "standardmandant_stellen": [],
    "null_stellen": [

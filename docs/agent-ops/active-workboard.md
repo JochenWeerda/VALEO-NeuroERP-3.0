@@ -21400,3 +21400,10 @@ MAIN-INTEGRATION RLS-Matrix synchron: einziger roter Backendtest (28388pass) bet
 MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene QA. Alle Tests/Bautests gruen, Sonar meldet fuenf S3923-Befunde aus nach Theme-Vereinheitlichung identischen Farbzweigen. Neue Abdeckung91.6%, Security/Maintainability/Hotspots/Duplikate gruen. Nur redundante Bedingungen entfernen, zentrale Tokens und berechtigte Navigation erhalten; gezielte Portaltests/Typpruefung.
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
+
+## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
+Ziel: Das Journal wird nur ueber FinanceTransactionService geschrieben (Periodensperre, Konten, Betraege, Belegbezug, Sequenz/Hash). Neue Ratsche tests/test_journal_schreiber_ratsche.py: 9 Rohschreiber -> 6.
+Erster Schnitt: Abgrenzung/Rueckstellung bucht ueber den Dienst mit Kontrollpruefung der manuellen Hauptbuchbuchung (vorher Kopf "posted" ohne Zeilen); Periodenabschluss ohne Scheinkopf (INSERT in nicht vorhandene Spalten brach die Transaktion ab, /closing/run scheiterte immer); Lagergeld ohne Direktbuchung (keine USt, kein OP, legte Konten selbst an) - Buchung ueber die Ausgangsrechnung.
+Offen (naechste Schnitte): Offene Posten, Buchungsvorlagen, Massenimport, Konnektoren, Inventurbuchung, POS-Tagesabschluss in compat.py; Lagergeld-Abrechnung als Ausgangsrechnung; Saldenvortrag/Jahresabschlussbuchung.
+Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, finance_actions.py (Docstring), neue Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.

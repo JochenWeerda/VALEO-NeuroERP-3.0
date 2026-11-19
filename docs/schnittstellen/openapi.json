@@ -156108,8 +156108,8 @@
             "type": "string"
           },
           "post_to_ledger": {
-            "default": true,
-            "description": "Create posted GL journal for non-dry-run",
+            "default": false,
+            "description": "Entfallen: Lagergeld wird ueber die Ausgangsrechnung gebucht (Umsatzsteuer, offener Posten). true wird mit 422 abgewiesen.",
             "title": "Post To Ledger",
             "type": "boolean"
           },
@@ -291120,7 +291120,7 @@
     },
     "/api/v1/finance/accruals-provisions/{item_id}/post": {
       "post": {
-        "description": "Post accrual/provision — creates GL journal entry.",
+        "description": "Bucht die Abgrenzung/Rueckstellung: Soll ``account_number``, Haben ``counterpart_account``, Stichtag Periodenende.\n\nGebucht wird ueber den kanonischen Buchungsdienst (Periodensperre, Konten, Sequenz und Hash-Kette) und mit der\nKontrollpruefung der manuellen Hauptbuchbuchung. Vorher entstand hier ein Journalkopf mit Status ``posted``, aber\nohne eine einzige Buchungszeile, ohne Periodenpruefung und ohne Hash - eine Buchung, die kein Konto bewegte.",
         "operationId": "post_accrual_provision_api_v1_finance_accruals_provisions__item_id__post_post",
         "parameters": [
           {
@@ -296756,7 +296756,7 @@
     },
     "/api/v1/finance/closing/run": {
       "post": {
-        "description": "Vollständiger Periodenabschluss: Salden berechnen, Abschluss-Buchung anlegen, Periode sperren.",
+        "description": "Vollständiger Periodenabschluss: Salden berechnen, Periode sperren (keine Abschlussbuchung, s. FinanceClosingService.run).",
         "operationId": "run_closing_api_v1_finance_closing_run_post",
         "requestBody": {
           "content": {
@@ -323534,7 +323534,7 @@
     },
     "/api/v1/inventory/storage-fees/run": {
       "post": {
-        "description": "Run monthly storage-fee calculation for consigned stock.",
+        "description": "Run monthly storage-fee calculation for consigned stock.\n\nDer Lauf berechnet und protokolliert das Lagergeld je Eigentuemer. Gebucht wird es nicht hier: Die fruehere\nDirektbuchung (Forderung an Erloes) umging Umsatzsteuer und offenen Posten und legte fehlende Konten selbst an.\nLagergeld ist eine Leistung an den Einlagerer und wird wie jede Leistung ueber die Ausgangsrechnung gebucht\n(belegfuehrende Domaene, Finance als Buchungsautoritaet).",
         "operationId": "run_storage_fee_engine_api_v1_inventory_storage_fees_run_post",
         "requestBody": {
           "content": {

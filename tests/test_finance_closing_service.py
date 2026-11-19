@@ -197,3 +197,12 @@ class TestRun:
         svc = self._svc(calc_result=calc)
         result = svc.run("2025-03")
         assert "42" in result.message
+
+    def test_run_schreibt_keinen_journalkopf_ohne_zeilen(self):
+        """Der Abschluss legte einen Kopf ohne Zeilen in nicht vorhandene Spalten an; der INSERT brach die
+        Transaktion ab, danach scheiterten Sperre und Commit. Der Abschluss ist die Sperre, keine Scheinbuchung."""
+        svc = self._svc()
+        result = svc.run("2025-01")
+        geschrieben = [str(aufruf.args[0]) for aufruf in svc.db.execute.call_args_list if aufruf.args]
+        assert not any("journal_entries" in sql for sql in geschrieben)
+        assert not hasattr(result, "closing_entry_id")

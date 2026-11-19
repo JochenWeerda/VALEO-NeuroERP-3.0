@@ -15,7 +15,6 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from ....core.database import engine, get_db
-from ....core.fibu_audit import log_fibu_audit
 from .inventory_auth import get_current_tenant_id, require_inventory_access, require_inventory_admin
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
@@ -25,7 +24,13 @@ router = APIRouter()
 class StorageFeeRunRequest(BaseModel):
     period: str = Field(..., description="Billing period as YYYY-MM")
     dry_run: bool = Field(default=False, description="Preview only, no DB write")
-    post_to_ledger: bool = Field(default=True, description="Create posted GL journal for non-dry-run")
+    post_to_ledger: bool = Field(
+        default=False,
+        description=(
+            "Entfallen: Lagergeld wird ueber die Ausgangsrechnung gebucht (Umsatzsteuer, offener Posten). "
+            "true wird mit 422 abgewiesen."
+        ),
+    )
     posting_date: Optional[date] = None
     currency: str = Field(default="EUR", min_length=3, max_length=3)
     idempotency_key: Optional[str] = Field(default=None, max_length=120)
@@ -193,134 +198,6 @@ def _write_audit_entry(
         pass
 
 
-def _post_storage_fee_journal(
-    db,
-    *,
-    tenant_id: str,
-    posting_date: date,
-    period: str,
-    charges: list[StorageFeeChargeOut],
-    total_amount: Decimal,
-) -> str:
-    entry_id = str(uuid4())
-    entry_number = f"STORAGE-{period}"
-    description = f"Lagergeld Fremdbestand {period}"
-
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_erp.journal_entries
-            (id, tenant_id, entry_number, entry_date, posting_date, document_type, document_number, reference, description, total_debit, total_credit, status, posted_at, created_at, updated_at)
-            VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :document_type, :document_number, :reference, :description, :total_debit, :total_credit, :status, NOW(), NOW(), NOW())
-            """
-        ),
-        {
-            "id": entry_id,
-            "tenant_id": tenant_id,
-            "entry_number": entry_number,
-            "entry_date": posting_date,
-            "posting_date": posting_date,
-            "document_type": "storage_fee",
-            "document_number": entry_number,
-            "reference": f"LAGERGELD-{period}",
-            "description": description,
-            "status": "posted",
-            "total_debit": total_amount,
-            "total_credit": total_amount,
-        },
-    )
-
-    # Debit A/R per owner, Credit storage revenue on one aggregate line.
-    def _ensure_account(account_number: str, account_name: str, account_type: str, category: str) -> str:
-        existing = db.execute(
-            text(
-                """
-                SELECT id
-                FROM domain_erp.chart_of_accounts
-                WHERE tenant_id = :tenant_id AND account_number = :account_number
-                LIMIT 1
-                """
-            ),
-            {"tenant_id": tenant_id, "account_number": account_number},
-        ).mappings().first()
-        if existing:
-            return str(existing["id"])
-        account_id = str(uuid4())
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.chart_of_accounts
-                (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
-                VALUES (:id, :tenant_id, :account_number, :account_name, :account_type, :category, TRUE, NOW(), NOW())
-                """
-            ),
-            {
-                "id": account_id,
-                "tenant_id": tenant_id,
-                "account_number": account_number,
-                "account_name": account_name,
-                "account_type": account_type,
-                "category": category,
-            },
-        )
-        return account_id
-
-    line_number = 1
-    ar_account_id = _ensure_account("1200", "Forderungen aus Lieferungen und Leistungen", "asset", "current_assets")
-    revenue_account_id = _ensure_account("8400", "Lagergelderloese Fremdbestand", "revenue", "storage_fee")
-    owner_totals: dict[str, Decimal] = {}
-    for item in charges:
-        owner_totals[item.owner_partner_id] = owner_totals.get(item.owner_partner_id, Decimal("0")) + Decimal(str(item.amount))
-
-    for owner_id, amount in owner_totals.items():
-        db.execute(
-            text(
-                """
-                INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
-                """
-            ),
-            {
-                "id": str(uuid4()),
-                "tenant_id": tenant_id,
-                "journal_entry_id": entry_id,
-                "account_id": ar_account_id,
-                "debit": _round_money(amount),
-                "credit": Decimal("0.00"),
-                "line_number": line_number,
-                "description": f"Lagergeld Forderung Eigentuemer {owner_id}",
-            },
-        )
-        line_number += 1
-
-    db.execute(
-        text(
-            """
-            INSERT INTO domain_erp.journal_entry_lines
-            (id, tenant_id, journal_entry_id, account_id, description, debit, credit, line_number, created_at)
-            VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit, :line_number, NOW())
-            """
-        ),
-        {
-            "id": str(uuid4()),
-            "tenant_id": tenant_id,
-            "journal_entry_id": entry_id,
-            "account_id": revenue_account_id,
-            "debit": Decimal("0.00"),
-            "credit": _round_money(total_amount),
-            "line_number": line_number,
-            "description": f"Lagergelderloese Fremdbestand {period}",
-        },
-    )
-    log_fibu_audit(
-        db, tenant_id, "create", "journal_entry", entry_id,
-        {"source": "storage_fee", "entry_number": entry_number, "period": period},
-        request=None,
-    )
-    return entry_id
-
-
 @router.post("/run", response_model=StorageFeeRunOut, dependencies=SCHREIBEN["LAGER"])
 async def run_storage_fee_engine(
     payload: StorageFeeRunRequest,
@@ -328,7 +205,21 @@ async def run_storage_fee_engine(
     _: str = Depends(require_inventory_admin),
     effective_tenant: str = Depends(get_current_tenant_id),
 ):
-    """Run monthly storage-fee calculation for consigned stock."""
+    """Run monthly storage-fee calculation for consigned stock.
+
+    Der Lauf berechnet und protokolliert das Lagergeld je Eigentuemer. Gebucht wird es nicht hier: Die fruehere
+    Direktbuchung (Forderung an Erloes) umging Umsatzsteuer und offenen Posten und legte fehlende Konten selbst an.
+    Lagergeld ist eine Leistung an den Einlagerer und wird wie jede Leistung ueber die Ausgangsrechnung gebucht
+    (belegfuehrende Domaene, Finance als Buchungsautoritaet).
+    """
+    if payload.post_to_ledger:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Lagergeld wird nicht direkt ins Journal gebucht, sondern ueber eine Ausgangsrechnung an den "
+                "Einlagerer (Umsatzsteuer, offener Posten). post_to_ledger weglassen."
+            ),
+        )
     period_start, period_end = _period_bounds(payload.period)
     posting_date = payload.posting_date or period_end
     charges = _collect_charge_candidates(db, effective_tenant, period_end, payload.currency.upper())
@@ -457,16 +348,6 @@ async def run_storage_fee_engine(
                         ),
                     },
                 )
-
-        if payload.post_to_ledger and charges:
-            journal_entry_id = _post_storage_fee_journal(
-                db,
-                tenant_id=effective_tenant,
-                posting_date=posting_date,
-                period=payload.period,
-                charges=charges,
-                total_amount=total_amount,
-            )
 
         db.execute(
                 text(
