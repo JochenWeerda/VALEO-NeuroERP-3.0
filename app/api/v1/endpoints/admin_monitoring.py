@@ -223,7 +223,7 @@ def list_admin_monitoring_alerts(
             text(
                 """
                 SELECT COUNT(*) AS cnt
-                FROM offene_posten
+                FROM domain_erp.offene_posten
                 WHERE faelligkeit < CURRENT_DATE
                   AND COALESCE(offen, 0) > 0
                 """

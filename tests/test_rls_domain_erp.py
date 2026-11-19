@@ -43,7 +43,8 @@ LINKS = ((ITEMS, "run_id", RUNS), (DEBITORS, "customer_id", CUSTOMERS))
 
 @pytest.fixture(scope="module")
 def probe():
-    with support.probe(ISOLATED + (RUNS, CUSTOMERS)) as conn:
+    # Buchen prueft die Periode (Buchungsdienst): das Periodenregister braucht die App-Rolle lesend.
+    with support.probe(ISOLATED + (RUNS, CUSTOMERS, "public.finance_accounting_periods")) as conn:
         support.ensure_tenants(conn, A, B, SYSTEM)
         rows = {}
         for tenant in (A, B, SYSTEM):
@@ -205,8 +206,9 @@ CSV = (b"buchungsdatum;konto;betrag;soll_haben;buchungstext\n"
 def _konten(db, tenant, *nummern):
     for nummer in nummern:
         db.execute(sa.text(
-            "INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, account_type) "
-            "VALUES (:i, :t, :n, :n, 'expense')"), {"i": str(uuid4()), "t": tenant, "n": nummer})
+            # aktiv: der Buchungsdienst bucht nur auf eigene aktive Konten
+            "INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, account_type, "
+            "is_active) VALUES (:i, :t, :n, :n, 'expense', TRUE)"), {"i": str(uuid4()), "t": tenant, "n": nummer})
 
 
 def _lauf(db, tenant, csv=CSV) -> str:

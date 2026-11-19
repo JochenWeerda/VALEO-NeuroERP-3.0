@@ -14,6 +14,8 @@ from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
+from app.core.exceptions import DomainError
+from app.services.finance_transaction_service import FinanceTransactionService
 
 from ....core.database import get_db
 from app.core.tenant import get_tenant_id
@@ -21,7 +23,6 @@ from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
 
 
 router = APIRouter(prefix="/booking-templates", tags=["finance", "templates"])
@@ -346,153 +347,69 @@ async def apply_booking_template(
         if not amount:
             raise HTTPException(status_code=400, detail="Amount is required (either in request or template default)")
         
-        # Generate entry number
         entry_number = f"TMP-{request.entry_date.strftime('%Y%m%d')}-{uuid7()[:6].upper()}"
-        
-        # Create journal entry
-        entry_id = uuid7()
-        journal_entry_insert = text("""
-            INSERT INTO domain_erp.journal_entries
-            (id, tenant_id, entry_number, entry_date, posting_date, description,
-             source, currency, status, total_debit, total_credit, created_at, updated_at)
-            VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description,
-                    :source, :currency, :status, :total_debit, :total_credit, NOW(), NOW())
-            RETURNING id
-        """)
-        
+
+        def _ersetze(vorlage: str) -> str:
+            for key, value in (request.variables or {}).items():
+                vorlage = vorlage.replace(f"{{{{{key}}}}}", str(value))
+            return vorlage
+
         description = request.description or template.name
         if template.lines and template.lines[0].description_template:
-            # Replace placeholders in description
-            desc_template = template.lines[0].description_template
-            if request.variables:
-                for key, value in request.variables.items():
-                    desc_template = desc_template.replace(f"{{{{{key}}}}}", str(value))
-            description = desc_template
-        
-        total_debit = Decimal("0.00")
-        total_credit = Decimal("0.00")
-        
-        # Calculate totals from template lines
-        for line in template.lines:
-            if line.debit_percentage > 0:
-                total_debit += amount * (line.debit_percentage / Decimal("100.00"))
-            elif line.fixed_debit:
-                total_debit += line.fixed_debit
-            
-            if line.credit_percentage > 0:
-                total_credit += amount * (line.credit_percentage / Decimal("100.00"))
-            elif line.fixed_credit:
-                total_credit += line.fixed_credit
-        
-        # Ein Buchungsentwurf muss ausgeglichen sein; vorher entstand er bei fehlerhafter Vorlage mit Soll != Haben.
-        if round(total_debit, 2) != round(total_credit, 2):
-            raise HTTPException(status_code=422, detail=(
-                f"Vorlage ergibt keinen ausgeglichenen Beleg (Soll {total_debit:.2f} / Haben {total_credit:.2f})"))
+            description = _ersetze(template.lines[0].description_template)
 
-        db.execute(journal_entry_insert, {
-            "id": entry_id,
-            "tenant_id": tenant_id,
-            "entry_number": entry_number,
-            "entry_date": request.entry_date,
-            "posting_date": request.entry_date,
-            "description": description,
-            "source": "booking_template",
-            "currency": template.currency,
-            "status": "draft",
-            "total_debit": total_debit,
-            "total_credit": total_credit
-        })
-        
-        # Create journal entry lines
-        for line in template.lines:
-            # Get account ID
-            # Eigenes Konto vor dem gemeinsamen Kontenrahmen (wie sales_credit_notes/steuerschluessel):
-            # gemeinsame Vorlagen nennen Konten des Standardkontenrahmens.
-            account_query = text("""
-                SELECT id FROM domain_erp.chart_of_accounts
-                WHERE account_number = :account_number AND tenant_id IN (:tenant_id, :shared)
-                ORDER BY tenant_id = :shared
-                LIMIT 1
-            """)
-            
-            account_row = db.execute(account_query, {
-                "account_number": line.account_number,
-                "tenant_id": tenant_id,
-                "shared": SHARED_TENANT,
-            }).fetchone()
-            
-            if not account_row:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Account not found: {line.account_number}"
-                )
-            
-            account_id = str(account_row[0])
-            
-            # Calculate line amounts
-            line_debit = Decimal("0.00")
-            line_credit = Decimal("0.00")
-            
-            if line.debit_percentage > 0:
-                line_debit = amount * (line.debit_percentage / Decimal("100.00"))
-            elif line.fixed_debit:
-                line_debit = line.fixed_debit
-            
-            if line.credit_percentage > 0:
-                line_credit = amount * (line.credit_percentage / Decimal("100.00"))
-            elif line.fixed_credit:
-                line_credit = line.fixed_credit
-            
-            # Line description
-            line_description = description
-            if line.description_template:
-                line_desc_template = line.description_template
-                if request.variables:
-                    for key, value in request.variables.items():
-                        line_desc_template = line_desc_template.replace(f"{{{{{key}}}}}", str(value))
-                line_description = line_desc_template
-            
-            # Insert journal entry line
-            line_id = f"{entry_id}-L{line.line_number}"
-            journal_line_insert = text("""
-                INSERT INTO domain_erp.journal_entry_lines
-                (id, tenant_id, journal_entry_id, account_id, debit, credit,
-                 line_number, description, tax_code, cost_center, profit_center, reference,
-                 created_at)
-                VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :debit, :credit,
-                        :line_number, :description, :tax_code, :cost_center, :profit_center, :reference,
-                        NOW())
-            """)
-            
-            db.execute(journal_line_insert, {
-                "id": line_id,
-                "tenant_id": tenant_id,
-                "journal_entry_id": entry_id,
-                "account_id": account_id,
-                "debit": line_debit,
-                "credit": line_credit,
-                "line_number": line.line_number,
-                "description": line_description,
-                "tax_code": line.tax_code,
-                "cost_center": line.cost_center,
-                "profit_center": line.profit_center,
-                "reference": request.reference
-            })
+        def _betrag(prozent: Decimal, fest: Optional[Decimal]) -> Decimal:
+            if prozent > 0:
+                return (amount * (prozent / Decimal("100.00"))).quantize(Decimal("0.01"))
+            return Decimal(str(fest or 0)).quantize(Decimal("0.01"))
+
+        # Gebucht wird ueber den kanonischen Buchungsdienst (Periodensperre, eigene buchbare Konten, Belegbezug,
+        # Sequenz und Hash). Bis 19.11.2026 schrieb dieser Weg Kopf und Zeilen roh, mit Konten auch des gemeinsamen
+        # Kontenrahmens ("system") und ohne Periodenpruefung. Die Vorlage nennt Kontonummern; gebucht wird auf das
+        # eigene Konto des Mandanten mit dieser Nummer.
+        # Belegbezug: der angegebene Beleg, sonst die Vorlage selbst (die Studio-Zeilenaktion schickt nur das Datum).
+        # Es entsteht ein Entwurf; den Bezug kann die Buchhaltung vor dem Buchen auf den Beleg setzen.
+        bezug = (request.reference or f"VORLAGE-{template_id}")[:50]
+        buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+        try:
+            zeilen = [
+                {
+                    "account_id": buchung.account_id_for_number(line.account_number),
+                    "debit_amount": _betrag(line.debit_percentage, line.fixed_debit),
+                    "credit_amount": _betrag(line.credit_percentage, line.fixed_credit),
+                    "description": (_ersetze(line.description_template) if line.description_template else description)[:200],
+                    "tax_code": line.tax_code, "cost_center": line.cost_center, "profit_center": line.profit_center,
+                    "reference": bezug,
+                }
+                for line in sorted(template.lines, key=lambda zeile: zeile.line_number)
+            ]
+            eintrag = buchung.create(
+                entry_number=entry_number,
+                description=description[:200],
+                entry_date=request.entry_date,
+                lines=zeilen,
+                reference=bezug,
+                source="booking_template",
+                currency=template.currency,
+            )
+        except DomainError as fehler:
+            db.rollback()
+            raise HTTPException(status_code=fehler.http_status, detail=str(fehler)) from fehler
         log_fibu_audit(
-            db, tenant_id, "create", "journal_entry", str(entry_id),
+            db, tenant_id, "create", "journal_entry", str(eintrag.id),
             {"source": "booking_template", "template_id": template_id, "entry_number": entry_number},
             request=http_request,
         )
         db.commit()
 
         return ApplyTemplateResponse(
-            journal_entry_id=entry_id,
+            journal_entry_id=str(eintrag.id),
             entry_number=entry_number,
-            total_debit=total_debit,
-            total_credit=total_credit,
+            total_debit=eintrag.total_debit,
+            total_credit=eintrag.total_credit,
             applied_at=datetime.now()
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

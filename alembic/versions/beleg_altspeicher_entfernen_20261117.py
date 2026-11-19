@@ -1,7 +1,7 @@
 """Die alten Belegspeicher entfallen - DocFlow ist der einzige Belegspeicher (BELEG-052 S5).
 
 Revision ID: beleg_altspeicher_entfernen_20261117
-Revises: rohware_schema_canonical_20261115
+Revises: journal_periode_nachfuellen_20261119
 
 Seit den Schnitten S1-S4 schreibt und liest niemand mehr die alten Speicher fuer Lieferschein, Rechnung, Gutschrift,
 Bestellung und Auftrag (Ratschen tests/test_altspeicher_schreiber_ratsche.py, tests/test_sicht_auftraege_ratsche.py).
@@ -21,7 +21,7 @@ from pathlib import Path
 from alembic import op
 
 revision = "beleg_altspeicher_entfernen_20261117"
-down_revision = "rohware_schema_canonical_20261115"
+down_revision = "journal_periode_nachfuellen_20261119"
 branch_labels = None
 depends_on = None
 

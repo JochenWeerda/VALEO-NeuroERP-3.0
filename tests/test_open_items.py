@@ -1,12 +1,12 @@
 """
 Tests for open items (OP) management endpoints (app/api/v1/endpoints/open_items.py).
 
-Covers Pydantic schema validation, status machine rules, and endpoint structure tests.
+Covers the read schema, the read endpoints and the removal of the manual write paths (19.11.2026).
 """
 
 import pytest
 from decimal import Decimal
-from datetime import datetime, date
+from datetime import date
 from pydantic import ValidationError
 from starlette.testclient import TestClient
 
@@ -28,65 +28,10 @@ def auth_headers():
     }
 
 
+
 def _import_schemas():
-    from app.api.v1.endpoints.open_items import (
-        OpenItemSettlement,
-        OpenItemBase,
-        OpenItemCreate,
-        OpenItemUpdate,
-        BatchSettleRequest,
-        SettlementResult,
-        OpenItem,
-    )
-    return {
-        "OpenItemSettlement": OpenItemSettlement,
-        "OpenItemBase": OpenItemBase,
-        "OpenItemCreate": OpenItemCreate,
-        "OpenItemUpdate": OpenItemUpdate,
-        "BatchSettleRequest": BatchSettleRequest,
-        "SettlementResult": SettlementResult,
-        "OpenItem": OpenItem,
-    }
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Schema unit tests
-# ═══════════════════════════════════════════════════════════════════════════
-
-class TestOpenItemSettlementSchema:
-    def test_requires_op_id_payment_amount_date(self):
-        S = _import_schemas()
-        with pytest.raises(ValidationError):
-            S["OpenItemSettlement"]()
-
-    def test_valid_settlement(self):
-        S = _import_schemas()
-        s = S["OpenItemSettlement"](
-            op_id="OP-001",
-            payment_amount=Decimal("1500.00"),
-            payment_date=datetime(2026, 4, 10, 12, 0, 0),
-        )
-        assert s.op_id == "OP-001"
-        assert s.payment_amount == Decimal("1500.00")
-        assert s.payment_type == "payment"
-
-    def test_payment_type_default(self):
-        S = _import_schemas()
-        s = S["OpenItemSettlement"](
-            op_id="OP-X", payment_amount=Decimal("100"), payment_date=datetime.now()
-        )
-        assert s.payment_type == "payment"
-
-    def test_payment_type_accepts_known_values(self):
-        S = _import_schemas()
-        for pt in ("payment", "discount", "credit_note", "reversal"):
-            s = S["OpenItemSettlement"](
-                op_id="OP-X",
-                payment_amount=Decimal("50"),
-                payment_date=datetime.now(),
-                payment_type=pt,
-            )
-            assert s.payment_type == pt
+    from app.api.v1.endpoints.open_items import OpenItemBase, OpenItem
+    return {"OpenItemBase": OpenItemBase, "OpenItem": OpenItem}
 
 
 class TestOpenItemBaseSchema:
@@ -142,13 +87,6 @@ class TestOpenItemStatusMachine:
             )
             assert item.op_status == status
 
-    def test_editable_statuses(self):
-        from app.api.v1.endpoints.open_items import OP_EDITABLE_STATUSES
-        assert "offen" in OP_EDITABLE_STATUSES
-        assert "teilweise" in OP_EDITABLE_STATUSES
-        assert "geschlossen" not in OP_EDITABLE_STATUSES
-        assert "storniert" not in OP_EDITABLE_STATUSES
-
     def test_konto_typ_values(self):
         S = _import_schemas()
         for typ in ("debitoren", "kreditoren"):
@@ -162,58 +100,6 @@ class TestOpenItemStatusMachine:
             )
             assert item.konto_typ == typ
 
-
-class TestOpenItemCreateSchema:
-    def test_inherits_from_base(self):
-        S = _import_schemas()
-        assert issubclass(S["OpenItemCreate"], S["OpenItemBase"])
-
-
-class TestOpenItemUpdateSchema:
-    def test_all_fields_optional(self):
-        S = _import_schemas()
-        upd = S["OpenItemUpdate"]()
-        assert upd.rechnungsnr is None
-        assert upd.konto_typ is None
-
-
-class TestBatchSettleRequestSchema:
-    def test_empty_items_list(self):
-        S = _import_schemas()
-        req = S["BatchSettleRequest"](items=[])
-        assert req.items == []
-
-    def test_with_items(self):
-        S = _import_schemas()
-        req = S["BatchSettleRequest"](items=[
-            S["OpenItemSettlement"](
-                op_id="OP-1",
-                payment_amount=Decimal("100"),
-                payment_date=datetime.now(),
-            )
-        ])
-        assert len(req.items) == 1
-
-
-class TestSettlementResultSchema:
-    def test_valid_result(self):
-        S = _import_schemas()
-        r = S["SettlementResult"](
-            op_id="OP-1",
-            settlement_id="SET-001",
-            previous_open_amount=Decimal("1000"),
-            settlement_amount=Decimal("500"),
-            new_open_amount=Decimal("500"),
-            status="partial",
-            settlement_date=datetime.now(),
-        )
-        assert r.status == "partial"
-        assert r.new_open_amount == Decimal("500")
-
-
-# ═══════════════════════════════════════════════════════════════════════════
-# Endpoint structure tests
-# ═══════════════════════════════════════════════════════════════════════════
 
 class TestOpenItemEndpoints:
     def test_list_open_items(self, client, auth_headers):
@@ -229,19 +115,12 @@ class TestOpenItemEndpoints:
         skip_if_db_unavailable(resp)
         assert resp.status_code == 404
 
-    def test_create_open_item_422_on_empty_body(self, client, auth_headers):
-        resp = client.post("/api/v1/finance/open-items", headers=auth_headers, json={})
-        assert resp.status_code == 422
+    def test_manuelle_schreibwege_sind_entfernt(self, client, auth_headers):
+        """OPs entstehen aus der Belegbuchung und werden ueber den Bankabgleich ausgeglichen."""
+        from app.api.v1.endpoints import open_items
 
-    def test_batch_settle_empty_items(self, client, auth_headers):
-        resp = client.post(
-            "/api/v1/finance/open-items/batch-settle",
-            headers=auth_headers,
-            json={"items": []},
-        )
-        skip_if_db_unavailable(resp)
-        # Empty items list is valid, should return 200 with empty results
-        if resp.status_code == 200:
-            body = resp.json()
-            assert body["success_count"] == 0
-            assert body["results"] == []
+        wege = {(m, r.path) for r in open_items.router.routes for m in getattr(r, "methods", ())}
+        assert wege == {("GET", "/open-items"), ("GET", "/open-items/{op_id}"),
+                        ("GET", "/open-items/{op_id}/settlements"), ("POST", "/open-items/{entity_id}/actions/mahnen")}
+        assert client.post("/api/v1/finance/open-items/batch-settle", headers=auth_headers,
+                           json={"items": []}).status_code in (404, 405)

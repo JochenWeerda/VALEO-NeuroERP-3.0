@@ -77,7 +77,7 @@ def aufraeumen(engine):
             "domain_erp.payment_runs",
             "domain_ops.reklamationen",
             "domain_finance.finance_mahnstufen_audit",
-            "public.offene_posten",
+            "domain_erp.offene_posten",
         ):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
 
@@ -207,8 +207,8 @@ def offener_posten(engine, haus: str, rechnungsnr: str | None = "RE-1") -> str:
     with engine.begin() as v:
         v.execute(
             text(
-                "INSERT INTO public.offene_posten (id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, konto_typ) "
-                "VALUES (:id, :h, :nr, :d, :d, 100, 100, 'debitoren')"
+                "INSERT INTO domain_erp.offene_posten (id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, konto_typ, op_status) "
+                "VALUES (:id, :h, :nr, :d, :d, 100, 100, 'debitoren', 'offen')"
             ),
             {"id": kennung, "h": haus, "nr": rechnungsnr if rechnungsnr else "", "d": date.today()},
         )

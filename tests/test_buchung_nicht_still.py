@@ -82,21 +82,31 @@ def _zahl(sql: str, **werte) -> int:
 
 # --- Bestandskorrektur und Inventur ------------------------------------------------------------
 
-def _kaputte_buchung(*_a, **_k):
-    raise RuntimeError("Hauptbuch nicht erreichbar")
+def _meldungen(monkeypatch) -> list[tuple[str, str]]:
+    gemeldet: list[tuple[str, str]] = []
+    monkeypatch.setattr(inventory_operations, "melde_fehlende_bewertung", lambda vorgang, beleg: gemeldet.append((vorgang, beleg)))
+    return gemeldet
 
 
-def test_bestandskorrektur_meldet_buchungsfehler_als_fehler(haus, monkeypatch):
-    monkeypatch.setattr(inventory_operations, "_post_inventory_journal", _kaputte_buchung)
+def _journalzeilen(mandant: str) -> int:
+    return _zahl("SELECT count(*) FROM domain_erp.journal_entry_lines l JOIN domain_erp.journal_entries e "
+                 "ON e.id = l.journal_entry_id WHERE e.tenant_id = :t", t=mandant)
+
+
+def test_bestandskorrektur_bucht_keine_menge_als_betrag(haus, monkeypatch):
+    """Bis 19.11.2026 ging die Menge (t) als Eurobetrag ins Journal. Ohne Bewertung: Bestand ja, Buchung nein."""
+    gemeldet = _meldungen(monkeypatch)
     weg = next(r.path for r in inventory_operations.router.routes
                if getattr(r, "name", "") == "create_bestandskorrektur")
     antwort = haus["client"].post("/lager" + weg, json={
         "article_id": f"bs-{haus['lauf']}-art", "warehouse_id": f"bs-{haus['lauf']}-lag",
         "menge": 1.0, "grund": "messdifferenz"})
-    assert antwort.status_code == 500, antwort.text
-    assert "nicht gebucht" in antwort.json()["detail"]
+    assert antwort.status_code == 201, antwort.text
+    assert antwort.json()["journal_entry_id"] is None
     assert _zahl("SELECT count(*) FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
-                 t=haus["mandant"]) == 0
+                 t=haus["mandant"]) == 1
+    assert _journalzeilen(haus["mandant"]) == 0
+    assert [vorgang for vorgang, _ in gemeldet] == ["inventory_operations_gl"]
 
 
 @pytest.fixture
@@ -120,26 +130,17 @@ def inventur(haus):
     return {**haus, "id": f"bs-{lauf}-inv"}
 
 
-def test_inventur_wird_mit_buchung_verbucht(inventur):
+def test_inventur_wird_verbucht_ohne_menge_als_betrag(inventur, monkeypatch):
+    gemeldet = _meldungen(monkeypatch)
     antwort = inventur["client"].post(f"/inventur/{inventur['id']}/post")
     assert antwort.status_code == 200, antwort.text
+    assert antwort.json()["journal_entry_id"] is None
     assert _zahl("SELECT count(*) FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
                  t=inventur["mandant"]) == 1
-    assert _zahl("SELECT count(*) FROM domain_erp.journal_entry_lines l JOIN domain_erp.journal_entries e "
-                 "ON e.id = l.journal_entry_id WHERE e.tenant_id = :t", t=inventur["mandant"]) == 2
+    assert _journalzeilen(inventur["mandant"]) == 0
     assert _zahl("SELECT count(*) FROM domain_inventory.inventory_counts WHERE id = :id AND status = 'posted'",
                  id=inventur["id"]) == 1
-
-
-def test_inventur_meldet_buchungsfehler_als_fehler(inventur, monkeypatch):
-    monkeypatch.setattr(inventory_operations, "_post_inventory_journal", _kaputte_buchung)
-    antwort = inventur["client"].post(f"/inventur/{inventur['id']}/post")
-    assert antwort.status_code == 500, antwort.text
-    assert "nicht verbucht" in antwort.json()["detail"]
-    assert _zahl("SELECT count(*) FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
-                 t=inventur["mandant"]) == 0
-    assert _zahl("SELECT count(*) FROM domain_inventory.inventory_counts WHERE id = :id AND status = 'draft'",
-                 id=inventur["id"]) == 1
+    assert [vorgang for vorgang, _ in gemeldet] == ["inventory_counts_gl"]
 
 
 # --- Inventur: Mandant aus der Anmeldung -------------------------------------------------------
