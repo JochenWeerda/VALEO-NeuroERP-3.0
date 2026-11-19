@@ -279299,84 +279299,21 @@
     },
     "/api/v1/einkauf/anfragen": {
       "get": {
-        "description": "Holt Anfragen/Bedarfsmeldungen",
-        "operationId": "get_anfragen_api_v1_einkauf_anfragen_get",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "status",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Status"
-            }
-          },
-          {
-            "in": "query",
-            "name": "typ",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Typ"
-            }
-          },
-          {
-            "in": "query",
-            "name": "skip",
-            "required": false,
-            "schema": {
-              "default": 0,
-              "title": "Skip",
-              "type": "integer"
-            }
-          },
-          {
-            "in": "query",
-            "name": "limit",
-            "required": false,
-            "schema": {
-              "default": 100,
-              "title": "Limit",
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "einkauf_anfragen_list_api_v1_einkauf_anfragen_get",
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Get Anfragen Api V1 Einkauf Anfragen Get",
-                  "type": "object"
+                  "items": {
+                    "$ref": "#/components/schemas/CompatBridgeOut"
+                  },
+                  "title": "Response Einkauf Anfragen List Api V1 Einkauf Anfragen Get",
+                  "type": "array"
                 }
               }
             },
             "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
           }
         },
         "security": [
@@ -279384,10 +279321,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Anfragen",
+        "summary": "Anfragen list einkauf",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "compat"
         ]
       },
       "post": {
@@ -279482,8 +279418,7 @@
         ]
       },
       "get": {
-        "description": "Holt einzelne Anfrage",
-        "operationId": "get_anfrage_api_v1_einkauf_anfragen__anfrage_id__get",
+        "operationId": "einkauf_anfrage_get_api_v1_einkauf_anfragen__anfrage_id__get",
         "parameters": [
           {
             "in": "path",
@@ -279499,7 +279434,9 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufAnfrageOut"
+                }
               }
             },
             "description": "Successful Response"
@@ -279520,10 +279457,9 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Anfrage",
+        "summary": "Anfrage get einkauf",
         "tags": [
-          "Einkauf",
-          "Einkauf"
+          "compat"
         ]
       },
       "put": {

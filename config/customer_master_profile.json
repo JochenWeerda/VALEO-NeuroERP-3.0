@@ -244,12 +244,6 @@
           "clearable": true
         },
         {
-          "key": "payment_terms_id",
-          "label": "Zahlungsbedingung",
-          "type": "text",
-          "clearable": true
-        },
-        {
           "key": "credit_limit",
           "label": "Kreditlimit",
           "type": "currency",
@@ -338,18 +332,6 @@
       "label": "Logistik",
       "model": "Logistics",
       "fields": [
-        {
-          "key": "default_route_id",
-          "label": "Standardtour",
-          "type": "text",
-          "clearable": true
-        },
-        {
-          "key": "preferred_carrier_id",
-          "label": "Bevorzugter Spediteur",
-          "type": "text",
-          "clearable": true
-        },
         {
           "key": "loading_requirements",
           "label": "Verladeanforderungen",
@@ -2546,6 +2528,21 @@
       "key": "price_agreements",
       "model": "LegacyCustomerFields",
       "reason": "Historischer JSON-Bestand; normalisierte Preisvereinbarungen verwenden."
+    },
+    {
+      "key": "payment_terms_id",
+      "model": "Finance",
+      "reason": "Zahlungsbedingung ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
+    },
+    {
+      "key": "default_route_id",
+      "model": "Logistics",
+      "reason": "Standardtour ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
+    },
+    {
+      "key": "preferred_carrier_id",
+      "model": "Logistics",
+      "reason": "Bevorzugter Spediteur ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
     }
   ]
 }
