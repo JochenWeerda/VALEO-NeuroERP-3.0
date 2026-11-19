@@ -27,6 +27,9 @@ MONEY_CENT = Decimal("0.01")
 class FinanceTransactionService:
     """Encapsulates journal entry creation, validation, posting, and GoBD compliance."""
 
+    # Optionale Kontierungszusaetze, die eine Zeile mitbringen darf.
+    ZEILEN_ZUSAETZE = ("tax_code", "cost_center", "profit_center", "reference")
+
     def __init__(self, db: Session, tenant_id: str, *, commit_on_success: bool = True) -> None:
         """Set False when the caller owns commit/rollback for a larger transaction."""
         self.db = db
@@ -371,6 +374,7 @@ class FinanceTransactionService:
             source=source or "manual",
             currency=currency,
             document_type=document_type,
+            period=derived_period,
             status="draft",
             total_debit=total_debit,
             total_credit=total_debit,
@@ -393,6 +397,7 @@ class FinanceTransactionService:
                 credit_amount=credit,
                 line_number=line_number,
                 description=ln.get("description") or "",
+                **{feld: ln[feld] for feld in self.ZEILEN_ZUSAETZE if ln.get(feld) is not None},
             )
             self.db.add(line)
 
@@ -472,6 +477,7 @@ class FinanceTransactionService:
             description=rev_desc,
             entry_date=now,
             posting_date=now,
+            period=now.strftime("%Y-%m"),
             reference=original.reference,
             source="reversal",
             currency=getattr(original, "currency", None),
@@ -500,6 +506,7 @@ class FinanceTransactionService:
                     credit_amount=ln.debit,
                     line_number=line_number,
                     description=ln.description,
+                    **{feld: getattr(ln, feld) for feld in self.ZEILEN_ZUSAETZE if getattr(ln, feld, None) is not None},
                 )
             )
 

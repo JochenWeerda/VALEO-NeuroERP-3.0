@@ -24,7 +24,6 @@ from app.core.data_quality_enforcement import (
     evaluate_customer_datensatz,
 )
 from app.core.database import get_db
-from app.core.uuid7 import uuid7
 from app.auth.deps import get_current_user
 from app.core.tenant import get_tenant_id
 from app.infrastructure.models import LkwAnnahmeQueue
@@ -2321,44 +2320,6 @@ class TagesabschlussOut(BaseModel):
     belegnummer: str
 
 
-def _ensure_chart_account(
-    db: Session,
-    tenant_id: str,
-    account_number: str,
-    _legacy_account_name: str | None = None,
-) -> str:
-    """Hole oder erstelle Kontenplan-Eintrag, return chart_of_accounts.id."""
-    from app.services.pos_accounting_service import ACCOUNT_DEFINITIONS
-
-    definition = ACCOUNT_DEFINITIONS[account_number]
-    row = db.execute(
-        text("""
-            SELECT id FROM domain_erp.chart_of_accounts
-            WHERE tenant_id = :tid AND account_number = :num LIMIT 1
-        """),
-        {"tid": tenant_id, "num": account_number},
-    ).fetchone()
-    if row:
-        return str(row[0])
-    acc_id = uuid7()
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.chart_of_accounts
-            (id, tenant_id, account_number, account_name, account_type, category, is_active, created_at, updated_at)
-            VALUES (:id, :tid, :num, :name, :account_type, :category, TRUE, NOW(), NOW())
-        """),
-        {
-            "id": acc_id,
-            "tid": tenant_id,
-            "num": account_number,
-            "name": definition.name,
-            "account_type": definition.account_type,
-            "category": definition.category,
-        },
-    )
-    return acc_id
-
-
 @router.post("/pos/tagesabschluss", response_model=TagesabschlussOut, status_code=201, tags=["pos"], summary="Tagesabschluss anlegen", dependencies=SCHREIBEN["VERKAUF"])
 async def create_tagesabschluss(
     payload: TagesabschlussIn,
@@ -2388,6 +2349,20 @@ async def create_tagesabschluss(
             status_code=422,
             detail="Gemeldeter Umsatz stimmt nicht mit den Zahlungsarten ueberein",
         )
+
+    # Buchbarkeit vor dem fiskalischen Abschluss pruefen: Ist der TSE-Abschluss signiert, darf die Buchung nicht
+    # mehr an einem fehlenden Konto oder einer gesperrten Periode scheitern. Konten legt der Abschluss nicht mehr
+    # selbst an (bis 19.11.2026 tat er das und schrieb Kopf und Zeilen roh ins Journal).
+    from app.core.exceptions import DomainError
+    from app.services.finance_transaction_service import FinanceTransactionService
+
+    buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+    try:
+        buchung.check_period_open(payload.datum.strftime("%Y-%m"))
+        kassenkonten = {line.account_number: buchung.account_id_for_number(line.account_number)
+                        for line in accounting_lines}
+    except DomainError as exc:
+        raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht buchbar: {exc}") from exc
 
     fiscal = FiscalizationService(db, tenant_id)
     try:
@@ -2463,60 +2438,22 @@ async def create_tagesabschluss(
         },
     )
 
-    # Verdrahtung zur FiBu: Journal-Eintrag erstellen (SKR03)
-    period = payload.datum.strftime("%Y-%m")
-
+    # Verdrahtung zur FiBu ueber den kanonischen Buchungsdienst (Sequenz, Hash, Periodensperre).
     if accounting_lines:
-        entry_id = uuid7()
-        desc = f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"
-
-        db.execute(
-            text("""
-                INSERT INTO domain_erp.journal_entries
-                (id, tenant_id, entry_number, entry_date, posting_date, description,
-                 source, reference, period, status, total_debit, total_credit, created_at, updated_at)
-                VALUES (:id, :tid, :entry_number, :edate, :pdate, :desc,
-                        'POS', :ref, :period, 'posted', :total_d, :total_c, NOW(), NOW())
-            """),
-            {
-                "id": entry_id,
-                "tid": tenant_id,
-                "entry_number": belegnummer,
-                "edate": payload.datum,
-                "pdate": payload.datum,
-                "desc": desc,
-                "ref": belegnummer,
-                "period": period,
-                "total_d": sum((line.debit for line in accounting_lines), Decimal("0.00")),
-                "total_c": sum((line.credit for line in accounting_lines), Decimal("0.00")),
-            },
-        )
-
-        account_ids = {
-            line.account_number: _ensure_chart_account(
-                db, tenant_id, line.account_number, line.description
+        try:
+            eintrag = buchung.create(
+                entry_number=belegnummer,
+                description=f"Tagesabschluss POS {payload.datum.isoformat()} ({payload.kassierer or 'Kassierer'})"[:200],
+                entry_date=payload.datum,
+                lines=[{"account_id": kassenkonten[line.account_number], "debit_amount": line.debit,
+                        "credit_amount": line.credit, "description": line.description} for line in accounting_lines],
+                reference=belegnummer,
+                source="POS",
             )
-            for line in accounting_lines
-        }
-        for ln, line in enumerate(accounting_lines, start=1):
-            line_id = f"{entry_id}-L{ln}"
-            db.execute(
-                text("""
-                    INSERT INTO domain_erp.journal_entry_lines
-                    (id, tenant_id, journal_entry_id, account_id, debit, credit, line_number, description, created_at)
-                    VALUES (:id, :tid, :je_id, :acc_id, :debit, :credit, :ln, :desc, NOW())
-                """),
-                {
-                    "id": line_id,
-                    "tid": tenant_id,
-                    "je_id": entry_id,
-                    "acc_id": account_ids[line.account_number],
-                    "debit": line.debit,
-                    "credit": line.credit,
-                    "ln": ln,
-                    "desc": line.description,
-                },
-            )
+            buchung.post(str(eintrag.id))
+        except DomainError as exc:
+            db.rollback()
+            raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht gebucht: {exc}") from exc
 
     db.commit()
 

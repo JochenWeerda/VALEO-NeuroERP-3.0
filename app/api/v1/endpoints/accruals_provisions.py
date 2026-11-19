@@ -5,6 +5,7 @@ FIBU-CLS-03: Abgrenzungen / Rückstellungen
 
 from app.auth.finance_roles import finance_admin, finance_read, finance_write
 from typing import List, Optional
+from calendar import monthrange
 from datetime import date, datetime
 from decimal import Decimal
 
@@ -15,9 +16,12 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
+from app.core.exceptions import DomainError
 from app.core.uuid7 import uuid7
+from app.services import finance_freigabe
+from app.services.finance_transaction_service import FinanceTransactionService
 
-from app.api.v1.schemas.base import BaseSchema, StatusResponse
+from app.api.v1.schemas.base import StatusResponse
 
 
 router = APIRouter(prefix="/accruals-provisions", tags=["finance", "closing"])
@@ -194,48 +198,50 @@ async def post_accrual_provision(
     item_id: str,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
+    nutzer: dict = Depends(finance_write),
 ):
-    """Post accrual/provision — creates GL journal entry."""
-    row = db.execute(
-        text("SELECT id, status FROM domain_erp.accruals_provisions WHERE id = :id AND tenant_id = :tid"),
-        {"id": item_id, "tid": tenant_id},
-    ).fetchone()
-    if not row:
-        raise HTTPException(status_code=404, detail="Accrual/Provision not found")
-    if row[1] == "posted":
+    """Bucht die Abgrenzung/Rueckstellung: Soll ``account_number``, Haben ``counterpart_account``, Stichtag Periodenende.
+
+    Gebucht wird ueber den kanonischen Buchungsdienst (Periodensperre, Konten, Sequenz und Hash-Kette) und mit der
+    Kontrollpruefung der manuellen Hauptbuchbuchung. Vorher entstand hier ein Journalkopf mit Status ``posted``, aber
+    ohne eine einzige Buchungszeile, ohne Periodenpruefung und ohne Hash - eine Buchung, die kein Konto bewegte.
+    """
+    item = _fetch_accrual_or_404(db, item_id, tenant_id)
+    if item.status == "posted":
         raise HTTPException(status_code=400, detail="Already posted")
+    try:
+        year, month = (int(teil) for teil in item.period.split("-")[:2])
+        stichtag = date(year, month, monthrange(year, month)[1])
+    except (ValueError, TypeError) as fehler:
+        raise HTTPException(status_code=422, detail=f"Periode {item.period!r} ist kein Monat (JJJJ-MM)") from fehler
 
-    full = db.execute(
-        text("SELECT * FROM domain_erp.accruals_provisions WHERE id = :id AND tenant_id = :tid"),
-        {"id": item_id, "tid": tenant_id},
-    ).fetchone()
-    if not full:
-        raise HTTPException(status_code=404, detail="Not found")
-
-    je_id = uuid7()
-    period = full[6]
-    year, month = period.split("-")[:2]
-    from calendar import monthrange
-    last_day = monthrange(int(year), int(month))[1]
-    entry_date = date(int(year), int(month), last_day)
-
-    db.execute(
-        text("""
-            INSERT INTO domain_erp.journal_entries
-            (id, tenant_id, entry_number, entry_date, posting_date, description,
-             source, status, total_debit, total_credit, reference, created_at, updated_at)
-            VALUES (:id, :tid, :en, :ed, :ed, :desc, 'accrual_provision', 'posted',
-                    :amt, :amt, :ref, NOW(), NOW())
-        """),
-        {
-            "id": je_id, "tid": tenant_id,
-            "en": f"AP-{period}-{item_id[:8]}", "ed": entry_date,
-            "desc": full[2], "amt": full[3], "ref": f"Abgrenzung {full[2][:30]}",
-        },
-    )
-    db.execute(
-        text("UPDATE domain_erp.accruals_provisions SET status = 'posted' WHERE id = :id AND tenant_id = :tid"),
-        {"id": item_id, "tid": tenant_id},
-    )
-    db.commit()
-    return {"ok": True, "journal_entry_id": je_id}
+    akteur = str(nutzer.get("sub") or "") if isinstance(nutzer, dict) else None
+    buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
+    try:
+        eintrag = buchung.create(
+            entry_number=f"AP-{item.period}-{item_id[:8]}",
+            description=item.description[:200],
+            entry_date=stichtag,
+            reference=f"ABGR-{item_id}",
+            source="accrual_provision",
+            lines=[
+                {"account_id": buchung.account_id_for_number(item.account_number),
+                 "debit_amount": item.amount, "credit_amount": Decimal("0"), "description": item.description[:200]},
+                {"account_id": buchung.account_id_for_number(item.counterpart_account),
+                 "debit_amount": Decimal("0"), "credit_amount": item.amount, "description": item.description[:200]},
+            ],
+        )
+        finance_freigabe.verlange_hauptbuchbuchung(db, tenant_id, str(eintrag.id), akteur)
+        buchung.post(str(eintrag.id), posted_by=akteur)
+        db.execute(
+            text("UPDATE domain_erp.accruals_provisions SET status = 'posted' WHERE id = :id AND tenant_id = :tid"),
+            {"id": item_id, "tid": tenant_id},
+        )
+        db.commit()
+    except DomainError as fehler:
+        db.rollback()
+        raise HTTPException(status_code=fehler.http_status, detail=str(fehler)) from fehler
+    except Exception:
+        db.rollback()
+        raise
+    return {"ok": True, "journal_entry_id": str(eintrag.id)}

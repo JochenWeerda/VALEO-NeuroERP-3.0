@@ -755,7 +755,27 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
             )
 
     monkeypatch.setattr(compat, "_enqueue_event", fake_enqueue)
-    monkeypatch.setattr(compat, "_ensure_chart_account", lambda db, tenant_id, account_number, account_name: account_number)
+    gebucht: list[dict[str, Any]] = []
+
+    class FakeBuchung:
+        def __init__(self, db, tenant_id, *, commit_on_success=True):
+            assert commit_on_success is False
+
+        def check_period_open(self, period):
+            assert period == "2026-03"
+
+        def account_id_for_number(self, nummer):
+            return nummer
+
+        def create(self, **daten):
+            gebucht.append(daten)
+            return type("Eintrag", (), {"id": "je-pos-1"})()
+
+        def post(self, entry_id, posted_by=None):
+            assert entry_id == "je-pos-1"
+
+    from app.services import finance_transaction_service
+    monkeypatch.setattr(finance_transaction_service, "FinanceTransactionService", FakeBuchung)
     monkeypatch.setattr(fiscal_service_module, "FiscalizationService", FakeFiscalizationService)
 
     payload = compat.TagesabschlussIn(
@@ -784,13 +804,10 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     assert captured["tenant_id"] == "tenant-wave1"
     assert captured["payload"]["cash_closing_id"] == response.id
     assert captured["payload"]["belegnummer"] == response.belegnummer
-    journal_lines = [
-        params
-        for statement, params in db.commands
-        if "INSERT INTO domain_erp.journal_entry_lines" in statement
-    ]
+    assert len(gebucht) == 1 and gebucht[0]["source"] == "POS" and gebucht[0]["reference"] == response.belegnummer
+    journal_lines = gebucht[0]["lines"]
     assert {
-        (line["acc_id"], line["debit"], line["credit"]) for line in journal_lines
+        (line["account_id"], line["debit_amount"], line["credit_amount"]) for line in journal_lines
     } == {
         ("1000", Decimal("219.00"), Decimal("0.00")),
         ("1200", Decimal("238.00"), Decimal("0.00")),
