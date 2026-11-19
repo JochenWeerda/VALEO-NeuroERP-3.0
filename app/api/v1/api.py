@@ -148,7 +148,6 @@ from app.api.v1.endpoints import (
     controlling,
     controlling_actions,
     feed_produktion_actions,
-    pos_tagesabschluss_actions,
     doc_nachweisraum_actions,
     hrm_lifecycle_actions,
     meldewesen_lifecycle_actions,
@@ -1764,11 +1763,6 @@ api_router.include_router(
 api_router.include_router(
     feed_produktion_actions.router,
     tags=["feed-produktion"]
-)
-
-api_router.include_router(
-    pos_tagesabschluss_actions.router,
-    tags=["pos-tagesabschluss"]
 )
 
 api_router.include_router(

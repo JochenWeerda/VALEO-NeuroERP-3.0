@@ -805,6 +805,11 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     assert captured["payload"]["cash_closing_id"] == response.id
     assert captured["payload"]["belegnummer"] == response.belegnummer
     assert len(gebucht) == 1 and gebucht[0]["source"] == "POS" and gebucht[0]["reference"] == response.belegnummer
+    # Der Kassentag steht danach als abgeschlossen (Z-Bon, Kassenmasken) - frueher schrieb das nur die
+    # ueberdeckte Zustandsmaschine mit simulierter Signatur.
+    stand = [params for statement, params in db.commands if "INSERT INTO domain_pos.pos_tagesabschluesse" in statement]
+    assert len(stand) == 1 and stand[0]["kasse"] == "register-1" and stand[0]["datum"] == "2026-03-11"
+    assert stand[0]["zbon"] == response.belegnummer and stand[0]["tse"] == "closing-1"
     journal_lines = gebucht[0]["lines"]
     assert {
         (line["account_id"], line["debit_amount"], line["credit_amount"]) for line in journal_lines
