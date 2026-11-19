@@ -62,7 +62,6 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 ## Gleicher Tabellenname in mehreren Schemas
 
 - `business_partners` in `domain_crm`, `domain_erp`
-- `delivery_notes` in `domain_erp`, `domain_sales`
 - `harvest_acceptances` in `domain_agrar`, `domain_inventory`
 - `open_items` in `domain_erp`, `domain_shared`
 - `policy_rules` in `domain_erp`, `domain_shared`

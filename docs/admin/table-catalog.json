@@ -9,13 +9,6 @@
     },
     {
       "schemas": [
-        "domain_erp",
-        "domain_sales"
-      ],
-      "table": "delivery_notes"
-    },
-    {
-      "schemas": [
         "domain_agrar",
         "domain_inventory"
       ],
