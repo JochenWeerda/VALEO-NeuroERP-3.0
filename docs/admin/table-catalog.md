@@ -559,7 +559,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_portal.lohndienst_auftraege` | `app/services/portal_lohndienst_service.py` | `app/services/portal_lohndienst_service.py` | — |
 | `domain_portal.lohndienst_ereignisse` | `app/services/portal_lohndienst_service.py` | `app/services/portal_lohndienst_service.py` | — |
 | `domain_pos.payment_methods` | `app/api/v1/endpoints/pos_payments.py` | — | — |
-| `domain_pos.pos_tagesabschluesse` | `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/kasse_tagesabschluss.py`, `app/api/v1/endpoints/pos_payments.py` | `app/api/v1/endpoints/compat.py` | — |
+| `domain_pos.pos_tagesabschluesse` | `app/api/v1/endpoints/kasse_tagesabschluss.py`, `app/api/v1/endpoints/pos_payments.py` | `app/api/v1/endpoints/kasse_tagesabschluss.py` | — |
 | `domain_pos.promotions` | `app/api/v1/endpoints/pos_payments.py` | `app/api/v1/endpoints/pos_payments.py` | — |
 | `domain_pricing.discount_rules` | `app/services/preisfindung_service.py` | — | — |
 | `domain_pricing.price_list_items` | `app/api/v1/endpoints/price_lists.py`, `app/services/preisfindung_service.py` | `app/api/v1/endpoints/price_lists.py` | — |

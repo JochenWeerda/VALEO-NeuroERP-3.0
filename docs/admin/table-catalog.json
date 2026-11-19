@@ -46572,12 +46572,11 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/compat.py",
             "app/api/v1/endpoints/kasse_tagesabschluss.py",
             "app/api/v1/endpoints/pos_payments.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/compat.py"
+            "app/api/v1/endpoints/kasse_tagesabschluss.py"
           ]
         },
         "pos_tagesabschluss_log": {
