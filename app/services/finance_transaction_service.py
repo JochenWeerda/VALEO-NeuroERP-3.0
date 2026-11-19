@@ -27,6 +27,9 @@ MONEY_CENT = Decimal("0.01")
 class FinanceTransactionService:
     """Encapsulates journal entry creation, validation, posting, and GoBD compliance."""
 
+    # Optionale Kontierungszusaetze, die eine Zeile mitbringen darf.
+    ZEILEN_ZUSAETZE = ("tax_code", "cost_center", "profit_center", "reference")
+
     def __init__(self, db: Session, tenant_id: str, *, commit_on_success: bool = True) -> None:
         """Set False when the caller owns commit/rollback for a larger transaction."""
         self.db = db
@@ -393,6 +396,7 @@ class FinanceTransactionService:
                 credit_amount=credit,
                 line_number=line_number,
                 description=ln.get("description") or "",
+                **{feld: ln[feld] for feld in self.ZEILEN_ZUSAETZE if ln.get(feld) is not None},
             )
             self.db.add(line)
 

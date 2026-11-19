@@ -43,7 +43,8 @@ def _account(conn, tenant: str, number: str) -> str:
 
 @pytest.fixture(scope="module")
 def probe():
-    with support.probe((TEMPLATES, ACCOUNTS)) as conn:
+    # Buchen prueft die Periode (Buchungsdienst): die Fachkette braucht das Periodenregister.
+    with support.probe((TEMPLATES, ACCOUNTS, "public.finance_accounting_periods")) as conn:
         support.ensure_tenants(conn, A, B, SYSTEM)
         for schema in SCHEMAS:
             conn.execute(sa.text(f"GRANT USAGE ON SCHEMA {schema} TO valeo_app"))
@@ -112,17 +113,22 @@ def test_fachkette_gemeinsame_vorlage_anwenden(db):
             listed = {t.id: t for t in run(ep.list_booking_templates(None, True, tenant_id=A, db=session))}
             assert listed[rows["shared"]].shared and not listed[rows["own"]].shared
             assert rows["foreign"] not in listed
-            applied = run(ep.apply_booking_template(
-                rows["shared"], ep.ApplyTemplateRequest(entry_date=date(2026, 10, 27), amount=Decimal("250")),
-                tenant_id=A, db=session, http_request=None))
+            anfrage = ep.ApplyTemplateRequest(entry_date=date(2026, 10, 27), amount=Decimal("250"), reference="RLS-BELEG-1")
+            # Gebucht wird nur auf eigene Konten des Mandanten (Buchungsdienst, JOURNAL-ACCOUNT-ID): Ein Konto des
+            # gemeinsamen Kontenrahmens, auf das alle Mandanten buchen, mischte ihre Salden. Fehlt das eigene Konto,
+            # bucht die Vorlage nichts.
+            with pytest.raises(HTTPException) as fehlt:
+                run(ep.apply_booking_template(rows["shared"], anfrage, tenant_id=A, db=session, http_request=None))
+            assert fehlt.value.status_code == 422
+            rows["a_9820"] = _account(conn, A, "9820")
+            applied = run(ep.apply_booking_template(rows["shared"], anfrage, tenant_id=A, db=session, http_request=None))
             entry = conn.execute(sa.text("SELECT tenant_id, total_debit FROM domain_erp.journal_entries WHERE id = :i"),
                                  {"i": applied.journal_entry_id}).one()
             assert entry.tenant_id == A and Decimal(str(entry.total_debit)) == Decimal("250")
             accounts = {r.line_number: str(r.account_id) for r in conn.execute(sa.text(
                 "SELECT line_number, account_id FROM domain_erp.journal_entry_lines WHERE journal_entry_id = :i "
                 "AND tenant_id = :a"), {"i": applied.journal_entry_id, "a": A})}
-            # eigenes Konto vor dem gemeinsamen Kontenrahmen
-            assert accounts == {1: rows["a_9810"], 2: rows["system_9820"]}
+            assert accounts == {1: rows["a_9810"], 2: rows["a_9820"]}
             for call in (
                 lambda: ep.update_booking_template(rows["shared"], ep.BookingTemplateUpdate(name="x"),
                                                    tenant_id=A, db=session),

@@ -26,6 +26,11 @@ class JournalEntryLine(Base):
     credit_amount = Column(DECIMAL(15, 2), default=0)
     line_number = Column(Integer, nullable=False)
     description = Column(String(200), nullable=True)
+    # Kontierungszusaetze je Zeile (Spalten aus der Basismigration; Buchungsvorlagen setzen sie).
+    tax_code = Column(String(20), nullable=True)
+    cost_center = Column(String(100), nullable=True)
+    profit_center = Column(String(100), nullable=True)
+    reference = Column(String(255), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     journal_entry = relationship(
