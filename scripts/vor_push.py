@@ -30,6 +30,9 @@ HIER = Path(__file__).resolve().parent
 VORGABE_PRUEFSTAND = "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"
 BLOCK = 6  # Testdateien je pytest-Prozess (mehr legte Docker Desktop lahm)
 RUECKWEG: str | None = None  # Revision, auf die der Pruefstand nach voruebergehend eingespielten Branch-Migrationen zurueckgeht
+#: Tabellen, die die Branch-Migrationen entfernen: Tests, die sie nennen, laufen mit (19.11.2026: S5 entfernte
+#: domain_einkauf.bestellungen; der RLS-Test nannte sie, aber keines der geaenderten Module - lokal gruen, CI rot).
+ENTFERNTE_TABELLEN: set[str] = set()
 
 #: Register und Verzeichnisse: (Name, Pruefbefehl, Befehl zum Neuerzeugen)
 REGISTER: list[tuple[str, list[str], str]] = [
@@ -162,8 +165,12 @@ def pruefe_pruefstand(url: str, base: str) -> bool:
         if not _laufe(rollen, "Rollen und Eigentum (vor dem Einspielen)"):
             return False
         RUECKWEG = next(iter(stand))
+        vorher = _tabellen(url)
         if not _laufe([py, "-m", "alembic", "upgrade", "head"], "Branch-Migrationen voruebergehend einspielen"):
             return False
+        ENTFERNTE_TABELLEN.update(vorher - _tabellen(url))
+        if ENTFERNTE_TABELLEN:
+            print(f"  Entfernte Tabellen: {len(ENTFERNTE_TABELLEN)} - Tests, die sie nennen, laufen mit.")
         return _laufe(rollen, "Rechte auf neue Objekte")
     neu_aufgebaut = stand != koepfe
     if neu_aufgebaut:
@@ -178,6 +185,14 @@ def pruefe_pruefstand(url: str, base: str) -> bool:
         schritte.append(([py, "-m", "app.seeds.inventory_seed"], "Bestands-Seed"))
     schritte.append(([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"], "Rollen und Rechte"))
     return all([_laufe(befehl, titel) for befehl, titel in schritte])
+
+
+def _tabellen(url: str) -> set[str]:
+    import sqlalchemy as sa
+
+    with sa.create_engine(url).connect() as verbindung:
+        return {f"{s}.{n}" for s, n in verbindung.execute(sa.text(
+            "SELECT schemaname, tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')"))}
 
 
 def _wie_ci(url: str) -> bool:
@@ -248,6 +263,11 @@ def betroffene_tests(base: str) -> list[str]:
             begriffe.add(stamm)
     for begriff in sorted(begriffe):
         for treffer in _git("grep", "-l", "-F", begriff, "--", "tests/*.py", "tests/**/*.py").split():
+            tests.add(treffer)
+    for tabelle in sorted(ENTFERNTE_TABELLEN):
+        # schema.name oder f"{SCHEMA}.name": der Name nach einem Punkt, als ganzes Wort
+        name = tabelle.split(".", 1)[1]
+        for treffer in _git("grep", "-l", "-w", "-F", f".{name}", "--", "tests/*.py", "tests/**/*.py").split():
             tests.add(treffer)
     tests.update(p for p in IMMER if (REPO / p).exists())
     tests.update(str(p.relative_to(REPO)).replace("\\", "/") for p in (REPO / "tests").glob("*ratsche*.py"))
