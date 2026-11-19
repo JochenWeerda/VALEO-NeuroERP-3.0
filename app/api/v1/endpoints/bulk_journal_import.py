@@ -8,7 +8,6 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, 
 from app.core.exceptions import kontosperre_meldung
 from app.auth.finance_roles import finance_admin, finance_read
 from sqlalchemy.orm import Session
-from sqlalchemy import text
 from decimal import Decimal, InvalidOperation
 from datetime import date, datetime
 from pydantic import BaseModel, Field, field_validator
@@ -16,6 +15,8 @@ import csv
 import io
 import logging
 from app.core.uuid7 import uuid7
+from app.core.exceptions import DomainError
+from app.services.finance_transaction_service import FinanceTransactionService
 
 from ....core.database import get_db
 from ....core.data_quality_enforcement import (
@@ -26,7 +27,6 @@ from ....core.fibu_audit import log_fibu_audit
 
 logger = logging.getLogger(__name__)
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.bulk_journal_import_schemas import BulkJournalImportOut
 from app.core import finance_periods
 
@@ -258,20 +258,23 @@ async def import_journal_entries_csv(
                     detail=finance_periods.meldung(period, gesperrt),
                 )
 
-            # Create journal entries
+            # Gebucht wird ueber den kanonischen Buchungsdienst (Periodensperre je Buchungsdatum, eigene buchbare Konten,
+            # Belegbezug, Sequenz und Hash), alles oder nichts. Bis 19.11.2026 gingen Kopf und Zeilen roh ins Journal;
+            # fehlte ein Konto, rollte der Weg mitten in der Schleife zurueck und schrieb danach weiter Zeilen.
+            buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
             for entry_key, entry_lines in entries_dict.items():
                 if not entry_lines:
                     continue
-                
-                # Get first line for entry metadata
                 first_line = entry_lines[0]
                 entry_date = first_line.entry_date
-                
-                # Calculate totals
+                if entry_date.strftime("%Y-%m") != period:
+                    errors.append(ImportError(
+                        row_number=0, field='entry_date',
+                        error_message=f'Entry {entry_key}: Buchungsdatum {entry_date.isoformat()} liegt nicht in der Periode {period}',
+                        row_data={'entry_key': entry_key}))
+                    continue
                 total_debit = sum(line.debit_amount for line in entry_lines)
                 total_credit = sum(line.credit_amount for line in entry_lines)
-                
-                # Validate balance
                 if abs(total_debit - total_credit) >= Decimal("0.01"):
                     errors.append(ImportError(
                         row_number=0,
@@ -280,94 +283,41 @@ async def import_journal_entries_csv(
                         row_data={'entry_key': entry_key}
                     ))
                     continue
-                
-                # Generate entry number if not provided
-                entry_number = first_line.entry_number
-                if not entry_number:
-                    # Das Ende der Kennung ist zufaellig; ihr Anfang ist die Zeit und war fuer zwei Importe kurz
-                    # nacheinander gleich (doppelte Buchungsnummer, 500).
-                    entry_number = f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid7()[-8:].upper()}"
-                
-                # Create journal entry
-                entry_id = uuid7()
-                journal_entry_insert = text("""
-                    INSERT INTO domain_erp.journal_entries
-                    (id, tenant_id, entry_number, entry_date, posting_date, description,
-                     source, currency, status, total_debit, total_credit, created_at, updated_at)
-                    VALUES (:id, :tenant_id, :entry_number, :entry_date, :posting_date, :description,
-                            :source, :currency, :status, :total_debit, :total_credit, NOW(), NOW())
-                    RETURNING id
-                """)
-                
-                db.execute(journal_entry_insert, {
-                    "id": entry_id,
-                    "tenant_id": tenant_id,
-                    "entry_number": entry_number,
-                    "entry_date": entry_date,
-                    "posting_date": entry_date,
-                    "description": first_line.description,
-                    "source": "bulk_import",
-                    "currency": "EUR",
-                    "status": "posted",  # BULK-JE-POST-001: direkt buchen (Belegbruch schliessen)
-                    "total_debit": total_debit,
-                    "total_credit": total_credit
-                })
-                
-                # Create journal entry lines
-                for line_idx, line in enumerate(entry_lines, start=1):
-                    # Get account ID
-                    account_query = text("""
-                        SELECT id FROM domain_erp.chart_of_accounts
-                        WHERE account_number = :account_number AND tenant_id = :tenant_id
-                        LIMIT 1
-                    """)
-                    
-                    account_row = db.execute(account_query, {
-                        "account_number": line.account_number,
-                        "tenant_id": tenant_id
-                    }).fetchone()
-                    
-                    if not account_row:
-                        errors.append(ImportError(
-                            row_number=0,
-                            field='account_number',
-                            error_message=f'Account not found: {line.account_number}',
-                            row_data={'account_number': line.account_number}
-                        ))
-                        db.rollback()
-                        continue
-                    
-                    account_id = str(account_row[0])
-                    
-                    # Insert journal entry line (Schema: debit/credit, siehe ensure_chart_of_accounts_and_journal_entry_lines)
-                    line_id = f"{entry_id}-L{line_idx}"
-                    journal_line_insert = text("""
-                        INSERT INTO domain_erp.journal_entry_lines
-                        (id, tenant_id, journal_entry_id, account_id, description, debit, credit,
-                         cost_center, project, line_number, created_at)
-                        VALUES (:id, :tenant_id, :journal_entry_id, :account_id, :description, :debit, :credit,
-                                :cost_center, :project, :line_number, NOW())
-                    """)
-                    
-                    db.execute(journal_line_insert, {
-                        "id": line_id,
-                        "tenant_id": tenant_id,
-                        "journal_entry_id": entry_id,
-                        "account_id": account_id,
-                        "description": line.description,
-                        "debit": line.debit_amount,
-                        "credit": line.credit_amount,
-                        "cost_center": line.cost_center,
-                        "project": line.reference,
-                        "line_number": line_idx,
-                    })
-                if not dry_run:
-                    log_fibu_audit(
-                        db, tenant_id, "create", "journal_entry", entry_id,
-                        {"source": "bulk_import", "entry_number": entry_number},
-                        request=request,
+                # Belegbezug: der Beleg der Zeile, sonst ihre Belegnummer, sonst die freigegebene Importdatei selbst
+                # (ihr Abdruck ueber Mandant, Periode und Inhalt).
+                bezug = (first_line.reference or first_line.entry_number or f"IMPORT-{abdruck}")[:50]
+                # Das Ende der Kennung ist zufaellig; ihr Anfang ist die Zeit und war fuer zwei Importe kurz
+                # nacheinander gleich (doppelte Buchungsnummer, 500).
+                entry_number = first_line.entry_number or f"IMP-{entry_date.strftime('%Y%m%d')}-{uuid7()[-8:].upper()}"
+                try:
+                    zeilen = [
+                        {
+                            "account_id": buchung.account_id_for_number(line.account_number),
+                            "debit_amount": line.debit_amount, "credit_amount": line.credit_amount,
+                            "description": (line.description or "")[:200], "tax_code": line.tax_code,
+                            "cost_center": line.cost_center, "profit_center": line.profit_center,
+                            "reference": line.reference,
+                        }
+                        for line in entry_lines
+                    ]
+                    eintrag = buchung.create(
+                        entry_number=entry_number, description=(first_line.description or entry_number)[:200],
+                        entry_date=entry_date, lines=zeilen, reference=bezug, source="bulk_import",
                     )
-                created_entry_ids.append(entry_id)
+                    # BULK-JE-POST-001: direkt buchen (die Freigabe gilt der ganzen Datei, s. o.)
+                    buchung.post(str(eintrag.id), posted_by=akteur)
+                except DomainError as fehler:
+                    errors.append(ImportError(
+                        row_number=0, field='entry', error_message=f'Entry {entry_key}: {fehler}',
+                        row_data={'entry_key': entry_key}))
+                    break  # alles oder nichts: unten zurueckgerollt
+                # Ohne eigenen Commit: frueher committete jeder Auditeintrag den Import halb.
+                log_fibu_audit(
+                    db, tenant_id, "create", "journal_entry", str(eintrag.id),
+                    {"source": "bulk_import", "entry_number": entry_number},
+                    request=request, commit=False,
+                )
+                created_entry_ids.append(str(eintrag.id))
 
             if errors:
                 db.rollback()

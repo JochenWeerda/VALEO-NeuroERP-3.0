@@ -21,7 +21,6 @@ SCHREIBEN = re.compile(
 # schreiben kein Journal mehr.
 # Nur streichen, nie ergaenzen.
 SCHREIBER: dict[str, set[str]] = {
-    "app/api/v1/endpoints/bulk_journal_import.py": {"journal_entries", "journal_entry_lines"},
     "app/api/v1/endpoints/compat.py": {"journal_entries", "journal_entry_lines"},
     "app/api/v1/endpoints/inventory_operations.py": {"journal_entries", "journal_entry_lines"},
     "app/core/connectors/workflow.py": {"journal_entries", "journal_entry_lines"},
