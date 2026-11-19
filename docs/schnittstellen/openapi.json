@@ -45804,17 +45804,6 @@
             ],
             "title": "Partner Debtor Account"
           },
-          "partner_default_route_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partner Default Route Id"
-          },
           "partner_default_silo_location": {
             "anyOf": [
               {
@@ -46490,17 +46479,6 @@
             ],
             "title": "Partner Payment Target Days"
           },
-          "partner_payment_terms_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partner Payment Terms Id"
-          },
           "partner_phone": {
             "anyOf": [
               {
@@ -46533,17 +46511,6 @@
               }
             ],
             "title": "Partner Postal Code"
-          },
-          "partner_preferred_carrier_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Partner Preferred Carrier Id"
           },
           "partner_price_group": {
             "anyOf": [
@@ -260628,17 +260595,6 @@
                     ],
                     "title": "Partner Customer Group"
                   },
-                  "partner_default_route_id": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "title": "Partner Default Route Id"
-                  },
                   "partner_default_silo_location": {
                     "anyOf": [
                       {
@@ -261136,17 +261092,6 @@
                     ],
                     "title": "Partner Payment Target Days"
                   },
-                  "partner_payment_terms_id": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "title": "Partner Payment Terms Id"
-                  },
                   "partner_post_open_items_blocked": {
                     "anyOf": [
                       {
@@ -261157,17 +261102,6 @@
                       }
                     ],
                     "title": "Partner Post Open Items Blocked"
-                  },
-                  "partner_preferred_carrier_id": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ],
-                    "title": "Partner Preferred Carrier Id"
                   },
                   "partner_price_group": {
                     "anyOf": [

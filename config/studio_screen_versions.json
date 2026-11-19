@@ -3434,7 +3434,7 @@
       "version": "1.0.0"
     },
     "crm/customer-360": {
-      "definition_hash": "d9f019fc8b90f676d37c96cec754fa58072f48bd0f924516934d3f44347f2d6c",
+      "definition_hash": "97e76397cdf18042fc5d55ad85ddc45f784289326aa8f4cb085dc7ed804912d9",
       "gates_passed": [
         "A",
         "B",
@@ -3621,7 +3621,7 @@
       "version": "1.0.0"
     },
     "crm/kunden-cockpit": {
-      "definition_hash": "0f06781c9725f6a4040362eb1565b097bd11016a12324f8a4c4b4524f7abfb2c",
+      "definition_hash": "d31fd0407c61010f66fa39607d56b1faaab2ffa8953072e16173729fa969a9a7",
       "gates_passed": [
         "A",
         "B",
