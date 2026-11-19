@@ -21408,6 +21408,12 @@ MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene 
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
 
+## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
+Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
+Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
+Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
+Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
+
 ## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
 Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
