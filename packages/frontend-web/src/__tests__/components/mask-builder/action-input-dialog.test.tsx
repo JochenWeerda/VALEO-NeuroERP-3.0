@@ -82,6 +82,33 @@ describe('ActionInputDialog', () => {
     expect(onSubmit).toHaveBeenCalledWith({ tokens: 10000, max_children: 0, reference: '000051' })
   })
 
+  it('gruppiert Abschnitte und begrenzt die Dialoghoehe', () => {
+    const action: ScreenActionDefinition = { key: 'edit', label: 'Bearbeiten', inputFields: [
+      { key: 'name', label: 'Name', type: 'text', section: 'Stammdaten' },
+      { key: 'email', label: 'E-Mail', type: 'text', section: 'Kontakt' },
+    ] }
+    render(mitAbfragen(<ActionInputDialog action={action} open onCancel={vi.fn()} onSubmit={vi.fn()} />))
+    expect(screen.getByRole('group', { name: 'Stammdaten' })).toContainElement(screen.getByLabelText('Name'))
+    expect(screen.getByRole('group', { name: 'Kontakt' })).toContainElement(screen.getByLabelText('E-Mail'))
+    expect(screen.getByRole('dialog')).toHaveClass('max-h-[90vh]', 'overflow-y-auto')
+  })
+
+  it('sendet null fuer geleerte vorbelegte clearable Felder und behaelt Altverhalten', () => {
+    const onSubmit = vi.fn()
+    const action: ScreenActionDefinition = { key: 'edit', label: 'Bearbeiten', inputFields: [
+      { key: 'email', label: 'E-Mail', type: 'text', clearable: true },
+      { key: 'amount', label: 'Betrag', type: 'number', clearable: true },
+      { key: 'empty', label: 'Leer', type: 'text', clearable: true },
+      { key: 'legacy', label: 'Alt', type: 'text' },
+    ] }
+    render(mitAbfragen(<ActionInputDialog action={action} open initialValues={{ email: 'a@b.de', amount: 0, empty: '', legacy: 'x' }} onCancel={vi.fn()} onSubmit={onSubmit} />))
+    fireEvent.change(screen.getByLabelText('E-Mail'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Betrag'), { target: { value: '' } })
+    fireEvent.change(screen.getByLabelText('Alt'), { target: { value: '' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    expect(onSubmit).toHaveBeenCalledWith({ email: null, amount: null, legacy: '' })
+  })
+
   it('Abbrechen gibt nichts weiter', () => {
     const onSubmit = vi.fn()
     const onCancel = vi.fn()

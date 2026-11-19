@@ -8,7 +8,8 @@ from scripts.check_mask_command_endpoint_inventory import valid_input_flow
 
 
 def flows():
-    return [action for screen in SCREEN_DEFINITION_BUILDERS
+    # Kopie: get_screen_definition registriert verzoegert weitere Masken (dict changed size during iteration).
+    return [action for screen in list(SCREEN_DEFINITION_BUILDERS)
             for action in get_screen_definition(screen).get("actions", [])
             if action.get("inputFlow")]
 

@@ -108,67 +108,9 @@ async def delete_bestellung(
 # ANFRAGEN / BEDARFSMELDUNGEN (Requisitions) - PROC-REQ-01
 # ============================================================================
 
-@router.get("/anfragen", response_model=dict)
-async def get_anfragen(
-    status: Optional[str] = None,
-    typ: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Holt Anfragen/Bedarfsmeldungen"""
-    try:
-        query = "SELECT * FROM einkauf_anfragen WHERE tenant_id = :tenant_id"
-        params: dict = {"limit": limit, "skip": skip, "tenant_id": tenant_id}
-
-        if status:
-            query += " AND status = :status"
-            params["status"] = status
-        if typ:
-            query += " AND typ = :typ"
-            params["typ"] = typ
-
-        query += " ORDER BY created_at DESC LIMIT :limit OFFSET :skip"
-
-        result = db.execute(text(query), params)
-        anfragen = [dict(row._mapping) for row in result]
-
-        return {"total": len(anfragen), "items": anfragen}
-    except Exception:
-        logger.exception("Anfragenliste laden fehlgeschlagen")
-        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfragen")
-
-
-@router.get("/anfragen/{anfrage_id}")
-async def get_anfrage(
-    anfrage_id: str,
-    db: Session = Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Holt einzelne Anfrage"""
-    try:
-        row = db.execute(
-            text("SELECT * FROM einkauf_anfragen WHERE (id = :id OR anfrage_nummer = :id) AND tenant_id = :tenant_id"),
-            {"id": anfrage_id, "tenant_id": tenant_id},
-        ).fetchone()
-        if not row:
-            raise HTTPException(status_code=404, detail="Anfrage nicht gefunden")
-
-        anfrage = dict(row._mapping)
-
-        pos_rows = db.execute(
-            text("SELECT * FROM einkauf_anfragen_positionen WHERE anfrage_id = :id"),
-            {"id": anfrage["id"]},
-        ).fetchall()
-        anfrage["positionen"] = [dict(p._mapping) for p in pos_rows]
-
-        return anfrage
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("Anfrage laden fehlgeschlagen")
-        raise HTTPException(status_code=500, detail="Datenbankfehler beim Laden der Anfrage")
+# Lesen: GET /einkauf/anfragen und /einkauf/anfragen/{anfrage_id} beantwortet compat.py (typisiert, zuerst
+# eingebunden). Die gleichnamigen Routen hier waren ueberdeckt und nie erreichbar, standen aber in der
+# produktiven OpenAPI und machten den Feldvertrag der Maske einkauf/anfrage blind (entfernt 19.11.2026).
 
 
 @router.post("/anfragen", status_code=201, dependencies=SCHREIBEN["EINKAUF"])

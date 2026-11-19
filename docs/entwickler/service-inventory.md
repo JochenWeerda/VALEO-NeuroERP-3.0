@@ -102,6 +102,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
 | `crm_segment_service` | Canonical, tenant-scoped CRM segment data and bounded membership evaluation. |
+| `customer_master_profile_service` | Tenant-scoped customer master profile; mutations stay within the caller's transaction. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
