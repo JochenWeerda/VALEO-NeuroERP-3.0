@@ -1162,7 +1162,7 @@
     "dienst": 14,
     "nutzlast": 8,
     "standardmandant": 6,
-    "token": 26
+    "token": 27
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",
