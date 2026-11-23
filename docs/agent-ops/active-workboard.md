@@ -21611,3 +21611,4 @@ M2-RECHNUNGSPRUEFUNG-FREIGABE: Besitz erweitert um Leseprojektion rechnungspruef
 Drei-Wege-Abgleich liefert Rechnungspruefungen mit stabiler Pruefungs-ID. Neue Studio-Tabelle, OpenAPI und Katalog synchron. PostgreSQL-HTTP-Vertrag auf bestehendem valeo_probe bestanden: passende Pruefung sichtbar, fremder Mandant und andere Bestellung ausgeschlossen. Rueckrollbare Fixture. Entscheidungsdialog steht aus.
 
 Rechnungsfreigabe liefert den gespeicherten Entscheidungsgrund bereits in der REST-Antwort. Vorher konnte die Antwort den alten Grund zeigen. Fachtest prueft Grund und Operator, 14 Tests gruen.
+M2-RECHNUNGSPRUEFUNG-FREIGABE: REST-Detail und Service-Lesevertrag fuer einzelne Pruefungs-ID im aktiven Mandanten, DTO und gezielter Negativtest.
