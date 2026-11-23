@@ -60,3 +60,27 @@ def test_follow_up_rest_rolls_back_without_exposing_storage_details(monkeypatch)
     assert error.value.status_code == 503
     assert error.value.detail == "Folgeaktion konnte nicht gespeichert werden."
     db.rollback.assert_called_once_with()
+
+
+def test_follow_up_replay_leaves_the_existing_entry_unchanged(monkeypatch):
+    from unittest.mock import Mock
+
+    from app.api.v1.endpoints import procurement_match
+
+    db = Mock()
+    service = Mock()
+    replay = Mock(return_value={"id": "saved", "replayed": True})
+    monkeypatch.setattr(procurement_match, "ProcurementMatchService", lambda *_: service)
+    monkeypatch.setattr(procurement_match, "gepruefter_akteur_aus_request", lambda _: "actor")
+    monkeypatch.setattr(procurement_match, "lock_and_replay", replay)
+    body = procurement_match.FollowUpIn(bestellnummer="PO-42", action_type="eskalation", grund="Prüfen")
+
+    assert procurement_match.create_follow_up(
+        body, Mock(), db=db, tenant_id="tenant-a", idempotency_key="attempt-1",
+    )["id"] == "saved"
+
+    assert replay.call_args.kwargs["tenant"] == "tenant-a"
+    assert replay.call_args.kwargs["actor"] == "actor"
+    service.create_follow_up.assert_not_called()
+    db.commit.assert_not_called()
+    db.rollback.assert_called_once_with()

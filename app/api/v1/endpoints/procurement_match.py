@@ -7,9 +7,10 @@ Wertabweichung und Lücken je Bestellung sichtbar machen.
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any, Optional
+from hashlib import sha256
+from typing import Annotated, Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
@@ -28,6 +29,7 @@ from app.api.v1.schemas.procurement_match_schemas import (
     ThreeWayMatchOut,
     WareneingangOut,
 )
+from app.services.command_idempotency import lock_and_replay, store_execution
 from app.services.procurement_match_service import ProcurementMatchService
 from app.api.v1.schemas.base import TypedObjectOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
@@ -94,17 +96,40 @@ def create_follow_up(
     request: Request,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    idempotency_key: Annotated[str | None, Header(min_length=1, max_length=200)] = None,
 ) -> dict[str, Any]:
     service = ProcurementMatchService(db, tenant_id)
     try:
-        return service.create_follow_up(
+        actor = gepruefter_akteur_aus_request(request)
+        replay_args = None
+        if idempotency_key is not None:
+            payload = body.model_dump_json(exclude={"created_by"})
+            replay_args = {
+                "tenant": tenant_id, "command": "procurement.follow_up.create.v1",
+                "key": idempotency_key, "actor": actor,
+                "fingerprint": sha256(payload.encode("utf-8")).hexdigest(),
+            }
+            replay = lock_and_replay(db, **replay_args)
+            if replay is not None:
+                db.rollback()
+                return replay
+
+        result = service.create_follow_up(
             bestellnummer=body.bestellnummer,
             action_type=body.action_type,
             grund=body.grund,
             ausnahme_code=body.ausnahme_code,
-            created_by=gepruefter_akteur_aus_request(request),
+            created_by=actor,
         )
+        if replay_args is not None:
+            store_execution(db, **replay_args, result=result)
+        db.commit()
+        return result
+    except HTTPException:
+        db.rollback()
+        raise
     except ValueError as exc:
+        db.rollback()
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         db.rollback()

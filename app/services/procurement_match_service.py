@@ -494,7 +494,6 @@ class ProcurementMatchService:
                 "by": created_by,
             },
         ).mappings().one()
-        self.db.commit()
         return _follow_up_row(inserted)
 
     def list_ers_credits(self, bestellnummer: str, limit: int = 20) -> list[dict]:

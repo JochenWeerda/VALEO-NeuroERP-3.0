@@ -21577,3 +21577,5 @@ M2-WARENEINGANGSABGLEICH: Codex uebernimmt fuer Folgeaktionen die Service-Method
 Folgeaktion: Fachservice loest die Bestellung im aktiven Mandanten auf und speichert die kanonische Bestellnummer. Fehlende Bestellung wird vor Eskalationsabfrage und INSERT abgewiesen. Drei Service-Tests bestanden. Studio-Schreibaktion, Idempotenz und Browserabnahme offen.
 
 Folgeaktions-REST: Speicherfehler werden nach Rollback mit neutraler Fehlermeldung beantwortet. Vier fokussierte Tests bestanden, inklusive Rollback und Schutz interner Fehlerdetails.
+
+Folgeaktions-REST akzeptiert Idempotency-Key. Protokolleintrag und Wiederholungsergebnis werden in derselben Transaktion gespeichert. Altaufrufer ohne Header bleiben kompatibel. OpenAPI erzeugt, fuenf gezielte Tests bestanden. PostgreSQL-Nachweis und Studio-Schreibaktion offen.
