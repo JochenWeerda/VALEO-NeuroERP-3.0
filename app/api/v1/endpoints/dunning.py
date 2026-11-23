@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from decimal import Decimal
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from pydantic import BaseModel, Field
 import logging
 from app.core.uuid7 import uuid7
@@ -39,6 +39,22 @@ MONEY_QUANT = Decimal("0.01")
 
 def _money(value: Decimal) -> Decimal:
     return value.quantize(MONEY_QUANT)
+
+# Spalten einer Mahnung in der Reihenfolge von ``_notice_response``.
+_NOTICE_COLUMNS = ("id, op_id, debtor_id, dunning_level, dunning_date, due_date, open_amount, dunning_fee, interest, "
+                   "total_amount, payment_deadline, status, sent_date, payment_date, notes, created_at, updated_at")
+
+
+def _notice_response(row) -> "DunningResponse":
+    return DunningResponse(
+        id=str(row[0]), op_id=str(row[1]), debtor_id=str(row[2] or ""), dunning_level=int(row[3]),
+        dunning_date=row[4], due_date=row[5], open_amount=Decimal(str(row[6] or 0)),
+        dunning_fee=Decimal(str(row[7] or 0)), interest=Decimal(str(row[8] or 0)),
+        total_amount=Decimal(str(row[9] or 0)), payment_deadline=row[10], status=str(row[11] or ""),
+        sent_date=row[12], payment_date=row[13], notes=str(row[14]) if row[14] else None,
+        created_at=row[15], updated_at=row[16] or row[15],
+    )
+
 
 
 class DunningRule(BaseModel):
@@ -294,196 +310,34 @@ async def process_dunning(
     request: ProcessDunningRequest,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ):
+    """Mahnt die mahnfaelligen Posten (Auswahl: ``op_ids`` oder ``debtor_id``) ueber den einen Mahnweg.
+
+    Bis 23.11.2026 rechnete dieser Weg mit eigener Stufen- und Gebuehrenlogik neben dem Mahnlauf
+    (``FinanceDunningService.run_dunning``); jetzt ruft er ihn.
     """
-    Process dunning for overdue open items based on rules.
-    """
+    from app.auth.deps import anmeldename
+    from app.services.finance_dunning_service import FinanceDunningService
+
     try:
-        # Get active dunning rules
-        rules = await list_dunning_rules(active_only=True, tenant_id=tenant_id, db=db)
-        
-        if not rules:
-            raise HTTPException(status_code=400, detail="No active dunning rules found")
-        
-        # Get overdue open items
-        if request.op_ids:
-            op_query = text("""
-                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
-                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
-                FROM domain_erp.offene_posten
-                WHERE id = ANY(:op_ids) AND tenant_id = :tenant_id
-                AND COALESCE(debtor_id, kunde_id) IS NOT NULL
-                AND COALESCE(open_amount, offen) > 0
-            """)
-            op_rows = db.execute(op_query, {
-                "op_ids": request.op_ids,
-                "tenant_id": tenant_id
-            }).fetchall()
-        elif request.debtor_id:
-            op_query = text("""
-                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
-                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
-                FROM domain_erp.offene_posten
-                WHERE COALESCE(debtor_id, kunde_id) = :debtor_id AND tenant_id = :tenant_id
-                AND COALESCE(open_amount, offen) > 0
-            """)
-            op_rows = db.execute(op_query, {
-                "debtor_id": request.debtor_id,
-                "tenant_id": tenant_id
-            }).fetchall()
-        else:
-            op_query = text("""
-                SELECT id, COALESCE(debtor_id, kunde_id), COALESCE(booking_date, rechnungsdatum),
-                       COALESCE(due_date, faelligkeit), COALESCE(open_amount, offen), dunning_level
-                FROM domain_erp.offene_posten
-                WHERE tenant_id = :tenant_id
-                AND COALESCE(debtor_id, kunde_id) IS NOT NULL
-                AND COALESCE(open_amount, offen) > 0
-                AND COALESCE(due_date, faelligkeit) < CURRENT_DATE
-            """)
-            op_rows = db.execute(op_query, {
-                "tenant_id": tenant_id
-            }).fetchall()
-        
-        created_dunnings = []
-        today = date.today()
-        
-        for op_row in op_rows:
-            op_id = str(op_row[0])
-            debtor_id = str(op_row[1])
-            _booking_date = op_row[2]  # noqa: F841
-            due_date = op_row[3]
-            open_amount = Decimal(str(op_row[4]))
-            current_dunning_level = int(op_row[5]) if op_row[5] else 0
-            
-            # Calculate days overdue
-            days_overdue = (today - due_date).days
-            
-            if days_overdue < 0:
-                continue  # Not overdue yet
-            
-            # Find applicable rule
-            applicable_rule = None
-            for rule in sorted(rules, key=lambda r: r.level, reverse=True):
-                if rule.days_overdue_min <= days_overdue:
-                    if rule.days_overdue_max is None or days_overdue <= rule.days_overdue_max:
-                        if rule.level > current_dunning_level:
-                            applicable_rule = rule
-                            break
-            
-            if not applicable_rule:
-                continue  # No rule applies or already at max level
-            
-            # Calculate fees and interest
-            dunning_fee = applicable_rule.fee_amount
-            if applicable_rule.fee_percentage > 0:
-                dunning_fee += open_amount * (applicable_rule.fee_percentage / Decimal("100.00"))
-            
-            # Calculate interest (simple interest: amount * rate * days / 365)
-            interest = Decimal("0.00")
-            if applicable_rule.interest_rate > 0:
-                interest = open_amount * (applicable_rule.interest_rate / Decimal("100.00")) * Decimal(str(days_overdue)) / Decimal("365.00")
-            
-            dunning_fee = _money(dunning_fee)
-            interest = _money(interest)
-            total_amount = _money(open_amount + dunning_fee + interest)
-            payment_deadline = today + timedelta(days=applicable_rule.payment_deadline_days)
-            
-            # Create dunning notice
-            dunning_id = uuid7()
-            dunning_insert = text("""
-                INSERT INTO domain_erp.dunning_notices
-                (id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-                 open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-                 notes, created_at, updated_at)
-                VALUES
-                (:id, :tenant_id, :op_id, :debtor_id, :dunning_level, :dunning_date, :due_date,
-                 :open_amount, :dunning_fee, :interest, :total_amount, :payment_deadline, :status,
-                 :notes, NOW(), NOW())
-                RETURNING id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-                          open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-                          sent_date, payment_date, notes, created_at, updated_at
-            """)
-            
-            # Replace placeholders in description
-            description = applicable_rule.description_template.replace("{{days_overdue}}", str(days_overdue))
-            
-            row = db.execute(dunning_insert, {
-                "id": dunning_id,
-                "tenant_id": tenant_id,
-                "op_id": op_id,
-                "debtor_id": debtor_id,
-                "dunning_level": applicable_rule.level,
-                "dunning_date": today,
-                "due_date": due_date,
-                "open_amount": open_amount,
-                "dunning_fee": dunning_fee,
-                "interest": interest,
-                "total_amount": total_amount,
-                "payment_deadline": payment_deadline,
-                "status": "created",
-                "notes": description
-            }).fetchone()
-
-            if row is None:
-                continue  # INSERT returned no row (test stub or DB error)
-
-            # Update open item dunning level
-            update_op_query = text("""
-                UPDATE domain_erp.offene_posten
-                SET dunning_level = :dunning_level, updated_at = NOW()
-                WHERE id = :op_id AND tenant_id = :tenant_id
-            """)
-            
-            db.execute(update_op_query, {
-                "dunning_level": applicable_rule.level,
-                "op_id": op_id,
-                "tenant_id": tenant_id
-            })
-            
-            # Block customer if rule requires it
-            if applicable_rule.block_customer:
-                block_debtor_query = text("""
-                    UPDATE domain_erp.debtors
-                    SET blocked = true, updated_at = NOW()
-                    WHERE id = :debtor_id AND tenant_id = :tenant_id
-                """)
-                
-                db.execute(block_debtor_query, {
-                    "debtor_id": debtor_id,
-                    "tenant_id": tenant_id
-                })
-            
-            created_dunnings.append(DunningResponse(
-                id=str(row[0]),
-                op_id=str(row[1]),
-                debtor_id=str(row[2]),
-                dunning_level=int(row[3]),
-                dunning_date=row[4],
-                due_date=row[5],
-                open_amount=Decimal(str(row[6])),
-                dunning_fee=Decimal(str(row[7])),
-                interest=Decimal(str(row[8])),
-                total_amount=Decimal(str(row[9])),
-                payment_deadline=row[10],
-                status=str(row[11]),
-                sent_date=row[12] if row[12] else None,
-                payment_date=row[13] if row[13] else None,
-                notes=str(row[14]) if row[14] else None,
-                created_at=row[15],
-                updated_at=row[16]
-            ))
-        
-        db.commit()
-        
-        return created_dunnings
-        
-    except HTTPException:
-        raise
-    except Exception as e:
+        ergebnis = FinanceDunningService(db, tenant_id).run_dunning(
+            bediener=anmeldename(nutzer) or "unbekannt", op_ids=request.op_ids, debtor_id=request.debtor_id,
+            stichtag=request.as_of_date)
+    except DomainError:
         db.rollback()
-        logger.error(f"Error processing dunning: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to process dunning: {str(e)}")
+        raise
+    except SQLAlchemyError as exc:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Mahnwesen nicht verfügbar - keine Mahnung erzeugt") from exc
+    ids = [m["id"] for m in ergebnis.get("mahnungen", [])]
+    if not ids:
+        return []
+    rows = db.execute(text(f"SELECT {_NOTICE_COLUMNS} FROM domain_erp.dunning_notices "  # nosec B608 - feste Spalten
+                           "WHERE tenant_id = :t AND id = ANY(:ids) ORDER BY dunning_date, dunning_level"),
+                      {"t": tenant_id, "ids": ids}).fetchall()
+    return [_notice_response(row) for row in rows]
+
 
 
 @router.post("/run", response_model=DunningRunResponse, summary="Dunning ausführen",
@@ -492,6 +346,7 @@ async def run_dunning(
     request: DunningRunRequest,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    nutzer: dict = Depends(get_current_user),
 ):
     """
     Start a dunning run for all overdue open items as of the given date.
@@ -499,144 +354,13 @@ async def run_dunning(
     """
     run_id = str(uuid7())
     process_request = ProcessDunningRequest(as_of_date=request.as_of_date)
-    created = await process_dunning(process_request, db, tenant_id)
+    created = await process_dunning(process_request, db, tenant_id, nutzer)
     return DunningRunResponse(
         run_id=run_id,
         notices_created=len(created),
     )
 
 
-@router.post("", response_model=DunningResponse, status_code=201, summary="Dunning anlegen",
-            dependencies=[Depends(finance_write)])
-async def create_dunning(
-    dunning: DunningCreate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
-):
-    """
-    Create a manual dunning notice.
-    """
-    try:
-        # Get dunning rule for level
-        rule_query = text("""
-            SELECT fee_amount, fee_percentage, interest_rate, payment_deadline_days, description_template
-            FROM domain_erp.dunning_rules
-            WHERE level = :level AND tenant_id = :tenant_id AND active = true
-            LIMIT 1
-        """)
-        
-        rule_row = db.execute(rule_query, {
-            "level": dunning.dunning_level,
-            "tenant_id": tenant_id
-        }).fetchone()
-        
-        # Calculate fees
-        if rule_row:
-            dunning_fee = Decimal(str(rule_row[0]))
-            if Decimal(str(rule_row[1])) > 0:
-                dunning_fee += dunning.open_amount * (Decimal(str(rule_row[1])) / Decimal("100.00"))
-            
-            # Calculate interest
-            days_overdue = (dunning.dunning_date - dunning.due_date).days
-            if Decimal(str(rule_row[2])) > 0 and days_overdue > 0:
-                interest = dunning.open_amount * (Decimal(str(rule_row[2])) / Decimal("100.00")) * Decimal(str(days_overdue)) / Decimal("365.00")
-            else:
-                interest = Decimal("0.00")
-            
-            payment_deadline_days = int(rule_row[3])
-            description_template = str(rule_row[4])
-        else:
-            # Default values if no rule found
-            dunning_fee = dunning.custom_fee or Decimal("5.00")
-            interest = dunning.custom_interest or Decimal("0.00")
-            payment_deadline_days = 14
-            description_template = "Mahnung Stufe {{dunning_level}}"
-        
-        # Override with custom values if provided
-        if dunning.custom_fee is not None:
-            dunning_fee = dunning.custom_fee
-        if dunning.custom_interest is not None:
-            interest = dunning.custom_interest
-        
-        dunning_fee = _money(dunning_fee)
-        interest = _money(interest)
-        total_amount = _money(dunning.open_amount + dunning_fee + interest)
-        payment_deadline = dunning.dunning_date + timedelta(days=payment_deadline_days)
-        
-        # Create dunning notice
-        dunning_id = uuid7()
-        dunning_insert = text("""
-            INSERT INTO domain_erp.dunning_notices
-            (id, tenant_id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-             open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-             notes, created_at, updated_at)
-            VALUES
-            (:id, :tenant_id, :op_id, :debtor_id, :dunning_level, :dunning_date, :due_date,
-             :open_amount, :dunning_fee, :interest, :total_amount, :payment_deadline, :status,
-             :notes, NOW(), NOW())
-            RETURNING id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-                      open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-                      sent_date, payment_date, notes, created_at, updated_at
-        """)
-        
-        row = db.execute(dunning_insert, {
-            "id": dunning_id,
-            "tenant_id": tenant_id,
-            "op_id": dunning.op_id,
-            "debtor_id": dunning.debtor_id,
-            "dunning_level": dunning.dunning_level,
-            "dunning_date": dunning.dunning_date,
-            "due_date": dunning.due_date,
-            "open_amount": dunning.open_amount,
-            "dunning_fee": dunning_fee,
-            "interest": interest,
-            "total_amount": total_amount,
-            "payment_deadline": payment_deadline,
-            "status": "created",
-            "notes": dunning.notes or description_template.replace("{{dunning_level}}", str(dunning.dunning_level))
-        }).fetchone()
-        
-        # Update open item dunning level
-        update_op_query = text("""
-            UPDATE domain_erp.offene_posten
-            SET dunning_level = :dunning_level, updated_at = NOW()
-            WHERE id = :op_id AND tenant_id = :tenant_id
-        """)
-        
-        db.execute(update_op_query, {
-            "dunning_level": dunning.dunning_level,
-            "op_id": dunning.op_id,
-            "tenant_id": tenant_id
-        })
-        
-        db.commit()
-        
-        return DunningResponse(
-            id=str(row[0]),
-            op_id=str(row[1]),
-            debtor_id=str(row[2]),
-            dunning_level=int(row[3]),
-            dunning_date=row[4],
-            due_date=row[5],
-            open_amount=Decimal(str(row[6])),
-            dunning_fee=Decimal(str(row[7])),
-            interest=Decimal(str(row[8])),
-            total_amount=Decimal(str(row[9])),
-            payment_deadline=row[10],
-            status=str(row[11]),
-            sent_date=row[12] if row[12] else None,
-            payment_date=row[13] if row[13] else None,
-            notes=str(row[14]) if row[14] else None,
-            created_at=row[15],
-            updated_at=row[16]
-        )
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error creating dunning: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to create dunning: {str(e)}")
 
 
 @router.get("", response_model=List[DunningResponse], summary="Dunnings auflisten",
@@ -765,78 +489,4 @@ async def send_dunning(
         db.rollback()
         logger.error(f"Error sending dunning: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to send dunning: {str(e)}")
-
-
-@router.put("/{dunning_id}/paid", response_model=DunningResponse, summary="Dunning paid markieren",
-            dependencies=[Depends(finance_write)])
-async def mark_dunning_paid(
-    dunning_id: str,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db)
-):
-    """
-    Mark dunning notice as paid.
-    """
-    try:
-        update_query = text("""
-            UPDATE domain_erp.dunning_notices
-            SET status = 'paid', payment_date = CURRENT_DATE, updated_at = NOW()
-            WHERE id = :dunning_id AND tenant_id = :tenant_id
-            RETURNING id, op_id, debtor_id, dunning_level, dunning_date, due_date,
-                      open_amount, dunning_fee, interest, total_amount, payment_deadline, status,
-                      sent_date, payment_date, notes, created_at, updated_at
-        """)
-        
-        row = db.execute(update_query, {
-            "dunning_id": dunning_id,
-            "tenant_id": tenant_id
-        }).fetchone()
-        
-        if not row:
-            raise HTTPException(status_code=404, detail="Dunning notice not found")
-
-        op_id = str(row[1]) if row[1] else None
-
-        # Belegbruch schließen: offene_posten auf ausgeziffert setzen (gleiche Transaktion)
-        if op_id:
-            try:
-                db.execute(
-                    text("""
-                        UPDATE domain_erp.offene_posten
-                        SET offen = 0, op_status = 'ausgeziffert', updated_at = NOW()
-                        WHERE id = :op_id AND tenant_id = :tid
-                    """),
-                    {"op_id": op_id, "tid": tenant_id},
-                )
-            except Exception:  # noqa: BLE001 — OP-Update nicht kritisch für Mahnung-Bezahlung
-                pass
-
-        db.commit()
-
-        return DunningResponse(
-            id=str(row[0]),
-            op_id=str(row[1]),
-            debtor_id=str(row[2]),
-            dunning_level=int(row[3]),
-            dunning_date=row[4],
-            due_date=row[5],
-            open_amount=Decimal(str(row[6])),
-            dunning_fee=Decimal(str(row[7])),
-            interest=Decimal(str(row[8])),
-            total_amount=Decimal(str(row[9])),
-            payment_deadline=row[10],
-            status=str(row[11]),
-            sent_date=row[12] if row[12] else None,
-            payment_date=row[13] if row[13] else None,
-            notes=str(row[14]) if row[14] else None,
-            created_at=row[15],
-            updated_at=row[16]
-        )
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error marking dunning as paid: {e}")
-        raise HTTPException(status_code=500, detail=f"Failed to mark dunning as paid: {str(e)}")
 
