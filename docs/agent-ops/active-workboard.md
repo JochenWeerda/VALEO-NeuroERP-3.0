@@ -21489,3 +21489,8 @@ Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-Ap
 
 ## M2-MASKENFELDER-PRODUKTIV-20261119 — offen, Claude Code (M2)
 Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
+## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — zur Abnahme, Claude Code (M3, Codex-Pause)
+Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.-22.11.2026). Meilenstein M3 (echter Kassen-/Tagesabschluss).
+Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
+Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
+Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).

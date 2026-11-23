@@ -276,7 +276,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `pos_accounting_service` | — |
 | `pos_compat_service` | Service layer for compat POS domain routes. |
 | `pos_fiscal_document_service` | — |
-| `pos_tagesabschluss_service` | DOM-POS-004.2 — POS Tagesabschluss Lifecycle (Z-Bon, TSE-Signatur, DSFinV-K-Export). |
 | `position_guard_service` | No-Speculation Guard Service for Commodity Positions. |
 | `position_service` | Commodity Position Calculation Service. |
 | `position_snapshot_service` | Commodity Position Snapshot Service (optional cache for matrix performance). |
