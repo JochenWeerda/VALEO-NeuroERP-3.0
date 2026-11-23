@@ -21508,3 +21508,5 @@ Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebs
 
 ## M0-PROBE-SAFETY-20261123 — reserviert, Codex Lead
 Ziel: vor_push standardmaessig lesend, explizit konfigurierte Testverbindung, Abbruch bei nicht bereitem Pruefstand vor Folgepruefungen. Keine impliziten Resets/Migrationen/Seeds/Rechtewechsel oder Klartext-Zugangsdefaults. Besitzer ci_failures_review: scripts/vor_push.py, tests/test_vor_push.py; Lead QA/Runbook/Handshakes. Effiziente Testauswahl/Blockgroesse und entfernte-Tabellen-Erkennung erhalten; Konfliktmarkierungen vor Push abweisen. Keine reale DB-Aktion bei Umsetzung/Unit-Tests; Wartung separat koordiniert.
+
+M0-PROBE-SAFETY Dateibesitzpraezisierung23.11: Lead gleicht CLAUDE.md (Abschnitt vor jedem Push), Pruefstand-Runbook und eigene QA mit dem lesenden Vor-Push-Vertrag ab. Keine Aenderung an Claudes laufenden Worktrees oder Datenbanken.
