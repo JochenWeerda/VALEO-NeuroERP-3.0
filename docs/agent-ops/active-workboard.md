@@ -21408,6 +21408,67 @@ MAIN-INTEGRATION Sonarfix reserviert Codex: CustomerPortalLayout.tsx und eigene 
 
 MAIN-INTEGRATION Sonarfix umgesetzt: fuenf identische Theme-Zweige entfernt, zentrale Farben/Autorisierung unveraendert.14Portaltests und volleTyppruefung gruen. Vorheriger Endstand fachlich28389Backendtests/Frontend/Bautests gruen, Sonargate nurS3923rot (neueAbdeckung91.6%). Finaler Nachlauf auf bereinigtem Portalrahmen folgt, keine Gate-Ausnahmen.
 
+## CUSTOMER-MASTER-COMPLETENESS-20261117 — reserviert, Codex Lead
+
+Ziel: sichtbare Kunden-/Kundenkartenfelder gegen vorhandenes Feldregister und
+Nutzerreferenz Kundenstammdaten Extraktion pruefen und vollstaendige native
+Studio-Pflege mit Bank-/Zahlungs-/Steuerungsdaten wiederherstellen. Kein
+Rueckbau auf handgemachte Maske, keine pauschale Freigabe interner Daten im
+Kundenportal. Bestehende Modelle/Adapter nutzen, keine zweite Kundenquelle.
+Besitz: betroffene kanonische CRM-ScreenDefinitions, Kundenfeldprojektionen
+und deren vorhandene native Routen/Vertraege nach Inventar; eigene QA,
+Feldparitaetsmatrix und Workboard/Handshake. Referenzchat/Anhang nur fuer
+Feldnamen/Fachfunktionen, keine Echtdaten oder Originalscreens nach Git.
+Vor Aenderungen an Persistenz/Schema Dateibesitz konkret nachtragen.
+Abnahme: Bestandsfeldinventar, sichtbare/bedienbare Gruppen, echte Speicher-
+und Wiederlesevertraege, Rollen-/Mandantengrenzen, passende Browserabnahme.
+
+## RUNTIME-FIVE-503-20261117 — reserviert, Codex Lead
+
+Ziel: fuenf noch offene Runtime503 aus M0-Nachlauf konkret zuordnen und
+beheben; keine erfundenen Erfolgswerte oder gelockerten Fehler-Gates.
+Zunaechst Diagnose vorhandener Nachweise ohne DB-Aenderung; Dateibesitz
+vor jeweiliger Umsetzung konkretisieren. Keine neuen DB/Container.
+
+MAIN-INTEGRATION abgeschlossen: PR151 nach vollstaendig gruener gemeinsamer
+CI samt SonarCloud am 17.11.2026 nach main integriert. Main f9630be04,
+Inhalt identisch zum abgenommenen Head14c2f81c5. Formale Codeowner-Sperre
+mit vorhandener Nutzer-/Administratorfreigabe uebersteuert, Schutzregeln
+unveraendert; keine technischen Gates umgangen. Separater main-Nachlauf
+bleibt auf aktuellem Mergecommit zu beobachten.
+
+RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung des vorhandenen optionalen Meta-Webhooks, WhatsAppWeb-Vorgabe erhalten), neue enge Tests und eigene QA. Keine Proplanta-/FAOSTAT-Freischaltung ohne echte Quelle, keine Runtime-Ausnahmen/Gates lockern, keine DB/Docker-Ressourcen anlegen. Gemeinsame OpenAPI/Inventare regeneriert nurLead. Keine konkurrierenden Builds/Tests.
+
+RUNTIME-FIVE-503 Praezisierung: Dockerfile-Ansatz gestoppt, weil produktives Dockerfile.backend und ausgeschlossene Dokuquellen keinen vollstaendigen Bericht erzeugen wuerden. Kein unvollstaendiges Artefakt einbauen. Agentbesitz erweitert auf .github/workflows/runtime-sweep.yml fuer echten Report aus vollem Checkout vor Appstart. Image-Artefaktversorgung bleibt getrennt offen; keine .dockerignore-/Dockerfile.backend-Aenderung ohne neuen konkreten Claim. Enger Webhooktest darf ohne DB/Container laufen.
+
+CUSTOMER-MASTER Erweiterung vor Edit: kanonischer Feldkatalog config/customer_master_profile.json (Metadaten, keine Echtdaten) an customer_field_audit; Lead besitzt neue app/core/customer_master_profile.py, app/api/v1/endpoints/kunden_stamm_profil.py, app/services/customer_master_profile.py und betroffene vorhandene CRM-Definition/Registrierung. Native Studio-Kette erhalten, vorhandene Partner-/Untertabellenfachwege wiederverwenden; keine neue Tabelle geplant. Actor/Mandant/IDs/Rollen und fest vergebene Kontonummern nicht frei editierbar; Einwilligungen nicht ohne Nachweis vortaeuschen. Bei noetiger zentraler Dialog-/Schemaerweiterung Besitz vorab ergaenzen. Quelle sind vorhandene DTO/ORM-Felder und Nutzerreferenz, Schemalauf/echtes Roundtrip noch offen.
+
+CUSTOMER-MASTER Sicherheits-/Renderer-Erweiterung vor Edit: master_command_safety besitzt app/services/mask_action_runtime_service.py und neue enge Tests fuer optionalen serverseitigen Urheber und bindenden Request-Fingerprint bei Wiederholung (bestehende Aufrufer ohne neue Parameter unveraendert). Fingerprint im vorhandenen Outbox-Payload, kein Schemaaenderung. Lead besitzt zentral schema.ts/ActionInputDialog.tsx fuer gruppierte lange Eingaben und explizites Loeschen nullable Felder; keine individuelle handgemachte Kundenform. Neue Profilbefehle verlangen erwartete Version, Idempotenz und geprueften Actor.
+
+CUSTOMER-MASTER Dateinamen praezisiert: profile_backend besitzt neue app/services/customer_master_profile_service.py und app/api/v1/endpoints/customer_master_profile.py samt engen Tests. Lead integriert Router und Definition. Keine andere Persistenzarchitektur. RUNTIME-FIVE-503 Lead besitzt zusaetzlich app/domains/agrar/api/psm_proplanta.py und engen Verdrahtungstest: vorhandene konfigurierte Clientinstanz statt zweite leere Instanz. Fehlender realer Transport bleibt fail-closed.
+
+CUSTOMER-MASTER PostgreSQL-Abnahme: valeo_probe frei, Revision psm_register_entfernt_20261104; valeo_agent ist NOSUPERUSER/NOBYPASSRLS, hat dort aber noch keine Datenrechte auf domain_shared/domain_crm/public. Lead beansprucht enges Rechtefenster nur mit bestehendem scripts/provision_db_roles.py --data-only fuer diese drei Schemas und valeo_agent: erst Plan und transaktionaler Rollback-Probelauf, danach Datenrechte anwenden. Keine Eigentumsuebertragung, keine CREATE-/BYPASSRLS-Rechte, kein Passwortwechsel, keine Migration/Reset/neue Ressource. Grund: vorgeschriebene eingeschraenkte Agentenrolle statt Superuser-Fachtests.
+
+CUSTOMER-MASTER Launcher-Korrektur: Lead besitzt packages/frontend-web/src/pages/crm/kunden-karte.tsx und engen Navigationstest. Die vorhandene NativeListPage referenziert eine nicht registrierte Definition crm/kunden-karte; fuer die Kundenauswahl wird die bestehende crm/kunden-liste mit derselben Kundenakte verwendet. Keine geografische Karte oder zusaetzliche Stammdatenquelle vortaeuschen.
+
+
+CUSTOMER-MASTER Zwischenstand 17.11: Kopfkatalog und sichere native Pflege
+implementiert; 144 sichtbare Attribute/102 Eingaben, SQL-Roundtrip als valeo_agent
+und sieben Runtime-Vertraege gruen, zentrale Dialogtests8/8 und volle tsc gruen.
+OpenAPI/Registry/Kataloge/Agent-Handbuch nachgezogen. Vollstaendige Untertabellen-
+und Browserabnahme weiterhin in Arbeit; keine pauschale 180-Felder-Freigabe.
+Alias/BP-only-Resolver wird vor Abschluss gegen vorhandene Lookupvertraege
+nachgeprueft. QA/Handshake/Open-Gaps enthalten Grenzen und naechste Abnahmen.
+RUNTIME-FIVE-503: Webhookparameter korrekt400, Proplanta gleiche echteClientinstanz;
+externe Konfiguration/FAOSTAT403/Image-Evidence bleiben getrennte offene Nachweise.
+MAIN-SONAR Nachlauf44021259183: alle anderenJobs gruen, nur NewCoverage71,2<80
+rot. Sicherheits-/Bug-/Wartbarkeitskriterien A. Keine Schwelle abgesenkt.
+
+CUSTOMER-MASTER Pruefquellen-Korrektur vor Edit: Lead besitzt scripts/check_field_contracts.py und neuen engen Regressionstest. _spec importiert derzeit app.main (authfreie Testanwendung), waehrend kanonische API aus main:app exportiert wird. Pruefung soll die versionierte Produktions-OpenAPI lesen; deren Aktualitaet bleibt durch generate_openapi --check abgesichert. Kein erneuter schwerer Appimport, keine Schwellen-/Ausnahmenaenderung. Global199 Befunde noch nicht als Basis-/Neubefunde klassifiziert.
+
+CUSTOMER-MASTER Meilenstein: finale88 Backend-Vertraege, PostgreSQL1/1, zentraleDialoge8/8 und tsc gruen. Produktions-OpenAPI exportiert/geprueft, 3731/3731 Routen mit Summary/Antwortmodell; Doku-Drift0, Tenant-Audit und Godfile-Ratsche gruen. Globale Feldpruefung54 bleibt rot; Kundenprofil0. Versionierte Schnittstellen-/Registry-/MCP-/Handbuchgeneratoren synchronisiert. Bereit fuer Branch-Push/PR-CI, keine Gesamtfreigabe oder bereits erfolgte lokale Bereitstellung behauptet.
+
+CUSTOMER-MASTER Integration17.11: PR153 konfliktfrei gegen nachgezogenes main8575b4df9 (ClaudePR146) zusammengefuehrt. Sechs generierte Konflikte aus beiden Quellen neu erzeugt; keine fachliche Fremdaenderung verworfen. Danach88 gezielte Vertraege erneutgruen, 3697/3697 API-Routen dokumentiert/typisiert, aktuelle12-Godfile-Ratsche und MCP-/Code-Inventare gruen. Gemeinsame GitHub-Abnahme folgt auf Mergecommit; main-Sonar-Abdeckung und54 Batch15-Felder bleiben getrenntoffen.
 ## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
 Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
 Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
@@ -21429,3 +21490,15 @@ Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
 Meilenstein: M2. Aus #165: Sieben Masken lasen ihre Liste aus dem entfernten Altweg /api/v1/fibu/anlagen bzw. /fibu/kreditoren, obwohl sie fachlich anderes zeigen (Bilanz und GuV zeigten Anlagen): fibu/atlas, fibu/bilanz, fibu/guv, fibu/monatswerte, fibu/sachkonto, fibu/sicherheiten, rezepte/editor. Gate C entfaellt dort ehrlich (studio_screen_versions.json); Eintraege stehen in config/mask_endpoint_altlast.json.
 Ziel: Bilanz/GuV an /api/v1/financial-reports/balance-sheet bzw. /profit-loss mit passendem Berichts-Maskentyp (kein Listenmuster), Sachkonto an /chart-of-accounts, die uebrigen an ihren Fachweg anbinden oder entfernen. fibu/anlagen ist in #165 bereits an /finance/asset-accounting/assets angebunden.
+## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — zur Abnahme, Claude Code (M2, Codex-Pause)
+Owner: Claude Code (uebernommen von Codex, PR #153, Codex ruht 19.-22.11.2026). Branch claude/uebernahme-kundenstamm-20261119.
+Codex' Stand unveraendert uebernommen; dazu: main eingemergt; ADR in die Pflichtform gebracht (Status/Datum, Kontext, Entscheidung, Konsequenzen); Aktion stammdaten_pflegen als high mit Bestaetigung (Server verlangt Begruendung; aendert Bank/Steuer); Reiter-Vertrag auf die kanonischen partner_*-Gruppen; Zahlungsbedingung/Standardtour/Spediteur bis zum Lookup in unsupportedFields (keine Eingabe technischer Schluessel); USt-IdNr./EU-Betriebsnummer als fachliche Kennung freigegeben.
+Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-App) es aufdeckte: ueberdeckte GET /einkauf/anfragen(/{id}) in app/einkauf/router.py entfernt (die OpenAPI zeigte den toten untypisierten Weg).
+
+## M2-MASKENFELDER-PRODUKTIV-20261119 — offen, Claude Code (M2)
+Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
+## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — zur Abnahme, Claude Code (M3, Codex-Pause)
+Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.-22.11.2026). Meilenstein M3 (echter Kassen-/Tagesabschluss).
+Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
+Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
+Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).

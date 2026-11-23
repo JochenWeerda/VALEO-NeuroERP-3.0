@@ -45738,11 +45738,11 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/pos_payments.py",
-            "app/services/pos_tagesabschluss_service.py"
+            "app/api/v1/endpoints/kasse_tagesabschluss.py",
+            "app/api/v1/endpoints/pos_payments.py"
           ],
           "written_by": [
-            "app/services/pos_tagesabschluss_service.py"
+            "app/api/v1/endpoints/kasse_tagesabschluss.py"
           ]
         },
         "pos_tagesabschluss_log": {
@@ -45789,9 +45789,6 @@
           "placement": "native",
           "primary_key": [
             "id"
-          ],
-          "written_by": [
-            "app/services/pos_tagesabschluss_service.py"
           ]
         },
         "promotions": {

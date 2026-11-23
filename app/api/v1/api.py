@@ -148,7 +148,6 @@ from app.api.v1.endpoints import (
     controlling,
     controlling_actions,
     feed_produktion_actions,
-    pos_tagesabschluss_actions,
     doc_nachweisraum_actions,
     hrm_lifecycle_actions,
     meldewesen_lifecycle_actions,
@@ -1767,11 +1766,6 @@ api_router.include_router(
 )
 
 api_router.include_router(
-    pos_tagesabschluss_actions.router,
-    tags=["pos-tagesabschluss"]
-)
-
-api_router.include_router(
     doc_nachweisraum_actions.router,
     tags=["nachweisraum"]
 )
@@ -1963,6 +1957,8 @@ api_router.include_router(crm_listen_kommandos.router)
 from app.api.v1.endpoints import kunden_stamm_pflege  # noqa: E402
 
 api_router.include_router(kunden_stamm_pflege.router)
+from app.api.v1.endpoints import customer_master_profile  # noqa: E402
+api_router.include_router(customer_master_profile.router)
 api_router.include_router(mask_rollout_summaries.router)
 api_router.include_router(mask_screen_definition.router)
 api_router.include_router(studio_drafts.router)
