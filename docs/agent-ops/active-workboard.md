@@ -21520,5 +21520,7 @@ expliziter Volltestmodus ohne Wartung. Probe hat3 fremde agent:vor_push-
 Sitzungen; keine Fachtests/DDL/Resets durch Root. Claudes PR160/161-Integration
 bleibt bei Claude; eigener Zweig ergaenzt Mitgliedschafts- und Ressourcenschutz.
 
-## M0-EFFECT-REDOS-20261123 — reserviert, Codex Lead
+## M0-EFFECT-REDOS-20261123 — lokal abgenommen, Codex Lead
 Befund GitHubDependabot710/GHSA-7589-6fvf-x4pw: effect3.21.3 im pnpm-Lock ueber @prisma/config6.19.0, behoben ab3.22.1. Besitzer Lead: package.json nur effect-Override, pnpm-lock.yaml nur gezielte Aufloesung, eigener enger Sicherheitsnachweis/QA/Handshake. Erst Pfad/Version/Integritaet pruefen; keine fremden node_modules, DB/Container oder generellen Paketupdates; keine Ausnahme/Schwellenlockerung.
+
+23.11 Effect: exakt3.22.1, eingefrorener Lock-Check36 Workspaces und isolierter Integritaets-/ReDoS-Verhaltenstest bestanden. Keine DB-/Docker-/fremde Installationsaenderung. QA und Handshake effect-redos-20261123; main-Integration/Sicherheitsnachlauf offen.
