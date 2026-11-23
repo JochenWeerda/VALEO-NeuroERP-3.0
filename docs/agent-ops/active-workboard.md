@@ -21571,3 +21571,5 @@ M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um scripts/check_field_contracts
 M2-WARENEINGANGSABGLEICH: Drei native Tabellen nutzen die gemeinsame Detailantwort: Bestellpositionen, Wareneingaenge, Eingangsrechnungen. Spalten gegen Produktions-OpenAPI abgeglichen; 15 Frontend-Vertragstests gruen, davon einer fuer die gemeinsame Antwort. Folgeaktionen und Browserabnahme offen.
 
 M2-WARENEINGANGSABGLEICH: Folgeaktionsprotokoll lesend eingebunden. Alle vier Detailtabellen gegen ihre benannten OpenAPI-Arrays geprueft und Studio-Katalog aktualisiert. Erfassungs- und Freigabeaktionen sowie Browserabnahme stehen aus.
+
+M2-WARENEINGANGSABGLEICH: Codex uebernimmt fuer Folgeaktionen die Service-Methode create_follow_up, ihren REST-Fehlervertrag und den zugehoerigen Negativtest. Bestellung muss vor jedem Schreiben im aktiven Mandanten aufloesbar sein.
