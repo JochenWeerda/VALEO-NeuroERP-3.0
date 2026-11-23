@@ -228,8 +228,11 @@ async def rename_branch(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> MaskActionResult:
-    if command.mode == "execute" and not command.idempotency_key:
-        raise HTTPException(422, "Ein Idempotenzschlüssel ist erforderlich.")
+    if command.mode == "execute":
+        if not command.idempotency_key:
+            raise HTTPException(422, "Ein Idempotenzschlüssel ist erforderlich.")
+        if not command.reason:
+            raise HTTPException(422, "Eine Auditbegründung ist erforderlich.")
     actor = gepruefter_akteur_aus_request(request)
     body = command.model_dump(by_alias=True, exclude_none=True)
     fingerprint = hashlib.sha256(
