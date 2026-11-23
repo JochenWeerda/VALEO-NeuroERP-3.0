@@ -740,6 +740,9 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
             return {
                 "incomplete_count": 0,
                 "gross_total": 407.0,
+                # Seit 19.11.2026 kennt die Tagessumme das Brutto je Umsatzsteuersatz (POS-Umsatzsteuer).
+                "gross_by_rate": {Decimal("19"): Decimal("407.00")},
+                "gross_by_rate_total": Decimal("407.00"),
                 "cash_total": 119.0,
                 "card_total": 238.0,
                 "transaction_count": 5,
@@ -777,6 +780,9 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
     from app.services import finance_transaction_service
     monkeypatch.setattr(finance_transaction_service, "FinanceTransactionService", FakeBuchung)
     monkeypatch.setattr(fiscal_service_module, "FiscalizationService", FakeFiscalizationService)
+    from app.finance import steuerschluessel
+    monkeypatch.setattr(steuerschluessel, "kassen_verkaufsschluessel",
+                        lambda db, tenant_id, saetze: {Decimal("19"): ("3", "8400", "1776")})
 
     payload = compat.TagesabschlussIn(
         datum=date(2026, 3, 11),
@@ -820,7 +826,9 @@ def test_pos_tagesabschluss_enqueues_cash_closing_outbox_event(monkeypatch):
         # ein Gutschein ist eine Leistungsverpflichtung gegenueber dem
         # Kunden (GoBD-Kontentrennung, erp_gutscheinkonto_20260928).
         ("1700", Decimal("50.00"), Decimal("0.00")),
-        ("8400", Decimal("0.00"), Decimal("407.00")),
+        # Erloes netto und Umsatzsteuer je Satz statt 407,00 brutto auf 8400 (POS-Umsatzsteuer, 19.11.2026).
+        ("8400", Decimal("0.00"), Decimal("342.02")),
+        ("1776", Decimal("0.00"), Decimal("64.98")),
         ("1700", Decimal("0.00"), Decimal("100.00")),
         ("1800", Decimal("80.00"), Decimal("0.00")),
         ("1000", Decimal("0.00"), Decimal("80.00")),

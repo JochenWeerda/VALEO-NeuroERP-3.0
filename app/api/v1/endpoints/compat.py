@@ -2331,7 +2331,7 @@ async def create_tagesabschluss(
     from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
     from app.services.fiscalization.providers import FiscalProviderError
     from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
-    from app.services.pos_accounting_service import PosClosingAmounts, build_pos_closing_lines
+    from app.services.pos_accounting_service import PosClosingAmounts, build_pos_closing_lines, pos_buchungszeilen_mit_ust
 
     amounts = PosClosingAmounts(
         cash_sales=Decimal(str(payload.umsatz_bar or 0)),
@@ -2355,12 +2355,6 @@ async def create_tagesabschluss(
     from app.services.finance_transaction_service import FinanceTransactionService
 
     buchung = FinanceTransactionService(db, tenant_id, commit_on_success=False)
-    try:
-        buchung.check_period_open(payload.datum.strftime("%Y-%m"))
-        kassenkonten = {line.account_number: buchung.account_id_for_number(line.account_number)
-                        for line in accounting_lines}
-    except DomainError as exc:
-        raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht buchbar: {exc}") from exc
 
     fiscal = FiscalizationService(db, tenant_id)
     try:
@@ -2373,6 +2367,10 @@ async def create_tagesabschluss(
     expected_total = float(summary["gross_total"])
     if abs(float(payload.umsatz_gesamt or 0) - expected_total) > 0.01:
         raise HTTPException(status_code=422, detail="Gemeldeter Umsatz stimmt nicht mit dem Fiskaljournal ueberein")
+    try:  # Umsatzsteuer je Satz, Periode und Konten - alles vor der TSE-Signatur
+        accounting_lines, kassenkonten = pos_buchungszeilen_mit_ust(db, tenant_id, buchung, accounting_lines, summary, payload.datum)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht buchbar: {exc}") from exc
     try:
         closing = fiscal.close_cash_point(
             CashPointClosingCommand(

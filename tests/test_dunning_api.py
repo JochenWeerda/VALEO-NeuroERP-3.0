@@ -4,12 +4,10 @@ Tests für app/api/v1/endpoints/dunning.py
 Abgedeckte Pfade:
   GET  /dunning/rules        — list_dunning_rules (DB-Pfad + Fallback)
   POST /dunning/rules        — create_dunning_rule (OK, Duplikat-Fehler, DB-Fehler)
-  POST /dunning/process      — process_dunning (regelbasiert, kein überfälliger OP, kein Mahnlevel)
+  POST /dunning/process      — process_dunning (ruft seit 23.11.2026 den einen Mahnweg)
   POST /dunning/run          — run_dunning
-  POST /dunning              — create_dunning (mit Regel, ohne Regel, custom values)
   GET  /dunning              — list_dunnings
   PUT  /dunning/{id}/send    — send_dunning
-  PUT  /dunning/{id}/paid    — mark_dunning_paid
   Berechnung: Zinsen, Gebühren, Gesamtbetrag, payment_deadline
 """
 
@@ -17,9 +15,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
-from typing import Any
 
-import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
@@ -260,164 +256,6 @@ class TestCreateDunningRule:
 
 
 # ---------------------------------------------------------------------------
-# POST /dunning/process
-# ---------------------------------------------------------------------------
-
-class TestProcessDunning:
-    def _op_row(self, days_overdue: int = 20, current_level: int = 0) -> tuple:
-        due = TODAY - timedelta(days=days_overdue)
-        return ("op-1", "deb-1", due - timedelta(days=30), due, Decimal("1000.00"), current_level)
-
-    def _make_db_with_rules_and_ops(self, ops: list) -> FakeDb:
-        db = FakeDb()
-        db._exec_results = [
-            # list_dunning_rules → 3 Regeln
-            _FakeResult(fetchall=[_rule_row(1), _rule_row(2, days_min=30, days_max=59), _rule_row(3, days_min=60)]),
-            # op_query
-            _FakeResult(fetchall=ops),
-            # dunning_insert returning
-            _FakeResult(fetchone=_notice_row()),
-            # update op
-            _FakeResult(),
-        ]
-        return db
-
-    def test_creates_notice_for_overdue_op(self):
-        db = self._make_db_with_rules_and_ops([self._op_row(20)])
-        client = _make_app(db)
-        r = client.post("/dunning/process", json={"tenant_id": "system"})
-        assert r.status_code == 200
-        data = r.json()
-        assert len(data) == 1
-        assert data[0]["dunning_level"] == 1
-        assert db.commit_count == 1
-
-    def test_skips_op_not_overdue(self):
-        db = FakeDb()
-        db._exec_results = [
-            _FakeResult(fetchall=[_rule_row()]),
-            _FakeResult(fetchall=[self._op_row(-5)]),  # future due date
-        ]
-        client = _make_app(db)
-        r = client.post("/dunning/process", json={"tenant_id": "system"})
-        assert r.status_code == 200
-        assert r.json() == []
-
-    def test_skips_op_already_at_max_level(self):
-        db = FakeDb()
-        db._exec_results = [
-            _FakeResult(fetchall=[_rule_row(1)]),
-            _FakeResult(fetchall=[self._op_row(20, current_level=1)]),
-        ]
-        client = _make_app(db)
-        r = client.post("/dunning/process", json={"tenant_id": "system"})
-        assert r.status_code == 200
-        assert r.json() == []
-
-    def test_no_active_rules_returns_400(self):
-        db = FakeDb()
-        db._exec_results = [_FakeResult(fetchall=[])]  # no rules from DB → fallback gibt 3 zurück aber…
-        # Wir simulieren den Fallback-Pfad indem wir DB-Fehler erzwingen → fallback rules sind immer aktiv.
-        # Einfacher: Wir patchen list_dunning_rules über einen expliziten DB-Fehler damit fallback greift
-        # und prüfen stattdessen den Pfad ohne jede Regel durch direkte DB-Exception auf erstem Execute.
-        # Tatsächlich liefert der Fallback immer 3 Regeln, also testen wir hier den echten no-rule-path
-        # über aktiven DB-Return mit leerer Liste UND active_only=False-Weg:
-        # process_dunning ruft list_dunning_rules(active_only=True) → wenn DB leer, Fallback greift.
-        # => dieser Pfad ist in der Praxis nicht erreichbar; wir testen ihn indirekt.
-        pass  # DB-Fehler -> 503, siehe test_mahnlauf_mahnt_nicht_mit_erfundenen_regeln
-
-    def test_interest_calculation(self):
-        """20 Tage überfällig, 9% p.a., 1000€ → 1000 * 0.09 * 20/365 = 4.93"""
-        db = self._make_db_with_rules_and_ops([self._op_row(20)])
-        # Ersetze notice-row mit berechneten Werten
-        expected_interest = (Decimal("1000.00") * Decimal("9.00") / 100 * 20 / 365).quantize(Decimal("0.01"))
-        db._exec_results[2] = _FakeResult(fetchone=_notice_row(interest=str(expected_interest)))
-        client = _make_app(db)
-        r = client.post("/dunning/process", json={"tenant_id": "system"})
-        assert r.status_code == 200
-        assert Decimal(r.json()[0]["interest"]) == expected_interest
-
-
-# ---------------------------------------------------------------------------
-# POST /dunning/run
-# ---------------------------------------------------------------------------
-
-class TestRunDunning:
-    def test_run_returns_run_id_and_count(self):
-        db = FakeDb()
-        db._exec_results = [
-            _FakeResult(fetchall=[_rule_row()]),
-            _FakeResult(fetchall=[]),  # keine überfälligen OPs
-        ]
-        client = _make_app(db)
-        r = client.post("/dunning/run", json={"tenant_id": "system", "as_of_date": str(TODAY)})
-        assert r.status_code == 200
-        data = r.json()
-        assert "run_id" in data
-        assert data["notices_created"] == 0
-
-
-# ---------------------------------------------------------------------------
-# POST /dunning  (manuell)
-# ---------------------------------------------------------------------------
-
-class TestCreateDunning:
-    def _payload(self) -> dict:
-        return {
-            "op_id": "op-1",
-            "debtor_id": "deb-1",
-            "dunning_level": 1,
-            "dunning_date": str(TODAY),
-            "due_date": str(TODAY - timedelta(days=20)),
-            "open_amount": "1000.00",
-        }
-
-    def test_create_with_rule(self):
-        db = FakeDb()
-        # rule_query → returning row; dunning_insert → returning row
-        rule = (Decimal("5.00"), Decimal("0.00"), Decimal("9.00"), 14, "Mahnung {{dunning_level}}")
-        db._exec_results = [
-            _FakeResult(fetchone=rule),
-            _FakeResult(fetchone=_notice_row()),
-        ]
-        client = _make_app(db)
-        r = client.post("/dunning", json=self._payload())
-        assert r.status_code == 201
-        assert r.json()["dunning_level"] == 1
-        assert db.commit_count == 1
-
-    def test_create_without_rule_uses_defaults(self):
-        db = FakeDb()
-        db._exec_results = [
-            _FakeResult(fetchone=None),   # keine Regel gefunden
-            _FakeResult(fetchone=_notice_row()),
-        ]
-        client = _make_app(db)
-        r = client.post("/dunning", json=self._payload())
-        assert r.status_code == 201
-
-    def test_create_with_custom_fee_overrides_rule(self):
-        db = FakeDb()
-        rule = (Decimal("5.00"), Decimal("0.00"), Decimal("9.00"), 14, "Mahnung")
-        db._exec_results = [
-            _FakeResult(fetchone=rule),
-            _FakeResult(fetchone=_notice_row(fee="20.00", total="1022.47")),
-        ]
-        payload = {**self._payload(), "custom_fee": "20.00"}
-        client = _make_app(db)
-        r = client.post("/dunning", json=payload)
-        assert r.status_code == 201
-
-    def test_db_error_returns_500(self):
-        db = FakeDb()
-        db._raise_on_execute = RuntimeError("insert failed")
-        client = _make_app(db)
-        r = client.post("/dunning", json=self._payload())
-        assert r.status_code == 500
-        assert db.rollback_count == 1
-
-
-# ---------------------------------------------------------------------------
 # GET /dunning
 # ---------------------------------------------------------------------------
 
@@ -489,30 +327,6 @@ class TestSendDunning:
 
 
 # ---------------------------------------------------------------------------
-# PUT /dunning/{id}/paid
-# ---------------------------------------------------------------------------
-
-class TestMarkDunningPaid:
-    def test_paid_ok(self):
-        db = FakeDb()
-        db._exec_results = [
-            _FakeResult(fetchone=_notice_row(notice_id="n-1", status="sent")),
-            _FakeResult(fetchone=_notice_row(notice_id="n-1", status="paid")),
-        ]
-        client = _make_app(db)
-        r = client.put("/dunning/n-1/paid")
-        assert r.status_code == 200
-        assert db.commit_count == 1
-
-    def test_paid_not_found_returns_404(self):
-        db = FakeDb()
-        db._exec_results = [_FakeResult(fetchone=None)]
-        client = _make_app(db)
-        r = client.put("/dunning/missing/paid")
-        assert r.status_code == 404
-
-
-# ---------------------------------------------------------------------------
 # Berechnungslogik (unit, kein HTTP)
 # ---------------------------------------------------------------------------
 
@@ -547,8 +361,13 @@ class TestMandantAusDemKontext:
         client.get("/dunning?tenant_id=fremd", headers={"X-Tenant-ID": "haus-a"})
         assert db.mandanten and set(db.mandanten) == {"haus-a"}
 
-    def test_rumpf_waehlt_keinen_mandanten(self):
+    def test_rumpf_waehlt_keinen_mandanten(self, monkeypatch):
+        from app.services.finance_dunning_service import FinanceDunningService
+
         db = _MandantenSpion()
+        # Der Mahnweg selbst ist in tests/test_ein_mahnweg.py echt geprueft; hier zaehlt nur der Mandant.
+        monkeypatch.setattr(FinanceDunningService, "run_dunning",
+                            lambda self, **_: db.mandanten.append(self.tenant_id) or {"erzeugt": 0, "mahnungen": []})
         client = _make_app(db)
         client.post("/dunning/process", json={"tenant_id": "fremd"}, headers={"X-Tenant-ID": "haus-a"})
         client.post("/dunning/run", json={"tenant_id": "fremd", "as_of_date": "2026-10-08"},

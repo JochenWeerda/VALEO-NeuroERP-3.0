@@ -76,7 +76,7 @@ class FinanceClosingService:
                     JOIN domain_erp.journal_entry_lines jl ON jl.journal_entry_id = je.id
                     WHERE je.tenant_id = :tid
                       AND je.period    = :period
-                      AND je.status    = 'posted'
+                      AND je.status    IN ('posted', 'reversed')
                 """),
                 {"tid": self.tenant_id, "period": period},
             ).first()
@@ -111,7 +111,7 @@ class FinanceClosingService:
                 LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jl.account_id
                 WHERE je.tenant_id = :tid
                   AND je.period    = :period
-                  AND je.status    = 'posted'
+                  AND je.status    IN ('posted', 'reversed')
                 GROUP BY jl.account_id, coa.account_number, coa.account_name
                 ORDER BY coa.account_number NULLS LAST
                 LIMIT 200

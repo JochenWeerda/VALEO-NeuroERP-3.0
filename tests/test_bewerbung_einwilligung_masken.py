@@ -78,7 +78,9 @@ class TestVollstaendig:
         # Die Seite verdrahtet Befehle, nicht Tastenschluessel — eine Aktion ohne
         # Befehl waere ein Knopf ohne Wirkung.
         for a in BUILDER[screen_id]()["actions"]:
-            assert a.get("command", "").startswith("personal."), a
+            # Seit 23.11.2026 auch eine deklarierte Navigation (navigationRoute + localEffect) - sie hat ein Ziel.
+            assert a.get("command", "").startswith("personal.") or (
+                a.get("navigationRoute", "").startswith("/personal/") and a.get("localEffect") == "navigation"), a
 
 
 class TestEinwilligungsmaske:
@@ -148,4 +150,4 @@ class TestArbeitsliste:
 
     def test_von_der_arbeitsliste_zu_den_fassungen(self):
         sd = build_personal_bewerbungen_screen_definition()
-        assert aktion(sd, "erklaerungen")["command"] == "personal.openErklaerungen"
+        assert aktion(sd, "erklaerungen")["navigationRoute"] == "/personal/einwilligungserklaerungen"

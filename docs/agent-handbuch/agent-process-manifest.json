@@ -17777,7 +17777,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Wechselt zur Bewerbungsliste."
+          "stubReason": null
         },
         {
           "key": "erklaerungen",
@@ -17788,7 +17788,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -17845,7 +17845,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
+          "stubReason": null
         }
       ],
       "sensitive_fields": [
@@ -20452,7 +20452,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Wechselt zur Fahrzeugliste."
+          "stubReason": null
         },
         {
           "key": "drucker",
@@ -21135,7 +21135,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Wechselt in die Tourenplanung."
+          "stubReason": null
         },
         {
           "key": "dokumente",
@@ -21146,7 +21146,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet die Dokumentenablage."
+          "stubReason": null
         },
         {
           "key": "export",

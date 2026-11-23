@@ -940,12 +940,12 @@
      "zone": "header"
     },
     {
-     "command": "fuhrpark.openFahrzeugListe",
      "dangerLevel": "safe",
      "key": "liste",
      "kind": "secondary",
      "label": "Zur Liste",
-     "stubReason": "Wechselt zur Fahrzeugliste.",
+     "localEffect": "navigation",
+     "navigationRoute": "/fuhrpark/fahrzeuge",
      "zone": "footer"
     },
     {
@@ -3170,21 +3170,21 @@
      "zone": "header"
     },
     {
-     "command": "personal.openBewerbungen",
      "dangerLevel": "safe",
      "key": "zurueck",
      "kind": "secondary",
      "label": "Zu den Bewerbungen",
-     "stubReason": "Wechselt zur Bewerbungsliste.",
+     "localEffect": "navigation",
+     "navigationRoute": "/personal/bewerbungen",
      "zone": "footer"
     },
     {
-     "command": "personal.openErklaerungen",
      "dangerLevel": "safe",
      "key": "erklaerungen",
      "kind": "secondary",
      "label": "Einwilligungserklärungen",
-     "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+     "localEffect": "navigation",
+     "navigationRoute": "/personal/einwilligungserklaerungen",
      "zone": "footer"
     }
    ],
@@ -3432,12 +3432,12 @@
      "zone": "footer"
     },
     {
-     "command": "personal.openErklaerungen",
      "dangerLevel": "safe",
      "key": "erklaerungen",
      "kind": "secondary",
      "label": "Einwilligungserklärungen",
-     "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung.",
+     "localEffect": "navigation",
+     "navigationRoute": "/personal/einwilligungserklaerungen",
      "zone": "footer"
     }
    ],
@@ -4872,21 +4872,21 @@
      "zone": "footer"
     },
     {
-     "command": "driver.openTours",
      "dangerLevel": "safe",
      "key": "touren",
      "kind": "secondary",
      "label": "Tourenplanung",
-     "stubReason": "Wechselt in die Tourenplanung.",
+     "localEffect": "navigation",
+     "navigationRoute": "/logistik/tourenplanung",
      "zone": "footer"
     },
     {
-     "command": "driver.openDocuments",
      "dangerLevel": "safe",
      "key": "dokumente",
      "kind": "secondary",
      "label": "Dokumente",
-     "stubReason": "Oeffnet die Dokumentenablage.",
+     "localEffect": "navigation",
+     "navigationRoute": "/dokumente/ablage",
      "zone": "footer"
     },
     {

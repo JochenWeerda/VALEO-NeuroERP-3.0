@@ -1511,7 +1511,8 @@
    "gruende": [
     "dienst",
     "referenzdaten",
-    "mandant_nullbar"
+    "mandant_nullbar",
+    "standardmandant"
    ],
    "modell": [
     "app/infrastructure/models/__init__.py"
@@ -1537,6 +1538,7 @@
     "app/domains/finance/domain/entities/account.py",
     "app/domains/shared/domain_events.py",
     "app/finance/export_sepa.py",
+    "app/finance/router.py",
     "app/finance/ustva.py",
     "app/infrastructure/models/__init__.py",
     "app/infrastructure/models/journal.py",
@@ -1544,6 +1546,7 @@
     "app/security/audit_service.py",
     "app/services/finance_closing_service.py",
     "app/services/finance_freigabe.py",
+    "app/services/finance_saldenvortrag_service.py",
     "app/services/finance_transaction_service.py",
     "app/services/sales_posting_service.py",
     "app/services/sepa_xml_generator.py",
@@ -1570,9 +1573,13 @@
     "dienst": 2,
     "kopfzeile": 2,
     "nutzlast": 2,
+    "standardmandant": 1,
     "token": 8
    },
-   "standardmandant_stellen": [],
+   "standardmandant_stellen": [
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
+   ],
    "null_stellen": [
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
@@ -1605,7 +1612,8 @@
    "ursache": "referenzdaten",
    "gruende": [
     "referenzdaten",
-    "mandant_nullbar"
+    "mandant_nullbar",
+    "standardmandant"
    ],
    "modell": [],
    "leser": [
@@ -1625,8 +1633,10 @@
     "app/api/v1/endpoints/subsidiary_ledger_reconciliation.py",
     "app/crm/router.py",
     "app/finance/op_saldo.py",
+    "app/finance/router.py",
     "app/services/closing_checklist_validation.py",
     "app/services/finance_datev_service.py",
+    "app/services/finance_mahnstufe_service.py",
     "app/services/finance_op_service.py",
     "app/services/finance_period_service.py",
     "app/services/mcp_execution_service.py",
@@ -1636,7 +1646,6 @@
    "schreiber": [
     "app/api/v1/endpoints/credit_debit_memos.py",
     "app/api/v1/endpoints/dauerauftraege.py",
-    "app/api/v1/endpoints/dunning.py",
     "app/api/v1/endpoints/erechnung_import.py",
     "app/api/v1/endpoints/ers_settlement.py",
     "app/api/v1/endpoints/fibu_zahlungsmeldungen.py",
@@ -1662,9 +1671,13 @@
    "identitaet": {
     "kopfzeile": 2,
     "nutzlast": 1,
+    "standardmandant": 1,
     "token": 20
    },
-   "standardmandant_stellen": [],
+   "standardmandant_stellen": [
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
+   ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1556",
     "app/api/v1/endpoints/compat.py:1563",

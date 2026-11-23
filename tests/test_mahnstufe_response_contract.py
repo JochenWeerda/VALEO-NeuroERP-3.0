@@ -1,46 +1,49 @@
-"""Exercise real escalation service results through FastAPI response validation."""
+"""Antwortvertrag von ``POST /finance/mahnstufe/{rechnungsnr}/eskalieren`` ueber den einen Mahnweg (23.11.2026).
+
+Die Eskalation erzeugt eine Mahnung (``FinanceDunningService.run_dunning``); die Stufen kommen dort als Zahl und
+werden als Text ausgeliefert. Ist der Posten nicht mahnfaellig, antwortet der Weg 422 und schreibt nichts.
+Der Mahnweg selbst ist gegen die echte Datenbank in tests/test_ein_mahnweg.py geprueft.
+"""
 from unittest.mock import MagicMock
 
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-import pytest
 
 from app.api.v1.endpoints.finance_actions import router
 from app.core.database import get_db
+from app.services.finance_dunning_service import FinanceDunningService
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 
-@pytest.mark.parametrize("current,next_stage", [(None, "1"), ("1", "2"), ("2", "3"), ("3", "INKASSO")])
-def test_escalation_serializes_service_and_audit_stages(current, next_stage):
-    db = MagicMock()
-    db.execute.return_value.mappings.return_value.first.return_value = (
-        {"stufe": current} if current is not None else None
-    )
+def _client(db):
     app = FastAPI()
     ersetze_mandant(app)
     ersetze_nutzer(app, "FINANCE_BEARBEITEN")
     app.include_router(router, prefix="/finance")
     app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app) as client:
-        response = client.post("/finance/mahnstufe/RE-CONTRACT/eskalieren",
-                               headers={"X-Tenant-ID": "contract-test"},
-                               json={"operator": "contract-test"})
-    assert response.status_code == 201, response.text
-    assert response.json()["stufe"] == next_stage
-    assert response.json()["vorherige_stufe"] == current
-    db.commit.assert_called_once()
+    return TestClient(app)
 
 
-def test_maximum_stage_remains_rejected_without_another_write():
+@pytest.mark.parametrize("vorher,stufe", [(0, "1"), (1, "2"), (2, "3")])
+def test_eskalation_liefert_die_stufen_als_text(monkeypatch, vorher, stufe):
+    monkeypatch.setattr(FinanceDunningService, "run_dunning", lambda self, **_: {
+        "ok": True, "erzeugt": 1,
+        "mahnungen": [{"id": "n-1", "stufe": int(stufe), "vorherige_stufe": vorher, "gebuehr": 5.0}]})
+    with _client(MagicMock()) as client:
+        antwort = client.post("/finance/mahnstufe/RE-CONTRACT/eskalieren", json={"operator": "contract-test"})
+    assert antwort.status_code == 201, antwort.text
+    assert antwort.json()["stufe"] == stufe
+    assert antwort.json()["vorherige_stufe"] == (str(vorher) if vorher else None)
+    assert antwort.json()["id"] == "n-1"
+
+
+def test_nicht_mahnfaellig_wird_abgelehnt_ohne_schreibzugriff(monkeypatch):
+    monkeypatch.setattr(FinanceDunningService, "run_dunning",
+                        lambda self, **_: {"ok": True, "erzeugt": 0, "mahnungen": []})
     db = MagicMock()
-    db.execute.return_value.mappings.return_value.first.return_value = {"stufe": "INKASSO"}
-    app = FastAPI()
-    ersetze_mandant(app)
-    ersetze_nutzer(app, "FINANCE_BEARBEITEN")
-    app.include_router(router, prefix="/finance")
-    app.dependency_overrides[get_db] = lambda: db
-    with TestClient(app) as client:
-        response = client.post("/finance/mahnstufe/RE-CONTRACT/eskalieren", json={"operator": "test"})
-    assert response.status_code == 422
+    with _client(db) as client:
+        antwort = client.post("/finance/mahnstufe/RE-CONTRACT/eskalieren", json={"operator": "test"})
+    assert antwort.status_code == 422
+    assert "nicht mahnfällig" in antwort.json()["detail"]
     db.commit.assert_not_called()
-    assert db.execute.call_count == 1

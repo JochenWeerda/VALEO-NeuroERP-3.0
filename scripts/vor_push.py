@@ -64,7 +64,9 @@ REGISTER: list[tuple[str, list[str], str]] = [
 ]
 
 #: Tests, die bei jeder Aenderung mitlaufen: Register, die ein Grep auf Namen nicht findet.
-IMMER = ["tests/test_mask_endpoint_inventory.py", "tests/test_rls_inventory_contract.py"]
+IMMER = ["tests/test_mask_endpoint_inventory.py", "tests/test_rls_inventory_contract.py",
+         # Woertliche Kopien der ScreenDefinitions im Frontend (23.11.2026: #172 erst in CI rot).
+         "tests/test_multi_domain_uix_fixture_contract.py"]
 
 #: Skip-Gruende, die heissen: die Datenbank fehlte - das ist ein Fehler, kein Skip.
 STILLER_SKIP = re.compile(

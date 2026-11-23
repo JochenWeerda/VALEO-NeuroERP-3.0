@@ -43,9 +43,6 @@
     "app/api/v1/endpoints/direct_debits.py": {
       "date.today": 3
     },
-    "app/api/v1/endpoints/dunning.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/erloeskennziffern.py": {
       "date.today": 1
     },
@@ -179,26 +176,17 @@
     "app/finance/export_sepa.py": {
       "date.today": 1
     },
-    "app/finance/fx_loader.py": {
-      "date.today": 1
-    },
     "app/finance/gobd.py": {
       "date.today": 5
     },
-    "app/finance/repositories.py": {
-      "date.today": 1
-    },
     "app/finance/router.py": {
-      "date.today": 5
+      "date.today": 3
     },
     "app/finance/tax_resolver.py": {
       "date.today": 1
     },
     "app/reports/services.py": {
       "datetime.now.date": 1
-    },
-    "app/routers/fibu_router.py": {
-      "date.today": 5
     },
     "app/services/admin_core_service.py": {
       "date.today": 1
