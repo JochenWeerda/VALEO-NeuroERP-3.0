@@ -23952,55 +23952,6 @@
             "app/api/v1/endpoints/ebilanz_elster.py"
           ]
         },
-        "finance_mahnstufen_audit": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "rechnungsnr",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "stufe",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "operator",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "bearbeitungsgebuehr_eur",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "finance",
-          "ownership_reason": "Custodian domain_finance / Domain finance.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/services/finance_mahnstufe_service.py"
-          ]
-        },
         "finance_ratenzahlungsplaene": {
           "columns": [
             {

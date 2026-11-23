@@ -357,6 +357,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_freight_tariff_storno_20260613` | Fracht-Tarif: Storno-Spalten (soft, auditierbar). |
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
+| `mahnstufen_verlauf_entfernen_20261123` | Der eigene Mahnstufen-Verlauf entfaellt - der Verlauf sind die Mahnungen (M3, ein Mahnweg). |
 | `mail_workspace_20260821` | Role based ERP mail workspace. |
 | `mailkonto_mandant_20261008` | Postfaecher je Mandant: ausgehende E-Mails ueber den Dienst des Mandanten. |
 | `mandant_finanz_crm_20261007` | Ersteller eines Zahlungslaufs, Opportunity an der Aktivitaet. |
