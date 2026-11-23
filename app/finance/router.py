@@ -694,45 +694,56 @@ async def execute_abstimmung(
     current_user=Depends(get_current_user),
     db=Depends(get_db)
 ):
-    """Führe Abstimmung aus (vergleiche NB ↔ HB)"""
-    from app.finance.models import NebenbuchAbstimmung as NbModel, OffenerPosten
-    from sqlalchemy import select, func, text as sqlt
+    """Stimmt beide Nebenbuecher der offenen Posten mit ihrem Sammelkonto im Hauptbuch ab.
+
+    Je Nebenbuch (Debitoren, Kreditoren): offener Betrag aller nicht stornierten Posten in
+    ``domain_erp.offene_posten`` gegen den Saldo des Sammelkontos aus dem Kontenrahmen des Mandanten (SKR03
+    1400/1600, SKR04 1200/3300) ueber alle gebuchten Journalzeilen (``posted`` und ``reversed``: ein Storno zaehlt
+    mit seinem Original), beides zum Ausfuehrungszeitpunkt. ``nebenbuch_saldo``/``hauptbuch_saldo`` sind die
+    Nettoposition (Forderungen minus Verbindlichkeiten); ``differenz`` ist die Summe der Betragsabweichungen beider
+    Nebenbuecher, damit sich Abweichungen nicht gegenseitig aufheben. Abweichende Nebenbuecher stehen in
+    ``nicht_abgestimmte``.
+
+    Bis 23.11.2026 las das Nebenbuch den leeren Altspeicher ``public.offene_posten`` und das Hauptbuch die Summe
+    aller Buchungen der Periode (Haben minus Soll - fuer ausgeglichene Buchungen immer null); ein Lesefehler wurde
+    still zu 0. So meldete jede Abstimmung "ABGESTIMMT".
+    """
+    from app.finance.models import NebenbuchAbstimmung as NbModel
+    from app.finance.steuerschluessel import DEBITORENKONTO, KREDITORENKONTO, kontenrahmen
+    from sqlalchemy import select, text as sqlt
 
     ab = db.execute(
         select(NbModel).where(NbModel.id == id, NbModel.tenant_id == tenant_id)
     ).scalar_one_or_none()
     if not ab:
         raise HTTPException(status_code=404, detail="Abstimmung nicht gefunden")
+    rahmen = kontenrahmen(db, tenant_id)
+    if rahmen not in DEBITORENKONTO or rahmen not in KREDITORENKONTO:
+        raise HTTPException(status_code=409, detail="Kontenrahmen des Mandanten nicht eingerichtet")
 
-    # Nebenbuch: Summe offener Posten (Debitoren + Kreditoren)
-    nb_saldo = float(
-        db.execute(
-            select(func.sum(OffenerPosten.offen)).where(
-                OffenerPosten.tenant_id == tenant_id,
-                OffenerPosten.zahlbar == True,
-            )
-        ).scalar() or 0
-    )
+    nebenbuecher = []
+    # Vorzeichen: Forderungen stehen im Soll, Verbindlichkeiten im Haben.
+    for art, konto, vorzeichen in (("debitoren", DEBITORENKONTO[rahmen], 1), ("kreditoren", KREDITORENKONTO[rahmen], -1)):
+        nb = round(float(db.execute(sqlt("""
+            SELECT COALESCE(SUM(offen), 0) FROM domain_erp.offene_posten
+            WHERE tenant_id = :tid AND konto_typ = :typ AND COALESCE(op_status, 'offen') <> 'storniert'
+        """), {"tid": tenant_id, "typ": art}).scalar() or 0), 2)
+        hb = round(vorzeichen * float(db.execute(sqlt("""
+            SELECT COALESCE(SUM(jel.debit_amount - jel.credit_amount), 0)
+            FROM domain_erp.journal_entry_lines jel
+            JOIN domain_erp.journal_entries je ON je.id = jel.journal_entry_id AND je.tenant_id = jel.tenant_id
+            JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id AND coa.tenant_id = je.tenant_id
+            WHERE je.tenant_id = :tid AND je.status IN ('posted', 'reversed') AND coa.account_number = :konto
+        """), {"tid": tenant_id, "konto": konto}).scalar() or 0), 2)
+        nebenbuecher.append({"nebenbuch": art, "sammelkonto": konto, "nebenbuch_saldo": nb,
+                             "hauptbuch_saldo": hb, "differenz": round(nb - hb, 2)})
 
-    # Hauptbuch: Summe über journal_entries für die Periode (soft-fallback)
-    hb_saldo = 0.0
-    try:
-        hb_saldo = float(
-            db.execute(sqlt("""
-                SELECT COALESCE(SUM(total_credit - total_debit), 0)
-                FROM domain_erp.journal_entries
-                WHERE tenant_id = :tid
-                  AND TO_CHAR(posting_date, 'YYYY-MM') = :periode
-            """), {"tid": tenant_id, "periode": ab.periode}).scalar() or 0
-        )
-    except Exception:  # noqa: BLE001 — Buchungs-Zählabfrage nicht verfügbar; Wert bleibt 0
-        pass
-
-    differenz = round(nb_saldo - hb_saldo, 2)
-    ab.nebenbuch_saldo = nb_saldo
-    ab.hauptbuch_saldo = hb_saldo
-    ab.differenz = differenz
-    ab.status = "ABGESTIMMT" if abs(differenz) < 0.01 else "ABWEICHEND"
+    debitoren, kreditoren = nebenbuecher
+    ab.nebenbuch_saldo = round(debitoren["nebenbuch_saldo"] - kreditoren["nebenbuch_saldo"], 2)
+    ab.hauptbuch_saldo = round(debitoren["hauptbuch_saldo"] - kreditoren["hauptbuch_saldo"], 2)
+    ab.differenz = round(sum(abs(n["differenz"]) for n in nebenbuecher), 2)
+    ab.nicht_abgestimmte = [n for n in nebenbuecher if abs(n["differenz"]) >= 0.01]
+    ab.status = "ABWEICHEND" if ab.nicht_abgestimmte else "ABGESTIMMT"
     ab.abgestimmt_durch = str(current_user.get("sub", "system"))
     ab.updated_at = datetime.utcnow()
     db.commit()
@@ -740,10 +751,11 @@ async def execute_abstimmung(
     return {
         "message": "Abstimmung ausgeführt",
         "id": id,
-        "nebenbuch_saldo": nb_saldo,
-        "hauptbuch_saldo": hb_saldo,
-        "differenz": differenz,
+        "nebenbuch_saldo": ab.nebenbuch_saldo,
+        "hauptbuch_saldo": ab.hauptbuch_saldo,
+        "differenz": ab.differenz,
         "status": ab.status,
+        "nebenbuecher": nebenbuecher,
     }
 
 
