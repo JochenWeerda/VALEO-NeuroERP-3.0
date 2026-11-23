@@ -16866,6 +16866,11 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "vat_breakdown",
+              "nullable": false,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],

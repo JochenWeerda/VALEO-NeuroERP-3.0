@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 696 Tabellen, 9105 Spalten.**
+**31 Schemas, 696 Tabellen, 9106 Spalten.**
 
 ## Schemas
 
@@ -30,7 +30,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_controlling` | `finance` | 9 | 88 |
 | `domain_crm` | `crm` | 46 | 819 |
 | `domain_dev_mock` | `platform` | 1 | 7 |
-| `domain_docflow` | `dms-compliance` | 27 | 350 |
+| `domain_docflow` | `dms-compliance` | 27 | 351 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 291 |
 | `domain_erp` | `finance` | 46 | 601 |
@@ -961,7 +961,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `pos_fiscal_closings` | `dms-compliance` | native | `id` | id, tenant_id, closing_id, provider, provider_reference, cash_register_id, terminal_id, business_date, transaction_count, gross_total, status, provider_response, simulated, created_at, updated_at |
 | `pos_fiscal_exports` | `dms-compliance` | native | `id` | id, tenant_id, export_id, export_type, provider, provider_reference, cash_register_id, period_from, period_to, status, download_url, provider_response, simulated, created_at, updated_at |
 | `pos_fiscal_provider_configs` | `dms-compliance` | native | `tenant_id` | tenant_id, provider, dsfinvk_provider, cash_register_id, client_id, simulation_allowed, settings, created_at, updated_at |
-| `pos_fiscal_transactions` | `dms-compliance` | native | `id` | id, tenant_id, transaction_id, provider, provider_reference, terminal_id, cash_register_id, client_id, business_date, transaction_type, state, receipt_number, gross_total, payment_breakdown, signature, signature_counter, serial_number, qr_code_data, started_at, finished_at, provider_response, simulated, created_at, updated_at |
+| `pos_fiscal_transactions` | `dms-compliance` | native | `id` | id, tenant_id, transaction_id, provider, provider_reference, terminal_id, cash_register_id, client_id, business_date, transaction_type, state, receipt_number, gross_total, payment_breakdown, signature, signature_counter, serial_number, qr_code_data, started_at, finished_at, provider_response, simulated, created_at, updated_at, vat_breakdown |
 | `pos_receipt_compliance` | `dms-compliance` | native | `id` | id, tenant_id, header_id, terminal_id, cash_register_id, transaction_type, payment_breakdown, tse_transaction_id, tse_signature, tse_signature_counter, transaction_started_at, transaction_ended_at, receipt_issued_at, dsfinvk_export_batch_id, correction_type, original_header_id, created_at, updated_at |
 | `pos_regulatory_notices` | `dms-compliance` | native | `id` | id, tenant_id, terminal_id, tse_device_id, notice_type, notice_status, effective_date, submitted_at, reference_number, payload, created_at, updated_at |
 | `pos_terminals` | `dms-compliance` | native | `id` | id, tenant_id, terminal_code, name, location_name, branch_code, is_active, registered_at, unregistered_at, metadata, created_at, updated_at |
