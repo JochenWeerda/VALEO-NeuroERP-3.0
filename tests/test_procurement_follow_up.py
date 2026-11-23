@@ -84,3 +84,17 @@ def test_follow_up_replay_leaves_the_existing_entry_unchanged(monkeypatch):
     service.create_follow_up.assert_not_called()
     db.commit.assert_not_called()
     db.rollback.assert_called_once_with()
+
+
+def test_follow_up_validation_prepares_canonical_values_without_writing():
+    from unittest.mock import Mock
+
+    db = Mock()
+    db.execute.return_value.mappings.return_value.first.return_value = {"bestellnummer": "PO-42"}
+    svc = ProcurementMatchService(db=db, tenant_id="tenant-a")
+
+    assert svc.validate_follow_up(
+        bestellnummer="order-id", action_type=" Eskalation ", grund=" Prüfen ",
+    ) == ("PO-42", "eskalation", "Prüfen")
+    db.execute.assert_called_once()
+    db.commit.assert_not_called()

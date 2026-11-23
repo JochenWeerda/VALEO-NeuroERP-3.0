@@ -21579,3 +21579,5 @@ Folgeaktion: Fachservice loest die Bestellung im aktiven Mandanten auf und speic
 Folgeaktions-REST: Speicherfehler werden nach Rollback mit neutraler Fehlermeldung beantwortet. Vier fokussierte Tests bestanden, inklusive Rollback und Schutz interner Fehlerdetails.
 
 Folgeaktions-REST akzeptiert Idempotency-Key. Protokolleintrag und Wiederholungsergebnis werden in derselben Transaktion gespeichert. Altaufrufer ohne Header bleiben kompatibel. OpenAPI erzeugt, fuenf gezielte Tests bestanden. PostgreSQL-Nachweis und Studio-Schreibaktion offen.
+
+Folgeaktion: Schreibservice verwendet eine separat aufrufbare lesende Fachvalidierung fuer mandantenbezogene Bestellaufloesung, Aktionsart und Begruendung. Der positive Vertrag prueft kanonische Eingaben und genau einen Lesezugriff ohne Commit. Sechs Folgeaktionstests bestanden.

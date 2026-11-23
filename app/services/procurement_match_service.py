@@ -442,15 +442,8 @@ class ProcurementMatchService:
         ).mappings().all()
         return [_follow_up_row(row) for row in rows]
 
-    def create_follow_up(
-        self,
-        *,
-        bestellnummer: str,
-        action_type: str,
-        grund: str,
-        ausnahme_code: Optional[str] = None,
-        created_by: Optional[str] = None,
-    ) -> dict:
+    def validate_follow_up(self, *, bestellnummer: str, action_type: str, grund: str) -> tuple[str, str, str]:
+        """Validate the command without writes and return its canonical values."""
         action = (action_type or "").strip().lower()
         reason = (grund or "").strip()
         if action not in _FOLLOW_UP_ACTIONS:
@@ -461,7 +454,20 @@ class ProcurementMatchService:
         order = self._resolve_po(bestellnummer)
         if order is None:
             raise ValueError("Bestellung nicht auflösbar.")
-        bestellnummer = order["bestellnummer"]
+        return order["bestellnummer"], action, reason
+
+    def create_follow_up(
+        self,
+        *,
+        bestellnummer: str,
+        action_type: str,
+        grund: str,
+        ausnahme_code: Optional[str] = None,
+        created_by: Optional[str] = None,
+    ) -> dict:
+        bestellnummer, action, reason = self.validate_follow_up(
+            bestellnummer=bestellnummer, action_type=action_type, grund=grund,
+        )
 
         eskalationsstufe = 1
         if action == "eskalation":
