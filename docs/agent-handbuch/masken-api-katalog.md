@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (779 Masken).
+> Generiert aus `app/core/screen_definitions.py` (780 Masken).
 
 ## Übersicht
 
@@ -27,7 +27,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/belegfolgekonfig` | Belegfolgekonfig | admin | niedrig | — | `GET /api/v1/masks/admin/belegfolgekonfig/agent-contract` |
 | `admin/benutzer-liste` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/benutzer-liste/agent-contract` |
 | `admin/berechtigungen-matrix` | Berechtigungen matrix | admin | niedrig | — | `GET /api/v1/masks/admin/berechtigungen-matrix/agent-contract` |
-| `admin/branches` | Branches | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
+| `admin/branches` | Niederlassungen | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
+| `admin/branches/detail` | Niederlassung | admin | niedrig | — | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
 | `admin/command-monitor` | Command monitor | admin | niedrig | — | `GET /api/v1/masks/admin/command-monitor/agent-contract` |
 | `admin/compliance-dashboard` | Compliance-Dashboard | compliance | niedrig | — | `GET /api/v1/masks/admin/compliance-dashboard/agent-contract` |
 | `admin/control-center` | Admin Kontrollzentrum | admin | mittel | — | `GET /api/v1/masks/admin/control-center/agent-contract` |
@@ -1041,9 +1042,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/branches` — Branches
+### `admin/branches` — Niederlassungen
 
-**Zweck:** Stamm- und Fachmaske fuer Branches (admin/branches).
+**Zweck:** Niederlassungen — admin
 
 | | |
 |---|---|
@@ -1055,17 +1056,25 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
+- `branches` → `/api/v1/admin/branches`
+
+---
+
+### `admin/branches/detail` — Niederlassung
+
+**Zweck:** Niederlassung — admin
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/branches/detail/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/branches/detail/readiness` |
+| Rollout-Route | `/mask-rollout/admin__branches__detail/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
 - `entity` → `/api/v1/admin/branches/{entity_id}`
-
-**Beispiel-Prompts:**
-
-- Zeige Stammdaten fuer Branches {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -21024,7 +21033,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `dispo` | Dispo-Arbeitsraum | safe | nein | `Oeffnet den bestehenden Dispo-Arbeitsraum.` |
+| `dispo` | Dispo-Arbeitsraum | safe | nein | `—` |
 | `aufloesen` | Auflösen | safe | nein | `Liest den Lieferschein und setzt das Ziel.` |
 | `anlegen` | Tour anlegen | safe | nein | `/api/v1/logistik/tours/actions/anlegen` |
 

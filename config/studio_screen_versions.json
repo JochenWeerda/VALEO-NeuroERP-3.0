@@ -113,7 +113,18 @@
       "version": "1.0.0"
     },
     "admin/branches": {
-      "definition_hash": "4af412bc6d3a3818a38a530d4b92701721783d64c393cf3a23ac4222d4d90c8c",
+      "definition_hash": "287e4ff93af198b9b2ce8bf9f73c92abfd55a5bf3b00924669a2da78fdcfbc97",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/branches/detail": {
+      "definition_hash": "9c5d83fb1a172fd990df16b67f83c2b60dfd2de6737d43b85aa7861e8202c0db",
       "gates_passed": [
         "A",
         "B",

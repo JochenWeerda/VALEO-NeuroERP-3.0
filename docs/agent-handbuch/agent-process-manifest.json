@@ -1058,7 +1058,7 @@
     },
     {
       "mask_id": "admin/branches",
-      "title": "Branches",
+      "title": "Niederlassungen",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__branches/:entityId",
@@ -1066,19 +1066,21 @@
       "screen_definition_url": "/api/v1/masks/admin/branches/screen-definition",
       "readiness_url": "/api/v1/masks/admin/branches/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "admin.branches.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/branches/detail",
+      "title": "Niederlassung",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__branches__detail/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/branches/detail/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/branches/detail/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/branches/detail/readiness",
+      "risk_summary": "low",
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -20772,7 +20774,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum."
+          "stubReason": null
         },
         {
           "key": "aufloesen",

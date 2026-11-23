@@ -131,6 +131,11 @@
       "source": "alias"
     },
     {
+      "module": "@/pages/admin/branch-detail",
+      "path": "admin/branches/:id",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/command-monitor",
       "path": "admin/command-monitor",
       "source": "auto"

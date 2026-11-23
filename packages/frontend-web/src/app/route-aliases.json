@@ -2729,6 +2729,10 @@
       "path": "admin/branches"
     },
     {
+      "module": "@/pages/admin/branch-detail",
+      "path": "admin/branches/:id"
+    },
+    {
       "module": "@/pages/admin/control-center/incident-response",
       "path": "admin/control-center/incident-response"
     },

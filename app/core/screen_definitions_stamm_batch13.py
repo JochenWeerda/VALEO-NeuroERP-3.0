@@ -104,10 +104,35 @@ def build_admin_branches() -> dict[str, Any]:
                 {"key": "name", "label": "Niederlassung", "sortable": True, "filterable": True, "width": 280},
                 {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "width": 100},
             ],
+            "rowActions": [{"key": "open", "label": "Details öffnen", "dangerLevel": "safe",
+                            "navigationRoute": "/admin/branches/{entity_id}"}],
         }],
         "layout": {"floorplan": "worklist", "density": "compact", "contextRail": "none", "tableProfile": "standard"},
         "noWorkflowReason": "Die Niederlassungsliste zeigt den aktuellen Stammdatenstand.",
     }
+
+def build_admin_branch_detail() -> dict[str, Any]:
+    screen_id = "admin/branches/detail"
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": "admin",
+        "mode": "detail",
+        "title": "Niederlassung",
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "identityField": "name",
+        "dataSources": [stamm_entity_source("/api/v1/admin/branches/{entity_id}")],
+        "tabs": [stamm_kopf_tab([
+            {"key": "branch_number", "label": "Nummer", "type": "number", "readOnly": True},
+            {"key": "name", "label": "Name", "type": "text", "readOnly": True},
+            {"key": "is_active", "label": "Aktiv", "type": "boolean", "readOnly": True},
+            {"key": "created_at", "label": "Angelegt am", "type": "datetime", "readOnly": True},
+            {"key": "updated_at", "label": "Geändert am", "type": "datetime", "readOnly": True},
+        ])],
+        "layout": {"floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "standard"},
+        "noWorkflowReason": "Die Ansicht zeigt den aktuellen Stand der ausgewählten Niederlassung.",
+    }
+
 
 def build_admin_command_monitor() -> dict[str, Any]:
     return _batch13_stamm("admin/command-monitor", domain="admin", title="Command monitor",
@@ -522,6 +547,7 @@ BATCH13_SCREEN_BUILDERS: dict[str, Any] = {
     "admin/backup-restore": build_admin_backup_restore,
     "admin/berechtigungen-matrix": build_admin_berechtigungen_matrix,
     "admin/branches": build_admin_branches,
+    "admin/branches/detail": build_admin_branch_detail,
     "admin/command-monitor": build_admin_command_monitor,
     "admin/system-einstellungen": build_admin_system_einstellungen,
     "admin/tankstelle-evb": build_admin_tankstelle_evb,
@@ -604,6 +630,7 @@ BATCH13_ROUTEN: dict[str, str] = {
     "admin/backup-restore": "/admin/backup-restore",
     "admin/berechtigungen-matrix": "/admin/berechtigungen-matrix",
     "admin/branches": "/admin/branches",
+    "admin/branches/detail": "/admin/branches/:id",
     "admin/command-monitor": "/admin/command-monitor",
     "admin/system-einstellungen": "/admin/system-einstellungen",
     "admin/tankstelle-evb": "/admin/tankstelle-evb",
