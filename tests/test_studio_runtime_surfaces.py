@@ -38,3 +38,13 @@ def test_runtime_evidence_requires_visible_exact_binding_and_actual_host(tmp_pat
     assert not bound_domain_runtime_ids(source.replace("intake/domain-runtime", "legacy-page"))
     hidden = source.split("export default")[0] + 'export default () => <div aria-hidden>' + source.split('=> ')[1] + '</div>'
     assert not bound_domain_runtime_ids(hidden)
+
+
+def test_control_center_laeuft_nachweisbar_ueber_den_admin_fach_host():
+    """23.11.2026: admin_workbench fehlte in der Nachweiskette - das Control-Center stand als "handgebaut"."""
+    from pathlib import Path
+
+    from app.core.mask_runtime_evidence import bound_domain_runtime_ids
+
+    seite = Path("packages/frontend-web/src/pages/admin/control-center/index.tsx").read_text(encoding="utf-8")
+    assert bound_domain_runtime_ids(seite) == frozenset({"admin/control-center"})
