@@ -21590,3 +21590,5 @@ M2-WARENEINGANGSABGLEICH: Rollenprojektion fuer route-gebundene Aktionen mit Que
 Folgeaktionsdialog fuer Nachforderung, Reklamation und Eskalation an native Detailansicht gebunden. Einkaufsrollen aus dem REST-Endpunkt projiziert; Bestellnummer als kodierter Query-Wert. Der Standard-Dialog sendet im Execute-Modus kein _mode; der neue Endpunkt behandelt dies als Execute und verlangt Schluessel und Auditgrund. Vorschau sendet dryRun explizit. CLI/MCP-Register erzeugt, sieben Backend- und zehn Frontend-Tests gruen. Reale Kanal- und Browserabnahme sowie Freigabe ausstehend.
 
 Kanalvertrag Folgeaktion: CLI und generischer MCP-Adapter uebergeben in Vorschau und Execute identische Methode, kodierte Bestellnummer und Nutzlast. MCP leitet den Aufrufer-Bearer weiter; die Pruefung verwendet Entwicklungskonfiguration, synthetische Identitaet und HTTP-Testtransport. Neun gezielte Tests bestanden. Reale HTTP-/PostgreSQL-/Browser-Abnahmen offen.
+
+Studio-Folgeaktion: Negativnachweise fuer fehlenden Idempotenzschluessel und fehlenden Auditgrund bestaetigen Ablehnung vor dem ersten Datenbankzugriff. Elf Folgeaktionstests bestanden.

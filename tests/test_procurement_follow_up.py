@@ -6,6 +6,7 @@ DB-Pfade werden in tests/test_procurement_match_integration.py abgedeckt.
 from __future__ import annotations
 
 import pytest
+from fastapi import HTTPException
 
 from app.services.procurement_match_service import ProcurementMatchService
 
@@ -44,7 +45,6 @@ def test_create_follow_up_does_not_write_without_tenant_order():
 def test_follow_up_rest_rolls_back_without_exposing_storage_details(monkeypatch):
     from unittest.mock import Mock
 
-    from fastapi import HTTPException
     from app.api.v1.endpoints import procurement_match
 
     db = Mock()
@@ -171,3 +171,31 @@ def test_follow_up_cli_and_mcp_use_the_same_rest_contract(monkeypatch, mode):
         request, "tenant-a", "Bearer synthetic-test", transport=httpx.MockTransport(target),
     )
     assert result["success"]
+
+
+@pytest.mark.parametrize("key", [None, "attempt-1"])
+def test_mask_follow_up_requires_execute_metadata_before_database_access(monkeypatch, key):
+    import asyncio
+    from unittest.mock import Mock
+
+    from app.api.v1.endpoints import procurement_match
+
+    db = Mock()
+    monkeypatch.setattr(procurement_match, "gepruefter_akteur_aus_request", lambda _: "actor")
+    body = procurement_match.FollowUpMaskIn(
+        action_type="reklamation", grund="Menge prüfen", _idempotencyKey=key,
+    )
+    call = procurement_match.follow_up_mask_action("PO-42", body, Mock(), db, "tenant-a")
+
+    if key is None:
+        with pytest.raises(HTTPException) as error:
+            asyncio.run(call)
+        assert error.value.status_code == 422
+        assert "Idempotenzschlüssel" in error.value.detail
+    else:
+        result = asyncio.run(call)
+        assert not result.success
+        assert result.validationErrors[0]["field"] == "_auditReason"
+
+    db.execute.assert_not_called()
+    db.commit.assert_not_called()
