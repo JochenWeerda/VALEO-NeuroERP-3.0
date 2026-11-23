@@ -185,9 +185,6 @@
     "app/finance/gobd.py": {
       "date.today": 5
     },
-    "app/finance/repositories.py": {
-      "date.today": 1
-    },
     "app/finance/router.py": {
       "date.today": 5
     },
