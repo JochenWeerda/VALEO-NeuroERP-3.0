@@ -48,4 +48,3 @@ test.describe('@smoke Finance Lifecycle', () => {
     }
   })
 })
-})
