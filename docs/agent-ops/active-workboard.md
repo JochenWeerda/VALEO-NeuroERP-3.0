@@ -1006,3 +1006,5 @@ M2-WORKSPACE-PRODUCTION-NAV umgesetzt. Druckaktion fuehrt zur vorhandenen Druckm
 ## M2-PRUEFKORB-NAV - reserviert, Codex
 
 Ziel: vorhandenen Belegsprung deklarieren. Dateibesitz: Definition des Pruefkorbs und abgeleiteter Versionskatalog. Abnahme: serverseitige Belegroute, bestehender UI-Handler und Studio-Inventar.
+
+M2-PRUEFKORB-NAV umgesetzt: Zum Beleg nutzt die serverseitig abgeleitete Belegroute. Drei gezielte Maskenvertraege bestanden, Studio-Inventar 283 -> 282 auf diesem Zweig. Browserabnahme offen.

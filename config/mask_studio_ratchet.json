@@ -213,7 +213,6 @@
   "mask:finance/audit-trail:open_source",
   "mask:finance/bank-account:edit",
   "mask:finance/bank-stamm:edit",
-  "mask:finance/pruefkorb:open_source",
   "mask:finance/pruefkorb:pruefen",
   "mask:finance/rechnungstapel:execute",
   "mask:finance/rechnungstapel:open_evidence",

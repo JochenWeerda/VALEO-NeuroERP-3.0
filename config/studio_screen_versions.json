@@ -5287,7 +5287,7 @@
       "version": "1.0.0"
     },
     "finance/pruefkorb": {
-      "definition_hash": "2301efa98298db05c80caf19bf2e6a06e5981a117c39fe7ffa88b808dd048b09",
+      "definition_hash": "6da0e1e1e941839fbb59da62ecc2e158bcc2e891f604bc849c1bf4e88f0ecbbd",
       "gates_passed": [
         "A",
         "B",

@@ -62,7 +62,7 @@ def build_pruefkorb_screen_definition() -> dict[str, Any]:
                 ],
                 row_actions=[
                     {"key": "pruefen", "label": "Bewerten", "visibleWhen": nur_offen},
-                    {"key": "open_source", "label": "Zum Beleg"},
+                    {"key": "open_source", "label": "Zum Beleg", "dangerLevel": "safe", "localEffect": "navigation"},
                 ],
             ),
         ],
