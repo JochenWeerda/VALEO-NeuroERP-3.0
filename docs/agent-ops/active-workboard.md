@@ -21525,5 +21525,7 @@ Befund GitHubDependabot710/GHSA-7589-6fvf-x4pw: effect3.21.3 im pnpm-Lock ueber 
 
 23.11 Effect: exakt3.22.1, eingefrorener Lock-Check36 Workspaces und isolierter Integritaets-/ReDoS-Verhaltenstest bestanden. Keine DB-/Docker-/fremde Installationsaenderung. QA und Handshake effect-redos-20261123; main-Integration/Sicherheitsnachlauf offen.
 
-## M0-CONSOLIDATED-CI-20261123 — reserviert, Codex Lead
+## M0-CONSOLIDATED-CI-20261123 — in Arbeit, Codex Lead
 Ziel: aktualisierten Kundenstamm-PR160 mit eigenem Mandanten-/Vor-Push-/Effect-Schutz konsolidieren, engen Integrationsdiff pruefen, einen PR-CI-Nachlauf starten. Dateibesitz: eigene Integrationscommits, QA/Handshake/Workboard; Claudes PR161 unveraendert. Keine DB-Wartung, keine doppelten Volltests. Abnahme: finaler Head im PR nachvollziehbar, CI-Ergebnis ehrlich je Gate, keine roten Checks umgehen.
+
+M0 konsolidiert23.11: PR160-Head9b27b57d9 integriert,36 gezielte Tests gruen, keine fachliche Aenderung im Integrationsdiff. Effect ist Ursache der neuen Dependency-Rotlaeufe; Backend-Evidence bleibt absichtlich an erfolgreiches Gesamtgate gebunden. QA m0-consolidated-ci-20261123; neuer PR-Nachlauf folgt, keine Gesamtfreigabe.
