@@ -98125,6 +98125,57 @@
         "title": "LagerbewegungOut",
         "type": "object"
       },
+      "LagergeldRechnungIn": {
+        "properties": {
+          "artikel_nr": {
+            "default": "LAGERGELD",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Artikel Nr",
+            "type": "string"
+          },
+          "steuerschluessel": {
+            "description": "Verkaufs-Steuerschluessel des Mandanten (keine Vorgabe)",
+            "maxLength": 2,
+            "minLength": 1,
+            "title": "Steuerschluessel",
+            "type": "string"
+          }
+        },
+        "required": [
+          "steuerschluessel"
+        ],
+        "title": "LagergeldRechnungIn",
+        "type": "object"
+      },
+      "LagergeldRechnungOut": {
+        "properties": {
+          "beleg_id": {
+            "title": "Beleg Id",
+            "type": "string"
+          },
+          "betrag_netto": {
+            "title": "Betrag Netto",
+            "type": "number"
+          },
+          "partner_id": {
+            "title": "Partner Id",
+            "type": "string"
+          },
+          "positionen": {
+            "title": "Positionen",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "partner_id",
+          "beleg_id",
+          "positionen",
+          "betrag_netto"
+        ],
+        "title": "LagergeldRechnungOut",
+        "type": "object"
+      },
       "LastOrderInfo": {
         "description": "Information zur letzten Bestellung eines Artikels",
         "properties": {
@@ -321838,6 +321889,69 @@
           }
         ],
         "summary": "Get Storage Fee Run",
+        "tags": [
+          "inventory",
+          "storage-fees"
+        ]
+      }
+    },
+    "/api/v1/inventory/storage-fees/runs/{run_id}/rechnungen": {
+      "post": {
+        "description": "Je Einlagerer ein Rechnungsentwurf (DocFlow ``sales_invoice``) aus einem abgeschlossenen Lagergeld-Lauf.\n\nFreigabe und Buchung (Umsatzsteuer, offener Posten) laufen danach ueber die Belegmaske. Wiederholbar: derselbe\nLauf legt fuer denselben Einlagerer keinen zweiten Entwurf an.",
+        "operationId": "lagergeld_rechnungen_api_v1_inventory_storage_fees_runs__run_id__rechnungen_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LagergeldRechnungIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LagergeldRechnungOut"
+                  },
+                  "title": "Response Lagergeld Rechnungen Api V1 Inventory Storage Fees Runs  Run Id  Rechnungen Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Lagergeld Rechnungen",
         "tags": [
           "inventory",
           "storage-fees"
