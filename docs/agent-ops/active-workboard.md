@@ -21569,3 +21569,5 @@ M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um compile-data-binding-plan.ts,
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um scripts/check_field_contracts.py fuer die Pruefung benannter Arrays im Detailvertrag.
 
 M2-WARENEINGANGSABGLEICH: Drei native Tabellen nutzen die gemeinsame Detailantwort: Bestellpositionen, Wareneingaenge, Eingangsrechnungen. Spalten gegen Produktions-OpenAPI abgeglichen; 15 Frontend-Vertragstests gruen, davon einer fuer die gemeinsame Antwort. Folgeaktionen und Browserabnahme offen.
+
+M2-WARENEINGANGSABGLEICH: Folgeaktionsprotokoll lesend eingebunden. Alle vier Detailtabellen gegen ihre benannten OpenAPI-Arrays geprueft und Studio-Katalog aktualisiert. Erfassungs- und Freigabeaktionen sowie Browserabnahme stehen aus.
