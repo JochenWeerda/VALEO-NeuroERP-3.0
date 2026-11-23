@@ -251496,6 +251496,9 @@
           "204": {
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Community fehlt"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -251552,6 +251555,12 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Community fehlt"
+          },
+          "409": {
+            "description": "Konflikt"
+          },
           "422": {
             "content": {
               "application/json": {
@@ -251603,6 +251612,9 @@
               }
             },
             "description": "Successful Response"
+          },
+          "404": {
+            "description": "Community fehlt"
           },
           "422": {
             "content": {
@@ -251660,15 +251672,14 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Zuordnung fehlt"
+          },
+          "409": {
+            "description": "Konflikt"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Ungueltige Angaben"
           }
         },
         "security": [
@@ -251709,6 +251720,9 @@
         "responses": {
           "204": {
             "description": "Successful Response"
+          },
+          "404": {
+            "description": "Zuordnung fehlt"
           },
           "422": {
             "content": {
@@ -251775,15 +251789,14 @@
             },
             "description": "Successful Response"
           },
+          "404": {
+            "description": "Zuordnung fehlt"
+          },
+          "409": {
+            "description": "Konflikt"
+          },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "Ungueltige Angaben"
           }
         },
         "security": [

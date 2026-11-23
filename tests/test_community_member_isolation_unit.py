@@ -53,38 +53,53 @@ def test_list_joins_partner_and_filters_tenant_and_community():
     query, values = sql(db.statements[1])
     assert 'JOIN domain_crm.business_partners' in query
     assert 'business_partners.partner_id = domain_crm.business_partner_community_members.partner_id' in query
-    assert 'business_partners.tenant_id' in query and 'business_partner_community_members.community_id' in query
-    assert 'tenant-A' in values.values() and 'community-A' in values.values()
+    assert 'business_partners.tenant_id' in query
+    assert 'business_partner_community_members.community_id' in query
+    assert 'tenant-A' in values.values()
+    assert 'community-A' in values.values()
 
 
 def test_missing_tenant_denied_before_any_query():
     db = FakeDb()
+    service = BusinessPartnerService(db, '')
     with pytest.raises(PermissionDeniedError):
-        BusinessPartnerService(db, '').list_community_members('community-A')
+        service.list_community_members('community-A')
     assert not db.statements
 
 
 def test_create_checks_parent_and_exact_tenant_partner_before_insert():
     db = FakeDb(('community',), None)
+    service = BusinessPartnerService(db, 'tenant-A')
     with pytest.raises(EntityNotFoundError):
-        BusinessPartnerService(db, 'tenant-A').create_community_member('community-A', {'partner_id': 'foreign'})
-    assert not db.added and db.commits == 0
+        service.create_community_member('community-A', {'partner_id': 'foreign'})
+    assert not db.added
+    assert db.commits == 0
     query, values = sql(db.statements[1])
-    assert 'business_partners.tenant_id' in query and 'business_partners.partner_id' in query
-    assert 'tenant-A' in values.values() and 'foreign' in values.values()
+    assert 'business_partners.tenant_id' in query
+    assert 'business_partners.partner_id' in query
+    assert 'tenant-A' in values.values()
+    assert 'foreign' in values.values()
     missing_parent = FakeDb(None)
+    service = BusinessPartnerService(missing_parent, 'tenant-A')
     with pytest.raises(EntityNotFoundError):
-        BusinessPartnerService(missing_parent, 'tenant-A').create_community_member('missing', {'partner_id': 'p'})
-    assert len(missing_parent.statements) == 1 and not missing_parent.added
+        service.create_community_member('missing', {'partner_id': 'p'})
+    assert len(missing_parent.statements) == 1
+    assert not missing_parent.added
 
 
 @pytest.mark.parametrize('method', ['patch', 'delete'])
 def test_member_write_requires_url_community_and_tenant(method):
     db = FakeDb(('community',), None)
     service = BusinessPartnerService(db, 'tenant-A')
+    from functools import partial
+
+    operation = (
+        partial(service.patch_community_member, 'wrong-community', 'member', {'share_percent': 5})
+        if method == 'patch'
+        else partial(service.delete_community_member, 'wrong-community', 'member')
+    )
     with pytest.raises(EntityNotFoundError):
-        if method == 'patch': service.patch_community_member('wrong-community', 'member', {'share_percent': 5})
-        else: service.delete_community_member('wrong-community', 'member')
+        operation()
     query, values = sql(db.statements[1])
     assert 'JOIN domain_crm.business_partners' in query
     assert 'business_partner_community_members.id' in query
@@ -92,21 +107,27 @@ def test_member_write_requires_url_community_and_tenant(method):
     assert 'business_partners.tenant_id' in query
     assert {'wrong-community', 'member', 'tenant-A'} <= set(values.values())
     assert 'FOR UPDATE' in query
-    assert not db.deleted and db.commits == 0
+    assert not db.deleted
+    assert db.commits == 0
 
 
 def test_reassignment_requires_own_partner_and_null_is_rejected():
     member = SimpleNamespace(partner_id='own', share_percent=10)
     db = FakeDb(('community',), member, None)
+    service = BusinessPartnerService(db, 'tenant-A')
     with pytest.raises(EntityNotFoundError):
-        BusinessPartnerService(db, 'tenant-A').patch_community_member('community', 'member', {'partner_id': 'foreign'})
-    assert member.partner_id == 'own' and db.commits == 0
+        service.patch_community_member('community', 'member', {'partner_id': 'foreign'})
+    assert member.partner_id == 'own'
+    assert db.commits == 0
     query, values = sql(db.statements[2])
-    assert 'business_partners.tenant_id' in query and {'tenant-A', 'foreign'} <= set(values.values())
+    assert 'business_partners.tenant_id' in query
+    assert {'tenant-A', 'foreign'} <= set(values.values())
     db = FakeDb(('community',), member)
+    service = BusinessPartnerService(db, 'tenant-A')
     with pytest.raises(ValidationFailedError):
-        BusinessPartnerService(db, 'tenant-A').patch_community_member('community', 'member', {'partner_id': None})
-    assert member.partner_id == 'own' and db.commits == 0
+        service.patch_community_member('community', 'member', {'partner_id': None})
+    assert member.partner_id == 'own'
+    assert db.commits == 0
 
 
 def _role_check(method, path, roles):
@@ -134,16 +155,21 @@ def test_own_member_create_reassign_and_delete_succeed():
     create_db = FakeDb(('community',), ('own-partner',))
     created = BusinessPartnerService(create_db, 'tenant-A').create_community_member(
         'community-A', {'partner_id': 'partner-A', 'share_percent': 12})
-    assert created.community_id == 'community-A' and created.partner_id == 'partner-A'
-    assert create_db.added == [created] and create_db.commits == 1
+    assert created.community_id == 'community-A'
+    assert created.partner_id == 'partner-A'
+    assert create_db.added == [created]
+    assert create_db.commits == 1
     member = SimpleNamespace(partner_id='partner-A', share_percent=12)
     patch_db = FakeDb(('community',), member, ('new-own-partner',))
     assert BusinessPartnerService(patch_db, 'tenant-A').patch_community_member(
         'community-A', 'member-A', {'partner_id': 'partner-B', 'share_percent': 25}) is member
-    assert member.partner_id == 'partner-B' and member.share_percent == 25 and patch_db.commits == 1
+    assert member.partner_id == 'partner-B'
+    assert member.share_percent == 25
+    assert patch_db.commits == 1
     delete_db = FakeDb(('community',), member)
     BusinessPartnerService(delete_db, 'tenant-A').delete_community_member('community-A', 'member-A')
-    assert delete_db.deleted == [member] and delete_db.commits == 1
+    assert delete_db.deleted == [member]
+    assert delete_db.commits == 1
 
 
 def test_member_routes_require_trusted_tenant_and_crm_write_roles():
@@ -156,3 +182,38 @@ def test_member_routes_require_trusted_tenant_and_crm_write_roles():
         assert _role_check(method, path, ['CRM_ADMIN'])['sub'] == 'actor'
         with pytest.raises(HTTPException): _role_check(method, path, ['CRM_LESEN'])
         with pytest.raises(HTTPException): _role_check(method, path, ['customer_portal'])
+
+
+@pytest.mark.parametrize(("method", "error", "status"), [
+    ("list", EntityNotFoundError("Community", "missing"), 404),
+    ("create", EntityNotFoundError("Partner", "foreign"), 404),
+    ("create", ValidationFailedError("Ungültiger Anteil"), 422),
+    ("patch", EntityNotFoundError("Member", "foreign"), 404),
+    ("patch", ValidationFailedError("Ungültiger Anteil"), 422),
+    ("delete", EntityNotFoundError("Member", "foreign"), 404),
+])
+def test_membership_http_errors_preserve_tenant_and_status(monkeypatch, method, error, status):
+    import asyncio
+    from unittest.mock import Mock
+
+    from app.api.v1.endpoints import business_partners
+
+    service = Mock()
+    service_method = getattr(service, f"{method}_community_member" + ("s" if method == "list" else ""))
+    service_method.side_effect = error
+    factory = Mock(return_value=service)
+    monkeypatch.setattr(business_partners, "_svc", factory)
+    db = object()
+    args = {
+        "list": ("community",),
+        "create": ("community", business_partners.CommunityMemberCreate(partner_id="partner")),
+        "patch": ("community", "member", business_partners.CommunityMemberUpdate()),
+        "delete": ("community", "member"),
+    }[method]
+    endpoint = getattr(business_partners, f"{method}_community_member" + ("s" if method == "list" else ""))
+    call = endpoint(*args, db=db, tenant_id="tenant-A")
+    with pytest.raises(HTTPException) as response:
+        asyncio.run(call)
+    assert response.value.status_code == status
+    factory.assert_called_once_with(db, "tenant-A")
+    service_method.assert_called_once()

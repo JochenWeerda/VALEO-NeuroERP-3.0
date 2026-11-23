@@ -2509,6 +2509,7 @@ def _to_community_member(row: BusinessPartnerCommunityMember) -> CommunityMember
 async def list_communities(db: Session = Depends(get_db)):
     rows = BusinessPartnerService(db, "").list_communities()
     return [_to_community(r) for r in rows]
+_COMMUNITY_NOT_FOUND = "Community not found"
 
 
 @router.post("/catalog/communities", response_model=Community, status_code=201, summary="Community anlegen", dependencies=SCHREIBEN["PLATTFORM"])
@@ -2520,36 +2521,36 @@ async def create_community(payload: CommunityCreate, db: Session = Depends(get_d
     return _to_community(row)
 
 
-@router.patch("/catalog/communities/{community_id}", response_model=Community, summary="Community aktualisieren", dependencies=SCHREIBEN["PLATTFORM"])
+@router.patch("/catalog/communities/{community_id}", response_model=Community, summary="Community aktualisieren", dependencies=SCHREIBEN["PLATTFORM"], responses={404: {"description": "Community fehlt"}, 409: {"description": "Konflikt"}})
 async def patch_community(community_id: str, payload: CommunityUpdate, db: Session = Depends(get_db)):
     try:
         row = BusinessPartnerService(db, "").patch_community(community_id, payload.model_dump(exclude_unset=True))
     except EntityNotFoundError:
-        raise HTTPException(status_code=404, detail="Community not found")
+        raise HTTPException(status_code=404, detail=_COMMUNITY_NOT_FOUND)
     except ConflictError as exc:
         raise HTTPException(status_code=409, detail=str(exc))
     return _to_community(row)
 
 
-@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response, response_model=None, summary="Community löschen", dependencies=SCHREIBEN["PLATTFORM"])
+@router.delete("/catalog/communities/{community_id}", status_code=204, response_class=Response, response_model=None, summary="Community löschen", dependencies=SCHREIBEN["PLATTFORM"], responses={404: {"description": "Community fehlt"}})
 async def delete_community(community_id: str, db: Session = Depends(get_db)):
     try:
         BusinessPartnerService(db, "").delete_community(community_id)
     except EntityNotFoundError:
-        raise HTTPException(status_code=404, detail="Community not found")
+        raise HTTPException(status_code=404, detail=_COMMUNITY_NOT_FOUND)
     return None
 
 
-@router.get("/catalog/communities/{community_id}/members", response_model=list[CommunityMember], summary="Community members auflisten", dependencies=[Depends(open_items_read)])
+@router.get("/catalog/communities/{community_id}/members", response_model=list[CommunityMember], summary="Community members auflisten", dependencies=[Depends(open_items_read)], responses={404: {"description": "Community fehlt"}})
 async def list_community_members(community_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
         rows = _svc(db, tenant_id).list_community_members(community_id)
     except EntityNotFoundError:
-        raise HTTPException(404, "Community not found")
+        raise HTTPException(404, _COMMUNITY_NOT_FOUND)
     return [_to_community_member(r) for r in rows]
 
 
-@router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201, summary="Community member anlegen", dependencies=SCHREIBEN["CRM"])
+@router.post("/catalog/communities/{community_id}/members", response_model=CommunityMember, status_code=201, summary="Community member anlegen", dependencies=SCHREIBEN["CRM"], responses={404: {"description": "Zuordnung fehlt"}, 409: {"description": "Konflikt"}, 422: {"description": "Ungueltige Angaben"}})
 async def create_community_member(community_id: str, payload: CommunityMemberCreate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
         row = _svc(db, tenant_id).create_community_member(community_id, payload.model_dump())
@@ -2562,7 +2563,7 @@ async def create_community_member(community_id: str, payload: CommunityMemberCre
     return _to_community_member(row)
 
 
-@router.patch("/catalog/communities/{community_id}/members/{member_id}", response_model=CommunityMember, summary="Community member aktualisieren", dependencies=SCHREIBEN["CRM"])
+@router.patch("/catalog/communities/{community_id}/members/{member_id}", response_model=CommunityMember, summary="Community member aktualisieren", dependencies=SCHREIBEN["CRM"], responses={404: {"description": "Zuordnung fehlt"}, 409: {"description": "Konflikt"}, 422: {"description": "Ungueltige Angaben"}})
 async def patch_community_member(community_id: str, member_id: str, payload: CommunityMemberUpdate, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
         row = _svc(db, tenant_id).patch_community_member(community_id, member_id, payload.model_dump(exclude_unset=True))
@@ -2575,13 +2576,12 @@ async def patch_community_member(community_id: str, member_id: str, payload: Com
     return _to_community_member(row)
 
 
-@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response, response_model=None, summary="Community member löschen", dependencies=SCHREIBEN["CRM"])
+@router.delete("/catalog/communities/{community_id}/members/{member_id}", status_code=204, response_class=Response, response_model=None, summary="Community member löschen", dependencies=SCHREIBEN["CRM"], responses={404: {"description": "Zuordnung fehlt"}})
 async def delete_community_member(community_id: str, member_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
         _svc(db, tenant_id).delete_community_member(community_id, member_id)
     except EntityNotFoundError:
         raise HTTPException(status_code=404, detail="Community member not found")
-    return None
 
 
 def _to_profile(row: BusinessPartnerProfile) -> Profile:

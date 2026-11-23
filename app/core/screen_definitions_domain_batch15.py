@@ -66,7 +66,7 @@ def build_einkauf_service_entry_sheets_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Leistungsnachweise im Einkauf finden und auswerten.",
-        prompts=["Zeige Leistungsnachweise.", "Filtere die Liste."],
+        prompts=["Zeige Leistungsnachweise.", "Filtere Leistungsnachweise nach Status."],
         bundle="einkauf",
         no_workflow="Diese Liste zeigt Leistungsnachweise; Anlage, Bearbeitung und Freigabe sind hier nicht verfügbar.",
     )

@@ -13514,7 +13514,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige Leistungsnachweise.
-- Filtere die Liste.
+- Filtere Leistungsnachweise nach Status.
 
 **Actions:**
 

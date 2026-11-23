@@ -65,16 +65,19 @@ def test_real_memberships_keep_tenant_and_url_parent_boundaries():
                         service.delete_community_member(other_group, own_id)
                     db.rollback()
                     before = service.list_community_members(group)[0]
-                    assert before.partner_id == ax and before.share_percent == 25
+                    assert before.partner_id == ax
+                    assert before.share_percent == 25
                     db.rollback()
                     changed = service.patch_community_member(group, own_id, {'partner_id': ay, 'share_percent': 40})
-                    assert changed.partner_id == ay and changed.share_percent == 40
+                    assert changed.partner_id == ay
+                    assert changed.share_percent == 40
                     db.rollback()
                     service.delete_community_member(group, own_id)
                     assert service.list_community_members(group) == []
                     db.rollback()
+                    without_tenant = BusinessPartnerService(db, '')
                     with pytest.raises(PermissionDeniedError):
-                        BusinessPartnerService(db, '').list_community_members(group)
+                        without_tenant.list_community_members(group)
                 with tenant_scope(b, 'synthetic foreign membership remains unchanged'):
                     remaining = BusinessPartnerService(db, b).list_community_members(group)
                     assert [m.id for m in remaining] == [foreign_id]

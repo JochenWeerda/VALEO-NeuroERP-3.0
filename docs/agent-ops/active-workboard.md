@@ -21554,3 +21554,5 @@ Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteue
 
 ## M0-PR163-SONAR - reserviert, Codex Lead
 Sonar auf dfabfb63c: 75,6 Prozent neue Coverage und Wartbarkeit B. Besitz: Community-Routen/Tests, gezielte weitere Befunde und OpenAPI. Kanalzweig bleibt getrennt; keine Gate-Absenkung.
+
+PR163-Sonar: 14 nicht abgedeckte neue Zeilen in Community-Routen ermittelt. Sechs HTTP-Fehlerfaelle und vertrauenswuerdige Mandantweitergabe neu getestet. 16 gezielte Tests bestanden. Fehlercodes dokumentiert, doppelte Meldung zentralisiert, Testassertionen getrennt, OpenAPI und Studio-Artefakte erzeugt. Gatebewertung auf neuem Head offen.
