@@ -83,9 +83,31 @@ def build_admin_berechtigungen_matrix() -> dict[str, Any]:
         edit_permission="admin.berechtigungen-matrix.update", bearbeiten_endpoint=None)
 
 def build_admin_branches() -> dict[str, Any]:
-    return _batch13_stamm("admin/branches", domain="admin", title="Branches",
-        entity_endpoint="/api/v1/admin/branches/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.branches.update", bearbeiten_endpoint=None)
+    return {
+        "schemaVersion": 1,
+        "id": "admin/branches",
+        "domain": "admin",
+        "mode": "list",
+        "title": "Niederlassungen",
+        "adapter": {"type": "native", "sourceId": "admin/branches", "temporary": False},
+        "dataSources": [{"key": "branches", "endpoint": "/api/v1/admin/branches", "staleTimeMs": 15_000}],
+        "tables": [{
+            "key": "branches",
+            "label": "Niederlassungen",
+            "dataSourceKey": "branches",
+            "serverPagination": False,
+            "pageSize": 50,
+            "virtualized": True,
+            "rowHeight": 44,
+            "columns": [
+                {"key": "branch_number", "label": "Nummer", "numeric": True, "sortable": True, "width": 100},
+                {"key": "name", "label": "Niederlassung", "sortable": True, "filterable": True, "width": 280},
+                {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "width": 100},
+            ],
+        }],
+        "layout": {"floorplan": "worklist", "density": "compact", "contextRail": "none", "tableProfile": "standard"},
+        "noWorkflowReason": "Die Niederlassungsliste zeigt den aktuellen Stammdatenstand.",
+    }
 
 def build_admin_command_monitor() -> dict[str, Any]:
     return _batch13_stamm("admin/command-monitor", domain="admin", title="Command monitor",

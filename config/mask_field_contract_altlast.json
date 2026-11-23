@@ -4,7 +4,6 @@
     "admin/api-keys",
     "admin/backup-restore",
     "admin/berechtigungen-matrix",
-    "admin/branches",
     "admin/command-monitor",
     "admin/system-einstellungen",
     "admin/tenants",

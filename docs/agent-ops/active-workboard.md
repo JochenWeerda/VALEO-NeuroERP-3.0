@@ -1012,3 +1012,5 @@ M2-PRUEFKORB-NAV umgesetzt: Zum Beleg nutzt die serverseitig abgeleitete Belegro
 ## M2-ADMIN-BRANCHES-RUNTIME - reserviert, Codex
 
 Befund: /admin/branches hat keinen ID-Parameter und mountet ausschliesslich MadeByStudioDetailRuntimeWire. Deshalb endet der normale Einstieg vor dem Datenabruf bei der Datensatzauswahl. Die Detaildefinition erwartet bezeichnung/status, die vorhandene mandantengebundene Branch-API liefert branch_number/name/is_active. Folgeauftrag: Listenquelle am Einstieg anbinden, Auswahl und typgerechte Details belegen. Bearbeiten erst mit passendem Feldschema, bestehender Admin-Autorisierung und einem registrierten Kommando anbinden; ein Deklarationswechsel allein behebt den Laufzeitfehler nicht.
+
+Listeneinstieg umgesetzt: /admin/branches liest den vorhandenen mandantengebundenen Listenvertrag und zeigt Nummer, Name und Aktivstatus. Regressionstest und Studio-Inventar gruen. Die unwirksame Bearbeitungsdeklaration wurde entfernt; typisierte Detailansicht und Rollen-/Command-Anbindung der Bearbeitung sowie Browserabnahme bleiben offen.
