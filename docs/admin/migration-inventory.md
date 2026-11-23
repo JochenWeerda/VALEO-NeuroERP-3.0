@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-17
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -117,6 +117,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `b38680c2f581_add_harvest_acceptance_with_nuts2_` | add_harvest_acceptance_with_nuts2_20260217 |
 | `bank_gl_binding_20261001` | Persist an explicit tenant-bound bank-to-ledger link; no inferred backfill. |
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
+| `beleg_altspeicher_entfernen_20261117` | Die alten Belegspeicher entfallen - DocFlow ist der einzige Belegspeicher (BELEG-052 S5). |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
 | `bewerbung_einwilligung_20261006` | Das Verzeichnis der Aufbewahrungs-Einwilligungen — Nachweis und Widerruf. |
 | `bewerbung_erklaerung_fassung_20261006` | Die Einwilligungserklaerung in Fassungen — welchem Wortlaut zugestimmt wurde. |
@@ -314,6 +315,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `journal_entries_document_type_20260408` | domain_erp.journal_entries: document_type ergaenzen (GoBD Belegart) |
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
+| `journal_periode_nachfuellen_20261119` | Buchungsperiode der Journalbuchungen aus dem Buchungsdatum nachfuellen (M3). |
 | `konto_sperre_20261012` | Kontosperre: ein gesperrtes Konto nimmt keine neue Buchungszeile an. |
 | `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |

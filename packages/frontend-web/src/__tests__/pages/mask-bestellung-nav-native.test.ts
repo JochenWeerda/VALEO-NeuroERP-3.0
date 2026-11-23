@@ -16,7 +16,7 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
     expect(src).toContain('screenId="beleg-liste/purchase-order"')
   })
 
-  it('Listen-SD row_route zeigt auf native Singular-Detailroute wenn Listen-Modul vorhanden', () => {
+  it('Listen-SD row_route oeffnet die Belegmaske der Bestellung (DocFlow, BELEG-052 S3)', () => {
     const listenPath = resolve(repoRoot, 'app/core/screen_definitions_listen.py')
     if (!existsSync(listenPath)) {
       // WIP kann das Modul entfernen; dann gilt der NativeListPage-Vertrag oben.
@@ -24,8 +24,9 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
       return
     }
     const src = readFileSync(listenPath, 'utf8')
-    expect(src).toContain('row_route="/einkauf/bestellung/{id}"')
+    expect(src).toContain('row_route="/belege/purchase_order/{id}"')
     expect(src).not.toContain('row_route="/einkauf/bestellungen/{id}"')
+    expect(src).not.toContain('endpoint="/api/v1/einkauf/bestellungen"')
   })
 
   it('Angebot-Stamm Folgebestellung oeffnet die native Detailroute', () => {

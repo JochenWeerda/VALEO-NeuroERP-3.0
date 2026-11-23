@@ -5312,6 +5312,11 @@ _SCREEN_LIST_ROUTE: dict[str, str] = {
     # Einkauf (BELEG-052 Phase 3b): ohne Eintrag bliebe nur die Platzhalter-Route /belege/:belegart.
     "beleg-liste/purchase-order": "/belege/purchase_order",
     "beleg-liste/purchase-invoice": "/belege/purchase_invoice",
+    # Die uebrigen Beleglisten ebenso (Fachrest 3B) - die Platzhalter-Route /belege/:belegart ist keine Liste.
+    "beleg-liste/goods-receipt": "/belege/goods_receipt",
+    "beleg-liste/purchase-credit-memo": "/belege/purchase_credit_memo",
+    "beleg-liste/sales-credit-memo": "/belege/sales_credit_memo",
+    "beleg-liste/sales-offer": "/belege/sales_offer",
     "beleg-liste/sales-order": "/verkauf/auftraege",
     "beleg-liste/sales-delivery": "/sales/lieferungen",
     "strecke/streckengeschaeft": "/strecke/streckengeschaeft",

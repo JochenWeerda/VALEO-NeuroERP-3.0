@@ -60,8 +60,8 @@ def test_affected_modules_have_no_duplicate_method_paths():
 
 
 @pytest.mark.parametrize("name", [
+    # Bestellungen liest und fuehrt DocFlow (BELEG-052 Phase 3b, Lese-Routen S3).
     "list_lieferanten", "get_lieferant", "create_lieferant", "update_lieferant",
-    "list_bestellungen", "get_bestellung",  # Anlegen/Aendern fuehrt DocFlow (BELEG-052 Phase 3b)
 ])
 def test_purchasing_handlers_and_published_contract_are_canonical(name):
     from fastapi.openapi.utils import get_openapi

@@ -4,7 +4,6 @@ Deckt freigeben/stornieren Bestellungen und Kontrakt-PUT ab.
 """
 from __future__ import annotations
 
-import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -18,28 +17,11 @@ _client = TestClient(app, raise_server_exceptions=False)
 # EINKAUF — freigeben / stornieren workflow
 # ===========================================================================
 
-def test_freigeben_nonexistent_bestellung_returns_404():
-    resp = _client.post("/api/v1/einkauf/bestellungen/does-not-exist/freigeben", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
-def test_stornieren_nonexistent_bestellung_returns_404():
-    resp = _client.post("/api/v1/einkauf/bestellungen/does-not-exist/stornieren", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 404
-
-
 def test_list_bestellvorschlaege_returns_200():
     resp = _client.get("/api/v1/einkauf/bestellvorschlaege/lager", headers=_HEADERS)
     skip_if_db_unavailable(resp)
     assert resp.status_code == 200
 
-
-def test_list_bestellungen_returns_200():
-    resp = _client.get("/api/v1/einkauf/bestellungen", headers=_HEADERS)
-    skip_if_db_unavailable(resp)
-    assert resp.status_code == 200
 
 
 # ===========================================================================

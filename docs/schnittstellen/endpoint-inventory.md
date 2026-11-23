@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-17
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -335,7 +335,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `o2c_chain` | Order-to-Cash-Kette (DOM-SALES-004) — Angebot→Auftrag→Lieferschein→Rechnung (read-only). |
 | `o2c_uat_scaffold` | O2C/P2P UAT scaffold — end-to-end process chain test data and scenario runner. |
 | `op_skonto_auszifferung` | OP Skonto-Auszifferung — Offene Posten mit Skontoaufteilung ausgleichen. |
-| `open_items` | Open Items (OP) management endpoints |
+| `open_items` | Offene Posten (FIBU-AR-05): Lesen, Ausgleichshistorie und Mahnen. |
 | `operational_governance` | Operational Governance API — Wave 4 AP4 |
 | `operator_agent` | OPERATOR-AGENT-001 — API fuer den ERP-Operator-Agent (Proposal + LOW-Risiko-Execute). |
 | `opportunities` | CRM Sales Opportunities API endpoints proxied through crm-sales. |
@@ -421,7 +421,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `sales_order_commands` | Lieferschein-Status und Preisabweichung (DOM-SALES-004) unter ``/sales/orders``; Bearbeiter aus dem Token. |
 | `sales_reports` | Sales Reports and Dashboards endpoints. |
 | `sales_shipping_ext` | Sales shipping extension endpoints (l3c-verkaufslieferschein extras) |
-| `sales_storno` | Lieferungs-Storno & Gutschrift-Übersicht (DOM-SALES-004.4). |
 | `sanctions_compliance` | Sanctions Compliance API — Verbotsliste / Sanktionsprüfung |
 | `scan` | Mobile-Scan / Barcode-Dispatch API. |
 | `schaeden` | Schadenmeldungen und Versicherungsvertraege. |

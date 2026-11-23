@@ -74,7 +74,6 @@ def probe():
                 conn.execute(text("GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA domain_docflow TO valeo_agent"))
                 conn.execute(text("GRANT SELECT ON domain_docflow.pos_receipt_compliance TO valeo_agent"))
                 conn.execute(text("GRANT SELECT, INSERT ON domain_shared.tenants TO valeo_agent"))
-                conn.execute(text("GRANT SELECT ON domain_sales.delivery_notes, domain_sales.delivery_note_positions TO valeo_agent"))
                 conn.execute(text("GRANT SELECT, INSERT ON public.outbox_events TO valeo_agent"))
                 conn.execute(text("GRANT INSERT ON infrastructure.audit_log TO valeo_agent"))
                 conn.execute(text("SET LOCAL ROLE valeo_agent"))

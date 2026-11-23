@@ -46,8 +46,6 @@ class _DB:
     def execute(self, statement, params=None):
         sql = str(statement)
         self.calls.append((sql, dict(params or {})))
-        if "FROM pg_class" in sql:
-            return _CountResult("domain_erp")
         if "FROM information_schema.columns" in sql:
             return _CountResult([(name,) for name in self.columns])
         if sql.lstrip().upper().startswith("SELECT COUNT(*)"):
@@ -120,12 +118,12 @@ def test_list_applies_shared_filters_count_offset_and_stable_order():
 
     assert response.total == 17
     assert response.summary["count"] == 1  # summary retains limited-page semantics
-    assert len(db.calls) == 4
-    count_sql, count_params = db.calls[2]
-    page_sql, page_params = db.calls[3]
+    assert len(db.calls) == 3  # Spalten des Nebenbuchs, Zaehlung, Seite (keine Suchpfad-Aufloesung mehr)
+    count_sql, count_params = db.calls[1]
+    page_sql, page_params = db.calls[2]
     assert "tenant_id = :tenant_id" in count_sql
     assert "konto_typ = :konto_typ" in count_sql
-    assert "rechnungsnr ILIKE :search" in count_sql
+    assert "COALESCE(rechnungsnr,'') ILIKE :search" in count_sql
     assert "offen > 0" in count_sql
     assert "op_status IN (:only_open_status, :partially_open_status)" in count_sql
     assert count_params == {

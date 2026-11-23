@@ -48,6 +48,12 @@ def stand():
     art = verbindung.execute(sa.text(
         "SELECT c.relkind FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace "
         "WHERE n.nspname = 'domain_crm' AND c.relname = 'sales_orders'")).scalar()
+    if art is None and verbindung.execute(sa.text(
+            "SELECT to_regclass('domain_crm.sales_orders_vor_docflow') IS NULL")).scalar():
+        # Nach BELEG-052 S5 sind die Altspeicher entfernt: erst deren Rueckweg (in dieser Transaktion).
+        with Operations.context(MigrationContext.configure(verbindung)):
+            _modul("beleg_altspeicher_entfernen_20261117").downgrade()
+        art = "v"
     if art == "v":
         # Frischer Pruefstand nach ``upgrade head``: erst der Rueckweg (in dieser Transaktion), dann wird geprueft.
         with Operations.context(MigrationContext.configure(verbindung)):

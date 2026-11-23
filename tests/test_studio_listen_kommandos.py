@@ -68,7 +68,6 @@ def aufraeumen(engine):
         v.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.futtermittel_mischfutter WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_agrar.agrar_duenger WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
-        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM einkauf_angebote_positionen WHERE angebot_id IN "
                        "(SELECT id FROM einkauf_angebote WHERE tenant_id = ANY(:h))"), {"h": [HAUS_A, HAUS_B]})
@@ -325,30 +324,6 @@ def test_lieferantenliste_liest_die_quelle_der_objektmaske():
     assert liste["tables"][0]["rowRouteTemplate"] == "/einkauf/lieferanten/{id}"
 
 
-def bestellung(engine, status: str) -> str:
-    from sqlalchemy import text
-
-    kennung, lieferant = str(uuid.uuid4()), str(uuid.uuid4())
-    with engine.begin() as v:
-        v.execute(text("INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, firmenname) "
-                       "VALUES (:l, :h, :n, 'Muehle Nord')"), {"l": lieferant, "h": HAUS_A, "n": f"L-{lieferant[:6]}"})
-        v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                       "bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, :s)"),
-                  {"i": kennung, "h": HAUS_A, "n": f"EK-{kennung[:8]}", "l": lieferant, "s": status})
-    return kennung
-
-
-def bestell_status(engine, kennung: str) -> str:
-    return zeile(engine, "SELECT status FROM domain_einkauf.bestellungen WHERE id = CAST(:i AS uuid)", i=kennung)["status"]
-
-
-def bestell_aktion(client, kennung: str, aktion: str, body: dict) -> dict:
-    antwort = client.post(f"/api/v1/einkauf/bestellungen/{kennung}/actions/{aktion}", json=body,
-                          headers={"X-Tenant-ID": HAUS_A})
-    assert antwort.status_code == 200, antwort.text
-    return antwort.json()
-
-
 def test_bestellliste_liest_die_quelle_der_objektmaske():
     """Bestellliste und Belegmaske lesen denselben Speicher (DocFlow, BELEG-052); Freigeben, Umwandeln und
     Stornieren laufen in der Belegmaske je Beleg, nicht als Zeilenkommando auf einen Eigenspeicher."""
@@ -506,8 +481,9 @@ def test_buchungsvorlage_anwenden_erzeugt_einen_ausgeglichenen_entwurf_im_mandan
 
     with engine.begin() as v:
         for nummer, typ in (("4210", "expense"), ("1200", "asset")):
+            # aktiv: gebucht wird nur auf eigene aktive Konten (Buchungsdienst)
             v.execute(text("INSERT INTO domain_erp.chart_of_accounts (id, tenant_id, account_number, account_name, "
-                           "account_type) VALUES (:i, :h, :n, :n, :t)"),
+                           "account_type, is_active) VALUES (:i, :h, :n, :n, :t, TRUE)"),
                       {"i": str(uuid.uuid4()), "h": HAUS_A, "n": nummer, "t": typ})
     vorlage = client.post("/api/v1/finance/booking-templates", headers={"X-Tenant-ID": HAUS_A}, json={
         "name": "Miete", "category": "GENERAL", "default_amount": "1200.00", "lines": [

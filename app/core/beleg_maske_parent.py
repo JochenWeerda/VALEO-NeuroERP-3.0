@@ -147,13 +147,16 @@ def beleg_kopffelder(variante: Belegvariante) -> list[dict[str, Any]]:
 
 def beleg_kopfbaustein_felder(variante: Belegvariante) -> list[dict[str, Any]]:
     """Felder der Kopfbausteine der Belegart (BELEG-052): was die alten Belegseiten pflegten, pflegt die Variante."""
-    from app.core.belegvertrag import BAUSTEIN_FELDER, BAUSTEINE, KOPFBAUSTEINE, TRENNER
+    from app.core.belegvertrag import BAUSTEIN_AUSWAHL, BAUSTEIN_FELDER, BAUSTEINE, KOPFBAUSTEINE, TRENNER
 
     felder: list[dict[str, Any]] = []
     for name in KOPFBAUSTEINE.get(variante.belegart, ()):
         for feld_key, label, typ in BAUSTEIN_FELDER[name]:
-            felder.append({"key": f"{name}{TRENNER}{feld_key}", "label": label, "type": typ,
-                           "helpText": f"{name.capitalize()}: {BAUSTEINE[name]}"})
+            eingabe = {"key": f"{name}{TRENNER}{feld_key}", "label": label, "type": typ,
+                       "helpText": f"{name.capitalize()}: {BAUSTEINE[name]}"}
+            if (name, feld_key) in BAUSTEIN_AUSWAHL:
+                eingabe["options"] = [{"value": w, "label": a} for w, a in BAUSTEIN_AUSWAHL[(name, feld_key)]]
+            felder.append(eingabe)
     return felder
 
 
@@ -399,6 +402,8 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
                     permission=f"belege.{freigaberecht}",
                     enabledWhen=zustandsfeld(state_action),
                     requiresConfirmation=True,
+                    # Eine Freigabeentscheidung bindet (Vier-Augen); die alte Maske fuehrte sie als moderate (3B).
+                    dangerLevel="moderate",
                     commandBinding={
                         "adapter": "docflow.v1",
                         "command": "approval_decide",
@@ -411,15 +416,24 @@ def beleg_aktionen(variante: Belegvariante) -> list[dict[str, Any]]:
             )
 
     # Versenden (BELEG-052 Stufe 2b): PDF per E-Mail an den Partner, eigener Kommandoweg (kein DocFlow-Kommando).
+    eingaben: list[dict[str, Any]] = [
+        {"key": "empfaenger", "label": "Empfänger (E-Mail)", "type": "text",
+         "helpText": "Leer = Adresse aus dem Partnerstamm."},
+        {"key": "nachricht", "label": "Nachricht", "type": "textarea"},
+    ]
+    if variante.belegart == "purchase_order":
+        # Versandwege der Bestellung (Fachrest 3B): Fax/EDI ueber den Lieferantenstamm, Portal = Lieferantenportal.
+        eingaben.insert(0, {"key": "kanal", "label": "Versandweg", "type": "select", "defaultValue": "email",
+                            "options": [{"value": "email", "label": "E-Mail"}, {"value": "fax", "label": "Fax"},
+                                        {"value": "edi", "label": "EDI (ORDERS)"}, {"value": "post", "label": "Post"},
+                                        {"value": "portal", "label": "Im Lieferantenportal veroeffentlichen"}]})
+        eingaben[1] = {**eingaben[1], "label": "Empfänger (E-Mail oder Faxnummer)"}
     liste.append({
-        "key": "versenden", "label": "Per E-Mail versenden", "kind": "secondary", "dangerLevel": "moderate",
+        "key": "versenden", "label": "Versenden" if variante.belegart == "purchase_order" else "Per E-Mail versenden",
+        "kind": "secondary", "dangerLevel": "moderate",
         "permission": "belege.ausstellen", "commandEndpoint": f"/api/v1/belege/{variante.belegart}/{{entity_id}}/actions/versenden",
         "method": "POST", "requiresConfirmation": True, "forbiddenForAgents": True,
-        "inputFields": [
-            {"key": "empfaenger", "label": "Empfänger (E-Mail)", "type": "text",
-             "helpText": "Leer = Adresse aus dem Partnerstamm."},
-            {"key": "nachricht", "label": "Nachricht", "type": "textarea"},
-        ],
+        "inputFields": eingaben,
     })
     if variante.belegart in ("sales_invoice", "sales_credit_memo"):
         # E-Rechnung (XRechnung, GoBD-Archiv): erst erzeugen und archivieren, dann das archivierte Original laden.

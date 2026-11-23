@@ -37,6 +37,9 @@ TRANSITIONS: dict[str, dict[str, str]] = {
     "purchase_invoice": {"purchase_credit_memo": "purchase_invoice_to_credit_memo"},
 }
 
+# Folgebelege, die mehr als die Restmenge aufnehmen duerfen (BELEG-052: Ueberlieferung im Wareneingang).
+UEBERLIEFERUNG_ERLAUBT: frozenset[str] = frozenset({"order_to_receipt"})
+
 # Einkaufsbelege nehmen Vorsteuerschluessel; alles andere Umsatzsteuerschluessel.
 EINKAUF_TYPES: frozenset[str] = frozenset({"purchase_order", "goods_receipt", "purchase_invoice", "purchase_credit_memo"})
 # Rechnung aus dem Auftrag direkt oder aus dessen Lieferungen — nie beides (sonst waere die Menge doppelt fakturiert).
@@ -184,96 +187,9 @@ class DocflowService:
 
     # ── bootstrap ─────────────────────────────────────────────────────────────
 
-    def _bootstrap_sales_delivery(self, doc_id: str) -> Optional[dict[str, Any]]:
-        existing = self.fetch_header(doc_id)
-        if existing:
-            return existing
-        src = self.db.execute(
-            text("""
-                SELECT id, tenant_id, delivery_note_number, customer_id, status, delivery_date, totals, created_at, updated_at
-                FROM domain_sales.delivery_notes WHERE tenant_id = :tenant_id AND id = :id
-            """),
-            {"tenant_id": self.tenant_id, "id": doc_id},
-        ).mappings().first()
-        if not src:
-            return None
-        src_d = dict(src)
-        src_items = self.db.execute(
-            text("""
-                SELECT id, pos_nr, artikel_nr, bezeichnung, menge, einheit, listenpreis, rabatt, mwst_prozent, netto_preis, netto_betrag
-                FROM domain_sales.delivery_note_positions WHERE delivery_note_id = :delivery_note_id ORDER BY pos_nr ASC
-            """),
-            {"delivery_note_id": doc_id},
-        ).mappings().all()
-        total_net = total_tax = total_gross = Decimal("0.00")
-        now = datetime.now(timezone.utc)
-        raw_date = src_d.get("delivery_date") or src_d.get("created_at")
-        if raw_date is None:
-            doc_date = now
-        elif isinstance(raw_date, datetime):
-            doc_date = raw_date if raw_date.tzinfo else raw_date.replace(tzinfo=timezone.utc)
-        else:
-            try:
-                doc_date = datetime.combine(raw_date, datetime.min.time(), tzinfo=timezone.utc)
-            except Exception:
-                doc_date = now
-        self.db.execute(
-            text("""
-                INSERT INTO domain_docflow.document_headers
-                (id, tenant_id, doc_type, doc_number, status, source_system, source_ref, customer_id, supplier_id,
-                 currency, total_net, total_tax, total_gross, document_date, version, created_at, updated_at)
-                VALUES (:id, :tenant_id, 'sales_delivery', :doc_number, :status, 'domain_sales.delivery_notes', :source_ref,
-                 :customer_id, NULL, :currency, 0, 0, 0, :document_date, 1, :created_at, :updated_at)
-            """),
-            {
-                "id": str(src_d["id"]), "tenant_id": self.tenant_id,
-                "doc_number": src_d.get("delivery_note_number") or "",
-                "status": "open" if (src_d.get("status") or "draft") not in {"posted", "reversed"} else (src_d.get("status") or "draft"),
-                "source_ref": str(src_d["id"]),
-                "customer_id": str(src_d["customer_id"]) if src_d.get("customer_id") else None,
-                "currency": "EUR", "document_date": doc_date,
-                "created_at": src_d.get("created_at") or now,
-                "updated_at": src_d.get("updated_at") or now,
-            },
-        )
-        for item in src_items:
-            qty = Decimal(str(item.get("menge") or 0))
-            price = Decimal(str(item.get("unit_price") or item.get("netto_preis") or item.get("listenpreis") or 0))
-            discount = Decimal(str(item.get("rabatt") or 0))
-            tax_rate = Decimal(str(item.get("mwst_prozent") or 0))
-            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
-            total_net += line_net; total_tax += line_tax; total_gross += line_gross
-            self.db.execute(
-                text("""
-                    INSERT INTO domain_docflow.document_items
-                    (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_rate, line_total_net, line_total_tax, line_total_gross, created_at, updated_at)
-                    VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description,
-                     :quantity, :unit, :unit_price, :discount_percent, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, NOW(), NOW())
-                """),
-                {
-                    "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": doc_id,
-                    "line_number": int(item.get("pos_nr") or 0),
-                    "source_line_id": str(item["id"]),
-                    "article_number": (item.get("artikel_nr") or "").strip() or "",
-                    "description": item.get("bezeichnung"),
-                    "quantity": _qty(qty), "unit": item.get("einheit"),
-                    "unit_price": price, "discount_percent": discount, "tax_rate": tax_rate,
-                    "line_total_net": line_net, "line_total_tax": line_tax, "line_total_gross": line_gross,
-                },
-            )
-        self.db.execute(
-            text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g, updated_at=NOW() WHERE id=:id AND tenant_id=:tenant_id"),
-            {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},
-        )
-        return self.fetch_header(doc_id)
-
     def bootstrap_doc(self, doc_id: str) -> Optional[dict[str, Any]]:
-        existing = self.fetch_header(doc_id)
-        if existing:
-            return existing
-        # Auftraege stehen seit docflow_auftraege_uebernahme_20261109 nur in DocFlow; Lieferscheine folgen.
-        return self._bootstrap_sales_delivery(doc_id)
+        """Der Beleg, wenn es ihn in DocFlow gibt. Aus Altspeichern wird nichts mehr nachgeladen (BELEG-052)."""
+        return self.fetch_header(doc_id)
 
     # ── number series ─────────────────────────────────────────────────────────
 
@@ -1037,7 +953,9 @@ class DocflowService:
                 target_qty = Decimal(str(raw))
                 if target_qty < 0:
                     raise ValidationFailedError("Negative quantity in partial conversion")
-                if target_qty > rest:
+                # Ueberlieferung: Der Wareneingang nimmt auf, was tatsaechlich kam (22 t auf 20 t bestellt). Der Abgleich
+                # zeigt die Mehrmenge als ueberliefert, ERS schreibt sie gut. Alle anderen Folgebelege bleiben begrenzt.
+                if target_qty > rest and relation_type not in UEBERLIEFERUNG_ERLAUBT:
                     raise ValidationFailedError(
                         f"Position {item.get('line_number')}: Menge {_qty(target_qty).normalize():f} übersteigt die "
                         f"Restmenge {_qty(rest).normalize():f} (Beleg {_qty(src_qty).normalize():f}, bereits umgewandelt "

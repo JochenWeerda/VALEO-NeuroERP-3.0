@@ -170,7 +170,7 @@ class WebshopIntegrationService:
         if steuerfehler:
             return {"verarbeitet": False, "auftrag_nr": None,
                     "hinweis": "Webshop-Bestellung hat fachliche Blocker", "blockers": steuerfehler}
-        # Auftrag als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher domain_crm.sales_orders).
+        # Auftrag als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher der CRM-Auftragsspeicher).
         # Der Shop liefert Bruttopreise; netto rechnet der Steuerschluessel der Position (eine Steuerquelle).
         from app.services.beleg_anlage import lege_beleg_an
 

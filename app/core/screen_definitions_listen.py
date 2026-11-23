@@ -2722,10 +2722,10 @@ def build_einkauf_angebote_vergleich_liste() -> dict[str, Any]:
 def build_einkauf_dienstleistungen_haltung_liste() -> dict[str, Any]:
     return _liste(
         screen_id="einkauf/dienstleistungen-haltung-liste", domain="einkauf", title="Dienstleistungen Haltung",
-        subtitle="DL-Bestellungen Tierhaltung", endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        subtitle="DL-Bestellungen Tierhaltung", endpoint="/api/v1/belege/purchase_order", row_route="/belege/purchase_order/{id}", bundle="einkauf",
         columns=[
-            {"key": "bestellNummer", "label": "Bestell-Nr.", "filterable": True, "priority": "primary"},
-            {"key": "lieferant", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "beleg_nr", "label": "Bestell-Nr.", "filterable": True, "priority": "primary"},
+            {"key": "partner_name", "label": "Lieferant", "filterable": True, "priority": "primary"},
             {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
         ],
         actions=[_EXPORT],
@@ -2737,9 +2737,9 @@ def build_einkauf_dienstleistungen_haltung_liste() -> dict[str, Any]:
 def build_einkauf_einkauf_vorgang_liste() -> dict[str, Any]:
     return _liste(
         screen_id="einkauf/einkauf-vorgang-liste", domain="einkauf", title="Einkaufsvorgaenge",
-        subtitle="Vorgaenge im Einkauf", endpoint="/api/v1/einkauf/bestellungen", row_route="/einkauf/bestellung/{id}", bundle="einkauf",
+        subtitle="Vorgaenge im Einkauf", endpoint="/api/v1/belege/purchase_order", row_route="/belege/purchase_order/{id}", bundle="einkauf",
         columns=[
-            {"key": "nummer", "label": "Vorgang", "filterable": True, "priority": "primary"},
+            {"key": "beleg_nr", "label": "Vorgang", "filterable": True, "priority": "primary"},
             {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
         ],
         actions=[_EXPORT],

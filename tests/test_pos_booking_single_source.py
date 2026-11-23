@@ -55,17 +55,17 @@ class TestEineBuchungsstelle:
         ):
             assert hasattr(PosCompatService, name), name
 
-    def test_nur_compat_py_schreibt_pos_nach_journal_entries(self):
+    def test_nur_der_tagesabschluss_bucht_pos(self):
         """Ein zweiter POS-Schreiber waere wieder eine Buchungsquelle ohne
-        Fiskalisierungs-Gate."""
+        Fiskalisierungs-Gate. Seit 19.11.2026 bucht der Tagesabschluss ueber den
+        Buchungsdienst (source="POS"); roh schreibt niemand mehr ins Journal
+        (tests/test_journal_schreiber_ratsche.py)."""
         treffer = []
         for pfad in (REPO / "app").rglob("*.py"):
             quelle = io.open(pfad, encoding="utf-8", errors="ignore").read()
-            if "journal_entries" not in quelle:
-                continue
-            if "pos_tagesabschluss" in quelle.lower() or "'POS'" in quelle:
-                if "INSERT INTO domain_erp.journal_entries" in quelle:
-                    treffer.append(pfad.relative_to(REPO).as_posix())
+            bucht = "FinanceTransactionService" in quelle or "INSERT INTO domain_erp.journal_entries" in quelle
+            if bucht and ('source="POS"' in quelle or "'POS', :ref" in quelle):
+                treffer.append(pfad.relative_to(REPO).as_posix())
         assert treffer == ["app/api/v1/endpoints/compat.py"], treffer
 
     def test_keine_nicht_existierenden_spalten_mehr(self):

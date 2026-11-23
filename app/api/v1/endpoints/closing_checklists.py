@@ -121,7 +121,7 @@ async def list_checklist_templates(
                         "description": "Debitoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AR",
                         "validation_type": "automatic",
-                        "validation_query": "SELECT COUNT(*) FROM offene_posten WHERE debtor_id IS NOT NULL AND offen > 0",
+                        "validation_query": "SELECT COUNT(*) FROM domain_erp.offene_posten WHERE debtor_id IS NOT NULL AND offen > 0",
                         "required": True,
                         "responsible_role": "accountant",
                         "due_date_offset": 0
@@ -131,7 +131,7 @@ async def list_checklist_templates(
                         "description": "Kreditoren-Abstimmung durchgefÃ¼hrt",
                         "category": "AP",
                         "validation_type": "automatic",
-                        "validation_query": "SELECT COUNT(*) FROM offene_posten WHERE creditor_id IS NOT NULL AND offen > 0",
+                        "validation_query": "SELECT COUNT(*) FROM domain_erp.offene_posten WHERE creditor_id IS NOT NULL AND offen > 0",
                         "required": True,
                         "responsible_role": "accountant",
                         "due_date_offset": 0

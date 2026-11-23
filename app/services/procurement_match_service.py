@@ -1,13 +1,16 @@
 """Beschaffungs-Abgleich / 3-Wege-Match (DOM-PROC-004).
 
-Gleicht Bestellung (domain_einkauf.bestellungen/_positionen) gegen Wareneingang
-(public.inventory_goods_receipts/_lines) ab — Basis für den 3-Wege-Match; die
-Rechnungs-Stufe wird ergänzt, sobald ein PO-Bezug am Eingangsrechnungs-Modell
-vorliegt.
+Gleicht Bestellung, Wareneingang und Eingangsrechnung ab. Quelle ist DocFlow, der einzige Belegspeicher (BELEG-052):
 
-Je Bestellposition: bestellt vs. geliefert (aggregiert aus WE-Zeilen) → offene
-Menge, Über-/Unterlieferung (Toleranz), Wertabweichung. Liefert zusätzlich Lücken
-(kein WE, Teil-/Überlieferung). Die Vergleichslogik ist rein (ohne DB) und damit
+* Bestellung = ``purchase_order`` mit ihren Positionen.
+* Geliefert = was die Belegverknuepfung ``order_to_receipt`` je Position (``document_links.quantity_linked``) an
+  nicht stornierte Wareneingaenge uebergeben hat - genau die Menge der Umwandlung.
+* Rechnung = ``purchase_invoice`` aus der Bestellung (``order_to_purchase_invoice``) oder aus ihren Wareneingaengen
+  (``receipt_to_purchase_invoice``); auch der Entwurf zaehlt, denn geprueft wird vor dem Buchen. Gibt es keine,
+  zaehlen die der Bestellnummer zugeordneten Eingaenge des E-Rechnungs-Postfachs (``finance_erechnungen``).
+
+Je Bestellposition: bestellt vs. geliefert → offene Menge, Ueber-/Unterlieferung (Toleranz), Wertabweichung. Liefert
+zusaetzlich Luecken (kein WE, Teil-/Ueberlieferung). Die Vergleichslogik ist rein (ohne DB) und damit
 deterministisch testbar.
 """
 
@@ -171,41 +174,47 @@ class ProcurementMatchService:
             raise ValueError("Mandant fehlt")
         self.tenant_id = tenant_id
 
-    # ── Geliefert-Mengen je PO-Position aus Wareneingängen ─────────────────────
-    def _delivered_by_line(self, po_id: Optional[str], po_number: Optional[str]) -> dict[str, Decimal]:
-        """Summiert WE-Zeilenmengen je PO-Positionsnummer (po_line_number)."""
+    # ── Belege aus DocFlow ─────────────────────────────────────────────────────
+    def _delivered_by_item(self, po_id: str) -> dict[str, Decimal]:
+        """Gelieferte Menge je Bestellposition: Summe der Umwandlungen in nicht stornierte Wareneingaenge."""
         rows = self.db.execute(
             text(
-                "SELECT l.po_line_number AS posnr, COALESCE(SUM(l.received_quantity),0) AS menge "
-                "FROM public.inventory_goods_receipts gr "
-                "JOIN public.inventory_goods_receipt_lines l ON l.goods_receipt_id = gr.id "
-                "WHERE gr.tenant_id = :t AND (gr.po_id::text = :pid OR gr.po_number = :pnum) "
-                "GROUP BY l.po_line_number"
+                "SELECT l.from_item_id AS pos, COALESCE(SUM(l.quantity_linked), 0) AS menge "
+                "FROM domain_docflow.document_links l "
+                "JOIN domain_docflow.document_headers z ON z.id = l.to_header_id AND z.tenant_id = l.tenant_id "
+                "WHERE l.tenant_id = :t AND l.from_header_id = :pid AND l.relation_type = 'order_to_receipt' "
+                "AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed') "
+                "GROUP BY l.from_item_id"
             ),
-            {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
+            {"t": self.tenant_id, "pid": po_id},
         ).mappings().all()
-        return {str(r["posnr"]): Decimal(str(r["menge"] or 0)) for r in rows}
+        return {str(r["pos"]): Decimal(str(r["menge"] or 0)) for r in rows}
 
-    def _goods_receipts(self, po_id: Optional[str], po_number: Optional[str]) -> list[dict]:
+    def _goods_receipts(self, po_id: str) -> list[dict]:
         rows = self.db.execute(
             text(
-                "SELECT id, gr_number, receipt_date, status, delivery_note_number "
-                "FROM public.inventory_goods_receipts "
-                "WHERE tenant_id = :t AND (po_id::text = :pid OR po_number = :pnum) "
-                "ORDER BY receipt_date"
+                "SELECT z.id, z.doc_number, z.document_date, z.status, "
+                "z.bausteine #>> '{referenzen,fremde_referenz}' AS lieferschein "
+                "FROM domain_docflow.document_header_links k "
+                "JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id "
+                "WHERE k.tenant_id = :t AND k.from_header_id = :pid AND k.relation_type = 'order_to_receipt' "
+                "AND z.deleted_at IS NULL AND z.status NOT IN ('cancelled', 'reversed') "
+                "ORDER BY z.document_date, z.created_at"
             ),
-            {"t": self.tenant_id, "pid": str(po_id) if po_id else "", "pnum": po_number or ""},
+            {"t": self.tenant_id, "pid": po_id},
         ).mappings().all()
-        return [{"id": str(r["id"]), "gr_number": r["gr_number"],
-                 "datum": r["receipt_date"].isoformat() if r["receipt_date"] else None,
-                 "status": r["status"], "lieferschein": r["delivery_note_number"]} for r in rows]
+        return [{"id": str(r["id"]), "gr_number": r["doc_number"],
+                 "datum": r["document_date"].isoformat() if r["document_date"] else None,
+                 "status": r["status"], "lieferschein": r["lieferschein"]} for r in rows]
 
     def _resolve_po(self, bestellung: str) -> Optional[dict]:
         r = self.db.execute(
             text(
-                "SELECT id, bestellnummer, lieferant_id, status, netto_summe, brutto_summe, "
-                "bestelldatum FROM domain_einkauf.bestellungen "
-                "WHERE tenant_id = :t AND (id::text = :v OR bestellnummer = :v) LIMIT 1"
+                "SELECT id, doc_number AS bestellnummer, supplier_id AS lieferant_id, status, "
+                "total_net AS netto_summe, total_gross AS brutto_summe, document_date AS bestelldatum "
+                "FROM domain_docflow.document_headers "
+                "WHERE tenant_id = :t AND doc_type = 'purchase_order' AND deleted_at IS NULL "
+                "AND (id::text = :v OR doc_number = :v) LIMIT 1"
             ),
             {"t": self.tenant_id, "v": bestellung},
         ).mappings().first()
@@ -217,22 +226,20 @@ class ProcurementMatchService:
             return {"found": False, "detail": "Bestellung nicht auflösbar."}
         positionen = self.db.execute(
             text(
-                "SELECT pos_nr, artikel_nr, artikel_bezeichnung, menge, menge_geliefert, "
-                "einzelpreis, netto_betrag, einheit, status "
-                "FROM domain_einkauf.bestellung_positionen WHERE bestellung_id = :bid ORDER BY pos_nr"
+                "SELECT id, line_number AS pos_nr, article_number AS artikel_nr, "
+                "description AS artikel_bezeichnung, quantity AS menge, unit_price AS einzelpreis, "
+                "line_total_net AS netto_betrag, unit AS einheit "
+                "FROM domain_docflow.document_items WHERE header_id = :bid AND tenant_id = :t "
+                "ORDER BY line_number"
             ),
-            {"bid": po["id"]},
+            {"bid": po["id"], "t": self.tenant_id},
         ).mappings().all()
-        delivered = self._delivered_by_line(po["id"], po["bestellnummer"])
+        delivered = self._delivered_by_item(str(po["id"]))
 
         zeilen: list[dict] = []
         luecken: list[dict] = []
         for p in positionen:
-            posnr = str(p["pos_nr"])
-            # Geliefert: WE-Zeilen bevorzugt, sonst die am Beleg geführte Liefermenge.
-            geliefert = delivered.get(posnr)
-            if geliefert is None:
-                geliefert = Decimal(str(p["menge_geliefert"] or 0))
+            geliefert = delivered.get(str(p["id"]), Decimal("0"))
             m = match_position(p["menge"], geliefert)
             preis = _f(p["einzelpreis"])
             wert_offen = (m["offen"] or 0) * (preis or 0) if preis is not None else None
@@ -251,10 +258,11 @@ class ProcurementMatchService:
                 luecken.append({"pos_nr": p["pos_nr"], "schwere": "warnung",
                                 "text": f"Position {p['pos_nr']} überliefert ({m['geliefert']}/{m['bestellt']})."})
 
-        wareneingaenge = self._goods_receipts(po["id"], po["bestellnummer"])
+        wareneingaenge = self._goods_receipts(str(po["id"]))
         vollstaendig = bool(zeilen) and all(z["status"] in ("vollstaendig", "ueberliefert") for z in zeilen)
         return {
             "found": True,
+            "bestellung_id": str(po["id"]),
             "bestellnummer": po["bestellnummer"],
             "status": po["status"],
             "lieferant_id": str(po["lieferant_id"]) if po["lieferant_id"] else None,
@@ -274,12 +282,18 @@ class ProcurementMatchService:
     def list_orders(self, limit: int = 50) -> list[dict]:
         rows = self.db.execute(
             text(
-                "SELECT b.id, b.bestellnummer, b.bestelldatum, b.status, b.netto_summe, "
-                "(SELECT count(*) FROM domain_einkauf.bestellung_positionen p WHERE p.bestellung_id = b.id) AS pos, "
-                "EXISTS(SELECT 1 FROM public.inventory_goods_receipts gr "
-                "       WHERE gr.tenant_id = b.tenant_id AND (gr.po_id::text = b.id::text OR gr.po_number = b.bestellnummer)) AS hat_we "
-                "FROM domain_einkauf.bestellungen b WHERE b.tenant_id = :t "
-                "ORDER BY b.bestelldatum DESC NULLS LAST, b.created_at DESC LIMIT :lim"
+                "SELECT b.id, b.doc_number AS bestellnummer, b.document_date AS bestelldatum, b.status, "
+                "b.total_net AS netto_summe, "
+                "(SELECT count(*) FROM domain_docflow.document_items p "
+                "  WHERE p.header_id = b.id AND p.tenant_id = b.tenant_id) AS pos, "
+                "EXISTS(SELECT 1 FROM domain_docflow.document_header_links k "
+                "       JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id "
+                "       WHERE k.tenant_id = b.tenant_id AND k.from_header_id = b.id "
+                "       AND k.relation_type = 'order_to_receipt' AND z.deleted_at IS NULL "
+                "       AND z.status NOT IN ('cancelled', 'reversed')) AS hat_we "
+                "FROM domain_docflow.document_headers b "
+                "WHERE b.tenant_id = :t AND b.doc_type = 'purchase_order' AND b.deleted_at IS NULL "
+                "ORDER BY b.document_date DESC NULLS LAST, b.created_at DESC LIMIT :lim"
             ),
             {"t": self.tenant_id, "lim": max(1, min(limit, 500))},
         ).mappings().all()
@@ -287,6 +301,43 @@ class ProcurementMatchService:
                  "datum": r["bestelldatum"].isoformat() if r["bestelldatum"] else None,
                  "status": r["status"], "netto_summe": _f(r["netto_summe"]),
                  "positionen": int(r["pos"]), "hat_wareneingang": bool(r["hat_we"])} for r in rows]
+
+    def _docflow_invoices(self, po_id: str, bestellnummer: str) -> list[dict]:
+        """Eingangsrechnungen der Bestellung aus DocFlow - direkt oder ueber ihre Wareneingaenge."""
+        rows = self.db.execute(
+            text(
+                "SELECT DISTINCT z.id, z.doc_number, z.document_date, z.total_net, z.total_gross, z.status, "
+                "z.created_at, "
+                "(SELECT w.doc_number FROM domain_docflow.document_headers w "
+                "  WHERE w.id = k.from_header_id AND w.tenant_id = k.tenant_id "
+                "  AND k.relation_type = 'receipt_to_purchase_invoice') AS wareneingang "
+                "FROM domain_docflow.document_header_links k "
+                "JOIN domain_docflow.document_headers z ON z.id = k.to_header_id AND z.tenant_id = k.tenant_id "
+                "WHERE k.tenant_id = :t AND z.doc_type = 'purchase_invoice' AND z.deleted_at IS NULL "
+                "AND z.status NOT IN ('cancelled', 'reversed') "
+                "AND ((k.relation_type = 'order_to_purchase_invoice' AND k.from_header_id = :pid) "
+                "  OR (k.relation_type = 'receipt_to_purchase_invoice' AND k.from_header_id IN ( "
+                "        SELECT kw.to_header_id FROM domain_docflow.document_header_links kw "
+                "         WHERE kw.tenant_id = :t AND kw.from_header_id = :pid "
+                "           AND kw.relation_type = 'order_to_receipt'))) "
+                "ORDER BY z.document_date DESC NULLS LAST, z.created_at DESC"
+            ),
+            {"t": self.tenant_id, "pid": po_id},
+        ).mappings().all()
+        return [
+            {
+                "id": str(r["id"]),
+                "rechnungsnummer": r["doc_number"],
+                "datum": r["document_date"].isoformat() if r["document_date"] else None,
+                "gesamt_netto": _f(r["total_net"]),
+                "gesamt_brutto": _f(r["total_gross"]),
+                "zugeordneter_auftrag": bestellnummer,
+                "zugeordneter_lieferschein": r["wareneingang"],
+                "status": r["status"],
+                "quelle": "docflow",
+            }
+            for r in rows
+        ]
 
     def _invoices_for_po(self, bestellnummer: str) -> list[dict]:
         rows = self.db.execute(
@@ -309,6 +360,7 @@ class ProcurementMatchService:
                 "zugeordneter_auftrag": r["zugeordneter_auftrag"],
                 "zugeordneter_lieferschein": r["zugeordneter_lieferschein"],
                 "status": r["status"],
+                "quelle": "e-rechnung-postfach",
             }
             for r in rows
         ]
@@ -326,7 +378,9 @@ class ProcurementMatchService:
             preis = Decimal(str(pos.get("einzelpreis") or 0))
             geliefert_wert += menge * preis
 
-        rechnungen = self._invoices_for_po(base["bestellnummer"])
+        # DocFlow fuehrt die Eingangsrechnung; nur ohne sie zaehlt das E-Rechnungs-Postfach (sonst doppelt).
+        rechnungen = (self._docflow_invoices(base["bestellung_id"], base["bestellnummer"])
+                      or self._invoices_for_po(base["bestellnummer"]))
         fakturiert_netto = sum(Decimal(str(r.get("gesamt_netto") or 0)) for r in rechnungen)
         wert_match = match_three_way_value(geliefert_wert, fakturiert_netto)
 

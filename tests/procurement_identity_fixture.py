@@ -39,31 +39,45 @@ def procurement_context(require_db, probe):
 
 
 def seed_match_cases(context, monkeypatch):
-    # Reuse the existing INSERT factories, never seed() or its shared DEMO rows.
+    """Zwei Bestellungen in DocFlow, dem einzigen Belegspeicher (BELEG-052 S3).
+
+    PO1: zwei Positionen, Wareneingang teilweise (100/100 und 30/50), Eingangsrechnung aus dem Wareneingang (27.700).
+    PO2: voll geliefert (20 t zu 480), die Rechnung im E-Rechnungs-Postfach lautet auf 22 t - 960 zu viel berechnet.
+    Ueberlieferung kennt DocFlow nicht (die Umwandlung uebersteigt die Bestellmenge nie).
+    """
     from scripts import seed_demo_procurement as factory
+    from stammsaetze import lege_lieferanten_an
+
+    from app.api.v1.schemas.docflow_schemas import DocflowConvertRequest, DocflowCreateRequest, DocflowLineInput
+    from app.services.docflow_service import DocflowService
+
     monkeypatch.setattr(factory, 'TENANT', context.tenant)
     db, ns = context.db, context.namespace
-    warehouse, location = str(uuid4()), str(uuid4())
-    now = datetime.now(timezone.utc)
-    db.execute(text('INSERT INTO public.inventory_warehouses (id,code,name,tenant_id,is_active,created_at,updated_at) VALUES (:id,:code,:name,:tenant,TRUE,:now,:now)'),
-               {'id': warehouse, 'code': 'IT-WH-'+ns, 'name': 'Synthetic test warehouse', 'tenant': context.tenant, 'now': now})
-    db.execute(text("INSERT INTO public.inventory_locations (id,warehouse_id,code,location_type,created_at) VALUES (:id,:warehouse,:code,'bulk',:now)"),
-               {'id': location, 'warehouse': warehouse, 'code': 'IT-LOC-'+ns, 'now': now})
-    po_ok, po_over = 'IT-'+ns+'-PO1', 'IT-'+ns+'-PO2'
-    first = factory._po(db, context.supplier, po_ok, [
-        {'pos': 1, 'artikel_nr': 'WEIZEN-A', 'bezeichnung': 'Test wheat', 'menge': 100, 'einheit': 't', 'einzelpreis': 220},
-        {'pos': 2, 'artikel_nr': 'GERSTE-B', 'bezeichnung': 'Test barley', 'menge': 50, 'einheit': 't', 'einzelpreis': 190},
-    ])
-    factory._gr(db, first, po_ok, context.supplier, 'IT-'+ns+'-GR1', [
-        {'pos': 1, 'sku': 'WEIZEN-A', 'bezeichnung': 'Test wheat', 'bestellt': 100, 'geliefert': 100, 'einheit': 't'},
-        {'pos': 2, 'sku': 'GERSTE-B', 'bezeichnung': 'Test barley', 'bestellt': 50, 'geliefert': 30, 'einheit': 't'},
-    ], warehouse, location)
-    factory._invoice(db, po_ok, 'IT-'+ns+'-RE1', 27700)
-    second = factory._po(db, context.supplier, po_over, [
-        {'pos': 1, 'artikel_nr': 'RAPS-00', 'bezeichnung': 'Test rapeseed', 'menge': 20, 'einheit': 't', 'einzelpreis': 480},
-    ])
-    factory._gr(db, second, po_over, context.supplier, 'IT-'+ns+'-GR2', [
-        {'pos': 1, 'sku': 'RAPS-00', 'bezeichnung': 'Test rapeseed', 'bestellt': 20, 'geliefert': 22, 'einheit': 't'},
-    ], warehouse, location)
-    db.commit()
+    monkeypatch.setattr(db, 'commit', db.flush)  # Kommandos committen - hier bleibt alles in der Testtransaktion
+    lege_lieferanten_an(db, context.tenant, context.supplier)
+    svc = DocflowService(db, context.tenant, 'einkauf-1')
+
+    def bestellung(zeilen):
+        kennung = svc.create_document(DocflowCreateRequest.model_validate({
+            'doc_type': 'purchase_order', 'doc_number': 'ENTWURF-'+uuid4().hex[:6], 'supplier_id': context.supplier,
+            'items': [DocflowLineInput(article_number=a, description=b, quantity=m, unit='t', unit_price=p).model_dump()
+                      for a, b, m, p in zeilen]}))
+        svc.release(kennung, 'rel-'+uuid4().hex, None, None)
+        nummer = db.execute(text('SELECT doc_number FROM domain_docflow.document_headers WHERE id = :id'),
+                            {'id': kennung}).scalar()
+        positionen = db.execute(text('SELECT id FROM domain_docflow.document_items WHERE header_id = :id '
+                                     'ORDER BY line_number'), {'id': kennung}).scalars().all()
+        return kennung, nummer, [str(p) for p in positionen]
+
+    def wandle(quelle, ziel, mengen=None):
+        return str(svc.convert(quelle, DocflowConvertRequest(
+            target_doc_type=ziel, idempotency_key='conv-'+uuid4().hex,
+            quantities_by_source_item_id=mengen or {}))['target_doc_id'])
+
+    po1, po_ok, (p1, p2) = bestellung([('WEIZEN-A', 'Test wheat', 100, 220), ('GERSTE-B', 'Test barley', 50, 190)])
+    wareneingang = wandle(po1, 'goods_receipt', {p1: 100, p2: 30})
+    wandle(wareneingang, 'purchase_invoice')
+    po2, po_over, (p3,) = bestellung([('RAPS-00', 'Test rapeseed', 20, 480)])
+    wandle(po2, 'goods_receipt', {p3: 20})
+    factory._invoice(db, po_over, 'IT-'+ns+'-RE2', 10560)
     return po_ok, po_over

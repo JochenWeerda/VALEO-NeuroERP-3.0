@@ -194,9 +194,9 @@ async def get_customer_screen_summary(
     sales_row = _query_one(
         db,
         """
-        SELECT COALESCE(SUM(total_amount), 0)::float AS sales_ytd
-        FROM domain_crm.sales_orders
-        WHERE (
+        SELECT COALESCE(SUM(total_gross), 0)::float AS sales_ytd
+        FROM domain_docflow.document_headers
+        WHERE doc_type = 'sales_order' AND (
                 customer_id::text = :cid
              OR (:nr IS NOT NULL AND customer_id::text = :nr)
               )
@@ -265,15 +265,15 @@ async def get_customer_360(
     customer_id = str(customer.get("id") or customer_id)
     kunden_nr = customer.get("kunden_nr")
 
-    # 1. Letzte 10 Aufträge (domain_crm.sales_orders)
+    # 1. Letzte 10 Aufträge (DocFlow, BELEG-052)
     orders = _query_many(
         db,
         """
-        SELECT id, order_number, status,
-               COALESCE(total_amount, 0)::float AS total_amount,
+        SELECT id, doc_number AS order_number, CASE status WHEN 'reversed' THEN 'cancelled' ELSE status END AS status,
+               COALESCE(total_gross, 0)::float AS total_amount,
                created_at::text
-        FROM domain_crm.sales_orders
-        WHERE (
+        FROM domain_docflow.document_headers
+        WHERE doc_type = 'sales_order' AND (
                 customer_id::text = :cid
              OR (:nr IS NOT NULL AND customer_id::text = :nr)
               )
@@ -290,9 +290,9 @@ async def get_customer_360(
     umsatz_row = _query_one(
         db,
         """
-        SELECT COALESCE(SUM(total_amount), 0)::float AS jahresumsatz
-        FROM domain_crm.sales_orders
-        WHERE (
+        SELECT COALESCE(SUM(total_gross), 0)::float AS jahresumsatz
+        FROM domain_docflow.document_headers
+        WHERE doc_type = 'sales_order' AND (
                 customer_id::text = :cid
              OR (:nr IS NOT NULL AND customer_id::text = :nr)
               )

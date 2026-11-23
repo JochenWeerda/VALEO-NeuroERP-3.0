@@ -1,4 +1,4 @@
-"""Wave 70 — Unit-Tests fuer can_storno (sales_storno_service) und credit_check (sales_credit_service)."""
+"""Wave 70 — Unit-Tests fuer credit_check (sales_credit_service)."""
 
 from __future__ import annotations
 
@@ -9,52 +9,6 @@ import pytest
 # sales_storno_service — can_storno  (pure predicate, keine DB)
 # ---------------------------------------------------------------------------
 
-@pytest.mark.unit
-def test_can_storno_not_billed_allowed() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, reason = can_storno(status=None, invoice_number=None)
-    assert ok is True
-    assert reason == ""
-
-
-@pytest.mark.unit
-def test_can_storno_open_status_no_invoice_allowed() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, _ = can_storno(status="open", invoice_number=None)
-    assert ok is True
-
-
-@pytest.mark.unit
-def test_can_storno_already_cancelled_blocked() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, reason = can_storno(status="storniert", invoice_number="INV-001")
-    assert ok is False
-    assert len(reason) > 0
-
-
-@pytest.mark.unit
-def test_can_storno_billed_blocked() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, reason = can_storno(status="open", invoice_number="INV-001")
-    assert ok is False
-    assert "Gutschrift" in reason or len(reason) > 0
-
-
-@pytest.mark.unit
-def test_can_storno_both_none_allowed() -> None:
-    from app.services.sales_storno_service import can_storno
-    ok, _ = can_storno(None, None)
-    assert ok is True
-
-
-@pytest.mark.unit
-def test_can_storno_returns_tuple() -> None:
-    from app.services.sales_storno_service import can_storno
-    result = can_storno("open", None)
-    assert isinstance(result, tuple)
-    assert len(result) == 2
-    assert isinstance(result[0], bool)
-    assert isinstance(result[1], str)
 
 
 # ---------------------------------------------------------------------------

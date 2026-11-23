@@ -19,6 +19,7 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
+from app.services.auftrag_lesewege import OFFENE_AUFTRAEGE, liefertermin_sql, offene_menge_sql
 from sqlalchemy import and_, func, or_, text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -78,15 +79,10 @@ def _open_sales_quantity(db: Session, article_id: str, tenant_id: str,
     Abfrage derselben Sitzung scheitert an einem Fehler, den sie nicht
     verursacht hat.
 
-    Gefuehrt werden die Auftraege in ``domain_crm.sales_orders`` und
-    ``domain_crm.sales_order_items``. Die Position kennt dort keine
-    gelieferte Menge, sondern nur ``article_number`` und ``quantity`` —
-    offen ist deshalb die Menge der Positionen auf Auftraegen, die weder
-    storniert noch abgeschlossen oder ausgeliefert sind. Das ist eine
-    Naeherung nach oben: Teillieferungen sind darin noch nicht abgezogen,
-    weil der Auftrag im Mengenmodell (``domain_docs.doc_allocation_sources``)
-    bisher nicht als Quelle gefuehrt wird — dort stehen nur Lieferscheine.
-    Sobald er dort steht, gehoert die Differenz hierher.
+    Gefuehrt werden die Auftraege in DocFlow (BELEG-052). Offen ist je
+    Position, was noch in keinen Lieferschein und keine Rechnung ging
+    (``auftrag_lesewege.offene_menge_sql``), auf Auftraegen, die weder
+    storniert noch abgeschlossen sind.
     """
     if not artikel_nr:
         artikel_nr = db.query(Article.article_number).filter(
@@ -98,24 +94,21 @@ def _open_sales_quantity(db: Session, article_id: str, tenant_id: str,
     params: dict[str, Any] = {"tenant_id": tenant_id, "artikel_nr": artikel_nr}
     where_extra = ""
     if von_datum:
-        where_extra += " AND so.delivery_date >= :von_datum"
+        where_extra += f" AND {liefertermin_sql('so')} >= :von_datum"
         params["von_datum"] = von_datum
     if bis_datum:
-        where_extra += " AND so.delivery_date <= :bis_datum"
+        where_extra += f" AND {liefertermin_sql('so')} <= :bis_datum"
         params["bis_datum"] = bis_datum
     # Eine Niederlassung fuehrt der Auftragskopf hier nicht; der Parameter
     # bleibt in der Signatur, damit die Aufrufer unveraendert bleiben.
 
     sql = text(f"""
-        SELECT COALESCE(SUM(soi.offene_menge), 0)
-        FROM domain_crm.sales_order_items soi
-        JOIN domain_crm.sales_orders so ON so.id = soi.order_id
+        SELECT COALESCE(SUM({offene_menge_sql('soi')}), 0)
+        FROM domain_docflow.document_items soi
+        JOIN domain_docflow.document_headers so ON so.id = soi.header_id AND so.tenant_id = soi.tenant_id
         WHERE soi.article_number = :artikel_nr
           AND so.tenant_id::text = :tenant_id
-          AND so.deleted_at IS NULL
-          AND lower(COALESCE(so.status, '')) NOT IN (
-              'cancelled', 'completed', 'reversed'
-          )
+          AND {OFFENE_AUFTRAEGE}
           {where_extra}
     """)  # nosec B608  # reviewed-safe: where_extra ist code-kontrolliert, Werte sind Parameter
     try:
@@ -541,24 +534,21 @@ def engine_verkauf(
     der Vorschlag meldete "nichts zu bestellen", waehrend die Auftraege offen
     dastanden. Eine leere Liste sieht aus wie ein Ergebnis.
 
-    Gefuehrt werden die Auftraege in ``domain_crm``. Die Position verweist dort
-    ueber ``article_number`` auf den Artikel, nicht ueber eine Id, und fuehrt
-    **keine** gelieferte Menge: Die offene Menge ist deshalb die Auftragsmenge
-    auf Auftraegen, die weder storniert noch abgeschlossen oder ausgeliefert
-    sind — eine Naeherung nach oben, bis der Auftrag im Mengenmodell
-    (``domain_docs.doc_allocation_sources``) als Quelle gefuehrt wird.
+    Gefuehrt werden die Auftraege in DocFlow (BELEG-052); die Position verweist
+    ueber ``article_number`` auf den Artikel. Offen ist, was noch in keinen
+    Lieferschein und keine Rechnung ging (``auftrag_lesewege``).
     """
     # Alle offenen VK-Auftrags-Artikel ermitteln
     try:
         params: dict[str, Any] = {"tenant_id": tenant_id}
         where_extra = ""
         if von_datum:
-            where_extra += " AND so.delivery_date >= :von_datum"
+            where_extra += f" AND {liefertermin_sql('so')} >= :von_datum"
             params["von_datum"] = von_datum
         if bis_datum:
-            where_extra += " AND so.delivery_date <= :bis_datum"
+            where_extra += f" AND {liefertermin_sql('so')} <= :bis_datum"
             params["bis_datum"] = bis_datum
-        # Eine Niederlassung fuehrt der Auftragskopf in domain_crm nicht; der
+        # Eine Niederlassung wertet diese Abfrage noch nicht aus; der
         # Parameter bleibt in der Signatur, damit die Aufrufer gleich bleiben.
 
         # Offene Mengen je Artikel summieren
@@ -568,19 +558,16 @@ def engine_verkauf(
                 a.article_number,
                 a.name AS artikel_bezeichnung,
                 a.warengruppe,
-                SUM(soi.offene_menge) AS offene_menge,
+                SUM({offene_menge_sql('soi')}) AS offene_menge,
                 COALESCE(MAX(soi.unit), a.gebinde_einheit) AS einheit
-            FROM domain_crm.sales_order_items soi
-            JOIN domain_crm.sales_orders so ON so.id = soi.order_id
+            FROM domain_docflow.document_items soi
+            JOIN domain_docflow.document_headers so ON so.id = soi.header_id AND so.tenant_id = soi.tenant_id
             JOIN domain_inventory.articles a
               ON a.article_number = soi.article_number
              AND a.tenant_id::text = so.tenant_id::text
             WHERE so.tenant_id::text = :tenant_id
-              AND so.deleted_at IS NULL
-              AND lower(COALESCE(so.status, '')) NOT IN (
-                  'cancelled', 'completed', 'reversed'
-              )
-              AND soi.offene_menge > 0
+              AND {OFFENE_AUFTRAEGE}
+              AND {offene_menge_sql('soi')} > 0
               {where_extra}
             {'AND a.warengruppe = :artikelgruppe' if artikelgruppe else ''}
             GROUP BY a.id, a.article_number, a.name, a.warengruppe, a.gebinde_einheit
@@ -890,7 +877,7 @@ def vorschlag_zu_bestellungen(
         if lieferant_id is None:
             continue  # Bestellung ohne Lieferant nicht anlegen (NOT NULL)
 
-        # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher EinkaufBestellung mit
+        # Bestellung als DocFlow-Entwurf (BELEG-052: DocFlow einziger Belegspeicher; vorher das ORM-Modell der Altbestellung mit
         # fester Mehrwertsteuer 7 % und "Preis je 100 kg" gegen Menge in t). Die Menge steht in der Einheit des
         # Preises (z. B. dt bei Preis je 100 kg), umgerechnet ueber app/core/agrar_units.py; Steuer nur per Schluessel.
         from app.services.beleg_anlage import lege_beleg_an, position_in_preiseinheit

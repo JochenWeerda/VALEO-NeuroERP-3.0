@@ -53,7 +53,6 @@ def _aufraeumen(v) -> None:
         "DELETE FROM domain_shared.mailkonten WHERE tenant_id = ANY(:h) AND zugang_von IS NOT NULL",
         "DELETE FROM domain_shared.mailkonten WHERE tenant_id = ANY(:h)",
         "DELETE FROM domain_einkauf.bestellung_kommunikation WHERE tenant_id = ANY(:h)",
-        "DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = ANY(:h)",
         "DELETE FROM domain_einkauf.rfq_requests WHERE tenant_id = ANY(:h)",
         "DELETE FROM einkauf_anfragen_positionen WHERE anfrage_id IN "
         "(SELECT id FROM einkauf_anfragen WHERE tenant_id = ANY(:h))",
@@ -218,18 +217,6 @@ class TestAnhang:
 
 
 # ── Bestellung ────────────────────────────────────────────────────────────────
-@pytest.fixture
-def bestellung(engine):
-    from sqlalchemy import text
-
-    kennung, nummer = str(uuid.uuid4()), f"EK-{uuid.uuid4().hex[:8]}"
-    with engine.begin() as v:
-        v.execute(text("INSERT INTO domain_einkauf.bestellungen (id, tenant_id, bestellnummer, lieferant_id, "
-                       " bestelldatum, status) VALUES (:i, :h, :n, :l, CURRENT_DATE, 'entwurf')"),
-                  {"i": kennung, "h": HAUS_A, "n": nummer, "l": MIT_ADRESSE})
-    return kennung
-
-
 # ── Preisanfrage (RFQ) ────────────────────────────────────────────────────────
 @pytest.fixture
 def rfq(engine):

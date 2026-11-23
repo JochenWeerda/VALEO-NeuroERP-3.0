@@ -41,17 +41,6 @@ def test_forderungen_stehen_nicht_auf_dem_bankkonto() -> None:
     assert SalesPostingService.ACCOUNT_RECEIVABLES != "1200"
 
 
-def test_wareneinkauf_steht_nicht_auf_dem_lohnkonto() -> None:
-    """6000 ist Loehne und Gehaelter — dort hat Handelsware nichts zu suchen."""
-    quelle = (WURZEL / "app" / "services" / "procurement_service.py").read_text(
-        encoding="utf-8"
-    )
-    obligo = quelle[quelle.index("OBLIGO-") : quelle.index("OBLIGO-") + 1500]
-
-    assert 'fin.account_id_for_number("5100")' in obligo, "Das Bestellobligo bucht nicht auf 5100"
-    assert 'fin.account_id_for_number("6000")' not in obligo, "Das Bestellobligo bucht noch auf 6000"
-
-
 def test_gutscheine_stehen_nicht_bei_den_lieferantenschulden() -> None:
     from app.services.pos_accounting_service import ACCOUNT_DEFINITIONS
 

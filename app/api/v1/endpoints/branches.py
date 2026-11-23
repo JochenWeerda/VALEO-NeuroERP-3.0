@@ -191,23 +191,20 @@ async def delete_branch(
     db: Session = Depends(get_db),
 ):
     """Delete a branch."""
-    _get_branch_or_404(db, branch_id, tenant_id)
-    
-    # Check if branch is used in delivery notes
-    used = db.execute(
+    zweig = dict(_get_branch_or_404(db, branch_id, tenant_id))
+
+    # Belege tragen die Niederlassung im Kopfbaustein organisation (BELEG-052), als Kennung oder
+    # Niederlassungsnummer. Eine Niederlassung mit Belegen bleibt stehen - sonst zeigten diese ins Leere.
+    belegt = db.execute(
         text("""
-            SELECT COUNT(*) FROM domain_sales.delivery_notes 
-            WHERE branch_id = :branch_id
+            SELECT COUNT(*) FROM domain_docflow.document_headers
+            WHERE tenant_id = :tenant_id AND deleted_at IS NULL
+              AND bausteine #>> '{organisation,niederlassung}' IN (:id, :kuerzel)
         """),
-        {"branch_id": branch_id}
+        {"tenant_id": tenant_id, "id": str(branch_id), "kuerzel": str(zweig["branch_number"] if zweig.get("branch_number") is not None else branch_id)},
     ).scalar()
-    
-    if used and used > 0:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Cannot delete branch: it is used in {used} delivery note(s)"
-        )
-    
+    if belegt:
+        raise HTTPException(status_code=409, detail=f"Die Niederlassung steht auf {belegt} Beleg(en) und bleibt.")
     db.execute(
         text("""
             DELETE FROM domain_shared.branches 
