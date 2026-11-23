@@ -30,3 +30,36 @@ async def test_branch_address_is_bound_as_json(create):
     assert json.loads(bindings["address"]) == address
     assert bindings["tenant_id"] == "tenant"
     db.commit.assert_called_once()
+
+
+@pytest.mark.integration
+@pytest.mark.asyncio
+async def test_branch_addresses_roundtrip_in_postgresql(require_db):
+    from uuid import uuid4
+
+    from sqlalchemy import text
+    from sqlalchemy.orm import Session
+
+    from app.api.v1.endpoints.branches import get_branch
+    from app.core.database import engine
+
+    tenant = str(uuid4())
+    original = {"street": "O'Brien", "primary": True, "extra": None}
+    revised = {"street": 'Markt "Nord"', "primary": False, "extra": {"number": 7}}
+    with engine.connect() as connection:
+        transaction = connection.begin()
+        try:
+            connection.execute(
+                text("INSERT INTO domain_shared.tenants (id, name, domain, is_active) VALUES (:id, :name, :domain, TRUE)"),
+                {"id": tenant, "name": "Synthetic branch address test", "domain": f"{tenant}.test.local"},
+            )
+            with Session(bind=connection, join_transaction_mode="create_savepoint") as db:
+                branch = await create_branch(
+                    BranchCreate(branch_number=1, name="Nord", address=original), tenant_id=tenant, db=db,
+                )
+                assert branch.address == original
+                updated = await update_branch(branch.id, BranchUpdate(address=revised), tenant_id=tenant, db=db)
+                assert updated.address == revised
+                assert (await get_branch(branch.id, tenant_id=tenant, db=db)).address == revised
+        finally:
+            transaction.rollback()

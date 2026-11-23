@@ -1018,3 +1018,5 @@ Listeneinstieg umgesetzt: /admin/branches liest den vorhandenen mandantengebunde
 Detailansicht umgesetzt: Aus der Niederlassungsliste zur Studio-Objektseite. Die Ansicht liest den vorhandenen mandantengebundenen Detailvertrag und zeigt Nummer, Namen, Aktivstatus und Zeitstempel. Zwei Vertragspruefungen sowie Studio-Gates A/B/C/E gruen. Bearbeitung und Browserabnahme offen.
 
 Schreibvertrag vorbereitet: Adressen werden beim Anlegen und Aendern als echtes JSON gebunden, einschliesslich Apostroph, Boolean und null. SQLAlchemy-Bindung und bestehende Lesemaske mit vier gezielten Tests geprueft. Freigabe der Studio-Bearbeitung steht aus.
+
+PostgreSQL-Abnahme bestanden: Auf valeo_probe (mahnstufen_verlauf_entfernen_20261123) wurden Anlegen, Aendern und erneutes Lesen einer JSONB-Adresse geprueft. Der Test legt seinen eigenen Mandantendatensatz fuer den Fremdschluessel in derselben Transaktion an und rollt beide Datensaetze zurueck. Drei Tests bestanden.
