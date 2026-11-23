@@ -21413,3 +21413,11 @@ CUSTOMER-MASTER Integration17.11: PR153 konfliktfrei gegen nachgezogenes main857
 
 ## CUSTOMER-COMMUNITY-ISOLATION-20261117 — reserviert, Codex Lead
 Ziel: bestaetigte mandantenuebergreifende Leser/Schreiber bei Partner-Gemeinschaftsmitgliedern schliessen: Community bleibt gemeinsamer Katalog, Mitglied muss eigenem Partner und URL-Community entsprechen; globale Katalogpflege mit vorhandener Adminrolle absichern. Besitzer profile_backend: app/services/business_partner_service.py nur Community-Mitglieder, app/api/v1/endpoints/business_partners.py nur Community-Katalog-/Mitgliedswege und entfallender globaler Partnerpruefer; neue kleine Hilfsmodule/Tests falls erforderlich, Quell-Godfile darf nicht wachsen. Lead besitzt QA/Handshakes/Inventare. Kein neues Tabellenmodell/DDL/DB/Container, gemeinsamer Probe nur abgestimmt und rollbackisoliert. PR153-CI laeuft unveraendert auf cd2644b92; neuer Sicherheits-Slice separat, kein Abbruch laufender gruener Nachweise.
+
+CUSTOMER-COMMUNITY Zwischenabnahme: 9 Unit+1 PostgreSQL-Vertrag als valeo_agent
+mit zwei Mandanten gruen; fremde Mitgliederdaten und falsche URL-Community
+abgewiesen, erlaubte Wirkung nachgewiesen, alleszurueckgerollt. Angrenzende49
+Partner-/Profil-/HTTP-Vertraege plus3 Metadatenvertraege gruen. Endpoint2704LOC,
+Baseline nurgesenkt. Expliziter Kunden-Agentenvertrag kennzeichnet neue Bank-/
+Steuer-/Kontakt-/Datenschutzfelder sensibel; keine Rechte durch Tool-Sichtbarkeit.
+Quell- und Rechtekorrektur lokal fertig, generierte Artefakte/Integration folgen.

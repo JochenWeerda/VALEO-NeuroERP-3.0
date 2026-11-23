@@ -10003,7 +10003,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen, iban, bic, bankname, kontoinhaber, partner_account_holder, email, telefon` …
 
 **Actions:**
 
@@ -10709,7 +10709,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen, iban, bic, bankname, kontoinhaber, partner_account_holder, email, telefon` …
 
 **Actions:**
 

@@ -199,3 +199,15 @@ Ratsche angehoben; diese Befunde bleiben offen. Keine konkurrierenden Arbeiten
 an screen_definitions_domain_batch15.py begonnen.
 
 PR153 nach main8575b4df9/ClaudePR146 integriert: nur sechs generierte Artefakte konfligierten, aus aktuellen Quellen regeneriert. Eigene Kundenprofile und Claudes Beleg-Rueckbau bleiben erhalten; keine Migration/DB-Aenderung im Integrationsschritt. 88 gezielte Vertraege erneutgruen; aktuelles API-/Godfile-Inventar geprueft. Gemeinsame CI nach Push noch offen.
+
+
+COMMUNITY-ISOLATION Folge-Slice separat auf cd2644b92: bestaetigte globale
+Mitgliederzugriffe im Partnerstamm durch eigenen Partner-Tenant-Join und genaue
+URL-Communitybindung geschlossen. Globale Katalogpflege jetzt vorhandene
+PLATTFORM/admin-Policy, Mitgliedsrollen sonst unveraendert CRM bzw. vorhandene
+interne Leser. API-Datei2716->2704, kein DDL/Modellwechsel. 9 Unit+1 echter
+PostgreSQL-Vertrag mit zwei Mandanten gruen; angrenzende49 Vertraege und drei
+Profilmetadaten-Vertraege gruen. Alle synthetischen Zeilen zurueckgerollt;
+Probe vorher frei, Revision unveraendert. Bank-/Steuer-/Kontakt-/Datenschutzfelder
+im expliziten Agentenvertrag als sensibel nachgetragen. QA community-member-
+isolation-20261117.md. PR153-CI laeuft unveraendert; Folge-CI noch offen.
