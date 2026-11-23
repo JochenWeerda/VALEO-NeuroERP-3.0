@@ -62,7 +62,7 @@ nur Planbefehl, eigene Tests, Architekturprefix, betroffene generierte
 API-/Inventar-/Handbuchprojektionen und Platform-Doku. Keine fremden
 MASK-STUDIO-ROLLOUT-Seiten/Builder. Abnahme: unregistrierte Commands/URLs,
 mehrdeutige Bindungen, SQL-/Namensinjektion und ueberschriebene Identitaetsfelder
-sperren; Artefakt-/Definitionshash bindet … (gekuerzt; Volltext unter STUDIO-MIGRATION-ENGINE-20261020 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+sperren; Artefakt-/Definitionshash bindet Freigabeplan; … (gekuerzt; Volltext unter STUDIO-MIGRATION-ENGINE-20261020 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## STUDIO-GENERATED-ENTITIES-20261021 - in arbeit, Codex
 
@@ -78,7 +78,7 @@ Studio-Stammdatentabellen; Fachbuchungen, Zahlungen und Bestaende bleiben in
 registrierten Fachcommands. Rollen aus bestehendem Bereichsmodell, Mandant aus
 verifizierter Identitaet, Idempotenz/Version/Audit transaktional. Keine freie
 SQL-Ausfuehrung oder Aktivierung durch MCP. Bestehende Register statt zweiter
-Rechteverwaltung; ungepruefte Writes … (gekuerzt; Volltext unter STUDIO-GENERATED-ENTITIES-20261021 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+Rechteverwaltung; ungepruefte Writes bleiben … (gekuerzt; Volltext unter STUDIO-GENERATED-ENTITIES-20261021 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## STUDIO-ENTITY-RELEASE-20261021 - reserviert, Codex
 
@@ -94,7 +94,7 @@ Kein pauschales Oeffnen von grain.v1, keine fremden Fachmasken oder Gateabsenkun
 Simulation: vorhandener valeo_probe, echte Domaincommands und zurueckgerollte
 synthetische Daten/Outbox; kein neuer Container/DB/Reset. Testtabellen nur eigene
 eindeutig bezeichnete Artefakte, kontrollierte eigene Bereinigung.
-Abnahme: serverseitige Registrierung … (gekuerzt; Volltext unter STUDIO-ENTITY-RELEASE-20261021 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+Abnahme: serverseitige Registrierung und … (gekuerzt; Volltext unter STUDIO-ENTITY-RELEASE-20261021 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## STUDIO-MODEL-20261015 — in Arbeit, Codex
 
@@ -113,7 +113,7 @@ Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
 Meilenstein: M0 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
 **Zwischenstand 1:** 87 Testdateien von der Produktions-App mit abgeschafftem Dev-Token auf die Test-App `app.main` bzw. ausdrueckliche Testgrenze (`tests/testgrenze.py`: `ersetze_bearer`, `ALLE_FACHROLLEN`) umgestellt — darunter 28, die CI wegen fehlendem Identity-Provider still uebersprungen hat. **Gefunden und behoben:** `ap_memo_booking` ohne Mandant (Regression aus ALTBELEG-QUARANTAENE: Memo-Buchung scheiterte); `token_type == "dev"`-Sonderwege in `rbac`/`security`/Lagerpruefung entfernt (gaben Admin-Rechte bzw. liessen jede Pruefung aus), Lagerpruefung auf Fachrollen `LAGER_*`, totes `app/core/inventory_permissions.py` entfernt; Etikettendruck gab rohes SQL samt Parametern an den Client. Offen fuer Codex: `test_posting_services` (Self-Billing-Eingangssteuer, aktiver Slice SELF-BILLING-ATOMIC).
 
-**Zwischenstand 2:** UAT-Vertrag getrennt (ohne Anmeldung → main:app, Fachpruefungen … (gekuerzt; Volltext unter CI-GRUEN-20261014 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Zwischenstand 2:** UAT-Vertrag getrennt (ohne Anmeldung → main:app, Fachpruefungen → … (gekuerzt; Volltext unter CI-GRUEN-20261014 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## MCP-WRITE-CANONICAL-ENFORCEMENT — offen
 
@@ -210,7 +210,7 @@ Meilenstein: M0 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
 **Dateibesitz:** app/api/v1/endpoints/compat.py, ap_invoices.py, agrar_wetter.py, inventory_operations.py; modules/einkauf/services/bestellvorschlag_service.py; neue fokussierte Tests, eigene QA/Doku-Hunks und committed Generatorartefakte bei messbarem Drift.
 **Abnahme:** echte Verhaltenspruefungen ohne DB/SMTP-Nachrichten, Code-/API-Vertraege unveraendert, keine Gate-Ausnahme. XML-Namensraeume und Masken-Passwortfeld sind gesondert zu bewertende Scannerbefunde, nicht blind umzuschreiben. Fremdes WIP schuetzen; Gesamt-Sonar-Abnahme weiter offen.
 
-**Zwischenabnahme:** Fuenf Backend-Befunde korrigiert; fuenf echte Verhaltensvertraege gruen, gemeinsam mit staged … (gekuerzt; Volltext unter QUALITY-GATE-SONAR-BACKEND-20261011 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Zwischenabnahme:** Fuenf Backend-Befunde korrigiert; fuenf echte Verhaltensvertraege gruen, gemeinsam mit staged MCP-Vertraegen … (gekuerzt; Volltext unter QUALITY-GATE-SONAR-BACKEND-20261011 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## QUALITY-GATE-CATALOG-SYNC-20261011 — in arbeit, Codex
 
@@ -251,7 +251,7 @@ Workboard/Gaps/Finance-API-Abschnitte und abgegrenzte OpenAPI-Vertragshunks.
 **Abnahme:** Fremdkonto/-tenant 404; SQL-Fehler sichtbar; CSV ohne Banksaldo
 kein erfolgreicher Saldenbeleg; fehlender GL-Link/Journalnachweis ungeklärt;
 PARTIAL/Unknown-Zaehler und Dezimalwerte typisiert; reale PostgreSQL-Vertraege.
-**Risiken:** Fremde EUDR-Migrationen aktiv: keine … (gekuerzt; Volltext unter BANK-RECONCILIATION-PROOF-20261001 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Risiken:** Fremde EUDR-Migrationen aktiv: keine gemeinsame … (gekuerzt; Volltext unter BANK-RECONCILIATION-PROOF-20261001 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## OPENAPI-DRIFT-REFRESH-20260930 — reserviert, Codex
 
@@ -282,7 +282,7 @@ Open-Gaps und dieser Abschnitt.
 werden aliasfest erkannt; der Bestand ist exakt inventarisiert; neue, verschobene
 oder wieder eingefuehrte Verstoesse lassen das Gate fehlschlagen; Abbau verlangt
 eine kleinere Baseline; Unit-Tests, Gate und Doku-Gates sind gruen.
-**Risiken:** … (gekuerzt; Volltext unter BUSINESS-TIME-RATCHET-20260930 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Risiken:** Der Bestand … (gekuerzt; Volltext unter BUSINESS-TIME-RATCHET-20260930 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## HOME-UIX-ANWENDER-BEDIENWEGE — Touch, Sprache, Agent 2026-09-17, Cursor
 
@@ -300,7 +300,7 @@ Naechste: weitere MCP-Schreibadapter.
 **Ziel:** Produktive Einstiege per Finger, Stimme und ehrlichem Agent-Vertrag
 bedienbar machen; Lücken dokumentieren statt Dynamics-MCP vortäuschen.
 
-**Dateibesitz:** … (gekuerzt; Volltext unter HOME-UIX-ANWENDER-BEDIENWEGE in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Dateibesitz:** `TopBar.tsx`, … (gekuerzt; Volltext unter HOME-UIX-ANWENDER-BEDIENWEGE in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## FSX-ARTIKEL-IMPORT - reserviert 2026-09-15
 
@@ -365,7 +365,7 @@ schliessen — keine Schwellensenkung, keine Testentschaerfung.
 `app/services/procurement_service.py` (nur Datumsfallback),
 `app/services/ap_invoice_kernel_posting.py` (nur Datumsfallback),
 `app/services/agrar_settlement_service.py` (nur Datumsfallback),
-`app/services/settlement_drying_service.py` … (gekuerzt; Volltext unter RESTFEHLER-20260911 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+`app/services/settlement_drying_service.py` (nur … (gekuerzt; Volltext unter RESTFEHLER-20260911 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## DESIGN-STATUS-COLORS-020 - in Arbeit
 
@@ -384,7 +384,7 @@ Abschnitt, Dateien unter `packages/frontend-web/src` mit rohen Palettenklassen.
 Textfarbe**; farbig werden sie nur als Statusanzeige. Farbe darf nie der
 einzige Traeger einer Information sein.
 
-**Der … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-020 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Der Befund widerspricht … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-020 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## DESIGN-STATUS-COLORS-018 - in arbeit
 
@@ -400,7 +400,9 @@ Dateien unter `packages/frontend-web/src` mit rohen Status-Flaechenklassen.
 `pages/produktion/mischfutter-produktion.tsx` im geteilten Arbeitsbaum — beide
 fasse ich nicht an, solange der Slice laeuft.
 **Abnahme:** Callout vorhanden und variantengleich mit Alert, Bloecke auf 0 bzw.
-begruendet ausgenommen, `tsc --noEmit` exit 0, Vitest identisch zur … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-018 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+begruendet ausgenommen, `tsc --noEmit` exit 0, Vitest identisch zur Baseline.
+
+**Messung … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-018 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## DESIGN-STATUS-COLORS-015 - in arbeit
 
@@ -416,7 +418,8 @@ rohen Status-Textklassen ohne `bg-`/`border-`-Begleiter.
 **Abgrenzung:** Codex' Arbeitsstand umfasst `package.json`-Manifeste,
 `docker-compose.yml`, Inventardokumente und Meridian-Builder/Runtime — **keine
 einzige Datei unter `packages/frontend-web/src`**. Vor dem Commit erneut geprueft.
-**Abnahme:** Welle-1-Vorkommen auf 0, TypeScript und Vitest … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-015 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Abnahme:** Welle-1-Vorkommen auf 0, TypeScript und Vitest gruen,
+Badge-Tripel … (gekuerzt; Volltext unter DESIGN-STATUS-COLORS-015 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## L3-JOURNAL-SOURCE-20260910 - in arbeit
 
@@ -438,7 +441,7 @@ Weitere Dateien erst nach Abstimmung ueber diesen Abschnitt.
 sichtbar; Regressionen fuer fachliche Quellen und weiterhin ungueltige
 Schreibeingaben; vorhandene Journal-Tests gruen; isolierter Commit + Push.
 
-**Risiken:** … (gekuerzt; Volltext unter L3-JOURNAL-SOURCE-20260910 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**Risiken:** Keine historische … (gekuerzt; Volltext unter L3-JOURNAL-SOURCE-20260910 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## ADDRESS-VALUE-OBJECT — kanonisches Adressmodell (P2-Fundament)
 
@@ -555,7 +558,7 @@ Meilenstein: M0 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
 Nachlauf auf7bc7e37fa: CI rot in Migration/Backend/Frontend und Dependencysecurity. Enger Besitz: api_contracts diagnostiziert und repariert fehlende Alembic-Vorgaenger und frisches Schema-/Inventardrift; entity_projection uebertraegt bereits abgenommene Securityfixes aus PR39 nach exaktem Quellenvergleich, keine Paketpauschalupdates; runtime_closure diagnostiziert echte Frontendregressionen und veraltete Strukturtests, entfernt keine fachliche Abnahme. Lead integriert, testet und aktualisiert Artefakte/QA/GitHub. Alle Edits in repair-view; Root nur nach Diffreview. Keine neueDB/Container/Reset, kein Tabellenkatalog aus unvollstaendiger lokaler DB. Vorhandene restliche Studioarbeit bewahren.
 
 
-**PR38-CI-FOLLOWUP Migrationsmeilenstein:** Fehlende dms_inbox_tenant_20261022 wiederhergestellt; Singlehead und Syntax geprueft,437 Migrationsdateien inhaltlich identisch zum separat … (gekuerzt; Volltext unter PR38-CI-FOLLOWUP-20261024 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+**PR38-CI-FOLLOWUP Migrationsmeilenstein:** Fehlende dms_inbox_tenant_20261022 wiederhergestellt; Singlehead und Syntax geprueft,437 Migrationsdateien inhaltlich identisch zum separat abgenommenen … (gekuerzt; Volltext unter PR38-CI-FOLLOWUP-20261024 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## PENDING-INTEGRATION-20261024 - reserviert, Codex Lead
 
@@ -614,7 +617,7 @@ Abnahme: typisierter Feldvertrag, Mandant aus Anmeldung, keine erfundenen Werte,
 Risiken: Verbraucher vor Tabellenentfernung vollstaendig pruefen; ungemergte Migration ausschliesslich transaktional pruefen; keine neue Testdatenbank.
 
 
-PSM-ZULASSUNGEN Zwischenstand: lokale PSM-Projektion und native Liste vorbereitet. Der Ablaufzaehler betrachtet alle Seiten in der Betriebszeitzone. Nach vorrangiger Nutzerentscheidung vom … (gekuerzt; Volltext unter PSM-ZULASSUNGEN-20261104 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+PSM-ZULASSUNGEN Zwischenstand: lokale PSM-Projektion und native Liste vorbereitet. Der Ablaufzaehler betrachtet alle Seiten in der Betriebszeitzone. Nach vorrangiger Nutzerentscheidung vom 04.11.2026 … (gekuerzt; Volltext unter PSM-ZULASSUNGEN-20261104 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## GESAMTINTEGRATION-20261105 — lokal abgenommen, Codex Lead
 
@@ -757,7 +760,7 @@ damit Quellen nicht erneut waehrend einer Vollsuite fortgeschrieben werden.
 Branches und einzelne Tests auf bestehenden eigenen Pruefstaenden bleiben frei.
 Keine neuen Testdatenbanken/Container, keine fremden Prozesse abbrechen.
 
-M0-CI-GESAMTBASIS-20261115 … (gekuerzt; Volltext unter M0-CI-GESAMTBASIS-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+M0-CI-GESAMTBASIS-20261115 Erweiterung vor … (gekuerzt; Volltext unter M0-CI-GESAMTBASIS-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — zur Abnahme, Claude Code (M1)
 
@@ -777,7 +780,7 @@ bestehende Rollen und get_tenant_id nutzen. Existierende Fachregeln und berechne
 Werte erhalten; Fremdbeleg/-zeile wie nicht vorhanden, Payload kann Mandant nicht
 ueberschreiben. Guards vor Lesen/Mutation, keine DB-Details in Antworten. Gegenproben
 mit zwei isolierten Kontexten, verweigerten Mutationen und erhaltenem Zustand;
-wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte … (gekuerzt; Volltext unter M0-ROHWARE-TENANT-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+wo Datenbankgrenzen simuliert werden, ausdruecklich keine echte RLS-Abnahme … (gekuerzt; Volltext unter M0-ROHWARE-TENANT-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M0-SCHEMA-BUDGET-ROHWARE-20261115 — reserviert, Codex
 
@@ -792,7 +795,8 @@ erhalten; Gruppenzuordnung mandantensicher. Die bestehende Pfadabweichung
 GET /rohware/gruppen/{gruppe_id}/schemata schliessen. Ein eigener Budget-
 Positions-Leseweg nur wenn realer vorhandener Verbraucher ihn benoetigt.
 
-Besitz Budget-Subagent: app/api/v1/endpoints/budget_planning.py, … (gekuerzt; Volltext unter M0-SCHEMA-BUDGET-ROHWARE-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+Besitz Budget-Subagent: app/api/v1/endpoints/budget_planning.py, Migration
+alembic/versions/budget_planning_schema_20261115.py … (gekuerzt; Volltext unter M0-SCHEMA-BUDGET-ROHWARE-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M0-ROHWARE-FORMEL-SAFETY-20261115 — reserviert, Codex
 
@@ -839,7 +843,7 @@ Abnahme: keine rohen UUID-/Reasoncode-Diagnosen im Standardbild, fachliche
 Navigation erhalten, operative Details bewusst oeffnen, keine Berechtigungen
 erweitern oder Fehler als leere Daten tarnen. Gezielte Verhaltenstests, Typpruefung
 und visuelle Hell-/Dunkelpruefung; nur ein Build zur lokalen Bereitstellung.
-Keine DB-Schreibtests, neuen Container … (gekuerzt; Volltext unter WORKSPACE-HOME-USABILITY-20261116 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+Keine DB-Schreibtests, neuen Container oder … (gekuerzt; Volltext unter WORKSPACE-HOME-USABILITY-20261116 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## GROUPED-APP-LAUNCHER-20261116 — lokal abgenommen, Codex Lead; GitHub-Integration offen
 
@@ -854,7 +858,7 @@ Direktnavigation, Suche, Personalisierung und Theme; keine Kennzahlen/Tafeln
 auf dem Standardstart, bestehende operative Komposition getrennt erreichbar.
 Keine Attrappen, Rechteerweiterung, neue Datenbank oder Container.
 
-GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarter statt Dashboard. Default zeigt vorhandene Navigation als gruppierte Symbole und echte Maskenlinks mit Suche; keine operativen … (gekuerzt; Volltext unter GROUPED-APP-LAUNCHER-20261116 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+GROUPED-APP-LAUNCHER-20261116 implementiert: Nutzerbilder praezisieren Appstarter statt Dashboard. Default zeigt vorhandene Navigation als gruppierte Symbole und echte Maskenlinks mit Suche; keine operativen Dashboard-GETs. … (gekuerzt; Volltext unter GROUPED-APP-LAUNCHER-20261116 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## CUSTOMER-MASTER-COMPLETENESS-20261117 — reserviert, Codex Lead
 
@@ -870,7 +874,7 @@ Feldparitaetsmatrix und Workboard/Handshake. Referenzchat/Anhang nur fuer
 Feldnamen/Fachfunktionen, keine Echtdaten oder Originalscreens nach Git.
 Vor Aenderungen an Persistenz/Schema Dateibesitz konkret nachtragen.
 Abnahme: Bestandsfeldinventar, sichtbare/bedienbare Gruppen, echte Speicher-
-und Wiederlesevertraege, Rollen-/Mandantengrenzen, passende … (gekuerzt; Volltext unter CUSTOMER-MASTER-COMPLETENESS-20261117 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+und Wiederlesevertraege, Rollen-/Mandantengrenzen, passende Browserabnahme.
 
 ## RUNTIME-FIVE-503-20261117 — reserviert, Codex Lead
 
@@ -886,7 +890,7 @@ mit vorhandener Nutzer-/Administratorfreigabe uebersteuert, Schutzregeln
 unveraendert; keine technischen Gates umgangen. Separater main-Nachlauf
 bleibt auf aktuellem Mergecommit zu beobachten.
 
-RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung … (gekuerzt; Volltext unter RUNTIME-FIVE-503-20261117 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung des … (gekuerzt; Volltext unter RUNTIME-FIVE-503-20261117 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
 
@@ -904,13 +908,17 @@ Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-
 Dateibesitz: … (gekuerzt; Volltext unter M3-JOURNAL-SCHREIBER-20261119 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
+
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
 #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
 #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
-Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, main.py, app/domains/finance/api/__init__.py, alembic/versions/fibu_altspeicher_entfernen_20261123.*, nebenbuch_abstimmung_tabelle_20261123.py, finance_router_altspeicher_entfernen_20261123.py, Tests.
+Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
+
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
+
 Meilenstein: M2. Aus #165: Sieben Masken lasen ihre Liste aus dem entfernten Altweg /api/v1/fibu/anlagen bzw. /fibu/kreditoren, obwohl sie fachlich anderes zeigen (Bilanz und GuV zeigten Anlagen): fibu/atlas, fibu/bilanz, fibu/guv, fibu/monatswerte, fibu/sachkonto, fibu/sicherheiten, rezepte/editor. Gate C entfaellt dort ehrlich (studio_screen_versions.json); Eintraege stehen in config/mask_endpoint_altlast.json.
 Ziel: Bilanz/GuV an /api/v1/financial-reports/balance-sheet bzw. /profit-loss mit passendem Berichts-Maskentyp (kein Listenmuster), Sachkonto an /chart-of-accounts, die uebrigen an ihren Fachweg anbinden oder entfernen. fibu/anlagen ist in #165 bereits an /finance/asset-accounting/assets angebunden.
+
 ## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — zur Abnahme, Claude Code (M2, Codex-Pause)
 
 Owner: Claude Code (uebernommen von Codex, PR #153, Codex ruht 19.-22.11.2026). Branch claude/uebernahme-kundenstamm-20261119.
