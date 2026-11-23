@@ -43,9 +43,6 @@
     "app/api/v1/endpoints/direct_debits.py": {
       "date.today": 3
     },
-    "app/api/v1/endpoints/dunning.py": {
-      "date.today": 1
-    },
     "app/api/v1/endpoints/erloeskennziffern.py": {
       "date.today": 1
     },

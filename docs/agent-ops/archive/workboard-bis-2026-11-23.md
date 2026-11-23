@@ -2299,6 +2299,12 @@ Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tag
 Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
 Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.
 
+### M3-STORNO-GEBUCHT-20261123 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 (Integritaet Journal/Abschluss). PR #164.
+Befund: FinanceTransactionService.reverse setzt das Original auf reversed und bucht die Gegenbuchung posted. Abschluss, UStVA, Bilanz/GuV/BWA, Kontenblatt, Kontenabfrage, Nebenbuch-Abstimmung (subsidiary_ledger), Bankabgleich und DATEV-Export zaehlten nur posted -> jeder Storno als negative Buchung (Entwicklungsdatenbank: drei Faelle).
+Ergebnis: status IN ('posted', 'reversed') an allen Stellen; Ratsche und Datenbankprobe tests/test_journal_storno_gebucht.py.
+Folgend (eigene PRs): #165 Schein-Fibu (public.offene_posten/buchungen/konten/anlagen) entfernt + Nebenbuch-Abstimmung echt; #167 Finanz-Altwege ohne Migration; #166 POS-Umsatzsteuer je Satz (auf #161).
+Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py, subsidiary_ledger_reconciliation.py, finance/ustva.py, finance_closing_service.py, finance_datev_service.py, tests/test_journal_storno_gebucht.py.
 ### M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
 #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
@@ -2319,6 +2325,13 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+### M3-EIN-MAHNWEG-20261123 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 ("Ein Mahnweg statt drei").
+Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/run (FinanceDunningService) und "Mahnstufe eskalieren" samt Maskenaktion open-items/{id}/actions/mahnen (eigener Verlauf domain_finance.finance_mahnstufen_audit, keine Mahnung, keine Stufe am Posten) liefen nebeneinander. Der Mahnlauf eskalierte bei jedem Lauf (zweimal am Tag = Stufe 2) und setzte ohne Mahnregeln erfundene Gebuehren 5/10/20 EUR an. POST /dunning legte Mahnungen an Regeln und Fristen vorbei an; PUT /dunning/{id}/paid zifferte den Posten ohne Zahlungsbuchung aus.
+Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und Debitorsperre nach Regel. Mahnstufe eskalieren und /dunning/process|run rufen ihn; Verlauf = Mahnungen des Postens. POST /dunning und PUT /paid entfernt. Tests tests/test_ein_mahnweg.py (echte DB) und angepasste Vertraege.
+Offen: domain_finance.finance_mahnstufen_audit hat keinen Schreiber mehr -> per Migration entfernen (eigener Schnitt).
+Dateibesitz: app/services/finance_dunning_service.py, finance_mahnstufe_service.py, app/api/v1/endpoints/dunning.py, Tests test_ein_mahnweg, test_dunning_api, test_finance_dunning(_api), test_mahnwesen_rollen_vertrag, test_dom_finance_004, test_mask_aktionen_wirkung.
 ## Abgeschlossen
 
 ### README-DOKU-20261110 — abgeschlossen, Claude Code (PR #132 gemergt 15.11.2026)
