@@ -28,12 +28,12 @@ services:
       dockerfile: Dockerfile
     container_name: valeo-app
     environment:
-      - DATABASE_URL=postgresql://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      - DATABASE_URL=postgresql://valeo:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt (Produktionsgeheimnis)}@postgres:5432/valeo_neuro_erp
       - REDIS_URL=redis://redis:6379/0
       - NATS_SERVERS=nats://nats:4222
       - OIDC_ISSUER_URL=http://keycloak:8080/realms/valeo-neuro-erp
       - OIDC_CLIENT_ID=valeo-neuro-erp-backend
-      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET}
+      - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:?OIDC_CLIENT_SECRET fehlt (Produktionsgeheimnis)}
       - APP_ENV=production
       - DEBUG=false
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
@@ -68,7 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: valeo-inventory
     environment:
-      INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo:${POSTGRES_PASSWORD}@postgres:5432/valeo_neuro_erp
+      INVENTORY_DATABASE_URL: postgresql+asyncpg://valeo:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt (Produktionsgeheimnis)}@postgres:5432/valeo_neuro_erp
       INVENTORY_EVENT_BUS_ENABLED: "true"
       INVENTORY_EVENT_BUS_URL: nats://nats:4222
       INVENTORY_DEFAULT_TENANT: default
@@ -101,7 +101,7 @@ services:
     environment:
       POSTGRES_DB: valeo_neuro_erp
       POSTGRES_USER: valeo
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD fehlt (Produktionsgeheimnis)}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./infra/database/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -156,7 +156,7 @@ services:
     environment:
       POSTGRES_DB: keycloak
       POSTGRES_USER: keycloak
-      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD fehlt (Produktionsgeheimnis)}
     volumes:
       - postgres_keycloak_data:/var/lib/postgresql/data
     networks:
@@ -181,9 +181,9 @@ services:
       KC_DB_NAME: keycloak
       KC_DB_URL: jdbc:postgresql://postgres-keycloak:5432/keycloak
       KC_DB_USERNAME: keycloak
-      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
-      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
-      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:?KEYCLOAK_DB_PASSWORD fehlt (Produktionsgeheimnis)}
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:?KEYCLOAK_ADMIN fehlt (Produktionsgeheimnis)}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?KEYCLOAK_ADMIN_PASSWORD fehlt (Produktionsgeheimnis)}
       KC_HOSTNAME: ${HOSTNAME}
       KC_PROXY: edge
       KC_HTTP_ENABLED: true
@@ -229,8 +229,8 @@ services:
     image: grafana/grafana:latest
     container_name: valeo-grafana
     environment:
-      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN}
-      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN:?GRAFANA_ADMIN fehlt (Produktionsgeheimnis)}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:?GRAFANA_ADMIN_PASSWORD fehlt (Produktionsgeheimnis)}
       - GF_INSTALL_PLUGINS=grafana-piechart-panel
     ports:
       - "127.0.0.1:3000:3000"
