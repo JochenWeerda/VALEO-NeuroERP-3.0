@@ -165,3 +165,23 @@ it('loads a root read table directly, without fabricating a mask source', () => 
     clientQuery: true, requiresServerQuery: true,
   })
 })
+
+it('reuses the order match entity response for its positions table', () => {
+  const plan = makeMockPlan({
+    tablesByKey: {
+      positionen: {
+        key: 'positionen', label: 'Bestellpositionen', columns: [], dataSourceKey: 'entity',
+        pageSize: 25, virtualized: true, rowHeight: 52, serverPagination: false,
+      },
+    },
+  })
+  const binding = compileDataBindingPlan(
+    plan,
+    [{ key: 'entity', endpoint: '/api/v1/procurement/match/three-way?bestellung={entity_id}' }],
+    undefined,
+    'PO-1',
+  )
+  expect(binding.tableBindings.positionen).toMatchObject({
+    sourceKey: 'entity', requiresServerQuery: false, clientQuery: true,
+  })
+})

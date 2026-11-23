@@ -21,6 +21,7 @@ from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
     stamm_kopf_tab,
+    stamm_lazy_table_tab,
 )
 
 
@@ -114,7 +115,24 @@ def build_einkauf_wareneingangsabgleich_detail() -> dict[str, Any]:
             {"key": "status", "label": "Bestellstatus", "type": "text", "readOnly": True},
             {"key": "netto_summe", "label": "Nettosumme", "type": "number", "readOnly": True},
             {"key": "detail", "label": "Hinweis", "type": "text", "readOnly": True},
-        ], label="Bestellung")],
+        ], label="Bestellung"), *[
+            stamm_lazy_table_tab(
+                key=key, label=label, data_source_key="entity", server_pagination=False,
+                columns=[{"key": field, "label": title, "sortable": True} for field, title in fields],
+            )
+            for key, label, fields in (
+                ("positionen", "Bestellpositionen", (
+                    ("pos_nr", "Position"), ("bezeichnung", "Artikel"), ("bestellt", "Bestellt"),
+                    ("geliefert", "Geliefert"), ("offen", "Offen"), ("einheit", "Einheit"), ("status", "Status"),
+                )),
+                ("wareneingaenge", "Wareneingänge", (
+                    ("gr_number", "Nummer"), ("datum", "Datum"), ("lieferschein", "Lieferschein"), ("status", "Status"),
+                )),
+                ("rechnungen", "Eingangsrechnungen", (
+                    ("rechnungsnummer", "Rechnung"), ("datum", "Datum"), ("gesamt_netto", "Netto"), ("status", "Status"),
+                )),
+            )
+        ]],
         edit_permission="einkauf.write",
         no_workflow_reason="Diese Ansicht liest den Abgleich zur ausgewählten Bestellung.",
         business_purpose="Den Drei-Wege-Abgleich zu einer Bestellung aufrufen.",

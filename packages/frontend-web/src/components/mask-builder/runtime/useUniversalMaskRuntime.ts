@@ -312,6 +312,15 @@ export function useUniversalMaskRuntime({
     const rows: Record<string, Record<string, unknown>[]> = {}
     const totals: Record<string, number> = {}
     const filtered: Record<string, Record<string, unknown>[]> = {}
+    for (const [key, table] of Object.entries(binding?.tableBindings ?? {})) {
+      if (table.sourceKey !== 'entity') continue
+      const data = (entityQuery.data as Record<string, unknown> | undefined)?.[key]
+      if (!Array.isArray(data)) continue
+      const page = applyClientTableQuery(data, resolvedTableQueryStates[key] ?? defaultTableQueryState(25))
+      rows[key] = page.rows
+      filtered[key] = page.filteredRows
+      totals[key] = page.total
+    }
     tableEntries.forEach(([tableKey, tb], i) => {
       const data = tableResults[i]?.data
       if (!data) return
@@ -332,7 +341,7 @@ export function useUniversalMaskRuntime({
       }
     })
     return { tableRows: rows, filteredTableRows: filtered, tableTotals: totals }
-  }, [tableEntries, tableResults, resolvedTableQueryStates, plan?.listExperience, completeClientTables])
+  }, [binding, entityQuery.data, tableEntries, tableResults, resolvedTableQueryStates, plan?.listExperience, completeClientTables])
 
   const messages: ScreenMessage[] = [
     ...(entityQuery.error ? [{

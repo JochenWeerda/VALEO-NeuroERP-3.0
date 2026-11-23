@@ -21567,3 +21567,5 @@ Bestellauswahl und lesender Abgleichkopf sind an die native Studio-Detailansicht
 
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um compile-data-binding-plan.ts, useUniversalMaskRuntime.ts und den Compilervertrag. Tabellen aus der bereits geladenen Detailantwort lesen.
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um scripts/check_field_contracts.py fuer die Pruefung benannter Arrays im Detailvertrag.
+
+M2-WARENEINGANGSABGLEICH: Drei native Tabellen nutzen die gemeinsame Detailantwort: Bestellpositionen, Wareneingaenge, Eingangsrechnungen. Spalten gegen Produktions-OpenAPI abgeglichen; 15 Frontend-Vertragstests gruen, davon einer fuer die gemeinsame Antwort. Folgeaktionen und Browserabnahme offen.

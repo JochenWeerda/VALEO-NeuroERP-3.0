@@ -129,7 +129,7 @@ def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
     return set(eigenschaften) or None
 
 
-def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
+def _zeilenform(spec: dict, operation: dict | None, *, array_key: str | None = None) -> set[str] | None:
     """Die Feldnamen **einer Zeile** — oder None, wenn sie nicht deklariert ist.
 
     Typisierte Arrays, Seiten-``items`` und eindeutige benannte Historien.
@@ -139,6 +139,13 @@ def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
         return None
     inhalt = ((operation.get("responses") or {}).get("200") or {}).get("content") or {}
     schema = (inhalt.get("application/json") or {}).get("schema") or {}
+
+    if array_key is not None:
+        properties = _komponente(spec, schema).get("properties") or {}
+        array = _komponente(spec, properties.get(array_key) or {})
+        if array.get("type") != "array":
+            return None
+        return _objektfelder(_komponente(spec, array.get("items") or {}))
 
     if schema.get("type") == "array":
         return _objektfelder(_komponente(spec, schema.get("items") or {}))
@@ -224,7 +231,8 @@ def pruefe() -> dict:
                 if not spalten or not endpunkt or not endpunkt.startswith("/api/"):
                     continue
 
-                zeile = _zeilenform(spec, _operation(spec, endpunkt))
+                array_key = tabelle.get("key") if tabelle.get("dataSourceKey") == "entity" else None
+                zeile = _zeilenform(spec, _operation(spec, endpunkt), array_key=array_key)
                 if zeile is None:
                     zeilen_nicht_pruefbar.append(
                         f"{screen_id}/{tab.get('key')}/{tabelle.get('key')} -> {endpunkt}"
