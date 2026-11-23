@@ -47,8 +47,6 @@ CRITICAL_THRESHOLDS: dict[str, float] = {
     "api/v1/endpoints/feed_produktion_actions.py": 0.62,   #  66% measured
 
     # ── DOM-POS-004: Tagesabschluss + TSE-Simulation ─────────────────────────
-    "services/pos_tagesabschluss_service.py": 0.76,        #  79% measured
-    "api/v1/endpoints/pos_tagesabschluss_actions.py": 0.50, #  53% measured
 
     # ── DOM-DOC-004: Nachweisraum + GoBD-Export ───────────────────────────────
     "services/doc_nachweisraum_lifecycle_service.py": 0.73, #  76% measured

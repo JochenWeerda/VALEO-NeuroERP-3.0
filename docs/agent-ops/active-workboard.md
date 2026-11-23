@@ -21427,3 +21427,8 @@ Befund: FinanceTransactionService.reverse setzt das Original auf reversed und bu
 Ergebnis: status IN ('posted', 'reversed') an allen Stellen; Ratsche und Datenbankprobe tests/test_journal_storno_gebucht.py.
 Folgend (eigene PRs): #165 Schein-Fibu (public.offene_posten/buchungen/konten/anlagen) entfernt + Nebenbuch-Abstimmung echt; #167 Finanz-Altwege ohne Migration; #166 POS-Umsatzsteuer je Satz (auf #161).
 Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py, subsidiary_ledger_reconciliation.py, finance/ustva.py, finance_closing_service.py, finance_datev_service.py, tests/test_journal_storno_gebucht.py.
+## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — zur Abnahme, Claude Code (M3, Codex-Pause)
+Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.-22.11.2026). Meilenstein M3 (echter Kassen-/Tagesabschluss).
+Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
+Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
+Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
