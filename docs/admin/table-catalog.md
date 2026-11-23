@@ -333,7 +333,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_finance.finance_sepa_mandate` | `app/api/v1/schemas/finance_actions_schemas.py`, `app/services/finance_sepa_service.py` | `app/services/finance_sepa_service.py` | — |
 | `domain_finance.fixed_assets` | `app/api/v1/endpoints/asset_accounting.py`, `app/api/v1/endpoints/mask_frontend_bridges.py` | `app/api/v1/endpoints/mask_frontend_bridges.py` | — |
 | `domain_finance.kostenarten` | `app/api/v1/endpoints/kostenrechnung.py` | `app/api/v1/endpoints/kostenrechnung.py` | — |
-| `domain_finance.kostenstellen` | `app/api/v1/endpoints/budget_planning.py`, `app/api/v1/endpoints/kostenrechnung.py`, `app/finance/models.py`, `app/services/personal_organisation_service.py` | `app/api/v1/endpoints/kostenrechnung.py` | — |
+| `domain_finance.kostenstellen` | `app/api/v1/endpoints/budget_planning.py`, `app/api/v1/endpoints/kostenrechnung.py`, `app/services/personal_organisation_service.py` | `app/api/v1/endpoints/kostenrechnung.py` | — |
 | `domain_finance.kostenstellen_buchungen` | `app/api/v1/endpoints/kostenrechnung.py` | `app/api/v1/endpoints/kostenrechnung.py` | — |
 | `domain_finance.kostenstellen_umlagen` | `app/api/v1/endpoints/kostenrechnung.py` | `app/api/v1/endpoints/kostenrechnung.py` | — |
 | `domain_finance.self_billing_invoices` | `app/infrastructure/models/l3c_models.py` | — | — |

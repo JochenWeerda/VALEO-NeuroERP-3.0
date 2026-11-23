@@ -1576,8 +1576,8 @@
     "token": 8
    },
    "standardmandant_stellen": [
-    "app/finance/router.py:1165",
-    "app/finance/router.py:1200"
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/financial_reports.py:178",
@@ -1674,8 +1674,8 @@
     "token": 20
    },
    "standardmandant_stellen": [
-    "app/finance/router.py:1165",
-    "app/finance/router.py:1200"
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1556",

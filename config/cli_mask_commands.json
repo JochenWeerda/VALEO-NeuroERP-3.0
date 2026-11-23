@@ -5,7 +5,10 @@
   "mask:abrechnung/eb-lieferschein-kontrolle:resolve",
   "mask:abrechnung/eb-lieferschein-kontrolle:start_work",
   "mask:abrechnung/eb-lieferschein-kontrolle:waive",
+  "mask:admin/control-center:escalate",
   "mask:admin/control-center:plan",
+  "mask:admin/control-center:resolve",
+  "mask:admin/control-center:retry",
   "mask:admin/identity-budgets:allocate",
   "mask:admin/identity-budgets:root",
   "mask:admin/integrationen-quarantaene:resolve",
@@ -292,6 +295,7 @@
   "mask:einkauf/zahlungsbedingungen:neu",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bank-abgleich:import",
+  "mask:finance/bank-abgleich:validate",
   "mask:finance/bankkonto:bearbeiten",
   "mask:finance/buchungsvorlagen:anwenden",
   "mask:finance/buchungsvorlagen:loeschen",
@@ -341,6 +345,8 @@
   "mask:logistik/tourenplanung:storno",
   "mask:logistik/versandprofile:loeschen",
   "mask:mahnwesen/mahnlauf:run",
+  "mask:mahnwesen/mahnlauf:sendEmail",
+  "mask:mahnwesen/mahnlauf:sendPost",
   "mask:personal/bewerbungen:loeschen",
   "mask:personal/bewerbungen:speichern",
   "mask:personal/einwilligungserklaerungen:anlegen",
@@ -376,7 +382,6 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 963,
-  "pfadparameter": 6
+  "kein_endpunkt": 963
  }
 }
