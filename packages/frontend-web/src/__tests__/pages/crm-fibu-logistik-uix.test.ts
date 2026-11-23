@@ -249,8 +249,9 @@ describe('CRM/FIBU/Logistik UIX', () => {
     expect(src).toContain('auto_book=false')
   })
 
-  // Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46): prueft die fruehere handgebaute Seite; it.fails wird rot, sobald sie wieder passt.
-  it.fails('stellt Fahrer 44 px ohne Hover-Blau', async () => {
+  // Seit 23.11.2026 (M2, Navigations-Platzhalter) navigiert "Tourenplanung" ueber die ScreenDefinition - die
+  // Runtime46-Altlast passt wieder und ist ein normaler Test.
+  it('stellt Fahrer 44 px ohne Hover-Blau', async () => {
     await mountDomainPage(Drivers, 'transporte/fahrer', true)
     await expectSearchWorkArea('Fahrer')
     expect(screen.getByRole('button', { name: 'Tourenplanung' })).toHaveClass('min-h-touch')
