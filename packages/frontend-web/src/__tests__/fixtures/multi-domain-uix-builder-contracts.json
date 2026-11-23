@@ -12394,20 +12394,20 @@
       {
         "key": "touren",
         "label": "Tourenplanung",
-        "command": "driver.openTours",
+        "navigationRoute": "/logistik/tourenplanung",
+        "localEffect": "navigation",
         "kind": "secondary",
         "dangerLevel": "safe",
-        "zone": "footer",
-        "stubReason": "Wechselt in die Tourenplanung."
+        "zone": "footer"
       },
       {
         "key": "dokumente",
         "label": "Dokumente",
-        "command": "driver.openDocuments",
+        "navigationRoute": "/dokumente/ablage",
+        "localEffect": "navigation",
         "kind": "secondary",
         "dangerLevel": "safe",
-        "zone": "footer",
-        "stubReason": "Oeffnet die Dokumentenablage."
+        "zone": "footer"
       },
       {
         "key": "export",
