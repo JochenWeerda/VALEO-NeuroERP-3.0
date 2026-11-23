@@ -951,6 +951,6 @@ Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/
 Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und … (gekuerzt; Volltext unter M3-EIN-MAHNWEG-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 
-## M2-NAVIGATION-PLATZHALTER-20261123 � zur Abnahme, Claude Code (M2)
+## M2-NAVIGATION-PLATZHALTER-20261123 — zur Abnahme, Claude Code (M2)
 Meilenstein: M2. Sechs Maskenaktionen standen als "nicht verfuegbar" (stubReason), obwohl sie nur navigieren: Fahrer -> Tourenplanung/Dokumentenablage, Fahrzeug-Stamm -> Fahrzeugliste, Bewerbungen/Einwilligung -> Einwilligungserklaerungen und zurueck zu den Bewerbungen. Jetzt navigationRoute + localEffect "navigation" auf bestehende Zielmasken; Ratsche aktionen_nicht_verfuegbar 24 -> 18. Offen bleiben 18 echte Platzhalter (Drucken, Unfallanzeige, Einwilligung erteilen/widerrufen, Profile, Frachtprobe ...).
 Dateibesitz: app/core/screen_definitions_capture.py, app/core/screen_governance.py, tests/test_bewerbung_einwilligung_masken.py, erzeugte Kataloge.
