@@ -21566,3 +21566,4 @@ M2-WARENEINGANGSABGLEICH: Codex ergaenzt die native Detaildefinition und bindet 
 Bestellauswahl und lesender Abgleichkopf sind an die native Studio-Detailansicht gebunden. Katalog und Agentenhandbuch aktualisiert. Feldpruefung meldet weiterhin 54 bekannte Abweichungen ausserhalb dieses Abgleichkopfs. Positionstabellen, Folgeaktionen und Browserabnahme offen.
 
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um compile-data-binding-plan.ts, useUniversalMaskRuntime.ts und den Compilervertrag. Tabellen aus der bereits geladenen Detailantwort lesen.
+M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um scripts/check_field_contracts.py fuer die Pruefung benannter Arrays im Detailvertrag.
