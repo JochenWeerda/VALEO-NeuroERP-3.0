@@ -16,3 +16,7 @@ Codex besitzt ausschliesslich das Effect-Override und die zugehoerige Lock-Auflo
 PR160/161 und deren main-Merges bleiben bei Claude. Keine DB-Tests, Wartung, Docker-Builds oder Aenderungen in seinen Worktrees. Gemeinsamen Pruefstand erst nach Ende seiner laufenden Vor-Push-Laeufe beanspruchen.
 
 Vor Integration neue PR-Heads und Konfliktfreiheit pruefen; gruenes CI auf einem alten Head ist kein Nachweis des Merge-Ergebnisses. Das bestehende breite Sonar-Coverageproblem wird durch diesen engen Sicherheitsnachweis nicht geschlossen.
+
+## Ergaenzung: ZAP-Stabilisierung
+
+Neuer enger CI-Fix behebt den in PR160 belegten Schreibfehler fuer zap.yaml mit einem separaten Scannerverzeichnis.12 isolierte Verhaltenstests gruen; kein lokaler Docker-/DB-Lauf, keine Aenderung an Claude-Worktrees. QA zap-workspace-20261123. PR163 enthaelt den Effect-Fix; der alte Head37bf4db9c hat bereits gruene Dependency-/Security-Scans. Finalen neuen Head separat abnehmen, keine alten Evidenzen als neuen Erfolg ausgeben.

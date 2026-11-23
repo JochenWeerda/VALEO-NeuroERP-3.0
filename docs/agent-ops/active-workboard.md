@@ -21530,5 +21530,7 @@ Ziel: aktualisierten Kundenstamm-PR160 mit eigenem Mandanten-/Vor-Push-/Effect-S
 
 M0 konsolidiert23.11: PR160-Head9b27b57d9 integriert,36 gezielte Tests gruen, keine fachliche Aenderung im Integrationsdiff. Effect ist Ursache der neuen Dependency-Rotlaeufe; Backend-Evidence bleibt absichtlich an erfolgreiches Gesamtgate gebunden. QA m0-consolidated-ci-20261123; neuer PR-Nachlauf folgt, keine Gesamtfreigabe.
 
-## M0-ZAP-WORKSPACE-20261123 — reserviert, Codex Lead
+## M0-ZAP-WORKSPACE-20261123 — in Arbeit, Codex Lead
 Ziel: belegten ZAP-Arbeitsverzeichnisfehler in CI beheben (PR160 Job137506796501 Permission denied /zap/wrk/zap.yaml), ohne Gate-Absenkung. Besitzer Codex: .github/workflows/ci.yml nur ZAP-Schritte, enger Workflowvertrag, QA/Handshake. Dediziertes beschreibbares Scannerverzeichnis statt Repository-Schreibfreigabe, fehlender/ungueltiger Bericht und Scannerfehler bleiben blockierend. Keine DB/Docker-Lokalbauten; gezielte Tests ohne Dienste.
+
+ZAP23.11: dedizierter Mount statt Checkout-Schreibfreigabe, strenger Status-/Berichtsvertrag, Bericht bei Fehler hochgeladen;12 Mock-Verhaltenstests bestanden6,95s. Keine DB/Docker-Lokaltests. QA/Handshake nachgezogen; echte neue CI-Abnahme offen.
