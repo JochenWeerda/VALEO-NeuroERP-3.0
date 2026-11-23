@@ -39,3 +39,24 @@ def test_create_follow_up_does_not_write_without_tenant_order():
     assert lookup[1] == {"t": "tenant-a", "v": "PO-42"}
     db.execute.assert_called_once()
     db.commit.assert_not_called()
+
+
+def test_follow_up_rest_rolls_back_without_exposing_storage_details(monkeypatch):
+    from unittest.mock import Mock
+
+    from fastapi import HTTPException
+    from app.api.v1.endpoints import procurement_match
+
+    db = Mock()
+    service = Mock()
+    service.create_follow_up.side_effect = RuntimeError("interne Datenbankdetails")
+    monkeypatch.setattr(procurement_match, "ProcurementMatchService", lambda *_: service)
+    monkeypatch.setattr(procurement_match, "gepruefter_akteur_aus_request", lambda _: "actor")
+    body = procurement_match.FollowUpIn(bestellnummer="PO-42", action_type="eskalation", grund="Prüfen")
+
+    with pytest.raises(HTTPException) as error:
+        procurement_match.create_follow_up(body, Mock(), db=db, tenant_id="tenant-a")
+
+    assert error.value.status_code == 503
+    assert error.value.detail == "Folgeaktion konnte nicht gespeichert werden."
+    db.rollback.assert_called_once_with()

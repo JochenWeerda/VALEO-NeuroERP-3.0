@@ -21575,3 +21575,5 @@ M2-WARENEINGANGSABGLEICH: Folgeaktionsprotokoll lesend eingebunden. Alle vier De
 M2-WARENEINGANGSABGLEICH: Codex uebernimmt fuer Folgeaktionen die Service-Methode create_follow_up, ihren REST-Fehlervertrag und den zugehoerigen Negativtest. Bestellung muss vor jedem Schreiben im aktiven Mandanten aufloesbar sein.
 
 Folgeaktion: Fachservice loest die Bestellung im aktiven Mandanten auf und speichert die kanonische Bestellnummer. Fehlende Bestellung wird vor Eskalationsabfrage und INSERT abgewiesen. Drei Service-Tests bestanden. Studio-Schreibaktion, Idempotenz und Browserabnahme offen.
+
+Folgeaktions-REST: Speicherfehler werden nach Rollback mit neutraler Fehlermeldung beantwortet. Vier fokussierte Tests bestanden, inklusive Rollback und Schutz interner Fehlerdetails.

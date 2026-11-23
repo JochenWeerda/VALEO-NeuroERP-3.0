@@ -108,7 +108,7 @@ def create_follow_up(
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         db.rollback()
-        raise HTTPException(status_code=503, detail=f"Folgeaktion konnte nicht gespeichert werden: {exc}") from exc
+        raise HTTPException(status_code=503, detail="Folgeaktion konnte nicht gespeichert werden.") from exc
 
 
 @router.get("/match/ers/preview", response_model=ThreeWayMatchOut, summary="ERS-Gutschrift-Vorschau je Bestellung")
