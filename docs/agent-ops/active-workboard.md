@@ -21581,3 +21581,5 @@ Folgeaktions-REST: Speicherfehler werden nach Rollback mit neutraler Fehlermeldu
 Folgeaktions-REST akzeptiert Idempotency-Key. Protokolleintrag und Wiederholungsergebnis werden in derselben Transaktion gespeichert. Altaufrufer ohne Header bleiben kompatibel. OpenAPI erzeugt, fuenf gezielte Tests bestanden. PostgreSQL-Nachweis und Studio-Schreibaktion offen.
 
 Folgeaktion: Schreibservice verwendet eine separat aufrufbare lesende Fachvalidierung fuer mandantenbezogene Bestellaufloesung, Aktionsart und Begruendung. Der positive Vertrag prueft kanonische Eingaben und genau einen Lesezugriff ohne Commit. Sechs Folgeaktionstests bestanden.
+
+Folgeaktions-Masken-API nutzt gemeinsame Fachvalidierung und delegierten Transaktionsvertrag. Vorschau ist Standard, Ausfuehrung benoetigt Auditgrund und Wiederholungsschluessel. Unterstuetzt Nachforderung, Reklamation und Eskalation. Sieben gezielte Tests gruen, OpenAPI erzeugt. Studio-Aktionsbindung, Freigabe und PostgreSQL-/Browserabnahme offen.

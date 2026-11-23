@@ -6,9 +6,10 @@ Wertabweichung und Lücken je Bestellung sichtbar machen.
 
 from __future__ import annotations
 
+import json
 from decimal import Decimal
 from hashlib import sha256
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from pydantic import BaseModel, Field
@@ -29,6 +30,7 @@ from app.api.v1.schemas.procurement_match_schemas import (
     ThreeWayMatchOut,
     WareneingangOut,
 )
+from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 from app.services.command_idempotency import lock_and_replay, store_execution
 from app.services.procurement_match_service import ProcurementMatchService
 from app.api.v1.schemas.base import TypedObjectOut
@@ -134,6 +136,53 @@ def create_follow_up(
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=503, detail="Folgeaktion konnte nicht gespeichert werden.") from exc
+
+
+class FollowUpMaskIn(BaseModel):
+    action_type: Literal["nachforderung", "reklamation", "eskalation"]
+    grund: str = Field(min_length=3)
+    ausnahme_code: str | None = None
+    mode: Literal["dryRun", "validate", "propose", "execute"] = Field("dryRun", alias="_mode")
+    key: str | None = Field(None, alias="_idempotencyKey", min_length=1, max_length=200, pattern=r"^\S(?:.*\S)?$")
+    audit_reason: str | None = Field(None, alias="_auditReason")
+
+
+@router.post("/match/orders/{bestellung}/actions/folgeaktion", response_model=MaskActionResult,
+             summary="Folgeaktion zur Bestellung prüfen und erfassen", dependencies=SCHREIBEN["EINKAUF"])
+async def follow_up_mask_action(
+    bestellung: str, body: FollowUpMaskIn, request: Request,
+    db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id),
+) -> MaskActionResult:
+    actor = gepruefter_akteur_aus_request(request)
+    if body.mode == "execute" and body.key is None:
+        raise HTTPException(422, "Ein Idempotenzschlüssel ist erforderlich.")
+    values = body.model_dump(by_alias=True, exclude_none=True)
+    fingerprint = sha256(json.dumps(
+        [tenant_id, actor, bestellung, values], sort_keys=True, ensure_ascii=False,
+    ).encode("utf-8")).hexdigest()
+
+    def check(session: Session, payload: dict, order: str, tenant: str) -> list[dict]:
+        try:
+            ProcurementMatchService(session, tenant).validate_follow_up(
+                bestellnummer=order, action_type=payload["action_type"], grund=payload["grund"],
+            )
+        except ValueError as exc:
+            return [{"field": "_entity", "message": str(exc), "severity": "blocking"}]
+        return []
+
+    def execute(session: Session, payload: dict, order: str, tenant: str) -> str:
+        ProcurementMatchService(session, tenant).create_follow_up(
+            bestellnummer=order, action_type=payload["action_type"], grund=payload["grund"],
+            ausnahme_code=payload.get("ausnahme_code"), created_by=actor,
+        )
+        return "Folgeaktion erfasst."
+
+    return await run_delegated_mask_action(
+        db, action_key="folgeaktion", entity_type="procurement_order", entity_id=bestellung,
+        tenant_id=tenant_id, body=values, check_fn=check, delegate_fn=execute,
+        outbox_event_type="procurement.follow_up.created", require_audit_reason=True,
+        performed_by=actor, request_fingerprint=fingerprint,
+    )
 
 
 @router.get("/match/ers/preview", response_model=ThreeWayMatchOut, summary="ERS-Gutschrift-Vorschau je Bestellung")

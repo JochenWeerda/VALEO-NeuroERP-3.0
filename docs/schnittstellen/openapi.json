@@ -72991,6 +72991,77 @@
         "title": "FollowUpListOut",
         "type": "object"
       },
+      "FollowUpMaskIn": {
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "^\\S(?:.*\\S)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
+          "_mode": {
+            "default": "dryRun",
+            "enum": [
+              "dryRun",
+              "validate",
+              "propose",
+              "execute"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "action_type": {
+            "enum": [
+              "nachforderung",
+              "reklamation",
+              "eskalation"
+            ],
+            "title": "Action Type",
+            "type": "string"
+          },
+          "ausnahme_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ausnahme Code"
+          },
+          "grund": {
+            "minLength": 3,
+            "title": "Grund",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action_type",
+          "grund"
+        ],
+        "title": "FollowUpMaskIn",
+        "type": "object"
+      },
       "FollowUpOut": {
         "description": "Append-only Folgeaktion zu einer Bestellung.",
         "properties": {
@@ -383805,6 +383876,66 @@
           }
         ],
         "summary": "Bestellungen mit Match-Übersicht (Picker)",
+        "tags": [
+          "procurement",
+          "einkauf",
+          "procurement",
+          "einkauf"
+        ]
+      }
+    },
+    "/api/v1/procurement/match/orders/{bestellung}/actions/folgeaktion": {
+      "post": {
+        "operationId": "follow_up_mask_action_api_v1_procurement_match_orders__bestellung__actions_folgeaktion_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bestellung",
+            "required": true,
+            "schema": {
+              "title": "Bestellung",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowUpMaskIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Folgeaktion zur Bestellung prüfen und erfassen",
         "tags": [
           "procurement",
           "einkauf",
