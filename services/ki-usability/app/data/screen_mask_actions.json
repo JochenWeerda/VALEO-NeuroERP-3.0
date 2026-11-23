@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 795,
+    "actions": 793,
     "screens_with_actions": 403,
     "domains": 50
   },
@@ -14548,51 +14548,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "tour.resolveDeliveryNote",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:logistik/tourenplanung:beladung",
-      "label": "Beladung",
-      "description": "Beladung (logistik/tourenplanung)",
-      "category": "mask-action",
-      "domain": "logistics",
-      "mask": "logistik/tourenplanung",
-      "intent_phrases": [
-        "Beladung"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "logistik/tourenplanung",
-        "actionKey": "beladung",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "tour.openLoading",
-        "method": null,
-        "permission": "logistics.tour.loading",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:logistik/tourenplanung:dispo",
-      "label": "Dispo-Arbeitsraum",
-      "description": "Dispo-Arbeitsraum (logistik/tourenplanung)",
-      "category": "mask-action",
-      "domain": "logistics",
-      "mask": "logistik/tourenplanung",
-      "intent_phrases": [
-        "Dispo-Arbeitsraum"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "logistik/tourenplanung",
-        "actionKey": "dispo",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "tour.openWorkspace",
         "method": null,
         "dangerLevel": "safe"
       }

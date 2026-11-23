@@ -323,8 +323,6 @@
   "mask:logistik/frachttabellen:position",
   "mask:logistik/tour-fracht-arbeitsraum:probe",
   "mask:logistik/tourenplanung:aufloesen",
-  "mask:logistik/tourenplanung:beladung",
-  "mask:logistik/tourenplanung:dispo",
   "mask:logistik/tourenplanung:hinweise",
   "mask:logistik/versandprofile:avis",
   "mask:logistik/versandprofile:profil",

@@ -6244,7 +6244,7 @@
       "version": "1.0.0"
     },
     "logistik/tourenplanung": {
-      "definition_hash": "263f5986e07c33b43e0c534abdda8cd9cfd7ba17e79c0472eff3e76912ae3770",
+      "definition_hash": "e4f1f40a5cbb8fe427e7b544492cf3108b6fd77ffd662c42f72b08e0b23d2a8f",
       "gates_passed": [
         "A",
         "B",

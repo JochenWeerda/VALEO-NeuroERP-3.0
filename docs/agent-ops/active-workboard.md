@@ -982,3 +982,5 @@ M2-HARVEST-INSPECT: vorhandene Regelwahl als lokale Aktion load_row deklariert. 
 ## M2-TOUR-NAVIGATION - reserviert, Codex
 
 Ziel: Disposition und Beladung als bestehende lokale Navigation deklarieren. Dateibesitz: Tour-Definition und daraus erzeugte Inventare. Abnahme: beide Zielrouten und genaue Ratschen-Differenz. Browsernachweis offen.
+
+M2-TOUR-NAVIGATION umgesetzt: Dispo-Arbeitsraum und Beladung verwenden den vorhandenen Browser-Handler. Python-Definition, Frontend-Fallback und Versionenkatalog sind synchron. Mit der Regelinspektion sinken die nicht verfuegbaren Aktionen von 18 auf 15. Browserabnahme offen.

@@ -2468,12 +2468,11 @@
   "logistik/tourenplanung": {
    "actions": [
     {
-     "command": "tour.openWorkspace",
      "dangerLevel": "safe",
      "key": "dispo",
      "kind": "secondary",
      "label": "Dispo-Arbeitsraum",
-     "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum.",
+     "localEffect": "navigation",
      "zone": "header"
     },
     {
@@ -2682,12 +2681,11 @@
      "pageSize": 50,
      "rowActions": [
       {
-       "command": "tour.openLoading",
        "dangerLevel": "safe",
        "key": "beladung",
        "label": "Beladung",
-       "permission": "logistics.tour.loading",
-       "stubReason": "Oeffnet die Beladungsansicht der Tour in der Maske."
+       "localEffect": "navigation",
+       "permission": "logistics.tour.loading"
       },
       {
        "command": "tour.showHints",
