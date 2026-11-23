@@ -1022,3 +1022,5 @@ Schreibvertrag vorbereitet: Adressen werden beim Anlegen und Aendern als echtes 
 PostgreSQL-Abnahme bestanden: Auf valeo_probe (mahnstufen_verlauf_entfernen_20261123) wurden Anlegen, Aendern und erneutes Lesen einer JSONB-Adresse geprueft. Der Test legt seinen eigenen Mandantendatensatz fuer den Fremdschluessel in derselben Transaktion an und rollt beide Datensaetze zurueck. Drei Tests bestanden.
 
 Niederlassungs-Update liefert die in derselben SQL-Anweisung geaenderte Zeile zurueck. Der Mandantenfilter bleibt Teil des Updates. Das vermeidet zwei Leseabfragen und eine konkurrierende Neulesung nach dem Commit. Drei gezielte Tests auf valeo_probe bestanden; Studio-Schreibbindung weiter offen.
+
+Versionsschutz fuer Niederlassungen: REST liefert eine aus updated_at abgeleitete ganzzahlige Version und akzeptiert expected_version. Abgleich im mandantengebundenen UPDATE, bei veraltetem Stand 409. Bestehende PUT-Aufrufe ohne Version bleiben kompatibel. OpenAPI nachgezogen, fuenf Tests inklusive Konfliktnachweis auf valeo_probe bestanden. Die verpflichtend versionsgebundene Studio-/CLI-/MCP-Aktion bleibt offen.

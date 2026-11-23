@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from app.auth.deps import require_roles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -37,7 +37,11 @@ class BranchCreate(BranchBase):
     pass
 
 
+_BRANCH_VERSION_EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+
 class BranchUpdate(BaseModel):
+    expected_version: int | None = Field(default=None, ge=0, le=9007199254740991)
     name: Optional[str] = None
     address: Optional[dict] = None
     is_active: Optional[bool] = None
@@ -48,6 +52,13 @@ class Branch(BranchBase):
     tenant_id: str
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def version(self) -> int:
+        # Preserve PostgreSQL's microsecond precision in the browser's integer version.
+        age = self.updated_at - _BRANCH_VERSION_EPOCH
+        return (age.days * 86400 + age.seconds) * 1000000 + age.microseconds
 
 
 def _get_branch_or_404(db: Session, branch_id: str, tenant_id: str) -> dict:
@@ -155,7 +166,11 @@ async def update_branch(
     db: Session = Depends(get_db),
 ):
     """Update a branch and return the exact row written by this request."""
-    updates = {key: value for key, value in payload.model_dump(exclude_unset=True).items() if value is not None}
+    updates = {
+        key: value
+        for key, value in payload.model_dump(exclude_unset=True, exclude={"expected_version"}).items()
+        if value is not None
+    }
     if not updates:
         _get_branch_or_404(db, branch_id, tenant_id)
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -167,16 +182,25 @@ async def update_branch(
         for key in updates
     )
 
+    params = {**updates, "id": branch_id, "tenant_id": tenant_id}
+    version_condition = ""
+    if payload.expected_version is not None:
+        params["expected_updated_at"] = _BRANCH_VERSION_EPOCH + timedelta(microseconds=payload.expected_version)
+        version_condition = "AND updated_at = :expected_updated_at"
+
     row = db.execute(
         text(f"""
             UPDATE domain_shared.branches
-            SET {set_clause}, updated_at = NOW()
-            WHERE id = :id AND tenant_id = :tenant_id
+            SET {set_clause}, updated_at = GREATEST(clock_timestamp(), updated_at + INTERVAL '1 microsecond')
+            WHERE id = :id AND tenant_id = :tenant_id {version_condition}
             RETURNING *
         """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-        {**updates, "id": branch_id, "tenant_id": tenant_id},
+        params,
     ).mappings().first()
     if row is None:
+        if payload.expected_version is not None:
+            _get_branch_or_404(db, branch_id, tenant_id)
+            raise HTTPException(status_code=409, detail="Branch has changed")
         raise HTTPException(status_code=404, detail="Branch not found")
     result = Branch(**dict(row))
     db.commit()

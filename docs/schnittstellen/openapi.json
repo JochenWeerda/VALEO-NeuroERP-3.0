@@ -26837,6 +26837,11 @@
             "format": "date-time",
             "title": "Updated At",
             "type": "string"
+          },
+          "version": {
+            "readOnly": true,
+            "title": "Version",
+            "type": "integer"
           }
         },
         "required": [
@@ -26845,7 +26850,8 @@
           "id",
           "tenant_id",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "version"
         ],
         "title": "Branch",
         "type": "object"
@@ -26902,6 +26908,19 @@
               }
             ],
             "title": "Address"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
           },
           "is_active": {
             "anyOf": [
@@ -194662,7 +194681,7 @@
         ]
       },
       "put": {
-        "description": "Update a branch.",
+        "description": "Update a branch and return the exact row written by this request.",
         "operationId": "update_branch_api_v1_admin_branches__branch_id__put",
         "parameters": [
           {

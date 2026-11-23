@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
 import pytest
+from fastapi import HTTPException
 
 from app.api.v1.endpoints.branches import BranchCreate, BranchUpdate, create_branch, update_branch
 
@@ -61,8 +62,18 @@ async def test_branch_addresses_roundtrip_in_postgresql(require_db):
                     BranchCreate(branch_number=1, name="Nord", address=original), tenant_id=tenant, db=db,
                 )
                 assert branch.address == original
-                updated = await update_branch(branch.id, BranchUpdate(address=revised), tenant_id=tenant, db=db)
+                updated = await update_branch(
+                    branch.id, BranchUpdate(address=revised, expected_version=branch.version),
+                    tenant_id=tenant, db=db,
+                )
+                assert updated.version > branch.version
                 assert updated.address == revised
+                with pytest.raises(HTTPException) as conflict:
+                    await update_branch(
+                        branch.id, BranchUpdate(address=original, expected_version=branch.version),
+                        tenant_id=tenant, db=db,
+                    )
+                assert conflict.value.status_code == 409
                 assert (await get_branch(branch.id, tenant_id=tenant, db=db)).address == revised
         finally:
             transaction.rollback()
