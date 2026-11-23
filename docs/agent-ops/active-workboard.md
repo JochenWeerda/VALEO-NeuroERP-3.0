@@ -21556,3 +21556,5 @@ Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteue
 Eigentum: Builder build_einkauf_wareneingangsabgleich_screen_definition, zugehoerige Register und Nachweis. Zuerst native Bestellliste an Fachquelle anschliessen, anschliessend Auswahl, Abgleichpositionen und geregelte Folgeaktionen. Abnahme mit belegter Mandantenbindung und Studio-Kanalvertraegen.
 
 Bestellliste nutzt jetzt den mandantengebundenen Picker-Endpunkt. Alle sechs sichtbaren Spalten gegen das Antwortschema geprueft. Studio-Katalog und Agentenhandbuch erzeugt. Auswahl mit Abgleichdetails und Folgeaktionen bleiben offen.
+
+M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um data-source-resolver.ts und zugehoerigen Regressionstest. Bestellkennungen als einzelne URL-Werte kodieren, bevor die Detailmaske ihren Query-Parameter bindet.
