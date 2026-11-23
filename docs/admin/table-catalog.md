@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 696 Tabellen, 9106 Spalten.**
+**31 Schemas, 695 Tabellen, 9099 Spalten.**
 
 ## Schemas
 
@@ -34,7 +34,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 291 |
 | `domain_erp` | `finance` | 46 | 601 |
-| `domain_finance` | `finance` | 23 | 249 |
+| `domain_finance` | `finance` | 22 | 242 |
 | `domain_futtermittel` | `agrar` | 8 | 83 |
 | `domain_hr` | `hr` | 30 | 361 |
 | `domain_hrm` | `hr` | 3 | 32 |
@@ -326,7 +326,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_finance.budget_plans` | `app/api/v1/endpoints/budget_planning.py` | `app/api/v1/endpoints/budget_planning.py` | — |
 | `domain_finance.dispute_records` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_finance.ebilanz_exports` | `app/api/v1/endpoints/ebilanz_elster.py`, `app/services/mcp_execution_service.py` | `app/api/v1/endpoints/ebilanz_elster.py` | — |
-| `domain_finance.finance_mahnstufen_audit` | `app/services/finance_mahnstufe_service.py` | — | — |
 | `domain_finance.finance_ratenzahlungsplaene` | `app/services/finance_ratenzahlung_service.py` | `app/services/finance_ratenzahlung_service.py` | — |
 | `domain_finance.finance_ratenzahlungsraten` | `app/services/finance_ratenzahlung_service.py` | `app/services/finance_ratenzahlung_service.py` | — |
 | `domain_finance.finance_sepa_batches` | — | `app/services/finance_sepa_service.py` | — |
@@ -1062,7 +1061,6 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `budget_plans` | `finance` | native | `id` | id, tenant_id, plan_year, plan_name, status |
 | `dispute_records` | `finance` | native | `id` | id, tenant_id, invoice_id, dispute_type, dispute_reason, disputed_amount_eur, status, resolution_notes, resolved_by, resolved_at, created_at, created_by, updated_at, updated_by |
 | `ebilanz_exports` | `finance` | native | `id` | id, tenant_id, wirtschaftsjahr, bilanzart, berichtsperiode_von, berichtsperiode_bis, steuernummer, finanzamt_nr, status, taxonomie_version, xbrl_paketgroesse_kb, elster_transfer_ticket, uebertragen_am, erstellt_am |
-| `finance_mahnstufen_audit` | `finance` | native | `id` | id, tenant_id, rechnungsnr, stufe, operator, bearbeitungsgebuehr_eur, created_at |
 | `finance_ratenzahlungsplaene` | `finance` | native | `id` | id, tenant_id, op_id, gesamt_eur, anzahl_raten, restbetrag_eur, status, created_at |
 | `finance_ratenzahlungsraten` | `finance` | native | `id` | id, plan_id, tenant_id, rate_nr, betrag_eur, faellig_am, bezahlt_am, status |
 | `finance_sepa_batches` | `finance` | native | `id` | id, tenant_id, faellig_am, gesamt_eur, status, xml_payload, created_at |
