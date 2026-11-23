@@ -24454,7 +24454,6 @@
           "read_by": [
             "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/kostenrechnung.py",
-            "app/finance/models.py",
             "app/services/personal_organisation_service.py"
           ],
           "written_by": [

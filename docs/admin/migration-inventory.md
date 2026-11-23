@@ -275,6 +275,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `finance_agrar_sales_repair_20260626` | BULK-REPAIR-001: Finance + Agrar + Sales Batch-Repair-Migration Wave 11. |
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
 | `finance_hr_einkauf_repair_20260626` | FINANCE-HR-EINKAUF-REPAIR-001: Finance + HR + Einkauf Batch-Repair Wave 12. |
+| `finance_router_altspeicher_entfernen_20261123` | Fuenf Finanz-Alttabellen ohne Migration entfallen (M3). |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_document_link_unique_20260915` | FSX-011: eindeutiger Belegbezug fuer offene Flow-Spine-Vorgaenge |
 | `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
