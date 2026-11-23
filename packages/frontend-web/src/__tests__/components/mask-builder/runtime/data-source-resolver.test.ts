@@ -37,3 +37,12 @@ describe('appendQueryParams', () => {
       .toBe('/api/v1/items?q=Saatgut#results')
   })
 })
+
+it('keeps the selected purchase order in one query parameter', () => {
+  const path = resolveEndpoint('/api/v1/procurement/match/three-way?bestellung={entity_id}', {
+    entity_id: 'PO/23 & #1',
+  })
+  const url = new URL(path, 'https://erp.example')
+  expect([...url.searchParams.entries()]).toEqual([['bestellung', 'PO/23 & #1']])
+  expect(url.hash).toBe('')
+})

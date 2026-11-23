@@ -21558,3 +21558,5 @@ Eigentum: Builder build_einkauf_wareneingangsabgleich_screen_definition, zugehoe
 Bestellliste nutzt jetzt den mandantengebundenen Picker-Endpunkt. Alle sechs sichtbaren Spalten gegen das Antwortschema geprueft. Studio-Katalog und Agentenhandbuch erzeugt. Auswahl mit Abgleichdetails und Folgeaktionen bleiben offen.
 
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um data-source-resolver.ts und zugehoerigen Regressionstest. Bestellkennungen als einzelne URL-Werte kodieren, bevor die Detailmaske ihren Query-Parameter bindet.
+
+Studio-Datenbindung kodiert Bestellkennungen zentral als URL-Werte. 14 Tests in Resolver und Bindungscompiler bestanden, einschliesslich des Drei-Wege-Abgleich-Parameters. Detailmaske und Folgeaktionen bleiben offen.

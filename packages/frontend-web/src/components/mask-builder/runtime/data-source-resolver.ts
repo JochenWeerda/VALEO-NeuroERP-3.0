@@ -3,7 +3,7 @@ export function resolveEndpoint(
   template: string,
   vars: Record<string, string>,
 ): string {
-  return template.replace(/\{(\w+)\}/g, (_, k: string) => vars[k] ?? '')
+  return template.replace(/\{(\w+)\}/g, (_, k: string) => encodeURIComponent(vars[k] ?? ''))
 }
 
 /** Appends runtime query parameters without destroying fixed screen parameters. */
