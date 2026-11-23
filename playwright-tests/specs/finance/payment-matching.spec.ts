@@ -17,10 +17,22 @@ function kopf(): Record<string, string> {
   return { Authorization: `Bearer ${apiToken()}`, 'X-Tenant-ID': E2E_MANDANT }
 }
 
+// Der Kontoauszugsimport verlangt ein Bankkonto mit gueltiger IBAN (409 sonst); je Lauf eine eigene.
+function deutscheIban(lauf: string): string {
+  const bban = `37040044${lauf.slice(-10).padStart(10, '0')}`
+  const pruefziffer = 98n - (BigInt(`${bban}131400`) % 97n)
+  return `DE${pruefziffer.toString().padStart(2, '0')}${bban}`
+}
+
 async function legeBankkontoAn(request: APIRequestContext, lauf: string): Promise<{ id: string; account_number: string }> {
   const antwort = await request.post('/api/v1/finance/bank-accounts', {
     headers: kopf(),
-    data: { account_number: `E2E-${lauf}`, bank_name: 'E2E Raiffeisenbank', currency: 'EUR' },
+    data: {
+      account_number: `E2E-${lauf}`,
+      bank_name: 'E2E Raiffeisenbank',
+      iban: deutscheIban(lauf),
+      currency: 'EUR',
+    },
   })
   expect(antwort.status(), await antwort.text()).toBe(201)
   return antwort.json()
