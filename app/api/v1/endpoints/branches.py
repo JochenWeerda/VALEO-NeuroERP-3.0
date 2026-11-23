@@ -2,20 +2,22 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Optional
+from typing import Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from app.auth.deps import require_roles
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, ConfigDict, Field, computed_field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.akteur import gepruefter_akteur_aus_request
 from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
-from app.api.v1.schemas.base import BaseSchema
+from app.services.mask_action_runtime_service import MaskActionResult, run_delegated_mask_action
 
 
 router = APIRouter(prefix="/admin/branches", tags=["admin", "branches"])
@@ -205,6 +207,50 @@ async def update_branch(
     result = Branch(**dict(row))
     db.commit()
     return result
+
+
+class BranchRenameCommand(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    name: str = Field(min_length=1, max_length=255, pattern=r"\S")
+    expected_version: int = Field(ge=0, le=9007199254740991)
+    mode: Literal["execute", "dryRun", "validate", "propose"] = Field("execute", alias="_mode")
+    reason: str | None = Field(None, alias="_auditReason", pattern=r"\S")
+    idempotency_key: str | None = Field(None, alias="_idempotencyKey", min_length=1, max_length=200, pattern=r"^\S(?:.*\S)?$")
+
+
+@router.post("/{branch_id}/actions/bearbeiten", response_model=MaskActionResult,
+             summary="Niederlassung versionsgebunden umbenennen", dependencies=_NUR_ADMIN)
+async def rename_branch(
+    branch_id: str,
+    command: BranchRenameCommand,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> MaskActionResult:
+    if command.mode == "execute" and not command.idempotency_key:
+        raise HTTPException(422, "Ein Idempotenzschlüssel ist erforderlich.")
+    actor = gepruefter_akteur_aus_request(request)
+    body = command.model_dump(by_alias=True, exclude_none=True)
+    fingerprint = hashlib.sha256(
+        json.dumps([tenant_id, actor, branch_id, body], sort_keys=True).encode("utf-8")
+    ).hexdigest()
+
+    def check(session: Session, payload: dict, entity_id: str, mandant: str) -> list[dict]:
+        branch = Branch(**_get_branch_or_404(session, entity_id, mandant))
+        if branch.version != payload["expected_version"]:
+            return [{"field": "expected_version", "message": "Niederlassung wurde geändert.", "severity": "blocking"}]
+        return []
+
+    async def apply(session: Session, payload: dict, entity_id: str, mandant: str) -> str:
+        await update_branch(entity_id, BranchUpdate(**payload), tenant_id=mandant, db=session)
+        return "Niederlassung umbenannt."
+
+    return await run_delegated_mask_action(
+        db, action_key="bearbeiten", entity_type="branch", entity_id=branch_id, tenant_id=tenant_id,
+        body=body, check_fn=check, delegate_fn=apply, outbox_event_type="admin.branch.renamed",
+        require_audit_reason=True, performed_by=actor, request_fingerprint=fingerprint,
+    )
 
 
 @router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen",

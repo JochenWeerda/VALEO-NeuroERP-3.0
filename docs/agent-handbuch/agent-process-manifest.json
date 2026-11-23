@@ -1079,8 +1079,20 @@
       "agent_contract_url": "/api/v1/masks/admin/branches/detail/agent-contract",
       "screen_definition_url": "/api/v1/masks/admin/branches/detail/screen-definition",
       "readiness_url": "/api/v1/masks/admin/branches/detail/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "bearbeiten",
+          "label": "Umbenennen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": false,
+          "permission": "admin:all",
+          "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -27252,5 +27264,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 142
+  "event_count": 143
 }

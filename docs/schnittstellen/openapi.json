@@ -26895,6 +26895,67 @@
         "title": "BranchCreate",
         "type": "object"
       },
+      "BranchRenameCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "^\\S(?:.*\\S)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
+          "_mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "expected_version": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "expected_version"
+        ],
+        "title": "BranchRenameCommand",
+        "type": "object"
+      },
       "BranchUpdate": {
         "properties": {
           "address": {
@@ -194732,6 +194793,66 @@
           }
         ],
         "summary": "Branch aktualisieren",
+        "tags": [
+          "admin",
+          "branches",
+          "admin",
+          "branches"
+        ]
+      }
+    },
+    "/api/v1/admin/branches/{branch_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "rename_branch_api_v1_admin_branches__branch_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "branch_id",
+            "required": true,
+            "schema": {
+              "title": "Branch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchRenameCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Niederlassung versionsgebunden umbenennen",
         "tags": [
           "admin",
           "branches",

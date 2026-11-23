@@ -29,3 +29,15 @@ def test_branch_list_opens_the_typed_branch_detail():
     fields = screen["tabs"][0]["fields"]
     assert {field["key"] for field in fields} == {"branch_number", "name", "is_active", "created_at", "updated_at"}
     assert all(field["readOnly"] and field["key"] in Branch.model_fields for field in fields)
+
+
+def test_branch_rename_definition_requires_version_and_audit():
+    from app.api.v1.endpoints.branches import BranchRenameCommand, rename_branch
+
+    action, = build_admin_branch_detail()["actions"]
+    route = next(route for route in router.routes if route.endpoint is rename_branch)
+    assert action["commandEndpoint"] == f"/api/v1{route.path}".replace("{branch_id}", "{entity_id}")
+    assert route.methods == {action["method"]}
+    assert action["requiresExpectedVersion"] and action["requiresIdempotencyKey"] and action["auditReasonRequired"]
+    assert action["forbiddenForAgents"]
+    assert set(BranchRenameCommand.model_json_schema()["required"]) == {"name", "expected_version"}

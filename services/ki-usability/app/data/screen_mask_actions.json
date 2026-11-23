@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 793,
-    "screens_with_actions": 403,
+    "actions": 795,
+    "screens_with_actions": 405,
     "domains": 50
   },
   "actions": [
@@ -144,6 +144,55 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/branches/detail:bearbeiten",
+      "label": "Umbenennen",
+      "description": "Umbenennen (admin/branches/detail)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/branches/detail",
+      "intent_phrases": [
+        "Umbenennen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/branches/detail",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": "admin.branch.rename.v1",
+        "method": "POST",
+        "permission": "admin:all",
+        "forbiddenForAgents": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/branches:open",
+      "label": "Details öffnen",
+      "description": "Details öffnen (admin/branches)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/branches",
+      "intent_phrases": [
+        "Details öffnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/branches",
+        "actionKey": "open",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/branches/{entity_id}",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

@@ -124,7 +124,7 @@
       "version": "1.0.0"
     },
     "admin/branches/detail": {
-      "definition_hash": "9c5d83fb1a172fd990df16b67f83c2b60dfd2de6737d43b85aa7861e8202c0db",
+      "definition_hash": "0576d0aa5950d18b728d9f8d2a89c18cf14b9651e9032becc84d1c308d77dac5",
       "gates_passed": [
         "A",
         "B",

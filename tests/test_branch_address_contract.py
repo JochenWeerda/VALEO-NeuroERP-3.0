@@ -39,12 +39,13 @@ async def test_branch_address_is_bound_as_json(create):
 @pytest.mark.integration
 @pytest.mark.asyncio
 async def test_branch_addresses_roundtrip_in_postgresql(require_db):
+    from types import SimpleNamespace
     from uuid import uuid4
 
     from sqlalchemy import text
     from sqlalchemy.orm import Session
 
-    from app.api.v1.endpoints.branches import get_branch
+    from app.api.v1.endpoints.branches import BranchRenameCommand, get_branch, rename_branch
     from app.core.database import engine
 
     tenant = str(uuid4())
@@ -75,5 +76,22 @@ async def test_branch_addresses_roundtrip_in_postgresql(require_db):
                     )
                 assert conflict.value.status_code == 409
                 assert (await get_branch(branch.id, tenant_id=tenant, db=db)).address == revised
+                request = SimpleNamespace(state=SimpleNamespace(token_claims={"sub": str(uuid4())}))
+                payload = {"name": "Nordwest", "expected_version": updated.version}
+                dry_run = await rename_branch(
+                    branch.id, BranchRenameCommand(**payload, _mode="dryRun"),
+                    request, tenant_id=tenant, db=db,
+                )
+                assert dry_run.success
+                assert (await get_branch(branch.id, tenant_id=tenant, db=db)).name == "Nord"
+                command = BranchRenameCommand(**payload, _auditReason="Synthetischer Test", _idempotencyKey=str(uuid4()))
+                applied = await rename_branch(branch.id, command, request, tenant_id=tenant, db=db)
+                assert applied.success, applied.error
+                assert applied.auditEntryId and applied.outboxEventId
+                saved = await get_branch(branch.id, tenant_id=tenant, db=db)
+                assert saved.name == "Nordwest"
+                repeated = await rename_branch(branch.id, command, request, tenant_id=tenant, db=db)
+                assert repeated.success
+                assert (await get_branch(branch.id, tenant_id=tenant, db=db)).version == saved.version
         finally:
             transaction.rollback()

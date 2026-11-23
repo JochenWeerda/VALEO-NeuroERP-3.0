@@ -130,6 +130,14 @@ def build_admin_branch_detail() -> dict[str, Any]:
             {"key": "updated_at", "label": "Geändert am", "type": "datetime", "readOnly": True},
         ])],
         "layout": {"floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "standard"},
+        "actions": [{
+            "key": "bearbeiten", "label": "Umbenennen", "kind": "primary", "dangerLevel": "moderate",
+            "permission": "admin:all", "command": "admin.branch.rename.v1",
+            "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten", "method": "POST",
+            "inputFields": [{"key": "name", "label": "Name", "type": "text", "required": True}],
+            "inputPrefill": "entity", "requiresExpectedVersion": True, "requiresIdempotencyKey": True,
+            "auditReasonRequired": True, "forbiddenForAgents": True,
+        }],
         "noWorkflowReason": "Die Ansicht zeigt den aktuellen Stand der ausgewählten Niederlassung.",
     }
 

@@ -28,7 +28,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/benutzer-liste` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/benutzer-liste/agent-contract` |
 | `admin/berechtigungen-matrix` | Berechtigungen matrix | admin | niedrig | — | `GET /api/v1/masks/admin/berechtigungen-matrix/agent-contract` |
 | `admin/branches` | Niederlassungen | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
-| `admin/branches/detail` | Niederlassung | admin | niedrig | — | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
+| `admin/branches/detail` | Niederlassung | admin | mittel | — | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
 | `admin/command-monitor` | Command monitor | admin | niedrig | — | `GET /api/v1/masks/admin/command-monitor/agent-contract` |
 | `admin/compliance-dashboard` | Compliance-Dashboard | compliance | niedrig | — | `GET /api/v1/masks/admin/compliance-dashboard/agent-contract` |
 | `admin/control-center` | Admin Kontrollzentrum | admin | mittel | — | `GET /api/v1/masks/admin/control-center/agent-contract` |
@@ -1075,6 +1075,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Data Sources:**
 
 - `entity` → `/api/v1/admin/branches/{entity_id}`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `bearbeiten` | Umbenennen | moderate | nein | `/api/v1/admin/branches/{entity_id}/actions/bearbeiten` |
 
 ---
 
