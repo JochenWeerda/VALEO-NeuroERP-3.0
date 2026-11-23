@@ -2281,3 +2281,22 @@ OIDC-/Browserkette und die Aktion-zu-CI-Verknuepfung der Matrix bleiben
 getrennte offene Abnahmen. Die Backend-Vollsuite ist im neuen CI-Entwurf
 kanonisch im Quality Gate konzentriert; der Consumer verlangt dessen ganzen
 Erfolg und SHA-/Inhalts-/Ereignisnachweise. Reale GitHub-Abnahme bleibt Pflicht.
+
+
+### Kundenstamm-Feldparitaet und main-Sonar — 17.11.2026
+
+Kundenkopf-Erweiterung: 144 sichtbare Partnerattribute, 102 pflegbar mit
+bestehender Studio-Runtime und abgesichertem PostgreSQL-Command. Die komplette
+Untertabellenparitaet (16 Modelle, bisher sechs UI-Pflegebereiche), Artikel und
+Lieferanten bleiben eigene Folgeabnahmen. Der alte vollstaendige Partner-PUT
+ist noch nicht auf den neuen Versions-/Auditvertrag migriert; dessen
+Kanalgleichwertigkeit wird nicht allein durch die neue Profilaktion bestaetigt.
+[Inventar, Nachweise und Grenzen](../quality-assurance/customer-master-field-parity-20261117.md).
+
+Main-Sonar44021259183: ausschliesslich New Coverage71,2<80 rot; uebrige main-
+Jobs gruen. Breite echte Abdeckungsluecke seit vorheriger Projektversion vom
+04.04., keine Baseline-/Gateabsenkung. Optionales Proplanta braucht echten
+ToolCaller/Zugang; FAOSTAT-Aufrufe antworten403, aktueller offizieller Dienst
+verlangt bearerAuth. Doku-Driftreport wird nun im Sweep erzeugt; Versorgung im
+Backendimage und erneuter Runtime-Nachweis bleiben offen. Browserwerkzeug scheitert
+aktuell bereits beim Start an fehlenden Kernel-Assets; keine Sichtabnahme behauptet.

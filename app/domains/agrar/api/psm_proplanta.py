@@ -12,7 +12,7 @@ import logging
 
 from ....core.database import get_db
 from ....integrations.proplanta_psm_client import (
-    ProplantaPSMClient,
+    psm_client,
     ProplantaPSMContractError,
     is_configured
 )
@@ -23,8 +23,7 @@ router = APIRouter()
 
 logger = logging.getLogger(__name__)
 
-# Global PSM client instance
-psm_client = ProplantaPSMClient()
+# Use the configured integration client, including its injected transport and cache.
 
 
 @router.get("/status")

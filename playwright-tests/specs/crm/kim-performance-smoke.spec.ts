@@ -17,7 +17,8 @@ test.describe('CRM/KIM - Native Weiterleitung @smoke', () => {
   test('KIM-Deep-Link bewahrt Kundenkennung und Registerwahl', async ({ adminPage }) => {
     // Navigation smoke: a deterministic read fixture, not a persisted customer.
     // Keep the real ScreenDefinition and native renderer; only this entity is supplied.
-    await adminPage.route(`**/api/v1/crm/customers/${CUSTOMER_ID}`, route => route.fulfill({
+    // Die Kundenakte liest seit dem Kundenprofil /master-profile (Obermenge der Kundenantwort, PR #160).
+    await adminPage.route(new RegExp(`/api/v1/crm/customers/${CUSTOMER_ID}(/master-profile)?([?].*)?$`), route => route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({ id: CUSTOMER_ID, kunden_nr: 'SMOKE-K1', firma: 'KIM Smoke Kunde' }),
@@ -33,7 +34,8 @@ test.describe('CRM/KIM - Native Weiterleitung @smoke', () => {
   });
 
   test('KIM-Deep-Link auf fehlenden Kunden zeigt den Fehlerzustand', async ({ adminPage }) => {
-    await adminPage.route(`**/api/v1/crm/customers/${CUSTOMER_ID}`, route => route.fulfill({
+    // Die Kundenakte liest seit dem Kundenprofil /master-profile (Obermenge der Kundenantwort, PR #160).
+    await adminPage.route(new RegExp(`/api/v1/crm/customers/${CUSTOMER_ID}(/master-profile)?([?].*)?$`), route => route.fulfill({
       status: 404,
       contentType: 'application/json',
       body: JSON.stringify({ detail: 'Customer not found' }),
