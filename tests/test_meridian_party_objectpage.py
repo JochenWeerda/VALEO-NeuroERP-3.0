@@ -33,14 +33,13 @@ def test_customer_360_is_object_page_with_identity_and_anchors() -> None:
     assert "kontrakte" in tab_keys
     assert "praesente" in tab_keys
     assert "postfach" in tab_keys
-    assert "tax" in tab_keys
-    assert "bank" in tab_keys
-    assert "system" in tab_keys
-    assert "quality_compliance" in tab_keys
-    assert "marketing" in tab_keys
-    assert "cooperative" in tab_keys
-    assert "output" in tab_keys
-    assert "interfaces" in tab_keys
+    # Steuer, Bank, System, Qualitaet, Marketing, Genossenschaft, Ausgabe und Schnittstellen zeigt seit dem
+    # Kundenprofil (PR #153) je eine kanonische Partnergruppe; die alten Teilprojektionen sind ersetzt, keine zweite Form.
+    for neu in ("partner_identity", "partner_payment", "partner_agrar", "partner_billing", "partner_profile",
+                "partner_privacy", "partner_interfaces", "partner_cooperative", "partner_audit"):
+        assert neu in tab_keys
+    assert not {"tax", "bank", "system", "quality_compliance", "marketing", "cooperative", "output",
+                "interfaces"} & set(tab_keys)
     assert "potential" in tab_keys
     assert "chefanweisungen" in tab_keys
     assert "anschriften" in tab_keys
