@@ -289,49 +289,48 @@ def test_list_and_create_dunning_rule():
     assert duplicate.status_code == 400
 
 
-def test_create_list_and_transition_dunning_notice(monkeypatch):
+def test_mahnung_versenden_nach_dem_mahnweg(monkeypatch):
+    """Seit 23.11.2026 entsteht eine Mahnung nur ueber den Mahnweg; hier eine erzeugte Mahnung versenden."""
     db = FakeDb()
     client = _build_client(db)
     monkeypatch.setattr(dunning, "register_artifact", lambda *args, **kwargs: None)
-
-    created = client.post(
-        "/finance/dunning",
-        json={
-            "op_id": "OP-1",
-            "debtor_id": "DEB-1",
-            "dunning_level": 1,
-            "dunning_date": "2026-04-13",
-            "due_date": "2026-04-01",
-            "open_amount": "1250.00",
-        },
-    )
-    assert created.status_code == 201
-    created_id = created.json()["id"]
-    assert Decimal(created.json()["total_amount"]) == Decimal("1258.70")
+    db.notices["N-1"] = {
+        "id": "N-1", "tenant_id": "system", "op_id": "OP-1", "debtor_id": "DEB-1", "dunning_level": 1,
+        "dunning_date": date(2026, 4, 13), "due_date": date(2026, 4, 1), "open_amount": Decimal("1250.00"),
+        "dunning_fee": Decimal("5.00"), "interest": Decimal("3.70"), "total_amount": Decimal("1258.70"),
+        "payment_deadline": date(2026, 4, 27), "status": "offen", "sent_date": None, "payment_date": None,
+        "notes": None, "created_at": datetime(2026, 4, 13), "updated_at": datetime(2026, 4, 13),
+    }
 
     listed = client.get("/finance/dunning")
     assert listed.status_code == 200
     assert len(listed.json()) == 1
 
     # Postversand; der Mailweg laeuft echt in tests/test_versandwege_vertrag.py.
-    sent = client.put(f"/finance/dunning/{created_id}/send", params={"versand_art": "post"})
+    sent = client.put("/finance/dunning/N-1/send", params={"versand_art": "post"})
     assert sent.status_code == 200
     assert sent.json()["status"] == "sent"
-    assert db.notices[created_id]["versand_art"] == "post"
-
-    paid = client.put(f"/finance/dunning/{created_id}/paid")
-    assert paid.status_code == 200
-    assert paid.json()["status"] == "paid"
+    assert db.notices["N-1"]["versand_art"] == "post"
 
 
-def test_nonexistent_notice_actions_and_run_paths():
+def test_manuelle_mahnung_und_bezahlt_ohne_zahlung_gibt_es_nicht():
+    """POST /dunning legte Mahnungen an Regeln und Fristen vorbei an; PUT /paid zifferte den Posten ohne
+    Zahlungsbuchung aus (Nebenbuch != Hauptbuch). Beide entfielen am 23.11.2026."""
+    client = _build_client(FakeDb())
+    assert client.post("/finance/dunning", json={}).status_code == 405
+    assert client.put("/finance/dunning/N-1/paid").status_code in (404, 405)
+
+
+def test_nonexistent_notice_actions_and_run_paths(monkeypatch):
+    from app.services.finance_dunning_service import FinanceDunningService
+
+    monkeypatch.setattr(FinanceDunningService, "run_dunning",
+                        lambda self, **_: {"ok": True, "erzeugt": 0, "mahnungen": []})
     client = _build_client(FakeDb())
 
     missing_send = client.put("/finance/dunning/missing/send")
     assert missing_send.status_code == 404
 
-    missing_paid = client.put("/finance/dunning/missing/paid")
-    assert missing_paid.status_code == 404
 
     run = client.post("/finance/dunning/run", json={"as_of_date": "2026-04-13", "tenant_id": "system"})
     assert run.status_code == 200
