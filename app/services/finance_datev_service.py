@@ -118,7 +118,7 @@ class FinanceDatevService:
                 FROM domain_erp.journal_entries je
                 JOIN domain_erp.journal_entry_lines jel ON jel.journal_entry_id = je.id
                 WHERE je.tenant_id = :tid
-                  AND je.status = 'posted'
+                  AND je.status IN ('posted', 'reversed')
                   AND LEFT(je.entry_date::text, 7) BETWEEN :von AND :bis
                 ORDER BY je.entry_date, je.sequence_number, jel.id
             """),

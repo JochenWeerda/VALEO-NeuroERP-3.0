@@ -95,7 +95,7 @@ def _sum_gl_balance(
             JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
             WHERE jel.account_id = :account_id
               AND je.tenant_id = :tenant_id
-              AND je.status = 'posted'
+              AND je.status IN ('posted', 'reversed')
               AND TO_CHAR(je.entry_date::date, 'YYYY-MM') = :period
             """
         ),

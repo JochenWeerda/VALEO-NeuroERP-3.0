@@ -23,7 +23,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from datetime import date
+from datetime import date, timedelta
 
 import pytest
 from fastapi import Request  # Modulebene: FastAPI loest die Annotation hier auf
@@ -76,7 +76,7 @@ def aufraeumen(engine):
             "domain_audit.attestations",
             "domain_erp.payment_runs",
             "domain_ops.reklamationen",
-            "domain_finance.finance_mahnstufen_audit",
+            "domain_erp.dunning_notices",
             "domain_erp.offene_posten",
         ):
             v.execute(text(f"DELETE FROM {tabelle} WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})  # nosec B608
@@ -92,6 +92,14 @@ def haeuser(engine):
                 text("INSERT INTO domain_shared.tenants (id, name) VALUES (:id, :n) ON CONFLICT (id) DO NOTHING"),
                 {"id": haus, "n": f"Pruefbetrieb {haus}"},
             )
+            # Mahnen braucht hinterlegte Mahnregeln (seit 23.11.2026 keine Vorgaberegeln mehr).
+            v.execute(
+                text("INSERT INTO domain_erp.dunning_rules (id, tenant_id, level, days_overdue_min, fee_amount, "
+                     "interest_rate, payment_deadline_days, block_customer, active) "
+                     "SELECT gen_random_uuid()::text, :h, s, 1, 5 * s, 0, 14, false, true FROM generate_series(1, 3) s "
+                     "WHERE NOT EXISTS (SELECT 1 FROM domain_erp.dunning_rules WHERE tenant_id = :h)"),
+                {"h": haus},
+            )
         # Seit AUDIT-IDENTITY-INTEGRITY braucht eine Attestierung eine eindeutige lokale Nutzerzuordnung der
         # geprueften Identitaet im Mandanten; der gemeinsame Testnutzer ``dev`` gehoert keinem Testhaus.
         v.execute(
@@ -102,6 +110,7 @@ def haeuser(engine):
     yield
     aufraeumen(engine)
     with engine.begin() as v:
+        v.execute(text("DELETE FROM domain_erp.dunning_rules WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         v.execute(text("DELETE FROM domain_shared.users WHERE id = :id"), {"id": PRUEFER})
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
 
@@ -200,7 +209,7 @@ def reklamation(engine, haus: str, status: str = "anerkannt") -> str:
     return kennung
 
 
-def offener_posten(engine, haus: str, rechnungsnr: str | None = "RE-1") -> str:
+def offener_posten(engine, haus: str, rechnungsnr: str | None = "RE-1", ueberfaellig_tage: int = 0) -> str:
     from sqlalchemy import text
 
     kennung = str(uuid.uuid4())
@@ -210,7 +219,8 @@ def offener_posten(engine, haus: str, rechnungsnr: str | None = "RE-1") -> str:
                 "INSERT INTO domain_erp.offene_posten (id, tenant_id, rechnungsnr, datum, faelligkeit, betrag, offen, konto_typ, op_status) "
                 "VALUES (:id, :h, :nr, :d, :d, 100, 100, 'debitoren', 'offen')"
             ),
-            {"id": kennung, "h": haus, "nr": rechnungsnr if rechnungsnr else "", "d": date.today()},
+            {"id": kennung, "h": haus, "nr": rechnungsnr if rechnungsnr else "",
+             "d": date.today() - timedelta(days=ueberfaellig_tage)},
         )
     return kennung
 
@@ -336,27 +346,38 @@ class TestReklamation:
 
 
 class TestMahnen:
-    def test_mahnen_setzt_eine_mahnstufe(self, client, engine):
+    def test_mahnen_erzeugt_eine_mahnung_und_setzt_die_stufe_am_posten(self, client, engine):
+        # Seit 23.11.2026 der eine Mahnweg: Mahnung (dunning_notices) und Stufe am Posten, kein eigener Verlauf.
         nummer = f"RE-{uuid.uuid4().hex[:8]}"
-        posten = offener_posten(engine, HAUS_A, nummer)
+        posten = offener_posten(engine, HAUS_A, nummer, ueberfaellig_tage=20)
         antwort = client.post(MAHNEN.format(posten), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()
         assert antwort["success"] is True, antwort
-        assert wert(
-            engine,
-            "SELECT COUNT(*) FROM domain_finance.finance_mahnstufen_audit WHERE tenant_id = :h AND rechnungsnr = :n",
-            h=HAUS_A, n=nummer,
-        ) == 1
+        assert wert(engine, "SELECT COUNT(*) FROM domain_erp.dunning_notices WHERE tenant_id = :h AND op_id = :p",
+                    h=HAUS_A, p=posten) == 1
+        assert wert(engine, "SELECT dunning_level FROM domain_erp.offene_posten WHERE id = :p", p=posten) == 1
         assert spuren(engine, HAUS_A, "mahnen") == (1, 1)
 
-    def test_fremder_posten_wird_nicht_gemahnt(self, client, engine):
+    def test_zweites_mahnen_in_der_frist_wird_abgelehnt(self, client, engine):
+        posten = offener_posten(engine, HAUS_A, f"RE-{uuid.uuid4().hex[:8]}", ueberfaellig_tage=20)
+        assert client.post(MAHNEN.format(posten), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()["success"]
+        zweite = client.post(MAHNEN.format(posten), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()
+        assert zweite["success"] is False
+        assert "Zahlungsfrist" in str(zweite.get("error"))
+        assert wert(engine, "SELECT COUNT(*) FROM domain_erp.dunning_notices WHERE op_id = :p", p=posten) == 1
+        assert wert(engine, "SELECT dunning_level FROM domain_erp.offene_posten WHERE id = :p", p=posten) == 1
+
+    def test_nicht_ueberfaelliger_posten_wird_nicht_gemahnt(self, client, engine):
         posten = offener_posten(engine, HAUS_A, f"RE-{uuid.uuid4().hex[:8]}")
+        antwort = client.post(MAHNEN.format(posten), json={"_mode": "execute"}, headers=kopf(HAUS_A)).json()
+        assert antwort["success"] is False
+        assert wert(engine, "SELECT COUNT(*) FROM domain_erp.dunning_notices WHERE op_id = :p", p=posten) == 0
+
+    def test_fremder_posten_wird_nicht_gemahnt(self, client, engine):
+        posten = offener_posten(engine, HAUS_A, f"RE-{uuid.uuid4().hex[:8]}", ueberfaellig_tage=20)
         antwort = client.post(MAHNEN.format(posten), json={"_mode": "execute"}, headers=kopf(HAUS_B)).json()
         assert antwort["success"] is False
         assert spuren(engine, HAUS_B, "mahnen") == (0, 0)
-        assert wert(
-            engine, "SELECT COUNT(*) FROM domain_finance.finance_mahnstufen_audit WHERE tenant_id = ANY(:h)",
-            h=[HAUS_A, HAUS_B],
-        ) == 0
+        assert wert(engine, "SELECT COUNT(*) FROM domain_erp.dunning_notices WHERE op_id = :p", p=posten) == 0
 
 
 class TestEingangsrechnung:
