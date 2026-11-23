@@ -21596,3 +21596,5 @@ Studio-Folgeaktion: Negativnachweise fuer fehlenden Idempotenzschluessel und feh
 M2-WARENEINGANGSABGLEICH: Dateibesitz ergaenzt um tests/test_procurement_match_integration.py fuer PostgreSQL-Abnahme mit vorhandener Rollback-Fixture. Status: valeo_probe vorhanden, beide Tabellen vorhanden, vier fremde Sitzungen im Zustand idle. Kein Reset oder Migration.
 
 PostgreSQL-Abnahme der Studio-Folgeaktion auf valeo_probe: echter REST-Router, signierte synthetische Identitaet und bestehende rueckrollbare Bestellfixture. Vorschau hinterliess keinen Eintrag, zwei identische Execute-Aufrufe hinterliessen genau eine Reklamation. Ein Integrationstest bestanden, neun abgewählt. Keine neue DB oder Migration. Browser, externer CLI-/MCP-Lauf und Freigabe bleiben offen.
+
+Wareneingangsabgleich zeigt Ausnahmen und vorhandene ERS-Gutschriften in zwei weiteren lesenden Tabellen. Sechs Tabellen gegen Produktions-OpenAPI geprueft. Legacy-Folgeaktion freigabe schreibt nur einen Protokolleintrag. Tatsaechliche Rechnungsfreigabe aendert den Status einer gesperrten Rechnungspruefung und braucht einen eigenen Entscheidungsweg; Studio- und Laufzeitabnahme dafuer offen.

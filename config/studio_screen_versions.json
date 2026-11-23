@@ -4523,7 +4523,7 @@
       "version": "1.0.0"
     },
     "einkauf/wareneingangsabgleich-detail": {
-      "definition_hash": "bbdc31b2f5580d7c46a4963f7d4028dbdafc6a237b54702fbff0ea37725fd54a",
+      "definition_hash": "3b4c2d2eb480037d7c4c0091586944ba3b475b2375ee94b8233f9ee63e6e9405",
       "gates_passed": [
         "A",
         "B",

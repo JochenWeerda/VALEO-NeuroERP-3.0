@@ -128,6 +128,14 @@ def build_einkauf_wareneingangsabgleich_detail() -> dict[str, Any]:
                 ("wareneingaenge", "Wareneingänge", (
                     ("gr_number", "Nummer"), ("datum", "Datum"), ("lieferschein", "Lieferschein"), ("status", "Status"),
                 )),
+                ("ausnahmen", "Abweichungen und Ausnahmen", (
+                    ("pos_nr", "Position"), ("schwere", "Schweregrad"),
+                    ("code", "Ausnahmecode"), ("text", "Hinweis"),
+                )),
+                ("ers_credits", "ERS-Gutschriften", (
+                    ("gutschrift_nummer", "Gutschrift"), ("betrag_netto", "Netto"),
+                    ("status", "Status"), ("grund", "Begründung"), ("created_at", "Erfasst am"),
+                )),
                 ("follow_ups", "Folgeaktionsprotokoll", (
                     ("created_at", "Zeitpunkt"), ("action_type", "Aktion"),
                     ("ausnahme_code", "Ausnahme"), ("grund", "Begründung"),
