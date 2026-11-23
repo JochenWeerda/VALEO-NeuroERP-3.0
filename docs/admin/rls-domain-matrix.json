@@ -1053,6 +1053,7 @@
     "app/api/v1/schemas/crm.py",
     "app/api/v1/schemas/inventory.py",
     "app/auth/portal_kunde.py",
+    "app/core/customer_master_profile.py",
     "app/core/flow_spine_registry.py",
     "app/core/screen_definitions_domain_batch15.py",
     "app/core/screen_definitions_finance_capture.py",
@@ -1085,6 +1086,7 @@
     "app/services/beleg_liste.py",
     "app/services/crm_compat_service.py",
     "app/services/crm_lead_service.py",
+    "app/services/customer_master_profile_service.py",
     "app/services/customer_reference.py",
     "app/services/customer_sales_eligibility.py",
     "app/services/docflow_belegadapter.py",
@@ -1124,6 +1126,7 @@
     "app/api/v1/endpoints/compliance_dsgvo.py",
     "app/api/v1/endpoints/contacts.py",
     "app/api/v1/endpoints/customer_extensions.py",
+    "app/api/v1/endpoints/customer_master_profile.py",
     "app/api/v1/endpoints/customers.py",
     "app/api/v1/endpoints/finance_stammdaten.py",
     "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
@@ -1159,7 +1162,7 @@
     "dienst": 14,
     "nutzlast": 8,
     "standardmandant": 6,
-    "token": 26
+    "token": 27
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",

@@ -17,8 +17,6 @@ from app.core.database import get_db
 from app.core.tenant import get_tenant_id
 
 
-from app.api.v1.schemas.base import BaseSchema
-from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
 router = APIRouter(prefix="/kasse/tagesabschluss", tags=["Kasse - Tagesabschluss"])
@@ -36,22 +34,6 @@ class TagesabschlussAktuell(BaseModel):
     transaktionen: int
     stornos: int
     retouren: int
-
-
-class TagesabschlussSubmitIn(BaseModel):
-    datum: str
-    kassenstand: float
-    barverkauf: float
-    kartenzahlung: float
-    differenz: float
-
-
-class TagesabschlussSubmitOut(BaseModel):
-    id: str
-    datum: str
-    status: str
-    belegnummer: str
-    umsatz_gesamt: float
 
 
 # ---------------------------------------------------------------------------
@@ -112,96 +94,27 @@ async def get_aktuell(
     )
 
 
-@router.post("", response_model=TagesabschlussSubmitOut, status_code=201, summary="Tagesabschluss einreichen", dependencies=SCHREIBEN["VERKAUF"])
-async def submit_tagesabschluss(
-    payload: TagesabschlussSubmitIn,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-):
-    """Einfachen Kassen-Tagesabschluss buchen."""
-    from app.services.fiscalization.contracts import CashPointClosingCommand, PaymentLine
-    from app.services.fiscalization.providers import FiscalProviderError
-    from app.services.fiscalization.service import FiscalizationService, FiscalNotConfiguredError
+# Gebucht wird der Kassentag ausschliesslich ueber POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber
+# den Buchungsdienst, Stand in domain_pos.pos_tagesabschluesse). Der fruehere POST hier meldete "gebucht", ohne
+# zu buchen (entfernt 19.11.2026).
 
-    fiscal = FiscalizationService(db, tenant_id)
-    try:
-        config = fiscal.require_config()
-    except FiscalNotConfiguredError as exc:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=409, detail=str(exc)) from exc
-    summary = fiscal.daily_summary(date.fromisoformat(payload.datum))
-    if int(summary["incomplete_count"]) > 0:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=409, detail="Tagesabschluss blockiert: unvollstaendige TSE-Transaktionen")
-    if abs(payload.barverkauf - float(summary["cash_total"])) > 0.01 or abs(
-        payload.kartenzahlung - float(summary["card_total"])
-    ) > 0.01:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=422, detail="Gemeldete Zahlarten stimmen nicht mit dem Fiskaljournal ueberein")
 
-    abschluss_id = str(uuid4())
-    belegnummer = f"KA-{payload.datum}"
-    try:
-        closing = fiscal.close_cash_point(
-            CashPointClosingCommand(
-                closing_id=belegnummer,
-                cash_register_id=config["cash_register_id"],
-                terminal_id=str(config.get("settings", {}).get("terminal_id") or config["client_id"]),
-                business_date=date.fromisoformat(payload.datum),
-                transaction_count=int(summary["transaction_count"]),
-                gross_total=Decimal(str(summary["gross_total"])),
-                payments=[
-                    PaymentLine(method="BAR", amount=Decimal(str(summary["cash_total"]))),
-                    PaymentLine(method="KARTE", amount=Decimal(str(summary["card_total"]))),
-                ],
-                payload={"counted_cash": str(payload.kassenstand), "cash_difference": str(payload.differenz)},
-            )
-        )
-    except (FiscalProviderError, RuntimeError, ValueError) as exc:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=503, detail=f"Fiskalischer Tagesabschluss fehlgeschlagen: {exc}") from exc
-    if closing.simulated:
-        from fastapi import HTTPException
-        raise HTTPException(status_code=409, detail="Simulierter Tagesabschluss darf nicht als gebucht abgeschlossen werden")
-
-    # Delegate to the existing compat POS tagesabschluss logic if needed,
-    # or insert lightweight record
-    try:
-        import json
-        items_json = json.dumps({
-            "umsatz_bar": payload.barverkauf,
-            "umsatz_ec": payload.kartenzahlung,
-            "kassenstand": payload.kassenstand,
-            "differenz": payload.differenz,
-            "belegnummer": belegnummer,
-        })
-
-        db.execute(
-            text("""
-                INSERT INTO abschluss_checklisten
-                (id, tenant_id, periode, abschluss_art, status, verantwortlicher,
-                 beginn_datum, abschluss_datum, items, created_at, updated_at)
-                VALUES
-                (:id, :tid, :periode, 'kasse', 'gebucht', 'Kassierer',
-                 NOW(), NOW(), :items, NOW(), NOW())
-            """),
-            {
-                "id": abschluss_id,
-                "tid": tenant_id,
-                "periode": payload.datum,
-                "items": items_json,
-            },
-        )
-        db.commit()
-    except Exception:
-        db.rollback()
-        from fastapi import HTTPException
-        raise HTTPException(status_code=500, detail="Tagesabschluss konnte nicht persistiert werden")
-
-    return TagesabschlussSubmitOut(
-        id=abschluss_id,
-        datum=payload.datum,
-        status="gebucht",
-        belegnummer=belegnummer,
-        umsatz_gesamt=payload.barverkauf + payload.kartenzahlung,
+def merke_kassentag_abgeschlossen(db: Session, tenant_id: str, kasse_id: str, datum, z_bon_nr: str,
+                                  tse_referenz, umsatz_brutto, kassierer) -> None:
+    """Stand des Kassentags fuer Z-Bon und Kassenmasken (``domain_pos.pos_tagesabschluesse``), in der Transaktion
+    des Abschlusses. Bis 19.11.2026 schrieb ihn nur eine zweite, ueberdeckte Zustandsmaschine mit simulierter
+    TSE-Signatur; nach einem echten Abschluss blieb der Tag dort offen."""
+    db.execute(
+        text("""
+            INSERT INTO domain_pos.pos_tagesabschluesse
+            (id, tenant_id, kasse_id, datum, status, z_bon_nr, tse_signatur, umsatz_brutto_eur, operator,
+             created_at, updated_at)
+            VALUES (CAST(:id AS uuid), :tid, :kasse, :datum, 'ABGESCHLOSSEN', :zbon, :tse, :umsatz, :operator,
+                    NOW(), NOW())
+            ON CONFLICT (tenant_id, kasse_id, datum) DO UPDATE SET
+              status = 'ABGESCHLOSSEN', z_bon_nr = EXCLUDED.z_bon_nr, tse_signatur = EXCLUDED.tse_signatur,
+              umsatz_brutto_eur = EXCLUDED.umsatz_brutto_eur, fehler_grund = NULL, updated_at = NOW()
+        """),
+        {"id": str(uuid4()), "tid": tenant_id, "kasse": kasse_id, "datum": datum.isoformat(), "zbon": z_bon_nr,
+         "tse": tse_referenz, "umsatz": Decimal(str(umsatz_brutto or 0)), "operator": kassierer or "Kasse"},
     )

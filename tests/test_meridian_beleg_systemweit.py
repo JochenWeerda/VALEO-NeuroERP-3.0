@@ -48,6 +48,9 @@ _RAW_KEY_ALLOWLIST = {
     # USt-IdNr. ist eine Steuernummer, kein Fremdschluessel.
     "ust_id",
     "vat_id",
+    "partner_vat_id",  # Kundenprofil (Studio-Kundenakte): Praefix partner_ vor der USt-IdNr.
+    # EU-Betriebsnummer (InVeKoS) ist eine amtliche Kennung des Betriebs, kein Fremdschluessel.
+    "partner_eu_farm_id",
     # Glaeubiger-Identifikationsnummer der Bundesbank (SEPA), eine fachliche Kennung.
     "sepa_glaeubiger_id",
     # Futterplan: Herkunftsnachweis, ausdruecklich als technische ID beschriftet.

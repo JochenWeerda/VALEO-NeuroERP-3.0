@@ -102,6 +102,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `crm_opportunity_reference` | Shared tenant-checked opportunity reference resolution for every activity adapter. |
 | `crm_ownership_service` | Kunden-Ownership (DOM-CRM-004.3) — Zuordnung & Übergabe. |
 | `crm_segment_service` | Canonical, tenant-scoped CRM segment data and bounded membership evaluation. |
+| `customer_master_profile_service` | Tenant-scoped customer master profile; mutations stay within the caller's transaction. |
 | `customer_reference` | Referenzen in Maskenkoepfen lesbar machen. |
 | `customer_sales_eligibility` | CRM-Kunde ↔ Business-Partner: Sperr- und Lieferfähigkeit für Verkaufsbelege. |
 | `customer_service` | Service layer for CRM Customer management (crm-core + monolith bridge). |
@@ -275,7 +276,6 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `pos_accounting_service` | — |
 | `pos_compat_service` | Service layer for compat POS domain routes. |
 | `pos_fiscal_document_service` | — |
-| `pos_tagesabschluss_service` | DOM-POS-004.2 — POS Tagesabschluss Lifecycle (Z-Bon, TSE-Signatur, DSFinV-K-Export). |
 | `position_guard_service` | No-Speculation Guard Service for Commodity Positions. |
 | `position_service` | Commodity Position Calculation Service. |
 | `position_snapshot_service` | Commodity Position Snapshot Service (optional cache for matrix performance). |

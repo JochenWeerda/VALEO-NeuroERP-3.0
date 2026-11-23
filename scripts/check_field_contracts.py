@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import json
 import pathlib
 import re
 import sys
@@ -52,12 +53,16 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 #: Stand bei Einfuehrung. Abweichungen duerfen nicht zunehmen.
 BASELINE = 0
+SPEC_PATH = pathlib.Path(__file__).resolve().parents[1] / "docs" / "schnittstellen" / "openapi.json"
 
 
 def _spec():
-    from app.main import app
-
-    return app.openapi()
+    # This is exported from production main:app and checked for drift upstream.
+    # app.main is the compatibility test application and has a different API.
+    spec = json.loads(SPEC_PATH.read_text(encoding="utf-8"))
+    if not isinstance(spec, dict) or not isinstance(spec.get("paths"), dict) or not spec.get("openapi"):
+        raise ValueError("Canonical production OpenAPI is invalid")
+    return spec
 
 
 def _operation(spec: dict, endpunkt: str) -> dict | None:

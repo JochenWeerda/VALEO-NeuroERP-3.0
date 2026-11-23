@@ -55,6 +55,9 @@ async def whatsapp_verify(request: Request):
     token = request.query_params.get("hub.verify_token")
     challenge = request.query_params.get("hub.challenge")
 
+    if mode != "subscribe" or not token or not challenge:
+        raise HTTPException(status_code=400, detail="Invalid webhook verification parameters")
+
     verify_token = settings.CHANNEL_WHATSAPP_VERIFY_TOKEN
     if not verify_token:
         raise HTTPException(status_code=503, detail="CHANNEL_WHATSAPP_VERIFY_TOKEN not configured")

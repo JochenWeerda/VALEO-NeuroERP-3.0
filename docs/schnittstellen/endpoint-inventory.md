@@ -147,6 +147,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_reports` | CRM Reports and Analytics endpoints. |
 | `crm_segments` | Canonical persistent CRM segments; all routes use the verified tenant. |
 | `customer_extensions` | Customer extension endpoints (l3c-kunde extras) |
+| `customer_master_profile` | Staff-only customer master profile and audited update command. |
 | `customers` | CRM Customer endpoints backed by the crm-core service. |
 | `daily_prices` | Daily Price API endpoints. |
 | `data_quality` | Datenqualitäts-API (Gap 040): Validierung von Dubletten, Pflichtfeldern und Referenzen. |
@@ -363,7 +364,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pos_payments` | — |
 | `pos_payments_promotions` | POS payment split and promotions preview endpoints. |
 | `pos_retoure` | POS: Retoure und Abgleich offline kassierter Bons. |
-| `pos_tagesabschluss_actions` | DOM-POS-004 — POS Tagesabschluss: Z-Bon, TSE-Simulation, DSFinV-K. |
 | `position_overrides` | Commodity Position Override API (Freigabe anfordern / genehmigen / ablehnen). |
 | `position_rules` | Commodity Position Rules API (No-Speculation Guard Regeln). |
 | `preis_kalkulation_bridge` | Preiskalkulation der Maske ``preise/kalkulation`` (aus ``mask_frontend_bridges`` herausgeloest, 19.10.2026). |
