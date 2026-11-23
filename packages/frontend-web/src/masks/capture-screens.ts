@@ -1578,20 +1578,20 @@ export const transporteFahrerScreen = {
     {
       "key": "touren",
       "label": "Tourenplanung",
-      "command": "driver.openTours",
+      "navigationRoute": "/logistik/tourenplanung",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Wechselt in die Tourenplanung."
+      "zone": "footer"
     },
     {
       "key": "dokumente",
       "label": "Dokumente",
-      "command": "driver.openDocuments",
+      "navigationRoute": "/dokumente/ablage",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Oeffnet die Dokumentenablage."
+      "zone": "footer"
     },
     {
       "key": "export",
@@ -3023,11 +3023,11 @@ export const fuhrparkFahrzeugStammScreen = {
     {
       "key": "liste",
       "label": "Zur Liste",
-      "command": "fuhrpark.openFahrzeugListe",
+      "navigationRoute": "/fuhrpark/fahrzeuge",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Wechselt zur Fahrzeugliste."
+      "zone": "footer"
     },
     {
       "key": "drucker",
@@ -4073,11 +4073,11 @@ export const personalBewerbungenScreen = {
     {
       "key": "erklaerungen",
       "label": "Einwilligungserklärungen",
-      "command": "personal.openErklaerungen",
+      "navigationRoute": "/personal/einwilligungserklaerungen",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
+      "zone": "footer"
     }
   ],
   "tables": [
@@ -4233,20 +4233,20 @@ export const personalBewerbungEinwilligungScreen = {
     {
       "key": "zurueck",
       "label": "Zu den Bewerbungen",
-      "command": "personal.openBewerbungen",
+      "navigationRoute": "/personal/bewerbungen",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Wechselt zur Bewerbungsliste."
+      "zone": "footer"
     },
     {
       "key": "erklaerungen",
       "label": "Einwilligungserklärungen",
-      "command": "personal.openErklaerungen",
+      "navigationRoute": "/personal/einwilligungserklaerungen",
+      "localEffect": "navigation",
       "kind": "secondary",
       "dangerLevel": "safe",
-      "zone": "footer",
-      "stubReason": "Oeffnet die Fassungen der Einwilligungserklaerung."
+      "zone": "footer"
     }
   ],
   "tabs": [

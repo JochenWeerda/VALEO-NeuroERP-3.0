@@ -7,13 +7,16 @@ from decimal import Decimal
 import pytest
 
 from app.services.finance_dunning_service import (
-    _DEFAULT_RULES,
     compute_dunning,
     days_based_level,
     next_dunning_level,
 )
 
 pytestmark = pytest.mark.unit
+
+# Regeln wie ein Mandant sie hinterlegt (Vorgaberegeln gibt es seit 23.11.2026 nicht mehr).
+REGEL = {1: {"fee_amount": 5.0, "interest_rate": 0.0, "payment_deadline_days": 14},
+         3: {"fee_amount": 20.0, "interest_rate": 8.0, "payment_deadline_days": 7}}
 
 
 def test_days_based_level():
@@ -38,12 +41,17 @@ def test_next_dunning_level_springt_nach_ueberfaelligkeit():
 
 def test_compute_dunning_zins_anteilig():
     # 800 € @ Stufe 3 (8 % p.a.), 76 Tage → Zins 800*0.08*76/365 = 13,33.
-    r = compute_dunning(Decimal("800"), 3, _DEFAULT_RULES[3], 76)
+    r = compute_dunning(Decimal("800"), 3, REGEL[3], 76)
     assert r["dunning_fee"] == 20.0
     assert r["interest"] == 13.33
     assert r["total_amount"] == 833.33
 
 
 def test_compute_dunning_stufe1_ohne_zins():
-    r = compute_dunning(Decimal("5000"), 1, _DEFAULT_RULES[1], 15)
+    r = compute_dunning(Decimal("5000"), 1, REGEL[1], 15)
     assert r["dunning_fee"] == 5.0 and r["interest"] == 0.0 and r["total_amount"] == 5005.0
+
+
+def test_prozentuale_gebuehr_kommt_zur_festen_hinzu():
+    r = compute_dunning(Decimal("1000"), 1, {"fee_amount": 5.0, "fee_percentage": 1.5, "interest_rate": 0}, 10)
+    assert r["dunning_fee"] == 20.0 and r["total_amount"] == 1020.0

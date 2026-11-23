@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MARKE = "// Runtime46-Altlast (STUDIO-UMBAU-RUNTIME46)"
-HOECHSTENS = 131  # Stand 14.11.2026 (Klassen, Workflow, Sorten und Listen verhaltensgeprueft); nur senken
+HOECHSTENS = 130  # Stand 23.11.2026 (Fahrer: Tourenplanung navigiert ueber die ScreenDefinition); nur senken
 # E2E-Smoke: Faelle ohne echte Maske (fehlende Maske oder batch15-Platzhalter) laufen als test.fixme.
 HOECHSTENS_SMOKE = 9  # Stand 03.11.2026 (Lagerbestand repariert); nur senken
 

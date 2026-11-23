@@ -275,6 +275,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `finance_agrar_sales_repair_20260626` | BULK-REPAIR-001: Finance + Agrar + Sales Batch-Repair-Migration Wave 11. |
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
 | `finance_hr_einkauf_repair_20260626` | FINANCE-HR-EINKAUF-REPAIR-001: Finance + HR + Einkauf Batch-Repair Wave 12. |
+| `finance_router_altspeicher_entfernen_20261123` | Fuenf Finanz-Alttabellen ohne Migration entfallen (M3). |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_document_link_unique_20260915` | FSX-011: eindeutiger Belegbezug fuer offene Flow-Spine-Vorgaenge |
 | `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
@@ -356,6 +357,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `log_freight_tariff_storno_20260613` | Fracht-Tarif: Storno-Spalten (soft, auditierbar). |
 | `log_logistics_core_20260612` | Logistik Kern-Tabellen (domain_logistics) — Alembic statt Runtime-DDL. |
 | `log_touren_initial` | Verladung Domain Models Migration |
+| `mahnstufen_verlauf_entfernen_20261123` | Der eigene Mahnstufen-Verlauf entfaellt - der Verlauf sind die Mahnungen (M3, ein Mahnweg). |
 | `mail_workspace_20260821` | Role based ERP mail workspace. |
 | `mailkonto_mandant_20261008` | Postfaecher je Mandant: ausgehende E-Mails ueber den Dienst des Mandanten. |
 | `mandant_finanz_crm_20261007` | Ersteller eines Zahlungslaufs, Opportunity an der Aktivitaet. |
@@ -411,6 +413,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `portal_order_idempotency_20261014` | Portal-Bestellungen: Spalte idempotency_key, eindeutig je Mandant und Kunde. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
+| `pos_ust_je_satz_20261119` | Kassiervorgaenge fuehren ihren Bruttobetrag je Umsatzsteuersatz (M3, POS-Umsatzsteuer). |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
 | `postfach_microsoft_20261008` | Postfaecher: Anbieter Microsoft 365. |
 | `preisfindung_rabattregeln_20261005` | Rollenrabatte als Tabelle — und ein Rabatt bleibt unter hundert Prozent. |

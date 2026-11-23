@@ -120,7 +120,7 @@ def berechne(db: Session, tenant_id: str, zeitraum: str) -> UStVAStand:
                 FROM domain_erp.journal_entry_lines jel
                 JOIN domain_erp.journal_entries je ON je.id = jel.journal_entry_id
                 JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
-                WHERE je.tenant_id = :tid AND je.status = 'posted' AND je.period = ANY(:ps)
+                WHERE je.tenant_id = :tid AND je.status IN ('posted', 'reversed') AND je.period = ANY(:ps)
                 GROUP BY coa.account_number
                 """
             ),
@@ -130,7 +130,7 @@ def berechne(db: Session, tenant_id: str, zeitraum: str) -> UStVAStand:
     stand = db.execute(
         text(
             """
-            SELECT COUNT(*) FILTER (WHERE status = 'posted') AS gebucht,
+            SELECT COUNT(*) FILTER (WHERE status IN ('posted', 'reversed')) AS gebucht,
                    COUNT(*) FILTER (WHERE status = 'draft')  AS entwurf
             FROM domain_erp.journal_entries
             WHERE tenant_id = :tid AND period = ANY(:ps)

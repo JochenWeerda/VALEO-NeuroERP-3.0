@@ -1546,6 +1546,7 @@
     "app/security/audit_service.py",
     "app/services/finance_closing_service.py",
     "app/services/finance_freigabe.py",
+    "app/services/finance_saldenvortrag_service.py",
     "app/services/finance_transaction_service.py",
     "app/services/sales_posting_service.py",
     "app/services/sepa_xml_generator.py",
@@ -1576,8 +1577,8 @@
     "token": 8
    },
    "standardmandant_stellen": [
-    "app/finance/router.py:1165",
-    "app/finance/router.py:1200"
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/financial_reports.py:178",
@@ -1635,6 +1636,7 @@
     "app/finance/router.py",
     "app/services/closing_checklist_validation.py",
     "app/services/finance_datev_service.py",
+    "app/services/finance_mahnstufe_service.py",
     "app/services/finance_op_service.py",
     "app/services/finance_period_service.py",
     "app/services/mcp_execution_service.py",
@@ -1644,7 +1646,6 @@
    "schreiber": [
     "app/api/v1/endpoints/credit_debit_memos.py",
     "app/api/v1/endpoints/dauerauftraege.py",
-    "app/api/v1/endpoints/dunning.py",
     "app/api/v1/endpoints/erechnung_import.py",
     "app/api/v1/endpoints/ers_settlement.py",
     "app/api/v1/endpoints/fibu_zahlungsmeldungen.py",
@@ -1674,8 +1675,8 @@
     "token": 20
    },
    "standardmandant_stellen": [
-    "app/finance/router.py:1165",
-    "app/finance/router.py:1200"
+    "app/finance/router.py:396",
+    "app/finance/router.py:431"
    ],
    "null_stellen": [
     "app/api/v1/endpoints/compat.py:1556",

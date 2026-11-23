@@ -139,8 +139,6 @@ REFERENCE_COMMANDS: dict[str, frozenset[str]] = {
     "transporte/fahrer": frozenset({
         "driver.create",
         "driver.openAvailable",
-        "driver.openTours",
-        "driver.openDocuments",
         "driver.export",
     }),
     "fuhrpark/fahrzeuge": frozenset({"vehicle.create"}),

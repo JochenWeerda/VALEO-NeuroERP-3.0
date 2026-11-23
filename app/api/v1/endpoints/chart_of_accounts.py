@@ -325,7 +325,7 @@ async def datev_export_chart_of_accounts(
         JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
         LEFT JOIN domain_erp.chart_of_accounts coa ON coa.id = jel.account_id
         WHERE je.tenant_id = :tenant_id
-          AND je.status = 'posted'
+          AND je.status IN ('posted', 'reversed')
           AND DATE(je.entry_date) >= :von_datum
           AND DATE(je.entry_date) <= :bis_datum
         ORDER BY je.entry_date, jel.journal_entry_id, jel.line_number

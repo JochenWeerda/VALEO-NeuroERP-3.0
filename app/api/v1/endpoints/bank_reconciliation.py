@@ -57,7 +57,7 @@ WITH statement AS (
                AND l.credit_amount::text NOT IN ('NaN','Infinity','-Infinity')
                AND ((l.debit_amount>0 AND l.credit_amount=0) OR (l.credit_amount>0 AND l.debit_amount=0)),FALSE)) AS valid_legs
     FROM statement s
-    JOIN domain_erp.journal_entries je ON je.tenant_id=s.tenant_id AND je.status='posted'
+    JOIN domain_erp.journal_entries je ON je.tenant_id=s.tenant_id AND je.status IN ('posted','reversed')
          AND je.entry_date < s.statement_date + 1
     JOIN domain_erp.journal_entry_lines l ON l.journal_entry_id=je.id
     LEFT JOIN domain_erp.chart_of_accounts ca ON ca.id=l.account_id

@@ -16866,6 +16866,11 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "vat_breakdown",
+              "nullable": false,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],
@@ -20259,6 +20264,7 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py"
           ],
           "written_by": [
@@ -20759,7 +20765,7 @@
             "id"
           ],
           "written_by": [
-            "app/api/v1/endpoints/dunning.py"
+            "app/services/finance_dunning_service.py"
           ]
         },
         "delivery_notes": {
@@ -21086,10 +21092,10 @@
             "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/export_service.py",
             "app/services/finance_dunning_service.py",
+            "app/services/finance_mahnstufe_service.py",
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/dunning.py",
             "app/services/finance_dunning_service.py"
           ]
         },
@@ -21730,6 +21736,7 @@
             "app/services/finance_datev_service.py",
             "app/services/finance_freigabe.py",
             "app/services/finance_read_model_service.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py",
             "app/services/kontrollkorb.py",
             "app/services/open_item_read_source.py",
@@ -21854,7 +21861,8 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
-            "app/services/finance_freigabe.py"
+            "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py"
           ]
         },
         "lohn_import_runs": {
@@ -22210,7 +22218,6 @@
             "app/api/v1/endpoints/credit_management.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
-            "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/liquidity.py",
             "app/api/v1/endpoints/liquidity_planning.py",
@@ -22227,6 +22234,7 @@
             "app/services/finance_clearing_service.py",
             "app/services/finance_datev_service.py",
             "app/services/finance_dunning_service.py",
+            "app/services/finance_mahnstufe_service.py",
             "app/services/finance_op_service.py",
             "app/services/finance_period_service.py",
             "app/services/mcp_execution_service.py",
@@ -22243,7 +22251,6 @@
           "written_by": [
             "app/api/v1/endpoints/credit_debit_memos.py",
             "app/api/v1/endpoints/dauerauftraege.py",
-            "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/erechnung_import.py",
             "app/api/v1/endpoints/ers_settlement.py",
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py",
@@ -23025,7 +23032,8 @@
             "app/services/beleg_erechnung.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
-            "app/services/fiscalization/service.py"
+            "app/services/fiscalization/service.py",
+            "app/services/pos_accounting_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",
@@ -23953,58 +23961,6 @@
             "app/api/v1/endpoints/ebilanz_elster.py"
           ]
         },
-        "finance_mahnstufen_audit": {
-          "columns": [
-            {
-              "name": "id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "tenant_id",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "rechnungsnr",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "stufe",
-              "nullable": false,
-              "type": "character varying"
-            },
-            {
-              "name": "operator",
-              "nullable": true,
-              "type": "character varying"
-            },
-            {
-              "name": "bearbeitungsgebuehr_eur",
-              "nullable": true,
-              "type": "numeric"
-            },
-            {
-              "name": "created_at",
-              "nullable": false,
-              "type": "timestamp with time zone"
-            }
-          ],
-          "foreign_keys": [],
-          "owner_domain": "finance",
-          "ownership_reason": "Custodian domain_finance / Domain finance.",
-          "placement": "native",
-          "primary_key": [
-            "id"
-          ],
-          "read_by": [
-            "app/services/finance_mahnstufe_service.py"
-          ],
-          "written_by": [
-            "app/services/finance_mahnstufe_service.py"
-          ]
-        },
         "finance_ratenzahlungsplaene": {
           "columns": [
             {
@@ -24454,7 +24410,6 @@
           "read_by": [
             "app/api/v1/endpoints/budget_planning.py",
             "app/api/v1/endpoints/kostenrechnung.py",
-            "app/finance/models.py",
             "app/services/personal_organisation_service.py"
           ],
           "written_by": [

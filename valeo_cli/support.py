@@ -24,6 +24,26 @@ SUPPORTED_ADAPTERS = {"docflow.v1", "harvest.control.v1"}
 GENERIC_PATH_PARAMETERS = {"{entity_id}", "{screen_id}"}
 
 _PLACEHOLDER = re.compile(r"\{[^}]+\}")
+#: Platzhalter, die in Maskenaktionen die Zeile selbst meinen - dieselbe Kennung, die ``--id`` angibt (23.11.2026:
+#: Mahnung versenden, Kontoauszug abgleichen, Vorfall eskalieren/erledigen/wiederholen waren nur deshalb ohne CLI).
+#: Bewusst eine Liste: ``{approval_id}`` etwa ist nicht die Zeile, sondern gehoert dem DocFlow-Freigabe-Adapter.
+ZEILEN_KENNUNGEN = {"{id}", "{incident_id}", "{statement_id}"}
+
+
+def _unbekannte_platzhalter(endpoint: str) -> set[str]:
+    unbekannt = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
+    if len(unbekannt) == 1 and "{entity_id}" not in endpoint and next(iter(unbekannt)) in ZEILEN_KENNUNGEN:
+        return set()
+    return unbekannt
+
+
+def _entitaet_einsetzen(endpoint: str, entity_id: str | None, screen_id: str) -> str:
+    wert = quote(entity_id or "", safe="")
+    pfad = endpoint.replace("{entity_id}", wert).replace("{screen_id}", screen_id)
+    rest = set(_PLACEHOLDER.findall(pfad))
+    if len(rest) == 1 and next(iter(rest)) in ZEILEN_KENNUNGEN:
+        pfad = pfad.replace(next(iter(rest)), wert)
+    return pfad
 _DOCFLOW = re.compile(r"^/api/v1/docflow(?:/|$)")
 _IDENTITY_BUDGET = re.compile(r"^/api/v1/identity/budgets/actions/(root|allocate)$")
 _ROW_COMMANDS = {
@@ -64,7 +84,7 @@ def support(action: dict[str, Any], screen_id: str | None = None) -> Support:
         endpoint = flow.get("submitEndpoint") if isinstance(flow, dict) else None
         if not endpoint:
             return Support(False, "eingabe_in_maske")
-        unknown = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
+        unknown = _unbekannte_platzhalter(endpoint)
         if unknown:
             return Support(False, "pfadparameter:" + ",".join(sorted(unknown)))
         return Support(True)
@@ -77,7 +97,7 @@ def support(action: dict[str, Any], screen_id: str | None = None) -> Support:
         return Support(True) if adapter in SUPPORTED_ADAPTERS else Support(False, f"adapter:{adapter}")
     if _DOCFLOW.match(endpoint):
         return Support(False, "docflow_ohne_adapter")
-    unknown = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
+    unknown = _unbekannte_platzhalter(endpoint)
     if unknown:
         return Support(False, "pfadparameter:" + ",".join(sorted(unknown)))
     return Support(True)
@@ -109,7 +129,9 @@ def requires_entity(action: dict[str, Any]) -> bool:
     view = action.get("readView")
     if isinstance(view, dict):
         return bool(_PLACEHOLDER.search(view.get("endpoint", "")))
-    return "{entity_id}" in (action.get("commandEndpoint") or input_flow_endpoint(action) or "")
+    endpoint = action.get("commandEndpoint") or input_flow_endpoint(action) or ""
+    rest = set(_PLACEHOLDER.findall(endpoint)) - GENERIC_PATH_PARAMETERS
+    return "{entity_id}" in endpoint or (len(rest) == 1 and next(iter(rest)) in ZEILEN_KENNUNGEN)
 
 
 def identity_budget_input(endpoint: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -141,7 +163,7 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
             raise ValueError("Eingabefluesse kennen keinen Trockenlauf; nur ausfuehren (--modus execute).")
         if requires_entity(action) and not entity_id:
             raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
-        path = flow_endpoint.replace("{entity_id}", quote(entity_id or "", safe="")).replace("{screen_id}", screen_id)
+        path = _entitaet_einsetzen(flow_endpoint, entity_id, screen_id)
         body = dict(payload)
         if audit_reason and "reason" not in body:
             body["reason"] = audit_reason
@@ -149,7 +171,7 @@ def build_request(action: dict[str, Any], *, screen_id: str, entity_id: str | No
     endpoint = action["commandEndpoint"]
     if requires_entity(action) and not entity_id:
         raise ValueError("Diese Aktion braucht eine Objektkennung (--id).")
-    path = endpoint.replace("{entity_id}", quote(entity_id or "", safe="")).replace("{screen_id}", screen_id)
+    path = _entitaet_einsetzen(endpoint, entity_id, screen_id)
     row_field = row_command(action)
     if row_field:
         if mode != "execute":
