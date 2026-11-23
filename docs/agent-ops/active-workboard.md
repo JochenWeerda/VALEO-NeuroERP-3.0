@@ -976,3 +976,5 @@ Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. RE
 
 ## M2-NAVIGATION-CONTRACTS - reserviert, Codex Lead
 Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen Maskendefinitionen und deren erzeugte Register. Nur bereits verdrahtete UI-Aktionen deklarieren; Funktionsumfang und Ratschenabnahme pruefen.
+
+M2-NAVIGATION-CONTRACTS: DMS-Vorschau und Artikelnavigation sowie Duengemittel-Quellbeleg als bestehende lokale Effekte deklariert. Inventar auf Basis 602394bd9 gruen: genau drei undeclarierte Eintraege entfallen, 292 -> 289. Andere Listen unveraendert. Studio-Katalog synchron; kein neuer Serverbefehl. Browserabnahme offen.

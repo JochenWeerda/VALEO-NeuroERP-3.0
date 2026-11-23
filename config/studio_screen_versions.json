@@ -2126,7 +2126,7 @@
       "version": "1.0.0"
     },
     "auswertungen/dms-volltext": {
-      "definition_hash": "4c123a3b7863ae9d2d46ea384bc09f902b384ece95acea1335f67b291bae635e",
+      "definition_hash": "eaace41645fe72b03c2020451eb586664e9c0bb7cfcc170102e86f29dc6d2bdf",
       "gates_passed": [
         "A",
         "B",
@@ -2137,7 +2137,7 @@
       "version": "1.0.0"
     },
     "auswertungen/duengemittelmengen": {
-      "definition_hash": "7ce22fec3333e7e2461eddbf6f048635102f09f23cf8b9d9b474312292efb8cb",
+      "definition_hash": "4b6ce04dac894fea96bdee4e7e3ef2d94f2789b35c0e133aed7c236c060afad7",
       "gates_passed": [
         "A",
         "B",
