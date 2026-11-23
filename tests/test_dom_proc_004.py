@@ -168,6 +168,11 @@ class TestRechnungspruefung:
         result = freigabe_rechnungspruefung(db, "rp-1", "t1", "FREIGEGEBEN", "mgr-1", "Sonderfall")
         assert result["status"] == "FREIGEGEBEN"
         db.commit.assert_called_once()
+        lookup, update = db.execute.call_args_list
+        assert "tenant_id = :tenant FOR UPDATE" in str(lookup.args[0])
+        assert lookup.args[1] == {"id": "rp-1", "tenant": "t1"}
+        assert "tenant_id = :tenant" in str(update.args[0])
+        assert update.args[1]["tenant"] == "t1"
 
     def test_freigabe_nicht_gesperrt_raises(self):
         from app.services.proc_rechnungspruefung_service import freigabe_rechnungspruefung, RechnungspruefungError

@@ -86,13 +86,11 @@ def freigabe_rechnungspruefung(
         raise RechnungspruefungError(f"Ungültige Entscheidung: {entscheidung}")
 
     row = db.execute(
-        text("SELECT * FROM domain_procurement.proc_rechnungspruefungen WHERE id = :id"),
-        {"id": pruefung_id},
+        text("SELECT * FROM domain_procurement.proc_rechnungspruefungen WHERE id = :id AND tenant_id = :tenant FOR UPDATE"),
+        {"id": pruefung_id, "tenant": tenant_id},
     ).mappings().first()
     if not row:
         raise RechnungspruefungError(f"Rechnungsprüfung {pruefung_id} nicht gefunden")
-    if row["tenant_id"] != tenant_id:
-        raise RechnungspruefungError(f"Rechnungsprüfung {pruefung_id} gehört nicht zu Tenant {tenant_id}")
     if row["status"] != "GESPERRT":
         raise RechnungspruefungError(
             f"Manuelle Freigabe nur für GESPERRT möglich (aktuell: {row['status']})"
@@ -102,9 +100,9 @@ def freigabe_rechnungspruefung(
         text("""
             UPDATE domain_procurement.proc_rechnungspruefungen
             SET status = :status, freigabe_operator = :operator, freigabe_grund = :grund
-            WHERE id = :id
+            WHERE id = :id AND tenant_id = :tenant
         """),
-        {"status": entscheidung.upper(), "operator": operator, "grund": grund, "id": pruefung_id},
+        {"status": entscheidung.upper(), "operator": operator, "grund": grund, "id": pruefung_id, "tenant": tenant_id},
     )
     db.commit()
     logger.info("rechnungspruefung %s: GESPERRT → %s von %s", pruefung_id, entscheidung, operator)
