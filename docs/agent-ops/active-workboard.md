@@ -21583,3 +21583,5 @@ Folgeaktions-REST akzeptiert Idempotency-Key. Protokolleintrag und Wiederholungs
 Folgeaktion: Schreibservice verwendet eine separat aufrufbare lesende Fachvalidierung fuer mandantenbezogene Bestellaufloesung, Aktionsart und Begruendung. Der positive Vertrag prueft kanonische Eingaben und genau einen Lesezugriff ohne Commit. Sechs Folgeaktionstests bestanden.
 
 Folgeaktions-Masken-API nutzt gemeinsame Fachvalidierung und delegierten Transaktionsvertrag. Vorschau ist Standard, Ausfuehrung benoetigt Auditgrund und Wiederholungsschluessel. Unterstuetzt Nachforderung, Reklamation und Eskalation. Sieben gezielte Tests gruen, OpenAPI erzeugt. Studio-Aktionsbindung, Freigabe und PostgreSQL-/Browserabnahme offen.
+
+M2-WARENEINGANGSABGLEICH: Codex ergaenzt Studio-Aktionsdefinition und prueft das Standard-Execute-Envelope. Dateibesitz erweitert um runtime/useActionRuntime.ts fuer URL-Kodierung des Befehlsparameters.
