@@ -211,3 +211,27 @@ Profilmetadaten-Vertraege gruen. Alle synthetischen Zeilen zurueckgerollt;
 Probe vorher frei, Revision unveraendert. Bank-/Steuer-/Kontakt-/Datenschutzfelder
 im expliziten Agentenvertrag als sensibel nachgetragen. QA community-member-
 isolation-20261117.md. PR153-CI laeuft unveraendert; Folge-CI noch offen.
+
+
+23.11 Koordination: Nutzer meldet, dass Claude main in PR160 und PR161
+integriert und der Kassen-Push-Hook laeuft. Root startet deshalb keine DB-
+Tests/Wartung. PR160-Korrekturen343463697 wurden lokal mit main6bb75adbc und
+der eigenen Mitgliedschafts-Isolation zusammengefuehrt; keine Behauptung,
+dass diese Korrekturen bereits auf main waren. Claudes Integration bleibt
+bei Claude. Lokaler Sicherheitszweig ergaenzt nur die eigene Absicherung.
+
+M0-PROBE-SAFETY: vor_push arbeitet jetzt standardmaessig lesend, ohne Default-
+Zugangsdaten und ohne implizite Wartung. 24 Mockvertraege gruen; Blockgroesse6
+und gezielte Auswahl erhalten, dynamische DDL fail-closed. Vergleichsstand/
+Konfliktmarker vor DB-Zugriff, Read-only-Transaktionen und Poolfreigabe.
+CLAUDE.md und Ressourcenrunbook angeglichen. Neue QA vom23.11; keine fremden
+Prozesse/Worktrees oder Datenbanken angefasst. Integration/CI noch offen.
+
+23.11 Nachlauf: neue Vor-Push-Fassung27 isolierte Tests; --volle-tests ist
+explizite Moeglichkeit fuer dynamische DDL, weiterhin keinerlei Wartung.
+Konfliktpruefung verwechselt legitime Markdown-Trennlinien nicht mit Markern.
+75+12 gezielte Vertraege und172 Referenz-Lesemodellfaelle gruen; Gesamt-CI
+fuer Kombination bleibt offen.143/141/99 Kopfkatalog/Sicht/Eingabe nach160;
+keine Vollparitaet oder Agentenschreibfreigabe fuer Bankpflege behauptet.
+Probe aktuell3 agent:vor_push-Sitzungen; Root fuehrt keine Fachtests/Wartung
+parallel zu Claudes gemeldetem Lauf durch.

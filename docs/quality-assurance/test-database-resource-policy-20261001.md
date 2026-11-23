@@ -71,3 +71,25 @@ Test-URL hat Vorrang und muss dort ebenfalls zur effektiven Verbindung passen.
 Die Regeln erzeugen keine Testdatenbank und ersetzen keine koordinierte Migration.
 
 Nachweis: [CI-Identitaet und Testdatenisolation](ci-identity-test-isolation-20261013.md).
+
+
+## Vor-Push-Schutz seit 23.11.2026
+
+`scripts/vor_push.py` verlangt eine ausdrueckliche PostgreSQL-Testverbindung,
+prueft Vergleichsstand und Konfliktmarkierungen vor dem Datenbankzugriff und
+liest Revision/Rollenrecht in schreibgeschuetzten Transaktionen. Fehlende
+Bereitschaft beendet den Lauf vor Registern und Tests. Auch `--ohne-tests`
+fuehrt keinen Reset, Upgrade, Seed, Downgrade oder Rechte-/Eigentumswechsel aus.
+Die Bereitschaftsmeldung benennt die tatsaechlich geprueften Grenzen; Seed und
+weitere Rechte werden damit nicht vollstaendig bestaetigt. Verbindungspools
+werden auch im Fehlerfall freigegeben.
+
+Die benoetigte Wartung erfolgt nach Ressourcenpruefung und eigenem Workboard-
+Claim getrennt am vorhandenen Pruefstand. Ein unerwarteter Revisionsstand ist
+kein Auftrag zum Loeschen. Unaufloesbare dynamische Migrationsauswirkungen
+blockieren die gezielte Testauswahl und verlangen ausdruecklich `--volle-tests`
+auf dem koordiniert vorbereiteten Pruefstand. Statisch entfernte Tabellen ziehen ihre betroffenen
+Leser-/Schreiber- und Schema-Vertraege mit; reine unveraenderte Tests werden
+nicht pauschal bei jeder Migration erneut ausgefuehrt.
+
+Nachweis: [Vor-Push-Ressourcenschutz](pre-push-resource-safety-20261123.md).

@@ -21470,7 +21470,7 @@ CUSTOMER-MASTER Meilenstein: finale88 Backend-Vertraege, PostgreSQL1/1, zentrale
 
 CUSTOMER-MASTER Integration17.11: PR153 konfliktfrei gegen nachgezogenes main8575b4df9 (ClaudePR146) zusammengefuehrt. Sechs generierte Konflikte aus beiden Quellen neu erzeugt; keine fachliche Fremdaenderung verworfen. Danach88 gezielte Vertraege erneutgruen, 3697/3697 API-Routen dokumentiert/typisiert, aktuelle12-Godfile-Ratsche und MCP-/Code-Inventare gruen. Gemeinsame GitHub-Abnahme folgt auf Mergecommit; main-Sonar-Abdeckung und54 Batch15-Felder bleiben getrenntoffen.
 
-## CUSTOMER-COMMUNITY-ISOLATION-20261117 — reserviert, Codex Lead
+## CUSTOMER-COMMUNITY-ISOLATION-20261117 — in Arbeit, Codex Lead
 Ziel: bestaetigte mandantenuebergreifende Leser/Schreiber bei Partner-Gemeinschaftsmitgliedern schliessen: Community bleibt gemeinsamer Katalog, Mitglied muss eigenem Partner und URL-Community entsprechen; globale Katalogpflege mit vorhandener Adminrolle absichern. Besitzer profile_backend: app/services/business_partner_service.py nur Community-Mitglieder, app/api/v1/endpoints/business_partners.py nur Community-Katalog-/Mitgliedswege und entfallender globaler Partnerpruefer; neue kleine Hilfsmodule/Tests falls erforderlich, Quell-Godfile darf nicht wachsen. Lead besitzt QA/Handshakes/Inventare. Kein neues Tabellenmodell/DDL/DB/Container, gemeinsamer Probe nur abgestimmt und rollbackisoliert. PR153-CI laeuft unveraendert auf cd2644b92; neuer Sicherheits-Slice separat, kein Abbruch laufender gruener Nachweise.
 
 CUSTOMER-COMMUNITY Zwischenabnahme: 9 Unit+1 PostgreSQL-Vertrag als valeo_agent
@@ -21506,7 +21506,16 @@ Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-Ap
 Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
 
 
-## M0-PROBE-SAFETY-20261123 — reserviert, Codex Lead
+## M0-PROBE-SAFETY-20261123 — in Arbeit, Codex Lead
 Ziel: vor_push standardmaessig lesend, explizit konfigurierte Testverbindung, Abbruch bei nicht bereitem Pruefstand vor Folgepruefungen. Keine impliziten Resets/Migrationen/Seeds/Rechtewechsel oder Klartext-Zugangsdefaults. Besitzer ci_failures_review: scripts/vor_push.py, tests/test_vor_push.py; Lead QA/Runbook/Handshakes. Effiziente Testauswahl/Blockgroesse und entfernte-Tabellen-Erkennung erhalten; Konfliktmarkierungen vor Push abweisen. Keine reale DB-Aktion bei Umsetzung/Unit-Tests; Wartung separat koordiniert.
 
 M0-PROBE-SAFETY Dateibesitzpraezisierung23.11: Lead gleicht CLAUDE.md (Abschnitt vor jedem Push), Pruefstand-Runbook und eigene QA mit dem lesenden Vor-Push-Vertrag ab. Keine Aenderung an Claudes laufenden Worktrees oder Datenbanken.
+
+23.11 konsolidiert: 75 gezielte Vertraege,12 ehemalige CI-/Register-/CLI-/
+Studio-/Async-Vertraege und172 Referenz-Lesemodellfaelle gruen. Kein pauschaler
+Gesamt-CI-Erfolg behauptet.143 Katalogattribute/141 sichtbare/99 editierbare
+Profilfelder nach PR160; technische Lookups bleiben offen, Bankpflege high
+und agentengesperrt. Vor-Push-Ressourcenschutz27 isolierte Tests gruen,
+expliziter Volltestmodus ohne Wartung. Probe hat3 fremde agent:vor_push-
+Sitzungen; keine Fachtests/DDL/Resets durch Root. Claudes PR160/161-Integration
+bleibt bei Claude; eigener Zweig ergaenzt Mitgliedschafts- und Ressourcenschutz.
