@@ -11226,8 +11226,8 @@
         "screenId": "fuhrpark/fahrzeug-stamm",
         "actionKey": "liste",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "fuhrpark.openFahrzeugListe",
+        "navigationRoute": "/fuhrpark/fahrzeuge",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -14911,8 +14911,8 @@
         "screenId": "personal/bewerbung-einwilligung",
         "actionKey": "erklaerungen",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "personal.openErklaerungen",
+        "navigationRoute": "/personal/einwilligungserklaerungen",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -14975,8 +14975,8 @@
         "screenId": "personal/bewerbung-einwilligung",
         "actionKey": "zurueck",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "personal.openBewerbungen",
+        "navigationRoute": "/personal/bewerbungen",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -15020,8 +15020,8 @@
         "screenId": "personal/bewerbungen",
         "actionKey": "erklaerungen",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "personal.openErklaerungen",
+        "navigationRoute": "/personal/einwilligungserklaerungen",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -16872,8 +16872,8 @@
         "screenId": "transporte/fahrer",
         "actionKey": "dokumente",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "driver.openDocuments",
+        "navigationRoute": "/dokumente/ablage",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -16935,8 +16935,8 @@
         "screenId": "transporte/fahrer",
         "actionKey": "touren",
         "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "driver.openTours",
+        "navigationRoute": "/logistik/tourenplanung",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }

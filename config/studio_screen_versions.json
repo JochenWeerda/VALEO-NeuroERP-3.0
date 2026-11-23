@@ -5440,7 +5440,7 @@
       "version": "1.0.0"
     },
     "fuhrpark/fahrzeug-stamm": {
-      "definition_hash": "794216cf64f87a308a2adff274cc8c0957dadb389916ea8fd13779bd2a1f4377",
+      "definition_hash": "54276b137cee7c6442a9848ba013ddac8250cfb7f04a39c2d43004b597b3c9e5",
       "gates_passed": [
         "A",
         "B",
@@ -6331,7 +6331,7 @@
       "version": "1.0.0"
     },
     "personal/bewerbung-einwilligung": {
-      "definition_hash": "da83cd7a44e9c71910a3c956252f1d85744ae7ef8f08e12c55c7a342dbc05470",
+      "definition_hash": "c189e703511a426834394341fb8925c8cfdea3b9fff4cc3a07287bb88619b186",
       "gates_passed": [
         "A",
         "B",
@@ -6342,7 +6342,7 @@
       "version": "1.0.0"
     },
     "personal/bewerbungen": {
-      "definition_hash": "90ed62483bd502bd642ddb8e89de60ee2b1994824d07531bdd9ada917078bd2b",
+      "definition_hash": "d95961f88af93f86fb831eb4c961160488a89f44748dbfb8929452c822a874a4",
       "gates_passed": [
         "A",
         "B",
@@ -7617,7 +7617,7 @@
       "version": "1.0.0"
     },
     "transporte/fahrer": {
-      "definition_hash": "5c4e9e363350da5b690e5c30d2ea93ecbead1cf84d15f7b97a8432ef29367655",
+      "definition_hash": "dc45229af98a363ca09cfe9690c2f6e7b40b675b4f8146cfddd0e71f00618352",
       "gates_passed": [
         "A",
         "B",

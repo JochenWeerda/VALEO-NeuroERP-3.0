@@ -21502,3 +21502,7 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M2-NAVIGATION-PLATZHALTER-20261123 — zur Abnahme, Claude Code (M2)
+Meilenstein: M2. Sechs Maskenaktionen standen als "nicht verfuegbar" (stubReason), obwohl sie nur navigieren: Fahrer -> Tourenplanung/Dokumentenablage, Fahrzeug-Stamm -> Fahrzeugliste, Bewerbungen/Einwilligung -> Einwilligungserklaerungen und zurueck zu den Bewerbungen. Jetzt navigationRoute + localEffect "navigation" auf bestehende Zielmasken; Ratsche aktionen_nicht_verfuegbar 24 -> 18. Offen bleiben 18 echte Platzhalter (Drucken, Unfallanzeige, Einwilligung erteilen/widerrufen, Profile, Frachtprobe ...).
+Dateibesitz: app/core/screen_definitions_capture.py, app/core/screen_governance.py, tests/test_bewerbung_einwilligung_masken.py, erzeugte Kataloge.
