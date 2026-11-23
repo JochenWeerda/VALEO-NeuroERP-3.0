@@ -21502,3 +21502,9 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M3-POS-UMSATZSTEUER-20261119 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. PR #166. Handshake docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md (Codex-Pause, von Claude umgesetzt).
+Befund: POST /pos/tagesabschluss buchte den ganzen Kassenumsatz brutto auf 8400, ohne Umsatzsteuer.
+Ergebnis: Kassiervorgang speichert Brutto je Satz (pos_fiscal_transactions.vat_breakdown, Migration pos_ust_je_satz_20261119); Abschluss bucht je Satz Erloes netto und Umsatzsteuer ueber genau einen Verkaufs-Steuerschluessel aus domain_erp.tax_keys; Altvorgaenge ohne Saetze sperren; alle Pruefungen vor der TSE-Signatur.
+Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuerschluessel.py (kassen_verkaufsschluessel), app/services/fiscalization/service.py, app/services/pos_accounting_service.py, Tests test_pos_umsatzsteuer_je_satz, test_process_kernel_wave1_contracts.
