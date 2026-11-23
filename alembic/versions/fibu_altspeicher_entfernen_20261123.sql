@@ -2,7 +2,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict A31s9ep78DWmdaAL936RqBWu6xVs8ndBuJvzpElBSU4vAt7Epk9wL2FVKbaDo8D
 
 -- Dumped from database version 15.14
 -- Dumped by pg_dump version 15.14
@@ -375,5 +374,4 @@ CREATE POLICY tenant_isolation_update ON public.offene_posten FOR UPDATE USING (
 -- PostgreSQL database dump complete
 --
 
-\unrestrict A31s9ep78DWmdaAL936RqBWu6xVs8ndBuJvzpElBSU4vAt7Epk9wL2FVKbaDo8D
 

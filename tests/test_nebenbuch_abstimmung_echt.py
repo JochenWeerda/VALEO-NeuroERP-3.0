@@ -46,7 +46,7 @@ def mandant():
                         "(SELECT id FROM domain_erp.journal_entries WHERE tenant_id = :t)",
                         "DELETE FROM domain_erp.journal_entries WHERE tenant_id = :t",
                         "DELETE FROM domain_erp.offene_posten WHERE tenant_id = :t",
-                        "DELETE FROM domain_finance.nebenbuch_abstimmungen WHERE tenant_id = :t",
+                        "DELETE FROM public.nebenbuch_abstimmungen WHERE tenant_id = :t",
                         "DELETE FROM domain_erp.tax_keys WHERE tenant_id = :t",
                         "DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t",
                         "DELETE FROM domain_shared.system_properties WHERE tenant_id = :t"):
@@ -89,7 +89,7 @@ def _buche(mandant: str, soll: str, haben: str, betrag: str, storno: bool = Fals
         eintrag = dienst.create(f"T-{uuid.uuid4().hex[:8]}", "Testbuchung", datetime.utcnow(), [
             {"account_id": konto(soll), "debit_amount": betrag, "credit_amount": "0"},
             {"account_id": konto(haben), "debit_amount": "0", "credit_amount": betrag},
-        ])
+        ], reference=f"BELEG-{uuid.uuid4().hex[:6]}")
         dienst.post(eintrag.id)
         if storno:
             dienst.reverse(eintrag.id, "Testlauf")
