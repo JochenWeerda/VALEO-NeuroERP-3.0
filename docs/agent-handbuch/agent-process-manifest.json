@@ -13882,8 +13882,20 @@
       "agent_contract_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract",
       "screen_definition_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/screen-definition",
       "readiness_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/readiness",
-      "risk_summary": "low",
-      "actions": [],
+      "risk_summary": "medium",
+      "actions": [
+        {
+          "key": "folgeaktion",
+          "label": "Folgeaktion erfassen",
+          "dangerLevel": "moderate",
+          "humanApprovalRequired": false,
+          "requiresConfirmation": true,
+          "permission": "einkauf.write",
+          "commandEndpoint": "/api/v1/procurement/match/orders/actions/folgeaktion?bestellung={entity_id}",
+          "method": "POST",
+          "stubReason": null
+        }
+      ],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "einkauf.bestellung.list",
@@ -27353,5 +27365,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 142
+  "event_count": 143
 }

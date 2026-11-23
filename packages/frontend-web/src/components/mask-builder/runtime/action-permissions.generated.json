@@ -286,6 +286,32 @@
           "FINANCE_ADMIN",
           "admin"
         ]
+      ],
+      "release": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "agrar/harvest-settlement": {
@@ -1181,6 +1207,15 @@
         ]
       ],
       "einkauf.lieferant.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "einkauf/wareneingangsabgleich-detail": {
+      "einkauf.write": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",

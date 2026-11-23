@@ -73019,7 +73019,7 @@
             "title": "Idempotencykey"
           },
           "_mode": {
-            "default": "dryRun",
+            "default": "execute",
             "enum": [
               "dryRun",
               "validate",
@@ -383884,12 +383884,12 @@
         ]
       }
     },
-    "/api/v1/procurement/match/orders/{bestellung}/actions/folgeaktion": {
+    "/api/v1/procurement/match/orders/actions/folgeaktion": {
       "post": {
-        "operationId": "follow_up_mask_action_api_v1_procurement_match_orders__bestellung__actions_folgeaktion_post",
+        "operationId": "follow_up_mask_action_api_v1_procurement_match_orders_actions_folgeaktion_post",
         "parameters": [
           {
-            "in": "path",
+            "in": "query",
             "name": "bestellung",
             "required": true,
             "schema": {

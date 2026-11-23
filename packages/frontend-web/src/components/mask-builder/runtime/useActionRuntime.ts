@@ -111,7 +111,7 @@ export function useActionRuntime(
         }
         const method = actionDef.method ?? 'POST'
         const endpoint = actionDef.commandEndpoint
-          .replace('{entity_id}', actionDef.responseAdapter ? encodeURIComponent(opts.entityId ?? '') : opts.entityId ?? '')
+          .replace('{entity_id}', encodeURIComponent(opts.entityId ?? ''))
           .replace('{screen_id}', opts.screenId)
 
         const expectedVersion = req.expectedVersion ?? opts.entityData?.version

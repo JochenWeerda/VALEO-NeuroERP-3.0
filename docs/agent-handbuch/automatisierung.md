@@ -147,6 +147,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 |---|---|---|
 | `procurement.edi.message.ack` | outbox | `app/services/einkauf_compat_service.py` |
 | `procurement.edi.message.created` | outbox | `app/services/einkauf_compat_service.py` |
+| `procurement.follow_up.created` | outbox | `app/api/v1/endpoints/procurement_match.py` |
 | `procurement.return.created` | outbox | `app/services/einkauf_compat_service.py` |
 | `service_entry_sheet.created` | outbox | `app/services/einkauf_compat_service.py` |
 

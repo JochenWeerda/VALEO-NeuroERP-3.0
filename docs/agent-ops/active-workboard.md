@@ -21586,3 +21586,5 @@ Folgeaktions-Masken-API nutzt gemeinsame Fachvalidierung und delegierten Transak
 
 M2-WARENEINGANGSABGLEICH: Codex ergaenzt Studio-Aktionsdefinition und prueft das Standard-Execute-Envelope. Dateibesitz erweitert um runtime/useActionRuntime.ts fuer URL-Kodierung des Befehlsparameters.
 M2-WARENEINGANGSABGLEICH: Rollenprojektion fuer route-gebundene Aktionen mit Query-Parametern in generate_action_permission_projection.py ergaenzen.
+
+Folgeaktionsdialog fuer Nachforderung, Reklamation und Eskalation an native Detailansicht gebunden. Einkaufsrollen aus dem REST-Endpunkt projiziert; Bestellnummer als kodierter Query-Wert. Der Standard-Dialog sendet im Execute-Modus kein _mode; der neue Endpunkt behandelt dies als Execute und verlangt Schluessel und Auditgrund. Vorschau sendet dryRun explizit. CLI/MCP-Register erzeugt, sieben Backend- und zehn Frontend-Tests gruen. Reale Kanal- und Browserabnahme sowie Freigabe ausstehend.

@@ -442,7 +442,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/service-entry-sheets` | Leistungsnachweise | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/service-entry-sheets/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | hoch | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `einkauf/wareneingangsabgleich` | Wareneingangsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich/agent-contract` |
-| `einkauf/wareneingangsabgleich-detail` | Drei-Wege-Abgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract` |
+| `einkauf/wareneingangsabgleich-detail` | Drei-Wege-Abgleich | einkauf | mittel | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
 | `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
 | `errors/NotFound` | Seite nicht gefunden | platform | niedrig | — | `GET /api/v1/masks/errors/NotFound/agent-contract` |
@@ -13633,6 +13633,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 **Beispiel-Prompts:**
 
 - Zeige den Abgleich zu dieser Bestellung.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `folgeaktion` | Folgeaktion erfassen | moderate | nein | `/api/v1/procurement/match/orders/actions/folgeaktion?bestellung={entity_id}` |
 
 ---
 

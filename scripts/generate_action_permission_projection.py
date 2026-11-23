@@ -43,7 +43,7 @@ def _rollen_gruppen(dependant) -> list[list[str]]:  # noqa: ANN001
 def _route(app, pfad: str, methode: str):  # noqa: ANN001
     from starlette.routing import Match
 
-    konkret = re.sub(r"\{[^}]+\}", "X", pfad)
+    konkret = re.sub(r"\{[^}]+\}", "X", pfad.partition("?")[0])
     scope = {"type": "http", "path": konkret, "method": methode, "root_path": "", "query_string": b"",
              "headers": []}
     for route in app.router.routes:

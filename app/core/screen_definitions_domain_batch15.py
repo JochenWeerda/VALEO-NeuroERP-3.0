@@ -139,12 +139,28 @@ def build_einkauf_wareneingangsabgleich_detail() -> dict[str, Any]:
             )
         ]],
         edit_permission="einkauf.write",
-        no_workflow_reason="Diese Ansicht liest den Abgleich zur ausgewählten Bestellung.",
+        no_workflow_reason="Folgeaktionen ergänzen das Protokoll der Bestellung.",
         business_purpose="Den Drei-Wege-Abgleich zu einer Bestellung aufrufen.",
         example_prompts=["Zeige den Abgleich zu dieser Bestellung."],
         test_id="wareneingangsabgleich-detail",
     )
-    screen["actions"] = []
+    screen["actions"] = [{
+        "key": "folgeaktion", "label": "Folgeaktion erfassen", "kind": "secondary",
+        "dangerLevel": "moderate", "permission": "einkauf.write", "zone": "header",
+        "commandEndpoint": "/api/v1/procurement/match/orders/actions/folgeaktion?bestellung={entity_id}",
+        "method": "POST", "requiresIdempotencyKey": True,
+        "auditReasonRequired": True, "requiresConfirmation": True,
+        "enabledWhen": {"path": "bestellnummer", "exists": True},
+        "inputFields": [
+            {"key": "action_type", "label": "Aktion", "type": "select", "required": True, "options": [
+                {"value": "nachforderung", "label": "Nachforderung"},
+                {"value": "reklamation", "label": "Reklamation"},
+                {"value": "eskalation", "label": "Eskalation"},
+            ]},
+            {"key": "grund", "label": "Begründung der Folgeaktion", "type": "textarea", "required": True},
+            {"key": "ausnahme_code", "label": "Ausnahmecode", "type": "text"},
+        ],
+    }]
     return screen
 
 

@@ -284,6 +284,7 @@
   "mask:einkauf/supplier:bearbeiten",
   "mask:einkauf/supplier:entsperren",
   "mask:einkauf/supplier:sperren",
+  "mask:einkauf/wareneingangsabgleich-detail:folgeaktion",
   "mask:einkauf/warengruppen:bearbeiten",
   "mask:einkauf/warengruppen:deaktivieren",
   "mask:einkauf/warengruppen:neu",

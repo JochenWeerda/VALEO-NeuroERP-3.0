@@ -142,12 +142,12 @@ class FollowUpMaskIn(BaseModel):
     action_type: Literal["nachforderung", "reklamation", "eskalation"]
     grund: str = Field(min_length=3)
     ausnahme_code: str | None = None
-    mode: Literal["dryRun", "validate", "propose", "execute"] = Field("dryRun", alias="_mode")
+    mode: Literal["dryRun", "validate", "propose", "execute"] = Field("execute", alias="_mode")
     key: str | None = Field(None, alias="_idempotencyKey", min_length=1, max_length=200, pattern=r"^\S(?:.*\S)?$")
     audit_reason: str | None = Field(None, alias="_auditReason")
 
 
-@router.post("/match/orders/{bestellung}/actions/folgeaktion", response_model=MaskActionResult,
+@router.post("/match/orders/actions/folgeaktion", response_model=MaskActionResult,
              summary="Folgeaktion zur Bestellung prüfen und erfassen", dependencies=SCHREIBEN["EINKAUF"])
 async def follow_up_mask_action(
     bestellung: str, body: FollowUpMaskIn, request: Request,

@@ -100,7 +100,7 @@ def test_follow_up_validation_prepares_canonical_values_without_writing():
     db.commit.assert_not_called()
 
 
-def test_mask_follow_up_defaults_to_read_only_preview(monkeypatch):
+def test_mask_follow_up_preview_is_read_only(monkeypatch):
     import asyncio
     from unittest.mock import Mock
 
@@ -109,7 +109,7 @@ def test_mask_follow_up_defaults_to_read_only_preview(monkeypatch):
     db = Mock()
     db.execute.return_value.mappings.return_value.first.return_value = {"bestellnummer": "PO-42"}
     monkeypatch.setattr(procurement_match, "gepruefter_akteur_aus_request", lambda _: "actor")
-    body = procurement_match.FollowUpMaskIn(action_type="reklamation", grund="Menge prüfen")
+    body = procurement_match.FollowUpMaskIn(action_type="reklamation", grund="Menge prüfen", _mode="dryRun")
     result = asyncio.run(procurement_match.follow_up_mask_action("PO-42", body, Mock(), db, "tenant-a"))
 
     assert result.success
