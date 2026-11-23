@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from typing import Optional
 
@@ -103,7 +104,7 @@ async def create_branch(
             "tenant_id": tenant_id,
             "branch_number": payload.branch_number,
             "name": payload.name,
-            "address": str(payload.address or {}).replace("'", '"'),
+            "address": json.dumps(payload.address or {}),
             "is_active": payload.is_active,
         }
     )
@@ -161,8 +162,8 @@ async def update_branch(
         raise HTTPException(status_code=400, detail="No fields to update")
     
     if "address" in updates:
-        updates["address"] = str(updates["address"]).replace("'", '"')
-        set_clause = ", ".join(f"{k} = :{k}::jsonb" if k == "address" else f"{k} = :{k}" for k in updates.keys())
+        updates["address"] = json.dumps(updates["address"])
+        set_clause = ", ".join(f"{k} = CAST(:{k} AS jsonb)" if k == "address" else f"{k} = :{k}" for k in updates.keys())
     else:
         set_clause = ", ".join(f"{k} = :{k}" for k in updates.keys())
     

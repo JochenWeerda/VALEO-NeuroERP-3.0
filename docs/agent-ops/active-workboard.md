@@ -1016,3 +1016,5 @@ Befund: /admin/branches hat keinen ID-Parameter und mountet ausschliesslich Made
 Listeneinstieg umgesetzt: /admin/branches liest den vorhandenen mandantengebundenen Listenvertrag und zeigt Nummer, Name und Aktivstatus. Regressionstest und Studio-Inventar gruen. Die unwirksame Bearbeitungsdeklaration wurde entfernt; typisierte Detailansicht und Rollen-/Command-Anbindung der Bearbeitung sowie Browserabnahme bleiben offen.
 
 Detailansicht umgesetzt: Aus der Niederlassungsliste zur Studio-Objektseite. Die Ansicht liest den vorhandenen mandantengebundenen Detailvertrag und zeigt Nummer, Namen, Aktivstatus und Zeitstempel. Zwei Vertragspruefungen sowie Studio-Gates A/B/C/E gruen. Bearbeitung und Browserabnahme offen.
+
+Schreibvertrag vorbereitet: Adressen werden beim Anlegen und Aendern als echtes JSON gebunden, einschliesslich Apostroph, Boolean und null. SQLAlchemy-Bindung und bestehende Lesemaske mit vier gezielten Tests geprueft. Freigabe der Studio-Bearbeitung steht aus.
