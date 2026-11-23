@@ -10,7 +10,7 @@ mit solchen Vorgaengen wird abgewiesen, statt eine Steuer anzunehmen.
 from alembic import op
 
 revision = "pos_ust_je_satz_20261119"
-down_revision = "beleg_altspeicher_entfernen_20261117"
+down_revision = "finance_router_altspeicher_entfernen_20261123"
 branch_labels = None
 depends_on = None
 
