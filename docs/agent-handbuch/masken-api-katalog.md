@@ -439,7 +439,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/rechnung-abgleich-liste` | Rechnungsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/rechnung-abgleich-liste/agent-contract` |
 | `einkauf/reports` | Reports | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/reports/agent-contract` |
 | `einkauf/retouren-liste` | Retouren | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/retouren-liste/agent-contract` |
-| `einkauf/service-entry-sheets` | Service entry sheets | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/service-entry-sheets/agent-contract` |
+| `einkauf/service-entry-sheets` | Leistungsnachweise | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/service-entry-sheets/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | hoch | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `einkauf/wareneingangsabgleich` | Wareneingangsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
@@ -13488,9 +13488,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `einkauf/service-entry-sheets` — Service entry sheets
+### `einkauf/service-entry-sheets` — Leistungsnachweise
 
-**Zweck:** Service entry sheets im einkauf-Bereich finden und auswerten.
+**Zweck:** Leistungsnachweise im Einkauf finden und auswerten.
 
 | | |
 |---|---|
@@ -13502,7 +13502,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/einkauf/anfragen`
+- `list` → `/api/v1/einkauf/service-entry-sheets`
 
 **MCP-Tools (Domäne):**
 
@@ -13513,7 +13513,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Zeige Service entry sheets.
+- Zeige Leistungsnachweise.
 - Filtere die Liste.
 
 **Actions:**

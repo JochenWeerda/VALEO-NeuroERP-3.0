@@ -13744,7 +13744,7 @@
     },
     {
       "mask_id": "einkauf/service-entry-sheets",
-      "title": "Service entry sheets",
+      "title": "Leistungsnachweise",
       "domain": "einkauf",
       "process_keys": [],
       "rollout_route": "/mask-rollout/einkauf__service-entry-sheets/:entityId",
