@@ -153,10 +153,10 @@ class FinanceDunningService:
         Mahnlauf, Mahnung aus dem offenen Posten, Mahnstufe eskalieren und /dunning/process|run rufen ihn.
         ``commit=False``: der Aufrufer besitzt die Transaktion.
         """
-        rules = self._rules()
         ops = self._overdue_ops(rechnungsnr, op_ids=op_ids, debtor_id=debtor_id, stichtag=stichtag)
         if not ops:
             return {"ok": True, "erzeugt": 0, "mahnungen": [], "detail": "Keine mahnfälligen Debitoren-OP."}
+        rules = self._rules()  # erst wenn etwas faellig ist: "nichts faellig" ist kein Regelfehler
         today = stichtag or date.today()
         erzeugt = []
         for op in ops:

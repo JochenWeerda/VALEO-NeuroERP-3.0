@@ -31,33 +31,21 @@ test.describe('@smoke Finance Lifecycle', () => {
     await ctx.dispose()
   })
 
-  test('3 — Mahnstufe eskalieren', async () => {
+  test('3 — Mahnstufe einer unbekannten Rechnung wird nicht eskaliert', async () => {
+    // Bis 23.11.2026 eskalierte dieser Weg eine erfundene Rechnung bis INKASSO, ohne Mahnung und ohne Posten.
+    // Seit dem einen Mahnweg entsteht eine Stufe nur mit einer Mahnung zu einem ueberfaelligen offenen Posten.
     const ctx = await request.newContext({ baseURL: BASE })
     const invoice = `RE-SMOKE-${randomUUID()}`
     const endpoint = `/api/v1/finance/mahnstufe/${invoice}`
     try {
-      let previous: string | null = null
-      for (const stage of ['1', '2', '3', 'INKASSO']) {
-        const res = await ctx.post(`${endpoint}/eskalieren`, {
-          headers: HEADERS, data: { operator: 'smoke-test' },
-        })
-        expect(res.status(), await res.text()).toBe(201)
-        const body = await res.json()
-        expect(body.stufe).toBe(stage)
-        expect(body.vorherige_stufe).toBe(previous)
-        previous = stage
-      }
-      const blocked = await ctx.post(`${endpoint}/eskalieren`, {
-        headers: HEADERS, data: { operator: 'smoke-test' },
-      })
-      expect(blocked.status()).toBe(422)
+      const res = await ctx.post(`${endpoint}/eskalieren`, { headers: HEADERS, data: { operator: 'smoke-test' } })
+      expect(res.status(), await res.text()).toBe(422)
       const trail = await ctx.get(`${endpoint}/trail`, { headers: HEADERS })
       expect(trail.status()).toBe(200)
-      const body = await trail.json()
-      expect(body.count).toBe(4)
-      expect(body.trail.map((entry: { stufe: string }) => entry.stufe)).toEqual(['1', '2', '3', 'INKASSO'])
+      expect((await trail.json()).count).toBe(0)
     } finally {
       await ctx.dispose()
     }
   })
+})
 })
