@@ -117,3 +117,57 @@ def test_mask_follow_up_preview_is_read_only(monkeypatch):
     assert db.execute.call_args.args[1] == {"t": "tenant-a", "v": "PO-42"}
     db.execute.assert_called_once()
     db.commit.assert_not_called()
+
+
+@pytest.mark.parametrize("mode", ["dryRun", "execute"])
+def test_follow_up_cli_and_mcp_use_the_same_rest_contract(monkeypatch, mode):
+    import json
+    from types import SimpleNamespace
+
+    import httpx
+
+    from app.api.v1.endpoints.procurement_match import FollowUpMaskIn
+    from app.core.screen_definitions_domain_batch15 import build_einkauf_wareneingangsabgleich_detail
+    from app.services import mcp_mask_actions, mcp_write_capability
+    from valeo_cli.support import build_request
+
+    screen = build_einkauf_wareneingangsabgleich_detail()
+    action = next(entry for entry in screen["actions"] if entry["key"] == "folgeaktion")
+    order = "PO/23 & #1"
+    payload = {"action_type": "reklamation", "grund": "Menge prüfen"}
+    audit_reason = "Wareneingang abgeglichen"
+    key = "follow-up-1"
+    method, path, body = build_request(
+        action, screen_id=screen["id"], entity_id=order, payload=payload, mode=mode,
+        audit_reason=audit_reason, idempotency_key=key,
+    )
+
+    from app.core import identity_context
+
+    principal = SimpleNamespace(scopes=frozenset({"masks:write"}))
+    monkeypatch.setattr(identity_context, "current_identity", lambda: principal)
+    monkeypatch.setattr(mcp_mask_actions, "_definition", lambda *_: screen)
+    monkeypatch.setattr(mcp_write_capability, "_registry", lambda: {"agent_write_phase": "entwicklung"})
+    request = SimpleNamespace(
+        mode=mode, idempotency_key=key,
+        parameters={"screen_id": screen["id"], "action": action["key"], "entity_id": order,
+                    "input": payload, "audit_reason": audit_reason, "confirm": mode == "execute"},
+    )
+
+    def target(forwarded):
+        assert forwarded.method == method
+        assert forwarded.url.raw_path.decode() == path
+        assert list(forwarded.url.params.multi_items()) == [("bestellung", order)]
+        assert forwarded.headers["authorization"] == "Bearer synthetic-test"
+        assert "x-tenant-id" not in forwarded.headers
+        assert json.loads(forwarded.content) == body
+        parsed = FollowUpMaskIn.model_validate(body)
+        assert parsed.mode == mode
+        assert parsed.key == key
+        assert parsed.audit_reason == audit_reason
+        return httpx.Response(200, json={"success": True})
+
+    result = mcp_mask_actions.execute(
+        request, "tenant-a", "Bearer synthetic-test", transport=httpx.MockTransport(target),
+    )
+    assert result["success"]
