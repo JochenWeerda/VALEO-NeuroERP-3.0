@@ -160,44 +160,32 @@ class TestRatenzahlungService:
 # ---------------------------------------------------------------------------
 
 class TestMahnstufeService:
-    def test_eskalation_erstmalig(self):
+    """Seit 23.11.2026 eskaliert die Mahnstufe ueber den einen Mahnweg (FinanceDunningService.run_dunning)."""
+
+    def test_eskalation_erzeugt_eine_mahnung_ueber_den_mahnweg(self, monkeypatch):
+        from app.services import finance_dunning_service as fds
         from app.services.finance_mahnstufe_service import eskaliere_mahnstufe
-        db = _mock_db({"finance_mahnstufen_audit": None})
-        result = eskaliere_mahnstufe(db, "RE-2026-001", "t1")
-        assert result["stufe"] == 1
-        assert result["vorherige_stufe"] is None
-        assert result["bearbeitungsgebuehr_eur"] == 0.0
-        db.commit.assert_called_once()
 
-    def test_eskalation_1_zu_2(self):
-        from app.services.finance_mahnstufe_service import eskaliere_mahnstufe
-        stufe1 = {"id": "a-1", "rechnungsnr": "RE-001", "tenant_id": "t1", "stufe": "1"}
-        db = _mock_db({"finance_mahnstufen_audit": stufe1})
-        result = eskaliere_mahnstufe(db, "RE-001", "t1")
-        assert result["stufe"] == 2
-        assert result["bearbeitungsgebuehr_eur"] == 5.0
+        aufrufe = []
 
-    def test_eskalation_zu_inkasso(self):
-        from app.services.finance_mahnstufe_service import eskaliere_mahnstufe
-        stufe3 = {"id": "a-3", "rechnungsnr": "RE-001", "tenant_id": "t1", "stufe": "3"}
-        db = _mock_db({"finance_mahnstufen_audit": stufe3})
-        result = eskaliere_mahnstufe(db, "RE-001", "t1")
-        assert result["stufe"] == "INKASSO"
-        assert result["bearbeitungsgebuehr_eur"] == 40.0
+        def lauf(self, rechnungsnr=None, bediener="KIM", **_):
+            aufrufe.append((rechnungsnr, bediener))
+            return {"ok": True, "erzeugt": 1, "mahnungen": [
+                {"id": "n-1", "stufe": 2, "vorherige_stufe": 1, "gebuehr": 10.0, "rechnungsnr": rechnungsnr}]}
 
-    def test_eskalation_ueber_inkasso_raises(self):
-        from app.services.finance_mahnstufe_service import eskaliere_mahnstufe, MahnstufeError
-        inkasso = {"id": "a-4", "rechnungsnr": "RE-001", "tenant_id": "t1", "stufe": "INKASSO"}
-        db = _mock_db({"finance_mahnstufen_audit": inkasso})
-        with pytest.raises(MahnstufeError, match="maximaler Stufe"):
-            eskaliere_mahnstufe(db, "RE-001", "t1")
+        monkeypatch.setattr(fds.FinanceDunningService, "run_dunning", lauf)
+        result = eskaliere_mahnstufe(object(), "RE-001", "t1", "anna")
+        assert aufrufe == [("RE-001", "anna")]
+        assert (result["id"], result["stufe"], result["vorherige_stufe"]) == ("n-1", "2", "1")
+        assert result["bearbeitungsgebuehr_eur"] == 10.0
 
-    def test_get_trail(self):
-        from app.services.finance_mahnstufe_service import get_mahnstufen_trail
-        trail = [
-            {"id": "a-1", "stufe": "1", "rechnungsnr": "RE-001"},
-            {"id": "a-2", "stufe": "2", "rechnungsnr": "RE-001"},
-        ]
-        db = _mock_db({"finance_mahnstufen_audit": trail})
-        result = get_mahnstufen_trail(db, "RE-001", "t1")
-        assert len(result) == 2
+    def test_nicht_mahnfaellig_wird_abgelehnt(self, monkeypatch):
+        from app.services import finance_dunning_service as fds
+        from app.services.finance_mahnstufe_service import MahnstufeError, eskaliere_mahnstufe
+
+        monkeypatch.setattr(fds.FinanceDunningService, "run_dunning",
+                            lambda self, **_: {"ok": True, "erzeugt": 0, "mahnungen": []})
+        with pytest.raises(MahnstufeError, match="nicht mahnfällig"):
+            eskaliere_mahnstufe(object(), "RE-001", "t1")
+
+
