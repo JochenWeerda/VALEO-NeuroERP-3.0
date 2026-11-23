@@ -21128,8 +21128,8 @@ Fachliche Befunde: Die KIM-Belegliste las ohne Mandantenfilter (jetzt mandanteng
 Dateibesitz: die genannten Module, tests/test_auftrag_leser_docflow.py (neu), Ratsche tests/test_sicht_auftraege_ratsche.py (Leser 0, Muster mit Selbsttest).
 Abnahme: neue Tests gegen echtes Schema gruen; gestaffelter Lauf der betroffenen Tests; Pruefkette; CI des PR. Danach S5: Sichten und Alttabellen per Migration entfernen.
 
-## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — zur Abnahme, Claude Code (M1)
-Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S4. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
+## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — abgeschlossen (PR #157 gemergt), Claude Code (M1)
+Owner: Claude Code. Stand: abgeschlossen 19.11.2026 (PR #157 gemergt); M1 damit inhaltlich fertig. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: DocFlow ist der einzige Belegspeicher. Migration beleg_altspeicher_entfernen_20261117 entfernt die Sichten domain_crm.sales_orders/_items und die Tabellen der alten Speicher (Lieferschein, Quittung, Rechnung, Gutschrift, Bestellung, Auftrags-Ursprungsdaten) - Inhalt laut Nutzerentscheidung 10.11.2026 Testdaten; haelt an bei gebuchten Altrechnungen/-gutschriften bestehender Mandanten. Rueckweg legt die Speicher leer wieder an (DDL per pg_dump aus frischer DB, beleg_altspeicher_entfernen_20261117.sql).
 Mit entfernt: ORM-Modelle (sales_invoice_models, EinkaufBestellung/-Position), Freigabe-Subjekte sales_credit_note und finance_sales_invoice (ohne Aufrufer), Demo-Seeds Verkauf/Logistik, Tabellenzuordnung, Tabellenkatalog (707 -> 696), Indizes in migrations/sql/erp/006.
 Pruefung: Migration frisch (valeo_s5_test per pruefstand_db.py, alembic downgrade -1/upgrade head) und gewachsen (valeo_neuro_erp, zurueckgerollte Transaktion: up/down/up). Gestaffelter Lauf 170 Testdateien auf dem frischen S5-Stand; rot nur bekannte Umgebungsfaelle (valeo_probe-gebunden, POS-Retoure-Grant, Studio-Release-SQL, Portal-Verzeichnis auch ohne S5).
@@ -21469,28 +21469,28 @@ CUSTOMER-MASTER Pruefquellen-Korrektur vor Edit: Lead besitzt scripts/check_fiel
 CUSTOMER-MASTER Meilenstein: finale88 Backend-Vertraege, PostgreSQL1/1, zentraleDialoge8/8 und tsc gruen. Produktions-OpenAPI exportiert/geprueft, 3731/3731 Routen mit Summary/Antwortmodell; Doku-Drift0, Tenant-Audit und Godfile-Ratsche gruen. Globale Feldpruefung54 bleibt rot; Kundenprofil0. Versionierte Schnittstellen-/Registry-/MCP-/Handbuchgeneratoren synchronisiert. Bereit fuer Branch-Push/PR-CI, keine Gesamtfreigabe oder bereits erfolgte lokale Bereitstellung behauptet.
 
 CUSTOMER-MASTER Integration17.11: PR153 konfliktfrei gegen nachgezogenes main8575b4df9 (ClaudePR146) zusammengefuehrt. Sechs generierte Konflikte aus beiden Quellen neu erzeugt; keine fachliche Fremdaenderung verworfen. Danach88 gezielte Vertraege erneutgruen, 3697/3697 API-Routen dokumentiert/typisiert, aktuelle12-Godfile-Ratsche und MCP-/Code-Inventare gruen. Gemeinsame GitHub-Abnahme folgt auf Mergecommit; main-Sonar-Abdeckung und54 Batch15-Felder bleiben getrenntoffen.
-## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
+## M0-VOR-PUSH-PRUEFKETTE-20261119 — abgeschlossen (PR #159 gemergt), Claude Code (M0)
 Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
 Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
 Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
 Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
 
-## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
+## M3-JOURNAL-SCHREIBER-20261119 — abgeschlossen (PR #158 gemergt), Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
 Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
 Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tagesabschluss. Ohne Journal: Periodenabschluss (Scheinkopf), Lagergeld (keine USt/OP), Bestandskorrektur/Inventur (Menge als Betrag), manueller OP-Ausgleich. Offene Posten lesen das Nebenbuch domain_erp statt des leeren public.offene_posten.
-Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
+Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md; in der Codex-Pause von Claude uebernommen, PR #166 offen), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
 Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.
 
-## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — zur Abnahme, Claude Code (M2, Codex-Pause)
+## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — abgeschlossen (PR #160 gemergt), Claude Code (M2, Codex-Pause)
 Owner: Claude Code (uebernommen von Codex, PR #153, Codex ruht 19.-22.11.2026). Branch claude/uebernahme-kundenstamm-20261119.
 Codex' Stand unveraendert uebernommen; dazu: main eingemergt; ADR in die Pflichtform gebracht (Status/Datum, Kontext, Entscheidung, Konsequenzen); Aktion stammdaten_pflegen als high mit Bestaetigung (Server verlangt Begruendung; aendert Bank/Steuer); Reiter-Vertrag auf die kanonischen partner_*-Gruppen; Zahlungsbedingung/Standardtour/Spediteur bis zum Lookup in unsupportedFields (keine Eingabe technischer Schluessel); USt-IdNr./EU-Betriebsnummer als fachliche Kennung freigegeben.
 Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-App) es aufdeckte: ueberdeckte GET /einkauf/anfragen(/{id}) in app/einkauf/router.py entfernt (die OpenAPI zeigte den toten untypisierten Weg).
 
 ## M2-MASKENFELDER-PRODUKTIV-20261119 — offen, Claude Code (M2)
 Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
-## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — zur Abnahme, Claude Code (M3, Codex-Pause)
+## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — abgeschlossen (PR #161 gemergt), Claude Code (M3, Codex-Pause)
 Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.-22.11.2026). Meilenstein M3 (echter Kassen-/Tagesabschluss).
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
-Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (Migration vat_breakdown, PR #166 offen).
