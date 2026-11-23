@@ -994,3 +994,5 @@ M2-FEED-NAVIGATION umgesetzt: Bestandsliste und mobile Fuetterungsdokumentation 
 ## M2-LOCAL-PRINT - reserviert, Codex
 
 Ziel: vorhandenen Browserdruck fuer Fuetterungsplan, Fremdware, Inventur und Abfrage-Center deklarieren. Dateibesitz: ScreenDefinitions und erzeugte Inventare. Abnahme: Handlerabgleich und Studio-Ratsche.
+
+M2-LOCAL-PRINT umgesetzt. Alle vier UI-Handler oeffnen den Browserdruck; es entsteht kein Server-Command. Studio-Ratsche 289 -> 285 undeklarierte Aktionen. Versionskatalog synchron, Katalog der Agentenwerkzeuge unveraendert. Die vorherige Fuetterungsnavigation ist mit sieben Definitionstests abgenommen.

@@ -3323,7 +3323,7 @@ def build_agrar_feeding_plan_screen_definition() -> dict[str, Any]:
             },
         ],
         "actions": [{
-            "key": "print_plan", "label": "Drucken / als PDF speichern", "kind": "primary",
+            "key": "print_plan", "label": "Drucken / als PDF speichern", "localEffect": "print", "kind": "primary",
             "dangerLevel": "safe", "permission": "futtermittel.rations.read",
         }, {
             "key": "open_mobile", "label": "Mobile Stallansicht", "localEffect": "navigation", "kind": "secondary",
@@ -4053,7 +4053,7 @@ def build_inventory_auxiliary_screen_definition() -> dict[str, Any]:
                 {"key": "review", "label": "Pruefen", "visibleWhen": {"field": "status", "values": ["generated"]}},
                 {"key": "approve", "label": "Freigeben", "visibleWhen": {"field": "status", "values": ["reviewed"]}},
                 {"key": "apply", "label": "Uebernehmen", "dangerLevel": "moderate", "permission": "inventory.aux.apply", "visibleWhen": {"field": "status", "values": ["approved"]}},
-                {"key": "open_source", "label": "Inventur"}, {"key": "print", "label": "Drucken"},
+                {"key": "open_source", "label": "Inventur"}, {"key": "print", "label": "Drucken", "dangerLevel": "safe", "localEffect": "print"},
             ]}],
         "actions": [
             {"key": "create_count_sheet", "label": "Zaehlliste", "kind": "secondary", "permission": "inventory.aux.write", "dangerLevel": "low"},
@@ -4246,7 +4246,7 @@ def build_foreign_goods_screen_definition() -> dict[str, Any]:
                 {"key": "transfer", "label": "Umbuchen", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
                 {"key": "complete", "label": "Auslagern / erledigen", "dangerLevel": "moderate", "permission": "inventory.foreign_goods.complete", "visibleWhen": {"field": "status", "values": ["eingelagert", "teilausgelagert"]}},
                 {"key": "open_source", "label": "Ursprung"},
-                {"key": "print", "label": "Drucken"},
+                {"key": "print", "label": "Drucken", "dangerLevel": "safe", "localEffect": "print"},
             ],
         }],
         "workflow": {"processKey": "foreign-goods", "status": "operator-worklist", "nextActionKey": "transfer", "auditRequired": True},
@@ -4534,7 +4534,7 @@ _SCREEN_DEFINITIONS: dict[str, Any] = {
                 {"key": "filter_spec", "label": "Filter", "width": 260},
                 {"key": "aggregations", "label": "Summen", "width": 180},
                 {"key": "updated_at", "label": "Geaendert", "renderKind": "datetime", "sortable": True, "width": 150}],
-            "rowActions": [{"key": "preview", "label": "Vorschau"}, {"key": "print", "label": "Drucken"}, {"key": "export", "label": "Signiert exportieren"}]}],
+            "rowActions": [{"key": "preview", "label": "Vorschau"}, {"key": "print", "label": "Drucken", "dangerLevel": "safe", "localEffect": "print"}, {"key": "export", "label": "Signiert exportieren"}]}],
         "actions": [
             {"key": "create", "label": "Neue Abfrage", "kind": "primary", "permission": "reporting.query.write", "dangerLevel": "low"},
             {
