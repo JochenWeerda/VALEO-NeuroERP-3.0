@@ -314,7 +314,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_erp.pos_transactions` | `app/api/v1/endpoints/admin_pos.py` | — | — |
 | `domain_erp.schaden_meldungen` | `app/services/schaden_service.py` | — | — |
 | `domain_erp.serial_numbers` | `app/api/v1/endpoints/admin_pos.py` | — | — |
-| `domain_erp.tax_keys` | `app/api/v1/endpoints/preis_kalkulation_bridge.py`, `app/api/v1/endpoints/tax_keys.py`, `app/core/screen_definitions_capture.py`, `app/finance/steuerschluessel.py`, `app/finance/tax_resolver.py`, `app/finance/ustva.py`, `app/services/beleg_erechnung.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/fiscalization/service.py` | `app/api/v1/endpoints/tax_keys.py`, `app/finance/steuerschluessel.py` | — |
+| `domain_erp.tax_keys` | `app/api/v1/endpoints/preis_kalkulation_bridge.py`, `app/api/v1/endpoints/tax_keys.py`, `app/core/screen_definitions_capture.py`, `app/finance/steuerschluessel.py`, `app/finance/tax_resolver.py`, `app/finance/ustva.py`, `app/services/beleg_erechnung.py`, `app/services/docflow_service.py`, `app/services/finance_freigabe.py`, `app/services/fiscalization/service.py`, `app/services/pos_accounting_service.py` | `app/api/v1/endpoints/tax_keys.py`, `app/finance/steuerschluessel.py` | — |
 | `domain_erp.vat_returns` | `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/vat_return_export.py`, `app/services/closing_checklist_validation.py` | `app/api/v1/endpoints/vat_return_export.py` | — |
 | `domain_erp.versicherungen` | `app/services/schaden_service.py` | — | — |
 | `domain_finance.asset_depreciation_runs` | `app/api/v1/endpoints/asset_accounting.py` | — | — |
