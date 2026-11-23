@@ -13874,6 +13874,25 @@
       ]
     },
     {
+      "mask_id": "einkauf/wareneingangsabgleich-detail",
+      "title": "Drei-Wege-Abgleich",
+      "domain": "einkauf",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/einkauf__wareneingangsabgleich-detail/:entityId",
+      "agent_contract_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract",
+      "screen_definition_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/screen-definition",
+      "readiness_url": "/api/v1/masks/einkauf/wareneingangsabgleich-detail/readiness",
+      "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": [
+        "einkauf.bestellung.list",
+        "einkauf.bestellung.status",
+        "einkauf.angebot.bestellen",
+        "einkauf.anlieferavis.wareneingang"
+      ]
+    },
+    {
       "mask_id": "einkauf/warengruppen",
       "title": "Warengruppen",
       "domain": "einkauf",

@@ -21562,3 +21562,5 @@ M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um data-source-resolver.ts und z
 Studio-Datenbindung kodiert Bestellkennungen zentral als URL-Werte. 14 Tests in Resolver und Bindungscompiler bestanden, einschliesslich des Drei-Wege-Abgleich-Parameters. Detailmaske und Folgeaktionen bleiben offen.
 
 M2-WARENEINGANGSABGLEICH: Codex ergaenzt die native Detaildefinition und bindet sie im vorhandenen Seiteneinstieg an die ausgewaehlte Bestellung. Dateibesitz erweitert um pages/einkauf/wareneingangsabgleich.tsx.
+
+Bestellauswahl und lesender Abgleichkopf sind an die native Studio-Detailansicht gebunden. Katalog und Agentenhandbuch aktualisiert. Feldpruefung meldet weiterhin 54 bekannte Abweichungen ausserhalb dieses Abgleichkopfs. Positionstabellen, Folgeaktionen und Browserabnahme offen.

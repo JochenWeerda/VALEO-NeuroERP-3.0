@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (779 Masken).
+> Generiert aus `app/core/screen_definitions.py` (780 Masken).
 
 ## Übersicht
 
@@ -442,6 +442,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/service-entry-sheets` | Leistungsnachweise | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/service-entry-sheets/agent-contract` |
 | `einkauf/supplier` | Lieferant | einkauf | hoch | `procure-to-pay` | `GET /api/v1/masks/einkauf/supplier/agent-contract` |
 | `einkauf/wareneingangsabgleich` | Wareneingangsabgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich/agent-contract` |
+| `einkauf/wareneingangsabgleich-detail` | Drei-Wege-Abgleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract` |
 | `einkauf/warengruppen` | Warengruppen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/warengruppen/agent-contract` |
 | `einkauf/zahlungsbedingungen` | Zahlungsbedingungen | finance | niedrig | — | `GET /api/v1/masks/einkauf/zahlungsbedingungen/agent-contract` |
 | `errors/NotFound` | Seite nicht gefunden | platform | niedrig | — | `GET /api/v1/masks/errors/NotFound/agent-contract` |
@@ -13603,6 +13604,35 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `einkauf/wareneingangsabgleich-detail` — Drei-Wege-Abgleich
+
+**Zweck:** Den Drei-Wege-Abgleich zu einer Bestellung aufrufen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/agent-contract` |
+| Readiness | `GET /api/v1/masks/einkauf/wareneingangsabgleich-detail/readiness` |
+| Rollout-Route | `/mask-rollout/einkauf__wareneingangsabgleich-detail/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/procurement/match/three-way?bestellung={entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `einkauf.bestellung.list` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.bestellung.status` — scope `einkauf:read`, Risiko niedrig
+- `einkauf.angebot.bestellen` — scope `einkauf:write`, Risiko mittel
+- `einkauf.anlieferavis.wareneingang` — scope `einkauf:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Zeige den Abgleich zu dieser Bestellung.
 
 ---
 

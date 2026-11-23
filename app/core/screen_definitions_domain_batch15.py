@@ -90,7 +90,7 @@ def build_einkauf_wareneingangsabgleich_screen_definition() -> dict[str, Any]:
         title="Wareneingangsabgleich",
         subtitle="einkauf",
         endpoint="/api/v1/procurement/match/orders",
-        row_route=None,
+        row_route="/einkauf/wareneingangsabgleich?bestellung={bestellnummer}",
         columns=columns,
         actions=[stamm_list_export_action()],
         row_actions=[],
@@ -99,6 +99,30 @@ def build_einkauf_wareneingangsabgleich_screen_definition() -> dict[str, Any]:
         bundle="einkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Diese Liste zeigt Bestellungen und den Wareneingangsstatus.",
     )
+
+
+def build_einkauf_wareneingangsabgleich_detail() -> dict[str, Any]:
+    screen = build_stamm_object_page(
+        screen_id="einkauf/wareneingangsabgleich-detail",
+        domain="einkauf",
+        title="Drei-Wege-Abgleich",
+        subtitle="Bestellung, Wareneingang und Eingangsrechnung",
+        identity_field="bestellnummer",
+        data_sources=[stamm_entity_source("/api/v1/procurement/match/three-way?bestellung={entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "bestellnummer", "label": "Bestellnummer", "type": "text", "readOnly": True},
+            {"key": "status", "label": "Bestellstatus", "type": "text", "readOnly": True},
+            {"key": "netto_summe", "label": "Nettosumme", "type": "number", "readOnly": True},
+            {"key": "detail", "label": "Hinweis", "type": "text", "readOnly": True},
+        ], label="Bestellung")],
+        edit_permission="einkauf.write",
+        no_workflow_reason="Diese Ansicht liest den Abgleich zur ausgewählten Bestellung.",
+        business_purpose="Den Drei-Wege-Abgleich zu einer Bestellung aufrufen.",
+        example_prompts=["Zeige den Abgleich zu dieser Bestellung."],
+        test_id="wareneingangsabgleich-detail",
+    )
+    screen["actions"] = []
+    return screen
 
 
 def build_export_ustva_screen_definition() -> dict[str, Any]:
@@ -2620,6 +2644,7 @@ BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,
+    "einkauf/wareneingangsabgleich-detail": build_einkauf_wareneingangsabgleich_detail,
     "export/ustva": build_export_ustva_screen_definition,
     "fibu/abschluss-checklist-detail": build_fibu_abschluss_checklist_detail_screen_definition,
     "fibu/anlagen": build_fibu_anlagen_screen_definition,

@@ -4512,7 +4512,18 @@
       "version": "1.0.0"
     },
     "einkauf/wareneingangsabgleich": {
-      "definition_hash": "1649512ba936a6c21f41b4c9a2ce1c3121c39e717df4900918c31b33434ce528",
+      "definition_hash": "794c9402f446bc73e65748724a414de53ea2381d2cad6c756b1f10ebe2038c69",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "einkauf/wareneingangsabgleich-detail": {
+      "definition_hash": "f0b926afa352eb15251957683b084b63c1a2f30e6596d526a0c70e25cd88fdad",
       "gates_passed": [
         "A",
         "B",
