@@ -21592,3 +21592,5 @@ Folgeaktionsdialog fuer Nachforderung, Reklamation und Eskalation an native Deta
 Kanalvertrag Folgeaktion: CLI und generischer MCP-Adapter uebergeben in Vorschau und Execute identische Methode, kodierte Bestellnummer und Nutzlast. MCP leitet den Aufrufer-Bearer weiter; die Pruefung verwendet Entwicklungskonfiguration, synthetische Identitaet und HTTP-Testtransport. Neun gezielte Tests bestanden. Reale HTTP-/PostgreSQL-/Browser-Abnahmen offen.
 
 Studio-Folgeaktion: Negativnachweise fuer fehlenden Idempotenzschluessel und fehlenden Auditgrund bestaetigen Ablehnung vor dem ersten Datenbankzugriff. Elf Folgeaktionstests bestanden.
+
+M2-WARENEINGANGSABGLEICH: Dateibesitz ergaenzt um tests/test_procurement_match_integration.py fuer PostgreSQL-Abnahme mit vorhandener Rollback-Fixture. Status: valeo_probe vorhanden, beide Tabellen vorhanden, vier fremde Sitzungen im Zustand idle. Kein Reset oder Migration.
