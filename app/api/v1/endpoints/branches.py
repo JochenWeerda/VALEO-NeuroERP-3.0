@@ -154,34 +154,33 @@ async def update_branch(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ):
-    """Update a branch."""
-    _get_branch_or_404(db, branch_id, tenant_id)
-    
-    updates = {k: v for k, v in payload.model_dump(exclude_unset=True).items() if v is not None}
+    """Update a branch and return the exact row written by this request."""
+    updates = {key: value for key, value in payload.model_dump(exclude_unset=True).items() if value is not None}
     if not updates:
+        _get_branch_or_404(db, branch_id, tenant_id)
         raise HTTPException(status_code=400, detail="No fields to update")
-    
+
     if "address" in updates:
         updates["address"] = json.dumps(updates["address"])
-        set_clause = ", ".join(f"{k} = CAST(:{k} AS jsonb)" if k == "address" else f"{k} = :{k}" for k in updates.keys())
-    else:
-        set_clause = ", ".join(f"{k} = :{k}" for k in updates.keys())
-    
-    updates["id"] = branch_id
-    updates["tenant_id"] = tenant_id
-    
-    db.execute(
+    set_clause = ", ".join(
+        "address = CAST(:address AS jsonb)" if key == "address" else f"{key} = :{key}"
+        for key in updates
+    )
+
+    row = db.execute(
         text(f"""
-            UPDATE domain_shared.branches 
+            UPDATE domain_shared.branches
             SET {set_clause}, updated_at = NOW()
             WHERE id = :id AND tenant_id = :tenant_id
+            RETURNING *
         """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
-        updates
-    )
+        {**updates, "id": branch_id, "tenant_id": tenant_id},
+    ).mappings().first()
+    if row is None:
+        raise HTTPException(status_code=404, detail="Branch not found")
+    result = Branch(**dict(row))
     db.commit()
-    
-    row = _get_branch_or_404(db, branch_id, tenant_id)
-    return Branch(**dict(row))
+    return result
 
 
 @router.delete("/{branch_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Branch löschen",

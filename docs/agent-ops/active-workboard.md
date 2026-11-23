@@ -1020,3 +1020,5 @@ Detailansicht umgesetzt: Aus der Niederlassungsliste zur Studio-Objektseite. Die
 Schreibvertrag vorbereitet: Adressen werden beim Anlegen und Aendern als echtes JSON gebunden, einschliesslich Apostroph, Boolean und null. SQLAlchemy-Bindung und bestehende Lesemaske mit vier gezielten Tests geprueft. Freigabe der Studio-Bearbeitung steht aus.
 
 PostgreSQL-Abnahme bestanden: Auf valeo_probe (mahnstufen_verlauf_entfernen_20261123) wurden Anlegen, Aendern und erneutes Lesen einer JSONB-Adresse geprueft. Der Test legt seinen eigenen Mandantendatensatz fuer den Fremdschluessel in derselben Transaktion an und rollt beide Datensaetze zurueck. Drei Tests bestanden.
+
+Niederlassungs-Update liefert die in derselben SQL-Anweisung geaenderte Zeile zurueck. Der Mandantenfilter bleibt Teil des Updates. Das vermeidet zwei Leseabfragen und eine konkurrierende Neulesung nach dem Commit. Drei gezielte Tests auf valeo_probe bestanden; Studio-Schreibbindung weiter offen.

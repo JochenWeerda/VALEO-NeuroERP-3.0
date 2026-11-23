@@ -24,8 +24,11 @@ async def test_branch_address_is_bound_as_json(create):
         await create_branch(BranchCreate(branch_number=1, name="Nord", address=address), tenant_id="tenant", db=db)
     else:
         await update_branch("branch", BranchUpdate(address=address), tenant_id="tenant", db=db)
-    statement, bindings = db.execute.call_args_list[1].args
+    statement, bindings = db.execute.call_args_list[int(create)].args
     assert "CAST(:address AS jsonb)" in statement.text
+    if not create:
+        assert "RETURNING *" in statement.text
+        db.execute.assert_called_once()
     assert statement.compile().params["address"] is None
     assert json.loads(bindings["address"]) == address
     assert bindings["tenant_id"] == "tenant"
