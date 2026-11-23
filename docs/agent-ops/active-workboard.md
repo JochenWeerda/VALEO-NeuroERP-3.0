@@ -1008,3 +1008,7 @@ M2-WORKSPACE-PRODUCTION-NAV umgesetzt. Druckaktion fuehrt zur vorhandenen Druckm
 Ziel: vorhandenen Belegsprung deklarieren. Dateibesitz: Definition des Pruefkorbs und abgeleiteter Versionskatalog. Abnahme: serverseitige Belegroute, bestehender UI-Handler und Studio-Inventar.
 
 M2-PRUEFKORB-NAV umgesetzt: Zum Beleg nutzt die serverseitig abgeleitete Belegroute. Drei gezielte Maskenvertraege bestanden, Studio-Inventar 283 -> 282 auf diesem Zweig. Browserabnahme offen.
+
+## M2-ADMIN-BRANCHES-RUNTIME - offen
+
+Befund: /admin/branches hat keinen ID-Parameter und mountet ausschliesslich MadeByStudioDetailRuntimeWire. Deshalb endet der normale Einstieg vor dem Datenabruf bei der Datensatzauswahl. Die Detaildefinition erwartet bezeichnung/status, die vorhandene mandantengebundene Branch-API liefert branch_number/name/is_active. Folgeauftrag: Listenquelle am Einstieg anbinden, Auswahl und typgerechte Details belegen. Bearbeiten erst mit passendem Feldschema, bestehender Admin-Autorisierung und einem registrierten Kommando anbinden; ein Deklarationswechsel allein behebt den Laufzeitfehler nicht.
