@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-23
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-23T08:44:16Z'
+generated_at: '2026-11-23T11:16:31Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -810,6 +810,7 @@ domains:
     - crm_opportunity_reference
     - crm_ownership_service
     - crm_segment_service
+    - customer_master_profile_service
     - customer_reference
     - customer_sales_eligibility
     - customer_service
@@ -880,6 +881,7 @@ domains:
     - crm_reports
     - crm_segments
     - customer_extensions
+    - customer_master_profile
     - customers
     - debtors
     - dunning
@@ -937,6 +939,7 @@ domains:
     - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
     - docs/adr/adr-crm-activity-canonical-20261029.md
+    - docs/adr/adr-customer-master-profile-20261117.md
     status: pilot
   dms-compliance:
     owner: domain/dms-compliance
@@ -2387,10 +2390,10 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 346
-  backend_services_mapped: 346
-  backend_endpoints_total: 474
-  backend_endpoints_mapped: 474
+  backend_services_total: 347
+  backend_services_mapped: 347
+  backend_endpoints_total: 475
+  backend_endpoints_mapped: 475
 unmapped:
   frontend_routes: []
   backend_services: []

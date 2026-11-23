@@ -1,0 +1,2548 @@
+{
+  "schemaVersion": 1,
+  "groups": [
+    {
+      "key": "coreIdentity",
+      "label": "Identität",
+      "model": "CoreIdentity",
+      "fields": [
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_number",
+          "label": "Partnernummer",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "matchcode",
+          "label": "Suchbegriff",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "name_1",
+          "label": "Name 1",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "name_2",
+          "label": "Name 2",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "legal_form",
+          "label": "Rechtsform",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "street",
+          "label": "Straße",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "house_number",
+          "label": "Hausnummer",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "postal_code",
+          "label": "Postleitzahl",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "city",
+          "label": "Ort",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "country",
+          "label": "Land",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "state",
+          "label": "Bundesland",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "language",
+          "label": "Sprache",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "status",
+          "label": "Status",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "key": "roles",
+      "label": "Rollen",
+      "model": "Roles",
+      "fields": [
+        {
+          "key": "is_customer",
+          "label": "Kunde",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "is_supplier",
+          "label": "Lieferant",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "is_carrier",
+          "label": "Spediteur",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "is_employee",
+          "label": "Mitarbeiter",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "is_service_provider",
+          "label": "Dienstleister",
+          "type": "boolean",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "contactData",
+      "label": "Kontakt",
+      "model": "ContactData",
+      "fields": [
+        {
+          "key": "phone",
+          "label": "Telefon",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "mobile",
+          "label": "Mobiltelefon",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "email",
+          "label": "E-Mail",
+          "type": "email",
+          "readOnly": true
+        },
+        {
+          "key": "website",
+          "label": "Webseite",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "fax",
+          "label": "Fax",
+          "type": "text",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "banking",
+      "label": "Bankverbindung",
+      "model": "Banking",
+      "fields": [
+        {
+          "key": "iban",
+          "label": "IBAN",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "bic",
+          "label": "BIC",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "bank_name",
+          "label": "Bank",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "sepa_mandate_reference",
+          "label": "SEPA-Mandatsreferenz",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "sepa_mandate_signed_at",
+          "label": "SEPA-Mandat unterzeichnet am",
+          "type": "datetime",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "finance",
+      "label": "Finanzen und Steuern",
+      "model": "Finance",
+      "fields": [
+        {
+          "key": "debtor_account",
+          "label": "Debitorenkonto",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "creditor_account",
+          "label": "Kreditorenkonto",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tax_number",
+          "label": "Steuernummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "vat_id",
+          "label": "Umsatzsteuer-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tax_type",
+          "label": "Steuerart",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "credit_limit",
+          "label": "Kreditlimit",
+          "type": "currency",
+          "readOnly": true
+        },
+        {
+          "key": "dunning_level",
+          "label": "Mahnstufe",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "blocked_for_delivery",
+          "label": "Liefersperre",
+          "type": "boolean"
+        },
+        {
+          "key": "blocked_for_invoice",
+          "label": "Rechnungssperre",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "key": "agrarExtension",
+      "label": "Agrar",
+      "model": "AgrarExtension",
+      "fields": [
+        {
+          "key": "farm_number",
+          "label": "Betriebsnummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "eu_farm_id",
+          "label": "EU-Betriebsnummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "harvest_year_default",
+          "label": "Standard-Erntejahr",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "qs_certificate_number",
+          "label": "QS-Zertifikatsnummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "qs_valid_until",
+          "label": "QS gültig bis",
+          "type": "datetime",
+          "clearable": true
+        },
+        {
+          "key": "bio_certified",
+          "label": "Bio-zertifiziert",
+          "type": "boolean"
+        },
+        {
+          "key": "bio_certificate_valid_until",
+          "label": "Bio-Zertifikat gültig bis",
+          "type": "datetime",
+          "clearable": true
+        },
+        {
+          "key": "contract_group",
+          "label": "Kontraktgruppe",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "default_silo_location",
+          "label": "Standard-Silostandort",
+          "type": "text",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "logistics",
+      "label": "Logistik",
+      "model": "Logistics",
+      "fields": [
+        {
+          "key": "loading_requirements",
+          "label": "Verladeanforderungen",
+          "type": "textarea",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "marketingConsent",
+      "label": "Marketing und Einwilligungen",
+      "model": "MarketingConsent",
+      "fields": [
+        {
+          "key": "email_opt_in",
+          "label": "E-Mail-Einwilligung",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "email_opt_in_timestamp",
+          "label": "E-Mail-Einwilligung erfasst am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "sms_opt_in",
+          "label": "SMS-Einwilligung",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "sms_opt_in_timestamp",
+          "label": "SMS-Einwilligung erfasst am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "whatsapp_opt_in",
+          "label": "WhatsApp-Einwilligung",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "whatsapp_opt_in_timestamp",
+          "label": "WhatsApp-Einwilligung erfasst am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "newsletter_opt_in",
+          "label": "Newsletter-Einwilligung",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "newsletter_language",
+          "label": "Newsletter-Sprache",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "flyer_subscription",
+          "label": "Prospektbezug",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "flyer_delivery_type",
+          "label": "Prospektversandart",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "marketing_segment",
+          "label": "Marketingsegment",
+          "type": "text",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "gdpr",
+      "label": "Datenschutz",
+      "model": "Gdpr",
+      "fields": [
+        {
+          "key": "privacy_policy_accepted",
+          "label": "Datenschutzhinweis bestätigt",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "privacy_policy_version",
+          "label": "Version Datenschutzhinweis",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "privacy_policy_accepted_at",
+          "label": "Datenschutzhinweis bestätigt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "data_processing_agreement_signed",
+          "label": "Auftragsverarbeitung vereinbart",
+          "type": "boolean",
+          "readOnly": true
+        },
+        {
+          "key": "data_retention_until",
+          "label": "Aufbewahrung bis",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "contact_block_reason",
+          "label": "Grund der Kontaktsperre",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "anonymized_at",
+          "label": "Anonymisiert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "legacy_payment",
+      "label": "Zahlung und Verzinsung",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "account_holder",
+          "label": "Kontoinhaber",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "bank_connection_active",
+          "label": "Bankverbindung aktiv",
+          "type": "boolean"
+        },
+        {
+          "key": "payment_method",
+          "label": "Zahlungsart",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "payment_target_days",
+          "label": "Zahlungsziel in Tagen",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "cash_discount_percent",
+          "label": "Skonto in %",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "cash_discount_days",
+          "label": "Skontofrist in Tagen",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "dunning_procedure",
+          "label": "Mahnverfahren",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "currency_code",
+          "label": "Währung",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "euro_conversion_rate",
+          "label": "Euro-Umrechnungskurs",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "interest_table_code",
+          "label": "Zinstabelle",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "last_interest_date",
+          "label": "Letzte Verzinsung",
+          "type": "date",
+          "readOnly": true
+        },
+        {
+          "key": "last_interest_balance",
+          "label": "Letzter Zinssaldo",
+          "type": "currency",
+          "readOnly": true
+        },
+        {
+          "key": "auto_offset_enabled",
+          "label": "Automatische Verrechnung",
+          "type": "boolean"
+        },
+        {
+          "key": "post_open_items_blocked",
+          "label": "Buchung offener Posten gesperrt",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "key": "legacy_billing",
+      "label": "Abrechnung und Ausgabe",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "wants_account_statement",
+          "label": "Kontoauszug gewünscht",
+          "type": "boolean"
+        },
+        {
+          "key": "print_balance_on_invoice",
+          "label": "Saldo auf Rechnung drucken",
+          "type": "boolean"
+        },
+        {
+          "key": "invoice_print_blocked",
+          "label": "Rechnungsdruck gesperrt",
+          "type": "boolean"
+        },
+        {
+          "key": "delivery_note_print_blocked",
+          "label": "Lieferscheindruck gesperrt",
+          "type": "boolean"
+        },
+        {
+          "key": "settlement_mode",
+          "label": "Abrechnungsart",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "collective_settlement_code",
+          "label": "Sammelabrechnung",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "bonus_recipient",
+          "label": "Bonusempfänger",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "invoice_recipient",
+          "label": "Rechnungsempfänger",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "self_billing_customer",
+          "label": "Selbstabrechner",
+          "type": "boolean"
+        },
+        {
+          "key": "invoice_dispatch_channel",
+          "label": "Rechnungsversand",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "reminder_dispatch_channel",
+          "label": "Mahnungsversand",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "contact_dispatch_channel",
+          "label": "Kontaktversand",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "zugferd_profile",
+          "label": "ZUGFeRD-Profil",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "due_date_basis",
+          "label": "Fälligkeitsgrundlage",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "proforma_invoice",
+          "label": "Proformarechnung",
+          "type": "boolean"
+        }
+      ]
+    },
+    {
+      "key": "legacy_pricing",
+      "label": "Preise und Rabatte",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "price_group",
+          "label": "Preisgruppe",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "discount_percent",
+          "label": "Rabatt in %",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "proforma_discount_1",
+          "label": "Proformarabatt 1",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "proforma_discount_2",
+          "label": "Proformarabatt 2",
+          "type": "number",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "legacy_logistics",
+      "label": "Lieferung und Logistik",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "calculate_shipping_flat",
+          "label": "Frachtpauschale berechnen",
+          "type": "boolean"
+        },
+        {
+          "key": "loading_information",
+          "label": "Verladehinweise",
+          "type": "textarea",
+          "clearable": true
+        },
+        {
+          "key": "route_information",
+          "label": "Tourenhinweise",
+          "type": "textarea",
+          "clearable": true
+        },
+        {
+          "key": "delivery_condition",
+          "label": "Lieferbedingung",
+          "type": "text",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "legacy_profile",
+      "label": "Kundenprofil",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "salutation",
+          "label": "Anrede",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "first_name",
+          "label": "Vorname",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "last_name",
+          "label": "Nachname",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "customer_group",
+          "label": "Kundengruppe",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "customer_addition",
+          "label": "Kundenzusatz",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "insurance_info",
+          "label": "Versicherungsangaben",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "statistics_code",
+          "label": "Statistikkennzeichen",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "agricultural_office",
+          "label": "Landwirtschaftsamt",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "operation_number",
+          "label": "Betriebsnummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "market_price_evaluation",
+          "label": "Marktpreisauswertung",
+          "type": "boolean"
+        },
+        {
+          "key": "threshold_value",
+          "label": "Schwellenwert",
+          "type": "currency",
+          "clearable": true
+        },
+        {
+          "key": "industry_key",
+          "label": "Branchenschlüssel",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "annual_revenue",
+          "label": "Jahresumsatz",
+          "type": "currency",
+          "clearable": true
+        },
+        {
+          "key": "employee_count",
+          "label": "Mitarbeiterzahl",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "company_philosophy",
+          "label": "Unternehmensphilosophie",
+          "type": "textarea",
+          "clearable": true
+        },
+        {
+          "key": "competitive_differentiation",
+          "label": "Wettbewerbsdifferenzierung",
+          "type": "textarea",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "legacy_interfaces",
+      "label": "Schnittstellen und Einwilligungsnachweise",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "webshop_customer",
+          "label": "Webshop-Kunde",
+          "type": "boolean"
+        },
+        {
+          "key": "fax_blocked",
+          "label": "Fax gesperrt",
+          "type": "boolean"
+        },
+        {
+          "key": "consent_valid_until",
+          "label": "Einwilligung gültig bis",
+          "type": "date",
+          "readOnly": true
+        },
+        {
+          "key": "consent_note",
+          "label": "Einwilligungsvermerk",
+          "type": "textarea",
+          "readOnly": true
+        },
+        {
+          "key": "tank_card_ean",
+          "label": "Tankkarten-EAN",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "customer_card_flag",
+          "label": "Kundenkartenkennzeichen",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_invoic",
+          "label": "EDIFACT INVOIC",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_orders",
+          "label": "EDIFACT ORDERS",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_desadv",
+          "label": "EDIFACT DESADV",
+          "type": "boolean"
+        },
+        {
+          "key": "webshop_customer_number",
+          "label": "Webshop-Kundennummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "webshop_description",
+          "label": "Webshop-Beschreibung",
+          "type": "text",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "legacy_cooperative",
+      "label": "Genossenschaft",
+      "model": "LegacyCustomerFields",
+      "fields": [
+        {
+          "key": "membership_number",
+          "label": "Mitgliedsnummer",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "membership_terminated",
+          "label": "Mitgliedschaft beendet",
+          "type": "boolean"
+        },
+        {
+          "key": "termination_reason",
+          "label": "Kündigungsgrund",
+          "type": "text",
+          "clearable": true
+        },
+        {
+          "key": "membership_entry_date",
+          "label": "Eintrittsdatum",
+          "type": "date",
+          "clearable": true
+        },
+        {
+          "key": "termination_date",
+          "label": "Kündigungsdatum",
+          "type": "date",
+          "clearable": true
+        },
+        {
+          "key": "exit_date",
+          "label": "Austrittsdatum",
+          "type": "date",
+          "clearable": true
+        },
+        {
+          "key": "mandatory_shares",
+          "label": "Pflichtanteile",
+          "type": "number",
+          "clearable": true
+        },
+        {
+          "key": "terminated_mandatory_shares",
+          "label": "Gekündigte Pflichtanteile",
+          "type": "number",
+          "clearable": true
+        }
+      ]
+    },
+    {
+      "key": "audit",
+      "label": "Änderungsnachweis",
+      "model": "Audit",
+      "fields": [
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        }
+      ]
+    }
+  ],
+  "subEntities": [
+    {
+      "key": "discountItems",
+      "label": "Rabatte",
+      "model": "BusinessPartnerDiscountItem",
+      "createSchema": "DiscountItemCreate",
+      "updateSchema": "DiscountItemUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "article_number",
+          "label": "Artikelnummer",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Bezeichnung",
+          "type": "text"
+        },
+        {
+          "key": "discount_percent",
+          "label": "Rabatt in %",
+          "type": "number"
+        },
+        {
+          "key": "valid_from",
+          "label": "Gültig ab",
+          "type": "date"
+        },
+        {
+          "key": "valid_to",
+          "label": "Gültig bis",
+          "type": "date"
+        },
+        {
+          "key": "discount_list_number",
+          "label": "Rabattlistennummer",
+          "type": "text"
+        },
+        {
+          "key": "source_type",
+          "label": "Herkunft",
+          "type": "text"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "priceAgreements",
+      "label": "Preisvereinbarungen",
+      "model": "BusinessPartnerPriceAgreement",
+      "createSchema": "PriceAgreementCreate",
+      "updateSchema": "PriceAgreementUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "article_number",
+          "label": "Artikelnummer",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Bezeichnung",
+          "type": "text"
+        },
+        {
+          "key": "valid_from",
+          "label": "Gültig ab",
+          "type": "date"
+        },
+        {
+          "key": "valid_to",
+          "label": "Gültig bis",
+          "type": "date"
+        },
+        {
+          "key": "price_net",
+          "label": "Nettopreis",
+          "type": "currency"
+        },
+        {
+          "key": "price_incl_freight",
+          "label": "Preis einschließlich Fracht",
+          "type": "currency"
+        },
+        {
+          "key": "price_unit",
+          "label": "Preiseinheit",
+          "type": "text"
+        },
+        {
+          "key": "discount_allowed",
+          "label": "Rabatt zulässig",
+          "type": "boolean"
+        },
+        {
+          "key": "special_freight",
+          "label": "Sonderfracht",
+          "type": "number"
+        },
+        {
+          "key": "payment_condition",
+          "label": "Zahlungsbedingung",
+          "type": "text"
+        },
+        {
+          "key": "source_type",
+          "label": "Herkunft",
+          "type": "text"
+        },
+        {
+          "key": "operator_name",
+          "label": "Bearbeiter",
+          "type": "text"
+        },
+        {
+          "key": "operator_date",
+          "label": "Bearbeitungsdatum",
+          "type": "datetime"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "instructions",
+      "label": "Chef-Anweisungen",
+      "model": "BusinessPartnerInstruction",
+      "createSchema": "InstructionCreate",
+      "updateSchema": "InstructionUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "instruction_text",
+          "label": "Anweisung",
+          "type": "textarea"
+        },
+        {
+          "key": "instruction_priority",
+          "label": "Priorität",
+          "type": "text"
+        },
+        {
+          "key": "valid_from",
+          "label": "Gültig ab",
+          "type": "date"
+        },
+        {
+          "key": "valid_to",
+          "label": "Gültig bis",
+          "type": "date"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "contacts",
+      "label": "Ansprechpartner",
+      "model": "BusinessPartnerContact",
+      "createSchema": "ContactCreate",
+      "updateSchema": "ContactUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "priority",
+          "label": "Priorität",
+          "type": "number"
+        },
+        {
+          "key": "salutation",
+          "label": "Anrede",
+          "type": "text"
+        },
+        {
+          "key": "brief_salutation",
+          "label": "Briefanrede",
+          "type": "text"
+        },
+        {
+          "key": "title",
+          "label": "Titel",
+          "type": "text"
+        },
+        {
+          "key": "first_name",
+          "label": "Vorname",
+          "type": "text"
+        },
+        {
+          "key": "last_name",
+          "label": "Nachname",
+          "type": "text"
+        },
+        {
+          "key": "position",
+          "label": "Funktion",
+          "type": "text"
+        },
+        {
+          "key": "department",
+          "label": "Abteilung",
+          "type": "text"
+        },
+        {
+          "key": "phone_1",
+          "label": "Telefon 1",
+          "type": "text"
+        },
+        {
+          "key": "phone_2",
+          "label": "Telefon 2",
+          "type": "text"
+        },
+        {
+          "key": "mobile",
+          "label": "Mobiltelefon",
+          "type": "text"
+        },
+        {
+          "key": "email",
+          "label": "E-Mail",
+          "type": "email"
+        },
+        {
+          "key": "street",
+          "label": "Straße",
+          "type": "text"
+        },
+        {
+          "key": "postal_code",
+          "label": "Postleitzahl",
+          "type": "text"
+        },
+        {
+          "key": "city",
+          "label": "Ort",
+          "type": "text"
+        },
+        {
+          "key": "birth_date",
+          "label": "Geburtsdatum",
+          "type": "date"
+        },
+        {
+          "key": "hobbies",
+          "label": "Interessen",
+          "type": "textarea"
+        },
+        {
+          "key": "info_1",
+          "label": "Information 1",
+          "type": "text"
+        },
+        {
+          "key": "info_2",
+          "label": "Information 2",
+          "type": "text"
+        },
+        {
+          "key": "invoice_email_recipient",
+          "label": "Empfänger für Rechnungs-E-Mails",
+          "type": "boolean"
+        },
+        {
+          "key": "reminder_email_recipient",
+          "label": "Empfänger für Mahnungs-E-Mails",
+          "type": "boolean"
+        },
+        {
+          "key": "contact_type",
+          "label": "Kontaktart",
+          "type": "text"
+        },
+        {
+          "key": "cad_system",
+          "label": "CAD-System",
+          "type": "text"
+        },
+        {
+          "key": "software_systems",
+          "label": "Softwaresysteme",
+          "type": "textarea"
+        },
+        {
+          "key": "is_data_protection_officer",
+          "label": "Datenschutzbeauftragter",
+          "type": "boolean"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "addresses",
+      "label": "Anschriften",
+      "model": "BusinessPartnerAddress",
+      "createSchema": "AddressCreate",
+      "updateSchema": "AddressUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "address_type",
+          "label": "Anschriftsart",
+          "type": "text"
+        },
+        {
+          "key": "name_1",
+          "label": "Name 1",
+          "type": "text"
+        },
+        {
+          "key": "name_2",
+          "label": "Name 2",
+          "type": "text"
+        },
+        {
+          "key": "name_3",
+          "label": "Name 3",
+          "type": "text"
+        },
+        {
+          "key": "street",
+          "label": "Straße",
+          "type": "text"
+        },
+        {
+          "key": "house_number",
+          "label": "Hausnummer",
+          "type": "text"
+        },
+        {
+          "key": "country",
+          "label": "Land",
+          "type": "text"
+        },
+        {
+          "key": "postal_code",
+          "label": "Postleitzahl",
+          "type": "text"
+        },
+        {
+          "key": "city",
+          "label": "Ort",
+          "type": "text"
+        },
+        {
+          "key": "po_box",
+          "label": "Postfach",
+          "type": "text"
+        },
+        {
+          "key": "po_box_postal_code",
+          "label": "Postfach-Postleitzahl",
+          "type": "text"
+        },
+        {
+          "key": "po_box_city",
+          "label": "Postfach-Ort",
+          "type": "text"
+        },
+        {
+          "key": "phone",
+          "label": "Telefon",
+          "type": "text"
+        },
+        {
+          "key": "fax",
+          "label": "Fax",
+          "type": "text"
+        },
+        {
+          "key": "email",
+          "label": "E-Mail",
+          "type": "email"
+        },
+        {
+          "key": "website",
+          "label": "Webseite",
+          "type": "text"
+        },
+        {
+          "key": "salutation",
+          "label": "Anrede",
+          "type": "text"
+        },
+        {
+          "key": "brief_salutation",
+          "label": "Briefanrede",
+          "type": "text"
+        },
+        {
+          "key": "free_field_1",
+          "label": "Freifeld 1",
+          "type": "text"
+        },
+        {
+          "key": "free_field_2",
+          "label": "Freifeld 2",
+          "type": "text"
+        },
+        {
+          "key": "free_field_3",
+          "label": "Freifeld 3",
+          "type": "text"
+        },
+        {
+          "key": "area_code",
+          "label": "Gebietskennzeichen",
+          "type": "text"
+        },
+        {
+          "key": "is_default",
+          "label": "Standardanschrift",
+          "type": "boolean"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "billing",
+      "label": "Abrechnungseinstellungen",
+      "model": "BusinessPartnerBillingConfig",
+      "createSchema": "BillingConfigCreate",
+      "updateSchema": "BillingConfigUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "customer_group",
+          "label": "Kundengruppe",
+          "type": "text"
+        },
+        {
+          "key": "customer_type",
+          "label": "Kundenart",
+          "type": "text"
+        },
+        {
+          "key": "account_statement_print",
+          "label": "Kontoauszug drucken",
+          "type": "boolean"
+        },
+        {
+          "key": "account_statement_separate",
+          "label": "Kontoauszug getrennt",
+          "type": "boolean"
+        },
+        {
+          "key": "account_statement_reprint",
+          "label": "Kontoauszug nachdrucken",
+          "type": "boolean"
+        },
+        {
+          "key": "last_account_statement_number",
+          "label": "Letzte Kontoauszugsnummer",
+          "type": "number",
+          "readOnly": true
+        },
+        {
+          "key": "last_account_statement_date",
+          "label": "Letzter Kontoauszug am",
+          "type": "date",
+          "readOnly": true
+        },
+        {
+          "key": "account_balance",
+          "label": "Kontosaldo",
+          "type": "currency",
+          "readOnly": true
+        },
+        {
+          "key": "print_ad_text",
+          "label": "Werbetext drucken",
+          "type": "boolean"
+        },
+        {
+          "key": "shipping_expenses_enabled",
+          "label": "Versandkosten berechnen",
+          "type": "boolean"
+        },
+        {
+          "key": "settlement_mode",
+          "label": "Abrechnungsart",
+          "type": "text"
+        },
+        {
+          "key": "admin_overhead_surcharge_percent",
+          "label": "Verwaltungskostenzuschlag in %",
+          "type": "number"
+        },
+        {
+          "key": "invoice_number_range",
+          "label": "Rechnungsnummernkreis",
+          "type": "text"
+        },
+        {
+          "key": "bonus_eligible",
+          "label": "Bonusberechtigt",
+          "type": "boolean"
+        },
+        {
+          "key": "self_billing_sales",
+          "label": "Selbstabrechnung Verkauf",
+          "type": "boolean"
+        },
+        {
+          "key": "self_billing_purchase",
+          "label": "Selbstabrechnung Einkauf",
+          "type": "boolean"
+        },
+        {
+          "key": "remarkable_claim",
+          "label": "Besondere Forderung",
+          "type": "boolean"
+        },
+        {
+          "key": "vat_optimizer",
+          "label": "Umsatzsteuer-Optierer",
+          "type": "boolean"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "cpd",
+      "label": "CPD-Konten",
+      "model": "BusinessPartnerCpdAccount",
+      "createSchema": "CpdAccountCreate",
+      "updateSchema": "CpdAccountUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tenant_id",
+          "label": "Mandant",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "cpd_customer_number",
+          "label": "CPD-Kundennummer",
+          "type": "text"
+        },
+        {
+          "key": "debtor_account",
+          "label": "Debitorenkonto",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "search_term",
+          "label": "Suchbegriff",
+          "type": "text"
+        },
+        {
+          "key": "name_1",
+          "label": "Name 1",
+          "type": "text"
+        },
+        {
+          "key": "name_2",
+          "label": "Name 2",
+          "type": "text"
+        },
+        {
+          "key": "name_3",
+          "label": "Name 3",
+          "type": "text"
+        },
+        {
+          "key": "street",
+          "label": "Straße",
+          "type": "text"
+        },
+        {
+          "key": "house_number",
+          "label": "Hausnummer",
+          "type": "text"
+        },
+        {
+          "key": "country",
+          "label": "Land",
+          "type": "text"
+        },
+        {
+          "key": "postal_code",
+          "label": "Postleitzahl",
+          "type": "text"
+        },
+        {
+          "key": "city",
+          "label": "Ort",
+          "type": "text"
+        },
+        {
+          "key": "po_box",
+          "label": "Postfach",
+          "type": "text"
+        },
+        {
+          "key": "po_box_city",
+          "label": "Postfach-Ort",
+          "type": "text"
+        },
+        {
+          "key": "phone_1",
+          "label": "Telefon 1",
+          "type": "text"
+        },
+        {
+          "key": "phone_2",
+          "label": "Telefon 2",
+          "type": "text"
+        },
+        {
+          "key": "fax",
+          "label": "Fax",
+          "type": "text"
+        },
+        {
+          "key": "salutation",
+          "label": "Anrede",
+          "type": "text"
+        },
+        {
+          "key": "brief_salutation",
+          "label": "Briefanrede",
+          "type": "text"
+        },
+        {
+          "key": "email",
+          "label": "E-Mail",
+          "type": "email"
+        },
+        {
+          "key": "website",
+          "label": "Webseite",
+          "type": "text"
+        },
+        {
+          "key": "branch_office",
+          "label": "Niederlassung",
+          "type": "text"
+        },
+        {
+          "key": "cost_center",
+          "label": "Kostenstelle",
+          "type": "text"
+        },
+        {
+          "key": "invoice_type",
+          "label": "Rechnungsart",
+          "type": "text"
+        },
+        {
+          "key": "collective_invoice",
+          "label": "Sammelrechnung",
+          "type": "boolean"
+        },
+        {
+          "key": "invoice_form_template",
+          "label": "Rechnungsvorlage",
+          "type": "text"
+        },
+        {
+          "key": "sales_representative",
+          "label": "Vertriebsmitarbeiter",
+          "type": "text"
+        },
+        {
+          "key": "area_code",
+          "label": "Gebietskennzeichen",
+          "type": "text"
+        },
+        {
+          "key": "cash_discount_percent",
+          "label": "Skonto in %",
+          "type": "number"
+        },
+        {
+          "key": "cash_discount_days",
+          "label": "Skontofrist in Tagen",
+          "type": "number"
+        },
+        {
+          "key": "payment_target_days",
+          "label": "Zahlungsziel in Tagen",
+          "type": "number"
+        },
+        {
+          "key": "created_by",
+          "label": "Erstellt von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "updated_by",
+          "label": "Geändert von",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "pricing",
+      "label": "Preissteuerung",
+      "model": "BusinessPartnerPricingRule",
+      "createSchema": "PricingRuleCreate",
+      "updateSchema": "PricingRuleUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "direct_account",
+          "label": "Direktkonto",
+          "type": "boolean"
+        },
+        {
+          "key": "discount_settlement",
+          "label": "Rabattabrechnung",
+          "type": "boolean"
+        },
+        {
+          "key": "self_pickup_discount_percent",
+          "label": "Selbstabholerrabatt in %",
+          "type": "number"
+        },
+        {
+          "key": "price_determination_mode",
+          "label": "Preisermittlung",
+          "type": "text"
+        },
+        {
+          "key": "direct_deduction",
+          "label": "Direktabzug",
+          "type": "boolean"
+        },
+        {
+          "key": "weekly_price_ec_basis",
+          "label": "Wochenpreis-EG-Basis",
+          "type": "boolean"
+        },
+        {
+          "key": "valid_from",
+          "label": "Gültig ab",
+          "type": "date"
+        },
+        {
+          "key": "valid_to",
+          "label": "Gültig bis",
+          "type": "date"
+        },
+        {
+          "key": "notes",
+          "label": "Notizen",
+          "type": "textarea"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "interest",
+      "label": "Verzinsung",
+      "model": "BusinessPartnerInterestSetting",
+      "createSchema": "InterestSettingCreate",
+      "updateSchema": "InterestSettingUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "interest_table_debit_code",
+          "label": "Sollzinstabelle",
+          "type": "text"
+        },
+        {
+          "key": "interest_table_credit_code",
+          "label": "Habenzinstabelle",
+          "type": "text"
+        },
+        {
+          "key": "last_interest_date",
+          "label": "Letzte Verzinsung",
+          "type": "date",
+          "readOnly": true
+        },
+        {
+          "key": "last_interest_balance",
+          "label": "Letzter Zinssaldo",
+          "type": "currency",
+          "readOnly": true
+        },
+        {
+          "key": "auto_offset_enabled",
+          "label": "Automatische Verrechnung",
+          "type": "boolean"
+        },
+        {
+          "key": "currency_code",
+          "label": "Währung",
+          "type": "text"
+        },
+        {
+          "key": "valid_from",
+          "label": "Gültig ab",
+          "type": "date"
+        },
+        {
+          "key": "valid_to",
+          "label": "Gültig bis",
+          "type": "date"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "dispatch",
+      "label": "Versandmedien",
+      "model": "BusinessPartnerDispatchMedium",
+      "createSchema": "DispatchMediumCreate",
+      "updateSchema": "DispatchMediumUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "document_type",
+          "label": "Dokumentart",
+          "type": "text"
+        },
+        {
+          "key": "dispatch_channel",
+          "label": "Versandweg",
+          "type": "text"
+        },
+        {
+          "key": "enabled",
+          "label": "Aktiv",
+          "type": "boolean"
+        },
+        {
+          "key": "zugferd_profile",
+          "label": "ZUGFeRD-Profil",
+          "type": "text"
+        },
+        {
+          "key": "recipient_email",
+          "label": "Empfänger-E-Mail",
+          "type": "email"
+        },
+        {
+          "key": "recipient_name",
+          "label": "Empfängername",
+          "type": "text"
+        },
+        {
+          "key": "notes",
+          "label": "Notizen",
+          "type": "textarea"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "cooperative",
+      "label": "Genossenschaftsmitgliedschaften",
+      "model": "BusinessPartnerCooperativeMembership",
+      "createSchema": "CooperativeMembershipCreate",
+      "updateSchema": "CooperativeMembershipUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "membership_number",
+          "label": "Mitgliedsnummer",
+          "type": "text"
+        },
+        {
+          "key": "account_number",
+          "label": "Kontonummer",
+          "type": "text"
+        },
+        {
+          "key": "membership_status",
+          "label": "Mitgliedsstatus",
+          "type": "text"
+        },
+        {
+          "key": "entry_date",
+          "label": "Eintrittsdatum",
+          "type": "date"
+        },
+        {
+          "key": "termination_date",
+          "label": "Kündigungsdatum",
+          "type": "date"
+        },
+        {
+          "key": "exit_date",
+          "label": "Austrittsdatum",
+          "type": "date"
+        },
+        {
+          "key": "termination_reason",
+          "label": "Kündigungsgrund",
+          "type": "text"
+        },
+        {
+          "key": "mandatory_shares",
+          "label": "Pflichtanteile",
+          "type": "number"
+        },
+        {
+          "key": "terminated_mandatory_shares",
+          "label": "Gekündigte Pflichtanteile",
+          "type": "number"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "email",
+      "label": "E-Mail-Verteiler",
+      "model": "BusinessPartnerEmailDistribution",
+      "createSchema": "EmailDistributionCreate",
+      "updateSchema": "EmailDistributionUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "distribution_name",
+          "label": "Verteilername",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Bezeichnung",
+          "type": "text"
+        },
+        {
+          "key": "email",
+          "label": "E-Mail",
+          "type": "email"
+        },
+        {
+          "key": "is_active",
+          "label": "Aktiv",
+          "type": "boolean"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "communities",
+      "label": "Gemeinschaften",
+      "model": "BusinessPartnerCommunity",
+      "createSchema": "CommunityCreate",
+      "updateSchema": "CommunityUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "community_number",
+          "label": "Gemeinschaftsnummer",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Bezeichnung",
+          "type": "text"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "communityMembers",
+      "label": "Gemeinschaftsmitglieder",
+      "model": "BusinessPartnerCommunityMember",
+      "createSchema": "CommunityMemberCreate",
+      "updateSchema": "CommunityMemberUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "community_id",
+          "label": "Gemeinschafts-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "share_percent",
+          "label": "Anteil in %",
+          "type": "number"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "profile",
+      "label": "Unternehmensprofil",
+      "model": "BusinessPartnerProfile",
+      "createSchema": "ProfileCreate",
+      "updateSchema": "ProfileUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "company_founded",
+          "label": "Gründungsjahr",
+          "type": "date"
+        },
+        {
+          "key": "annual_revenue",
+          "label": "Jahresumsatz",
+          "type": "currency"
+        },
+        {
+          "key": "industry_key",
+          "label": "Branchenschlüssel",
+          "type": "text"
+        },
+        {
+          "key": "industry_name",
+          "label": "Branche",
+          "type": "text"
+        },
+        {
+          "key": "professional_association",
+          "label": "Berufsgenossenschaft",
+          "type": "text"
+        },
+        {
+          "key": "professional_association_number",
+          "label": "Berufsgenossenschaftsnummer",
+          "type": "text"
+        },
+        {
+          "key": "competitors",
+          "label": "Wettbewerber",
+          "type": "textarea"
+        },
+        {
+          "key": "bottlenecks",
+          "label": "Engpässe",
+          "type": "textarea"
+        },
+        {
+          "key": "organization_structure",
+          "label": "Organisationsstruktur",
+          "type": "textarea"
+        },
+        {
+          "key": "employee_count",
+          "label": "Mitarbeiterzahl",
+          "type": "number"
+        },
+        {
+          "key": "competitive_differentiation",
+          "label": "Wettbewerbsdifferenzierung",
+          "type": "textarea"
+        },
+        {
+          "key": "works_council",
+          "label": "Betriebsrat",
+          "type": "boolean"
+        },
+        {
+          "key": "company_philosophy",
+          "label": "Unternehmensphilosophie",
+          "type": "textarea"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    },
+    {
+      "key": "interface",
+      "label": "Schnittstellenprofil",
+      "model": "BusinessPartnerInterfaceProfile",
+      "createSchema": "InterfaceProfileCreate",
+      "updateSchema": "InterfaceProfileUpdate",
+      "fields": [
+        {
+          "key": "id",
+          "label": "ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "partner_id",
+          "label": "Geschäftspartner-ID",
+          "type": "text",
+          "readOnly": true
+        },
+        {
+          "key": "tank_card_ean",
+          "label": "Tankkarten-EAN",
+          "type": "text"
+        },
+        {
+          "key": "customer_card_flag",
+          "label": "Kundenkartenkennzeichen",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_invoic",
+          "label": "EDIFACT INVOIC",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_orders",
+          "label": "EDIFACT ORDERS",
+          "type": "boolean"
+        },
+        {
+          "key": "edifact_desadv",
+          "label": "EDIFACT DESADV",
+          "type": "boolean"
+        },
+        {
+          "key": "webshop_customer_number",
+          "label": "Webshop-Kundennummer",
+          "type": "text"
+        },
+        {
+          "key": "webshop_description",
+          "label": "Webshop-Beschreibung",
+          "type": "text"
+        },
+        {
+          "key": "created_at",
+          "label": "Erstellt am",
+          "type": "datetime",
+          "readOnly": true
+        },
+        {
+          "key": "updated_at",
+          "label": "Geändert am",
+          "type": "datetime",
+          "readOnly": true
+        }
+      ]
+    }
+  ],
+  "unsupportedFields": [
+    {
+      "key": "tab_23",
+      "model": "LegacyCustomerFields",
+      "reason": "JSON-Restbestand; keine rohe Formulareingabe."
+    },
+    {
+      "key": "discount_items",
+      "model": "LegacyCustomerFields",
+      "reason": "Historischer JSON-Bestand; normalisierte Rabattpositionen verwenden."
+    },
+    {
+      "key": "price_agreements",
+      "model": "LegacyCustomerFields",
+      "reason": "Historischer JSON-Bestand; normalisierte Preisvereinbarungen verwenden."
+    },
+    {
+      "key": "payment_terms_id",
+      "model": "Finance",
+      "reason": "Zahlungsbedingung ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
+    },
+    {
+      "key": "default_route_id",
+      "model": "Logistics",
+      "reason": "Standardtour ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
+    },
+    {
+      "key": "preferred_carrier_id",
+      "model": "Logistics",
+      "reason": "Bevorzugter Spediteur ist ein Bezug; ohne Auswahl-Lookup (Name statt Schluessel) nicht pflegbar - Folgepunkt M2-MASKENFELDER-PRODUKTIV-20261119."
+    }
+  ]
+}

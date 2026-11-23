@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-19
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -343,7 +343,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/contact-detail-liste` | Kontakte | crm | niedrig | — | `GET /api/v1/masks/crm/contact-detail-liste/agent-contract` |
 | `crm/crm-dashboard` | CRM-Dashboard | crm | niedrig | — | `GET /api/v1/masks/crm/crm-dashboard/agent-contract` |
 | `crm/cross-selling` | Cross-Selling | crm | niedrig | — | `GET /api/v1/masks/crm/cross-selling/agent-contract` |
-| `crm/customer-360` | Kundenakte | crm | niedrig | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
+| `crm/customer-360` | Kundenakte | crm | hoch | `order-to-cash`, `service-to-customer` | `GET /api/v1/masks/crm/customer-360/agent-contract` |
 | `crm/dokumente-kunden` | Kundendokumente | crm | niedrig | — | `GET /api/v1/masks/crm/dokumente-kunden/agent-contract` |
 | `crm/dsgvo-anfragen-liste` | DSGVO-Anfragen | crm | niedrig | — | `GET /api/v1/masks/crm/dsgvo-anfragen-liste/agent-contract` |
 | `crm/dubletten-pruefung` | Dubletten-Pruefung | crm | niedrig | — | `GET /api/v1/masks/crm/dubletten-pruefung/agent-contract` |
@@ -360,7 +360,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `crm/kontakt` | Kontakt | crm | niedrig | — | `GET /api/v1/masks/crm/kontakt/agent-contract` |
 | `crm/kontakt-management-liste` | Kontakt-Management | crm | niedrig | — | `GET /api/v1/masks/crm/kontakt-management-liste/agent-contract` |
 | `crm/kontakte-liste` | Kontakte | crm | niedrig | — | `GET /api/v1/masks/crm/kontakte-liste/agent-contract` |
-| `crm/kunden-cockpit` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/kunden-cockpit/agent-contract` |
+| `crm/kunden-cockpit` | Kundenakte | crm | hoch | — | `GET /api/v1/masks/crm/kunden-cockpit/agent-contract` |
 | `crm/kunden-liste` | Kunden | crm | niedrig | — | `GET /api/v1/masks/crm/kunden-liste/agent-contract` |
 | `crm/lead` | Kundenakte | crm | niedrig | — | `GET /api/v1/masks/crm/lead/agent-contract` |
 | `crm/leads-liste` | Leads | crm | niedrig | — | `GET /api/v1/masks/crm/leads-liste/agent-contract` |
@@ -9970,7 +9970,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/crm/customers/{entity_id}`
+- `entity` → `/api/v1/crm/customers/{entity_id}/master-profile`
 - `contacts` → `/api/v1/crm/customers/{entity_id}/tabs/contacts`
 - `auftraege` → `/api/v1/crm/customers/{entity_id}/tabs/auftraege`
 - `aktivitaeten` → `/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten`
@@ -10003,7 +10003,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `iban, bic, kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen`
 
 **Actions:**
 
@@ -10017,6 +10017,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `cpd_anlegen` | CPD-Konto anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen` |
 | `rabatt_anlegen` | Rabatt anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen` |
 | `preis_anlegen` | Preisvereinbarung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/preis_anlegen` |
+| `stammdaten_pflegen` | Weitere Stammdaten pflegen | high | ja | `/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten` |
 
 ---
 
@@ -10675,7 +10676,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/crm/customers/{entity_id}`
+- `entity` → `/api/v1/crm/customers/{entity_id}/master-profile`
 - `contacts` → `/api/v1/crm/customers/{entity_id}/tabs/contacts`
 - `auftraege` → `/api/v1/crm/customers/{entity_id}/tabs/auftraege`
 - `aktivitaeten` → `/api/v1/crm/customers/{entity_id}/tabs/aktivitaeten`
@@ -10708,7 +10709,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Lege eine Aktivitaet fuer Kunde {entity_id} an — Betreff: {betreff}, Typ: Anruf.
 - Zeige alle offenen Auftraege von Kunde {entity_id} mit Status 'offen'.
 
-**Sensible Felder:** `iban, bic, kreditlimit, zahlungsbedingungen, notizen`
+**Sensible Felder:** `partner_iban, partner_bic, kreditlimit, zahlungsbedingungen, notizen`
 
 **Actions:**
 
@@ -10722,6 +10723,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `cpd_anlegen` | CPD-Konto anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/cpd_anlegen` |
 | `rabatt_anlegen` | Rabatt anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen` |
 | `preis_anlegen` | Preisvereinbarung anlegen | safe | nein | `/api/v1/crm/customers/{entity_id}/actions/preis_anlegen` |
+| `stammdaten_pflegen` | Weitere Stammdaten pflegen | high | ja | `/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten` |
 
 ---
 

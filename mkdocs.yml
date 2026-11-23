@@ -468,6 +468,7 @@ nav:
           - ADR-CRM-001 – CRM as Independent AI-First Bounded Context: adr/ADR-CRM-001.md
           - "ADR: Geschäftspartnerstamm führt Debitoren und Kreditoren": adr/adr-business-partner-debitoren-kreditoren-20261101.md
           - Kanonischer CRM-Aktivitaetsspeicher und gemeinsamer Command-Vertrag: adr/adr-crm-activity-canonical-20261029.md
+          - Kundenkopf als Studio-Projektion: adr/adr-customer-master-profile-20261117.md
           - Explizite Ernte-Abrechnungsregeln statt impliziter Freigrenze: adr/adr-harvest-deduction-resolver.md
           - "ADR Studio: Fachvertraege und kontingentierte Modellinterpretation": adr/adr-studio-semantic-contracts.md
           - Waagenstamm und Wiegescheinimport: adr/adr-waage-tenant-import-20261030.md

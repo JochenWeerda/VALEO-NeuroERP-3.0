@@ -147,6 +147,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `crm_reports` | CRM Reports and Analytics endpoints. |
 | `crm_segments` | Canonical persistent CRM segments; all routes use the verified tenant. |
 | `customer_extensions` | Customer extension endpoints (l3c-kunde extras) |
+| `customer_master_profile` | Staff-only customer master profile and audited update command. |
 | `customers` | CRM Customer endpoints backed by the crm-core service. |
 | `daily_prices` | Daily Price API endpoints. |
 | `data_quality` | Datenqualitäts-API (Gap 040): Validierung von Dubletten, Pflichtfeldern und Referenzen. |

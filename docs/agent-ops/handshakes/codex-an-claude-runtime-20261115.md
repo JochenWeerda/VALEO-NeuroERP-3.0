@@ -163,3 +163,39 @@ Portal-Einstieg lokal bereitgestellt: Quelle3b750ff68/Imageee27f8273cfb; nur Fro
 PORTAL-TENANT-BROKER Phase1: sichere lesende Ermittlung eigener aktiver Handelspartner, kein Kontext-/Tokenwechsel. 23 Tests mit zwei echten PostgreSQL-Nachweisen bestanden. Pruefstand unveraendert auf psm_register_entfernt_20261104; nur gezielte fehlende Lese-ACLs fuer vorhandene valeo_system-Rolle auf domain_portal.kundenzugaenge, domain_crm.customers, domain_shared.tenants nach Probelauf eingerichtet. Keine neuen Ressourcen, kein DDL/Reset/Migration, alle synthetischen Fachtestdaten zurueckgerollt; Entwicklungsdatenbank/Backend unveraendert. Quellen scripts/provision_portal_directory_reads.py und QA portal-tenant-directory-20261116.md. Folgephase vertraulicher Kontextwechsel nicht durch freie Tenantheader ersetzen.
 
 MAIN-INTEGRATION-20261116: eigene Kette147–151 im gemeinsamen PR151 gegen main gebuendelt; Gesamt-CI am Endstand vor Integration. Keine fremden Beleg-/Dependency-PRs integriert. Keine weiteren DB-Aenderungen oder lokales Wartungsfenster.
+
+17.11: PR151 vollstaendig gruen (einschliesslich Sonar) nachmain f9630be04 integriert, Inhalt exaktHead14c2f81c5. Eigene TeilPR147–150 vollstaendig enthalten. Neue Claims CUSTOMER-MASTER-COMPLETENESS-20261117 (native Feldparitaet Kunden/Bank/Steuerung) und RUNTIME-FIVE-503-20261117 (zunaechst Diagnose), keine aktuellen DB-Wartungsarbeiten. Nur Feldmetadaten aus Nutzerchat, keine Kundenechtdaten nach Git.
+
+
+17.11 CUSTOMER-MASTER: Erster Wiederherstellungsschritt im Branch
+codex/customer-master-completeness-20261117. 146 skalare Katalogattribute,
+144 sichtbare Partnerkopfpositionen, 102 pflegbar in bestehender Studio-Akte;
+kein Ersatz des Partneraggregats. Bank/Steuerung wieder ueber nativen Command,
+Versions-/Idempotenz-/Actor-/Tenant-Vertrag, nullable Loeschung und gruppierter
+Dialog. Kundenkarte referenziert jetzt registrierte Kundenliste zur Aktenwahl.
+Sechs Untertabellen bleiben; keine vollstaendige 16-Untermodell-/Artikel-/
+Lieferantenparitaet behauptet. Siehe QA customer-master-field-parity-20261117.md.
+
+Pruefstand frei vor Test, Revision psm_register_entfernt_20261104 unveraendert.
+Synthetische Fachzeilen komplett zurueckgerollt, acht SQL-/Runtime-Vertraege gruen.
+Vorhandene valeo_agent-Rolle erhielt nach Plan/Proberollback kanonische Datenrechte
+auf domain_shared/domain_crm/public nur in valeo_probe. Keine Migration,
+Eigentumsuebertragung, CREATE/BYPASSRLS-/Passwortaenderung oder neue Ressource.
+
+Main-QG44021259183 ist bis auf Sonar gruen. Sonar main ist wegen New Coverage
+71,2 statt80 rot (Zeitraum previous_version ab04.04.); kein neuer Security-/Bug-
+Befund. Breite Testluecke, ca14148 zusaetzliche gedeckte Zeilen/Bedingungen bei
+konstantem Nenner. Nicht durch eine geaenderte Baseline/Ausschluesse geschlossen.
+Browserwerkzeug startet aktuell nicht (kernel assets / Pfad fehlt), daher keine
+neue Browser-/Themeabnahme behauptet. Kein Umgehen der URL-Sicherheitspruefung.
+
+
+Kundenprofil-Nachlauf: 88 gezielte Backend-/HTTP-/Registry-Tests sowie echter
+PostgreSQL-Vertrag nach BP-only/Alias-Erweiterung erneut1/1 gruen. Bestehende
+Lookupkennungen bleiben unter Tenant-/Softdelete-/Kundenrollenpruefung erhalten.
+Globale Feldpruefung nutzt jetzt Produktions-OpenAPI statt authfreier Testapp:
+54 Befunde in generischen Batch15-Definitionen, 0 im Kundenprofil. Keine
+Ratsche angehoben; diese Befunde bleiben offen. Keine konkurrierenden Arbeiten
+an screen_definitions_domain_batch15.py begonnen.
+
+PR153 nach main8575b4df9/ClaudePR146 integriert: nur sechs generierte Artefakte konfligierten, aus aktuellen Quellen regeneriert. Eigene Kundenprofile und Claudes Beleg-Rueckbau bleiben erhalten; keine Migration/DB-Aenderung im Integrationsschritt. 88 gezielte Vertraege erneutgruen; aktuelles API-/Godfile-Inventar geprueft. Gemeinsame CI nach Push noch offen.

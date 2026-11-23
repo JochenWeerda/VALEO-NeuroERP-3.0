@@ -107,20 +107,30 @@ export function ActionInputDialog({
       return
     }
     const werte = Object.fromEntries(
-      Object.entries(form.values)
-        .filter(([key, wert]) => !leer(wert) || wert === '' &&
+      Object.entries(form.values).flatMap(([key, wert]) => {
+        const feld = felder.find((item) => item.key === key)
+        if (feld?.clearable && leer(wert)) return leer(initialValues?.[key]) ? [] : [[key, null]]
+        if (leer(wert) && !(wert === '' &&
           Object.prototype.hasOwnProperty.call(initialValues ?? {}, key) &&
-          ['text', 'textarea'].includes(felder.find(field => field.key === key)?.type ?? ''))
-        .map(([key, wert]) => [key, felder.find((feld) => feld.key === key)?.type === 'number' ? Number(wert) : wert]),
+          ['text', 'textarea'].includes(feld?.type ?? ''))) return []
+        return [[key, feld?.type === 'number' ? Number(wert) : wert]]
+      }),
     )
     onSubmit(werte)
   }
 
   const fehler = form.visibleFieldErrors ?? {}
+  // Consecutive sections retain the declaration order, including ungrouped fields.
+  const gruppen = mitOptionen.reduce<Array<{ section?: string; fields: ScreenActionInputField[] }>>((result, feld) => {
+    const last = result[result.length - 1]
+    if (last && last.section === feld.section) last.fields.push(feld)
+    else result.push({ section: feld.section, fields: [feld] })
+    return result
+  }, [])
 
   return (
     <Dialog open={open} onOpenChange={(offen) => { if (!offen) onCancel() }}>
-      <DialogContent className={felder.some(field => field.type === 'table') ? 'max-h-[90vh] max-w-[95vw] sm:max-w-[95vw] overflow-y-auto' : undefined}>
+      <DialogContent className={felder.some(field => field.type === 'table') ? 'max-h-[90vh] max-w-[95vw] sm:max-w-[95vw] overflow-y-auto' : 'max-h-[90vh] overflow-y-auto'}>
         <DialogHeader>
           <DialogTitle>{action.label}</DialogTitle>
           <DialogDescription>
@@ -129,19 +139,24 @@ export function ActionInputDialog({
         </DialogHeader>
         <div className="space-y-4">
           {error && <p role="alert" className="text-sm text-status-error">{error}</p>}
-          {mitOptionen.map((feld) => (
-            <div key={feld.key} className="space-y-1">
-              <FieldRenderer
-                field={feld}
-                value={feld.fileContent !== undefined ? form.values[feld.key] : form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
-                onChange={(wert) => form.setValue(feld.key, wert)}
-                voiceEnabled={false}
-              />
-              {(fehler[feld.key] ?? []).map((eintrag) => (
-                <p key={eintrag.message} className="text-sm text-status-error" role="alert">{eintrag.message}</p>
-              ))}
-            </div>
-          ))}
+          {gruppen.map((gruppe, index) => {
+            const fields = gruppe.fields.map((feld) => (
+              <div key={feld.key} className="space-y-1">
+                <FieldRenderer
+                  field={feld}
+                  value={feld.fileContent !== undefined ? form.values[feld.key] : form.values[feld.key] ?? (feld.type === 'table' ? [] : '')}
+                  onChange={(wert) => form.setValue(feld.key, wert)}
+                  voiceEnabled={false}
+                />
+                {(fehler[feld.key] ?? []).map((eintrag) => (
+                  <p key={eintrag.message} className="text-sm text-status-error" role="alert">{eintrag.message}</p>
+                ))}
+              </div>
+            ))
+            return gruppe.section
+              ? <fieldset key={index} className="space-y-4"><legend className="font-medium">{gruppe.section}</legend>{fields}</fieldset>
+              : <div key={index} className="space-y-4">{fields}</div>
+          })}
           {ladefehler.map((meldung) => (
             <p key={meldung} className="text-sm text-status-error" role="alert">{meldung}</p>
           ))}
