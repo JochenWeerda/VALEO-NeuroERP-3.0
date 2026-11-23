@@ -21560,3 +21560,5 @@ Bestellliste nutzt jetzt den mandantengebundenen Picker-Endpunkt. Alle sechs sic
 M2-WARENEINGANGSABGLEICH: Dateibesitz erweitert um data-source-resolver.ts und zugehoerigen Regressionstest. Bestellkennungen als einzelne URL-Werte kodieren, bevor die Detailmaske ihren Query-Parameter bindet.
 
 Studio-Datenbindung kodiert Bestellkennungen zentral als URL-Werte. 14 Tests in Resolver und Bindungscompiler bestanden, einschliesslich des Drei-Wege-Abgleich-Parameters. Detailmaske und Folgeaktionen bleiben offen.
+
+M2-WARENEINGANGSABGLEICH: Codex ergaenzt die native Detaildefinition und bindet sie im vorhandenen Seiteneinstieg an die ausgewaehlte Bestellung. Dateibesitz erweitert um pages/einkauf/wareneingangsabgleich.tsx.
