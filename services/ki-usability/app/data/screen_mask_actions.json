@@ -6507,9 +6507,10 @@
         "command": null,
         "method": "POST",
         "permission": "crm.customer.update",
-        "requiresConfirmation": false,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
         "auditReasonRequired": true,
-        "dangerLevel": "moderate"
+        "dangerLevel": "high"
       }
     },
     {
@@ -7267,9 +7268,10 @@
         "command": null,
         "method": "POST",
         "permission": "crm.customer.update",
-        "requiresConfirmation": false,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
         "auditReasonRequired": true,
-        "dangerLevel": "moderate"
+        "dangerLevel": "high"
       }
     },
     {

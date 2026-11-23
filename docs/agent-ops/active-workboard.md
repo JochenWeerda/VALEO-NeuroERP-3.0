@@ -21487,9 +21487,24 @@ Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Test
 Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
 Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
 
+
+
 ## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
 Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
 Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tagesabschluss. Ohne Journal: Periodenabschluss (Scheinkopf), Lagergeld (keine USt/OP), Bestandskorrektur/Inventur (Menge als Betrag), manueller OP-Ausgleich. Offene Posten lesen das Nebenbuch domain_erp statt des leeren public.offene_posten.
 Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
 Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.
+
+
+## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — zur Abnahme, Claude Code (M2, Codex-Pause)
+Owner: Claude Code (uebernommen von Codex, PR #153, Codex ruht 19.-22.11.2026). Branch claude/uebernahme-kundenstamm-20261119.
+Codex' Stand unveraendert uebernommen; dazu: main eingemergt; ADR in die Pflichtform gebracht (Status/Datum, Kontext, Entscheidung, Konsequenzen); Aktion stammdaten_pflegen als high mit Bestaetigung (Server verlangt Begruendung; aendert Bank/Steuer); Reiter-Vertrag auf die kanonischen partner_*-Gruppen; Zahlungsbedingung/Standardtour/Spediteur bis zum Lookup in unsupportedFields (keine Eingabe technischer Schluessel); USt-IdNr./EU-Betriebsnummer als fachliche Kennung freigegeben.
+Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-App) es aufdeckte: ueberdeckte GET /einkauf/anfragen(/{id}) in app/einkauf/router.py entfernt (die OpenAPI zeigte den toten untypisierten Weg).
+
+## M2-MASKENFELDER-PRODUKTIV-20261119 — offen, Claude Code (M2)
+Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
+
+
+## M0-PROBE-SAFETY-20261123 — reserviert, Codex Lead
+Ziel: vor_push standardmaessig lesend, explizit konfigurierte Testverbindung, Abbruch bei nicht bereitem Pruefstand vor Folgepruefungen. Keine impliziten Resets/Migrationen/Seeds/Rechtewechsel oder Klartext-Zugangsdefaults. Besitzer ci_failures_review: scripts/vor_push.py, tests/test_vor_push.py; Lead QA/Runbook/Handshakes. Effiziente Testauswahl/Blockgroesse und entfernte-Tabellen-Erkennung erhalten; Konfliktmarkierungen vor Push abweisen. Keine reale DB-Aktion bei Umsetzung/Unit-Tests; Wartung separat koordiniert.

@@ -1,6 +1,6 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-23'
+generated_on: '2026-11-19'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
@@ -96,11 +96,11 @@ stats:
   mask_actions_considered: 315
   mask_mutations_considered: 256
   by_coverage:
-    blocked_human_only: 80
+    blocked_human_only: 82
     blocked_unreleased: 2
     local_ui: 59
     mapped: 38
-    mapped_generic: 130
+    mapped_generic: 128
     mapped_propose_only: 1
     mapped_read: 1
     open_high: 4
@@ -1480,9 +1480,10 @@ mappings:
   label: Weitere Stammdaten pflegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/dsgvo-anfragen-liste:ablehnen
   mask: crm/dsgvo-anfragen-liste
   domain: crm
@@ -1707,9 +1708,10 @@ mappings:
   label: Weitere Stammdaten pflegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:crm/kunden-liste:neu
   mask: crm/kunden-liste
   domain: crm
@@ -3356,5 +3358,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 80; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 82; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

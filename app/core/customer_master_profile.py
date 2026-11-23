@@ -82,11 +82,13 @@ def apply_customer_master_profile(definition: dict[str, Any]) -> None:
                                    "keepAlive": True, "fields": fields})
     definition["actions"].append({
         "key": "stammdaten_pflegen", "label": "Weitere Stammdaten pflegen", "kind": "secondary",
-        "dangerLevel": "moderate", "permission": "crm.customer.update", "zone": "header",
+        # high: aendert u. a. Bankverbindung und Steuerkennungen (FIN-CONTROL-001: Bankverbindungsaenderung ist
+        # kritisch); der Server verlangt die Begruendung, also auch Bestaetigung (UIX-050/UIX-090).
+        "dangerLevel": "high", "permission": "crm.customer.update", "zone": "header",
         "commandEndpoint": "/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten",
         "method": "POST", "requiresIdempotencyKey": True, "requiresExpectedVersion": True,
         "inputPrefill": "entity",
-        "auditReasonRequired": True, "requiresConfirmation": False,
+        "auditReasonRequired": True, "requiresConfirmation": True,
         "enabledWhen": {"path": "business_partner_id", "exists": True},
         "inputFields": master_input_fields(),
     })
