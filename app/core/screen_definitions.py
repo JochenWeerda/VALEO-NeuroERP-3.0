@@ -3326,7 +3326,7 @@ def build_agrar_feeding_plan_screen_definition() -> dict[str, Any]:
             "key": "print_plan", "label": "Drucken / als PDF speichern", "kind": "primary",
             "dangerLevel": "safe", "permission": "futtermittel.rations.read",
         }, {
-            "key": "open_mobile", "label": "Mobile Stallansicht", "kind": "secondary",
+            "key": "open_mobile", "label": "Mobile Stallansicht", "localEffect": "navigation", "kind": "secondary",
             "dangerLevel": "safe", "permission": "futtermittel.rations.read",
         }],
         "noWorkflowReason": "Publizierte Planversionen sind unveraenderlich; Aenderungen entstehen als neue Publikation.",
@@ -3448,7 +3448,7 @@ def build_agrar_feed_readiness_screen_definition() -> dict[str, Any]:
         }],
         "actions": [
             {"key": "create_handoff", "label": "An Einkauf uebergeben", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/supply/procurement-handoffs"), "kind": "primary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
-            {"key": "open_inventory", "label": "Bestaende pflegen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "open_inventory", "label": "Bestaende pflegen", "localEffect": "navigation", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Die Maske erzeugt ausschliesslich einen auditierbaren Bedarfsvorschlag; Bestellung und Freigabe bleiben im Einkaufsprozess.",
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "copilot", "tableProfile": "inventory"},
@@ -3559,7 +3559,7 @@ def build_agrar_feeding_actuals_screen_definition() -> dict[str, Any]:
             {"key": "export_csv", "label": "CSV exportieren", "kind": "primary", "dangerLevel": "safe", "permission": "futtermittel.rations.read"},
             {"key": "create_measure", "label": "Massnahme aus Abweichung", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/actuals/measures"), "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
             {"key": "configure_threshold", "label": "Schwellen konfigurieren", **_human_input_flow("/api/v1/agrar/rations-optimization/feeding/actuals/deviation-policies"), "kind": "secondary", "dangerLevel": "confirm", "permission": "futtermittel.rations.update"},
-            {"key": "open_mobile", "label": "Ist-Fuetterung erfassen", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
+            {"key": "open_mobile", "label": "Ist-Fuetterung erfassen", "localEffect": "navigation", "kind": "secondary", "dangerLevel": "safe", "permission": "futtermittel.rations.update"},
         ],
         "noWorkflowReason": "Ist-Fuetterungen sind append-only Nachweise; Korrekturen erzeugen einen neuen Stand mit Vorgaengerreferenz.",
         "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44, "floorplan": "worklist", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
