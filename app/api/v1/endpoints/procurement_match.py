@@ -415,7 +415,7 @@ class RechnungspruefungIn(_BM):
 
 class RechnungsFreigabeIn(_BM):
     entscheidung: str
-    operator: str
+    operator: _Opt[str] = None  # Legacy input; actor identity comes from the verified token.
     grund: _Opt[str] = None
 
 
@@ -504,4 +504,5 @@ def rechnungsfreigabe_endpoint(
         return freigabe_rechnungspruefung(db, pruefung_id, tenant_id, body.entscheidung,
                                            gepruefter_akteur_aus_request(request), body.grund)
     except RechnungspruefungError as exc:
+        db.rollback()
         raise HTTPException(status_code=422, detail=str(exc)) from exc

@@ -180,3 +180,23 @@ class TestRechnungspruefung:
         db = _mock_db({"proc_rechnungspruefungen": row})
         with pytest.raises(RechnungspruefungError, match="GESPERRT"):
             freigabe_rechnungspruefung(db, "rp-1", "t1", "FREIGEGEBEN", "mgr-1")
+
+
+def test_invoice_approval_uses_verified_operator_and_releases_lock_on_rejection(monkeypatch):
+    from unittest.mock import Mock
+
+    from fastapi import HTTPException
+    from app.api.v1.endpoints import procurement_match
+    from app.services import proc_rechnungspruefung_service
+
+    db = Mock()
+    decision = Mock(side_effect=proc_rechnungspruefung_service.RechnungspruefungError("Nicht gesperrt"))
+    monkeypatch.setattr(procurement_match, "gepruefter_akteur_aus_request", lambda _: "verified")
+    monkeypatch.setattr(proc_rechnungspruefung_service, "freigabe_rechnungspruefung", decision)
+    body = procurement_match.RechnungsFreigabeIn(entscheidung="FREIGEGEBEN", grund="Geprüft")
+    with pytest.raises(HTTPException) as failure:
+        procurement_match.rechnungsfreigabe_endpoint("rp-1", body, Mock(), tenant_id="t1", db=db)
+
+    assert failure.value.status_code == 422
+    decision.assert_called_once_with(db, "rp-1", "t1", "FREIGEGEBEN", "verified", "Geprüft")
+    db.rollback.assert_called_once_with()

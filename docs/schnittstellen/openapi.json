@@ -139868,13 +139868,19 @@
             "title": "Grund"
           },
           "operator": {
-            "title": "Operator",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Operator"
           }
         },
         "required": [
-          "entscheidung",
-          "operator"
+          "entscheidung"
         ],
         "title": "RechnungsFreigabeIn",
         "type": "object"
