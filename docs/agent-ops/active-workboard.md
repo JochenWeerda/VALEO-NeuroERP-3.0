@@ -21535,5 +21535,7 @@ Ziel: belegten ZAP-Arbeitsverzeichnisfehler in CI beheben (PR160 Job137506796501
 
 ZAP23.11: dedizierter Mount statt Checkout-Schreibfreigabe, strenger Status-/Berichtsvertrag, Bericht bei Fehler hochgeladen;12 Mock-Verhaltenstests bestanden6,95s. Keine DB/Docker-Lokaltests. QA/Handshake nachgezogen; echte neue CI-Abnahme offen.
 
-## M5-IMAGE-DRIFT-EVIDENCE-20261123 — reserviert, Codex Lead
+## M5-IMAGE-DRIFT-EVIDENCE-20261123 — in Arbeit, Codex Lead
 Ziel: offenen RUNTIME-FIVE-503-Imagebericht aus vollstaendigen Buildquellen erzeugen und nur JSON in produktives Backendimage uebernehmen. Besitzer Lead: Dockerfile.backend (neue leichte Berichtsstufe), Dockerfile.backend.dockerignore (Root-Regeln plus benoetigte Markdown-Doku), enger Buildquellenvertrag und Docker-Smoke-Validierung in quality-gate.yml, QA/Runbook. Keine unvollstaendige Doku, keine lokalen Artefakte/Geheimnisse kopieren, keine Gate-Absenkung. Buildkontext-Erweiterung nur backend-spezifisch; keine konkurrierenden lokalen Builds/DB-Sitzungen.
+
+M5 Image23.11: vollstaendiger Buildquellenvergleich identisch; permanente kleine Quellketten-/Ignore-/Schema-Paketvertraege4/4 in1,77s. Docker Smoke erweitert um echte Ausschlussmarker und Bericht im Laufzeitimage. Keine lokale DB/Buildlast. QA backend-image-drift-evidence-20261123; CI-/Bereitstellungsabnahme noch offen.

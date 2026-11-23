@@ -1,0 +1,94 @@
+# Build-Kontext fuer Wurzelkontext-Images (services/ai, services/crm,
+# services/finance, services/inventory, services/workflow). Diese Dienste
+# brauchen den Wurzelkontext, weil sie packages/auth-shared ins Image installieren
+# (SILENT-FAILURE-20260914). Ohne Ausschluesse wuerde jeder dieser Builds das
+# vollstaendige Repository an den Daemon senden.
+#
+# Regel beim Erweitern: nichts ausschliessen, was ein Dockerfile per COPY
+# braucht — also services/*/requirements.txt, services/*/app, services/*/main.py,
+# services/*/alembic, services/*/docker-entrypoint.sh und packages/**.
+
+.git
+.github
+.gitignore
+.vscode
+.idea
+.cursor
+.claude
+
+node_modules
+**/node_modules
+.pnpm-store
+.turbo
+**/.next
+**/dist
+**/build
+**/storybook-static
+
+__pycache__
+**/__pycache__
+*.py[cod]
+.venv
+**/.venv
+venv
+**/*.egg-info
+.pytest_cache
+**/.pytest_cache
+.mypy_cache
+.ruff_cache
+.tox
+
+# Test- und Analyse-Ausgaben: gross, veraenderlich, fuer Images ohne Nutzen
+artifacts
+coverage
+**/coverage
+htmlcov
+**/htmlcov
+.nyc_output
+test-results
+**/test-results
+playwright-report
+**/playwright-report
+blob-report
+evidence
+swarm
+
+*.log
+*.tmp
+*.vhdx
+*.sqlite
+*.sqlite3
+*.db
+
+.env
+.env.*
+!.env.example
+
+# Only the canonical Studio runtime schema catalog belongs in backend images.
+docs/**
+!docs/admin/
+docs/admin/**
+!docs/admin/table-catalog.json
+*.md
+!README.md
+!.oss-scanner/README.md
+!.oss-scanner/threat_model.md
+
+# Backend evidence stage needs all Markdown documentation, not host artifacts.
+# Keep the prefix identical to .dockerignore (checked by the image contract).
+!docs/
+!docs/**/
+!docs/**/*.md
+
+# Documentation exceptions must not re-admit nested secrets or generated trees.
+**/.env*
+**/.git
+**/.git/**
+**/node_modules
+**/node_modules/**
+**/artifacts
+**/artifacts/**
+**/.venv
+**/.venv/**
+**/__pycache__
+**/__pycache__/**
