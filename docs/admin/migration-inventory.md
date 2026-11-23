@@ -268,6 +268,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `feldbuch_open_gaps_20260716` | Ackerschlagkartei open-gaps: Register, AUM, Lager, Offline client_ref. |
 | `feldbuch_schlag_massnahme_20260226` | Add feldbuch_schlaege and feldbuch_massnahmen to domain_agrar |
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
+| `fibu_altspeicher_entfernen_20261123` | Die Schein-Fibu auf vier leeren public-Tabellen entfaellt (M3). |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |
 | `fibu_connector_framework_20260301` | FIBU Connector Framework: Profile, Runs, Run-Items (domain_erp) |
 | `final_single_head_merge_20260626` | Final single-head merge: alle Repair-Wellen in einen Head zusammenführen. |
@@ -383,6 +384,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_warehouse_einkauf_20260626` | Merge Alembic heads: warehouse_schema_repair + merge_einkauf_log_agent. |
 | `merge_wave104_20260326` | Merge Wave 104 migrations with main head |
 | `mobile_event_queue_20260619` | MOB-SYNC-001: Mobile Offline-Sync Event-Queue |
+| `nebenbuch_abstimmung_tabelle_20261123` | Die Nebenbuch-Abstimmung bekommt ihre Tabelle auch auf einer frischen Installation (M3). |
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |
