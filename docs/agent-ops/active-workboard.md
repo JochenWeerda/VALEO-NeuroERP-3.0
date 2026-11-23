@@ -979,3 +979,5 @@ Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen M
 
 M2-NAVIGATION-CONTRACTS: DMS-Vorschau und Artikelnavigation sowie Duengemittel-Quellbeleg als bestehende lokale Effekte deklariert. Inventar auf Basis 602394bd9 gruen: genau drei undeclarierte Eintraege entfallen, 292 -> 289. Andere Listen unveraendert. Studio-Katalog synchron; kein neuer Serverbefehl. Browserabnahme offen.
 M2-NAVIGATION-CONTRACTS: Besitz erweitert auf vorhandene Quellspruenge in Dokumentenruecklauf, Produktionsleitstand, Chargenbearbeitung, Inventurnebenlaeufen, Fremdware und Rechnungstapel.
+
+M2-NAVIGATION-CONTRACTS: sieben vorhandene Quellspruenge deklariert, Inventar gruen 289 -> 282. Uebrige Ratschen unveraendert. GitHub-/Browserabnahme offen. PR163 inzwischen konfliktbehaftet und Sonar weiterhin rot; separat an aktuellen main-Stand angleichen.
