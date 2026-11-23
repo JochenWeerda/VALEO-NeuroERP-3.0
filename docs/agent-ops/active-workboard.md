@@ -950,3 +950,9 @@ Owner: Claude Code. Meilenstein: M3 ("Ein Mahnweg statt drei").
 Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/run (FinanceDunningService) und "Mahnstufe eskalieren" samt Maskenaktion open-items/{id}/actions/mahnen (eigener Verlauf domain_finance.finance_mahnstufen_audit, keine Mahnung, keine Stufe am Posten) liefen nebeneinander. Der Mahnlauf eskalierte bei jedem Lauf (zweimal am Tag = Stufe 2) und setzte ohne Mahnregeln erfundene Gebuehren 5/10/20 EUR an. POST /dunning legte Mahnungen an Regeln und Fristen vorbei an; PUT /dunning/{id}/paid zifferte den Posten ohne Zahlungsbuchung aus.
 Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und … (gekuerzt; Volltext unter M3-EIN-MAHNWEG-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
+
+## M3-POS-UMSATZSTEUER-20261119 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. PR #166. Handshake docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md (Codex-Pause, von Claude umgesetzt).
+Befund: POST /pos/tagesabschluss buchte den ganzen Kassenumsatz brutto auf 8400, ohne Umsatzsteuer.
+Ergebnis: Kassiervorgang speichert Brutto je Satz (pos_fiscal_transactions.vat_breakdown, Migration pos_ust_je_satz_20261119); Abschluss bucht je Satz Erloes netto und Umsatzsteuer ueber genau einen Verkaufs-Steuerschluessel aus domain_erp.tax_keys; Altvorgaenge ohne Saetze sperren; alle Pruefungen vor der TSE-Signatur.
+Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuerschluessel.py (kassen_verkaufsschluessel), app/services/fiscalization/service.py, app/services/pos_accounting_service.py, Tests test_pos_umsatzsteuer_je_satz, test_process_kernel_wave1_contracts.
