@@ -353,3 +353,21 @@ def test_eingabefluss_sendet_die_formularfelder_ohne_umschlag():
                               idempotency_key=None)
     assert support.policy_block({"key": "messen", "inputFlow": {"kind": "humanForm"}}, is_agent=True)
     assert support.policy_block({"key": "messen", "inputFlow": {"kind": "humanForm"}}, is_agent=False) is None
+
+
+def test_zeilenkennung_im_pfad_kommt_aus_der_objektkennung():
+    """{id}, {incident_id}, {statement_id} meinen die Zeile; {approval_id} bleibt dem Freigabe-Adapter (23.11.2026)."""
+    for platzhalter in ("{id}", "{incident_id}", "{statement_id}"):
+        aktion = {"key": "x", "commandEndpoint": f"/api/v1/a/{platzhalter}/send", "method": "PUT"}
+        assert support.support(aktion).supported, platzhalter
+        assert support.requires_entity(aktion)
+        _, pfad, _ = support.build_request(aktion, screen_id="s", entity_id="m 1", payload={}, mode="execute",
+                                           audit_reason=None, idempotency_key=None)
+        assert pfad == "/api/v1/a/m%201/send"
+        with pytest.raises(ValueError, match="--id"):
+            support.build_request(aktion, screen_id="s", entity_id=None, payload={}, mode="execute",
+                                  audit_reason=None, idempotency_key=None)
+    assert support.support({"key": "x", "commandEndpoint": "/api/v1/a/{approval_id}"}).reason \
+        == "pfadparameter:{approval_id}"
+    zwei = {"key": "x", "commandEndpoint": "/api/v1/a/{id}/b/{statement_id}"}
+    assert support.support(zwei).reason == "pfadparameter:{id},{statement_id}"

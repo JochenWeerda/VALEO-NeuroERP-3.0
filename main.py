@@ -47,7 +47,6 @@ from app.routers.verify_router import router as verify_router  # Document Verifi
 from app.routers.numbering_router import router as numbering_router  # Numbering Service
 from app.routers.admin_dms_router import router as admin_dms_router  # Admin DMS Integration
 from app.routers.dms_webhook_router import router as dms_webhook_router  # DMS Webhooks & Inbox
-from app.routers.fibu_router import router as fibu_router  # Finanzbuchhaltung (130 Masken)
 from app.routers.translations_router import router as translations_router  # Übersetzungen (/api/translations)
 from app.routers.vies_router import router as vies_router  # VIES USt-IdNr.-Prüfung (/api/vies)
 from app.routers.contracts_router import router as contracts_router  # Verträge (contracts-v2 Maske)
@@ -674,9 +673,6 @@ app.include_router(opportunities_endpoints.router, prefix="/api/crm-sales/opport
 
 # Include DMS Webhooks & Inbox
 app.include_router(dms_webhook_router)
-
-# Include Finanzbuchhaltung (130 Masken Integration)
-app.include_router(fibu_router, prefix="/api/v1")
 
 # Gap 039: OpenTelemetry (optional, siehe OTEL_EXPORTER_OTLP_ENDPOINT / ENABLE_TRACING)
 try:

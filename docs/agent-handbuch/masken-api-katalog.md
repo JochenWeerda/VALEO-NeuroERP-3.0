@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-19
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -13755,7 +13755,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -17751,8 +17751,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `erteilen` | Einwilligung erteilen | safe | nein | `Erteilt die Einwilligung gegen die gewaehlte Fassung.` |
 | `widerrufen` | Einwilligung widerrufen | moderate | nein | `Widerruft die Einwilligung sofort, ohne Grund.` |
-| `zurueck` | Zu den Bewerbungen | safe | nein | `Wechselt zur Bewerbungsliste.` |
-| `erklaerungen` | Einwilligungserklärungen | safe | nein | `Oeffnet die Fassungen der Einwilligungserklaerung.` |
+| `zurueck` | Zu den Bewerbungen | safe | nein | `—` |
+| `erklaerungen` | Einwilligungserklärungen | safe | nein | `—` |
 
 ---
 
@@ -17792,7 +17792,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `speichern` | Speichern | safe | nein | `/api/v1/personal/applications/actions/speichern` |
 | `neu` | Neu | safe | nein | `Leert die Eingabe fuer eine neue Bewerbung.` |
-| `erklaerungen` | Einwilligungserklärungen | safe | nein | `Oeffnet die Fassungen der Einwilligungserklaerung.` |
+| `erklaerungen` | Einwilligungserklärungen | safe | nein | `—` |
 
 ---
 
@@ -20677,7 +20677,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `speichern` | Speichern | safe | nein | `/api/v1/fuhrpark/fahrzeuge/actions/speichern` |
-| `liste` | Zur Liste | safe | nein | `Wechselt zur Fahrzeugliste.` |
+| `liste` | Zur Liste | safe | nein | `—` |
 | `drucker` | Drucker einrichten | safe | nein | `Hinterlegt den Drucker an der Fahrzeugakte.` |
 | `drucken` | Drucken | safe | nein | `Druckt die Fahrzeugakte.` |
 | `unfall` | Unfall-Anzeige | moderate | nein | `Erfasst eine Unfallanzeige zum Fahrzeug.` |
@@ -21304,8 +21304,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Neuer Fahrer | safe | nein | `Oeffnet das bestehende Fahrerformular.` |
 | `verfuegbar` | Verfügbaren Fahrer öffnen | safe | nein | `Oeffnet den ersten verfuegbaren Fahrer.` |
-| `touren` | Tourenplanung | safe | nein | `Wechselt in die Tourenplanung.` |
-| `dokumente` | Dokumente | safe | nein | `Oeffnet die Dokumentenablage.` |
+| `touren` | Tourenplanung | safe | nein | `—` |
+| `dokumente` | Dokumente | safe | nein | `—` |
 | `export` | Export | safe | nein | `Exportiert die sichtbare Fahrerliste.` |
 
 ---

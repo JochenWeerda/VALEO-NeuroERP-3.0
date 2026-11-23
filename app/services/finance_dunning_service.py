@@ -16,15 +16,11 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import DomainError
+from app.core.exceptions import ConflictError, DomainError
 
 
-# Default-Mahnstufen, falls domain_erp.dunning_rules leer ist.
-_DEFAULT_RULES: dict[int, dict] = {
-    1: {"fee_amount": 5.0, "interest_rate": 0.0, "payment_deadline_days": 14, "block": False},
-    2: {"fee_amount": 10.0, "interest_rate": 5.0, "payment_deadline_days": 10, "block": False},
-    3: {"fee_amount": 20.0, "interest_rate": 8.0, "payment_deadline_days": 7, "block": True},
-}
+# Keine Vorgabe-Mahnregeln: Ohne hinterlegte Regeln (domain_erp.dunning_rules) wird nicht gemahnt - bis
+# 23.11.2026 setzte der Mahnlauf dann Gebuehren von 5/10/20 EUR an, die niemand festgelegt hatte.
 
 
 def _f(v):
@@ -53,7 +49,8 @@ def next_dunning_level(current_level: int, tage_ueberfaellig: int) -> int:
 def compute_dunning(open_amount, level: int, rule: dict, tage_ueberfaellig: int) -> dict:
     """Reine Mahnbetrag-Berechnung: Gebühr + (anteilige) Zinsen + Gesamtbetrag."""
     offen = Decimal(str(open_amount or 0))
-    fee = Decimal(str(rule.get("fee_amount", 0) or 0))
+    fee = (Decimal(str(rule.get("fee_amount", 0) or 0))
+           + offen * Decimal(str(rule.get("fee_percentage", 0) or 0)) / 100).quantize(Decimal("0.01"))
     zins_pa = Decimal(str(rule.get("interest_rate", 0) or 0))
     interest = (offen * zins_pa / 100 * Decimal(str(max(tage_ueberfaellig, 0))) / 365).quantize(Decimal("0.01"))
     total = (offen + fee + interest).quantize(Decimal("0.01"))
@@ -75,36 +72,58 @@ class FinanceDunningService:
 
     def _rules(self) -> dict[int, dict]:
         rows = self.db.execute(
-            text("SELECT level, fee_amount, interest_rate, payment_deadline_days, block_customer "
+            text("SELECT level, fee_amount, fee_percentage, interest_rate, payment_deadline_days, block_customer "
                  "FROM domain_erp.dunning_rules WHERE tenant_id = :t AND COALESCE(active,true) = true"),
             {"t": self.tenant_id},
         ).mappings().all()
-        rules = {int(r["level"]): {"fee_amount": _f(r["fee_amount"]), "interest_rate": _f(r["interest_rate"]),
+        rules = {int(r["level"]): {"fee_amount": _f(r["fee_amount"]), "fee_percentage": _f(r["fee_percentage"]),
+                                   "interest_rate": _f(r["interest_rate"]),
                                    "payment_deadline_days": r["payment_deadline_days"],
                                    "block": bool(r["block_customer"])} for r in rows}
-        return rules or dict(_DEFAULT_RULES)
+        if not rules:
+            raise ConflictError("Keine aktiven Mahnregeln hinterlegt - ohne Regeln (Gebühr, Zins, Frist) wird nicht "
+                                "gemahnt.")
+        return rules
 
-    def _overdue_ops(self, rechnungsnr: Optional[str] = None) -> list[dict]:
+    def _overdue_ops(self, rechnungsnr: Optional[str] = None, *, op_ids: Optional[list[str]] = None,
+                     debtor_id: Optional[str] = None, stichtag: Optional[date] = None) -> list[dict]:
+        """Mahnfaellige Debitorenposten zum Stichtag.
+
+        Nicht faellig ist ein Posten, solange die Zahlungsfrist seiner letzten Mahnung laeuft, und einer, der seine
+        hoechste Stufe schon hat. Bis 23.11.2026 eskalierte jeder Lauf um eine Stufe: zwei Laeufe am selben Tag
+        brachten Stufe 2, drei Stufe 3 - jeweils mit neuer Mahnung und Gebuehr.
+        """
+        today = stichtag or date.today()
         rows = self.db.execute(
             text(
                 "SELECT id, op_id_src, rechnungsnr, debtor_id, kunde_id, kunde_name, "
                 "COALESCE(faelligkeit, due_date) AS faellig, "
-                "COALESCE(offen, open_amount, betrag) AS offen, COALESCE(dunning_level,0) AS level "
+                "COALESCE(offen, open_amount, betrag) AS offen, COALESCE(dunning_level,0) AS level, "
+                "(SELECT MAX(n.payment_deadline) FROM domain_erp.dunning_notices n WHERE n.tenant_id = o.tenant_id "
+                " AND n.op_id = o.op_id_src AND COALESCE(n.status, '') NOT IN ('storniert', 'cancelled')) "
+                "AS letzte_frist "
                 "FROM (SELECT *, id AS op_id_src FROM domain_erp.offene_posten) o "
                 "WHERE tenant_id = :t AND konto_typ = 'debitoren' "
                 "AND COALESCE(op_status,'') <> 'storniert' "
                 "AND COALESCE(offen, open_amount, betrag, 0) > 0 "
-                "AND COALESCE(faelligkeit, due_date) < CURRENT_DATE "
-                "AND (:rnr IS NULL OR rechnungsnr = :rnr) "
+                "AND COALESCE(faelligkeit, due_date) < :stichtag "
+                "AND (CAST(:rnr AS text) IS NULL OR rechnungsnr = :rnr) "
+                "AND (CAST(:deb AS text) IS NULL OR COALESCE(debtor_id, kunde_id)::text = :deb) "
                 "ORDER BY COALESCE(faelligkeit, due_date)"
             ),
-            {"t": self.tenant_id, "rnr": rechnungsnr},
+            {"t": self.tenant_id, "rnr": rechnungsnr, "deb": debtor_id, "stichtag": today},
         ).mappings().all()
-        today = date.today()
+        auswahl = {str(i) for i in op_ids} if op_ids is not None else None
         out = []
         for r in rows:
+            if auswahl is not None and str(r["op_id_src"]) not in auswahl:
+                continue
+            if r["letzte_frist"] and r["letzte_frist"] >= today:
+                continue  # die Zahlungsfrist der letzten Mahnung laeuft noch
             faellig = r["faellig"]
             tage = (today - faellig).days if faellig else 0
+            if next_dunning_level(int(r["level"]), tage) <= int(r["level"]):
+                continue  # hoechste Stufe erreicht: keine weitere Mahnung derselben Stufe
             out.append({
                 "op_id": str(r["op_id_src"]), "rechnungsnr": r["rechnungsnr"],
                 "debtor_id": r["debtor_id"] or r["kunde_id"], "partner": r["kunde_name"],
@@ -119,21 +138,32 @@ class FinanceDunningService:
         out = []
         for op in self._overdue_ops():
             lvl = op["naechste_stufe"]
-            rule = rules.get(lvl, _DEFAULT_RULES.get(lvl, _DEFAULT_RULES[1]))
+            rule = rules.get(lvl)
+            if rule is None:
+                raise ConflictError(f"Keine aktive Mahnregel für Stufe {lvl} hinterlegt.")
             calc = compute_dunning(op["offen"], lvl, rule, op["tage_ueberfaellig"])
             out.append({**op, **calc})
         return out
 
-    def run_dunning(self, rechnungsnr: Optional[str] = None, bediener: str = "KIM") -> dict[str, Any]:
-        rules = self._rules()
-        ops = self._overdue_ops(rechnungsnr)
+    def run_dunning(self, rechnungsnr: Optional[str] = None, bediener: str = "KIM", *,
+                    op_ids: Optional[list[str]] = None, debtor_id: Optional[str] = None,
+                    stichtag: Optional[date] = None, commit: bool = True) -> dict[str, Any]:
+        """Der eine Mahnweg: Mahnung je mahnfaelligem Debitorenposten, Stufe am Posten, Sperre nach Regel.
+
+        Mahnlauf, Mahnung aus dem offenen Posten, Mahnstufe eskalieren und /dunning/process|run rufen ihn.
+        ``commit=False``: der Aufrufer besitzt die Transaktion.
+        """
+        ops = self._overdue_ops(rechnungsnr, op_ids=op_ids, debtor_id=debtor_id, stichtag=stichtag)
         if not ops:
-            return {"ok": True, "erzeugt": 0, "mahnungen": [], "detail": "Keine überfälligen Debitoren-OP."}
-        today = date.today()
+            return {"ok": True, "erzeugt": 0, "mahnungen": [], "detail": "Keine mahnfälligen Debitoren-OP."}
+        rules = self._rules()  # erst wenn etwas faellig ist: "nichts faellig" ist kein Regelfehler
+        today = stichtag or date.today()
         erzeugt = []
         for op in ops:
             lvl = op["naechste_stufe"]
-            rule = rules.get(lvl, _DEFAULT_RULES.get(lvl, _DEFAULT_RULES[1]))
+            rule = rules.get(lvl)
+            if rule is None:
+                raise ConflictError(f"Keine aktive Mahnregel für Stufe {lvl} hinterlegt.")
             calc = compute_dunning(op["offen"], lvl, rule, op["tage_ueberfaellig"])
             deadline = today + timedelta(days=calc["payment_deadline_days"])
             nid = str(uuid.uuid4())
@@ -152,10 +182,18 @@ class FinanceDunningService:
                      "WHERE id = :id AND tenant_id = :t"),
                 {"lvl": lvl, "id": op["op_id"], "t": self.tenant_id},
             )
-            erzeugt.append({"rechnungsnr": op["rechnungsnr"], "stufe": lvl,
+            if rule.get("block") and op["debtor_id"]:
+                self.db.execute(
+                    text("UPDATE domain_erp.debtors SET blocked = true, updated_at = NOW() "
+                         "WHERE id::text = :d AND tenant_id::text = :t"),
+                    {"d": str(op["debtor_id"]), "t": self.tenant_id},
+                )
+            erzeugt.append({"id": nid, "op_id": op["op_id"], "vorherige_stufe": op["aktuelle_stufe"],
+                            "rechnungsnr": op["rechnungsnr"], "stufe": lvl,
                             "gebuehr": calc["dunning_fee"], "zinsen": calc["interest"],
                             "gesamt": calc["total_amount"], "frist": deadline.isoformat()})
-        self.db.commit()
+        if commit:
+            self.db.commit()
         return {"ok": True, "erzeugt": len(erzeugt), "mahnungen": erzeugt}
 
     def list_notices(self, limit: int = 100) -> list[dict]:

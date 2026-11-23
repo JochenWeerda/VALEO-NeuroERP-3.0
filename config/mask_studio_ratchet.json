@@ -1,7 +1,6 @@
 {
  "_hinweis": "Nur schrumpfen. Erzeugt von scripts/mask_studio_inventory.py --write-baseline; siehe Modul-Docstring.",
  "handgebaut_routen": [
-  "admin/control-center",
   "annahme/abrechnung",
   "lager/materialfluss"
  ],
@@ -321,7 +320,6 @@
   "mask:agrar/harvest-controls:inspect_rule",
   "mask:fuhrpark/fahrzeug-stamm:drucken",
   "mask:fuhrpark/fahrzeug-stamm:drucker",
-  "mask:fuhrpark/fahrzeug-stamm:liste",
   "mask:fuhrpark/fahrzeug-stamm:unfall",
   "mask:logistik/frachttabellen:position",
   "mask:logistik/tour-fracht-arbeitsraum:probe",
@@ -331,25 +329,13 @@
   "mask:logistik/tourenplanung:hinweise",
   "mask:logistik/versandprofile:avis",
   "mask:logistik/versandprofile:profil",
-  "mask:personal/bewerbung-einwilligung:erklaerungen",
   "mask:personal/bewerbung-einwilligung:erteilen",
   "mask:personal/bewerbung-einwilligung:widerrufen",
-  "mask:personal/bewerbung-einwilligung:zurueck",
-  "mask:personal/bewerbungen:erklaerungen",
   "mask:stammdaten/individuelle-artikelnummer:edit",
-  "mask:transporte/fahrer:dokumente",
   "mask:transporte/fahrer:export",
-  "mask:transporte/fahrer:touren",
   "mask:transporte/fahrer:verfuegbar"
  ],
  "aktionen_ohne_mcp_klassifikation": [],
- "aktionen_ohne_cli": [
-  "mask:admin/control-center:escalate",
-  "mask:admin/control-center:resolve",
-  "mask:admin/control-center:retry",
-  "mask:finance/bank-abgleich:validate",
-  "mask:mahnwesen/mahnlauf:sendEmail",
-  "mask:mahnwesen/mahnlauf:sendPost"
- ],
+ "aktionen_ohne_cli": [],
  "studio_katalog_nicht_bedienbar": []
 }

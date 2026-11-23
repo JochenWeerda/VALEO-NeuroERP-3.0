@@ -359,7 +359,25 @@ class FiscalizationService:
             ),
             params,
         ).mappings().one()
-        return dict(row)
+        summary = dict(row)
+        # Brutto je Satz ueber alle Vorgaenge des Tages; ``gross_by_rate_total`` deckt sich nur dann mit
+        # ``gross_total``, wenn jeder Vorgang seine Saetze kennt (Altvorgaenge vor dem 19.11.2026 nicht).
+        saetze = self.db.execute(
+            text(
+                f"""
+                SELECT satz.key AS satz, COALESCE(SUM(satz.value::numeric), 0) AS brutto
+                FROM domain_docflow.pos_fiscal_transactions t, jsonb_each_text(t.vat_breakdown) AS satz
+                WHERE t.tenant_id = :tenant_id
+                  AND t.business_date = :business_date
+                  {terminal_clause}
+                GROUP BY satz.key
+                """  # nosec B608  # reviewed-safe: SQL-Fragmente sind Code-Literale, Werte sind gebunden
+            ),
+            params,
+        ).mappings().all()
+        summary["gross_by_rate"] = {Decimal(str(r["satz"])): Decimal(str(r["brutto"])) for r in saetze}
+        summary["gross_by_rate_total"] = sum(summary["gross_by_rate"].values(), Decimal("0"))
+        return summary
 
     def stored_transaction(self, transaction_id: str) -> Any:
         return self.db.execute(
@@ -406,6 +424,11 @@ class FiscalizationService:
                 payment_breakdown.get(normalized_method, Decimal("0")) + payment.amount
             )
         gross_total = sum((line.gross_amount for line in command.lines), Decimal("0"))
+        # Brutto je Umsatzsteuersatz (wie die TSE ihn meldet): der Tagesabschluss bucht daraus Erloes und Steuer.
+        vat_breakdown: dict[str, Decimal] = {}
+        for line in command.lines:
+            satz = format(Decimal(str(line.vat_rate)).normalize(), "f")
+            vat_breakdown[satz] = vat_breakdown.get(satz, Decimal("0")) + line.gross_amount
         now = datetime.now(timezone.utc)
         self.db.execute(
             text(
@@ -413,17 +436,18 @@ class FiscalizationService:
                 INSERT INTO domain_docflow.pos_fiscal_transactions
                 (id, tenant_id, transaction_id, provider, provider_reference, terminal_id,
                  cash_register_id, client_id, business_date, transaction_type, state,
-                 receipt_number, gross_total, payment_breakdown, signature,
+                 receipt_number, gross_total, payment_breakdown, vat_breakdown, signature,
                  signature_counter, serial_number, qr_code_data, started_at, finished_at,
                  provider_response, simulated, created_at, updated_at)
                 VALUES
                 (:id, :tenant_id, :transaction_id, :provider, :provider_reference, :terminal_id,
                  :cash_register_id, :client_id, :business_date, :transaction_type, :state,
-                 :receipt_number, :gross_total, CAST(:payment_breakdown AS jsonb), :signature,
+                 :receipt_number, :gross_total, CAST(:payment_breakdown AS jsonb), CAST(:vat_breakdown AS jsonb), :signature,
                  :signature_counter, :serial_number, :qr_code_data, :started_at, :finished_at,
                  CAST(:provider_response AS jsonb), :simulated, NOW(), NOW())
                 ON CONFLICT (tenant_id, transaction_id) DO UPDATE SET
                   state = EXCLUDED.state,
+                  vat_breakdown = EXCLUDED.vat_breakdown,
                   provider_reference = EXCLUDED.provider_reference,
                   signature = EXCLUDED.signature,
                   signature_counter = EXCLUDED.signature_counter,
@@ -449,6 +473,7 @@ class FiscalizationService:
                 "receipt_number": command.receipt_number,
                 "gross_total": gross_total,
                 "payment_breakdown": json.dumps({key: str(value) for key, value in payment_breakdown.items()}),
+                "vat_breakdown": json.dumps({key: str(value) for key, value in vat_breakdown.items()}),
                 "signature": result.signature,
                 "signature_counter": result.signature_counter,
                 "serial_number": result.serial_number,
