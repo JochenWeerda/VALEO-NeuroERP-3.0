@@ -1,15 +1,3 @@
--- 006_missing_tenant_indexes.sql
--- Phase 4 Observability & Performance: fehlende Tenant-scoped Composite-Indexes
--- Idempotent via IF NOT EXISTS (PostgreSQL 9.5+)
--- Deploy-Order: nach 005_order_management_schema.sql
-
--- ── domain_sales ─────────────────────────────────────────────────────────────
-
-CREATE INDEX IF NOT EXISTS idx_sales_delivery_notes_tenant_date
-    ON domain_sales.delivery_notes (tenant_id, delivery_date);
-
-CREATE INDEX IF NOT EXISTS idx_sales_delivery_notes_tenant_status
-    ON domain_sales.delivery_notes (tenant_id, status);
 
 CREATE INDEX IF NOT EXISTS idx_sales_orders_tenant_date
     ON domain_sales.orders (tenant_id, order_date);

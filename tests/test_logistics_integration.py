@@ -542,7 +542,7 @@ class TestLogisticsIntegration:
             headers=HEADERS,
         )
         if ls.status_code != 200:
-            pytest.skip("DEMO-LS-001 nicht vorhanden — zuerst seed_demo_sales.py (optional seed_demo_logistics_spine.py)")
+            pytest.skip("DEMO-LS-001 nicht vorhanden — zuerst als DocFlow-Lieferschein anlegen")
 
         carrier = f"IT-CHAIN-{uuid.uuid4().hex[:8]}"
         tariff_id: str | None = None

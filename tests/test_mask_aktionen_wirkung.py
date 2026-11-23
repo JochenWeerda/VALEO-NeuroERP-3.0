@@ -75,7 +75,6 @@ def aufraeumen(engine):
             "public.outbox_events",
             "domain_audit.attestations",
             "domain_erp.payment_runs",
-            "domain_sales.delivery_notes",
             "domain_ops.reklamationen",
             "domain_finance.finance_mahnstufen_audit",
             "domain_erp.offene_posten",

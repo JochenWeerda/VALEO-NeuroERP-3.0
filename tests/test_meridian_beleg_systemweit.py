@@ -325,8 +325,6 @@ _MANDANTEN_TABELLEN = (
     ("domain_inventory.weighing_tickets", "tenant_id"),
     ("domain_inventory.inventory_stock_movements", "tenant_id"),
     ("domain_ops.reklamationen", "tenant_id"),
-    ("domain_einkauf.bestellungen", "tenant_id"),
-    ("domain_sales.delivery_notes", "tenant_id"),
     ("domain_einkauf.kontrakte", "tenant_id"),
     ("domain_einkauf.lieferanten", "tenant_id"),
     ("domain_inventory.agrar_contracts", "tenant_id"),

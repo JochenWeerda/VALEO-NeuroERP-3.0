@@ -48,7 +48,6 @@ def engine():
     yield motor
     with motor.begin() as v:
         v.execute(text("DELETE FROM documents WHERE doc_type = 'purchase_order' AND data->>'tenantId' = :h"), {"h": HAUS})
-        v.execute(text("DELETE FROM domain_einkauf.bestellungen WHERE tenant_id = :h"), {"h": HAUS})
         v.execute(text("DELETE FROM domain_einkauf.lieferanten WHERE id = :i"), {"i": LIEFERANT})
         v.execute(text("DELETE FROM domain_shared.tenants WHERE id = :h"), {"h": HAUS})
 
