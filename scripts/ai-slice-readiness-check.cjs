@@ -134,7 +134,13 @@ function main() {
   const args = parseArgs();
   const files = sliceFiles(args).filter((filePath) => fs.existsSync(path.join(repoRoot, filePath)));
   const workboardPath = path.join(repoRoot, "docs/agent-ops/active-workboard.md");
-  const workboard = fs.existsSync(workboardPath) ? fs.readFileSync(workboardPath, "utf8") : "";
+  // Seit der M0-Bereinigung (23.11.2026) stehen abgeschlossene Eintraege woertlich im Archiv; ein Slice darf dort stehen.
+  const archiveDir = path.join(repoRoot, "docs/agent-ops/archive");
+  const archived = fs.existsSync(archiveDir)
+    ? fs.readdirSync(archiveDir).filter((name) => name.endsWith(".md"))
+        .map((name) => fs.readFileSync(path.join(archiveDir, name), "utf8")).join("\n")
+    : "";
+  const workboard = (fs.existsSync(workboardPath) ? fs.readFileSync(workboardPath, "utf8") : "") + "\n" + archived;
   const errors = [];
 
   for (const filePath of files) {
