@@ -259,6 +259,10 @@ export interface ScreenFieldOptionsSource {
  */
 export interface ScreenActionInputField extends ScreenFieldDefinition {
   optionsSource?: ScreenFieldOptionsSource
+  /** Optional group heading in the action dialog. */
+  section?: string
+  /** Send null when a previously populated value is cleared. */
+  clearable?: boolean
 }
 
 export interface ScreenActionDefinition {

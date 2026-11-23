@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 794,
+    "actions": 796,
     "screens_with_actions": 403,
     "domains": 50
   },
@@ -6487,6 +6487,33 @@
       }
     },
     {
+      "id": "mask:crm/customer-360:stammdaten_pflegen",
+      "label": "Weitere Stammdaten pflegen",
+      "description": "Weitere Stammdaten pflegen (crm/customer-360)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/customer-360",
+      "intent_phrases": [
+        "Weitere Stammdaten pflegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/customer-360",
+        "actionKey": "stammdaten_pflegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "high"
+      }
+    },
+    {
       "id": "mask:crm/dsgvo-anfragen-liste:ablehnen",
       "label": "Ablehnen",
       "description": "Ablehnen (crm/dsgvo-anfragen-liste)",
@@ -7218,6 +7245,33 @@
         "permission": "crm.customer.update",
         "requiresConfirmation": false,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:crm/kunden-cockpit:stammdaten_pflegen",
+      "label": "Weitere Stammdaten pflegen",
+      "description": "Weitere Stammdaten pflegen (crm/kunden-cockpit)",
+      "category": "mask-action",
+      "domain": "crm",
+      "mask": "crm/kunden-cockpit",
+      "intent_phrases": [
+        "Weitere Stammdaten pflegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "crm/kunden-cockpit",
+        "actionKey": "stammdaten_pflegen",
+        "commandEndpoint": "/api/v1/crm/customers/{entity_id}/master-profile/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "crm.customer.update",
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "high"
       }
     },
     {
