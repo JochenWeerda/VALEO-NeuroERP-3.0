@@ -13584,7 +13584,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/einkauf/anfragen`
+- `list` → `/api/v1/procurement/match/orders`
 
 **MCP-Tools (Domäne):**
 

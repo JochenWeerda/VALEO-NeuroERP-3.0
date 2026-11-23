@@ -4512,7 +4512,7 @@
       "version": "1.0.0"
     },
     "einkauf/wareneingangsabgleich": {
-      "definition_hash": "69eb5d502475f8a54e1c6198b88f3662c94e9812d9c5e20b8122b188fa50762a",
+      "definition_hash": "1649512ba936a6c21f41b4c9a2ce1c3121c39e717df4900918c31b33434ce528",
       "gates_passed": [
         "A",
         "B",

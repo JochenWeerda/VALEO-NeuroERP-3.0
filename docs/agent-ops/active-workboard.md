@@ -21554,3 +21554,5 @@ Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteue
 
 ## M2-WARENEINGANGSABGLEICH — reserviert, Codex Lead
 Eigentum: Builder build_einkauf_wareneingangsabgleich_screen_definition, zugehoerige Register und Nachweis. Zuerst native Bestellliste an Fachquelle anschliessen, anschliessend Auswahl, Abgleichpositionen und geregelte Folgeaktionen. Abnahme mit belegter Mandantenbindung und Studio-Kanalvertraegen.
+
+Bestellliste nutzt jetzt den mandantengebundenen Picker-Endpunkt. Alle sechs sichtbaren Spalten gegen das Antwortschema geprueft. Studio-Katalog und Agentenhandbuch erzeugt. Auswahl mit Abgleichdetails und Folgeaktionen bleiben offen.
