@@ -1000,3 +1000,5 @@ M2-LOCAL-PRINT umgesetzt. Alle vier UI-Handler oeffnen den Browserdruck; es ents
 ## M2-WORKSPACE-PRODUCTION-NAV - reserviert, Codex
 
 Ziel: bestehende Navigation zur Druckmaske und zum zuletzt geoeffneten Dokument deklarieren. Dateibesitz: zugehoerige ScreenDefinitions. Abnahme: Handler, Zielroute, Inventar.
+
+M2-WORKSPACE-PRODUCTION-NAV umgesetzt. Druckaktion fuehrt zur vorhandenen Druckmaske; Dokumentaktion nutzt den vorhandenen Link der eigenen Historie. Studio-Inventar 285 -> 283. Browserabnahme offen.

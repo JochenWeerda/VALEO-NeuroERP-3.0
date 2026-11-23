@@ -6926,7 +6926,7 @@
       "version": "1.0.0"
     },
     "produktion/produktionsleitstand": {
-      "definition_hash": "8e096b64524df2a633a491595a7c65511f41a5325f7b667674527233c661a87e",
+      "definition_hash": "6e2e7dc978a4506a4c6f979203a89585cc0729590b7cdded4766ed6ae272318f",
       "gates_passed": [
         "A",
         "B",
@@ -8231,7 +8231,7 @@
       "version": "1.0.0"
     },
     "workspace/letzte-dokumente": {
-      "definition_hash": "eed430bdd0c465370fc910f2937be3f8a2d0ebddf4e10f0a99d327d1d894711e",
+      "definition_hash": "21a0ff372ab4e21d3cb8312781de0e791a3aa12be18e2d1a620ead38ca9bdbdf",
       "gates_passed": [
         "A",
         "B",

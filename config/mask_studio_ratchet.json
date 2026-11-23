@@ -266,7 +266,6 @@
   "mask:produktion/produktionsleitstand:complete",
   "mask:produktion/produktionsleitstand:mark_rework",
   "mask:produktion/produktionsleitstand:open_source",
-  "mask:produktion/produktionsleitstand:print",
   "mask:produktion/produktionsleitstand:release",
   "mask:produktion/produktionsleitstand:start",
   "mask:produktion/rezepturgruppe:edit",
@@ -305,7 +304,6 @@
   "mask:verkauf/kunden-stamm:edit",
   "mask:waage/wiegeschein:edit",
   "mask:workflow/workflow-monitoring:open_source",
-  "mask:workspace/letzte-dokumente:open",
   "mask:workspace/letzte-dokumente:remove"
  ],
  "aktionen_nicht_verfuegbar": [
