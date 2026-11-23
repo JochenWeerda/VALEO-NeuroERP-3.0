@@ -34,10 +34,3 @@ export class InteractionGuard {
     expect(this.failedResponses.slice(since.responses), 'Neue HTTP-Fehler').toEqual([])
   }
 }
-
-export async function expectCrm360RoundTrip(page: Page): Promise<void> {
-  await page.goBack({ waitUntil: 'domcontentloaded' })
-  await expect(page).toHaveURL(/\/crm(?:[?#]|$)/)
-  await expect(page.locator('#crm-main-viewport')).toBeVisible()
-  await expect(page.locator('body')).not.toContainText(ERROR_PAGE_PATTERN)
-}
