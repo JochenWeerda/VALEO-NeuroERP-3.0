@@ -161426,24 +161426,6 @@
         "title": "TagesabschlussAktuell",
         "type": "object"
       },
-      "TagesabschlussCreateRequest": {
-        "properties": {
-          "datum": {
-            "title": "Datum",
-            "type": "string"
-          },
-          "kasse_id": {
-            "title": "Kasse Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "kasse_id",
-          "datum"
-        ],
-        "title": "TagesabschlussCreateRequest",
-        "type": "object"
-      },
       "TagesabschlussIn": {
         "properties": {
           "barentnahme": {
@@ -161565,140 +161547,6 @@
           "belegnummer"
         ],
         "title": "TagesabschlussOut",
-        "type": "object"
-      },
-      "TagesabschlussSubmitIn": {
-        "properties": {
-          "barverkauf": {
-            "title": "Barverkauf",
-            "type": "number"
-          },
-          "datum": {
-            "title": "Datum",
-            "type": "string"
-          },
-          "differenz": {
-            "title": "Differenz",
-            "type": "number"
-          },
-          "kartenzahlung": {
-            "title": "Kartenzahlung",
-            "type": "number"
-          },
-          "kassenstand": {
-            "title": "Kassenstand",
-            "type": "number"
-          }
-        },
-        "required": [
-          "datum",
-          "kassenstand",
-          "barverkauf",
-          "kartenzahlung",
-          "differenz"
-        ],
-        "title": "TagesabschlussSubmitIn",
-        "type": "object"
-      },
-      "TagesabschlussSubmitOut": {
-        "properties": {
-          "belegnummer": {
-            "title": "Belegnummer",
-            "type": "string"
-          },
-          "datum": {
-            "title": "Datum",
-            "type": "string"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "status": {
-            "title": "Status",
-            "type": "string"
-          },
-          "umsatz_gesamt": {
-            "title": "Umsatz Gesamt",
-            "type": "number"
-          }
-        },
-        "required": [
-          "id",
-          "datum",
-          "status",
-          "belegnummer",
-          "umsatz_gesamt"
-        ],
-        "title": "TagesabschlussSubmitOut",
-        "type": "object"
-      },
-      "TagesabschlussTransitionRequest": {
-        "properties": {
-          "dsfinvk_export_pfad": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dsfinvk Export Pfad"
-          },
-          "fehler_grund": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Fehler Grund"
-          },
-          "new_status": {
-            "title": "New Status",
-            "type": "string"
-          },
-          "tse_signatur": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tse Signatur"
-          },
-          "umsatz_brutto_eur": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Umsatz Brutto Eur"
-          },
-          "z_bon_nr": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Z Bon Nr"
-          }
-        },
-        "required": [
-          "new_status"
-        ],
-        "title": "TagesabschlussTransitionRequest",
         "type": "object"
       },
       "TanBestaetigenRequest": {
@@ -327991,53 +327839,6 @@
         ]
       }
     },
-    "/api/v1/kasse/tagesabschluss": {
-      "post": {
-        "description": "Einfachen Kassen-Tagesabschluss buchen.",
-        "operationId": "submit_tagesabschluss_api_v1_kasse_tagesabschluss_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TagesabschlussSubmitIn"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TagesabschlussSubmitOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Tagesabschluss einreichen",
-        "tags": [
-          "Kasse - Tagesabschluss"
-        ]
-      }
-    },
     "/api/v1/kasse/tagesabschluss/aktuell": {
       "get": {
         "description": "Tagesabschluss-Daten fuer den aktuellen (oder angegebenen) Tag.",
@@ -366331,34 +366132,24 @@
     },
     "/api/v1/pos/tagesabschluss": {
       "post": {
+        "description": "POS Tagesabschluss buchen â€” schreibt in abschluss_checklisten UND erzeugt FiBu-Journal-EintrÃ¤ge.",
         "operationId": "create_tagesabschluss_api_v1_pos_tagesabschluss_post",
-        "parameters": [
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TagesabschlussCreateRequest"
+                "$ref": "#/components/schemas/TagesabschlussIn"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
+          "201": {
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "$ref": "#/components/schemas/TagesabschlussOut"
                 }
               }
             },
@@ -366380,153 +366171,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "POS-Tagesabschluss anlegen",
+        "summary": "Tagesabschluss anlegen",
         "tags": [
-          "pos-tagesabschluss",
-          "pos-tagesabschluss"
-        ]
-      }
-    },
-    "/api/v1/pos/tagesabschluss/tse/simulate": {
-      "post": {
-        "description": "Simulierte TSE-Signatur für Tests und Demo — kein echtes TSE-Gerät.",
-        "operationId": "simulate_tse_api_v1_pos_tagesabschluss_tse_simulate_post",
-        "parameters": [
-          {
-            "in": "query",
-            "name": "kasse_id",
-            "required": true,
-            "schema": {
-              "title": "Kasse Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "z_bon_nr",
-            "required": true,
-            "schema": {
-              "title": "Z Bon Nr",
-              "type": "string"
-            }
-          },
-          {
-            "in": "query",
-            "name": "umsatz_brutto_eur",
-            "required": true,
-            "schema": {
-              "title": "Umsatz Brutto Eur",
-              "type": "number"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "POS-TSE-Signatur simulieren",
-        "tags": [
-          "pos-tagesabschluss",
-          "pos-tagesabschluss"
-        ]
-      }
-    },
-    "/api/v1/pos/tagesabschluss/{abschluss_id}/transition": {
-      "post": {
-        "operationId": "transition_tagesabschluss_api_v1_pos_tagesabschluss__abschluss_id__transition_post",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "abschluss_id",
-            "required": true,
-            "schema": {
-              "title": "Abschluss Id",
-              "type": "string"
-            }
-          },
-          {
-            "in": "header",
-            "name": "x-tenant-id",
-            "required": true,
-            "schema": {
-              "title": "X-Tenant-Id",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TagesabschlussTransitionRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "POS-Tagesabschlussstatus wechseln",
-        "tags": [
-          "pos-tagesabschluss",
-          "pos-tagesabschluss"
+          "compat",
+          "pos"
         ]
       }
     },

@@ -2350,9 +2350,7 @@ async def create_tagesabschluss(
             detail="Gemeldeter Umsatz stimmt nicht mit den Zahlungsarten ueberein",
         )
 
-    # Buchbarkeit vor dem fiskalischen Abschluss pruefen: Ist der TSE-Abschluss signiert, darf die Buchung nicht
-    # mehr an einem fehlenden Konto oder einer gesperrten Periode scheitern. Konten legt der Abschluss nicht mehr
-    # selbst an (bis 19.11.2026 tat er das und schrieb Kopf und Zeilen roh ins Journal).
+    # Buchbar? Vor der TSE-Signatur pruefen (Konto, Periode); Konten legt der Abschluss nicht mehr selbst an.
     from app.core.exceptions import DomainError
     from app.services.finance_transaction_service import FinanceTransactionService
 
@@ -2438,7 +2436,6 @@ async def create_tagesabschluss(
         },
     )
 
-    # Verdrahtung zur FiBu ueber den kanonischen Buchungsdienst (Sequenz, Hash, Periodensperre).
     if accounting_lines:
         try:
             eintrag = buchung.create(
@@ -2455,6 +2452,9 @@ async def create_tagesabschluss(
             db.rollback()
             raise HTTPException(status_code=409, detail=f"Tagesabschluss nicht gebucht: {exc}") from exc
 
+    from app.api.v1.endpoints.kasse_tagesabschluss import merke_kassentag_abgeschlossen  # Z-Bon-Stand
+    merke_kassentag_abgeschlossen(db, tenant_id, str(config["cash_register_id"]), payload.datum, belegnummer,
+                                  closing.provider_reference, payload.umsatz_gesamt, payload.kassierer)
     db.commit()
 
     await _enqueue_event(

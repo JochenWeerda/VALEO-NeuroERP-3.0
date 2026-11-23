@@ -27,7 +27,7 @@ overrides:
   axios: ^1.18.0
   defu: ^6.1.5
   drizzle-orm: ^0.45.2
-  effect: 3.22.1
+  effect: ^3.22.1
   fast-uri: ^3.1.9
   moment: ^2.31.0
   fast-xml-parser: ^5.12.0
@@ -254,7 +254,7 @@ importers:
         version: 4.2.0
       '@valeo-neuroerp/inventory-domain':
         specifier: file:../inventory-domain
-        version: '@valero-neuroerp/inventory-domain@file:packages/inventory-domain(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))'
+        version: '@valero-neuroerp/inventory-domain@file:packages/inventory-domain(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))'
       '@valeo-neuroerp/purchase-domain':
         specifier: file:../purchase-domain
         version: file:packages/purchase-domain
@@ -439,7 +439,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.53.0
         version: 0.53.0(@opentelemetry/api@1.9.0)
@@ -689,7 +689,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/sdk-node':
         specifier: ^0.218.0
         version: 0.218.0(@opentelemetry/api@1.9.0)
@@ -925,7 +925,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.53.0
         version: 0.53.0(@opentelemetry/api@1.9.0)
@@ -1170,7 +1170,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-jaeger':
         specifier: ^1.25.0
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -1613,7 +1613,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/sdk-node':
         specifier: ^0.218.0
         version: 0.218.0(@opentelemetry/api@1.9.0)
@@ -1756,7 +1756,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-jaeger':
         specifier: ^1.25.0
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -2228,7 +2228,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-trace-otlp-http':
         specifier: ^0.53.0
         version: 0.53.0(@opentelemetry/api@1.9.0)
@@ -2467,7 +2467,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-jaeger':
         specifier: ^1.25.0
         version: 1.30.1(@opentelemetry/api@1.9.0)
@@ -2714,7 +2714,7 @@ importers:
         version: 1.9.0
       '@opentelemetry/auto-instrumentations-node':
         specifier: ^0.76.0
-        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+        version: 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/sdk-node':
         specifier: ^0.218.0
         version: 0.218.0(@opentelemetry/api@1.9.0)
@@ -9872,8 +9872,8 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
-  effect@3.22.1:
-    resolution: {integrity: sha512-TNoXushmPOBAjJlthF5d2QwnX2xBPEtcNJr5XKNKbRLbDvBcOYkXlYDfvGfSA0zriwLFuCll5MDtNMAdZL17PQ==}
+  effect@3.22.5:
+    resolution: {integrity: sha512-AdIU4llI19BzhJ4xUBZix7kS8oiYSlCsJ61j3UM3UyJw9ecDrsrrweDFm/Ku1nHbJWMLoynK+1Me4it3Zkmjpw==}
 
   electron-to-chromium@1.5.425:
     resolution: {integrity: sha512-QvPtl41EUOnuT1HBvMKgxXRIaHNcagBPs50u7VULzhZXaGfqTbZyE16LQsctZ/RQHlGu+FOWeDTR4mY6YbeF1g==}
@@ -18381,10 +18381,10 @@ snapshots:
 
   '@opentelemetry/api@1.9.0': {}
 
-  '@opentelemetry/auto-instrumentations-node@0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))':
+  '@opentelemetry/auto-instrumentations-node@0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/core': 2.8.0(@opentelemetry/api@1.9.0)
+      '@opentelemetry/core': 2.12.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation': 0.218.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-amqplib': 0.65.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/instrumentation-aws-lambda': 0.70.0(@opentelemetry/api@1.9.0)
@@ -19337,7 +19337,7 @@ snapshots:
     dependencies:
       c12: 3.1.0(magicast@0.3.5)
       deepmerge-ts: 8.0.2
-      effect: 3.22.1
+      effect: 3.22.5
       empathic: 2.0.0
     transitivePeerDependencies:
       - magicast
@@ -22005,10 +22005,10 @@ snapshots:
 
   '@valero-neuroerp/data-models@file:packages/data-models': {}
 
-  '@valero-neuroerp/inventory-domain@file:packages/inventory-domain(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))':
+  '@valero-neuroerp/inventory-domain@file:packages/inventory-domain(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))':
     dependencies:
       '@opentelemetry/api': 1.9.0
-      '@opentelemetry/auto-instrumentations-node': 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.8.0(@opentelemetry/api@1.9.0))
+      '@opentelemetry/auto-instrumentations-node': 0.76.0(@opentelemetry/api@1.9.0)(@opentelemetry/core@2.12.1(@opentelemetry/api@1.9.0))
       '@opentelemetry/exporter-jaeger': 1.30.1(@opentelemetry/api@1.9.0)
       '@opentelemetry/exporter-prometheus': 0.218.0(@opentelemetry/api@1.9.0)
       '@opentelemetry/sdk-node': 0.218.0(@opentelemetry/api@1.9.0)
@@ -23959,7 +23959,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  effect@3.22.1:
+  effect@3.22.5:
     dependencies:
       '@standard-schema/spec': 1.1.0
       fast-check: 3.23.2

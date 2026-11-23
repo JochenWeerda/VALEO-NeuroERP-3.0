@@ -241,7 +241,7 @@ _TAGESKENNZAHLEN = """
 """
 
 #: Ob der Tag abgeschlossen ist, weiss der Tagesabschluss
-#: (``pos_tagesabschluss_service``, Zustandsmaschine mit TSE und DSFinV-K) —
+#: (``POST /pos/tagesabschluss`` schreibt ``domain_pos.pos_tagesabschluesse``) —
 #: nicht der Bericht, der ihn anzeigt. Vorher stand im Z-Bon ``closed: True``
 #: als Zuweisung.
 _ABSCHLUSS_STAND = """

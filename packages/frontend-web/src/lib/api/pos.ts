@@ -3,7 +3,7 @@
  * Error-first fetching without mock fallback data.
  */
 
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '../api-client'
 
 export type GiftCard = {
@@ -114,22 +114,6 @@ export type KasseTagesabschlussAktuell = {
   retouren: number
 }
 
-export type KasseTagesabschlussSubmit = {
-  datum: string
-  kassenstand: number
-  barverkauf: number
-  kartenzahlung: number
-  differenz: number
-}
-
-export type KasseTagesabschlussResult = {
-  id: string
-  datum: string
-  status: string
-  belegnummer: string
-  umsatz_gesamt: number
-}
-
 const EMPTY_KASSE: KasseTagesabschlussAktuell = {
   datum: '',
   barverkauf: 0,
@@ -151,12 +135,5 @@ export function useKasseTagesabschlussAktuell(datum?: string) {
     // `staleTime` verhindert den Mount-Fetch (Nutzermeldung 17.07.2026).
     initialDataUpdatedAt: 0,
     staleTime: 30 * 1000,
-  })
-}
-
-export function useKasseTagesabschlussSubmit() {
-  return useMutation({
-    mutationFn: async (payload: KasseTagesabschlussSubmit) =>
-      (await apiClient.post<KasseTagesabschlussResult>('/api/v1/kasse/tagesabschluss', payload)).data,
   })
 }
