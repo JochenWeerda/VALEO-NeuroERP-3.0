@@ -951,6 +951,8 @@ Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/
 Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und … (gekuerzt; Volltext unter M3-EIN-MAHNWEG-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 
+## M2-CONTROL-CENTER-NACHWEIS-20261123 — zur Abnahme, Claude Code (M2)
+Meilenstein: M2. Das Control-Center laeuft ueber den Fach-Host IntakeWeighingPage mit registriertem Admin-Renderer (ControlCenterSurface, useDomainDispatch); die Nachweiskette app/core/mask_runtime_evidence.py kannte admin_workbench nicht und fuehrte die Route als "handgebaut". Eintrag ergaenzt, Ratsche handgebaut_routen 3 -> 2, Studio-Katalog Gate E. Verbleibend handgebaut: annahme/abrechnung, lager/materialfluss.
 ## M0-VOR-PUSH-FIXTURVERTRAG-20261123 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0. scripts/vor_push.py nimmt tests/test_multi_domain_uix_fixture_contract.py immer mit (woertliche Kopien der ScreenDefinitions im Frontend; #172 war erst in CI rot). Hook-Kopie ~/.claude/hooks/vor_push.py nachgezogen.
 ## M3-SALDENVORTRAG-20261123 — zur Abnahme, Claude Code (M3)
