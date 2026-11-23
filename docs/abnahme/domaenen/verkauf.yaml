@@ -1,0 +1,171 @@
+# Abnahmeblatt Verkauf — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skill l3-vertrieb-referenz: Angebot, Auftrag, Lieferschein, Fakturierung,
+# Rechnungsausgangsbuch). Status: abgenommen | teilweise | fehlt. "abgenommen" verlangt Nachweis, keine offene
+# P0/P1-Luecke und keine Platzhaltermaske; die Belegkette im Browser ist Teil der Maskenabnahme.
+id: verkauf
+titel: Verkauf (Angebot bis Rechnung)
+reifematrix: D01
+l3_referenz: l3-vertrieb-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [sales, verkauf, vertrieb]
+screen_domains: [sales, verkauf, vertrieb]
+prozesse:
+  - id: VK-01
+    name: Angebot erfassen und in Auftrag umwandeln
+    l3: ERFASSUNG > Verkauf > Angebot (gelber Kopf, Positionen mit Detailzeile, Summen)
+    routen: [sales/angebote, sales/angebot/neu, sales/angebot/:id]
+    rolle: VERKAUF (beleg_write); Preise nur mit Preisrecht
+    nachweise:
+      - tests/test_docflow_partial_conversion_postgres.py
+      - tests/test_docflow_conversion_options_http.py
+      - tests/test_beleg_rechte.py
+    status: teilweise
+    befund: >-
+      Angebot ist DocFlow-Beleg der Familie beleg (Variante sales_offer); Umwandlung mit Teilmengen, Wiederholung
+      und Mandantengrenze gegen PostgreSQL/RLS geprueft, Rechte je Bereich geprueft. Im Browser nur Ladetest
+      (playwright-tests/specs/sales/angebote-smoke.spec.ts), keine Umwandlung durch die Maske.
+    luecken:
+      - text: Browserkette Angebot > Auftrag durch die Belegmaske mit echtem Backend fehlt
+        prio: P2
+  - id: VK-02
+    name: Auftrag erfassen und bestaetigen
+    l3: ERFASSUNG > Verkauf > Auftrag (F5), Kreditlimit im Kopf, LS/Rechnung direkt aus dem Auftrag
+    routen: [sales/auftraege, sales/orders/new, sales/sales-order/:id]
+    rolle: VERKAUF (beleg_write)
+    nachweise:
+      - tests/test_docflow_auftragsbestaetigung.py
+      - tests/test_docflow_auftraege_uebernahme.py
+      - tests/test_rls_domain_sales.py
+    status: teilweise
+    befund: >-
+      Auftrag und Auftragsbestaetigung (Stand confirmed) laufen ueber DocFlow, Bestaetigen auch ueber die Maske
+      (test_belegaktion_bestaetigen_ueber_die_maske). Kreditlimit wird geprueft (VK-09). Browser: nur Ladetest
+      des Editors (order-flow.spec.ts).
+    luecken:
+      - text: Browserkette Auftrag erfassen > bestaetigen > Lieferschein durch die Belegmaske fehlt
+        prio: P2
+  - id: VK-03
+    name: Lieferschein erfassen, kommissionieren und ausbuchen
+    l3: ERFASSUNG > Verkauf > Lieferschein (F6), Charge, Selbstabholung, "wie vorheriger LS" (F11)
+    routen: [sales/lieferungen, sales/lieferungen/neu, sales/delivery-note/:id, verkauf/lieferschein-erfassung]
+    rolle: VERKAUF und LAGER (Lager ohne Preise)
+    nachweise:
+      - tests/test_lieferschein_pickliste_docflow.py
+      - tests/test_docflow_teilmengen_statushistorie.py
+      - tests/test_beleg_rechte.py
+    status: teilweise
+    befund: >-
+      Teillieferscheine bis zur Auftragsmenge, Ueberlieferung abgewiesen, Lagerabgang genau einmal ueber die
+      Pickliste, Lager sieht keine Preise. Nicht belegt: L3-Spalten zur Rueckverfolgung (Charge, Serie,
+      Gefahrgutpunkte, Bio) in den Lieferscheinpositionen und "wie vorheriger LS".
+    luecken:
+      - text: Agrarspalten der Lieferscheinposition (Charge, Gefahrgut, Bio/Nachhaltigkeit) gegen L3 nicht abgeglichen
+        prio: P2
+      - text: Funktion "wie vorheriger Lieferschein" (L3 F11) nicht vorhanden oder nicht belegt
+        prio: P3
+  - id: VK-04
+    name: Sofort-Rechnung aus dem Lieferschein
+    l3: Lieferschein > Sofort-Rechnung
+    routen: [sales/rechnungen, sales/invoices/new, verkauf/rechnung/:id]
+    rolle: VERKAUF; Buchen Sachbearbeitung, Storno Buchhaltung/Bereichsleitung
+    nachweise:
+      - tests/test_mcp_rechnung_aus_docflow_lieferschein.py
+      - tests/test_docflow_teilmengen_statushistorie.py::test_teilrechnungen_aus_dem_lieferschein_bis_zur_gelieferten_menge
+      - tests/test_beleg_aktionen.py
+    status: teilweise
+    befund: >-
+      Rechnung entsteht als DocFlow-Folgebeleg aus dem Lieferschein (Maske und MCP denselben Weg), Teilrechnungen
+      bis zur gelieferten Menge, Folgebeleg genau einmal. Browserkette fehlt.
+    luecken:
+      - text: Browserkette Lieferschein > Rechnung buchen durch die Belegmaske fehlt
+        prio: P2
+  - id: VK-05
+    name: Fakturierung (Sammelrechnungslauf ueber gelieferte Lieferscheine)
+    l3: ABRECHNUNG > Faktur > Verkauf (F8) — Auswahl nach Niederlassung, Zeitraum, Kunde; Aufbereiten, Kontrolle, Druck
+    routen: []
+    rolle: VERKAUF / Fakturierung
+    nachweise: []
+    status: fehlt
+    befund: >-
+      Kein Sammellauf: keine Route, kein Endpunkt fuer die Auswahl offener Lieferscheine je Zeitraum/Kunde und
+      Erzeugung aller Rechnungen. Rechnungen entstehen nur einzeln aus dem Lieferschein (VK-04). Im L3-Betrieb ist
+      das der regulaere Weg zur Ausgangsrechnung.
+    luecken:
+      - text: Sammelfakturierung offener Lieferscheine (Auswahl, Kontrolle, Probedruck, Lauf) fehlt
+        prio: P1
+  - id: VK-06
+    name: Rechnungsausgangsbuch
+    l3: DATEI > Hauptmodule > Rechnungsausgangsbuch (F9) — Filter, Storno anzeigen, Uebergabe Fibu, EUR/sFr
+    routen: [sales/rechnungen, verkauf/rechnungen]
+    rolle: VERKAUF lesen; Buchhaltung
+    nachweise:
+      - tests/test_beleg_erechnung.py
+      - tests/test_docflow_gobd.py
+    status: teilweise
+    befund: >-
+      Rechnungsliste ist die Belegliste der Familie (beleg-liste/sales-invoice). XRechnung aus dem gebuchten Beleg
+      ins GoBD-Archiv geprueft. Nicht belegt: Spalten Fibu-Uebergabe, Storno-Filter und Summen je Waehrung wie im
+      L3-Ausgangsbuch.
+    luecken:
+      - text: Ausgangsbuch-Sicht mit Fibu-Uebergabestatus, Storno-Filter und Summen je Waehrung nicht belegt
+        prio: P2
+  - id: VK-07
+    name: Verkaufsgutschrift
+    l3: Lieferschein "Gutschrift kennzeichnen"; Rechnungsausgangsbuch Korrektur
+    routen: [sales/credit-notes, sales/credit-note-editor]
+    rolle: VERKAUF; Buchen Sachbearbeitung
+    nachweise:
+      - tests/test_gutschrift_umsatzsteuer.py
+      - tests/test_beleg_aktionen.py::test_die_gutschrift_mit_bezugsrechnung_bucht_die_sachbearbeitung
+    status: teilweise
+    befund: >-
+      Umsatzsteuer je Position ueber Steuerschluessel, Erloes netto, Forderung brutto, Reverse Charge nicht
+      automatisch, doppelte Nummer abgewiesen; MCP-Trockenlauf schreibt nichts. Browserkette fehlt.
+    luecken:
+      - text: Browserkette Gutschrift mit Bezugsrechnung durch die Belegmaske fehlt
+        prio: P2
+  - id: VK-08
+    name: Storno von Rechnung und Lieferung
+    l3: Rechnungsausgangsbuch > Stornieren; LS loeschen
+    routen: [sales/lieferung-storno, sales/rechnungen]
+    rolle: Storno gebuchter Belege nur Buchhaltung/Bereichsleitung, mit Grund
+    nachweise:
+      - tests/test_beleg_aktionen.py::test_storno_aus_der_maske_braucht_einen_grund_und_das_recht
+      - tests/test_docflow_teilmengen_statushistorie.py::test_stornierte_rechnung_gibt_ihre_menge_wieder_frei
+      - tests/test_beleg_rechte.py::test_gebuchtes_storniert_nur_buchhaltung_und_bereichsleitung
+    status: teilweise
+    befund: >-
+      Storno aus der Belegmaske verlangt Grund und Recht, stornierte Rechnung gibt die Menge frei, Statushistorie
+      unveraenderlich. Die Route sales/lieferung-storno ist gesondert zu pruefen (siehe Maskenabnahme).
+    luecken:
+      - text: Maske sales/lieferung-storno gegen den Storno-Weg der Belegmaske abgleichen oder entfernen
+        prio: P2
+  - id: VK-09
+    name: Kreditlimit pruefen
+    l3: Auftrag/Lieferschein-Kopf Kredit-Limit
+    routen: [sales/kreditlimit-pruefung]
+    rolle: VERKAUF lesen
+    nachweise:
+      - tests/test_sales_credit.py
+    status: teilweise
+    befund: >-
+      Pruefregel rein getestet (kein Limit, Warnung ab 80 %, Sperre ab 100 %, verfuegbarer Rahmen). Nicht belegt:
+      Wirkung der Sperre beim Freigeben eines Auftrags gegen die Datenbank.
+    luecken:
+      - text: Kreditlimitsperre beim Freigeben eines Auftrags als Integrationstest gegen PostgreSQL fehlt
+        prio: P2
+  - id: VK-10
+    name: Unerledigte Auftragspositionen (Rueckstand)
+    l3: Auftrag offen/teilgeliefert
+    routen: [verkauf/unerledigte-auftrags-positionen]
+    rolle: VERKAUF lesen
+    nachweise:
+      - tests/test_docflow_teilmengen_statushistorie.py::test_ein_auftrag_drei_teillieferscheine_dann_ist_schluss
+    status: teilweise
+    befund: >-
+      Restmengen je Position fuehrt DocFlow (Teillieferscheine bis zur Auftragsmenge). Die Rueckstandsliste ist
+      eine generische Platzhaltermaske und zeigt weder Auftrag, Artikel noch Restmenge.
+    luecken:
+      - text: Rueckstandsliste als echte Liste offener Auftragspositionen mit Restmenge aus DocFlow, mit Integrationstest
+        prio: P2

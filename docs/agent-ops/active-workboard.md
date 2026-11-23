@@ -973,9 +973,22 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 ## M5-PRODUKTION-GEHEIMNISSE-PFLICHT-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
-## M4-DOMAENEN-ABNAHME-20261123 — reserviert, Cursor (M4)
+## M4-DOMAENEN-ABNAHME-20261123 — in arbeit, Cursor (M4)
 Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
 Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
 Abgrenzung: keine Fachumsetzung in diesem Slice; gefundene Luecken gehen als eigene Eintraege an die Bahn-Besitzer. VALEO-ERP-REFERENCE-AUDIT-001 bleibt eigenes Paket.
-Dateibesitz: docs/abnahme/domaenen/**, scripts/domaenen_abnahme.py, tests/unit/test_domaenen_abnahme.py, docs/gap/domain-maturity-matrix-*.csv (neue Erhebung), docs/gap/README.md.
+Dateibesitz: docs/abnahme/domaenen/**, scripts/domaenen_abnahme.py, tests/test_domaenen_abnahme.py, scripts/vor_push.py (nur Register Domaenenabnahme), docs/gap/domain-maturity-matrix-*.csv (neue Erhebung), docs/gap/README.md.
 Abnahme: Abnahmeblatt je Domaene vorhanden und per python scripts/domaenen_abnahme.py --check aktuell; Reifematrix neu erhoben; Lueckenliste mit Prioritaeten im Workboard.
+Stand 23.11.2026: Generator und Pruefregeln (abgenommen nur mit Nachweis, ohne P0/P1, ohne Platzhaltermaske) mit Vertragstest; Register in vor_push. Erstes Blatt Verkauf: 10 Prozesse, 9 teilweise, 1 fehlt (Sammelfakturierung P1), 8 Platzhaltermasken. Naechste Blaetter in L3-Reihenfolge: Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM.
+
+## M4-VK-SAMMELFAKTURIERUNG — offen (M4, P1)
+Meilenstein: M4. Owner: offen. Quelle: docs/abnahme/domaenen/verkauf.md (VK-05).
+Befund: Der L3-Regelweg zur Ausgangsrechnung ist der Fakturierungslauf (ABRECHNUNG > Faktur > Verkauf, F8): offene gelieferte Lieferscheine nach Niederlassung, Zeitraum, Kunde/Debitor waehlen, kontrollieren, Probedruck, Lauf. VALEO erzeugt Rechnungen nur einzeln als DocFlow-Folgebeleg aus dem Lieferschein; es gibt weder Route noch Endpunkt fuer einen Sammellauf.
+Ziel: Sammelfakturierung auf dem DocFlow-Umwandlungsweg (je Lieferschein genau eine Rechnung, idempotent, Teilmengen wie VK-04), Studio-Maske mit Auswahl, Kontrolle und Lauf, Rechte VERKAUF/Fakturierung.
+Abnahme: Integrationstest gegen PostgreSQL (Lauf ueber mehrere Lieferscheine, Wiederholung ohne zweite Rechnung, fremder Mandant unsichtbar) und Browserkette; VK-05 im Abnahmeblatt auf teilweise/abgenommen.
+
+## M2-PLATZHALTERMASKEN — offen (M2)
+Meilenstein: M2. Owner: offen (Bahn Codex laut Fahrplan). Quelle: scripts/domaenen_abnahme.py (ist_platzhalter), Messung 23.11.2026.
+Befund: 109 von 449 Listenmasken sind generische Platzhalter: Spalten nur Kennung/Name/Status/Datum, ausser CSV-Export keine Aktion. Das Masken-Studio-Inventar zaehlt sie als studio_versioniert. Betroffen u. a. finance 11, lager 11, pos 10, futtermittel 8, agrar 6, fibu 6; darunter fachlich tragende Masken wie Zahlungsabgleich (finance/payment-matching-liste), Kassen-Tagesabschluss (kasse/tagesabschluss) und Rueckstandsliste (verkauf/unerledigte-auftrags-positionen).
+Ziel: Platzhalter je Maske durch fachliche Spalten und Aktionen ersetzen oder die Route entfernen; Ratsche in scripts/mask_studio_inventory.py (nur schrumpfen) aufnehmen.
+Abnahme: Ratsche Platzhaltermasken bei 0.
