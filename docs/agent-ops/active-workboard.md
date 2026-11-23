@@ -21497,3 +21497,10 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M0-E2E-FULL-UAT-20261123 — reserviert, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor. Abgegrenzter Teil aus M0-CI-GESAMTBASIS-20261115 (Codex); Sonar-Abdeckung und Runtime API Sweep bleiben bei Codex. Handshake: docs/agent-ops/handshakes/cursor-an-codex-m0-e2e-full-uat-20261123.md.
+Befund (Lauf 45156197226, main bbe18fb8f): alle 21 roten @full-Tests (CRM 360 16, Zahlungsabgleich 3, POS-Fiskalisierung 2) stehen auf der SSO-Anmeldeseite. .github/workflows/e2e-full.yml startet weder Test-Keycloak noch Postgres/Redis, installiert keine Python-Abhaengigkeiten und migriert nicht; seit dem Wegfall des Dev-Tokens (12.10.2026) ist der Lauf deshalb unangemeldet. Workflow rot seit mindestens 09.11.2026.
+Ziel: Full-UAT-Workflow wie e2e-critical.yml mit echter Anmeldung (scripts/ci/e2e_keycloak.sh), Datenbank und Backend; Browser-Specs mit echter Sitzung; danach echte Fachfehler einzeln beheben. Keine Gates senken, keine Tests entschaerfen oder ueberspringen.
+Dateibesitz: .github/workflows/e2e-full.yml, playwright.config.ts (nur Projekt full), playwright-tests/helpers/anmeldung.ts, playwright-tests/specs/crm/crm360-*.spec.ts, playwright-tests/specs/finance/payment-matching.spec.ts, playwright-tests/specs/pos/fiscalization-admin.spec.ts, QA docs/quality-assurance/m0-e2e-full-uat-20261123.md.
+Abnahme: workflow_dispatch von e2e-full.yml auf dem Branch gruen; danach naechtlicher Lauf auf main gruen.
