@@ -21497,3 +21497,10 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M4-DOMAENEN-ABNAHME-20261123 — reserviert, Cursor (M4)
+Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
+Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
+Abgrenzung: keine Fachumsetzung in diesem Slice; gefundene Luecken gehen als eigene Eintraege an die Bahn-Besitzer. VALEO-ERP-REFERENCE-AUDIT-001 bleibt eigenes Paket.
+Dateibesitz: docs/abnahme/domaenen/**, scripts/domaenen_abnahme.py, tests/unit/test_domaenen_abnahme.py, docs/gap/domain-maturity-matrix-*.csv (neue Erhebung), docs/gap/README.md.
+Abnahme: Abnahmeblatt je Domaene vorhanden und per python scripts/domaenen_abnahme.py --check aktuell; Reifematrix neu erhoben; Lueckenliste mit Prioritaeten im Workboard.
