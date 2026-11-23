@@ -384167,6 +384167,59 @@
         ]
       }
     },
+    "/api/v1/procurement/rechnungspruefungen/{pruefung_id}": {
+      "get": {
+        "operationId": "rechnungspruefung_detail_api_v1_procurement_rechnungspruefungen__pruefung_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "pruefung_id",
+            "required": true,
+            "schema": {
+              "title": "Pruefung Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceCheckSummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Prüfung nicht gefunden"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rechnungsprüfung abrufen",
+        "tags": [
+          "procurement",
+          "einkauf",
+          "procurement",
+          "einkauf"
+        ]
+      }
+    },
     "/api/v1/procurement/rechnungspruefungen/{pruefung_id}/freigabe": {
       "post": {
         "operationId": "rechnungsfreigabe_endpoint_api_v1_procurement_rechnungspruefungen__pruefung_id__freigabe_post",

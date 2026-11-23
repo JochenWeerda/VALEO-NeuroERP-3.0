@@ -202,3 +202,19 @@ def test_invoice_approval_uses_verified_operator_and_releases_lock_on_rejection(
     assert failure.value.status_code == 422
     decision.assert_called_once_with(db, "rp-1", "t1", "FREIGEGEBEN", "verified", "Geprüft")
     db.rollback.assert_called_once_with()
+
+
+def test_invoice_check_detail_scopes_lookup_and_returns_uniform_not_found():
+    from fastapi import HTTPException
+    from app.api.v1.endpoints.procurement_match import rechnungspruefung_detail
+
+    db = _mock_db({"proc_rechnungspruefungen": None})
+    with pytest.raises(HTTPException) as failure:
+        rechnungspruefung_detail("check-42", tenant_id="tenant-a", db=db)
+
+    assert failure.value.status_code == 404
+    db.execute.assert_called_once()
+    query, parameters = db.execute.call_args.args
+    assert "WHERE id = :id AND tenant_id = :tenant" in str(query)
+    assert parameters == {"id": "check-42", "tenant": "tenant-a"}
+    db.commit.assert_not_called()

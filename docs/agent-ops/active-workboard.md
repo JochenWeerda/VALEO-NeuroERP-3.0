@@ -21612,3 +21612,5 @@ Drei-Wege-Abgleich liefert Rechnungspruefungen mit stabiler Pruefungs-ID. Neue S
 
 Rechnungsfreigabe liefert den gespeicherten Entscheidungsgrund bereits in der REST-Antwort. Vorher konnte die Antwort den alten Grund zeigen. Fachtest prueft Grund und Operator, 14 Tests gruen.
 M2-RECHNUNGSPRUEFUNG-FREIGABE: REST-Detail und Service-Lesevertrag fuer einzelne Pruefungs-ID im aktiven Mandanten, DTO und gezielter Negativtest.
+
+Rechnungspruefung: eigenstaendiger GET-Detailabruf mit Mandantenfilter und einheitlichem 404. 15 gezielte Tests bestanden, OpenAPI synchron. M2-Abgleich gegen origin/main 602394bd9 bestaetigt 292 undeklarierte Aktionen, 18 nicht verfuegbare Aktionen, 15 Altmuster und zwei handgebaute Routen (Annahmeabrechnung, Materialfluss). Frueheres Fachzweig-Inventar liegt vor den Merges #172/#173.

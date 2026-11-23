@@ -73,6 +73,18 @@ def pruefe_rechnung(
     }
 
 
+def lese_rechnungspruefung(db: Session, pruefung_id: str, tenant_id: str) -> dict[str, Any] | None:
+    row = db.execute(
+        text("""
+            SELECT id, rechnungs_nr, rechnungs_betrag_eur, abweichung_pct, status, freigabe_grund, created_at
+            FROM domain_procurement.proc_rechnungspruefungen
+            WHERE id = :id AND tenant_id = :tenant
+        """),
+        {"id": pruefung_id, "tenant": tenant_id},
+    ).mappings().first()
+    return dict(row) if row is not None else None
+
+
 def freigabe_rechnungspruefung(
     db: Session,
     pruefung_id: str,

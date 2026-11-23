@@ -23,6 +23,7 @@ from app.api.v1.schemas.procurement_match_schemas import (
     ErsCreditOut,
     FollowUpListOut,
     FollowUpOut,
+    InvoiceCheckSummaryOut,
     MatchOut,
     MatchResultListOut,
     OrderPickerListOut,
@@ -489,6 +490,19 @@ def rechnungspruefung_endpoint(
                                 body.we_menge, body.schwelle_pct or 3.0)
     except RechnungspruefungError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.get("/rechnungspruefungen/{pruefung_id}", response_model=InvoiceCheckSummaryOut,
+            summary="Rechnungsprüfung abrufen", responses={404: {"description": "Prüfung nicht gefunden"}})
+def rechnungspruefung_detail(
+    pruefung_id: str, tenant_id: str = Depends(get_tenant_id), db: Session = Depends(get_db),
+) -> dict:
+    from app.services.proc_rechnungspruefung_service import lese_rechnungspruefung
+
+    row = lese_rechnungspruefung(db, pruefung_id, tenant_id)
+    if row is None:
+        raise HTTPException(404, "Rechnungsprüfung nicht gefunden.")
+    return row
 
 
 @router.post("/rechnungspruefungen/{pruefung_id}/freigabe", response_model=RechnungspruefungOut, summary="Rechnungsprüfung manuell freigeben", dependencies=SCHREIBEN["EINKAUF"])
