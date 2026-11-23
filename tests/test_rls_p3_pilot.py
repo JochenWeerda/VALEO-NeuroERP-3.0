@@ -34,6 +34,10 @@ def _load_pilot():
 
 
 PILOT = _load_pilot()
+# Spaeter per Migration entfernte Pilottabellen (der Pilot selbst bleibt unveraendert):
+# finance_mahnstufen_audit seit mahnstufen_verlauf_entfernen_20261123 (ein Mahnweg).
+ENTFERNT = {"domain_finance.finance_mahnstufen_audit"}
+PILOT_TABELLEN = [t for t in PILOT.PILOT_TABLES if t not in ENTFERNT]
 
 
 @pytest.fixture(scope="module")
@@ -50,7 +54,7 @@ def conn():
         rls_inventory._pending_upgrade(connection)
         for schema in ("domain_erp", "domain_finance", "public"):
             connection.execute(sa.text(f"GRANT USAGE ON SCHEMA {schema} TO valeo_app"))
-        for table in PILOT.PILOT_TABLES:
+        for table in PILOT_TABELLEN:
             if connection.execute(sa.text("SELECT to_regclass(:t)"), {"t": table}).scalar():
                 connection.execute(sa.text(f"GRANT SELECT, INSERT, UPDATE, DELETE ON {table} TO valeo_app"))
         for tenant in (A, B):
@@ -111,8 +115,8 @@ def test_alle_pilottabellen_haben_rls_ohne_force(conn):
         "(SELECT count(*) FROM pg_policy p WHERE p.polrelid = c.oid AND p.polname IN ('tenant_isolation_select', 'tenant_isolation_insert', 'tenant_isolation_update', 'tenant_isolation_delete')) "
         "FROM pg_class c WHERE c.oid = ANY(:oids)"),
         {"oids": [conn.execute(sa.text("SELECT to_regclass(:t)::oid"), {"t": t}).scalar()
-                  for t in PILOT.PILOT_TABLES if conn.execute(sa.text("SELECT to_regclass(:t)"), {"t": t}).scalar()]}).all()
-    assert len(rows) == len(PILOT.PILOT_TABLES)
+                  for t in PILOT_TABELLEN if conn.execute(sa.text("SELECT to_regclass(:t)"), {"t": t}).scalar()]}).all()
+    assert len(rows) == len(PILOT_TABELLEN)
     assert all(rls and not force and policies == 4 for _, rls, force, policies in rows), rows
 
 
