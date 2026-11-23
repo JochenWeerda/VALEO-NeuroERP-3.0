@@ -21542,3 +21542,5 @@ M5 Image23.11: vollstaendiger Buildquellenvergleich identisch; permanente kleine
 
 ## M2-SERVICE-ENTRY-SOURCE-20261123 — reserviert, Codex Lead
 Ziel: bestaetigten Anfrage-Platzhalter der nativen Leistungsnachweisliste durch bestehenden tenantgebundenen SES-Listenvertrag samt echten Fachspalten ersetzen. Besitzer Lead: nur build_einkauf_service_entry_sheets_screen_definition in screen_definitions_domain_batch15.py, enger Definition-/Listen-/Tenantvertrag, abgeleitete Artefakte/QA. Keine Freigabe oder sichere Schreibparitaet behaupten; bestehende SES-Create/Patch-Vertragsluecken getrennt fortfuehren. Kein neues Fachmodell, keine DB/Container/Handmade-Seite; keine Aenderung an Claudes Finance/Kundenclaims.
+
+M2-SERVICE-ENTRY Dateibesitzpraezisierung vor Edit: Lead besitzt zusaetzlich typisierten SES-Lesevertrag in compat_schemas.py und GET-Bindung in compat.py; Subagent ausschliesslich nativen Builder+neuen Verhaltenstest. Kein konkurrierender Edit an Schreibwegen. OpenAPI soll die tatsaechlichen Fachspalten statt extra=allow ohne Feldvertrag beschreiben.
