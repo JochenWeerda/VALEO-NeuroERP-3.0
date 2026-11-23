@@ -951,7 +951,7 @@ Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/
 Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und … (gekuerzt; Volltext unter M3-EIN-MAHNWEG-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 
-## M3-SALDENVORTRAG-20261123 � zur Abnahme, Claude Code (M3)
+## M3-SALDENVORTRAG-20261123 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3 (Hauptbuch: Saldenvortrag, Jahresabschluss). Neue Fachaktion POST /api/v1/finance/closing/saldenvortrag (FINANCE_ADMIN): erst wenn alle zwoelf Perioden des Jahres gesperrt sind, eine Eroeffnungsbuchung am 01.01. des Folgejahres - Bestandskonten gegen 9000, Jahresergebnis auf 0860 Gewinnvortrag / 0868 Verlustvortrag (SKR04 2970/2978); gebucht = posted+reversed; ein Jahr nur einmal (409). SKR03-Einrichtung legt 9000/0860/0868 an.
 Offen: GuV-/Bilanz-Abschlussbuchungen (Abschlusskonten) und Ergebnisverwendung als eigene Schnitte; Maskenaktion im Abschluss-Cockpit.
 Dateibesitz: app/services/finance_saldenvortrag_service.py, app/api/v1/endpoints/finance_actions.py (Saldenvortrag), app/finance/steuerschluessel.py (SKR03_KONTEN), tests/test_saldenvortrag.py.
