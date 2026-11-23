@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-23
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-23T16:09:02Z'
+generated_at: '2026-11-23T17:52:17Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1399,6 +1399,7 @@ domains:
     - finance_period_service
     - finance_ratenzahlung_service
     - finance_read_model_service
+    - finance_saldenvortrag_service
     - finance_sepa_service
     - finance_transaction_service
     - fints_connector
@@ -2390,8 +2391,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 347
-  backend_services_mapped: 347
+  backend_services_total: 348
+  backend_services_mapped: 348
   backend_endpoints_total: 475
   backend_endpoints_mapped: 475
 unmapped:

@@ -169,6 +169,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_period_service` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_ratenzahlung_service` | DOM-FINANCE-004.3 — Ratenzahlungsplan-Lifecycle Service. |
 | `finance_read_model_service` | Service layer for Finance Read-Models (cockpit KPI projections). |
+| `finance_saldenvortrag_service` | Saldenvortrag ins neue Geschaeftsjahr (M3, 23.11.2026). |
 | `finance_sepa_service` | DOM-FINANCE-004.2 — SEPA-Zahlungsträger Service (Mandate + Batch-Export). |
 | `finance_transaction_service` | Service layer for finance journal entry and posting operations. |
 | `fints_connector` | FinTS/HBCI Bank-API Connector (§ 25a KWG, PSD2). |
