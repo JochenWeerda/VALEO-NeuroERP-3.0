@@ -21540,7 +21540,9 @@ Ziel: offenen RUNTIME-FIVE-503-Imagebericht aus vollstaendigen Buildquellen erze
 
 M5 Image23.11: vollstaendiger Buildquellenvergleich identisch; permanente kleine Quellketten-/Ignore-/Schema-Paketvertraege4/4 in1,77s. Docker Smoke erweitert um echte Ausschlussmarker und Bericht im Laufzeitimage. Keine lokale DB/Buildlast. QA backend-image-drift-evidence-20261123; CI-/Bereitstellungsabnahme noch offen.
 
-## M2-SERVICE-ENTRY-SOURCE-20261123 — reserviert, Codex Lead
+## M2-SERVICE-ENTRY-SOURCE-20261123 — in Arbeit, Codex Lead
 Ziel: bestaetigten Anfrage-Platzhalter der nativen Leistungsnachweisliste durch bestehenden tenantgebundenen SES-Listenvertrag samt echten Fachspalten ersetzen. Besitzer Lead: nur build_einkauf_service_entry_sheets_screen_definition in screen_definitions_domain_batch15.py, enger Definition-/Listen-/Tenantvertrag, abgeleitete Artefakte/QA. Keine Freigabe oder sichere Schreibparitaet behaupten; bestehende SES-Create/Patch-Vertragsluecken getrennt fortfuehren. Kein neues Fachmodell, keine DB/Container/Handmade-Seite; keine Aenderung an Claudes Finance/Kundenclaims.
 
 M2-SERVICE-ENTRY Dateibesitzpraezisierung vor Edit: Lead besitzt zusaetzlich typisierten SES-Lesevertrag in compat_schemas.py und GET-Bindung in compat.py; Subagent ausschliesslich nativen Builder+neuen Verhaltenstest. Kein konkurrierender Edit an Schreibwegen. OpenAPI soll die tatsaechlichen Fachspalten statt extra=allow ohne Feldvertrag beschreiben.
+
+Leistungsnachweis-Leseweg umgesetzt. Gezielter Vertrag prueft Statusfilter, Mandantentrennung am Repository-Aufruf, Felder und typisierte Antwort. Quelle auf 1.000 Datensaetze begrenzt. Browserabnahme und Studio-Schreibwege offen.

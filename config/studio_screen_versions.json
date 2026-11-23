@@ -4490,7 +4490,7 @@
       "version": "1.0.0"
     },
     "einkauf/service-entry-sheets": {
-      "definition_hash": "47053c717617dfc79443ba4c089211248516590730166646bf9c942f7f21aa86",
+      "definition_hash": "50be100348fa40cbb3e50b8229b04c5c084805331d95034a1eaee5a2124abda8",
       "gates_passed": [
         "A",
         "B",

@@ -45,21 +45,30 @@ def build_einkauf_reports_screen_definition() -> dict[str, Any]:
 
 
 def build_einkauf_service_entry_sheets_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
+    columns = [
+        {"key": key, "label": label, "sortable": True, "filterable": True, "width": width}
+        for key, label, width in (
+            ("number", "Nachweisnummer", 160), ("supplierId", "Lieferant", 160),
+            ("purchaseOrderId", "Bestellung", 160), ("serviceDate", "Leistungsdatum", 140),
+            ("description", "Leistung", 220), ("quantity", "Menge", 100),
+            ("unitPrice", "Einzelpreis", 120), ("amount", "Betrag", 120),
+            ("status", "Status", 130),
+        )
+    ]
     return build_stamm_list_screen(
         screen_id="einkauf/service-entry-sheets",
         domain="einkauf",
-        title="Service entry sheets",
-        subtitle="einkauf",
-        endpoint="/api/v1/einkauf/anfragen",
+        title="Leistungsnachweise",
+        subtitle="Einkauf",
+        endpoint="/api/v1/einkauf/service-entry-sheets",
         row_route=None,
         columns=columns,
         actions=[stamm_list_export_action()],
         row_actions=[],
-        purpose="Service entry sheets im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Service entry sheets.", "Filtere die Liste."],
+        purpose="Leistungsnachweise im Einkauf finden und auswerten.",
+        prompts=["Zeige Leistungsnachweise.", "Filtere die Liste."],
         bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        no_workflow="Diese Liste zeigt Leistungsnachweise; Anlage, Bearbeitung und Freigabe sind hier nicht verfügbar.",
     )
 
 

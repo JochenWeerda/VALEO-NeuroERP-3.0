@@ -151235,6 +151235,106 @@
         "title": "ServiceAnfragenOut",
         "type": "object"
       },
+      "ServiceEntrySheetListOut": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceEntrySheetOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "total": {
+            "minimum": 0.0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total"
+        ],
+        "title": "ServiceEntrySheetListOut",
+        "type": "object"
+      },
+      "ServiceEntrySheetOut": {
+        "description": "Existing service-entry read projection; no approval or posting authority.",
+        "properties": {
+          "amount": {
+            "title": "Amount",
+            "type": "number"
+          },
+          "createdAt": {
+            "title": "Createdat",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "number": {
+            "title": "Number",
+            "type": "string"
+          },
+          "purchaseOrderId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Purchaseorderid"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "number"
+          },
+          "serviceDate": {
+            "title": "Servicedate",
+            "type": "string"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "supplierId": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Supplierid"
+          },
+          "unitPrice": {
+            "title": "Unitprice",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "number",
+          "supplierId",
+          "purchaseOrderId",
+          "serviceDate",
+          "description",
+          "quantity",
+          "unitPrice",
+          "amount",
+          "status",
+          "createdAt"
+        ],
+        "title": "ServiceEntrySheetOut",
+        "type": "object"
+      },
       "SessionOut": {
         "properties": {
           "absolute_seconds": {
@@ -287194,7 +287294,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/EinkaufDocOut"
+                  "$ref": "#/components/schemas/ServiceEntrySheetListOut"
                 }
               }
             },
@@ -287216,7 +287316,7 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Service entry sheets auflisten",
+        "summary": "Leistungsnachweise auflisten",
         "tags": [
           "compat"
         ]
