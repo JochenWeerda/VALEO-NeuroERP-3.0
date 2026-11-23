@@ -990,3 +990,7 @@ M2-TOUR-NAVIGATION umgesetzt: Dispo-Arbeitsraum und Beladung verwenden den vorha
 Ziel: drei bestehende Navigationen der Fuetterungsberatung deklarieren. Dateibesitz: ScreenDefinitions der Fuetterungsberatung und erzeugter Versionskatalog. Abnahme: vorhandene Zielrouten, unveraenderte Rollen und Inventar.
 
 M2-FEED-NAVIGATION umgesetzt: Bestandsliste und mobile Fuetterungsdokumentation sind in drei Aktionen als Browser-Navigation deklariert. Zielrouten und vorhandene Handler abgeglichen. Geprueft: Studio-Inventar 292 -> 289 auf diesem Zweig, 15 nicht verfuegbare Aktionen. Browserabnahme offen.
+
+## M2-LOCAL-PRINT - reserviert, Codex
+
+Ziel: vorhandenen Browserdruck fuer Fuetterungsplan, Fremdware, Inventur und Abfrage-Center deklarieren. Dateibesitz: ScreenDefinitions und erzeugte Inventare. Abnahme: Handlerabgleich und Studio-Ratsche.
