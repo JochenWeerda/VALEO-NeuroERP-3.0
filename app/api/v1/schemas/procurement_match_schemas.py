@@ -15,6 +15,7 @@ haben: den Trefferfall und ``{"found": false, "detail": ...}``.
 
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Any, Optional
 
 from pydantic import Field
@@ -214,6 +215,18 @@ class MatchOut(BaseSchema):
     summary: Optional[MatchSummaryOut] = None
 
 
+class InvoiceCheckSummaryOut(BaseSchema):
+    """A persisted invoice check linked to the matching purchase order."""
+
+    id: str
+    rechnungs_nr: str
+    rechnungs_betrag_eur: float | None
+    abweichung_pct: float | None
+    status: str | None
+    freigabe_grund: str | None
+    created_at: datetime
+
+
 class ThreeWayMatchOut(MatchOut):
     """``GET /procurement/match/three-way`` und ``.../match/ers/preview``.
 
@@ -223,6 +236,7 @@ class ThreeWayMatchOut(MatchOut):
     rechnungen: list[InvoiceOut] = Field(default_factory=list)
     three_way: Optional[ThreeWayValueOut] = None
     ausnahmen: list[MatchHinweisOut] = Field(default_factory=list)
+    rechnungspruefungen: list[InvoiceCheckSummaryOut] = Field(default_factory=list)
     follow_ups: list[FollowUpOut] = Field(default_factory=list)
     ers_preview: Optional[ErsPreviewOut] = None
     ers_credits: list[ErsCreditOut] = Field(default_factory=list)

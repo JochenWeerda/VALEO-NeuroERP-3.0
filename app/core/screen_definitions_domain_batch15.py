@@ -141,6 +141,11 @@ def build_einkauf_wareneingangsabgleich_detail() -> dict[str, Any]:
                     ("ausnahme_code", "Ausnahme"), ("grund", "Begründung"),
                     ("eskalationsstufe", "Eskalationsstufe"),
                 )),
+                ("rechnungspruefungen", "Rechnungsprüfungen", (
+                    ("rechnungs_nr", "Rechnung"), ("rechnungs_betrag_eur", "Rechnungsbetrag"),
+                    ("abweichung_pct", "Abweichung (%)"), ("status", "Status"),
+                    ("freigabe_grund", "Entscheidungsgrund"), ("created_at", "Erfasst am"),
+                )),
                 ("rechnungen", "Eingangsrechnungen", (
                     ("rechnungsnummer", "Rechnung"), ("datum", "Datum"), ("gesamt_netto", "Netto"), ("status", "Status"),
                 )),

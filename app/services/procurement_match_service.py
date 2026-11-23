@@ -422,6 +422,7 @@ class ProcurementMatchService:
                 "drei_wege_abgeglichen": drei_wege_ok,
                 "hat_ausnahme": len(ausnahmen) > 0,
             },
+            "rechnungspruefungen": self.list_invoice_checks(base["bestellung_id"]),
             "follow_ups": self.list_follow_ups(base["bestellnummer"]),
             "ers_preview": calculate_ers_credit(positionen, {
                 **wert_match,
@@ -429,6 +430,18 @@ class ProcurementMatchService:
             }),
             "ers_credits": self.list_ers_credits(base["bestellnummer"]),
         }
+
+    def list_invoice_checks(self, order_id: str) -> list[dict]:
+        rows = self.db.execute(
+            text("""
+                SELECT id, rechnungs_nr, rechnungs_betrag_eur, abweichung_pct, status, freigabe_grund, created_at
+                FROM domain_procurement.proc_rechnungspruefungen
+                WHERE tenant_id = :tenant AND bestellung_id = :order_id
+                ORDER BY created_at DESC, id DESC LIMIT 50
+            """),
+            {"tenant": self.tenant_id, "order_id": order_id},
+        ).mappings().all()
+        return [dict(row) for row in rows]
 
     def list_follow_ups(self, bestellnummer: str, limit: int = 50) -> list[dict]:
         rows = self.db.execute(

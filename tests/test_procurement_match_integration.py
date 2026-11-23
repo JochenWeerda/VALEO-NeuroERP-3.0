@@ -43,6 +43,35 @@ class TestProcurementMatchIntegration:
         assert [r["quelle"] for r in data["rechnungen"]] == ["docflow"]
         assert [z["status"] for z in data["positionen"]] == ["vollstaendig", "teilgeliefert"]
 
+    def test_three_way_exposes_only_checks_for_selected_tenant_order(self, procurement_context):
+        from sqlalchemy import text
+
+        db = procurement_context.db
+        tenant = procurement_context.tenant
+        order = db.execute(text("""
+            SELECT id FROM domain_docflow.document_headers
+            WHERE tenant_id = :tenant AND doc_number = :number AND doc_type = 'purchase_order'
+        """), {"tenant": tenant, "number": PO_OK}).scalar_one()
+        own, foreign, unrelated = (str(uuid4()) for _ in range(3))
+        for check_id, check_tenant, check_order in (
+            (own, tenant, str(order)),
+            (foreign, str(uuid4()), str(order)),
+            (unrelated, tenant, str(uuid4())),
+        ):
+            db.execute(text("""
+                INSERT INTO domain_procurement.proc_rechnungspruefungen
+                    (id, tenant_id, bestellung_id, rechnungs_nr, status)
+                VALUES (:id, :tenant, :order, :number, 'GESPERRT')
+            """), {"id": check_id, "tenant": check_tenant, "order": check_order, "number": check_id})
+
+        response = client.get(
+            "/api/v1/procurement/match/three-way", params={"bestellung": PO_OK}, headers=AUTH_HEADERS,
+        )
+        assert response.status_code == 200, response.text
+        check, = response.json()["rechnungspruefungen"]
+        assert check["id"] == own
+        assert check["status"] == "GESPERRT"
+
     def test_three_way_demo_po_002_ers_preview_960(self):
         r = client.get(
             "/api/v1/procurement/match/three-way",

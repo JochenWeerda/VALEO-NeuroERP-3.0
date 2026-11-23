@@ -89116,6 +89116,79 @@
         "title": "InventurgruppeOut",
         "type": "object"
       },
+      "InvoiceCheckSummaryOut": {
+        "description": "A persisted invoice check linked to the matching purchase order.",
+        "properties": {
+          "abweichung_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Abweichung Pct"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "freigabe_grund": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Freigabe Grund"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "rechnungs_betrag_eur": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rechnungs Betrag Eur"
+          },
+          "rechnungs_nr": {
+            "title": "Rechnungs Nr",
+            "type": "string"
+          },
+          "status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Status"
+          }
+        },
+        "required": [
+          "id",
+          "rechnungs_nr",
+          "rechnungs_betrag_eur",
+          "abweichung_pct",
+          "status",
+          "freigabe_grund",
+          "created_at"
+        ],
+        "title": "InvoiceCheckSummaryOut",
+        "type": "object"
+      },
       "InvoiceOut": {
         "description": "Eingangsrechnung, die der Bestellung zugeordnet ist.",
         "properties": {
@@ -163869,6 +163942,13 @@
               "$ref": "#/components/schemas/InvoiceOut"
             },
             "title": "Rechnungen",
+            "type": "array"
+          },
+          "rechnungspruefungen": {
+            "items": {
+              "$ref": "#/components/schemas/InvoiceCheckSummaryOut"
+            },
+            "title": "Rechnungspruefungen",
             "type": "array"
           },
           "status": {

@@ -21607,3 +21607,5 @@ M2-RECHNUNGSPRUEFUNG-FREIGABE: Dateibesitz erweitert um den REST-Freigabeweg. Ve
 
 Rechnungsfreigabe REST: Legacy-Feld operator optional, Bearbeiter kommt weiterhin aus dem Token. Rollback bei abgelehnter Fachentscheidung gibt Zeilensperre sofort frei. 14 gezielte Tests bestanden und OpenAPI neu erzeugt. Studio-Freigabedialog offen.
 M2-RECHNUNGSPRUEFUNG-FREIGABE: Besitz erweitert um Leseprojektion rechnungspruefungen im Drei-Wege-Abgleich, Schema und Studio-Reiter. Zuordnung ueber kanonische DocFlow-Bestell-ID und Mandant.
+
+Drei-Wege-Abgleich liefert Rechnungspruefungen mit stabiler Pruefungs-ID. Neue Studio-Tabelle, OpenAPI und Katalog synchron. PostgreSQL-HTTP-Vertrag auf bestehendem valeo_probe bestanden: passende Pruefung sichtbar, fremder Mandant und andere Bestellung ausgeschlossen. Rueckrollbare Fixture. Entscheidungsdialog steht aus.
