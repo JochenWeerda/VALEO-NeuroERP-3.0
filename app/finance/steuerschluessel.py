@@ -365,6 +365,10 @@ SKR03_KONTEN = (
     ("3300", "Wareneingang 7 % Vorsteuer", "expense", "cost_of_goods_sold"),
     ("3400", "Wareneingang 19 % Vorsteuer", "expense", "cost_of_goods_sold"),
     ("1600", "Verbindlichkeiten aus Lieferungen und Leistungen", "liability", "current_liabilities"),
+    # Saldenvortrag ins neue Geschaeftsjahr (finance_saldenvortrag_service, 23.11.2026).
+    ("9000", "Saldenvorträge Sachkonten", "equity", "equity"),
+    ("0860", "Gewinnvortrag vor Verwendung", "equity", "equity"),
+    ("0868", "Verlustvortrag vor Verwendung", "equity", "equity"),
 )
 
 

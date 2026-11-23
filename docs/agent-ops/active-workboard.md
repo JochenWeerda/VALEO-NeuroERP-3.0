@@ -21502,3 +21502,8 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M3-SALDENVORTRAG-20261123 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Hauptbuch: Saldenvortrag, Jahresabschluss). Neue Fachaktion POST /api/v1/finance/closing/saldenvortrag (FINANCE_ADMIN): erst wenn alle zwoelf Perioden des Jahres gesperrt sind, eine Eroeffnungsbuchung am 01.01. des Folgejahres - Bestandskonten gegen 9000, Jahresergebnis auf 0860 Gewinnvortrag / 0868 Verlustvortrag (SKR04 2970/2978); gebucht = posted+reversed; ein Jahr nur einmal (409). SKR03-Einrichtung legt 9000/0860/0868 an.
+Offen: GuV-/Bilanz-Abschlussbuchungen (Abschlusskonten) und Ergebnisverwendung als eigene Schnitte; Maskenaktion im Abschluss-Cockpit.
+Dateibesitz: app/services/finance_saldenvortrag_service.py, app/api/v1/endpoints/finance_actions.py (Saldenvortrag), app/finance/steuerschluessel.py (SKR03_KONTEN), tests/test_saldenvortrag.py.
