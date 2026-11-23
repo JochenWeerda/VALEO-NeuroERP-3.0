@@ -58482,102 +58482,6 @@
         "title": "DunningCandidateOut",
         "type": "object"
       },
-      "DunningCreate": {
-        "description": "Schema for creating a dunning notice",
-        "properties": {
-          "custom_fee": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Override calculated fee",
-            "title": "Custom Fee"
-          },
-          "custom_interest": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Override calculated interest",
-            "title": "Custom Interest"
-          },
-          "debtor_id": {
-            "description": "Debtor ID",
-            "title": "Debtor Id",
-            "type": "string"
-          },
-          "due_date": {
-            "format": "date",
-            "title": "Due Date",
-            "type": "string"
-          },
-          "dunning_date": {
-            "format": "date",
-            "title": "Dunning Date",
-            "type": "string"
-          },
-          "dunning_level": {
-            "maximum": 3.0,
-            "minimum": 1.0,
-            "title": "Dunning Level",
-            "type": "integer"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "op_id": {
-            "description": "Open item ID",
-            "title": "Op Id",
-            "type": "string"
-          },
-          "open_amount": {
-            "anyOf": [
-              {
-                "minimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "title": "Open Amount"
-          }
-        },
-        "required": [
-          "op_id",
-          "debtor_id",
-          "dunning_level",
-          "dunning_date",
-          "due_date",
-          "open_amount"
-        ],
-        "title": "DunningCreate",
-        "type": "object"
-      },
       "DunningResponse": {
         "description": "Response schema for dunning notice",
         "properties": {
@@ -299319,59 +299223,11 @@
           "finance",
           "dunning"
         ]
-      },
-      "post": {
-        "description": "Create a manual dunning notice.",
-        "operationId": "create_dunning_api_v1_finance_dunning_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DunningCreate"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "201": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DunningResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Dunning anlegen",
-        "tags": [
-          "finance",
-          "dunning",
-          "finance",
-          "dunning"
-        ]
       }
     },
     "/api/v1/finance/dunning/process": {
       "post": {
-        "description": "Process dunning for overdue open items based on rules.",
+        "description": "Mahnt die mahnfaelligen Posten (Auswahl: ``op_ids`` oder ``debtor_id``) ueber den einen Mahnweg.\n\nBis 23.11.2026 rechnete dieser Weg mit eigener Stufen- und Gebuehrenlogik neben dem Mahnlauf\n(``FinanceDunningService.run_dunning``); jetzt ruft er ihn.",
         "operationId": "process_dunning_api_v1_finance_dunning_process_post",
         "requestBody": {
           "content": {
@@ -299571,57 +299427,6 @@
           }
         ],
         "summary": "Dunning ausführen",
-        "tags": [
-          "finance",
-          "dunning",
-          "finance",
-          "dunning"
-        ]
-      }
-    },
-    "/api/v1/finance/dunning/{dunning_id}/paid": {
-      "put": {
-        "description": "Mark dunning notice as paid.",
-        "operationId": "mark_dunning_paid_api_v1_finance_dunning__dunning_id__paid_put",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "dunning_id",
-            "required": true,
-            "schema": {
-              "title": "Dunning Id",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DunningResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "security": [
-          {
-            "HTTPBearer": []
-          }
-        ],
-        "summary": "Dunning paid markieren",
         "tags": [
           "finance",
           "dunning",

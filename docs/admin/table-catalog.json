@@ -20760,7 +20760,7 @@
             "id"
           ],
           "written_by": [
-            "app/api/v1/endpoints/dunning.py"
+            "app/services/finance_dunning_service.py"
           ]
         },
         "delivery_notes": {
@@ -21087,10 +21087,10 @@
             "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/export_service.py",
             "app/services/finance_dunning_service.py",
+            "app/services/finance_mahnstufe_service.py",
             "app/services/mcp_execution_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/dunning.py",
             "app/services/finance_dunning_service.py"
           ]
         },
@@ -22213,7 +22213,6 @@
             "app/api/v1/endpoints/credit_management.py",
             "app/api/v1/endpoints/crm_360.py",
             "app/api/v1/endpoints/crm_360_reads.py",
-            "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
             "app/api/v1/endpoints/liquidity.py",
             "app/api/v1/endpoints/liquidity_planning.py",
@@ -22230,6 +22229,7 @@
             "app/services/finance_clearing_service.py",
             "app/services/finance_datev_service.py",
             "app/services/finance_dunning_service.py",
+            "app/services/finance_mahnstufe_service.py",
             "app/services/finance_op_service.py",
             "app/services/finance_period_service.py",
             "app/services/mcp_execution_service.py",
@@ -22246,7 +22246,6 @@
           "written_by": [
             "app/api/v1/endpoints/credit_debit_memos.py",
             "app/api/v1/endpoints/dauerauftraege.py",
-            "app/api/v1/endpoints/dunning.py",
             "app/api/v1/endpoints/erechnung_import.py",
             "app/api/v1/endpoints/ers_settlement.py",
             "app/api/v1/endpoints/fibu_zahlungsmeldungen.py",
@@ -24002,9 +24001,6 @@
             "id"
           ],
           "read_by": [
-            "app/services/finance_mahnstufe_service.py"
-          ],
-          "written_by": [
             "app/services/finance_mahnstufe_service.py"
           ]
         },

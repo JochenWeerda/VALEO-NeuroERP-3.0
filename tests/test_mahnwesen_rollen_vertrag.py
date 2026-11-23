@@ -29,10 +29,8 @@ WEGE = [
     ("POST", "/dunning/rules", "write"),
     ("POST", "/dunning/process", "write"),
     ("POST", "/dunning/run", "write"),
-    ("POST", "/dunning", "write"),
     ("GET", "/dunning", "read"),
     ("PUT", "/dunning/mahnung/send", "write"),
-    ("PUT", "/dunning/mahnung/paid", "write"),
 ]
 ROLLEN = [None, "user", "LAGER_ADMIN", "PERSONAL_ADMIN", "SALES_BEARBEITEN",
           "FINANCE_LESEN", "FINANCE_BEARBEITEN", "FINANCE_ADMIN", "admin", "manager"]

@@ -1636,6 +1636,7 @@
     "app/finance/router.py",
     "app/services/closing_checklist_validation.py",
     "app/services/finance_datev_service.py",
+    "app/services/finance_mahnstufe_service.py",
     "app/services/finance_op_service.py",
     "app/services/finance_period_service.py",
     "app/services/mcp_execution_service.py",
@@ -1645,7 +1646,6 @@
    "schreiber": [
     "app/api/v1/endpoints/credit_debit_memos.py",
     "app/api/v1/endpoints/dauerauftraege.py",
-    "app/api/v1/endpoints/dunning.py",
     "app/api/v1/endpoints/erechnung_import.py",
     "app/api/v1/endpoints/ers_settlement.py",
     "app/api/v1/endpoints/fibu_zahlungsmeldungen.py",
