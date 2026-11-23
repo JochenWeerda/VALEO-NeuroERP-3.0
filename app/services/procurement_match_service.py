@@ -458,6 +458,11 @@ class ProcurementMatchService:
         if not reason:
             raise ValueError("Grund ist Pflicht.")
 
+        order = self._resolve_po(bestellnummer)
+        if order is None:
+            raise ValueError("Bestellung nicht auflösbar.")
+        bestellnummer = order["bestellnummer"]
+
         eskalationsstufe = 1
         if action == "eskalation":
             row = self.db.execute(
