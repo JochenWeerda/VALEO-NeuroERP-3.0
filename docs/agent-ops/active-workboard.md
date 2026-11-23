@@ -973,3 +973,6 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 ## M5-PRODUKTION-GEHEIMNISSE-PFLICHT-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
+
+## M2-HARVEST-INSPECT - reserviert, Codex Lead
+Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
