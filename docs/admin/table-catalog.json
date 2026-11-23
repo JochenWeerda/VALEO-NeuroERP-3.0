@@ -20259,6 +20259,7 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py"
           ],
           "written_by": [
@@ -21730,6 +21731,7 @@
             "app/services/finance_datev_service.py",
             "app/services/finance_freigabe.py",
             "app/services/finance_read_model_service.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py",
             "app/services/kontrollkorb.py",
             "app/services/open_item_read_source.py",
@@ -21854,7 +21856,8 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
-            "app/services/finance_freigabe.py"
+            "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py"
           ]
         },
         "lohn_import_runs": {

@@ -1546,6 +1546,7 @@
     "app/security/audit_service.py",
     "app/services/finance_closing_service.py",
     "app/services/finance_freigabe.py",
+    "app/services/finance_saldenvortrag_service.py",
     "app/services/finance_transaction_service.py",
     "app/services/sales_posting_service.py",
     "app/services/sepa_xml_generator.py",
