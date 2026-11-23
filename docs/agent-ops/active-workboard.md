@@ -21482,6 +21482,12 @@ Umgestellt: Abgrenzung, Buchungsvorlagen, Massenimport, Konnektorlaeufe, POS-Tag
 Offen: POS-Umsatzsteuer (Handshake an Codex docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md), Lagergeld-Abrechnung als Ausgangsrechnung, Bestandsbewertung, Migration public.offene_posten entfernen (nach #157), Saldenvortrag/Jahresabschluss.
 Dateibesitz: accruals_provisions.py, finance_closing_service.py, storage_fees.py, open_items.py, open_item_read_source.py, booking_templates.py, bulk_journal_import.py, inventory_operations.py, inventory_counts.py, connectors/workflow.py, compat.py (POS-Tagesabschluss), finance_transaction_service.py, models/journal.py, Tests, QA docs/quality-assurance/m3-journal-schreiber-20261119.md.
 
+## M3-STORNO-GEBUCHT-20261123 — zur Abnahme, Claude Code (M3)
+Owner: Claude Code. Meilenstein: M3 (Integritaet Journal/Abschluss). PR #164.
+Befund: FinanceTransactionService.reverse setzt das Original auf reversed und bucht die Gegenbuchung posted. Abschluss, UStVA, Bilanz/GuV/BWA, Kontenblatt, Kontenabfrage, Nebenbuch-Abstimmung (subsidiary_ledger), Bankabgleich und DATEV-Export zaehlten nur posted -> jeder Storno als negative Buchung (Entwicklungsdatenbank: drei Faelle).
+Ergebnis: status IN ('posted', 'reversed') an allen Stellen; Ratsche und Datenbankprobe tests/test_journal_storno_gebucht.py.
+Folgend (eigene PRs): #165 Schein-Fibu (public.offene_posten/buchungen/konten/anlagen) entfernt + Nebenbuch-Abstimmung echt; #167 Finanz-Altwege ohne Migration; #166 POS-Umsatzsteuer je Satz (auf #161).
+Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py, subsidiary_ledger_reconciliation.py, finance/ustva.py, finance_closing_service.py, finance_datev_service.py, tests/test_journal_storno_gebucht.py.
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
 #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
