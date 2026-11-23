@@ -1,5 +1,5 @@
 """Wave 95 — Unit-Tests fuer procurement_match_service, pos_accounting_service,
-pos_tagesabschluss_service, scheduler_heartbeat (pure domain functions)."""
+scheduler_heartbeat (pure domain functions)."""
 
 from __future__ import annotations
 
@@ -113,33 +113,6 @@ def test_build_pos_closing_lines_line_has_account_number() -> None:
     for line in lines:
         assert hasattr(line, "account_number")
         assert len(line.account_number) > 0
-
-
-# ---------------------------------------------------------------------------
-# pos_tagesabschluss_service — simulate_tse_signatur  (pure simulation)
-# ---------------------------------------------------------------------------
-
-@pytest.mark.unit
-def test_simulate_tse_signatur_returns_dict() -> None:
-    from app.services.pos_tagesabschluss_service import simulate_tse_signatur
-    result = simulate_tse_signatur("KASSE-001", 42, 15000.0)
-    assert isinstance(result, dict)
-
-
-@pytest.mark.unit
-def test_simulate_tse_signatur_has_required_keys() -> None:
-    from app.services.pos_tagesabschluss_service import simulate_tse_signatur
-    result = simulate_tse_signatur("KASSE-001", 1, 0.0)
-    for key in ("tse_serial", "tse_signatur", "tse_zeitpunkt"):
-        assert key in result
-
-
-@pytest.mark.unit
-def test_simulate_tse_signatur_serial_starts_with_prefix() -> None:
-    from app.services.pos_tagesabschluss_service import simulate_tse_signatur
-    result = simulate_tse_signatur("KASSE-007", 1, 0.0)
-    # Serial contains simulation prefix
-    assert result["tse_serial"].startswith("SIM-")
 
 
 # ---------------------------------------------------------------------------
