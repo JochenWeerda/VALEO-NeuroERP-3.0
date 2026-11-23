@@ -973,6 +973,11 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 ## M5-PRODUKTION-GEHEIMNISSE-PFLICHT-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
+
+## M3-LAGERGELD-RECHNUNG-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "posted" ohne Rechnung, Erloes oder offenen Posten. Neu: POST /api/v1/inventory/storage-fees/runs/{run_id}/rechnungen legt je Einlagerer einen DocFlow-Rechnungsentwurf (sales_invoice, Quelle lagergeld) mit einer Position je Lagergeld-Zeile an; Verkaufs-Steuerschluessel ausdruecklich (keine Vorgabe), wiederholbar ohne Doppel. Freigabe und Buchung ueber die Belegmaske.
+Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
+
 ## M4-DOMAENEN-ABNAHME-20261123 — in arbeit, Cursor (M4)
 Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
 Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
