@@ -102,6 +102,41 @@ class TestProcurementMatchIntegration:
         assert items[1]["id"] == r1.json()["id"]
         assert items[0]["eskalationsstufe"] >= items[1]["eskalationsstufe"]
 
+    def test_studio_follow_up_preview_and_replay(self, procurement_context, monkeypatch):
+        from sqlalchemy.orm import Session
+
+        db = procurement_context.db
+        # Preserve seeded rows across the action runtime's rollback of its read transaction.
+        # Session commits only release the savepoint; the fixture rolls back the outer transaction.
+        monkeypatch.setattr(db, "commit", Session.commit.__get__(db, Session))
+        db.commit()
+
+        endpoint = "/api/v1/procurement/match/orders/actions/folgeaktion"
+        params = {"bestellung": PO_OVER}
+        values = {"action_type": "reklamation", "grund": "Abweichende Menge"}
+        preview = client.post(endpoint, params=params, json={**values, "_mode": "dryRun"}, headers=AUTH_HEADERS)
+        assert preview.status_code == 200, preview.text
+        assert preview.json()["success"] is True
+
+        list_endpoint = "/api/v1/procurement/match/follow-up"
+        before = client.get(list_endpoint, params=params, headers=AUTH_HEADERS)
+        assert before.status_code == 200, before.text
+        assert before.json()["items"] == []
+
+        command = {**values, "_idempotencyKey": uuid4().hex, "_auditReason": "Abgleich geprüft"}
+        first = client.post(endpoint, params=params, json=command, headers=AUTH_HEADERS)
+        assert first.status_code == 200, first.text
+        assert first.json()["success"] is True, first.text
+        again = client.post(endpoint, params=params, json=command, headers=AUTH_HEADERS)
+        assert again.status_code == 200, again.text
+        assert again.json()["success"] is True, again.text
+
+        after = client.get(list_endpoint, params=params, headers=AUTH_HEADERS)
+        assert after.status_code == 200, after.text
+        entry, = after.json()["items"]
+        assert entry["action_type"] == "reklamation"
+        assert entry["grund"] == "Abweichende Menge"
+
     def test_ers_credit_create_and_list(self):
         preview = client.get(
             "/api/v1/procurement/match/ers/preview",
