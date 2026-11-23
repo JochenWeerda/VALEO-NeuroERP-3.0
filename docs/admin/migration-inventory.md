@@ -412,6 +412,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `portal_order_idempotency_20261014` | Portal-Bestellungen: Spalte idempotency_key, eindeutig je Mandant und Kunde. |
 | `pos_fiscal_providers_20260609` | POS fiscal provider abstraction and evidence tables. |
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
+| `pos_ust_je_satz_20261119` | Kassiervorgaenge fuehren ihren Bruttobetrag je Umsatzsteuersatz (M3, POS-Umsatzsteuer). |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
 | `postfach_microsoft_20261008` | Postfaecher: Anbieter Microsoft 365. |
 | `preisfindung_rabattregeln_20261005` | Rollenrabatte als Tabelle — und ein Rabatt bleibt unter hundert Prozent. |

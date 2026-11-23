@@ -331,6 +331,40 @@ async def run_closing(
         raise HTTPException(status_code=500, detail=f"Abschluss fehlgeschlagen: {exc}") from exc
 
 
+class SaldenvortragIn(BaseModel):
+    jahr: int = Field(..., ge=2000, le=2100, description="Abgeschlossenes Geschaeftsjahr, das vorgetragen wird")
+
+
+class SaldenvortragOut(BaseModel):
+    jahr: int
+    journal_entry_id: str
+    konten: int
+    jahresergebnis: float
+    zeilen: list[dict]
+
+
+@router.post("/closing/saldenvortrag", response_model=SaldenvortragOut, status_code=201,
+             summary="Saldenvortrag ins neue Geschaeftsjahr buchen", dependencies=[Depends(finance_admin)])
+def saldenvortrag(
+    body: SaldenvortragIn,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> SaldenvortragOut:
+    """Eroeffnungsbuchung am 01.01. des Folgejahres: Bestandskonten gegen 9000, Jahresergebnis auf Gewinn-/Verlustvortrag.
+
+    Erst wenn alle Perioden des Jahres gesperrt sind; ein zweiter Vortrag fuer dasselbe Jahr wird abgewiesen (409).
+    """
+    from app.services.finance_saldenvortrag_service import trage_salden_vor
+    try:
+        ergebnis = trage_salden_vor(db, tenant_id, body.jahr, actor=gepruefter_akteur_aus_request(request))
+    except Exception:
+        db.rollback()
+        raise
+    return SaldenvortragOut(jahr=ergebnis.jahr, journal_entry_id=ergebnis.journal_entry_id, konten=ergebnis.konten,
+                            jahresergebnis=float(ergebnis.jahresergebnis), zeilen=ergebnis.zeilen)
+
+
 @router.post("/closing/approve", response_model=ClosingApproveOut, summary="Closing genehmigen", dependencies=[Depends(finance_admin)])
 async def approve_closing(
     body: ClosingActionRequest,
