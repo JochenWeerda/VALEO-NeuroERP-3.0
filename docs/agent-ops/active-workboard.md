@@ -976,3 +976,5 @@ Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. RE
 
 ## M2-HARVEST-INSPECT - reserviert, Codex Lead
 Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
+
+M2-HARVEST-INSPECT: vorhandene Regelwahl als lokale Aktion load_row deklariert. Sie verwendet bereits geladene Regelzeilen und denselben Handler wie die Zeilenauswahl. Zwei Fachvertraege gruen, Inventar 18 -> 17 nicht verfuegbare Aktionen, uebrige Ratschen unveraendert. Browserabnahme offen.

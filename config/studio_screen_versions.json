@@ -795,7 +795,7 @@
       "version": "1.0.0"
     },
     "agrar/harvest-controls": {
-      "definition_hash": "b9760cb7b44acb4697550d22b4536c7aaa8557958d2dcfaa9318c21912dac2dd",
+      "definition_hash": "5e2bf8baeb11f03f7833af036828bc992cd83a7d6173c02c42a37b2defd5eec5",
       "gates_passed": [
         "A",
         "B",

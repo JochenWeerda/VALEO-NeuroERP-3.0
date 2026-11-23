@@ -317,7 +317,6 @@
  ],
  "aktionen_nicht_verfuegbar": [
   "mask:admin/postfaecher:anmelden",
-  "mask:agrar/harvest-controls:inspect_rule",
   "mask:fuhrpark/fahrzeug-stamm:drucken",
   "mask:fuhrpark/fahrzeug-stamm:drucker",
   "mask:fuhrpark/fahrzeug-stamm:unfall",

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 796,
+    "actions": 795,
     "screens_with_actions": 403,
     "domains": 50
   },
@@ -1684,29 +1684,6 @@
         "requiresConfirmation": false,
         "auditReasonRequired": false,
         "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:agrar/harvest-controls:inspect_rule",
-      "label": "Regelversion prüfen",
-      "description": "Regelversion prüfen (agrar/harvest-controls)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "agrar/harvest-controls",
-      "intent_phrases": [
-        "Regelversion prüfen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "agrar/harvest-controls",
-        "actionKey": "inspect_rule",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "harvest.control.inspect_rule",
-        "method": null,
-        "permission": "agrar.harvest.control.inspect"
       }
     },
     {
