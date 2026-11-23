@@ -950,3 +950,6 @@ Owner: Claude Code. Meilenstein: M3 ("Ein Mahnweg statt drei").
 Befund: /dunning/process|run (eigene Stufen-/Gebuehrenlogik), /finance/mahnlauf/run (FinanceDunningService) und "Mahnstufe eskalieren" samt Maskenaktion open-items/{id}/actions/mahnen (eigener Verlauf domain_finance.finance_mahnstufen_audit, keine Mahnung, keine Stufe am Posten) liefen nebeneinander. Der Mahnlauf eskalierte bei jedem Lauf (zweimal am Tag = Stufe 2) und setzte ohne Mahnregeln erfundene Gebuehren 5/10/20 EUR an. POST /dunning legte Mahnungen an Regeln und Fristen vorbei an; PUT /dunning/{id}/paid zifferte den Posten ohne Zahlungsbuchung aus.
 Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/Posten/Debitor, Stichtag, commit-Schalter); erneute Mahnung erst nach Ablauf der Frist der letzten Mahnung; hoechste Stufe mahnt nicht endlos; ohne Regeln 409; prozentuale Gebuehr und … (gekuerzt; Volltext unter M3-EIN-MAHNWEG-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
+
+## M0-VOR-PUSH-FIXTURVERTRAG-20261123 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. scripts/vor_push.py nimmt tests/test_multi_domain_uix_fixture_contract.py immer mit (woertliche Kopien der ScreenDefinitions im Frontend; #172 war erst in CI rot). Hook-Kopie ~/.claude/hooks/vor_push.py nachgezogen.
