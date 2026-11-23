@@ -445,3 +445,37 @@ def richte_skr03_ein(db: Session, tenant_id: str, gueltig_von: date = date(2021,
         )
         angelegt["steuerschluessel"].append(code)
     return angelegt
+
+
+def kassen_verkaufsschluessel(db: Session, tenant_id: str, saetze: list[Decimal]) -> dict[Decimal, tuple]:
+    """Je Umsatzsteuersatz der Kasse genau ein Verkaufsschluessel: ``satz -> (code, erloeskonto, steuerkonto)``.
+
+    Die Kasse kennt nur den Satz (TSE). Zulaessig ist ein aktiver, heute gueltiger Schluessel mit Erloeskonto, ohne
+    Reverse Charge, innergemeinschaftliche Lieferung, Ausfuhr oder Paragraf 24. Fehlt er oder gibt es mehrere, wird
+    nicht gebucht (``Steuerklaerung``) - kein angenommener Schluessel, keine 19-%-Vorgabe.
+    """
+    ergebnis: dict[Decimal, tuple] = {}
+    for satz in sorted(set(saetze)):
+        treffer = db.execute(
+            text(
+                "SELECT code, revenue_account, credit_account FROM domain_erp.tax_keys "
+                "WHERE tenant_id = :tid AND active AND steuersatz = :satz "
+                "AND COALESCE(reverse_charge, FALSE) = FALSE AND COALESCE(intracom, FALSE) = FALSE "
+                "AND COALESCE(export, FALSE) = FALSE AND COALESCE(par_24_ustg, FALSE) = FALSE "
+                "AND COALESCE(TRIM(revenue_account), '') <> '' "
+                "AND gueltig_von <= CURRENT_DATE AND (gueltig_bis IS NULL OR gueltig_bis >= CURRENT_DATE) "
+                "ORDER BY code"
+            ),
+            {"tid": tenant_id, "satz": satz},
+        ).fetchall()
+        anzeige = format(satz.normalize(), "f")
+        if len(treffer) != 1:
+            grund = "kein" if not treffer else f"{len(treffer)} ({', '.join(str(t[0]) for t in treffer)})"
+            raise Steuerklaerung(
+                f"Für den Kassensteuersatz {anzeige} % gibt es {grund} passenden Verkaufs-Steuerschlüssel."
+            )
+        code, erloeskonto, steuerkonto = treffer[0]
+        if satz > 0 and not (steuerkonto or "").strip():
+            raise Steuerklaerung(f"Steuerschlüssel {code} ({anzeige} %) hat kein Umsatzsteuerkonto.")
+        ergebnis[satz] = (str(code), str(erloeskonto).strip(), (str(steuerkonto).strip() or None) if steuerkonto else None)
+    return ergebnis

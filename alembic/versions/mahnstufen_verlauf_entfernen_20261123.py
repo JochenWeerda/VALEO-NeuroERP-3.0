@@ -1,7 +1,7 @@
 """Der eigene Mahnstufen-Verlauf entfaellt - der Verlauf sind die Mahnungen (M3, ein Mahnweg).
 
 Revision ID: mahnstufen_verlauf_entfernen_20261123
-Revises: finance_router_altspeicher_entfernen_20261123
+Revises: pos_ust_je_satz_20261119
 
 ``domain_finance.finance_mahnstufen_audit`` schrieb "Mahnstufe eskalieren" bis 23.11.2026 neben dem Mahnlauf (eigene
 Stufen bis INKASSO, ohne Mahnung, ohne Stufe am Posten). Seit #168 erzeugt die Eskalation eine Mahnung ueber
@@ -17,7 +17,7 @@ from pathlib import Path
 from alembic import op
 
 revision = "mahnstufen_verlauf_entfernen_20261123"
-down_revision = "finance_router_altspeicher_entfernen_20261123"
+down_revision = "pos_ust_je_satz_20261119"
 branch_labels = None
 depends_on = None
 

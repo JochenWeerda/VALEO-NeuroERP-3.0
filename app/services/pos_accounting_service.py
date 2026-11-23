@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 
 
 ZERO = Decimal("0.00")
@@ -119,3 +119,74 @@ def build_pos_closing_lines(amounts: PosClosingAmounts) -> list[PosAccountingLin
     if debit != credit:
         raise ValueError(f"POS-Buchung ist nicht ausgeglichen: Soll={debit}, Haben={credit}")
     return lines
+
+
+@dataclass(frozen=True)
+class PosVerkaufsschluessel:
+    """Steuerschluessel, auf den die Kasse einen Umsatzsteuersatz bucht (aus ``domain_erp.tax_keys``)."""
+
+    code: str
+    satz: Decimal
+    erloeskonto: str
+    steuerkonto: str | None
+
+
+def mit_umsatzsteuer(
+    lines: list[PosAccountingLine],
+    brutto_je_satz: dict[Decimal, Decimal],
+    schluessel: dict[Decimal, PosVerkaufsschluessel],
+) -> list[PosAccountingLine]:
+    """Ersetzt den Brutto-Erloes (8400) durch Netto-Erloes und Umsatzsteuer je Satz.
+
+    Bis 19.11.2026 ging der ganze Kassenumsatz brutto auf 8400 - ohne Umsatzsteuer. Je Satz wird aus dem Brutto
+    zurueckgerechnet: Netto = Brutto * 100 / (100 + Satz), auf Cent gerundet; die Steuer ist der Rest, damit die
+    Summe je Satz bitgleich das Brutto bleibt. Konten kommen aus dem Steuerschluessel, nie aus einer Vorgabe.
+    """
+    erloes = [line for line in lines if line.account_number == "8400" and line.credit > ZERO]
+    if len(erloes) != 1:
+        return lines
+    if sum(brutto_je_satz.values(), ZERO) != erloes[0].credit:
+        raise ValueError(
+            f"Brutto je Steuersatz ({sum(brutto_je_satz.values(), ZERO)}) deckt den Kassenumsatz "
+            f"({erloes[0].credit}) nicht"
+        )
+    neu: list[PosAccountingLine] = [line for line in lines if line is not erloes[0]]
+    for satz in sorted(brutto_je_satz):
+        brutto = brutto_je_satz[satz]
+        if brutto == ZERO:
+            continue
+        k = schluessel[satz]
+        netto = (brutto * Decimal("100") / (Decimal("100") + satz)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        steuer = brutto - netto
+        neu.append(PosAccountingLine(k.erloeskonto, ZERO, netto, f"Umsatzerloese POS {format(satz, 'f')} %"))
+        if steuer != ZERO:
+            if not k.steuerkonto:
+                raise ValueError(f"Steuerschluessel {k.code} ({format(satz, 'f')} %) hat kein Umsatzsteuerkonto")
+            neu.append(PosAccountingLine(k.steuerkonto, ZERO, steuer, f"Umsatzsteuer POS {format(satz, 'f')} %"))
+    return neu
+
+
+def pos_buchungszeilen_mit_ust(db, tenant_id: str, buchung, lines: list[PosAccountingLine], summary: dict,
+                               stichtag) -> tuple[list[PosAccountingLine], dict[str, str]]:
+    """Buchungszeilen des Tagesabschlusses mit Umsatzsteuer je Satz und aufgeloesten Konten - vor der TSE-Signatur.
+
+    Prueft die Periode, waehlt je Kassensteuersatz den Verkaufs-Steuerschluessel und loest alle Konten des Mandanten
+    auf. Jedes Hindernis wird ``ValueError``: Ist der TSE-Abschluss erst signiert, darf die Buchung nicht mehr
+    scheitern. Vorgaenge ohne Steuersaetze (vor dem 19.11.2026) sperren den Abschluss, statt eine Steuer anzunehmen.
+    """
+    from app.core.exceptions import DomainError
+    from app.finance.steuerschluessel import Steuerklaerung, kassen_verkaufsschluessel
+
+    brutto_je_satz = dict(summary.get("gross_by_rate") or {})
+    try:
+        buchung.check_period_open(stichtag.strftime("%Y-%m"))
+        if any(line.account_number == "8400" and line.credit > ZERO for line in lines):
+            if summary.get("gross_by_rate_total", ZERO) != Decimal(str(summary.get("gross_total") or 0)):
+                raise ValueError("Kassiervorgaenge ohne Steuersaetze (vor dem 19.11.2026) - Umsatzsteuer nicht bestimmbar")
+            schluessel = {satz: PosVerkaufsschluessel(code, satz, erloes, steuer) for satz, (code, erloes, steuer)
+                          in kassen_verkaufsschluessel(db, tenant_id, list(brutto_je_satz)).items()}
+            lines = mit_umsatzsteuer(lines, brutto_je_satz, schluessel)
+        konten = {line.account_number: buchung.account_id_for_number(line.account_number) for line in lines}
+    except (DomainError, Steuerklaerung) as fehler:
+        raise ValueError(str(fehler)) from fehler
+    return lines, konten

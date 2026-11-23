@@ -953,3 +953,8 @@ Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/P
 
 ## M3-MAHNSTUFEN-VERLAUF-ENTFERNEN-20261123 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3 (ein Mahnweg, Nachzug zu #168). domain_finance.finance_mahnstufen_audit hat seit dem einen Mahnweg keinen Leser und keinen Schreiber mehr; Migration mahnstufen_verlauf_entfernen_20261123 entfernt sie (haelt bei Zeilen bestehender Mandanten an; Rueckweg aus pg_dump mit RLS).
+## M3-POS-UMSATZSTEUER-20261119 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. PR #166. Handshake docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md (Codex-Pause, von Claude umgesetzt).
+Befund: POST /pos/tagesabschluss buchte den ganzen Kassenumsatz brutto auf 8400, ohne Umsatzsteuer.
+Ergebnis: Kassiervorgang speichert Brutto je Satz (pos_fiscal_transactions.vat_breakdown, Migration pos_ust_je_satz_20261119); Abschluss bucht je Satz Erloes netto und Umsatzsteuer ueber genau einen Verkaufs-Steuerschluessel aus domain_erp.tax_keys; Altvorgaenge ohne Saetze sperren; alle Pruefungen vor der TSE-Signatur.
+Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuerschluessel.py (kassen_verkaufsschluessel), app/services/fiscalization/service.py, app/services/pos_accounting_service.py, Tests test_pos_umsatzsteuer_je_satz, test_process_kernel_wave1_contracts.
