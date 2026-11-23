@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-19
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -163,7 +163,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `finance_dunning_service` | Mahnlauf & Mahnstufen-Eskalation (DOM-FIN-004.2). |
 | `finance_eingangsrechnung_buchung` | Eingangsrechnung buchen: Aufwand und Vorsteuer je Steuerschluessel im Soll, Kreditor brutto im Haben. |
 | `finance_freigabe` | Die Buchungswege neben DocFlow an der zentralen Approval Engine (APPROVAL-001). |
-| `finance_mahnstufe_service` | DOM-FINANCE-004.4 — Mahnstufen-Eskalation-Trail Service (append-only). |
+| `finance_mahnstufe_service` | Mahnstufe eines offenen Postens: eskalieren und Verlauf - ueber den einen Mahnweg (M3, 23.11.2026). |
 | `finance_op_service` | Offene-Posten-Cockpit / OP-Aging (DOM-FIN-004). |
 | `finance_period_service` | Periodenabschluss & Storno-Konsistenz (DOM-FIN-004.4). |
 | `finance_ratenzahlung_service` | DOM-FINANCE-004.3 — Ratenzahlungsplan-Lifecycle Service. |
