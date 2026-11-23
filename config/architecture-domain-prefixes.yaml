@@ -276,6 +276,7 @@ domains:
     service_prefixes:
       - inventory_
       - warehouse_
+      - lagergeld_
       - articles_
       - article_
       - number_range_
