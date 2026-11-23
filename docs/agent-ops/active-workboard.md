@@ -21524,3 +21524,6 @@ bleibt bei Claude; eigener Zweig ergaenzt Mitgliedschafts- und Ressourcenschutz.
 Befund GitHubDependabot710/GHSA-7589-6fvf-x4pw: effect3.21.3 im pnpm-Lock ueber @prisma/config6.19.0, behoben ab3.22.1. Besitzer Lead: package.json nur effect-Override, pnpm-lock.yaml nur gezielte Aufloesung, eigener enger Sicherheitsnachweis/QA/Handshake. Erst Pfad/Version/Integritaet pruefen; keine fremden node_modules, DB/Container oder generellen Paketupdates; keine Ausnahme/Schwellenlockerung.
 
 23.11 Effect: exakt3.22.1, eingefrorener Lock-Check36 Workspaces und isolierter Integritaets-/ReDoS-Verhaltenstest bestanden. Keine DB-/Docker-/fremde Installationsaenderung. QA und Handshake effect-redos-20261123; main-Integration/Sicherheitsnachlauf offen.
+
+## M0-CONSOLIDATED-CI-20261123 — reserviert, Codex Lead
+Ziel: aktualisierten Kundenstamm-PR160 mit eigenem Mandanten-/Vor-Push-/Effect-Schutz konsolidieren, engen Integrationsdiff pruefen, einen PR-CI-Nachlauf starten. Dateibesitz: eigene Integrationscommits, QA/Handshake/Workboard; Claudes PR161 unveraendert. Keine DB-Wartung, keine doppelten Volltests. Abnahme: finaler Head im PR nachvollziehbar, CI-Ergebnis ehrlich je Gate, keine roten Checks umgehen.
