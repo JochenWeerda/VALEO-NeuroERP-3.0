@@ -1032,3 +1032,5 @@ CLI-Vertrag belegt: Die Kommandozeile verwendet die echte Studio-Definition und 
 HTTP-Abnahme im ASGI-Test: Admin-Rolle, Pflichtversion, Idempotenz und Auditgrund geprueft. Fehlender Auditgrund wird vor der Ausfuehrung mit 422 abgewiesen; der Trockenlauf funktioniert ohne Schreibmetadaten. Sieben Tests gruen. Laufender Docker-Dienst: /api/v1/openapi.json antwortete nicht innerhalb von 30 Sekunden, Auslieferungsstand und Browserabnahme sind damit offen.
 
 Browserabnahme konkret eingegrenzt: Lokales Backend-Image accepted-a5f60738a und Frontend-Image portal-3b750ff68 melden healthy. Die serverseitige Umbenennung fehlt im laufenden Backend nachweislich. Fuer die Sichtpruefung ist ein gemeinsam aus demselben freigegebenen Stand gebautes Frontend und Backend erforderlich. PR #179 (21cf2416f) wartet auf CI und Pflichtreview.
+
+Frontend-Abnahme auf Komponentenebene: Umbenennen ueber echten Eingabedialog, Vorbelegung, Trockenlauf, Vorschau und Begründigung. Der Ausfuehrungsaufruf sendet nur Name, gelesene Version und Auditgrund. Ein neuer und 17 angrenzende Vitest-Faelle gruen. Reale Browserabnahme bleibt offen.
