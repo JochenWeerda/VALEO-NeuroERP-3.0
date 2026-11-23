@@ -21603,3 +21603,4 @@ Wareneingangsabgleich zeigt Ausnahmen und vorhandene ERS-Gutschriften in zwei we
 Besitz: freigabe_rechnungspruefung im Fachservice und zugehoerige Tests. Mandantenfilter bereits bei Abfrage und Update; Zeilensperre vor der manuell entschiedenen Statusaenderung.
 
 Rechnungsfreigabe: Fachservice liest und aendert ausschliesslich im aktiven Mandanten. Zeile wird bis zur Statusentscheidung gesperrt, damit konkurrierende Entscheidungen einander nicht ueberschreiben. 13 Fachtests bestanden. Reale Parallelitaets- und Studio-Abnahme offen.
+M2-RECHNUNGSPRUEFUNG-FREIGABE: Dateibesitz erweitert um den REST-Freigabeweg. Verifizierter Akteur statt Pflichtfeld operator, Rollback bei abgelehnter Entscheidung.
