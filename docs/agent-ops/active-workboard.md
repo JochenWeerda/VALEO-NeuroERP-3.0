@@ -21609,3 +21609,5 @@ Rechnungsfreigabe REST: Legacy-Feld operator optional, Bearbeiter kommt weiterhi
 M2-RECHNUNGSPRUEFUNG-FREIGABE: Besitz erweitert um Leseprojektion rechnungspruefungen im Drei-Wege-Abgleich, Schema und Studio-Reiter. Zuordnung ueber kanonische DocFlow-Bestell-ID und Mandant.
 
 Drei-Wege-Abgleich liefert Rechnungspruefungen mit stabiler Pruefungs-ID. Neue Studio-Tabelle, OpenAPI und Katalog synchron. PostgreSQL-HTTP-Vertrag auf bestehendem valeo_probe bestanden: passende Pruefung sichtbar, fremder Mandant und andere Bestellung ausgeschlossen. Rueckrollbare Fixture. Entscheidungsdialog steht aus.
+
+Rechnungsfreigabe liefert den gespeicherten Entscheidungsgrund bereits in der REST-Antwort. Vorher konnte die Antwort den alten Grund zeigen. Fachtest prueft Grund und Operator, 14 Tests gruen.

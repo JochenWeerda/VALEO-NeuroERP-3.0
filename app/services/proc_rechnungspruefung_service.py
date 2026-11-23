@@ -106,4 +106,9 @@ def freigabe_rechnungspruefung(
     )
     db.commit()
     logger.info("rechnungspruefung %s: GESPERRT → %s von %s", pruefung_id, entscheidung, operator)
-    return {**dict(row), "status": entscheidung.upper(), "freigabe_operator": operator}
+    return {
+        **dict(row),
+        "status": entscheidung.upper(),
+        "freigabe_operator": operator,
+        "freigabe_grund": grund,
+    }

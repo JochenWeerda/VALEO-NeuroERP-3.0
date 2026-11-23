@@ -167,6 +167,8 @@ class TestRechnungspruefung:
         db = _mock_db({"proc_rechnungspruefungen": row})
         result = freigabe_rechnungspruefung(db, "rp-1", "t1", "FREIGEGEBEN", "mgr-1", "Sonderfall")
         assert result["status"] == "FREIGEGEBEN"
+        assert result["freigabe_grund"] == "Sonderfall"
+        assert result["freigabe_operator"] == "mgr-1"
         db.commit.assert_called_once()
         lookup, update = db.execute.call_args_list
         assert "tenant_id = :tenant FOR UPDATE" in str(lookup.args[0])
