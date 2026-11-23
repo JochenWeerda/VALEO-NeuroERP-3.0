@@ -16866,6 +16866,11 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "vat_breakdown",
+              "nullable": false,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],
@@ -23027,7 +23032,8 @@
             "app/services/beleg_erechnung.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
-            "app/services/fiscalization/service.py"
+            "app/services/fiscalization/service.py",
+            "app/services/pos_accounting_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",

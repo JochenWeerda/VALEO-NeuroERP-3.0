@@ -955,3 +955,8 @@ Ergebnis: FinanceDunningService.run_dunning ist der eine Weg (Auswahl Rechnung/P
 Meilenstein: M3 (Hauptbuch: Saldenvortrag, Jahresabschluss). Neue Fachaktion POST /api/v1/finance/closing/saldenvortrag (FINANCE_ADMIN): erst wenn alle zwoelf Perioden des Jahres gesperrt sind, eine Eroeffnungsbuchung am 01.01. des Folgejahres - Bestandskonten gegen 9000, Jahresergebnis auf 0860 Gewinnvortrag / 0868 Verlustvortrag (SKR04 2970/2978); gebucht = posted+reversed; ein Jahr nur einmal (409). SKR03-Einrichtung legt 9000/0860/0868 an.
 Offen: GuV-/Bilanz-Abschlussbuchungen (Abschlusskonten) und Ergebnisverwendung als eigene Schnitte; Maskenaktion im Abschluss-Cockpit.
 Dateibesitz: app/services/finance_saldenvortrag_service.py, app/api/v1/endpoints/finance_actions.py (Saldenvortrag), app/finance/steuerschluessel.py (SKR03_KONTEN), tests/test_saldenvortrag.py.
+## M3-POS-UMSATZSTEUER-20261119 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. PR #166. Handshake docs/agent-ops/handshakes/claude-an-codex-pos-umsatzsteuer-20261119.md (Codex-Pause, von Claude umgesetzt).
+Befund: POST /pos/tagesabschluss buchte den ganzen Kassenumsatz brutto auf 8400, ohne Umsatzsteuer.
+Ergebnis: Kassiervorgang speichert Brutto je Satz (pos_fiscal_transactions.vat_breakdown, Migration pos_ust_je_satz_20261119); Abschluss bucht je Satz Erloes netto und Umsatzsteuer ueber genau einen Verkaufs-Steuerschluessel aus domain_erp.tax_keys; Altvorgaenge ohne Saetze sperren; alle Pruefungen vor der TSE-Signatur.
+Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuerschluessel.py (kassen_verkaufsschluessel), app/services/fiscalization/service.py, app/services/pos_accounting_service.py, Tests test_pos_umsatzsteuer_je_satz, test_process_kernel_wave1_contracts.
