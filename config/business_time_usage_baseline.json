@@ -179,17 +179,11 @@
     "app/finance/export_sepa.py": {
       "date.today": 1
     },
-    "app/finance/fx_loader.py": {
-      "date.today": 1
-    },
     "app/finance/gobd.py": {
       "date.today": 5
     },
-    "app/finance/repositories.py": {
-      "date.today": 1
-    },
     "app/finance/router.py": {
-      "date.today": 5
+      "date.today": 3
     },
     "app/finance/tax_resolver.py": {
       "date.today": 1
