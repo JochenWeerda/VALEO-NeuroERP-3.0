@@ -9,7 +9,7 @@ from uuid import uuid4
 import calendar
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -516,3 +516,42 @@ async def get_storage_fee_run(
             for r in charges
         ],
     }
+
+
+class LagergeldRechnungIn(BaseModel):
+    steuerschluessel: str = Field(..., min_length=1, max_length=2,
+                                  description="Verkaufs-Steuerschluessel des Mandanten (keine Vorgabe)")
+    artikel_nr: str = Field(default="LAGERGELD", min_length=1, max_length=80)
+
+
+class LagergeldRechnungOut(BaseModel):
+    partner_id: str
+    beleg_id: str
+    positionen: int
+    betrag_netto: float
+
+
+@router.post("/runs/{run_id}/rechnungen", response_model=list[LagergeldRechnungOut], status_code=201,
+             dependencies=SCHREIBEN["LAGER"])
+async def lagergeld_rechnungen(
+    run_id: str,
+    payload: LagergeldRechnungIn,
+    request: Request,
+    db: Session = Depends(get_db),
+    _: str = Depends(require_inventory_admin),
+    effective_tenant: str = Depends(get_current_tenant_id),
+):
+    """Je Einlagerer ein Rechnungsentwurf (DocFlow ``sales_invoice``) aus einem abgeschlossenen Lagergeld-Lauf.
+
+    Freigabe und Buchung (Umsatzsteuer, offener Posten) laufen danach ueber die Belegmaske. Wiederholbar: derselbe
+    Lauf legt fuer denselben Einlagerer keinen zweiten Entwurf an.
+    """
+    from app.core.akteur import gepruefter_akteur_aus_request
+    from app.services.lagergeld_rechnung import rechnungen_zum_lauf
+
+    try:
+        return rechnungen_zum_lauf(db, effective_tenant, run_id, steuerschluessel=payload.steuerschluessel,
+                                   artikel_nr=payload.artikel_nr, akteur=gepruefter_akteur_aus_request(request))
+    except Exception:
+        db.rollback()
+        raise
