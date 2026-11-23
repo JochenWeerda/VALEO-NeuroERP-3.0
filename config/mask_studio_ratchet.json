@@ -343,13 +343,6 @@
   "mask:transporte/fahrer:verfuegbar"
  ],
  "aktionen_ohne_mcp_klassifikation": [],
- "aktionen_ohne_cli": [
-  "mask:admin/control-center:escalate",
-  "mask:admin/control-center:resolve",
-  "mask:admin/control-center:retry",
-  "mask:finance/bank-abgleich:validate",
-  "mask:mahnwesen/mahnlauf:sendEmail",
-  "mask:mahnwesen/mahnlauf:sendPost"
- ],
+ "aktionen_ohne_cli": [],
  "studio_katalog_nicht_bedienbar": []
 }

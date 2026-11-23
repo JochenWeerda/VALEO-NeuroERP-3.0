@@ -3,7 +3,6 @@
   "quellen_ohne_route": [
     "crm/betriebsprofil dataSource:entity -> /api/v1/crm/betriebsprofile/{entity_id}",
     "crm/betriebsprofile-liste dataSource:list -> /api/v1/crm/betriebsprofile",
-    "fibu/anlagen dataSource:list -> /api/v1/fibu/anlagen",
     "fibu/atlas dataSource:list -> /api/v1/fibu/anlagen",
     "fibu/bilanz dataSource:list -> /api/v1/fibu/anlagen",
     "fibu/guv dataSource:list -> /api/v1/fibu/anlagen",

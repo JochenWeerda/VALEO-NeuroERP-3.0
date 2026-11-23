@@ -13755,7 +13755,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 

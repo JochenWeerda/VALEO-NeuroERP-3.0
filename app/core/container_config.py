@@ -26,7 +26,6 @@ from ..infrastructure.repositories.implementations import (
     JournalEntryRepositoryImpl,
 )
 from ..repositories.document_repository import DocumentRepository
-from ..finance.repositories import OffenerPostenRepository, BuchungRepository, KontoRepository, AnlageRepository
 from .services import (
     TenantService, UserService, CustomerService, LeadService, ContactService,
     ArticleService, WarehouseService, StockMovementService, InventoryCountService,
@@ -111,24 +110,6 @@ def configure_container():
     container.register_factory(AccountRepository, create_account_repository)
     container.register_factory(JournalEntryRepository, create_journal_entry_repository)
     container.register_factory(DocumentRepository, create_document_repository)
-
-    # Finance repositories
-    def create_offener_posten_repository():
-        return OffenerPostenRepository(SessionLocal())
-
-    def create_buchung_repository():
-        return BuchungRepository(SessionLocal())
-
-    def create_konto_repository():
-        return KontoRepository(SessionLocal())
-
-    def create_anlage_repository():
-        return AnlageRepository(SessionLocal())
-
-    container.register_factory(OffenerPostenRepository, create_offener_posten_repository)
-    container.register_factory(BuchungRepository, create_buchung_repository)
-    container.register_factory(KontoRepository, create_konto_repository)
-    container.register_factory(AnlageRepository, create_anlage_repository)
 
     # Infrastructure Services (Singletons)
     # These would be implemented as concrete classes in the infrastructure layer

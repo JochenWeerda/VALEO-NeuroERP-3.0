@@ -352,6 +352,8 @@ SKR03_STEUERSCHLUESSEL = (
 SKR03_AUFWANDSKONTEN = {"8": "3300", "9": "3400"}
 # Sammelkonto der Verbindlichkeiten aus Lieferungen und Leistungen je Kontenrahmen.
 KREDITORENKONTO = {"SKR03": "1600", "SKR04": "3300"}
+# Sammelkonto der Forderungen aus Lieferungen und Leistungen je Kontenrahmen (Debitoren-Nebenbuch).
+DEBITORENKONTO = {"SKR03": "1400", "SKR04": "1200"}
 SKR03_KONTEN = (
     # Kategorien des Kontenplan-Schemas (``tax`` kennt es nicht; bis 19.10.2026 scheiterte daran das Lesen).
     ("1571", "Abziehbare Vorsteuer 7 %", "asset", "current_assets"),
