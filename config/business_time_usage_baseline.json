@@ -197,9 +197,6 @@
     "app/reports/services.py": {
       "datetime.now.date": 1
     },
-    "app/routers/fibu_router.py": {
-      "date.today": 5
-    },
     "app/services/admin_core_service.py": {
       "date.today": 1
     },
