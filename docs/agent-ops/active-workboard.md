@@ -21502,3 +21502,6 @@ Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
 Entfernt: POST /kasse/tagesabschluss (meldete "gebucht" ohne Buchung), pos_tagesabschluss_actions (ueberdeckter POST, Statuswechsel, simulierte TSE-Signatur SIM-SIG) samt Dienst, UAT-Skript, Tests, Coverage-Baselines; ungenutzter Frontend-Hook useKasseTagesabschlussSubmit.
 Offen: Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss; Umsatzsteuer je Satz (nach S5-Merge, Migration vat_breakdown).
+
+## M2-CONTROL-CENTER-NACHWEIS-20261123 — zur Abnahme, Claude Code (M2)
+Meilenstein: M2. Das Control-Center laeuft ueber den Fach-Host IntakeWeighingPage mit registriertem Admin-Renderer (ControlCenterSurface, useDomainDispatch); die Nachweiskette app/core/mask_runtime_evidence.py kannte admin_workbench nicht und fuehrte die Route als "handgebaut". Eintrag ergaenzt, Ratsche handgebaut_routen 3 -> 2, Studio-Katalog Gate E. Verbleibend handgebaut: annahme/abrechnung, lager/materialfluss.

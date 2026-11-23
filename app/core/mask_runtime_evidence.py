@@ -54,7 +54,10 @@ def bound_domain_runtime_ids(source: str, *, root: Path | None = None) -> frozen
             continue
         modules = {'intake': ('Intake', 'intake/intake.tsx'),
                    'weighing': ('Weighing', 'weighing/weighing.tsx'),
-                   'finance_workbench': ('FinanceWorkbench', 'finance/finance-workbench.tsx')}
+                   'finance_workbench': ('FinanceWorkbench', 'finance/finance-workbench.tsx'),
+                   # Seit 23.11.2026: Control-Center und Webhooks laufen ueber denselben Fach-Host; ohne diesen
+                   # Eintrag stand das Control-Center im Inventar als "handgebaut".
+                   'admin_workbench': ('AdminWorkbench', 'admin/admin-workbench.tsx')}
         if kind not in modules:
             continue
         symbol, module = modules[kind]

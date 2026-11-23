@@ -1,7 +1,6 @@
 {
  "_hinweis": "Nur schrumpfen. Erzeugt von scripts/mask_studio_inventory.py --write-baseline; siehe Modul-Docstring.",
  "handgebaut_routen": [
-  "admin/control-center",
   "annahme/abrechnung",
   "lager/materialfluss"
  ],
