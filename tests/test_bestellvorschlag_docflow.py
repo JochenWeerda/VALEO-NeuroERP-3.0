@@ -82,7 +82,9 @@ def test_vorschlag_wird_docflow_bestellentwurf_in_dt(client, umgebung):
                           {"id": bestellung["bestellung_id"], "t": umgebung["mandant"]}).mappings().one()
         position = c.execute(text("SELECT quantity, unit, unit_price, tax_rate FROM domain_docflow.document_items "
                                   "WHERE header_id = :id"), {"id": bestellung["bestellung_id"]}).mappings().one()
-        alt = c.execute(text("SELECT count(*) FROM domain_einkauf.bestellungen WHERE tenant_id = :t"),
+        # Genau eine Bestellung, die aus dem Vorschlag (seit S5 gibt es keinen Altspeicher daneben).
+        alt = c.execute(text("SELECT count(*) - 1 FROM domain_docflow.document_headers "
+                             "WHERE tenant_id = :t AND doc_type = 'purchase_order'"),
                         {"t": umgebung["mandant"]}).scalar()
     assert (beleg["doc_type"], beleg["status"], beleg["supplier_id"]) == ("purchase_order", "draft",
                                                                          umgebung["lieferant"])

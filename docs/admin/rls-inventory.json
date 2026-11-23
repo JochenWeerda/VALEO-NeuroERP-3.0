@@ -1,23 +1,23 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 788,
+  "tables": 777,
   "by_class": {
-   "A": 722,
+   "A": 711,
    "B": 22,
    "C": 9,
    "D": 35
   },
-  "rls_enabled": 690,
+  "rls_enabled": 679,
   "tenant_types": {
-   "character varying": 340,
+   "character varying": 333,
    "character varying(100)": 9,
-   "character varying(120)": 64,
+   "character varying(120)": 62,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 85,
+   "character varying(36)": 84,
    "character varying(50)": 1,
-   "character varying(64)": 104,
+   "character varying(64)": 103,
    "character varying(80)": 24,
    "text": 111,
    "uuid": 4
@@ -1414,22 +1414,6 @@
    "policies": 4
   },
   {
-   "table": "domain_crm.sales_order_items_vor_docflow",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_crm.sales_orders_vor_docflow",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
    "table": "domain_crm.supplier_tax_profiles",
    "class": "A",
    "tenant_type": "character varying",
@@ -1689,22 +1673,6 @@
    "table": "domain_einkauf.bestellung_kommunikation",
    "class": "A",
    "tenant_type": "character varying(64)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_einkauf.bestellung_positionen",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_einkauf.bestellungen",
-   "class": "A",
-   "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -4349,65 +4317,9 @@
    "policies": 4
   },
   {
-   "table": "domain_sales.delivery_note_positions",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.delivery_notes",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
    "table": "domain_sales.sales_ab_status_log",
    "class": "A",
    "tenant_type": "character varying(36)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.sales_credit_note_lines",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.sales_credit_notes",
-   "class": "A",
-   "tenant_type": "character varying(64)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.sales_delivery_notes",
-   "class": "A",
-   "tenant_type": "character varying(36)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.sales_invoice_lines",
-   "class": "A",
-   "tenant_type": "character varying(120)",
-   "rls": true,
-   "force_rls": false,
-   "policies": 4
-  },
-  {
-   "table": "domain_sales.sales_invoices",
-   "class": "A",
-   "tenant_type": "character varying(120)",
    "rls": true,
    "force_rls": false,
    "policies": 4
