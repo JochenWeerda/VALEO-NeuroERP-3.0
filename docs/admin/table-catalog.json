@@ -16866,6 +16866,11 @@
               "name": "updated_at",
               "nullable": false,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "vat_breakdown",
+              "nullable": false,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [],
@@ -20259,6 +20264,7 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py"
           ],
           "written_by": [
@@ -21730,6 +21736,7 @@
             "app/services/finance_datev_service.py",
             "app/services/finance_freigabe.py",
             "app/services/finance_read_model_service.py",
+            "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py",
             "app/services/kontrollkorb.py",
             "app/services/open_item_read_source.py",
@@ -21854,7 +21861,8 @@
             "app/infrastructure/models/journal.py",
             "app/services/finance_closing_service.py",
             "app/services/finance_datev_service.py",
-            "app/services/finance_freigabe.py"
+            "app/services/finance_freigabe.py",
+            "app/services/finance_saldenvortrag_service.py"
           ]
         },
         "lohn_import_runs": {
@@ -23024,7 +23032,8 @@
             "app/services/beleg_erechnung.py",
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
-            "app/services/fiscalization/service.py"
+            "app/services/fiscalization/service.py",
+            "app/services/pos_accounting_service.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/tax_keys.py",

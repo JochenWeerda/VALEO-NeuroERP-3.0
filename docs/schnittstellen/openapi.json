@@ -146263,6 +146263,59 @@
         "title": "SaatzuchtOut",
         "type": "object"
       },
+      "SaldenvortragIn": {
+        "properties": {
+          "jahr": {
+            "description": "Abgeschlossenes Geschaeftsjahr, das vorgetragen wird",
+            "maximum": 2100.0,
+            "minimum": 2000.0,
+            "title": "Jahr",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "jahr"
+        ],
+        "title": "SaldenvortragIn",
+        "type": "object"
+      },
+      "SaldenvortragOut": {
+        "properties": {
+          "jahr": {
+            "title": "Jahr",
+            "type": "integer"
+          },
+          "jahresergebnis": {
+            "title": "Jahresergebnis",
+            "type": "number"
+          },
+          "journal_entry_id": {
+            "title": "Journal Entry Id",
+            "type": "string"
+          },
+          "konten": {
+            "title": "Konten",
+            "type": "integer"
+          },
+          "zeilen": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Zeilen",
+            "type": "array"
+          }
+        },
+        "required": [
+          "jahr",
+          "journal_entry_id",
+          "konten",
+          "jahresergebnis",
+          "zeilen"
+        ],
+        "title": "SaldenvortragOut",
+        "type": "object"
+      },
       "SalesBlanketOrdersOut": {
         "additionalProperties": true,
         "description": "Response schema for sales blanket orders endpoints.",
@@ -296362,6 +296415,56 @@
           }
         ],
         "summary": "Closing ausführen",
+        "tags": [
+          "finance",
+          "actions",
+          "finance",
+          "actions"
+        ]
+      }
+    },
+    "/api/v1/finance/closing/saldenvortrag": {
+      "post": {
+        "description": "Eroeffnungsbuchung am 01.01. des Folgejahres: Bestandskonten gegen 9000, Jahresergebnis auf Gewinn-/Verlustvortrag.\n\nErst wenn alle Perioden des Jahres gesperrt sind; ein zweiter Vortrag fuer dasselbe Jahr wird abgewiesen (409).",
+        "operationId": "saldenvortrag_api_v1_finance_closing_saldenvortrag_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaldenvortragIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaldenvortragOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Saldenvortrag ins neue Geschaeftsjahr buchen",
         "tags": [
           "finance",
           "actions",
