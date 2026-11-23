@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-19
+last_reviewed: 2026-11-23
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -268,12 +268,14 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `feldbuch_open_gaps_20260716` | Ackerschlagkartei open-gaps: Register, AUM, Lager, Offline client_ref. |
 | `feldbuch_schlag_massnahme_20260226` | Add feldbuch_schlaege and feldbuch_massnahmen to domain_agrar |
 | `ff7b1a7899b4_add_customer_inquiries_table` | add_customer_inquiries_table |
+| `fibu_altspeicher_entfernen_20261123` | Die Schein-Fibu auf vier leeren public-Tabellen entfaellt (M3). |
 | `fibu_connector_asset_ledger_rename_20260301` | FIBU Connector: QUADRIGA → ASSET_LEDGER (geschützter Name entfernt) |
 | `fibu_connector_framework_20260301` | FIBU Connector Framework: Profile, Runs, Run-Items (domain_erp) |
 | `final_single_head_merge_20260626` | Final single-head merge: alle Repair-Wellen in einen Head zusammenführen. |
 | `finance_agrar_sales_repair_20260626` | BULK-REPAIR-001: Finance + Agrar + Sales Batch-Repair-Migration Wave 11. |
 | `finance_followup_exports_einkauf_uq_20260406` | finance_followup_exports + optional unique (tenant_id, bestellnummer) |
 | `finance_hr_einkauf_repair_20260626` | FINANCE-HR-EINKAUF-REPAIR-001: Finance + HR + Einkauf Batch-Repair Wave 12. |
+| `finance_router_altspeicher_entfernen_20261123` | Fuenf Finanz-Alttabellen ohne Migration entfallen (M3). |
 | `finance_sepa_ratenzahlung_20260623` | DOM-FINANCE-004: finance_sepa_mandate, sepa_batches, ratenzahlungsplaene, ratenzahlungsraten, mahnstufen_audit |
 | `flow_spine_document_link_unique_20260915` | FSX-011: eindeutiger Belegbezug fuer offene Flow-Spine-Vorgaenge |
 | `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
@@ -383,6 +385,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `merge_warehouse_einkauf_20260626` | Merge Alembic heads: warehouse_schema_repair + merge_einkauf_log_agent. |
 | `merge_wave104_20260326` | Merge Wave 104 migrations with main head |
 | `mobile_event_queue_20260619` | MOB-SYNC-001: Mobile Offline-Sync Event-Queue |
+| `nebenbuch_abstimmung_tabelle_20261123` | Die Nebenbuch-Abstimmung bekommt ihre Tabelle auch auf einer frischen Installation (M3). |
 | `neuro_step_audit_einkauf_tenant_20260405` | neuro_step_audit_trace + einkauf_bestellungen.tenant_id |
 | `neuroassist_state_graph_confidence_ledger_20260329` | Neuro State Graph + Confidence Ledger tables |
 | `normalize_finance_hr_contracts_20260610` | Normalize finance account values and restore HR shift schema. |

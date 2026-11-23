@@ -4655,7 +4655,7 @@
       "version": "1.0.0"
     },
     "fibu/anlagen": {
-      "definition_hash": "15fd77b43d3f47090689b384ef923f3a454bfb6e147e6bc5c32d097bb632723a",
+      "definition_hash": "2a5f544f58681e0f2961a68e35170e7477514c43e12ba3f2668558b15407a912",
       "gates_passed": [
         "A",
         "B",
@@ -4681,7 +4681,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4692,7 +4691,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4769,7 +4767,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4813,7 +4810,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4857,7 +4853,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4923,7 +4918,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -4945,7 +4939,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,
@@ -7101,7 +7094,6 @@
       "gates_passed": [
         "A",
         "B",
-        "C",
         "E"
       ],
       "studio_draft_clean": true,

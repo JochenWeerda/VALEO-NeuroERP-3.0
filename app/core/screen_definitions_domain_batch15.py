@@ -119,13 +119,15 @@ def build_fibu_abschluss_checklist_detail_screen_definition() -> dict[str, Any]:
 
 
 def build_fibu_anlagen_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "anlagennr", "label": "Anlagennr", "sortable": True, "filterable": True, "width": 160}, {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "width": 160}, {"key": "anschaffung", "label": "Anschaffung", "sortable": True, "filterable": True, "width": 160}, {"key": "anschaffungswert", "label": "Anschaffungswert", "sortable": True, "filterable": True, "width": 160}, {"key": "afaSatz", "label": "Afasatz", "sortable": True, "filterable": True, "width": 160}, {"key": "kumulierteAfa", "label": "Kumulierteafa", "sortable": True, "filterable": True, "width": 160}, {"key": "buchwert", "label": "Buchwert", "sortable": True, "filterable": True, "width": 160}]
+    # Spalten der Anlagenbuchhaltung (domain_finance, /finance/asset-accounting/assets); bis 23.11.2026 las die Maske
+    # den entfernten Altweg /fibu/anlagen auf einer leeren Tabelle.
+    columns = [{"key": "asset_number", "label": "Anlagennr", "sortable": True, "filterable": True, "width": 140}, {"key": "description", "label": "Bezeichnung", "sortable": True, "filterable": True, "width": 220}, {"key": "asset_class", "label": "Anlagenklasse", "sortable": True, "filterable": True, "width": 140}, {"key": "acquisition_date", "label": "Anschaffung", "sortable": True, "filterable": True, "width": 130}, {"key": "acquisition_cost", "label": "Anschaffungswert", "sortable": True, "filterable": True, "width": 150}, {"key": "useful_life_years", "label": "Nutzungsdauer (Jahre)", "sortable": True, "filterable": True, "width": 150}, {"key": "book_value", "label": "Buchwert", "sortable": True, "filterable": True, "width": 140}]
     return build_stamm_list_screen(
         screen_id="fibu/anlagen",
         domain="fibu",
         title="Anlagen Gesamt",
         subtitle="fibu",
-        endpoint="/api/v1/fibu/anlagen",
+        endpoint="/api/v1/finance/asset-accounting/assets",
         row_route=None,
         columns=columns,
         actions=[stamm_list_export_action()],
