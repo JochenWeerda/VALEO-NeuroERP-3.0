@@ -4,6 +4,9 @@
  */
 
 import { useQuery } from '@tanstack/react-query'
+import { useAuth } from '@/hooks/useAuth'
+import { auth } from '@/lib/auth'
+import { tenantFromToken } from '@/lib/tenant-from-token'
 import { apiClient } from '@/lib/api-client'
 
 export type ProcessSummary = {
@@ -75,9 +78,14 @@ export function useProcessMiningDrilldown(projectionKey: string) {
 }
 
 export function useIdempotencyOverview() {
+  const { user } = useAuth()
+  const tenantId = tenantFromToken(auth.getAccessToken())
   return useQuery({
-    queryKey: ['admin', 'idempotency-overview'],
-    queryFn: () => apiClient.get<import('@/components/agent/IdempotencyMonitoringPanel').IdempotencyOverview>('/api/v1/process/actions/idempotency/overview'),
+    queryKey: ['admin', 'idempotency-overview', tenantId, user?.sub],
+    enabled: Boolean(tenantId && user?.sub),
+    queryFn: async () => (await apiClient.get<import('@/components/agent/IdempotencyMonitoringPanel').IdempotencyOverview>(
+      '/api/v1/process/actions/idempotency/overview',
+    )).data,
     staleTime: 30_000,
   })
 }
