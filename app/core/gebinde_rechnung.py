@@ -16,6 +16,11 @@ from enum import Enum, IntEnum
 from typing import Mapping, Optional, Sequence
 
 
+#: Version der Berechnungslogik; steht in jedem Belegabbild. Bei jeder fachlichen Aenderung der Rechnung erhoehen,
+#: damit nachvollziehbar bleibt, nach welcher Logik ein historischer Beleg gerechnet wurde.
+RECHENKERN_VERSION = "gebinde-1"
+
+
 class Gebindetyp(IntEnum):
     KEIN_GEBINDE = 0
     LINEAR = 1              # Anzahl x F1
@@ -195,16 +200,21 @@ class Gebindeberechnung:
     anzahl: str
     rundung: int
     ergebnis: str
+    einheit: Optional[str] = None          # Gebinde-Mengeneinheit (Ausgangsmenge = Anzahl in dieser Einheit)
+    ergebniseinheit: Optional[str] = None  # Einheit der Ergebnismenge
+    version: str = RECHENKERN_VERSION
 
     def als_dict(self) -> dict:
         return {"gebindetyp": self.gebindetyp, "faktorherkunft": self.faktorherkunft,
                 "herkunft_verwendet": self.herkunft_verwendet, "faktoren": list(self.faktoren),
-                "anzahl": self.anzahl, "rundung": self.rundung, "ergebnis": self.ergebnis}
+                "anzahl": self.anzahl, "einheit": self.einheit, "ergebnis": self.ergebnis,
+                "ergebniseinheit": self.ergebniseinheit, "rundung": self.rundung, "version": self.version}
 
 
 def berechne_gebinde(typ: int | Gebindetyp, anzahl: Decimal, herkunft: int | Faktorherkunft,
                      stufen: Mapping[Faktorherkunft, Optional[Sequence[Optional[Decimal]]]],
-                     rundung: int = 3) -> Gebindeberechnung:
+                     rundung: int = 3, einheit: Optional[str] = None,
+                     ergebniseinheit: Optional[str] = None) -> Gebindeberechnung:
     """Der eine Einstieg fuer Einkauf, Verkauf, Lager, Waage, Fakturierung und Bewertung."""
     gt = _typ(typ)
     if BENOETIGTE_FAKTOREN[gt] == 0:
@@ -216,4 +226,5 @@ def berechne_gebinde(typ: int | Gebindetyp, anzahl: Decimal, herkunft: int | Fak
     return Gebindeberechnung(gebindetyp=int(gt), faktorherkunft=int(Faktorherkunft(int(herkunft))),
                              herkunft_verwendet=None if verwendet is None else int(verwendet),
                              faktoren=tuple(str(f) for f in faktoren), anzahl=str(Decimal(str(anzahl))),
-                             rundung=rundung, ergebnis=str(ergebnis))
+                             rundung=rundung, ergebnis=str(ergebnis), einheit=einheit,
+                             ergebniseinheit=ergebniseinheit)

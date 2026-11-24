@@ -76549,6 +76549,122 @@
         "title": "GdprRequestsOut",
         "type": "object"
       },
+      "GebindeEinstellung": {
+        "properties": {
+          "ergebniseinheit": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergebniseinheit"
+          },
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          },
+          "faktorherkunft": {
+            "anyOf": [
+              {
+                "maximum": 4.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einstiegsstufe: 1 ME, 2 Artikelstamm, 3 Artikel, 4 Auspraegung",
+            "title": "Faktorherkunft"
+          },
+          "gebindetyp": {
+            "default": 0,
+            "description": "0 kein Gebinde, 1-5, 8, 9 (6/7 in a.eins deaktiv)",
+            "maximum": 9.0,
+            "minimum": 0.0,
+            "title": "Gebindetyp",
+            "type": "integer"
+          },
+          "lvs_default_lokalitaet": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lvs Default Lokalitaet"
+          },
+          "lvs_relevanz": {
+            "default": 0,
+            "description": "0 nicht relevant, 1 relevant, 2 buchend",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Lvs Relevanz",
+            "type": "integer"
+          }
+        },
+        "title": "GebindeEinstellung",
+        "type": "object"
+      },
       "GelangensbestaetigungCreate": {
         "properties": {
           "bestimmungsland_code": {
@@ -108126,6 +108242,77 @@
             "title": "Einheit Kuerzel",
             "type": "string"
           },
+          "ergebniseinheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergebniseinheit"
+          },
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          },
+          "faktorherkunft": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktorherkunft"
+          },
+          "gebindetyp": {
+            "default": 0,
+            "title": "Gebindetyp",
+            "type": "integer"
+          },
           "id": {
             "title": "Id",
             "type": "string"
@@ -108151,6 +108338,22 @@
               }
             ],
             "title": "Langtext"
+          },
+          "lvs_default_lokalitaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lvs Default Lokalitaet"
+          },
+          "lvs_relevanz": {
+            "default": 0,
+            "title": "Lvs Relevanz",
+            "type": "integer"
           },
           "nummer": {
             "anyOf": [
@@ -159143,6 +159346,68 @@
           "stage"
         ],
         "title": "StufeIn",
+        "type": "object"
+      },
+      "Stufenfaktoren": {
+        "properties": {
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          }
+        },
+        "title": "Stufenfaktoren",
         "type": "object"
       },
       "StundenBuchung": {
@@ -236816,6 +237081,347 @@
           }
         ],
         "summary": "Mengeneinheit aktualisieren",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebinde": {
+      "put": {
+        "operationId": "setze_gebinde_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebinde_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GebindeEinstellung"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gebinde der Mengeneinheit einstellen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebinde/berechnen": {
+      "get": {
+        "description": "Rechnet ohne zu speichern - dasselbe Abbild, das ein Beleg festschreibt.",
+        "operationId": "berechne_gebinde_weg_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebinde_berechnen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Anzahl in der Gebinde-Mengeneinheit",
+            "in": "query",
+            "name": "anzahl",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "description": "Anzahl in der Gebinde-Mengeneinheit",
+              "title": "Anzahl"
+            }
+          },
+          {
+            "in": "query",
+            "name": "artikel_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Artikel Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "artikelstamm_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Artikelstamm Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "auspraegung_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Auspraegung Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gebinderechnung pruefen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebindefaktoren": {
+      "get": {
+        "operationId": "list_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren lesen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebindefaktoren/{stufe}/{bezug_id}": {
+      "delete": {
+        "operationId": "entferne_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren__stufe___bezug_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stufe",
+            "required": true,
+            "schema": {
+              "title": "Stufe",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bezug_id",
+            "required": true,
+            "schema": {
+              "title": "Bezug Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren entfernen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      },
+      "put": {
+        "operationId": "setze_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren__stufe___bezug_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stufe",
+            "required": true,
+            "schema": {
+              "title": "Stufe",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bezug_id",
+            "required": true,
+            "schema": {
+              "title": "Bezug Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Stufenfaktoren"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren pflegen",
         "tags": [
           "Artikelstamm - Mengeneinheiten & Gruppen"
         ]

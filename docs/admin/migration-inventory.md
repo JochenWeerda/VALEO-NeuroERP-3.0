@@ -287,6 +287,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
 | `gdpr_request_processing_20261031` | Explicit CRM subject type and processing receipts; no guessed legacy identity. |
+| `gebinde_stamm_beleg_20261124` | Gebinde-Mengeneinheit am Stamm, Gebindefaktoren je Stufe, Berechnungsabbild je Belegposition (24.11.2026). |
 | `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |
 | `gis_geojson_schlag_20260527` | GIS: geometry_geojson column on feldbuch_schlaege for polygon capture. |
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |

@@ -15805,6 +15805,11 @@
               "name": "contract_ref",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "gebinde_berechnung",
+              "nullable": true,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [
@@ -15835,6 +15840,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/ist_aggregation_service.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mcp_execution_service.py",
@@ -15845,7 +15851,8 @@
           ],
           "written_by": [
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/gebinde_aufloesung.py"
           ]
         },
         "document_links": {
@@ -30215,6 +30222,7 @@
             "app/services/customer_reference.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_count_sheet_command.py",
             "app/services/ist_aggregation_service.py",
@@ -49311,6 +49319,84 @@
             "app/api/v1/endpoints/artikel_stamm_ext.py"
           ]
         },
+        "artikel_gebindefaktoren": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "einheit_kuerzel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "stufe",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "bezug_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "faktor1",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor2",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor3",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor4",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "geaendert_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/gebinde_aufloesung.py"
+          ],
+          "written_by": [
+            "app/services/gebinde_aufloesung.py"
+          ]
+        },
         "artikel_inventurgruppen": {
           "columns": [
             {
@@ -49454,6 +49540,51 @@
               "name": "un_code",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "gebindetyp",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "ergebniseinheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "faktorherkunft",
+              "nullable": true,
+              "type": "smallint"
+            },
+            {
+              "name": "faktor1",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor2",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor3",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor4",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "lvs_relevanz",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "lvs_default_lokalitaet",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -49466,6 +49597,7 @@
           "read_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py",
             "app/services/beleg_erechnung.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/mengeneinheiten_grund.py"
           ],
           "written_by": [
