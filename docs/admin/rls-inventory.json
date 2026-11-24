@@ -3,16 +3,16 @@
  "summary": {
   "tables": 773,
   "by_class": {
-   "A": 707,
+   "A": 708,
    "B": 22,
-   "C": 9,
+   "C": 8,
    "D": 35
   },
-  "rls_enabled": 675,
+  "rls_enabled": 676,
   "tenant_types": {
    "character varying": 333,
    "character varying(100)": 9,
-   "character varying(120)": 62,
+   "character varying(120)": 63,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 80,
@@ -3640,14 +3640,11 @@
   },
   {
    "table": "domain_ops.ops_fahrer",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
+   "class": "A",
+   "tenant_type": "character varying(120)",
+   "rls": true,
    "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_ops.ops_fahrzeuge"
-   ]
+   "policies": 4
   },
   {
    "table": "domain_ops.ops_fahrzeug_bussgeld",
