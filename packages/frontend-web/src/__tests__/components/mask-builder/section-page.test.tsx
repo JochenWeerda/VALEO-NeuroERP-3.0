@@ -7,6 +7,7 @@ import { compileRenderPlanFromScreenDefinition } from '@/components/mask-builder
 import {
   HEADER_COLLAPSE_AT_PX,
   HEADER_EXPAND_BELOW_PX,
+  JUMP_PIN_MS,
   nextCondensedState,
 } from '@/components/mask-builder/renderers/SectionPageRenderer'
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
@@ -187,6 +188,46 @@ describe('Meridian one-page document (sectionNavigation=anchors)', () => {
     fireEvent.click(screen.getByTestId('section-anchor-positionen'))
     expect(screen.getByLabelText('Charge')).toBeInTheDocument()
     expect(screen.queryByLabelText('Bemerkung')).not.toBeInTheDocument()
+  })
+
+  it('keeps a jump target aligned while sections above it grow, until the user scrolls or the pin expires', () => {
+    const observed: Array<{ callback: ResizeObserverCallback; target: Element }> = []
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(private readonly callback: ResizeObserverCallback) {}
+      observe(target: Element): void { observed.push({ callback: this.callback, target }) }
+      unobserve(): void {}
+      disconnect(): void {}
+    })
+    const growPage = (): void => {
+      act(() => {
+        observed
+          .filter(({ target }) => target === screen.getByTestId('section-page'))
+          .forEach(({ callback }) => callback([], {} as ResizeObserver))
+      })
+    }
+    render(
+      <Providers>
+        <UniversalMaskRenderer plan={compileRenderPlanFromScreenDefinition(deliveryNote())} />
+      </Providers>,
+    )
+
+    fireEvent.click(screen.getByTestId('section-anchor-dokumente'))
+    scrollIntoView.mockReset()
+    growPage()
+    expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start', behavior: 'auto' })
+
+    scrollIntoView.mockReset()
+    fireEvent.wheel(window)
+    growPage()
+    expect(scrollIntoView).not.toHaveBeenCalled()
+
+    const now = Date.now()
+    fireEvent.click(screen.getByTestId('section-anchor-positionen'))
+    scrollIntoView.mockReset()
+    const later = vi.spyOn(Date, 'now').mockReturnValue(now + JUMP_PIN_MS + 60_000)
+    growPage()
+    expect(scrollIntoView).not.toHaveBeenCalled()
+    later.mockRestore()
   })
 
   it('shows the document flow as the last section with the current step as plain text', () => {
