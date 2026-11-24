@@ -1033,3 +1033,6 @@ Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.besta
 
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
+
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
