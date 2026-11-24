@@ -425,21 +425,29 @@ class BusinessPartnerService:
         Domänen-Methoden nachgeladen (Phase-2D-Trennung). Sucht über Matchcode-Präfix,
         Name/Kundennummer (enthält) und PLZ-Präfix.
         """
+        from app.core.public_kunden_mandant import KUNDE_GEHOERT_MANDANT
+
         q = (query or "").strip()
+        params: dict = {"lim": limit, "tid": self.tenant_id}
         if not q:
             rows = self.db.execute(
-                text("SELECT * FROM public.kunden_lookup ORDER BY name LIMIT :lim"),
-                {"lim": limit},
+                text(
+                    f"SELECT k.* FROM public.kunden_lookup k "
+                    f"WHERE {KUNDE_GEHOERT_MANDANT} ORDER BY k.name LIMIT :lim"
+                ),
+                params,
             ).mappings().all()
         else:
             mc = re.sub(r"[^a-z0-9]", "", q.lower())
+            params.update({"mc": f"{mc}%", "term": f"%{q}%", "plz": f"{q}%"})
             rows = self.db.execute(
                 text(
-                    "SELECT * FROM public.kunden_lookup "
-                    "WHERE matchcode LIKE :mc OR kunden_nr ILIKE :term OR name ILIKE :term OR plz LIKE :plz "
-                    "ORDER BY name LIMIT :lim"
+                    f"SELECT k.* FROM public.kunden_lookup k "
+                    f"WHERE {KUNDE_GEHOERT_MANDANT} "
+                    f"AND (k.matchcode LIKE :mc OR k.kunden_nr ILIKE :term OR k.name ILIKE :term OR k.plz LIKE :plz) "
+                    f"ORDER BY k.name LIMIT :lim"
                 ),
-                {"mc": f"{mc}%", "term": f"%{q}%", "plz": f"{q}%", "lim": limit},
+                params,
             ).mappings().all()
         return [
             {**dict(r), "business_partner_id": str(r["business_partner_id"]) if r.get("business_partner_id") else None}

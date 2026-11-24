@@ -985,13 +985,13 @@ Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, L
 Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
 
-## M4-CR-P0-MANDANTENLECK-20261123 — reserviert, Cursor (M4, P0)
-Meilenstein: M4. Owner: Cursor. Stand: reserviert 2026-11-24.
+## M4-CR-P0-MANDANTENLECK-20261123 — zur Abnahme, Cursor (M4, P0)
+Meilenstein: M4. Owner: Cursor. Stand: zur Abnahme 2026-11-24.
 Quelle: docs/abnahme/domaenen/crm.md (D04) / Reifematrix 20261123 (PR #181).
-P0-Luecken: CR-01 lookup ohne tenant_id; CR-01 KIM customers ohne Mandantenfilter; CR-03 KIM-Ansprechpartner ohne Filter; CR-04 _kunde_finden Fallback public.kunden ohne Mandant; CR-11 CrmMergeService ohne tenant_id; zusaetzlich CustomerService.get_from_db_any_key Altbestand-Fallback (gleicher Leak).
-Dateibesitz: app/core/public_kunden_mandant.py (neu), app/services/business_partner_service.py (search_lookup), app/api/v1/endpoints/crm_kim.py, app/api/v1/endpoints/crm_360_sql.py, app/services/crm_merge_service.py, app/services/customer_service.py (Altbestand-Fallback), tests/test_m4_cr_p0_mandantenleck.py, QA, Workboard.
-Abnahme: Integrationstest gegen PostgreSQL mit Fremdmandant 404/leere Liste; eigener Mandant bleibt lesbar.
-Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion — kein Claim hier.
+Fix: Helfer `public_kunden_mandant`; Lookup/KIM/360/_kunde_finden/Merge/CustomerService-Altbestand mandantengefiltert (fail-closed ohne tenant_id).
+Dateibesitz: app/core/public_kunden_mandant.py, business_partner_service.py, crm_kim.py, crm_360_sql.py, crm_merge_service.py, customer_service.py, tests/test_m4_cr_p0_mandantenleck.py, tests/test_crm360_kunde_wird_gefunden.py (Bestandskunde jetzt 404), QA docs/quality-assurance/m4-cr-p0-mandantenleck-20261124.md, Workboard.
+Abnahme: `pytest tests/test_m4_cr_p0_mandantenleck.py --no-cov` 6/6 gegen valeo_probe.
+Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion.
 
 ## M4-LO-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
 Meilenstein: M4. Owner: offen (Bahn Logistik/Fuhrpark). Quelle: PR #181 / docs/abnahme/domaenen/logistik.md.
