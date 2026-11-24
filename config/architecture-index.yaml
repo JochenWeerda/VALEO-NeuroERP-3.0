@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-24
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-24T10:14:52Z'
+generated_at: '2026-11-24T17:49:52Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1681,8 +1681,11 @@ domains:
     - article_import
     - article_units_bridge
     - articles_service
+    - bestandsbewertung
+    - bestandsbuchung_schluessel
     - etikettendruck_service
     - foreign_goods_worklist_service
+    - gebinde_aufloesung
     - inventory_auxiliary_service
     - inventory_balance_reconciliation
     - inventory_compat_service
@@ -1694,6 +1697,7 @@ domains:
     - inventory_movement_direction
     - inventory_stock_balance
     - lagergeld_rechnung
+    - mengeneinheiten_grund
     - number_range_service
     - numbering_service
     - numbering_service_pg
@@ -1900,6 +1904,7 @@ domains:
     - /admin/ai-approvals
     - /admin/api-keys
     - /admin/audit-log
+    - /admin/background-jobs
     - /admin/backup-restore
     - /admin/belegfolgekonfig
     - /admin/benutzer
@@ -2390,10 +2395,10 @@ domains:
     - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1146
-  frontend_routes_mapped: 1146
-  backend_services_total: 349
-  backend_services_mapped: 349
+  frontend_routes_total: 1147
+  frontend_routes_mapped: 1147
+  backend_services_total: 353
+  backend_services_mapped: 353
   backend_endpoints_total: 474
   backend_endpoints_mapped: 474
 unmapped:

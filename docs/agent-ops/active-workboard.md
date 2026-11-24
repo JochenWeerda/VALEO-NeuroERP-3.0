@@ -1102,6 +1102,13 @@ Ziel: Architekturindex nach aktuellen Routen abgleichen und den beschaedigten Vo
 
 ## M0-I18NEXT-GHSA-6JCC-20261123 — abgeschlossen, Cursor (M0)
 Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+## M3-BESTANDSBEWERTUNG-BUCHUNG-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 2, gestapelt auf PR #184). Bestandskorrektur, Schwund, MHD-Abschreibung und Inventurdifferenzen erzeugen einen Buchungsentwurf (draft) zum gleitenden Durchschnitt: Zugang Soll Bestand an Gegenkonto Zugang, Abgang Soll Gegenkonto Abgang an Bestand, Konten nur aus domain_einkauf.lager_kontenzuordnung (keine Ersatzkonten). Gebucht wird ueber den Freigabeweg des Hauptbuchs (APPROVAL-001). Fehlt Bewertung oder Zuordnung: Bestand operativ gebucht, Luecke gemeldet (melde_fehlende_bewertung). Fix: positive adjustment zaehlte im Durchschnitt als Abgang.
 Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrte den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
 Ergebnis: Herstellerfix (ADR-080) — i18next ^26.3.4, Lock 26.7.2; gemergt als #183 (4859a973d).
 
@@ -1167,3 +1174,23 @@ Studio-Folgebefund: process/background-jobs liest bisher den Metadatenknoten que
 Ziel: eigene Studio-Listenroute fuer Hintergrundjobs. Dateibesitz: ScreenDefinition, Routeneinstieg und abgeleitete Kataloge. Abnahme: echte mandantengebundene Jobzeilen, keine Scheinaktionen und keine Doppelbelegung der Monitorroute.
 
 Die Hintergrundjob-Worklist hat den eigenen Einstieg /admin/background-jobs und verwendet paginierte Jobzeilen aus dem mandantengebundenen Listenvertrag. Die wirkungslose Zeilenaktion wurde entfernt. Der bisherige Command-Monitor-Einstieg bleibt fachlich getrennt. Die Browser- und PostgreSQL-Abnahmen stehen aus.
+
+## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
+## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Nutzerauftrag 24.11.2026: Mengeneinheiten nach a.eins, PR #186). Felder der Grundmengeneinheit (Nummer, Langtext, ISO-Name, DataNorm, Statistikkennzeichen, Rundung 0-4 nur nach oben bei aktiven Einheiten, Preisbezug, UN-Mengeneinheit Rec. 20), mitgelieferte Grundeinheiten, eRechnung liest den UN-Code aus dem Stamm, Maske stammdaten/mengeneinheit erweitert. Fachgrundlage docs/design/mengeneinheiten-aeins-uebernahme.md.
+## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
+
+## STAMM-GEBINDE-STAMM-BELEG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (Mengeneinheiten nach a.eins, Schnitt 2b-1, gestapelt auf PR #186 und #187). Gebindefelder und LVS-Relevanz 0/1/2 am Mengeneinheiten-Stamm, Stufenfaktoren (domain_shared.artikel_gebindefaktoren, RLS je Befehl) mit serverseitiger Pflegepruefung, unveraenderliches Berechnungsabbild je Belegposition (document_items.gebinde_berechnung, Trigger), app/services/gebinde_aufloesung.py als einziger Rechenweg mit Stammdaten. Offen 2b-2: LVS-Buchungsverantwortung mit persistenter Idempotenz, Masken, Belegfluesse (Verwiegung, Teillieferung, Retoure, Storno).
+## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitender Durchschnitt). Einstandspreis beim Lagerzugang aus DocFlow (unit_cost/total_cost, Storno zum Zugangspreis), app/services/bestandsbewertung.py: gleitender_durchschnitt und bewerte je Lagereinheit; nicht umrechenbare Einheit -> BewertungNichtBestimmbar. Schnitt 2 (Buchungsentwurf) gestapelt auf diesem Zweig.
+
+## M3-PREISBEZUG-POSITION-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3/M4 (kaufmaennischer Rechenkern, Nutzerauftrag 24.11.2026). app/core/kaufmaennisch.py als eine Quelle der Positionsrechnung (DocFlow _line_amounts delegiert): Decimal durchgaengig, kaufmaennisch je Position gerundet, Belegsumme aus gerundeten Positionen. document_items.price_unit_quantity (Preis je Preisbezugsmenge, Bestand 1 = bisherige Bedeutung); Menge bleibt in ihrer Einheit, Umwandlung uebernimmt den Preisbezug. Golden Master tests/golden_master/diesel_220050.json (9 Positionen, 660,10 statt 660,11). Offen: beleg_anlage.position_in_preiseinheit rechnet Menge in die Preiseinheit um und nutzt float - auf Preisbezug umstellen.
+## M0-TEST-CONVERT-WARTEN-20261124 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Positionszeile des Uebernahme-Dialogs zu, die erst nach dem Dialog rendert; unter CI-Last rot (#186, Lauf 45371355464 Versuch 1). Test wartet jetzt auf die Zeile (findByLabelText); 5 Laeufe hintereinander gruen.
+
+## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.

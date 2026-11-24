@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-24
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -119,6 +119,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_altspeicher_entfernen_20261117` | Die alten Belegspeicher entfallen - DocFlow ist der einzige Belegspeicher (BELEG-052 S5). |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
+| `bestandsbuchung_schluessel_20261124` | Buchungsschluessel fuer Bestandsbewegungen - doppelte Bewegungen technisch ausgeschlossen (24.11.2026). |
 | `bewerbung_einwilligung_20261006` | Das Verzeichnis der Aufbewahrungs-Einwilligungen — Nachweis und Widerruf. |
 | `bewerbung_erklaerung_fassung_20261006` | Die Einwilligungserklaerung in Fassungen — welchem Wortlaut zugestimmt wurde. |
 | `bewerbung_loeschlauf_20261006` | Der Loeschlauf fuer Bewerberdaten — Frist, Einwilligung und Nachweis. |
@@ -287,6 +288,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `fuhrpark_vertiefung_20260616` | Fuhrpark Vertiefung: Statushistorie, Schaeden, Bussgeld |
 | `futtermittel_sorten_produktion_20260410` | Futtermittel-Stammdaten, Rezepte, Produktionsaufträge und Sortenregister |
 | `gdpr_request_processing_20261031` | Explicit CRM subject type and processing receipts; no guessed legacy identity. |
+| `gebinde_stamm_beleg_20261124` | Gebinde-Mengeneinheit am Stamm, Gebindefaktoren je Artikel, versionierte Berechnungsabbilder (24.11.2026). |
 | `genossenschaft_mitgliederregister_20261005` | Das Mitgliederregister einer eingetragenen Genossenschaft. |
 | `gis_geojson_schlag_20260527` | GIS: geometry_geojson column on feldbuch_schlaege for polygon capture. |
 | `gobd_archiv_erechnung_20260301` | GoBD: Archiv (document_artifacts) + E-Rechnung XML-Speicher |
@@ -366,6 +368,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `mcp_tool_executions_20260921` | Transactional replay journal for authenticated ERP tool calls. |
 | `mde_inbox_hardening_20260821` | Harden the existing mobile sync queue for the MDE operator inbox. |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
+| `mengeneinheit_aeins_felder_20261124` | Mengeneinheiten-Stamm mit den Feldern der Grundmengeneinheit nach a.eins (24.11.2026). |
 | `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
 | `merge_crm_capture_pos_fiscal_20260609` | Merge CRM capture inbox and POS fiscal provider branches. |
 | `merge_crm_ownership_prod_20260610` | Merge CRM ownership and production-readiness migration branches. |
@@ -415,6 +418,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `pos_tagesabschluss_lifecycle_20260623` | DOM-POS-004 — POS Tagesabschluss Lifecycle Tabellen |
 | `pos_ust_je_satz_20261119` | Kassiervorgaenge fuehren ihren Bruttobetrag je Umsatzsteuersatz (M3, POS-Umsatzsteuer). |
 | `pos_zahlarten_aktionen_20260930` | Zahlarten und Kassenaktionen bekommen eine Migration. |
+| `position_preisbezug_20261124` | Belegposition mit Preisbezugsmenge - Preis je 100 Liter, ohne die Menge umzurechnen (24.11.2026). |
 | `postfach_microsoft_20261008` | Postfaecher: Anbieter Microsoft 365. |
 | `preisfindung_rabattregeln_20261005` | Rollenrabatte als Tabelle — und ein Rabatt bleibt unter hundert Prozent. |
 | `pricing_staffelrabatt_artikel_m2m_20260702` | pricing: staffelrabatte <-> artikel als many-to-many |

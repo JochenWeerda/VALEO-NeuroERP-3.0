@@ -46,6 +46,8 @@ async function openConversion() {
   fireEvent.click(screen.getByRole('button', { name: 'Lieferschein erstellen' }))
   const dialog = await screen.findByRole('dialog')
   expect(mocks.get).toHaveBeenCalledWith('/api/v1/docflow/doc-1/conversion-options?target_doc_type=sales_delivery')
+  // Die Positionszeilen rendern nach dem Dialog; unter CI-Last fehlte die Zeile beim synchronen Zugriff (24.11.2026).
+  await within(dialog).findByLabelText('Uebernahmemenge, Zeile 1')
   return dialog
 }
 
@@ -76,7 +78,7 @@ it('erhaelt die Eingaben nach abgelehnter Vorschau und fuehrt nichts aus', async
   fireEvent.change(within(dialog).getByLabelText('Uebernahmemenge, Zeile 1'), { target: { value: '4' } })
   fireEvent.click(within(dialog).getByRole('button', { name: 'Weiter' }))
   expect((await screen.findAllByText('Restmenge nicht mehr verfuegbar')).length).toBeGreaterThan(0)
-  expect(screen.getByLabelText('Uebernahmemenge, Zeile 1')).toHaveValue(4)
+  expect(await screen.findByLabelText('Uebernahmemenge, Zeile 1')).toHaveValue(4)
   expect(mocks.execute).toHaveBeenCalledTimes(1)
   expect(mocks.execute.mock.calls[0][0].mode).toBe('dryRun')
 })
