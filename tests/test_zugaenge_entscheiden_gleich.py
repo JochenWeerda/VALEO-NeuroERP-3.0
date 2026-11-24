@@ -64,6 +64,12 @@ def _entscheidung(antwort: dict[str, Any]) -> dict[str, Any]:
 
 @pytest.fixture
 def zugaenge(subject_data, monkeypatch):  # noqa: F811 - Fixture aus test_gdpr_subject_boundary
+    # Verglichen wird die Fachentscheidung einer fuer Agenten FREIGEGEBENEN Aktion. Seit 24.11.2026 (M5) ist die
+    # Entwicklungsfreigabe geschlossen: im Betrieb gilt Default Deny je Aktion (eigener Test unten). Hier wird die
+    # Freigabe ausdruecklich gesetzt, damit dieselbe Entscheidung auf allen vier Wegen pruefbar bleibt.
+    from app.services import mcp_write_capability
+
+    monkeypatch.setattr(mcp_write_capability, "development_release", lambda: True)
     from app.api.v1.endpoints import (
         admin_reporting_kommandos,
         admin_rollen_kommandos,
@@ -259,3 +265,12 @@ def test_mcp_vorpruefung_ist_strenger_nie_weicher(zugaenge):
     assert rest["success"] is False
     assert werkzeug.status_code == 200 and werkzeug.json()["result"]["success"] is False
     assert werkzeug.json()["result"]["error"] == rest["error"]
+
+
+def test_im_betrieb_lehnt_mcp_nicht_freigegebene_aktionen_ab():
+    """M5 (24.11.2026): ohne Freigabe je Aktion scheitert der Agentenweg geschlossen - strenger als REST, nie weicher."""
+    from app.services import mcp_write_capability
+
+    assert not mcp_write_capability.development_release()
+    assert not mcp_write_capability.capability_enabled(
+        "admin.rolle.anlegen.v1", "/api/v1/admin/rollen", "admin/rollen-verwaltung", "anlegen")
