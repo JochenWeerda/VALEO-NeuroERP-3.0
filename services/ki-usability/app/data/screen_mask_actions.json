@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 795,
-    "screens_with_actions": 405,
+    "actions": 796,
+    "screens_with_actions": 406,
     "domains": 50
   },
   "actions": [
@@ -894,6 +894,27 @@
         "command": "identity.budgets.open",
         "method": null,
         "permission": "identity:quota:read",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/users:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/users)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/users",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/users",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
         "dangerLevel": "safe"
       }
     },

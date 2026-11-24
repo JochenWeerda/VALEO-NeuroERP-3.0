@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23",
+  "generatedAt": "2026-11-24",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -1471,7 +1471,7 @@
     },
     {
       "mask_id": "admin/users",
-      "title": "Users",
+      "title": "Benutzer",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__users/:entityId",
@@ -1481,15 +1481,15 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
+          "key": "export",
+          "label": "CSV-Export",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "admin.users.update",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],

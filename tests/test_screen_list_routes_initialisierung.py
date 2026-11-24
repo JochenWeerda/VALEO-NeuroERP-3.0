@@ -23,3 +23,16 @@ def test_kalter_warmer_und_wiederholter_lauf_liefern_dieselben_routen(monkeypatc
     assert not set(cold["routen"]) & curated
     for screen_id in ("artikel/stamm", "annahme/waage-1", "admin/users"):
         assert cold["routen"][screen_id] == STAMM_ROUTEN[screen_id]
+
+
+def test_admin_users_reuses_the_canonical_user_list():
+    from app.api.v1.schemas.admin_core_schemas import AdminUserOut
+
+    alias = screens.get_screen_definition("admin/users")
+    canonical = screens.get_screen_definition("admin/benutzer-liste")
+    assert alias["id"] == "admin/users"
+    assert alias["mode"] == canonical["mode"] == "list"
+    assert alias["tables"] == canonical["tables"]
+    assert alias["actions"] == canonical["actions"]
+    assert alias["dataSources"] == canonical["dataSources"]
+    assert {column["key"] for column in alias["tables"][0]["columns"]} <= AdminUserOut.model_fields.keys()

@@ -163,9 +163,10 @@ def build_admin_tenants() -> dict[str, Any]:
         edit_permission="admin.tenants.update", bearbeiten_endpoint=None)
 
 def build_admin_users() -> dict[str, Any]:
-    return _batch13_stamm("admin/users", domain="admin", title="Users",
-        entity_endpoint="/api/v1/admin/benutzer/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.users.update", bearbeiten_endpoint=None)
+    from app.core.screen_definitions_listen import build_admin_benutzer_liste
+
+    return build_admin_benutzer_liste(screen_id="admin/users")
+
 
 def build_admin_workflow_editor() -> dict[str, Any]:
     return _batch13_stamm("admin/workflow-editor", domain="admin", title="Workflow editor",

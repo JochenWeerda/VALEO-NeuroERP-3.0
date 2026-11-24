@@ -1087,3 +1087,5 @@ Review PR 179: Rollenzuordnung aus dem Endpunkt erzeugt (admin erforderlich), HT
 ## M2-ADMIN-USERS-LIST - reserviert, Codex
 
 Ziel: /admin/users mit der bestehenden Studio-Benutzerliste verdrahten; keine zweite fachliche Liste. Dateibesitz: beide Definitionen, Routeneinstieg und abgeleitete Artefakte. Abnahme: gleiche Spalten, Datenquelle und Listenlaufzeit.
+
+/admin/users verwendet denselben Studio-Listenbuilder und denselben geschuetzten Lese-Endpunkt wie /admin/benutzer. Unwirksame Bearbeitungsdeklaration entfiel. Zwei Regressionstests und Studio-Gates A/B/C/E gruen; 280 undeklarierte Aktionen auf diesem Zweig. Browserabnahme offen.

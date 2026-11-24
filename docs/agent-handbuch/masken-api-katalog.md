@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-24
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -58,7 +58,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
 | `admin/terminologie` | Terminologie | platform | niedrig | — | `GET /api/v1/masks/admin/terminologie/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
-| `admin/users` | Users | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
+| `admin/users` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
 | `admin/webhooks-liste` | Webhook-Verwaltung | admin | mittel | — | `GET /api/v1/masks/admin/webhooks-liste/agent-contract` |
 | `admin/webshop` | Webshop-Anbindungen | sales | mittel | — | `GET /api/v1/masks/admin/webshop/agent-contract` |
 | `admin/webshop-bestellungen` | Webshop-Bestellungen | sales | niedrig | — | `GET /api/v1/masks/admin/webshop-bestellungen/agent-contract` |
@@ -1583,9 +1583,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/users` — Users
+### `admin/users` — Benutzer
 
-**Zweck:** Stamm- und Fachmaske fuer Users (admin/users).
+**Zweck:** Benutzer mit Rolle und letzter Anmeldung pruefen.
 
 | | |
 |---|---|
@@ -1597,17 +1597,18 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/admin/benutzer/{entity_id}`
+- `list` → `/api/v1/admin/benutzer`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Users {entity_id}.
+- Wer hat sich seit drei Monaten nicht angemeldet?
+- Welche Benutzer sind Administratoren?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 

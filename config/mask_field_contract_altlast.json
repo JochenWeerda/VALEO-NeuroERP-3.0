@@ -7,7 +7,6 @@
     "admin/command-monitor",
     "admin/system-einstellungen",
     "admin/tenants",
-    "admin/users",
     "admin/zeitachsen-editor",
     "agrar/ernte-annahme-abrechnung",
     "agrar/lieferschein-erstellen",
