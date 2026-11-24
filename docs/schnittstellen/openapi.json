@@ -193115,9 +193115,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Actions",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }
@@ -193190,9 +193196,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Action",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }
@@ -404929,7 +404941,8 @@
         ],
         "summary": "Resolve Voice",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }

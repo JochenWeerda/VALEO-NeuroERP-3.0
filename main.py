@@ -547,13 +547,6 @@ async def root():
 # Include API routers
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
-# KI-Usability (Sprachsteuerung, Action Registry) — integriert für Single-Process-Dev
-# Frontend /api/ki-usability → Proxy sendet /api/v1/actions (Rewrite)
-try:
-    from app.api.v1.endpoints.ki_usability import router as ki_usability_router
-    app.include_router(ki_usability_router, prefix="/api/v1", tags=["ki-usability"])
-except ImportError as e:
-    logger.debug("KI-Usability router not available: %s", e)
 app.include_router(policies_v1.router, prefix='/api/mcp')
 
 # GoBD Compliance (/api/gobd/status, /api/gobd/hash-chain, …)
