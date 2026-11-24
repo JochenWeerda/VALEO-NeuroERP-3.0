@@ -1004,3 +1004,6 @@ Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbe
 
 ## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitender Durchschnitt). Einstandspreis beim Lagerzugang aus DocFlow (unit_cost/total_cost, Storno zum Zugangspreis), app/services/bestandsbewertung.py: gleitender_durchschnitt und bewerte je Lagereinheit; nicht umrechenbare Einheit -> BewertungNichtBestimmbar. Schnitt 2 (Buchungsentwurf) gestapelt auf diesem Zweig.
+
+## M3-PREISBEZUG-POSITION-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3/M4 (kaufmaennischer Rechenkern, Nutzerauftrag 24.11.2026). app/core/kaufmaennisch.py als eine Quelle der Positionsrechnung (DocFlow _line_amounts delegiert): Decimal durchgaengig, kaufmaennisch je Position gerundet, Belegsumme aus gerundeten Positionen. document_items.price_unit_quantity (Preis je Preisbezugsmenge, Bestand 1 = bisherige Bedeutung); Menge bleibt in ihrer Einheit, Umwandlung uebernimmt den Preisbezug. Golden Master tests/golden_master/diesel_220050.json (9 Positionen, 660,10 statt 660,11). Offen: beleg_anlage.position_in_preiseinheit rechnet Menge in die Preiseinheit um und nutzt float - auf Preisbezug umstellen.

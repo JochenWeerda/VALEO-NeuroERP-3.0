@@ -53773,6 +53773,11 @@
             "title": "Line Total Tax",
             "type": "number"
           },
+          "price_unit_quantity": {
+            "default": 1,
+            "title": "Price Unit Quantity",
+            "type": "number"
+          },
           "quantity": {
             "title": "Quantity",
             "type": "number"
@@ -53907,6 +53912,19 @@
               }
             ],
             "title": "Expense Account"
+          },
+          "price_unit_quantity": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "1",
+            "title": "Price Unit Quantity"
           },
           "quantity": {
             "default": 0,

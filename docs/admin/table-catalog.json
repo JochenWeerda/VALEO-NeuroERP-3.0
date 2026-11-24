@@ -15805,6 +15805,11 @@
               "name": "contract_ref",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "price_unit_quantity",
+              "nullable": false,
+              "type": "numeric"
             }
           ],
           "foreign_keys": [
