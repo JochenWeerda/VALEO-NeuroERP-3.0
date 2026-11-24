@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 695 Tabellen, 9099 Spalten.**
+**31 Schemas, 695 Tabellen, 9107 Spalten.**
 
 ## Schemas
 
@@ -52,7 +52,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_procurement` | `procurement` | 5 | 50 |
 | `domain_reporting` | `finance` | 6 | 80 |
 | `domain_sales` | `crm` | 6 | 56 |
-| `domain_shared` | `platform` | 164 | 1967 |
+| `domain_shared` | `platform` | 164 | 1975 |
 | `domain_workflow` | `platform` | 3 | 37 |
 
 ## Geschwister-Modelle
@@ -1443,7 +1443,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `artikel_bestandteile_zuordnung` | `platform` | native | `id` | id, tenant_id, artikel_nr, bestandteil_nr, sollwert, created_at |
 | `artikel_folgeartikel` | `platform` | native | `id` | id, tenant_id, artikel_nr, folge_artikel_nr, gueltig_ab, gueltig_bis, grund, automatisch_ersetzen, aktiv, created_at |
 | `artikel_inventurgruppen` | `platform` | native | `id` | id, tenant_id, gruppe_nr, bezeichnung, inventur_zyklus, naechste_inventur, aktiv, created_at |
-| `artikel_mengeneinheiten` | `platform` | native | `id` | id, tenant_id, einheit_kuerzel, bezeichnung, basis_einheit, umrechnungsfaktor, dezimalstellen, aktiv, created_at |
+| `artikel_mengeneinheiten` | `platform` | native | `id` | id, tenant_id, einheit_kuerzel, bezeichnung, basis_einheit, umrechnungsfaktor, dezimalstellen, aktiv, created_at, nummer, langtext, iso_name, datanorm_kurz, statistikkennzeichen, preisbezug_einheit, preisbezug_menge, un_code |
 | `artikel_mengeneinheitengruppen` | `platform` | native | `id` | id, tenant_id, gruppe_nr, bezeichnung, bestand_einheit, ek_einheit, vk_einheit, preis_einheit, aktiv, created_at |
 | `artikel_sperren` | `platform` | native | `id` | id, tenant_id, artikel_id, sperrgrund, gesperrt_bis, bemerkung, gesperrt_am, status |
 | `artikel_stoffstrom` | `platform` | native | `id` | id, tenant_id, artikel_nr, anbauland, rohstoff_kategorie, co2_aequivalent_kg_per_t, thg_wert, nachhaltig, iscc_zertifiziert, red_konform, gueltig_ab, gueltig_bis, bemerkung, created_at, updated_at |
