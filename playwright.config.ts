@@ -48,11 +48,11 @@ export default defineConfig({
       grep: /@smoke/,
     },
     
-    // Full UAT Tests
+    // Full UAT Tests — echte Sitzung der Verwaltungs-Testkennung aus dem global-setup (playwright.anmeldung.mjs)
     {
       name: "full",
       testMatch: /.*\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/sitzung-admin.json' },
       grep: /@full/,
     },
     
