@@ -567,21 +567,28 @@ def get_idempotency_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[st
 
 
 @router.get("/actions/idempotency/{tenant_id}/{idempotency_key}", response_model=ProcessKernelOut, summary="Action by idempotency abrufen")
-def get_action_by_idempotency(tenant_id: str, idempotency_key: str) -> dict[str, Any]:
+def get_action_by_idempotency(
+    tenant_id: str,
+    idempotency_key: str,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Liefert den kanonischen Action-Snapshot zu einem Idempotency-Key."""
     store = get_action_idempotency_store()
-    record = store.get_by_key(tenant_id, idempotency_key)
+    record = store.get_by_key(active_tenant_id, idempotency_key) if tenant_id == active_tenant_id else None
     if record is None:
         raise HTTPException(status_code=404, detail="Keine Action zu diesem Idempotency-Key gefunden")
     return record.result.model_dump(mode="json")
 
 
 @router.get("/actions/{execution_id}", response_model=ProcessKernelOut, summary="Action by execution id abrufen")
-def get_action_by_execution_id(execution_id: str) -> dict[str, Any]:
+def get_action_by_execution_id(
+    execution_id: str,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Liefert den kanonischen Action-Snapshot zu einer execution_id."""
     store = get_action_idempotency_store()
     record = store.get_by_execution_id(execution_id)
-    if record is None:
+    if record is None or record.tenant_id != active_tenant_id:
         raise HTTPException(status_code=404, detail="Keine Action zu dieser execution_id gefunden")
     return record.result.model_dump(mode="json")
 

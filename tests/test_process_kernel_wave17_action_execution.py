@@ -6,7 +6,7 @@ from __future__ import annotations
 from unittest.mock import MagicMock
 
 from fastapi import FastAPI
-from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
 import pytest
 
@@ -44,6 +44,7 @@ def register_procurement_command_mutations():
 def client() -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_mandant(app, "t1")
     app.include_router(process_kernel_api.router)
     mock_session = MagicMock()
 
@@ -392,6 +393,11 @@ def test_get_action_by_idempotency_returns_same_snapshot_as_execution_lookup(cli
     assert by_execution.status_code == 200
     assert by_key.status_code == 200
     assert by_execution.json() == by_key.json()
+
+    ersetze_mandant(client.app, "t2")
+    assert client.get(f"/process/actions/{execution_id}").status_code == 404
+    assert client.get("/process/actions/idempotency/t1/idem-14").status_code == 404
+    assert client.get("/process/actions/idempotency/t2/idem-14").status_code == 404
 
 
 def test_get_action_endpoints_return_404_for_unknown_records(client: TestClient):
