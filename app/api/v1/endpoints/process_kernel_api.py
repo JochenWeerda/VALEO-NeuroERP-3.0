@@ -19,6 +19,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.tenant import get_tenant_id
+
 from ....core.action_execution import (
     ActionExecutionRequest,
     ActionExecutionService,
@@ -530,10 +532,10 @@ def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) 
 
 
 @router.get("/actions/idempotency/overview", response_model=ProcessKernelOut, summary="Idempotency overview abrufen")
-def get_idempotency_overview() -> dict[str, Any]:
+def get_idempotency_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     """Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer."""
     store = get_action_idempotency_store()
-    store_summary = store.summary()
+    store_summary = store.summary(tenant_id=tenant_id)
     catalog = build_core_command_catalog()
     idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
     human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]

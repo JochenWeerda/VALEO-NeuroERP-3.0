@@ -132,8 +132,13 @@ class ActionIdempotencyStore:
         self._records_by_execution_id[result.execution_id] = record
         return record
 
-    def summary(self) -> dict[str, Any]:
-        records = list(self._records_by_key.values())
+    def summary(self, *, tenant_id: str | None = None) -> dict[str, Any]:
+        records = [record for record in self._records_by_key.values()
+                   if tenant_id is None or record.tenant_id == tenant_id]
+        execution_count = sum(
+            tenant_id is None or record.tenant_id == tenant_id
+            for record in self._records_by_execution_id.values()
+        )
         tenant_ids = {record.tenant_id for record in records}
         command_names = sorted({record.result.command_name for record in records})
         aggregate_types = sorted({record.result.aggregate_type for record in records})
@@ -153,7 +158,7 @@ class ActionIdempotencyStore:
         return {
             "total_records": len(records),
             "tenant_count": len(tenant_ids),
-            "execution_count": len(self._records_by_execution_id),
+            "execution_count": execution_count,
             "command_count": len(command_names),
             "aggregate_count": len(aggregate_types),
             "commands": command_names,
