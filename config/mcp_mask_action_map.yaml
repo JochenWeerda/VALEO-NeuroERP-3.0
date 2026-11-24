@@ -1,12 +1,12 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-19'
+generated_on: '2026-11-24'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 796
-    screens_with_actions: 403
+    actions: 797
+    screens_with_actions: 404
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -93,10 +93,10 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 315
-  mask_mutations_considered: 256
+  mask_actions_considered: 316
+  mask_mutations_considered: 257
   by_coverage:
-    blocked_human_only: 82
+    blocked_human_only: 83
     blocked_unreleased: 2
     local_ui: 59
     mapped: 38
@@ -2298,6 +2298,17 @@ mappings:
   mcp_tool_id: mask.action.execute
   coverage: mapped_generic
   notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+- mask_action_id: mask:fibu/abschluss-checklist-detail:saldenvortrag
+  mask: fibu/abschluss-checklist-detail
+  domain: fibu
+  action_key: saldenvortrag
+  label: Saldenvortrag buchen
+  command_endpoint: /api/v1/finance/closing/saldenvortrag
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:finance/ar-open-item:mahnen
   mask: finance/ar-open-item
   domain: finance
@@ -3358,5 +3369,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 82; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 83; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

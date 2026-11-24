@@ -4623,7 +4623,7 @@
       "version": "1.0.0"
     },
     "fibu/abschluss-checklist-detail": {
-      "definition_hash": "06dc566ecd9e7e294e8d56c278dd250758cb74b0d0ef374cb80c440f2c1902e8",
+      "definition_hash": "418e43ff7ca2418aeec22b0424ebd634de7b004c957f25ea5cf1723056b3f466",
       "gates_passed": [
         "A",
         "B",
