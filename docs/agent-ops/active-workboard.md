@@ -1047,3 +1047,7 @@ Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "
 Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
 
 M2-READVIEW-IMPORT: Detail- und Cockpit-Maske verwenden direkte Modulimporte. Die 77 Mask-Builder-Testdateien sind mit 562 Tests gruen. main b881f45da integriert, beide Workboard-Eintraege erhalten, OpenAPI-Drift-Check gruen.
+
+## M0-I18NEXT-DEPENDENCY - reserviert, Codex
+
+Ziel: Auditbefund GHSA-6jcc-5g8w-32mx durch korrigierte i18next-Version schliessen. Dateibesitz: Frontend-Paket, pnpm-Lock und Migrationsnachweis. Abnahme: Installations- und i18n-Vertrag.
