@@ -55,3 +55,19 @@ def test_admin_tenant_list_binds_the_paginated_contract():
     assert list_tenants.__annotations__["return"].model_fields["items"].annotation == list[Tenant]
     assert set(definition["listExperience"]["searchFields"]) <= fields
     assert definition["actions"] == table["rowActions"] == []
+
+
+def test_admin_api_keys_list_uses_the_metadata_endpoint():
+    from app.api.v1.endpoints.admin_core import list_admin_api_keys, router
+    from app.api.v1.schemas.admin_core_schemas import AdminApiKeyOut
+
+    definition = screens.get_screen_definition("admin/api-keys")
+    route = next(route for route in router.routes if route.endpoint is list_admin_api_keys)
+    assert route.response_model == list[AdminApiKeyOut]
+    assert definition["mode"] == "list"
+    assert definition["dataSources"][0]["endpoint"] == f"/api/v1/admin{route.path}"
+    table, = definition["tables"]
+    fields = {column["key"] for column in table["columns"]}
+    assert fields == {"name", "key_prefix", "status", "expires_at", "last_used_at"}
+    assert fields <= AdminApiKeyOut.model_fields.keys()
+    assert definition["actions"] == table["rowActions"] == []

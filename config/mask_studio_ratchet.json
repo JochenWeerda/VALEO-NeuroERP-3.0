@@ -24,7 +24,6 @@
  "aktionen_nicht_deklariert": [
   "mask:admin/agenten-integration:bearbeiten",
   "mask:admin/ai-approvals:open_source",
-  "mask:admin/api-keys:bearbeiten",
   "mask:admin/audit-log:open",
   "mask:admin/backup-restore:bearbeiten",
   "mask:admin/belegfolgekonfig:open",

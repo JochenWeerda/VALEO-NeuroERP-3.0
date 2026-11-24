@@ -69,9 +69,23 @@ def build_admin_ai_approvals() -> dict[str, Any]:
         edit_permission="admin.ai-approvals.update", bearbeiten_endpoint=None)
 
 def build_admin_api_keys() -> dict[str, Any]:
-    return _batch13_stamm("admin/api-keys", domain="admin", title="Api keys",
-        entity_endpoint="/api/v1/admin/benutzer/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.api-keys.update", bearbeiten_endpoint=None)
+    return build_stamm_list_screen(
+        screen_id="admin/api-keys", domain="admin", title="API-Schlüssel",
+        subtitle="Schlüsselstatus im aktiven Mandanten",
+        endpoint="/api/v1/admin/api-keys", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "key_prefix", "label": "Präfix", "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "priority": "primary"},
+            {"key": "expires_at", "label": "Gültig bis", "renderKind": "datetime", "priority": "secondary"},
+            {"key": "last_used_at", "label": "Zuletzt verwendet", "renderKind": "datetime", "priority": "tertiary"},
+        ],
+        actions=[], row_actions=[],
+        purpose="Status und Gültigkeit von API-Schlüsseln prüfen.",
+        prompts=["Welche Schlüssel sind bald abgelaufen?"],
+        no_workflow="Die Liste zeigt die vom Verwaltungsdienst gelieferten Schlüsselmetadaten.",
+    )
+
 
 def build_admin_backup_restore() -> dict[str, Any]:
     return _batch13_stamm("admin/backup-restore", domain="admin", title="Backup restore",

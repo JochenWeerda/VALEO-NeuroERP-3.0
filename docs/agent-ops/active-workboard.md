@@ -1131,3 +1131,5 @@ Mandantenliste: Laufzeitvertrag mit 51 synthetischen Zeilen geprueft. Der gemein
 ## M2-ADMIN-API-KEYS-LIST - reserviert, Codex
 
 Ziel: API-Schluessel-Einstieg an die bereits autorisierte Metadatenliste anbinden. Dateibesitz: ScreenDefinition, Routeneinstieg und generierte Artefakte. Abnahme: Schema, bestehender GET und Studio-Gates.
+
+API-Schluessel-Einstieg als Studio-Liste umgesetzt. Verwendet den geschuetzten GET fuer Schluesselmetadaten statt der Benutzer-Detailquelle. Keine Schreib- oder Exportaktion deklariert. Vertragstest und Studio-Inventar gruen; Browserabnahme offen.

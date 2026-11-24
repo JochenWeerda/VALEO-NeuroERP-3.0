@@ -2,7 +2,6 @@
   "_hinweis": "Altlast Runtime46 (Workboard STUDIO-UMBAU-RUNTIME46): Belegmasken mit Platzhalter-Identitaet und Bezugsfelder, in die man rohe IDs tippt (brauchen eine Auswahl aus einer Datenquelle). Nur schrumpfend: tests/test_meridian_beleg_systemweit.py.",
   "identitaet": {
     "admin/agenten-integration": "bezeichnung",
-    "admin/api-keys": "bezeichnung",
     "admin/backup-restore": "bezeichnung",
     "admin/berechtigungen-matrix": "bezeichnung",
     "admin/command-monitor": "bezeichnung",

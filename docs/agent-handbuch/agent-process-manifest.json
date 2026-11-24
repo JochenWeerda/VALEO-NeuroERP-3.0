@@ -900,7 +900,7 @@
     },
     {
       "mask_id": "admin/api-keys",
-      "title": "Api keys",
+      "title": "API-Schlüssel",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__api-keys/:entityId",
@@ -908,19 +908,7 @@
       "screen_definition_url": "/api/v1/masks/admin/api-keys/screen-definition",
       "readiness_url": "/api/v1/masks/admin/api-keys/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "admin.api-keys.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },

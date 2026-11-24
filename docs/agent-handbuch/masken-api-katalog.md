@@ -20,7 +20,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
 | `admin/agenten-integration` | Agenten integration | admin | niedrig | — | `GET /api/v1/masks/admin/agenten-integration/agent-contract` |
 | `admin/ai-approvals` | AI-Freigaben | admin | niedrig | — | `GET /api/v1/masks/admin/ai-approvals/agent-contract` |
-| `admin/api-keys` | Api keys | admin | niedrig | — | `GET /api/v1/masks/admin/api-keys/agent-contract` |
+| `admin/api-keys` | API-Schlüssel | admin | niedrig | — | `GET /api/v1/masks/admin/api-keys/agent-contract` |
 | `admin/audit-log` | Audit log | admin | niedrig | — | `GET /api/v1/masks/admin/audit-log/agent-contract` |
 | `admin/audit-log-liste` | Audit-Log | admin | niedrig | — | `GET /api/v1/masks/admin/audit-log-liste/agent-contract` |
 | `admin/backup-restore` | Backup restore | admin | niedrig | — | `GET /api/v1/masks/admin/backup-restore/agent-contract` |
@@ -852,9 +852,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/api-keys` — Api keys
+### `admin/api-keys` — API-Schlüssel
 
-**Zweck:** Stamm- und Fachmaske fuer Api keys (admin/api-keys).
+**Zweck:** Status und Gültigkeit von API-Schlüsseln prüfen.
 
 | | |
 |---|---|
@@ -866,17 +866,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/admin/benutzer/{entity_id}`
+- `list` → `/api/v1/admin/api-keys`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Api keys {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+- Welche Schlüssel sind bald abgelaufen?
 
 ---
 

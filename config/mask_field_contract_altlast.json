@@ -1,7 +1,6 @@
 {
   "_hinweis": "Altlast Runtime46/batch15 (Workboard STUDIO-UMBAU-RUNTIME46, Nutzerentscheidung 02.11.2026 Weg 2). Masken, deren Felder die Antwort ihres Endpunkts nicht kennt, und Quellen ohne deklarierte Antwort. Darf nur schrumpfen: tests/test_mask_field_contracts.py. 19.11.2026: Seit der Feldvertrag gegen die produktive OpenAPI (main:app) prueft, sind Betriebsprofil, Kontakt und Bank-Stamm pruefbar und zeigen Felder, die ihre Antwort nicht hat (Workboard M2-MASKENFELDER-PRODUKTIV-20261119).",
   "abweichungen_masken": [
-    "admin/api-keys",
     "admin/backup-restore",
     "admin/berechtigungen-matrix",
     "admin/command-monitor",

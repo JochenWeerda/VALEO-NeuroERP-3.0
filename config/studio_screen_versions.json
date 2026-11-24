@@ -36,7 +36,7 @@
       "version": "1.0.0"
     },
     "admin/api-keys": {
-      "definition_hash": "2e8871bc1537a47cddf82e38ff2dd0e4a20fb85896fce50af12f13644332ea19",
+      "definition_hash": "f465e04e72d5fc7535cd0581a2dddf6c32eacaf5c51b17ad29f1c9841ec1e029",
       "gates_passed": [
         "A",
         "B",
