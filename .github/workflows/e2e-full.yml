@@ -1,81 +1,97 @@
 name: E2E Full UAT Tests
 
+# Naechtlicher Voll-Lauf der @full- und @fallback-Specs gegen einen echten Stack: Postgres, Redis, Wegwerf-Keycloak,
+# migriertes Backend. Frontend-Build, Preview (127.0.0.1:4173) und Anmeldung uebernimmt playwright.global-setup.mjs;
+# die Browser-Specs laufen mit der Sitzung der Verwaltungs-Testkennung (playwright.anmeldung.mjs).
+
 on:
   schedule:
     - cron: '0 2 * * *'  # Täglich um 2 Uhr nachts
   workflow_dispatch:
 
+concurrency:
+  group: e2e-full-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   full-uat:
     runs-on: ubuntu-24.04  # Playwright 1.60 unterstuetzt ubuntu-26.04 (neues ubuntu-latest) noch nicht
     timeout-minutes: 60
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9
 
-      # `actions/setup-node`'s pnpm caching requires `pnpm` to already be on PATH.
-      - name: Setup Node.js (pnpm cache)
-        uses: actions/setup-node@v4
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: valeo_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d valeo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/valeo_test
+      # Echte Anmeldung (seit 12.10.2026 kein Dev-Token): Wegwerf-Keycloak aus scripts/ci/e2e_keycloak.sh,
+      # Sitzungen in Redis. Kennungen und Kennwoerter setzt dieser Schritt je Lauf ueber $GITHUB_ENV.
+      REDIS_URL: redis://localhost:6379/0
+      IDENTITY_SESSION_IDLE_SECONDS: "3600"
+      EVENT_BUS_ENABLED: "false"
+      OUTBOX_WORKER_ENABLED: "false"
+      PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-full
+      BUILD_ID: ${{ github.sha }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
         with:
-          node-version: '20'
-          cache: 'pnpm'
-          cache-dependency-path: pnpm-lock.yaml
-      
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: pnpm/action-setup@v4
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
-      
-      - name: Setup Test Environment
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Start Test-Keycloak und Testkennungen
+        run: bash scripts/ci/e2e_keycloak.sh
+
+      - name: Migrate test database
+        run: python scripts/init_db.py
+
+      - name: Start backend
         run: |
-          if [ -f .env.uat ]; then
-            cp .env.uat .env
-          elif [ -f .env.example ]; then
-            cp .env.example .env
-          else
-            touch .env
-          fi
-          echo "VALEO_TENANT=QA-UAT-01" >> .env
-          echo "VALEO_BASE_URL=http://localhost:3000" >> .env
-      
-      - name: Build Application
-        run: pnpm --filter @valero-neuroerp/frontend-web build
-      
-      - name: Start Backend (Background)
-        run: |
-          python -m uvicorn main:app --host 0.0.0.0 --port 8000 &
-          sleep 10
-      
-      - name: Start Frontend (Background)
-        run: |
-          cd packages/frontend-web
-          pnpm preview --port 3000 &
-          sleep 10
-      
-      - name: Run Full UAT Tests
-        run: pnpm exec playwright test --project=full
-        env:
-          PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-full
-          BUILD_ID: ${{ github.sha }}
-      
-      - name: Run Fallback Verification
-        run: pnpm exec playwright test --project=fallback-verification
-        env:
-          PLAYWRIGHT_RUN_ID: ${{ github.run_id }}-fallback
-          BUILD_ID: ${{ github.sha }}
-      
+          python -m uvicorn main:app --host 0.0.0.0 --port 8000 > backend.log 2>&1 &
+          timeout 120 bash -c 'until curl -fsS http://127.0.0.1:8000/healthz; do sleep 2; done'
+
+      - name: Run Full UAT and Fallback Verification
+        run: pnpm exec playwright test --project=full --project=fallback-verification
+
       - name: Upload Full Artifacts
         if: always()
         uses: actions/upload-artifact@v4
@@ -83,42 +99,34 @@ jobs:
           name: full-uat-artifacts-${{ github.run_id }}
           path: |
             playwright-tests/artifacts/
-            playwright-report/
+            docs/uat/COVERAGE-MATRIX.csv
+            docs/uat/BUGLIST.json
+            backend.log
           retention-days: 30
-      
-      - name: Upload Coverage Matrix
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-matrix-full
-          path: docs/uat/COVERAGE-MATRIX.csv
-          retention-days: 90
-      
-      - name: Upload Bug List
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bug-list
-          path: docs/uat/BUGLIST.json
-          retention-days: 90
-      
+
       - name: Generate UAT Summary
         if: always()
         run: |
-          echo "# Full UAT Summary" > docs/uat/UAT-SUMMARY.md
-          echo "" >> docs/uat/UAT-SUMMARY.md
-          echo "**Run ID:** ${{ github.run_id }}" >> docs/uat/UAT-SUMMARY.md
-          echo "**Build:** ${{ github.sha }}" >> docs/uat/UAT-SUMMARY.md
-          echo "**Datum:** $(date -u)" >> docs/uat/UAT-SUMMARY.md
-          echo "" >> docs/uat/UAT-SUMMARY.md
-          echo "## KPIs" >> docs/uat/UAT-SUMMARY.md
-          echo "- Tests gesamt: TBD" >> docs/uat/UAT-SUMMARY.md
-          echo "- Bestanden: TBD" >> docs/uat/UAT-SUMMARY.md
-          echo "- Fehlgeschlagen: TBD" >> docs/uat/UAT-SUMMARY.md
-          echo "- Übersprungen: TBD" >> docs/uat/UAT-SUMMARY.md
-          echo "" >> docs/uat/UAT-SUMMARY.md
-          cat docs/uat/UAT-SUMMARY.md >> $GITHUB_STEP_SUMMARY
-      
+          node -e '
+            const fs = require("fs");
+            const datei = "playwright-tests/artifacts/results.json";
+            const zeilen = ["# Full UAT Summary", "", `**Run ID:** ${process.env.GITHUB_RUN_ID}`,
+              `**Build:** ${process.env.GITHUB_SHA}`, `**Datum:** ${new Date().toISOString()}`, ""];
+            if (!fs.existsSync(datei)) {
+              zeilen.push("Kein Ergebnis: der Testlauf hat keine results.json geschrieben.");
+            } else {
+              const s = JSON.parse(fs.readFileSync(datei, "utf8")).stats ?? {};
+              const n = (k) => s[k] ?? 0;
+              zeilen.push("## KPIs",
+                `- Tests gesamt: ${n("expected") + n("unexpected") + n("flaky") + n("skipped")}`,
+                `- Bestanden: ${n("expected")}`, `- Fehlgeschlagen: ${n("unexpected")}`,
+                `- Instabil (erst im Wiederholungslauf gruen): ${n("flaky")}`, `- Uebersprungen: ${n("skipped")}`);
+            }
+            fs.mkdirSync("docs/uat", { recursive: true });
+            fs.writeFileSync("docs/uat/UAT-SUMMARY.md", zeilen.join("\n") + "\n");
+          '
+          cat docs/uat/UAT-SUMMARY.md >> "$GITHUB_STEP_SUMMARY"
+
       - name: Upload Summary
         if: always()
         uses: actions/upload-artifact@v4
@@ -126,4 +134,3 @@ jobs:
           name: uat-summary
           path: docs/uat/UAT-SUMMARY.md
           retention-days: 90
-
