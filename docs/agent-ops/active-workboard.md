@@ -980,3 +980,9 @@ Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/stora
 
 ## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Domaenenabnahme Artikelstamm, Nutzerauftrag 24.11.2026: Mengeneinheiten nach a.eins). Schnitt 1: Felder der Grundmengeneinheit (Nummer, Langtext, ISO-Name, DataNorm, Statistikkennzeichen, Rundung 0-4 nur nach oben bei aktiven Einheiten, Preisbezug Einheit/Menge, UN-Mengeneinheit Rec. 20) am Stamm, mitgelieferte Grundeinheiten (POST /artikel/mengeneinheiten/stamm/grundeinheiten), eRechnung liest den UN-Code zuerst aus dem Stamm, Maske stammdaten/mengeneinheit erweitert. Fachgrundlage docs/design/mengeneinheiten-aeins-uebernahme.md (auch Gebindetypen 0-9, Faktorherkunft, LVS). Schnitt 2 offen: Gebinde-Mengeneinheit (Gebindetyp, Ergebniseinheit, Faktoren 1-4, Faktorherkunft) im Rechenkern agrar_units.
+## M0-I18NEXT-GHSA-6JCC-20261123 — in arbeit, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
