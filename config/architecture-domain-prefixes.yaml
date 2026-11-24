@@ -278,6 +278,7 @@ domains:
       - warehouse_
       - mengeneinheiten_
       - gebinde_
+      - bestandsbewertung
       - lagergeld_
       - articles_
       - article_
