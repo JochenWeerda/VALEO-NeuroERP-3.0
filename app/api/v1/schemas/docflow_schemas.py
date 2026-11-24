@@ -1,7 +1,5 @@
 """Canonical DocFlow request/response models shared by every adapter."""
 from __future__ import annotations
-
-from decimal import Decimal
 from datetime import date, datetime
 from typing import Annotated, Any, Optional
 from pydantic import BaseModel, Field, ConfigDict as _ConfigDict, model_validator
@@ -123,7 +121,8 @@ class DocflowLineInput(BaseModel):
     unit_price: float = Field(default=0, ge=0)
     # Preis gilt je Preisbezugsmenge (z. B. 140,00 EUR je 100 Liter -> 100). Standard 1: Preis je Mengeneinheit.
     # Die Menge bleibt in ihrer Einheit; sie wird nicht in die Preiseinheit umgerechnet.
-    price_unit_quantity: Decimal = Field(default=Decimal("1"), gt=0)
+    # float wie quantity/unit_price (JSON-tauglich bei model_dump); gerechnet wird in Decimal ueber str().
+    price_unit_quantity: float = Field(default=1, gt=0, allow_inf_nan=False)
     discount_percent: float = Field(default=0, ge=0, le=100)
     # Steuerschluessel des Mandanten (tax_keys.code). Mit ihm kommt der Satz vom Server; ein abweichend
     # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.

@@ -53914,17 +53914,10 @@
             "title": "Expense Account"
           },
           "price_unit_quantity": {
-            "anyOf": [
-              {
-                "exclusiveMinimum": 0.0,
-                "type": "number"
-              },
-              {
-                "type": "string"
-              }
-            ],
-            "default": "1",
-            "title": "Price Unit Quantity"
+            "default": 1,
+            "exclusiveMinimum": 0.0,
+            "title": "Price Unit Quantity",
+            "type": "number"
           },
           "quantity": {
             "default": 0,

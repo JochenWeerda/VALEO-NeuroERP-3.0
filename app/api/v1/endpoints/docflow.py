@@ -135,6 +135,7 @@ def _row_to_header_out(svc: DocflowService, header_id: str, snapshot: Optional[d
                 quantity=float(i.get("quantity") or 0),
                 unit=i.get("unit"),
                 unit_price=float(i.get("unit_price") or 0),
+                price_unit_quantity=float(i.get("price_unit_quantity") or 1),
                 discount_percent=float(i.get("discount_percent") or 0),
                 tax_code=i.get("tax_code"),
                 expense_account=i.get("expense_account"),

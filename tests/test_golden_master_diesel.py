@@ -87,7 +87,7 @@ def test_docflow_rechnet_den_dieselbeleg_exakt(welt):
     auftrag = dienst.create_document(DocflowCreateRequest(
         doc_type="sales_order", doc_number=f"AU-GM-{uuid.uuid4().hex[:5]}", customer_id=welt["kunde"],
         items=[DocflowLineInput(article_number=FALL["artikel"], description=FALL["bezeichnung"], quantity=float(m),
-                                unit="l", unit_price=float(p), price_unit_quantity=BEZUG, tax_code="3")
+                                unit="l", unit_price=float(p), price_unit_quantity=float(BEZUG), tax_code="3")
                for _, m, p, _ in POSITIONEN]))
 
     kopf = welt["db"].execute(sa.text("SELECT total_net FROM domain_docflow.document_headers WHERE id = :id"),
