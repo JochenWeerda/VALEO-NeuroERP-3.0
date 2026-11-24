@@ -1151,3 +1151,5 @@ Abnahme: gezielter Lauf fuer Wave 17/18/85 mit 27 bestandenen und einem ueberspr
 Command-Monitor-Oberflaeche liest den JSON-Inhalt der Antwort und trennt den Abfragecache nach Mandant und Benutzer. Ein Frontend-Regressionstest prueft Datenprojektion, Mandantenwechsel und fehlende Identitaet. Die Studio-Routentrennung bleibt offen.
 
 PR 179: Der CI-Integritaetscheck meldete den Process-Kernel-Router mit 6115 gegen 6100 Zeilen. Die fachliche Overview-Berechnung liegt jetzt im bestehenden Idempotenzmodul, HTTP-Pfad und Antwort bleiben gleich. Der Router ist auf 6092 Zeilen gesunken und der Grenzwert wurde entsprechend abgesenkt.
+
+PostgreSQL-CI zu PR 179: Acht Fehler liefen ueber einen Test-Adapter, der execute_action direkt aufrief und die FastAPI-Mandanten-Dependency ausliess. Der gemeinsame AP-Kernel-Test mountet jetzt die echte Route und behaelt die signierten Test-Identitaeten und die transaktionale Test-DB bei.
