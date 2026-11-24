@@ -1153,3 +1153,7 @@ Command-Monitor-Oberflaeche liest den JSON-Inhalt der Antwort und trennt den Abf
 PR 179: Der CI-Integritaetscheck meldete den Process-Kernel-Router mit 6115 gegen 6100 Zeilen. Die fachliche Overview-Berechnung liegt jetzt im bestehenden Idempotenzmodul, HTTP-Pfad und Antwort bleiben gleich. Der Router ist auf 6092 Zeilen gesunken und der Grenzwert wurde entsprechend abgesenkt.
 
 PostgreSQL-CI zu PR 179: Acht Fehler liefen ueber einen Test-Adapter, der execute_action direkt aufrief und die FastAPI-Mandanten-Dependency ausliess. Der gemeinsame AP-Kernel-Test mountet jetzt die echte Route und behaelt die signierten Test-Identitaeten und die transaktionale Test-DB bei.
+
+## M0-BACKGROUND-JOBS-TENANT - reserviert, Codex
+
+Ziel: Hintergrundjob-Daten und Statuswechsel ueber HTTP an den verifizierten Mandanten binden. Dateibesitz: Background-Job-Router, Registry und Wave-86-Vertrag. Abnahme: tenantgebundene Listen, Zaehler, Einzelabrufe und Statuswechsel; bestehende interne Aufrufer vor der Umstellung pruefen.
