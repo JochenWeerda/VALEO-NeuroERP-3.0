@@ -1034,3 +1034,7 @@ HTTP-Abnahme im ASGI-Test: Admin-Rolle, Pflichtversion, Idempotenz und Auditgrun
 Browserabnahme konkret eingegrenzt: Lokales Backend-Image accepted-a5f60738a und Frontend-Image portal-3b750ff68 melden healthy. Die serverseitige Umbenennung fehlt im laufenden Backend nachweislich. Fuer die Sichtpruefung ist ein gemeinsam aus demselben freigegebenen Stand gebautes Frontend und Backend erforderlich. PR #179 (21cf2416f) wartet auf CI und Pflichtreview.
 
 Frontend-Abnahme auf Komponentenebene: Umbenennen ueber echten Eingabedialog, Vorbelegung, Trockenlauf, Vorschau und Begründigung. Der Ausfuehrungsaufruf sendet nur Name, gelesene Version und Auditgrund. Ein neuer und 17 angrenzende Vitest-Faelle gruen. Reale Browserabnahme bleibt offen.
+
+## M2-READVIEW-IMPORT - reserviert, Codex
+
+Ziel: direkten Rueckimport des Lese-Dialogs in das Mask-Builder-Paket aufloesen. Dateibesitz: ReadViewDialog.tsx. Abnahme: bestehender Test des Lese-Dialogs.
