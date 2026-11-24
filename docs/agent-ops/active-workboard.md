@@ -1133,3 +1133,5 @@ Mandantenliste: Laufzeitvertrag mit 51 synthetischen Zeilen geprueft. Der gemein
 Ziel: API-Schluessel-Einstieg an die bereits autorisierte Metadatenliste anbinden. Dateibesitz: ScreenDefinition, Routeneinstieg und generierte Artefakte. Abnahme: Schema, bestehender GET und Studio-Gates.
 
 API-Schluessel-Einstieg als Studio-Liste umgesetzt. Verwendet den geschuetzten GET fuer Schluesselmetadaten statt der Benutzer-Detailquelle. Keine Schreib- oder Exportaktion deklariert. Vertragstest und Studio-Inventar gruen; Browserabnahme offen.
+
+CLI-Register nach Entfernung der wirkungslosen Admin-Aktionen neu erzeugt. 380 ausfuehrbare CLI-Aktionen; zwei ueberholte Eintraege aus der Statistik entfernt. CLI-, MCP- und Listenrouten-Generatoren ohne Drift.
