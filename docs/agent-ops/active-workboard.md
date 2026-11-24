@@ -985,6 +985,9 @@ Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, L
 Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
 
+## M0-VOR-PUSH-SPERRE-20261124 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. scripts/vor_push.py nimmt selbst die Pruefstand-Sperre (%TEMP%/valeo_vor_push.lock, PID-Pruefung, verwaiste Sperre wird uebernommen, Frist 45 min). Bisher sperrte nur der Claude-Code-Hook; eine Sitzung, die vor_push direkt aufrief, baute valeo_probe mitten in fremden Laeufen neu auf. Der Hook setzt VALEO_PRUEFSTAND_SPERRE=gehalten (keine Doppelsperre). Gilt damit fuer Claude, Cursor und Codex, sobald sie scripts/vor_push.py aus main nutzen.
+
 ## M4-DOMAENEN-ABNAHME-20261123 — zur Abnahme, Cursor (M4)
 Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
 Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
@@ -1031,6 +1034,7 @@ Abnahme: je Luecke Integrationstest gegen PostgreSQL bzw. Browserkette laut Abna
 Meilenstein: M4. Owner: offen (Bahn CRM/Sicherheit). Quelle: docs/abnahme/domaenen/crm.md (D04).
 P0-Luecken: CR-01: Kundenliste /crm/customers/lookup liest public.kunden_lookup ohne tenant_id — Mandantenleck lesend; CR-01: KIM /crm/kim/customers liest und aendert public.kunden/kunden_crm360 per kunden_nr ohne Mandantenfilter; CR-03: KIM-Ansprechpartner ohne Mandantenfilter; CR-04: Kundenakte _kunde_finden Fallback 3 auf public.kunden ohne Mandant; CR-11: Zusammenfuehren verschiebt/loescht public.* ueber kunden_nr ohne tenant_id.
 Abnahme: je Luecke Integrationstest gegen PostgreSQL mit Fremdmandant 404/403; P0 im Blatt geschlossen.
+Hinweis 2026-11-24: Fix laeuft parallel als PR #188 (zur Abnahme).
 
 ## M4-CR-P1-LUECKEN-20261123 — offen (M4, P1)
 Meilenstein: M4. Owner: offen (Bahn CRM). Quelle: docs/abnahme/domaenen/crm.md (D04).

@@ -309,6 +309,60 @@ def stelle_pruefstand_zurueck() -> None:
               "(oder sofort: python scripts/pruefstand_db.py in einem Baum auf main).")
 
 
+#: Eine Pruefkette zur Zeit: alle teilen valeo_probe und spielen Branch-Migrationen voruebergehend ein. Dieselbe
+#: Sperrdatei nutzt der Claude-Code-Hook; er setzt VALEO_PRUEFSTAND_SPERRE=gehalten, damit hier nicht doppelt gesperrt
+#: wird (24.11.2026: eine Sitzung rief vor_push direkt auf und baute den Pruefstand mitten in fremden Laeufen neu).
+SPERRE = Path(os.environ.get("TEMP") or os.environ.get("TMP") or "/tmp") / "valeo_vor_push.lock"
+SPERRE_FRIST_S = 45 * 60
+
+
+def _lebt(pid: int) -> bool:
+    if os.name == "nt":
+        ausgabe = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True,
+                                 check=False).stdout
+        return str(pid) in ausgabe
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False
+
+
+class _Sperre:
+    """Dateisperre ueber alle Aufrufer (Hook, Sitzungen, Hand); eine verwaiste Sperre wird uebernommen."""
+
+    def __enter__(self):
+        self.eigene = os.environ.get("VALEO_PRUEFSTAND_SPERRE") != "gehalten"
+        if not self.eigene:
+            return self
+        frist = time.monotonic() + SPERRE_FRIST_S
+        gemeldet = False
+        while True:
+            try:
+                fd = os.open(SPERRE, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+                os.write(fd, f"{os.getpid()} {REPO}".encode())
+                os.close(fd)
+                return self
+            except FileExistsError:
+                try:
+                    pid = int(SPERRE.read_text().split()[0])
+                except (OSError, ValueError, IndexError):
+                    pid = 0
+                if not pid or not _lebt(pid):
+                    SPERRE.unlink(missing_ok=True)
+                    continue
+                if not gemeldet:
+                    print(f"  Pruefstand belegt ({SPERRE.read_text().strip()}) - warte.", flush=True)
+                    gemeldet = True
+                if time.monotonic() > frist:
+                    raise SystemExit("Pruefstand seit 45 Minuten belegt - abgebrochen.")
+                time.sleep(15)
+
+    def __exit__(self, *_):
+        if self.eigene:
+            SPERRE.unlink(missing_ok=True)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--base", default="origin/main")
@@ -318,12 +372,13 @@ def main() -> int:
         strom.reconfigure(errors="replace")
 
     url = _pruefstand_umgebung()
-    try:
-        stand_ok = pruefe_pruefstand(url, args.base)
-        register_rot = pruefe_register(args.base)
-        tests_rot = [] if args.ohne_tests else pruefe_tests(betroffene_tests(args.base))
-    finally:
-        stelle_pruefstand_zurueck()
+    with _Sperre():
+        try:
+            stand_ok = pruefe_pruefstand(url, args.base)
+            register_rot = pruefe_register(args.base)
+            tests_rot = [] if args.ohne_tests else pruefe_tests(betroffene_tests(args.base))
+        finally:
+            stelle_pruefstand_zurueck()
 
     _kopf("Ergebnis")
     if stand_ok and not register_rot and not tests_rot:
