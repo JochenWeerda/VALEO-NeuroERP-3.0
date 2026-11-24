@@ -1252,6 +1252,14 @@
         ]
       ]
     },
+    "fibu/abschluss-checklist-detail": {
+      "finance.closing.saldenvortrag": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
     "finance/ar-open-item": {
       "finance.ar.mahnung": [
         [

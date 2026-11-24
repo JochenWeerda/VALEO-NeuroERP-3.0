@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 796,
-    "screens_with_actions": 406,
+    "actions": 797,
+    "screens_with_actions": 407,
     "domains": 50
   },
   "actions": [
@@ -9557,6 +9557,31 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:fibu/abschluss-checklist-detail:saldenvortrag",
+      "label": "Saldenvortrag buchen",
+      "description": "Saldenvortrag buchen (fibu/abschluss-checklist-detail)",
+      "category": "mask-action",
+      "domain": "fibu",
+      "mask": "fibu/abschluss-checklist-detail",
+      "intent_phrases": [
+        "Saldenvortrag buchen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fibu/abschluss-checklist-detail",
+        "actionKey": "saldenvortrag",
+        "commandEndpoint": "/api/v1/finance/closing/saldenvortrag",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "finance.closing.saldenvortrag",
+        "forbiddenForAgents": true,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "high"
       }
     },
     {
