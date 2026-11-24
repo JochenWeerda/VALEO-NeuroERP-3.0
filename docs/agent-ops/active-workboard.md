@@ -1028,3 +1028,6 @@ Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Position
 
 ## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
+
+## M4-FOLGEARTIKEL-FK-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Coverage-Matrix Artikelmodell, Punkt Beziehungen referenziell). domain_shared.artikel_folgeartikel: zusammengesetzte Fremdschluessel (tenant_id, artikel_nr|folge_artikel_nr) auf articles (tenant_id, article_number), ON UPDATE/DELETE CASCADE, Pruefbedingung verschieden; Anlageweg antwortet 404 statt 500. Bestand frisch und gewachsen: 0 Zeilen.
