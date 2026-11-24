@@ -1127,3 +1127,7 @@ Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbe
 main 5f5888862 integriert. Architekturindex frisch und vollstaendig (1.146 Routen, 349 Dienste, 474 Endpoint-Module). L3-YAML-Vorspann repariert; Validator meldet 8 Tabellen, 26 Zuordnungen, 0 Fehler, 0 Warnungen. CI behandelt einen Validatorfehler jetzt als Fehler. Kein L3-Datenimport durchgefuehrt.
 
 Mandantenliste: Laufzeitvertrag mit 51 synthetischen Zeilen geprueft. Der gemeinsame Datenleser ruft beide Seiten mit skip=0 und skip=50 ab und leitet das Bearer-Token ohne Mandantenheader weiter. Der Transport war simuliert.
+
+## M2-ADMIN-API-KEYS-LIST - reserviert, Codex
+
+Ziel: API-Schluessel-Einstieg an die bereits autorisierte Metadatenliste anbinden. Dateibesitz: ScreenDefinition, Routeneinstieg und generierte Artefakte. Abnahme: Schema, bestehender GET und Studio-Gates.
