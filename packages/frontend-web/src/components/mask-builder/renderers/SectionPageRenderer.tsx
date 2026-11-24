@@ -23,6 +23,12 @@ export const HEADER_COLLAPSE_AT_PX = 96
 export const HEADER_EXPAND_BELOW_PX = 48
 const ANCHOR_GAP_PX = 16
 const LAZY_MOUNT_MARGIN = '600px 0px'
+/**
+ * Sections passed on the way to a jump target mount and load while the page scrolls and push the target down.
+ * For this long after a jump the target is realigned on every height change unless the user scrolls himself.
+ */
+export const JUMP_PIN_MS = 2500
+const SCROLL_KEYS = new Set(['PageDown', 'PageUp', 'ArrowDown', 'ArrowUp', 'Home', 'End', ' '])
 
 type ScrollTarget = HTMLElement | Window
 
@@ -97,6 +103,7 @@ export function SectionPageRenderer({
   const stickyRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef(new Map<string, HTMLElement>())
   const scrollTargetRef = useRef<ScrollTarget | null>(null)
+  const jumpPinRef = useRef<{ key: string; until: number } | null>(null)
   const [condensed, setCondensed] = useState(false)
   const [stickyHeight, setStickyHeight] = useState(0)
   const [stickyInset, setStickyInset] = useState(0)
@@ -183,9 +190,40 @@ export function SectionPageRenderer({
     if (!element) return
     mountSection(key)
     setActiveKey(key)
+    jumpPinRef.current = { key, until: Date.now() + JUMP_PIN_MS }
     element.scrollIntoView?.({ block: 'start', behavior: prefersReducedMotion() ? 'auto' : 'smooth' })
     if (moveFocus) element.querySelector<HTMLElement>('[data-section-heading]')?.focus({ preventScroll: true })
   }, [mountSection])
+
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root || typeof ResizeObserver === 'undefined') return
+    const release = (): void => { jumpPinRef.current = null }
+    const releaseOnScrollKey = (event: KeyboardEvent): void => {
+      if (SCROLL_KEYS.has(event.key)) release()
+    }
+    const observer = new ResizeObserver(() => {
+      const pin = jumpPinRef.current
+      if (!pin) return
+      if (Date.now() > pin.until) {
+        release()
+        return
+      }
+      sectionRefs.current.get(pin.key)?.scrollIntoView?.({ block: 'start', behavior: 'auto' })
+    })
+    observer.observe(root)
+    window.addEventListener('wheel', release, { passive: true })
+    window.addEventListener('touchstart', release, { passive: true })
+    window.addEventListener('pointerdown', release)
+    window.addEventListener('keydown', releaseOnScrollKey)
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('wheel', release)
+      window.removeEventListener('touchstart', release)
+      window.removeEventListener('pointerdown', release)
+      window.removeEventListener('keydown', releaseOnScrollKey)
+    }
+  }, [])
 
   useEffect(() => {
     if (!requestedSectionKey) return

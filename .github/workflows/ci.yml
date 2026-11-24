@@ -50,7 +50,7 @@ jobs:
               --raw docs/data/l3/raw_tables.json \
               --fail-on-warn \
               --report-unmapped
-          fi || true
+          fi
 
       - name: Verify canonical Quality Gate backend evidence
         env:

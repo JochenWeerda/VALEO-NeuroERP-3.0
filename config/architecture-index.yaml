@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-23
+# Architecture Index — generiert 2026-11-24
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-23T21:17:32Z'
+generated_at: '2026-11-24T10:14:52Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1908,6 +1908,7 @@ domains:
     - /admin/benutzer/neu
     - /admin/berechtigungen-matrix
     - /admin/branches
+    - /admin/branches/:id
     - /admin/command-monitor
     - /admin/compliance
     - /admin/compliance-dashboard
@@ -2210,7 +2211,6 @@ domains:
     - rag
     - read_model_snapshots
     - recent_documents
-    - reports_export
     - runtime_operations
     - security_monitoring
     - service_anfragen
@@ -2390,12 +2390,12 @@ domains:
     - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1145
-  frontend_routes_mapped: 1145
+  frontend_routes_total: 1146
+  frontend_routes_mapped: 1146
   backend_services_total: 349
   backend_services_mapped: 349
-  backend_endpoints_total: 475
-  backend_endpoints_mapped: 475
+  backend_endpoints_total: 474
+  backend_endpoints_mapped: 474
 unmapped:
   frontend_routes: []
   backend_services: []
