@@ -2442,10 +2442,8 @@ tools:
     idempotent: true
     risk_class: medium
     data_classification: LOCAL_ONLY
-    # Nutzerentscheidung 2026-11-08: Waehrend der Softwareerstellung sind alle MCP- und CLI-Schreibzugriffe
-    # freigegeben (app/services/mcp_write_capability.py). Vor dem Go-Live entfernen; dann gelten nur die
-    # write_capabilities unten (Freigabe je Aktion, alles andere geschlossen).
-    agent_write_phase: entwicklung
+    # Nutzerentscheidung 24.11.2026 (M5): Entwicklungsfreigabe geschlossen - es gelten nur die write_capabilities
+    # unten (Freigabe je Aktion, Default Deny). Frueher: agent_write_phase: entwicklung (08.11.2026).
     # Per-action release (Produktivbetrieb); each endpoint and version must match the canonical command.
     write_capabilities:
       - domain_command: logistik.versandprofil.deactivate.v1
