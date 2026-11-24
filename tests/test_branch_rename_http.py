@@ -16,7 +16,7 @@ BODY = {"name": "Nordwest", "expected_version": 123, "_auditReason": "Korrektur"
 def branch_http(monkeypatch):
     app = FastAPI()
     app.include_router(branches.router)
-    identity = {"roles": ["admin"], "sub": "synthetic-admin"}
+    identity = {"roles": ["admin"], "sub": "synthetic-admin", "identity_type": "human"}
     calls = []
 
     def current_user(request: Request):
@@ -60,3 +60,11 @@ def test_branch_preview_and_execution_use_verified_context(branch_http):
     assert execute["body"]["_mode"] == "execute"
     assert execute["performed_by"] == identity["sub"]
     assert execute["tenant_id"] == "synthetic-tenant"
+
+
+@pytest.mark.parametrize("claims", [{"identity_type": "service"}, {"identity_type": None}, {"agent_id": "synthetic-agent"}])
+def test_branch_rename_requires_a_human_identity(branch_http, claims):
+    client, identity, calls = branch_http
+    identity.update(claims)
+    assert client.post(PATH, json=BODY).status_code == 403
+    assert not calls

@@ -1081,3 +1081,5 @@ Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, Q
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
 
 main 4859a973d integriert. Dessen i18next-Aufloesung 26.7.2 uebernommen; Frozen-Lockfile-Installation und echter Sprachwechseltest gruen.
+
+Review PR 179: Rollenzuordnung aus dem Endpunkt erzeugt (admin erforderlich), HTTP prueft jetzt menschliche Identitaet entsprechend CLI und Studio. 10 HTTP-Tests, 17 Frontend-Rollentests sowie 11 Registrierungs- und OpenAPI-Vertraege bestanden. GitHub-Pflichtreview braucht eine berechtigte Kennung ausserhalb der PR-Autorenschaft.

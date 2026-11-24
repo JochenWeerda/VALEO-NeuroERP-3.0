@@ -234,6 +234,9 @@ async def rename_branch(
         if not command.reason:
             raise HTTPException(422, "Eine Auditbegründung ist erforderlich.")
     actor = gepruefter_akteur_aus_request(request)
+    claims = request.state.token_claims
+    if claims.get("identity_type") != "human" or claims.get("act") or claims.get("agent_id"):
+        raise HTTPException(403, "Eine geprüfte menschliche Identität ist erforderlich.")
     body = command.model_dump(by_alias=True, exclude_none=True)
     fingerprint = hashlib.sha256(
         json.dumps([tenant_id, actor, branch_id, body], sort_keys=True).encode("utf-8")

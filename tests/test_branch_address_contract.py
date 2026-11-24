@@ -76,7 +76,7 @@ async def test_branch_addresses_roundtrip_in_postgresql(require_db):
                     )
                 assert conflict.value.status_code == 409
                 assert (await get_branch(branch.id, tenant_id=tenant, db=db)).address == revised
-                request = SimpleNamespace(state=SimpleNamespace(token_claims={"sub": str(uuid4())}))
+                request = SimpleNamespace(state=SimpleNamespace(token_claims={"sub": str(uuid4()), "identity_type": "human"}))
                 payload = {"name": "Nordwest", "expected_version": updated.version}
                 dry_run = await rename_branch(
                     branch.id, BranchRenameCommand(**payload, _mode="dryRun"),
