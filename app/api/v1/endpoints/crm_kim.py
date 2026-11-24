@@ -342,6 +342,15 @@ def list_contacts(
         "WHERE kunden_nr = :k ORDER BY prioritaet NULLS LAST, nachname",
         {"k": kunden_nr},
     )
+    if not rows:
+        # Alt-Schema ohne email-Spalte: gleiche Liste ohne email.
+        rows = _safe(
+            db,
+            "SELECT id, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, "
+            "geburtsdatum FROM public.kunden_ansprechpartner "
+            "WHERE kunden_nr = :k ORDER BY prioritaet NULLS LAST, nachname",
+            {"k": kunden_nr},
+        )
     out = []
     for r in rows:
         d = dict(r)

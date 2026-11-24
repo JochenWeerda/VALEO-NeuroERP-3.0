@@ -434,7 +434,7 @@ class BusinessPartnerService:
                 text(
                     f"SELECT k.* FROM public.kunden_lookup k "
                     f"WHERE {KUNDE_GEHOERT_MANDANT} ORDER BY k.name LIMIT :lim"
-                ),
+                ),  # nosec B608  # reviewed-safe: Mandantenfragment ist Konstante, Werte gebunden
                 params,
             ).mappings().all()
         else:
@@ -446,7 +446,7 @@ class BusinessPartnerService:
                     f"WHERE {KUNDE_GEHOERT_MANDANT} "
                     f"AND (k.matchcode LIKE :mc OR k.kunden_nr ILIKE :term OR k.name ILIKE :term OR k.plz LIKE :plz) "
                     f"ORDER BY k.name LIMIT :lim"
-                ),
+                ),  # nosec B608  # reviewed-safe: Mandantenfragment ist Konstante, Werte gebunden
                 params,
             ).mappings().all()
         return [

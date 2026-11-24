@@ -52,7 +52,7 @@ def public_kunde_im_mandanten(
             WHERE k.kunden_nr = :nr AND {KUNDE_GEHOERT_MANDANT}
             LIMIT 1
             """
-        ),
+        ),  # nosec B608  # reviewed-safe: KUNDE_GEHOERT_MANDANT ist Modulkonstante, Werte gebunden
         {"nr": kunden_nr, "tid": tenant_id},
     ).mappings().first()
     return dict(row) if row else None
