@@ -1,16 +1,16 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 775,
+  "tables": 776,
   "by_class": {
-   "A": 709,
+   "A": 710,
    "B": 22,
    "C": 9,
    "D": 35
   },
-  "rls_enabled": 677,
+  "rls_enabled": 678,
   "tenant_types": {
-   "character varying": 334,
+   "character varying": 335,
    "character varying(100)": 9,
    "character varying(120)": 62,
    "character varying(128)": 1,
@@ -2799,6 +2799,14 @@
   },
   {
    "table": "domain_inventory.articles",
+   "class": "A",
+   "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_inventory.bestandsbuchung_schluessel",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,

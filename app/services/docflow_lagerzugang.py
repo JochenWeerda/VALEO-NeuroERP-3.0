@@ -96,7 +96,8 @@ def buche_lagerzugang(db: Session, tenant_id: str, header: dict[str, Any], posit
     for pos, artikel, menge in vorhaben:
         _bewegung(db, tenant_id, artikel, lager, "einlagerung", menge, heute, beleg_nr, str(header["id"]),
                   pos.get("charge") or pos.get("batch_id"), akteur, f"Wareneingang {beleg_nr} Pos. {pos.get('line_number')}",
-                  einstand=einstandspreis(pos, menge))
+                  einstand=einstandspreis(pos, menge),
+                  schluessel=f"{QUELLE}:{header['id']}:{pos.get('id') or pos.get('line_number')}:einlagerung")
     return lager
 
 
@@ -115,13 +116,23 @@ def storniere_lagerzugang(db: Session, tenant_id: str, header: dict[str, Any], g
         _bewegung(db, tenant_id, {"id": z["article_id"], "unit": z["unit"]}, z["warehouse_id"], "abgang",
                   Decimal(str(z["quantity"])), heute, str(header.get("doc_number") or ""), str(header["id"]),
                   z["charge"], akteur, f"Storno Wareneingang {header.get('doc_number')}: {grund}", storno_ref=z["id"],
-                  einstand=Decimal(str(z["unit_cost"])) if z["unit_cost"] is not None else None)
+                  einstand=Decimal(str(z["unit_cost"])) if z["unit_cost"] is not None else None,
+                  schluessel=f"storno:{z['id']}")
     return len(zugaenge)
 
 
 def _bewegung(db: Session, tenant_id: str, artikel: Any, lager: str, art: str, menge: Decimal, datum: Any,
               beleg_nr: str, header_id: str, charge: Any, akteur: Optional[str], notiz: str,
-              storno_ref: Optional[str] = None, einstand: Optional[Decimal] = None) -> None:
+              storno_ref: Optional[str] = None, einstand: Optional[Decimal] = None,
+              schluessel: Optional[str] = None) -> str:
+    """Eine Bewegung; mit ``schluessel`` hoechstens einmal je Vorgang (bestandsbuchung_schluessel)."""
+    from app.services.bestandsbuchung_schluessel import beanspruche, verknuepfe
+
+    if schluessel:
+        vorhanden = beanspruche(db, tenant_id, schluessel)
+        if vorhanden is not None:
+            return vorhanden  # schon gebucht: keine zweite Bewegung, kein zweiter Bestandszugang
+    bewegung_id = str(uuid.uuid4())
     vorher = current_stock(db, tenant_id=tenant_id, article_id=artikel["id"], warehouse_id=lager)
     delta = float(menge) if art == "einlagerung" else -float(menge)
     db.execute(text("""
@@ -131,7 +142,7 @@ def _bewegung(db: Session, tenant_id: str, artikel: Any, lager: str, art: str, m
              ownership_type, storage_fee_relevant, charge, storno_ref, unit_cost, total_cost)
         VALUES (:id, :t, :a, :w, :art, :m, :e, :d, :nr, :q, :h, :notiz, :vorher, :nachher, :wer, true,
                 'owned', false, :charge, :storno, :kosten, :gesamt)
-    """), {"id": str(uuid.uuid4()), "t": tenant_id, "a": artikel["id"], "w": lager, "art": art, "m": menge,
+    """), {"id": bewegung_id, "t": tenant_id, "a": artikel["id"], "w": lager, "art": art, "m": menge,
            "e": artikel.get("unit"), "d": datum, "nr": beleg_nr, "q": QUELLE, "h": header_id, "notiz": notiz,
            "vorher": vorher, "nachher": vorher + delta, "wer": akteur, "charge": charge, "storno": storno_ref,
            "kosten": einstand, "gesamt": (einstand * menge).quantize(Decimal("0.01")) if einstand is not None else None})
@@ -140,3 +151,6 @@ def _bewegung(db: Session, tenant_id: str, artikel: Any, lager: str, art: str, m
         "UPDATE domain_inventory.articles SET current_stock = COALESCE(current_stock, 0) + :m, "
         "available_stock = COALESCE(current_stock, 0) + :m - COALESCE(reserved_stock, 0), updated_at = NOW() "
         "WHERE id::text = :id AND tenant_id = :t"), {"m": delta, "id": artikel["id"], "t": tenant_id})
+    if schluessel:
+        verknuepfe(db, tenant_id, schluessel, bewegung_id)
+    return bewegung_id
