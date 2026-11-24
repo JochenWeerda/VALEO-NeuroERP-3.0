@@ -1,21 +1,21 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 773,
+  "tables": 775,
   "by_class": {
-   "A": 707,
+   "A": 709,
    "B": 22,
    "C": 9,
    "D": 35
   },
-  "rls_enabled": 675,
+  "rls_enabled": 677,
   "tenant_types": {
-   "character varying": 333,
+   "character varying": 334,
    "character varying(100)": 9,
    "character varying(120)": 62,
    "character varying(128)": 1,
    "character varying(255)": 1,
-   "character varying(36)": 80,
+   "character varying(36)": 81,
    "character varying(50)": 1,
    "character varying(64)": 103,
    "character varying(80)": 24,
@@ -1505,6 +1505,14 @@
    "table": "domain_docflow.document_headers",
    "class": "A",
    "tenant_type": "character varying(64)",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_docflow.document_item_gebinde_abbilder",
+   "class": "A",
+   "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
@@ -4528,6 +4536,14 @@
    "table": "domain_shared.artikel_folgeartikel",
    "class": "A",
    "tenant_type": "character varying",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_shared.artikel_gebindefaktoren",
+   "class": "A",
+   "tenant_type": "character varying(36)",
    "rls": true,
    "force_rls": false,
    "policies": 4

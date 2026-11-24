@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-24
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-24T13:23:56Z'
+generated_at: '2026-11-24T14:57:43Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1684,6 +1684,7 @@ domains:
     - bestandsbewertung
     - etikettendruck_service
     - foreign_goods_worklist_service
+    - gebinde_aufloesung
     - inventory_auxiliary_service
     - inventory_balance_reconciliation
     - inventory_compat_service
@@ -2394,8 +2395,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1145
   frontend_routes_mapped: 1145
-  backend_services_total: 351
-  backend_services_mapped: 351
+  backend_services_total: 352
+  backend_services_mapped: 352
   backend_endpoints_total: 475
   backend_endpoints_mapped: 475
 unmapped:

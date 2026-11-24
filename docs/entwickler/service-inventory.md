@@ -182,6 +182,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `gap_pipeline_service` | Service layer for the GAP (Gemeinsame Agrarpolitik) ETL pipeline endpoints. |
 | `gap_progress` | In-process job- and progress-tracking for the GAP ETL pipeline. |
 | `gdpr_request_processor` | Explicit CRM-subject processing; never substitutes a system-user lookup. |
+| `gebinde_aufloesung` | Gebinderechnung mit Stammdaten - der eine Weg fuer Einkauf, Verkauf, Lager, Waage, Fakturierung, Bewertung. |
 | `genossenschaft_service` | Mitgliederregister einer eG — eine Wahrheit uber den Anteilsbestand. |
 | `geo_pipeline` | Geo-Pipeline – Betriebsadressen → Koordinaten für den Außendienst-Viewer. |
 | `guardrails` | Guardrails Service — NC-C3 |

@@ -131,8 +131,10 @@ def test_faktorpflege_nur_im_suchpfad(herkunft, stufe, erlaubt):
 
 
 def test_abbild_fuer_den_beleg_haelt_faktoren_und_herkunft_fest():
-    abbild = berechne_gebinde(2, D(10), H.ARTIKEL, {H.ARTIKEL: [D(24), D(6)]}, rundung=0).als_dict()
+    abbild = berechne_gebinde(2, D(10), H.ARTIKEL, {H.ARTIKEL: [D(24), D(6)]}, rundung=0,
+                              einheit="pal", ergebniseinheit="fl").als_dict()
 
     assert abbild == {"gebindetyp": 2, "faktorherkunft": 3, "herkunft_verwendet": 3, "faktoren": ["24", "6"],
-                      "anzahl": "10", "rundung": 0, "ergebnis": "1440"}
+                      "anzahl": "10", "einheit": "pal", "ergebnis": "1440", "ergebniseinheit": "fl",
+                      "rundung": 0, "version": "gebinde-1"}
     assert berechne_gebinde(0, D(4), H.MENGENEINHEIT, {}).herkunft_verwendet is None
