@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-24
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -55,6 +55,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `beleg_druck` | Belegdruck: ein PDF je DocFlow-Beleg aus dem Belegvertrag (BELEG-052 Stufe 2b, 09.11.2026). |
 | `beleg_erechnung` | E-Rechnung (XRechnung 3.0, UBL 2.1) aus dem DocFlow-Beleg (BELEG-052 Phase 2, 10.11.2026). |
 | `beleg_liste` | Belegliste aus DocFlow: eine Quelle fuer Maske (Familie ``beleg-liste``), CLI, MCP (``beleg_suchen``) und REST. |
+| `bestandsbewertung` | Bestandsbewertung zum gleitenden Durchschnittspreis (Nutzerentscheid 24.11.2026, HGB § 240 Abs. 4 / § 256). |
 | `bestell_kommunikation_service` | Kommunikation zu einer Bestellung (Reiter "Kommunikation") - nur noch lesend. |
 | `bewerbung_einwilligung_service` | Erteilen und Widerrufen der Aufbewahrungs-Einwilligung. |
 | `bewerbung_loeschlauf_service` | Der Loeschlauf fuer Bewerberdaten. |

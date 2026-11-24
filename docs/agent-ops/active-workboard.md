@@ -1004,3 +1004,5 @@ Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbe
 
 ## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
+## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitender Durchschnitt). Einstandspreis beim Lagerzugang aus DocFlow (unit_cost/total_cost, Storno zum Zugangspreis), app/services/bestandsbewertung.py: gleitender_durchschnitt und bewerte je Lagereinheit; nicht umrechenbare Einheit -> BewertungNichtBestimmbar. Schnitt 2 (Buchungsentwurf) gestapelt auf diesem Zweig.
