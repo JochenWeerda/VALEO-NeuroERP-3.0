@@ -1071,3 +1071,5 @@ Verdeckten statischen Zahlarten-Handler und leeren Berichtsexport entfernt. Open
 ## M0-CRM-ROUTER-DUPLIKATE - reserviert, Codex
 
 Ziel: sechs ueberschattete CRM-Registrierungen entfernen. Dateibesitz: betroffene Dekoratoren in app/crm/router.py, API-Artefakte. Abnahme: alle HTTP-Pfade und IDs bleiben erhalten, OpenAPI beschreibt die zuerst registrierten Handler.
+
+Sechs ueberschattete CRM-Registrierungen entfernt. OpenAPI ohne Duplikatwarnungen erzeugt. 3.221 Pfade, Methoden und IDs erhalten. Das Endpoint-Inventar zur Entfernung des Reporting-Stubs nachgezogen.

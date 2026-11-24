@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-24
 version: 3.0.0
 description: Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -405,7 +405,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `reklamation_api` | — |
 | `report_print` | Report and print endpoints for traceability, weighing PDFs and labels. |
 | `reporting_api` | — |
-| `reports_export` | Reports Export — generischer Berichts-Download-Endpunkt |
 | `rfq` | Einkauf — RFQ (Request for Quotation) — Anfrageprozess |
 | `rohware_sammelabrechnung` | Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (Agrar-Spezialsoftware Feature). |
 | `rohware_schema` | — |

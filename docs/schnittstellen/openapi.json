@@ -36032,17 +36032,6 @@
         "title": "ConnectorsUpdateIn",
         "type": "object"
       },
-      "ConsentChannel": {
-        "enum": [
-          "email",
-          "phone",
-          "sms",
-          "post",
-          "all"
-        ],
-        "title": "ConsentChannel",
-        "type": "string"
-      },
       "ConsentCheckRequest": {
         "properties": {
           "consent_type": {
@@ -36059,6 +36048,61 @@
           "consent_type"
         ],
         "title": "ConsentCheckRequest",
+        "type": "object"
+      },
+      "ConsentCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "minLength": 1,
+            "title": "Channel",
+            "type": "string"
+          },
+          "consent_type": {
+            "minLength": 1,
+            "title": "Consent Type",
+            "type": "string"
+          },
+          "contact_id": {
+            "minLength": 1,
+            "title": "Contact Id",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "source": {
+            "default": "manual",
+            "title": "Source",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "contact_id",
+          "channel",
+          "consent_type"
+        ],
+        "title": "ConsentCreate",
         "type": "object"
       },
       "ConsentGrantRequest": {
@@ -36083,108 +36127,6 @@
           "consent_type"
         ],
         "title": "ConsentGrantRequest",
-        "type": "object"
-      },
-      "ConsentResponse": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ConsentChannel"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "granted": {
-            "default": true,
-            "title": "Granted",
-            "type": "boolean"
-          },
-          "granted_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Granted At"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "ip_address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ip Address"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "partner_id": {
-            "title": "Partner Id",
-            "type": "string"
-          },
-          "purpose": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Purpose",
-            "type": "string"
-          },
-          "revoked_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Revoked At"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "partner_id",
-          "channel",
-          "purpose",
-          "id",
-          "tenant_id"
-        ],
-        "title": "ConsentResponse",
         "type": "object"
       },
       "ConsentRevokeRequest": {
@@ -181183,61 +181125,6 @@
         "title": "AssignIn",
         "type": "object"
       },
-      "app__api__v1__endpoints__crm_consents__ConsentCreate": {
-        "additionalProperties": false,
-        "properties": {
-          "channel": {
-            "minLength": 1,
-            "title": "Channel",
-            "type": "string"
-          },
-          "consent_type": {
-            "minLength": 1,
-            "title": "Consent Type",
-            "type": "string"
-          },
-          "contact_id": {
-            "minLength": 1,
-            "title": "Contact Id",
-            "type": "string"
-          },
-          "expires_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expires At"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          }
-        },
-        "required": [
-          "contact_id",
-          "channel",
-          "consent_type"
-        ],
-        "title": "ConsentCreate",
-        "type": "object"
-      },
       "app__api__v1__endpoints__crm_kim__Customer": {
         "properties": {
           "abcStatus": {
@@ -186079,62 +185966,6 @@
         "title": "AmendmentCreate",
         "type": "object"
       },
-      "app__crm__schemas__ConsentCreate": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ConsentChannel"
-          },
-          "granted": {
-            "default": true,
-            "title": "Granted",
-            "type": "boolean"
-          },
-          "ip_address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ip Address"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "partner_id": {
-            "title": "Partner Id",
-            "type": "string"
-          },
-          "purpose": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Purpose",
-            "type": "string"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          }
-        },
-        "required": [
-          "partner_id",
-          "channel",
-          "purpose"
-        ],
-        "title": "ConsentCreate",
-        "type": "object"
-      },
       "app__crm__schemas__Contact": {
         "properties": {
           "address_city": {
@@ -186334,122 +186165,6 @@
           "email"
         ],
         "title": "ContactCreate",
-        "type": "object"
-      },
-      "app__crm__schemas__ContactUpdate": {
-        "properties": {
-          "address_city": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address City"
-          },
-          "address_country": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Country"
-          },
-          "address_street": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Street"
-          },
-          "address_zip": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Zip"
-          },
-          "company": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Company"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone"
-          },
-          "type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ContactType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "ContactUpdate",
         "type": "object"
       },
       "app__crm__schemas__Lead": {
@@ -256342,12 +256057,11 @@
     },
     "/api/v1/crm/consents": {
       "get": {
-        "description": "List consent entries.",
         "operationId": "list_consents_api_v1_crm_consents_get",
         "parameters": [
           {
             "in": "query",
-            "name": "partner_id",
+            "name": "contact_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -256358,7 +256072,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Partner Id"
+              "title": "Contact Id"
             }
           },
           {
@@ -256376,6 +256090,45 @@
               ],
               "title": "Channel"
             }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -256384,7 +256137,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ConsentResponse"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Consents Api V1 Crm Consents Get",
                   "type": "array"
@@ -256409,20 +256162,19 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Consents",
+        "summary": "Einwilligungen auflisten",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       },
       "post": {
-        "description": "Record opt-in/opt-out consent for a partner (DSGVO Art. 6/7).",
         "operationId": "create_consent_api_v1_crm_consents_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ConsentCreate"
+                "$ref": "#/components/schemas/ConsentCreate"
               }
             }
           },
@@ -256433,7 +256185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConsentResponse"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -256455,10 +256207,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Consent",
+        "summary": "Einwilligung anlegen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       }
     },
@@ -256581,7 +256333,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v1__endpoints__crm_consents__ConsentCreate"
+                "$ref": "#/components/schemas/ConsentCreate"
               }
             }
           },
@@ -257022,7 +256774,6 @@
     },
     "/api/v1/crm/consents/{consent_id}/revoke": {
       "post": {
-        "description": "Revoke an existing consent (opt-out).",
         "operationId": "revoke_consent_api_v1_crm_consents__consent_id__revoke_post",
         "parameters": [
           {
@@ -257033,16 +256784,48 @@
               "title": "Consent Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reason"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Revoke Consent Api V1 Crm Consents  Consent Id  Revoke Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -257064,10 +256847,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Revoke Consent",
+        "summary": "Einwilligung widerrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       }
     },
@@ -257342,7 +257125,6 @@
     },
     "/api/v1/crm/contacts/{contact_id}": {
       "delete": {
-        "description": "Delete contact (soft delete or hard delete)",
         "operationId": "delete_contact_api_v1_crm_contacts__contact_id__delete",
         "parameters": [
           {
@@ -257375,14 +257157,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Contact",
+        "summary": "Contact löschen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       },
       "get": {
-        "description": "Get contact by ID",
         "operationId": "get_contact_api_v1_crm_contacts__contact_id__get",
         "parameters": [
           {
@@ -257400,7 +257181,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Contact"
+                  "$ref": "#/components/schemas/ContactsOut"
                 }
               }
             },
@@ -257422,14 +257203,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Contact",
+        "summary": "Contact abrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       },
       "put": {
-        "description": "Update contact",
         "operationId": "update_contact_api_v1_crm_contacts__contact_id__put",
         "parameters": [
           {
@@ -257446,7 +257226,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ContactUpdate"
+                "$ref": "#/components/schemas/app__api__v1__schemas__crm__ContactUpdate"
               }
             }
           },
@@ -257457,7 +257237,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Contact"
+                  "$ref": "#/components/schemas/ContactsOut"
                 }
               }
             },
@@ -257479,10 +257259,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Contact",
+        "summary": "Contact aktualisieren",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       }
     },
