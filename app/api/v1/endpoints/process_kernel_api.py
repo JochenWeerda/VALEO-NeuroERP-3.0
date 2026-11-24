@@ -507,8 +507,14 @@ def build_explainability(body: dict) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 @router.post("/actions/execute", response_model=ProcessKernelOut, summary="Action ausfÃ¼hren", dependencies=SCHREIBEN["FACHLICH"])
-def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
+def execute_action(
+    body: ActionExecutionRequest,
+    db: Session = Depends(get_db),
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Fuehrt einen Process-Kernel-Command ueber den zentralen Action-Layer aus."""
+    if body.tenant_id != active_tenant_id:
+        raise HTTPException(status_code=403, detail="Mandant stimmt nicht mit der Anmeldung ueberein")
     body.normalized_reference_context()
     try:
         get_aggregate_definition(body.aggregate_type)

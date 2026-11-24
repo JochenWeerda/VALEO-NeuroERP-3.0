@@ -398,6 +398,12 @@ def test_get_action_by_idempotency_returns_same_snapshot_as_execution_lookup(cli
     assert client.get(f"/process/actions/{execution_id}").status_code == 404
     assert client.get("/process/actions/idempotency/t1/idem-14").status_code == 404
     assert client.get("/process/actions/idempotency/t2/idem-14").status_code == 404
+    denied_replay = client.post(
+        "/process/actions/execute",
+        content=response.request.content,
+        headers={"Content-Type": "application/json"},
+    )
+    assert denied_replay.status_code == 403
 
 
 def test_get_action_endpoints_return_404_for_unknown_records(client: TestClient):

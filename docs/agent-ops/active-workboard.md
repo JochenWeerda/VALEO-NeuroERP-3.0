@@ -1143,3 +1143,5 @@ Ziel: Betriebszaehler des Command Monitors auf den geprueften aktiven Mandanten 
 Command-Monitor-Overview zeigt Store-Zaehler und ausgefuehrte Kommandos des geprueften Mandanten. Der statische Capability-Katalog bleibt global. Drei Tests gruen, OpenAPI unveraendert und reproduzierbar. Weitere Monitoring-Wege sind nicht Teil dieses Nachweises.
 
 Einzelabrufe nach Ausfuehrungs-ID und Idempotenzschluessel sind an den aktiven Mandanten gebunden. Eigene Eintraege bleiben in beiden Abrufen verfuegbar; fremde und unbekannte Eintraege liefern HTTP 404.
+
+Der Ausfuehrungs-Endpunkt weist einen abweichenden Mandanten im Request vor dem Idempotenz-Lookup und vor der Kommandoausfuehrung mit HTTP 403 ab. Der HTTP-Vertrag prueft auch den abgewiesenen Replay nach einem Mandantenwechsel.
