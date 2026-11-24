@@ -459,13 +459,16 @@ def setze_gebinde(
 @router.get("/stamm/{einheit_kuerzel}/gebindefaktoren", response_model=None, summary="Stufenfaktoren lesen")
 def list_gebindefaktoren(
     einheit_kuerzel: str,
+    limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
     zeilen = db.execute(text(
         "SELECT stufe, bezug_id, faktor1, faktor2, faktor3, faktor4, geaendert_von, updated_at "
         "FROM domain_shared.artikel_gebindefaktoren WHERE tenant_id = :t AND einheit_kuerzel = :k "
-        "ORDER BY stufe, bezug_id"), {"t": tenant_id, "k": einheit_kuerzel}).mappings().all()
+        "ORDER BY stufe, bezug_id LIMIT :limit OFFSET :offset"),
+        {"t": tenant_id, "k": einheit_kuerzel, "limit": limit, "offset": offset}).mappings().fetchmany(limit)
     return [dict(z) for z in zeilen]
 
 
@@ -491,7 +494,7 @@ def setze_gebindefaktoren(
         db.rollback()
         raise _gebinde_fehler(fehler) from fehler
     db.commit()
-    return list_gebindefaktoren(einheit_kuerzel, db=db, tenant_id=tenant_id)
+    return list_gebindefaktoren(einheit_kuerzel, limit=1000, offset=0, db=db, tenant_id=tenant_id)
 
 
 @router.delete("/stamm/{einheit_kuerzel}/gebindefaktoren/{stufe}/{bezug_id}", status_code=204,
