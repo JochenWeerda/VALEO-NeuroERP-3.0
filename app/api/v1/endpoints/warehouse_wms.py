@@ -2,7 +2,7 @@ from __future__ import annotations
 from decimal import Decimal
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -70,6 +70,8 @@ class StockMovementIn(BaseModel):
     unit_cost: Optional[Decimal] = None
     movement_type: str
     reference: Optional[str] = None
+    # Wiederholungsschluessel des Aufrufers: dieselbe Buchung mit demselben Schluessel bucht nur einmal (2b-2).
+    idempotency_key: Optional[str] = Field(None, min_length=8, max_length=160)
 
 
 class FefoSuggestionIn(BaseModel):
@@ -255,6 +257,7 @@ def book_stock_movement(payload: StockMovementIn, svc: WarehouseService = Depend
             unit_cost=payload.unit_cost,
             movement_type=payload.movement_type,
             reference=payload.reference,
+            buchungsschluessel=f"wms:{payload.idempotency_key}" if payload.idempotency_key else None,
         )
     except ValueError as e:
         raise HTTPException(status_code=422, detail=str(e))

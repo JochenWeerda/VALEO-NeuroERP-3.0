@@ -277,6 +277,7 @@ domains:
       - inventory_
       - warehouse_
       - mengeneinheiten_
+      - bestandsbuchung_
       - bestandsbewertung
       - lagergeld_
       - articles_

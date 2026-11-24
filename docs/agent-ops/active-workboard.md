@@ -1018,3 +1018,6 @@ Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitende
 
 ## M0-TEST-CONVERT-WARTEN-20261124 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Positionszeile des Uebernahme-Dialogs zu, die erst nach dem Dialog rendert; unter CI-Last rot (#186, Lauf 45371355464 Versuch 1). Test wartet jetzt auf die Zeile (findByLabelText); 5 Laeufe hintereinander gruen.
+
+## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.

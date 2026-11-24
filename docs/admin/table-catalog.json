@@ -30239,6 +30239,53 @@
             "app/services/warehouse_service.py"
           ]
         },
+        "bestandsbuchung_schluessel": {
+          "columns": [
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "schluessel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bewegung_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "bewegung_id",
+              "references": "domain_inventory.inventory_stock_movements.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_stock_movements.tenant_id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "schluessel"
+          ],
+          "read_by": [
+            "app/services/bestandsbuchung_schluessel.py"
+          ],
+          "written_by": [
+            "app/services/bestandsbuchung_schluessel.py"
+          ]
+        },
         "bin_locations": {
           "columns": [
             {
