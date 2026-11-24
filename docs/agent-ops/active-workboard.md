@@ -978,6 +978,13 @@ Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. RE
 Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "posted" ohne Rechnung, Erloes oder offenen Posten. Neu: POST /api/v1/inventory/storage-fees/runs/{run_id}/rechnungen legt je Einlagerer einen DocFlow-Rechnungsentwurf (sales_invoice, Quelle lagergeld) mit einer Position je Lagergeld-Zeile an; Verkaufs-Steuerschluessel ausdruecklich (keine Vorgabe), wiederholbar ohne Doppel. Freigabe und Buchung ueber die Belegmaske.
 Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
 
+## M0-I18NEXT-GHSA-6JCC-20261123 — in arbeit, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
 ## M4-DOMAENEN-ABNAHME-20261123 — zur Abnahme, Cursor (M4)
 Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
 Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
