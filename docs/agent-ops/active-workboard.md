@@ -1161,3 +1161,7 @@ Ziel: Hintergrundjob-Daten und Statuswechsel ueber HTTP an den verifizierten Man
 HTTP-Liste und Queue-Statistik, Einreihen, Entnahme, Einzelabruf, Abschluss und Fehlerstatus verwenden den geprueften Mandanten. Fremde Selektoren liefern 403, fremde Job-IDs 404. Die Wave-86-Faelle wurden um zwei Mandanten erweitert. Syntax und Diff geprueft; Testabnahme und Push stehen aus.
 
 Studio-Folgebefund: process/background-jobs liest bisher den Metadatenknoten queue als Zeilenliste und erwartet job_type, created_at und attempts. Die mandantengebundene Listenroute liefert jobs mit job_id, typ, erstellt_am und retry_count. Die Arbeit an der eigenen Studio-Route muss diese tatsaechliche Zeilenform verwenden.
+
+## M2-BACKGROUND-JOBS-STUDIO - reserviert, Codex
+
+Ziel: eigene Studio-Listenroute fuer Hintergrundjobs. Dateibesitz: ScreenDefinition, Routeneinstieg und abgeleitete Kataloge. Abnahme: echte mandantengebundene Jobzeilen, keine Scheinaktionen und keine Doppelbelegung der Monitorroute.
