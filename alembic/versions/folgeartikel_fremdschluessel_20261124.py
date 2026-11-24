@@ -1,7 +1,7 @@
 """Folgeartikel referenziell: Artikel und Folgeartikel muessen im selben Mandanten existieren (24.11.2026).
 
 Revision ID: folgeartikel_fremdschluessel_20261124
-Revises: bestandsbuchung_schluessel_20261124
+Revises: journal_status_pflicht_20261124
 
 Coverage-Matrix L3 -> VALEO (docs/design/artikelmodell-zuordnung-aeins-l3.md, 6.1): ``domain_shared.artikel_folgeartikel``
 fuehrte Artikel- und Folgeartikelnummer als freien Text - ein Folgeartikel konnte auf einen Artikel zeigen, den es
@@ -15,7 +15,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "folgeartikel_fremdschluessel_20261124"
-down_revision = "bestandsbuchung_schluessel_20261124"
+down_revision = "journal_status_pflicht_20261124"
 branch_labels = None
 depends_on = None
 

@@ -321,6 +321,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
 | `journal_periode_nachfuellen_20261119` | Buchungsperiode der Journalbuchungen aus dem Buchungsdatum nachfuellen (M3). |
+| `journal_status_pflicht_20261124` | Journalstatus ist Pflicht: Vorgabe draft, NOT NULL, nur die vier Status des Buchungsdienstes (24.11.2026). |
 | `konto_sperre_20261012` | Kontosperre: ein gesperrtes Konto nimmt keine neue Buchungszeile an. |
 | `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |

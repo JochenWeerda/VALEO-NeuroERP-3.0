@@ -21704,7 +21704,7 @@
             },
             {
               "name": "status",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
