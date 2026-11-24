@@ -26,8 +26,7 @@ from ....core.action_execution import (
     ActionExecutionService,
     build_action_conflict_error,
 )
-from ....core.action_idempotency import get_action_idempotency_store
-from ....core.business_commands import build_core_command_catalog
+from ....core.action_idempotency import build_idempotency_overview, get_action_idempotency_store
 from ....core.process_commands import get_process_command_catalog
 from ....core.process_references import build_process_reference_context
 from ....core.policy_decisions import PolicyOverrideLayer, resolve_policy_override_layers
@@ -540,30 +539,8 @@ def execute_action(
 @router.get("/actions/idempotency/overview", response_model=ProcessKernelOut, summary="Idempotency overview abrufen")
 def get_idempotency_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     """Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer."""
-    store = get_action_idempotency_store()
-    store_summary = store.summary(tenant_id=tenant_id)
-    catalog = build_core_command_catalog()
-    idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
-    human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]
-    agent_ready_commands = [cmd.command_name for cmd in catalog if cmd.allowed_agent_types]
-    total_commands = len(catalog)
-    idempotent_coverage_pct = round((len(idempotent_commands) / total_commands) * 100) if total_commands else 0
-    confidence_score = min(100, max(0, round((idempotent_coverage_pct * 0.7) + (min(store_summary["total_records"], total_commands) * 3))))
     return {
-        "schema_version": 1,
-        "catalog": {
-            "total_commands": total_commands,
-            "idempotent_commands": len(idempotent_commands),
-            "human_confirmation_commands": len(human_confirmation_commands),
-            "agent_ready_commands": len(agent_ready_commands),
-            "idempotent_coverage_pct": idempotent_coverage_pct,
-        },
-        "store": store_summary,
-        "confidence_score": confidence_score,
-        "recommended_action": (
-            "Idempotente Commands sind live und replay-sicher. "
-            "Nutze die Monitoring-Sicht, um Retries, Replays und Command-Abdeckung zu beobachten."
-        ),
+        **build_idempotency_overview(tenant_id),
         "lookup_paths": [
             "/api/v1/process/actions/execute",
             "/api/v1/process/actions/idempotency/{tenant_id}/{idempotency_key}",

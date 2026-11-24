@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.core.action_execution import ActionExecutionResult
+from app.core.business_commands import build_core_command_catalog
 
 
 @dataclass(frozen=True)
@@ -236,3 +237,31 @@ _STORE = ActionIdempotencyStore()
 
 def get_action_idempotency_store() -> ActionIdempotencyStore:
     return _STORE
+
+
+def build_idempotency_overview(tenant_id: str) -> dict[str, Any]:
+    """Combine the shared command catalog with tenant-scoped execution metrics."""
+    store_summary = get_action_idempotency_store().summary(tenant_id=tenant_id)
+    catalog = build_core_command_catalog()
+    idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
+    human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]
+    agent_ready_commands = [cmd.command_name for cmd in catalog if cmd.allowed_agent_types]
+    total_commands = len(catalog)
+    idempotent_coverage_pct = round((len(idempotent_commands) / total_commands) * 100) if total_commands else 0
+    confidence_score = min(100, max(0, round((idempotent_coverage_pct * 0.7) + (min(store_summary["total_records"], total_commands) * 3))))
+    return {
+        "schema_version": 1,
+        "catalog": {
+            "total_commands": total_commands,
+            "idempotent_commands": len(idempotent_commands),
+            "human_confirmation_commands": len(human_confirmation_commands),
+            "agent_ready_commands": len(agent_ready_commands),
+            "idempotent_coverage_pct": idempotent_coverage_pct,
+        },
+        "store": store_summary,
+        "confidence_score": confidence_score,
+        "recommended_action": (
+            "Idempotente Commands sind live und replay-sicher. "
+            "Nutze die Monitoring-Sicht, um Retries, Replays und Command-Abdeckung zu beobachten."
+        ),
+    }

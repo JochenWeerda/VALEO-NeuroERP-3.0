@@ -1149,3 +1149,5 @@ Der Ausfuehrungs-Endpunkt weist einen abweichenden Mandanten im Request vor dem 
 Abnahme: gezielter Lauf fuer Wave 17/18/85 mit 27 bestandenen und einem uebersprungenen Test. Studio-Folgebefund: /admin/command-monitor verwendet eine generische Artikel-Detaildefinition mit unwirksamer Bearbeiten-Aktion, obwohl die vorhandene Ansicht den Idempotenz-Overview liest. Die separate Definition process/background-jobs beansprucht dieselbe Browserroute, zeigt jedoch die Job-Queue. Bei der Migration getrennte fachliche Routen und einen gleichwertigen Monitor-Nachweis vorsehen.
 
 Command-Monitor-Oberflaeche liest den JSON-Inhalt der Antwort und trennt den Abfragecache nach Mandant und Benutzer. Ein Frontend-Regressionstest prueft Datenprojektion, Mandantenwechsel und fehlende Identitaet. Die Studio-Routentrennung bleibt offen.
+
+PR 179: Der CI-Integritaetscheck meldete den Process-Kernel-Router mit 6115 gegen 6100 Zeilen. Die fachliche Overview-Berechnung liegt jetzt im bestehenden Idempotenzmodul, HTTP-Pfad und Antwort bleiben gleich. Der Router ist auf 6092 Zeilen gesunken und der Grenzwert wurde entsprechend abgesenkt.
