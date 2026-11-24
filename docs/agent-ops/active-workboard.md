@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-#165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-#167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+- PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+- PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -1051,3 +1051,5 @@ M2-READVIEW-IMPORT: Detail- und Cockpit-Maske verwenden direkte Modulimporte. Di
 ## M0-I18NEXT-DEPENDENCY - reserviert, Codex
 
 Ziel: Auditbefund GHSA-6jcc-5g8w-32mx durch korrigierte i18next-Version schliessen. Dateibesitz: Frontend-Paket, pnpm-Lock und Migrationsnachweis. Abnahme: Installations- und i18n-Vertrag.
+
+GHSA-6jcc-5g8w-32mx behoben: i18next 26.3.4 im Frontend und Lockfile. Frozen-Lockfile-Installation, produktives Node-Audit (0 Befunde), TypeScript und zehn Frontend-Tests bestanden. GitHub-Nachlauf offen.
