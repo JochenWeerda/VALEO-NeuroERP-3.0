@@ -1135,3 +1135,7 @@ Ziel: API-Schluessel-Einstieg an die bereits autorisierte Metadatenliste anbinde
 API-Schluessel-Einstieg als Studio-Liste umgesetzt. Verwendet den geschuetzten GET fuer Schluesselmetadaten statt der Benutzer-Detailquelle. Keine Schreib- oder Exportaktion deklariert. Vertragstest und Studio-Inventar gruen; Browserabnahme offen.
 
 CLI-Register nach Entfernung der wirkungslosen Admin-Aktionen neu erzeugt. 380 ausfuehrbare CLI-Aktionen; zwei ueberholte Eintraege aus der Statistik entfernt. CLI-, MCP- und Listenrouten-Generatoren ohne Drift.
+
+## M0-COMMAND-MONITOR-TENANT - reserviert, Codex
+
+Ziel: Betriebszaehler des Command Monitors auf den geprueften aktiven Mandanten begrenzen. Dateibesitz: Overview-Handler, Idempotenz-Store und zugehoeriger Vertragstest. Abnahme: lokale und Gesamtstatistik des Stores.
