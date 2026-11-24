@@ -1061,3 +1061,7 @@ Nachweis fuer den Major-Wechsel: Echter i18next-Laufzeittest mit Deutsch, Englis
 Ziel: zweiten Mount desselben KI-Usability-Routers unter /api/v1 entfernen. Dateibesitz: KI-Mount in main.py und generierte API-Doku. Abnahme: bestehende Pfade bleiben erhalten, doppelte OpenAPI-Operationen der KI entfallen.
 
 Doppelten KI-Usability-Mount entfernt. 4.052 HTTP-Operationen behalten unveraenderte Methoden, Pfade und IDs. OpenAPI zeigt nun die Bearer-Pflicht der beiden Aktionsabfragen. Drei KI-Duplikatwarnungen entfallen, acht POS-/Reporting-/CRM-Warnungen bleiben separat offen.
+
+## M0-POS-REPORTS-ROUTER-DUPLIKATE - reserviert, Codex
+
+Ziel: zwei verdeckte Platzhalter fuer Zahlarten und Berichtsexport entfernen. Dateibesitz: deren Routendeklarationen und OpenAPI. Abnahme: fuehrende Handler und Pfade bleiben erhalten.
