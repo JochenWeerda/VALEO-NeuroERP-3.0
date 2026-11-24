@@ -2763,6 +2763,7 @@
     "app/services/esg_footprint_service.py",
     "app/services/eudr_register_service.py",
     "app/services/feed_produktion_lifecycle_service.py",
+    "app/services/lagergeld_rechnung.py",
     "app/services/report_print_service.py",
     "app/services/warehouse_service.py",
     "services/ai/app/api/v1/endpoints/agents.py",

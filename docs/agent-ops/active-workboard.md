@@ -1042,3 +1042,8 @@ Ziel: direkten Rueckimport des Lese-Dialogs in das Mask-Builder-Paket aufloesen.
 Lese-Dialog importiert Renderer und Laufzeit direkt. 13 Vitest-Faelle bestanden. Weitere Rueckimporte und Auswirkungen auf die Rollup-Warnungen sind offen.
 
 Folgeschritt M2-READVIEW-IMPORT: direkter Import in UniversalNativeDetailPage und UniversalNativeCockpitPage; betroffene Vitest-Mocks auf dieselben Module umstellen.
+## M3-LAGERGELD-RECHNUNG-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "posted" ohne Rechnung, Erloes oder offenen Posten. Neu: POST /api/v1/inventory/storage-fees/runs/{run_id}/rechnungen legt je Einlagerer einen DocFlow-Rechnungsentwurf (sales_invoice, Quelle lagergeld) mit einer Position je Lagergeld-Zeile an; Verkaufs-Steuerschluessel ausdruecklich (keine Vorgabe), wiederholbar ohne Doppel. Freigabe und Buchung ueber die Belegmaske.
+Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
+
+M2-READVIEW-IMPORT: Detail- und Cockpit-Maske verwenden direkte Modulimporte. Die 77 Mask-Builder-Testdateien sind mit 562 Tests gruen. main b881f45da integriert, beide Workboard-Eintraege erhalten, OpenAPI-Drift-Check gruen.

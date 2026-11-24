@@ -23033,6 +23033,7 @@
             "app/services/docflow_service.py",
             "app/services/finance_freigabe.py",
             "app/services/fiscalization/service.py",
+            "app/services/lagergeld_rechnung.py",
             "app/services/pos_accounting_service.py"
           ],
           "written_by": [
@@ -30563,7 +30564,8 @@
             "id"
           ],
           "read_by": [
-            "app/domains/inventory/api/storage_fees.py"
+            "app/domains/inventory/api/storage_fees.py",
+            "app/services/lagergeld_rechnung.py"
           ],
           "written_by": [
             "app/domains/inventory/api/storage_fees.py"
@@ -30655,7 +30657,8 @@
             "id"
           ],
           "read_by": [
-            "app/domains/inventory/api/storage_fees.py"
+            "app/domains/inventory/api/storage_fees.py",
+            "app/services/lagergeld_rechnung.py"
           ],
           "written_by": [
             "app/domains/inventory/api/storage_fees.py"
