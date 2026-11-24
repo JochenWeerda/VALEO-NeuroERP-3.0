@@ -18630,7 +18630,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/inventory_operations.py",
-            "app/infrastructure/models/einkauf_models.py"
+            "app/infrastructure/models/einkauf_models.py",
+            "app/services/bestandsbewertung.py"
           ]
         },
         "lieferanten": {

@@ -986,3 +986,6 @@ Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeff
 Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
 Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+## M3-BESTANDSBEWERTUNG-BUCHUNG-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 2, gestapelt auf PR #184). Bestandskorrektur, Schwund, MHD-Abschreibung und Inventurdifferenzen erzeugen einen Buchungsentwurf (draft) zum gleitenden Durchschnitt: Zugang Soll Bestand an Gegenkonto Zugang, Abgang Soll Gegenkonto Abgang an Bestand, Konten nur aus domain_einkauf.lager_kontenzuordnung (keine Ersatzkonten). Gebucht wird ueber den Freigabeweg des Hauptbuchs (APPROVAL-001). Fehlt Bewertung oder Zuordnung: Bestand operativ gebucht, Luecke gemeldet (melde_fehlende_bewertung). Fix: positive adjustment zaehlte im Durchschnitt als Abgang.
