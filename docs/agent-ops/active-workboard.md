@@ -1038,3 +1038,5 @@ Frontend-Abnahme auf Komponentenebene: Umbenennen ueber echten Eingabedialog, Vo
 ## M2-READVIEW-IMPORT - reserviert, Codex
 
 Ziel: direkten Rueckimport des Lese-Dialogs in das Mask-Builder-Paket aufloesen. Dateibesitz: ReadViewDialog.tsx. Abnahme: bestehender Test des Lese-Dialogs.
+
+Lese-Dialog importiert Renderer und Laufzeit direkt. 13 Vitest-Faelle bestanden. Weitere Rueckimporte und Auswirkungen auf die Rollup-Warnungen sind offen.
