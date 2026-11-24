@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+#165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+#167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -987,21 +987,3 @@ Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -
 
 ## M0-VOR-PUSH-SPERRE-20261124 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0. scripts/vor_push.py nimmt selbst die Pruefstand-Sperre (%TEMP%/valeo_vor_push.lock, PID-Pruefung, verwaiste Sperre wird uebernommen, Frist 45 min). Bisher sperrte nur der Claude-Code-Hook; eine Sitzung, die vor_push direkt aufrief, baute valeo_probe mitten in fremden Laeufen neu auf. Der Hook setzt VALEO_PRUEFSTAND_SPERRE=gehalten (keine Doppelsperre). Gilt damit fuer Claude, Cursor und Codex, sobald sie scripts/vor_push.py aus main nutzen.
-
-## M4-CR-P0-MANDANTENLECK-20261123 — zur Abnahme, Cursor (M4, P0)
-Meilenstein: M4. Owner: Cursor. Stand: zur Abnahme 2026-11-24.
-Quelle: docs/abnahme/domaenen/crm.md (D04) / Reifematrix 20261123 (PR #181).
-Fix: Helfer `public_kunden_mandant`; Lookup/KIM/360/_kunde_finden/Merge/CustomerService-Altbestand mandantengefiltert (fail-closed ohne tenant_id).
-Dateibesitz: app/core/public_kunden_mandant.py, business_partner_service.py, crm_kim.py, crm_360_sql.py, crm_merge_service.py, customer_service.py, tests/test_m4_cr_p0_mandantenleck.py, tests/test_crm360_kunde_wird_gefunden.py (Bestandskunde jetzt 404), QA docs/quality-assurance/m4-cr-p0-mandantenleck-20261124.md, Workboard.
-Abnahme: `pytest tests/test_m4_cr_p0_mandantenleck.py --no-cov` 6/6 gegen valeo_probe.
-Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion.
-
-## M4-LO-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
-Meilenstein: M4. Owner: offen (Bahn Logistik/Fuhrpark). Quelle: PR #181 / docs/abnahme/domaenen/logistik.md.
-P0: LO-02 Mandantenleck ops_fahrer ohne tenant_id und transporte.py ohne Filter. P1 siehe Abnahmeblatt.
-Hinweis 2026-11-24: P0 unbeansprucht; Cursor arbeitet zuerst M4-CR-P0.
-
-## M4-PM-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
-Meilenstein: M4. Owner: offen (Bahn Produktion/Futtermittel). Quelle: PR #181 / docs/abnahme/domaenen/produktion-muehle.md.
-P0: PM-06 Schnellerfassung ohne Bestandsabzug; PM-11 Freigabe ohne tenant_id; PM-11 Charge hart loeschen ohne Pruefung/Audit.
-Hinweis 2026-11-24: P0 unbeansprucht; Cursor arbeitet zuerst M4-CR-P0.
