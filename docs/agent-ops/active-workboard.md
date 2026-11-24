@@ -1031,8 +1031,12 @@ Meilenstein: M3. Bilanz, GuV und BWA (financial_reports.py) zaehlten Journalbuch
 ## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
 
+## M3-JOURNAL-STATUS-PFLICHT-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Folge aus PR #195). domain_erp.journal_entries.status: Vorgabe draft, NOT NULL, Pruefbedingung auf die vier Status des Buchungsdienstes (draft/posted/cancelled/reversed). Gewachsener Bestand: 0 Eintraege ohne Status, Migration in zurueckgerollter Transaktion geprueft.
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
 
 ## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
