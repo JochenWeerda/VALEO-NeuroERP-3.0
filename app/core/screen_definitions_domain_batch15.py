@@ -111,6 +111,23 @@ def build_fibu_abschluss_checklist_detail_screen_definition() -> dict[str, Any]:
         data_sources=[stamm_entity_source("/api/v1/finance/closing-checklists/{entity_id}")],
         tabs=[stamm_kopf_tab([{"key": "id", "label": "ID", "type": "text"}, {"key": "period", "label": "Periode", "type": "text"}, {"key": "closing_type", "label": "Abschlussart", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "progress_percentage", "label": "Fortschritt %", "type": "number"}, {"key": "updated_at", "label": "Aktualisiert", "type": "datetime"}])],
         edit_permission="fibu.write",
+        # Saldenvortrag ins neue Geschaeftsjahr (M3, 24.11.2026): Eroeffnungsbuchung ueber den kanonischen Buchungsdienst,
+        # erst wenn alle Perioden des Jahres gesperrt sind; ein zweiter Vortrag fuer dasselbe Jahr wird abgewiesen (409).
+        extra_actions=[
+            {
+                "key": "saldenvortrag",
+                "label": "Saldenvortrag buchen",
+                "kind": "secondary",
+                "dangerLevel": "high",
+                "permission": "finance.closing.saldenvortrag",
+                "commandEndpoint": "/api/v1/finance/closing/saldenvortrag",
+                "method": "POST",
+                "forbiddenForAgents": True,
+                "inputFields": [
+                    {"key": "jahr", "label": "Abgeschlossenes Geschaeftsjahr", "type": "number", "required": True},
+                ],
+            },
+        ],
         no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
         business_purpose="Abschluss checklist detail als Stammblatt pflegen.",
         example_prompts=["Oeffne Abschluss checklist detail.", "Bearbeite Stammdaten."],

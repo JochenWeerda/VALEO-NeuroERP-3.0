@@ -176,7 +176,7 @@ async def get_balance_sheet(
             LEFT JOIN domain_erp.journal_entries je ON jel.journal_entry_id = je.id
             WHERE coa.tenant_id = :tenant_id
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
-            AND (je.status IN ('posted', 'reversed') OR je.status IS NULL)
+            AND je.status IN ('posted', 'reversed')
             AND (TO_CHAR(je.entry_date, 'YYYY-MM') <= :period OR je.entry_date IS NULL)
             GROUP BY coa.id, coa.account_number, coa.account_name, coa.account_type, coa.parent_account_id
             ORDER BY coa.account_number
@@ -280,7 +280,7 @@ async def get_profit_loss(
             WHERE coa.tenant_id = :tenant_id
             AND coa.account_number LIKE '4%'
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
-            AND (je.status IN ('posted', 'reversed') OR je.status IS NULL)
+            AND je.status IN ('posted', 'reversed')
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
             GROUP BY coa.id, coa.account_number, coa.account_name
             HAVING ABS(COALESCE(SUM(CASE WHEN jel.credit > 0 THEN jel.credit ELSE 0 END), 0) - 
@@ -323,7 +323,7 @@ async def get_profit_loss(
             AND (coa.account_number LIKE '5%' OR coa.account_number LIKE '6%' OR 
                  coa.account_number LIKE '7%' OR coa.account_number LIKE '8%')
             AND (je.tenant_id = :tenant_id OR je.tenant_id IS NULL)
-            AND (je.status IN ('posted', 'reversed') OR je.status IS NULL)
+            AND je.status IN ('posted', 'reversed')
             AND TO_CHAR(je.entry_date, 'YYYY-MM') = :period
             GROUP BY coa.id, coa.account_number, coa.account_name
             HAVING ABS(COALESCE(SUM(CASE WHEN jel.debit > 0 THEN jel.debit ELSE 0 END), 0) - 

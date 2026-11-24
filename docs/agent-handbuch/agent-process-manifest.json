@@ -13897,7 +13897,7 @@
       "agent_contract_url": "/api/v1/masks/fibu/abschluss-checklist-detail/agent-contract",
       "screen_definition_url": "/api/v1/masks/fibu/abschluss-checklist-detail/screen-definition",
       "readiness_url": "/api/v1/masks/fibu/abschluss-checklist-detail/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "edit",
@@ -13908,6 +13908,17 @@
           "permission": "fibu.write",
           "commandEndpoint": null,
           "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "saldenvortrag",
+          "label": "Saldenvortrag buchen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "finance.closing.saldenvortrag",
+          "commandEndpoint": "/api/v1/finance/closing/saldenvortrag",
+          "method": "POST",
           "stubReason": null
         }
       ],

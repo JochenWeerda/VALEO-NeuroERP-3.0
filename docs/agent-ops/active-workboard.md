@@ -1026,8 +1026,12 @@ Meilenstein: M3/M4 (kaufmaennischer Rechenkern, Nutzerauftrag 24.11.2026). app/c
 ## M0-TEST-CONVERT-WARTEN-20261124 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Positionszeile des Uebernahme-Dialogs zu, die erst nach dem Dialog rendert; unter CI-Last rot (#186, Lauf 45371355464 Versuch 1). Test wartet jetzt auf die Zeile (findByLabelText); 5 Laeufe hintereinander gruen.
 
+## M3-BERICHTE-NUR-GEBUCHT-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. Bilanz, GuV und BWA (financial_reports.py) zaehlten Journalbuchungen ohne Status mit (je.status IS NULL); domain_erp.journal_entries.status ist auf frischer Installation nullbar ohne Vorgabe. Jetzt nur posted/reversed wie alle Journalleser (#164); Ratsche in tests/test_journal_storno_gebucht.py. Offen: status NOT NULL mit Vorgabe draft per Migration (Bestand pruefen).
 ## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
 
 ## M4-FOLGEARTIKEL-FK-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Coverage-Matrix Artikelmodell, Punkt Beziehungen referenziell). domain_shared.artikel_folgeartikel: zusammengesetzte Fremdschluessel (tenant_id, artikel_nr|folge_artikel_nr) auf articles (tenant_id, article_number), ON UPDATE/DELETE CASCADE, Pruefbedingung verschieden; Anlageweg antwortet 404 statt 500. Bestand frisch und gewachsen: 0 Zeilen.
+## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.

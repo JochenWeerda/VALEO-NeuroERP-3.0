@@ -293,6 +293,7 @@
   "mask:einkauf/zahlungsbedingungen:bearbeiten",
   "mask:einkauf/zahlungsbedingungen:deaktivieren",
   "mask:einkauf/zahlungsbedingungen:neu",
+  "mask:fibu/abschluss-checklist-detail:saldenvortrag",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bank-abgleich:import",
   "mask:finance/bank-abgleich:validate",
