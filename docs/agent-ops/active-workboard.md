@@ -1067,3 +1067,7 @@ Doppelten KI-Usability-Mount entfernt. 4.052 HTTP-Operationen behalten unveraend
 Ziel: zwei verdeckte Platzhalter fuer Zahlarten und Berichtsexport entfernen. Dateibesitz: deren Routendeklarationen und OpenAPI. Abnahme: fuehrende Handler und Pfade bleiben erhalten.
 
 Verdeckten statischen Zahlarten-Handler und leeren Berichtsexport entfernt. OpenAPI beschreibt jetzt die bereits wirksamen Handler. Abgleich: 3.221 Pfade, unveraenderte Methoden und Operation-IDs; nur die beiden erwarteten GET-Vertraege geaendert. Sechs CRM-Duplikatwarnungen offen.
+
+## M0-CRM-ROUTER-DUPLIKATE - reserviert, Codex
+
+Ziel: sechs ueberschattete CRM-Registrierungen entfernen. Dateibesitz: betroffene Dekoratoren in app/crm/router.py, API-Artefakte. Abnahme: alle HTTP-Pfade und IDs bleiben erhalten, OpenAPI beschreibt die zuerst registrierten Handler.
