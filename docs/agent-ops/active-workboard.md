@@ -1073,3 +1073,11 @@ Verdeckten statischen Zahlarten-Handler und leeren Berichtsexport entfernt. Open
 Ziel: sechs ueberschattete CRM-Registrierungen entfernen. Dateibesitz: betroffene Dekoratoren in app/crm/router.py, API-Artefakte. Abnahme: alle HTTP-Pfade und IDs bleiben erhalten, OpenAPI beschreibt die zuerst registrierten Handler.
 
 Sechs ueberschattete CRM-Registrierungen entfernt. OpenAPI ohne Duplikatwarnungen erzeugt. 3.221 Pfade, Methoden und IDs erhalten. Das Endpoint-Inventar zur Entfernung des Reporting-Stubs nachgezogen.
+## M0-I18NEXT-GHSA-6JCC-20261123 — in arbeit, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+main 4859a973d integriert. Dessen i18next-Aufloesung 26.7.2 uebernommen; Frozen-Lockfile-Installation und echter Sprachwechseltest gruen.
