@@ -412,7 +412,9 @@ def _gebinde_fehler(fehler: Exception) -> HTTPException:
     from app.core.gebinde_rechnung import FaktorpflegeNichtZulaessig
     from app.services.gebinde_aufloesung import MengeneinheitUnbekannt
 
-    if isinstance(fehler, MengeneinheitUnbekannt):
+    from app.services.gebinde_aufloesung import ArtikelUnbekannt
+
+    if isinstance(fehler, (MengeneinheitUnbekannt, ArtikelUnbekannt)):
         return HTTPException(404, str(fehler))
     if isinstance(fehler, FaktorpflegeNichtZulaessig):
         return HTTPException(409, str(fehler))
@@ -465,9 +467,9 @@ def list_gebindefaktoren(
     tenant_id: str = Depends(get_tenant_id),
 ):
     zeilen = db.execute(text(
-        "SELECT stufe, bezug_id, faktor1, faktor2, faktor3, faktor4, geaendert_von, updated_at "
+        "SELECT stufe, artikel_id, faktor1, faktor2, faktor3, faktor4, geaendert_von, updated_at "
         "FROM domain_shared.artikel_gebindefaktoren WHERE tenant_id = :t AND einheit_kuerzel = :k "
-        "ORDER BY stufe, bezug_id LIMIT :limit OFFSET :offset"),
+        "ORDER BY stufe, artikel_id LIMIT :limit OFFSET :offset"),
         {"t": tenant_id, "k": einheit_kuerzel, "limit": limit, "offset": offset}).mappings().fetchmany(limit)
     return [dict(z) for z in zeilen]
 
@@ -482,14 +484,17 @@ def setze_gebindefaktoren(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
+    """Stufe 3 Artikel: ``bezug_id`` ist die Artikel-ID dieses Mandanten. Stufen 2 Artikelstamm und 4 Auspraegung
+    haben in VALEO noch kein Gegenstueck und werden abgewiesen (422)."""
     from app.core.gebinde_rechnung import GebindeNichtRechenbar
-    from app.services.gebinde_aufloesung import MengeneinheitUnbekannt, setze_stufenfaktoren
+    from app.services.gebinde_aufloesung import MengeneinheitUnbekannt, pruefe_stufe_zugeordnet, setze_artikelfaktoren
 
     if stufe not in (2, 3, 4):
         raise HTTPException(422, "Stufe 2 Artikelstamm, 3 Artikel oder 4 Artikel-Auspraegung.")
     try:
-        setze_stufenfaktoren(db, tenant_id, einheit_kuerzel, stufe, bezug_id,
-                             [payload.faktor1, payload.faktor2, payload.faktor3, payload.faktor4])
+        pruefe_stufe_zugeordnet(stufe)
+        setze_artikelfaktoren(db, tenant_id, einheit_kuerzel, bezug_id,
+                              [payload.faktor1, payload.faktor2, payload.faktor3, payload.faktor4])
     except (GebindeNichtRechenbar, MengeneinheitUnbekannt) as fehler:
         db.rollback()
         raise _gebinde_fehler(fehler) from fehler
@@ -506,9 +511,9 @@ def entferne_gebindefaktoren(
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
-    from app.services.gebinde_aufloesung import entferne_stufenfaktoren
+    from app.services.gebinde_aufloesung import entferne_artikelfaktoren
 
-    if not entferne_stufenfaktoren(db, tenant_id, einheit_kuerzel, stufe, bezug_id):
+    if stufe != 3 or not entferne_artikelfaktoren(db, tenant_id, einheit_kuerzel, bezug_id):
         raise HTTPException(404, "Keine Faktoren fuer diese Stufe und diesen Bezug.")
     db.commit()
     return Response(status_code=204)
@@ -519,8 +524,6 @@ def berechne_gebinde_weg(
     einheit_kuerzel: str,
     anzahl: Decimal = Query(..., description="Anzahl in der Gebinde-Mengeneinheit"),
     artikel_id: Optional[str] = Query(None),
-    artikelstamm_id: Optional[str] = Query(None),
-    auspraegung_id: Optional[str] = Query(None),
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -529,7 +532,6 @@ def berechne_gebinde_weg(
     from app.services.gebinde_aufloesung import MengeneinheitUnbekannt, berechne_position
 
     try:
-        return berechne_position(db, tenant_id, einheit_kuerzel, anzahl, artikel_id=artikel_id,
-                                 artikelstamm_id=artikelstamm_id, auspraegung_id=auspraegung_id).als_dict()
+        return berechne_position(db, tenant_id, einheit_kuerzel, anzahl, artikel_id=artikel_id).als_dict()
     except (GebindeNichtRechenbar, MengeneinheitUnbekannt) as fehler:
         raise _gebinde_fehler(fehler) from fehler

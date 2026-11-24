@@ -237188,38 +237188,6 @@
               ],
               "title": "Artikel Id"
             }
-          },
-          {
-            "in": "query",
-            "name": "artikelstamm_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Artikelstamm Id"
-            }
-          },
-          {
-            "in": "query",
-            "name": "auspraegung_id",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "title": "Auspraegung Id"
-            }
           }
         ],
         "responses": {
@@ -237379,6 +237347,7 @@
         ]
       },
       "put": {
+        "description": "Stufe 3 Artikel: ``bezug_id`` ist die Artikel-ID dieses Mandanten. Stufen 2 Artikelstamm und 4 Auspraegung\nhaben in VALEO noch kein Gegenstueck und werden abgewiesen (422).",
         "operationId": "setze_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren__stufe___bezug_id__put",
         "parameters": [
           {

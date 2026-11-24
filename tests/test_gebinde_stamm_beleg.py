@@ -1,4 +1,4 @@
-"""Gebinde-Mengeneinheit am Stamm, Stufenfaktoren, Belegabbild - Landhandelsfaelle gegen die echte Datenbank.
+"""Gebinde-Mengeneinheit am Stamm, Artikelfaktoren, versionierte Belegabbilder - Landhandelsfaelle gegen die echte DB.
 
 Schnitt 2b-1 (24.11.2026). Faelle: Duenger als Sack, Big Bag und lose Ware; Pflanzenschutzmittel mit
 artikelabhaengigen Gebindegroessen; Saatmais mit unterschiedlicher Koernerzahl je Einheit; Futtermittel auf der
@@ -16,8 +16,10 @@ from sqlalchemy import text
 
 from app.api.v1.endpoints import artikel_mengeneinheiten
 from app.core.database import SessionLocal, get_db
-from app.core.gebinde_rechnung import FaktorFehlt, GebindeNichtRechenbar
-from app.services.gebinde_aufloesung import abbild_der_position, berechne_position, halte_fest
+from app.core.gebinde_rechnung import FaktorFehlt
+from app.services.gebinde_aufloesung import (
+    BelegGebucht, abbild_der_position, abbild_versionen, berechne_position, schreibe_abbild,
+)
 from testgrenze import ersetze_mandant, ersetze_nutzer
 
 pytestmark = pytest.mark.integration
@@ -25,23 +27,41 @@ D = Decimal
 BASIS = "/artikel/mengeneinheiten/stamm"
 
 
-@pytest.fixture
-def mandant():
+def _mandant_anlegen() -> str:
     kennung = f"gb-{uuid.uuid4().hex[:6]}"
     with SessionLocal() as db:
         db.execute(text("INSERT INTO domain_shared.tenants (id, name, is_active) VALUES (:id, :id, true)"),
                    {"id": kennung})
         db.commit()
+    return kennung
+
+
+def _aufraeumen(kennung: str) -> None:
+    with SessionLocal() as db:
+        for sql in ("DELETE FROM domain_docflow.document_headers WHERE tenant_id = :t",
+                    "DELETE FROM domain_shared.artikel_gebindefaktoren WHERE tenant_id = :t",
+                    "DELETE FROM domain_shared.artikel_mengeneinheiten WHERE tenant_id = :t",
+                    "DELETE FROM domain_inventory.articles WHERE tenant_id = :t"):
+            db.execute(text(sql), {"t": kennung})
+        db.commit()
+
+
+@pytest.fixture
+def mandant():
+    kennung = _mandant_anlegen()
     try:
         yield kennung
     finally:
-        with SessionLocal() as db:
-            for sql in ("DELETE FROM domain_docflow.document_items WHERE tenant_id = :t",
-                        "DELETE FROM domain_docflow.document_headers WHERE tenant_id = :t",
-                        "DELETE FROM domain_shared.artikel_gebindefaktoren WHERE tenant_id = :t",
-                        "DELETE FROM domain_shared.artikel_mengeneinheiten WHERE tenant_id = :t"):
-                db.execute(text(sql), {"t": kennung})
-            db.commit()
+        _aufraeumen(kennung)
+
+
+def _artikel(mandant: str, nummer: str) -> str:
+    kennung = f"{mandant}-{nummer}"
+    with SessionLocal() as db:
+        db.execute(text("INSERT INTO domain_inventory.articles (id, tenant_id, article_number, name, unit) "
+                        "VALUES (:id, :t, :nr, :nr, 'st')"), {"id": kennung, "t": mandant, "nr": nummer})
+        db.commit()
+    return kennung
 
 
 @pytest.fixture
@@ -86,26 +106,28 @@ def test_duenger_sack_bigbag_und_lose_ware(client):
     assert (lose["gebindetyp"], lose["ergebnis"], lose["herkunft_verwendet"]) == (0, "1234.500", None)
 
 
-def test_pflanzenschutz_gebindegroesse_je_artikel(client):
+def test_pflanzenschutz_gebindegroesse_je_artikel(client, mandant):
+    fuenf_l, zehn_l, ohne_faktor = (_artikel(mandant, n) for n in ("PSM-5L", "PSM-10L", "PSM-OHNE"))
     _einheit(client, "kan", "Kanister", gebindetyp=1, faktorherkunft=3, ergebniseinheit="l")
-    assert client.put(f"{BASIS}/kan/gebindefaktoren/3/PSM-5L", json={"faktor1": "5"}).status_code == 200
-    assert client.put(f"{BASIS}/kan/gebindefaktoren/3/PSM-10L", json={"faktor1": "10"}).status_code == 200
+    assert client.put(f"{BASIS}/kan/gebindefaktoren/3/{fuenf_l}", json={"faktor1": "5"}).status_code == 200
+    assert client.put(f"{BASIS}/kan/gebindefaktoren/3/{zehn_l}", json={"faktor1": "10"}).status_code == 200
 
-    fuenf = _rechne(client, "kan", 4, artikel_id="PSM-5L").json()
-    zehn = _rechne(client, "kan", 4, artikel_id="PSM-10L").json()
-    ohne = _rechne(client, "kan", 4, artikel_id="PSM-UNGEPFLEGT")
+    fuenf = _rechne(client, "kan", 4, artikel_id=fuenf_l).json()
+    zehn = _rechne(client, "kan", 4, artikel_id=zehn_l).json()
+    ohne = _rechne(client, "kan", 4, artikel_id=ohne_faktor)
 
     assert (fuenf["ergebnis"], zehn["ergebnis"]) == ("20.000", "40.000")
     assert ohne.status_code == 422 and "Keine Gebindefaktoren" in ohne.json()["detail"]  # kein Ersatzwert 1
 
 
-def test_saatmais_koernerzahl_je_einheit(client):
+def test_saatmais_koernerzahl_je_einheit(client, mandant):
+    mais50, mais80 = _artikel(mandant, "MAIS-50"), _artikel(mandant, "MAIS-80")
     _einheit(client, "ein", "Einheit Saatmais", gebindetyp=1, faktorherkunft=3, ergebniseinheit="st", rundung=0)
-    client.put(f"{BASIS}/ein/gebindefaktoren/3/MAIS-50", json={"faktor1": "50000"})
-    client.put(f"{BASIS}/ein/gebindefaktoren/3/MAIS-80", json={"faktor1": "80000"})
+    client.put(f"{BASIS}/ein/gebindefaktoren/3/{mais50}", json={"faktor1": "50000"})
+    client.put(f"{BASIS}/ein/gebindefaktoren/3/{mais80}", json={"faktor1": "80000"})
 
-    assert _rechne(client, "ein", 3, artikel_id="MAIS-50").json()["ergebnis"] == "150000"
-    assert _rechne(client, "ein", 3, artikel_id="MAIS-80").json()["ergebnis"] == "240000"
+    assert _rechne(client, "ein", 3, artikel_id=mais50).json()["ergebnis"] == "150000"
+    assert _rechne(client, "ein", 3, artikel_id=mais80).json()["ergebnis"] == "240000"
 
 
 def test_futtermittel_palette_zweistufig(client):
@@ -127,17 +149,42 @@ def test_diesel_liter_mit_preisbezug_100(client):
     assert float(client.get(f"{BASIS}/l100").json()["preisbezug_menge"]) == 100.0
 
 
-def test_faktorpflege_ausserhalb_des_suchpfads_abgewiesen(client):
+def test_faktorpflege_ausserhalb_des_suchpfads_abgewiesen(client, mandant):
+    artikel = _artikel(mandant, "PSM-X")
     _einheit(client, "kan2", "Kanister fest", gebindetyp=1, faktorherkunft=1, faktor1="10", ergebniseinheit="l")
 
-    am_artikel = client.put(f"{BASIS}/kan2/gebindefaktoren/3/PSM-X", json={"faktor1": "5"})
+    am_artikel = client.put(f"{BASIS}/kan2/gebindefaktoren/3/{artikel}", json={"faktor1": "5"})
 
     assert am_artikel.status_code == 409  # a.eins: bei Herkunft Mengeneinheit im Artikel nicht aenderbar
 
 
-def test_herkunft_nicht_enger_stellen_solange_faktoren_darueber_liegen(client):
+@pytest.mark.parametrize("stufe", [2, 4])
+def test_stufen_ohne_valeo_gegenstueck_nicht_pflegbar(client, stufe):
+    _einheit(client, "kan6", "Kanister", gebindetyp=1, faktorherkunft=4, ergebniseinheit="l")
+
+    antwort = client.put(f"{BASIS}/kan6/gebindefaktoren/{stufe}/irgendwas", json={"faktor1": "5"})
+
+    assert antwort.status_code == 422 and "kein Gegenstueck" in antwort.json()["detail"]
+
+
+def test_artikel_eines_fremden_mandanten_abgewiesen(client):
+    fremd = _mandant_anlegen()
+    try:
+        fremder_artikel = _artikel(fremd, "PSM-FREMD")
+        _einheit(client, "kan7", "Kanister", gebindetyp=1, faktorherkunft=3, ergebniseinheit="l")
+
+        antwort = client.put(f"{BASIS}/kan7/gebindefaktoren/3/{fremder_artikel}", json={"faktor1": "5"})
+        unbekannt = client.put(f"{BASIS}/kan7/gebindefaktoren/3/gibt-es-nicht", json={"faktor1": "5"})
+
+        assert (antwort.status_code, unbekannt.status_code) == (404, 404)
+    finally:
+        _aufraeumen(fremd)
+
+
+def test_herkunft_nicht_enger_stellen_solange_faktoren_darueber_liegen(client, mandant):
+    artikel = _artikel(mandant, "PSM-A")
     _einheit(client, "kan3", "Kanister", gebindetyp=1, faktorherkunft=3, ergebniseinheit="l")
-    client.put(f"{BASIS}/kan3/gebindefaktoren/3/PSM-A", json={"faktor1": "5"})
+    client.put(f"{BASIS}/kan3/gebindefaktoren/3/{artikel}", json={"faktor1": "5"})
 
     enger = client.put(f"{BASIS}/kan3/gebinde", json={"gebindetyp": 1, "faktorherkunft": 1, "faktor1": "10"})
 
@@ -169,48 +216,59 @@ def test_lvs_relevanz_ist_eigene_eigenschaft(client):
     assert falsch.status_code == 422
 
 
-def _position(mandant: str) -> str:
+def _position(mandant: str, artikel: str) -> tuple[str, str]:
     kopf, position = str(uuid.uuid4()), str(uuid.uuid4())
     with SessionLocal() as db:
         db.execute(text("INSERT INTO domain_docflow.document_headers (id, tenant_id, doc_type, doc_number) "
                         "VALUES (:id, :t, 'sales_delivery', :nr)"), {"id": kopf, "t": mandant, "nr": f"LS-{kopf[:8]}"})
         db.execute(text("INSERT INTO domain_docflow.document_items (id, tenant_id, header_id, line_number, "
-                        "article_number, quantity) VALUES (:id, :t, :k, 1, 'PSM-5L', 4)"),
-                   {"id": position, "t": mandant, "k": kopf})
+                        "article_number, quantity) VALUES (:id, :t, :k, 1, :a, 4)"),
+                   {"id": position, "t": mandant, "k": kopf, "a": artikel})
         db.commit()
-    return position
+    return kopf, position
 
 
-def test_abbild_schuetzt_den_beleg_vor_spaeteren_stammaenderungen(client, mandant):
+def test_entwurf_versioniert_gebuchter_beleg_unveraenderlich(client, mandant):
+    artikel = _artikel(mandant, "PSM-5L")
     _einheit(client, "kan4", "Kanister", gebindetyp=1, faktorherkunft=3, ergebniseinheit="l")
-    client.put(f"{BASIS}/kan4/gebindefaktoren/3/PSM-5L", json={"faktor1": "5"})
-    position = _position(mandant)
+    client.put(f"{BASIS}/kan4/gebindefaktoren/3/{artikel}", json={"faktor1": "5"})
+    kopf, position = _position(mandant, artikel)
 
     with SessionLocal() as db:
-        zum_beleg = berechne_position(db, mandant, "kan4", D(4), artikel_id="PSM-5L")
-        halte_fest(db, mandant, position, zum_beleg)
-        halte_fest(db, mandant, position, zum_beleg)  # Wiederholung mit gleichem Abbild: idempotent
+        erste = schreibe_abbild(db, mandant, position, berechne_position(db, mandant, "kan4", D(4), artikel_id=artikel))
+        wiederholt = schreibe_abbild(db, mandant, position,
+                                     berechne_position(db, mandant, "kan4", D(4), artikel_id=artikel))
+        # Verwiegung: im Entwurf aendert sich die Liefermenge -> neue Version, die alte bleibt erhalten
+        zweite = schreibe_abbild(db, mandant, position, berechne_position(db, mandant, "kan4", D(5), artikel_id=artikel))
+        db.execute(text("UPDATE domain_docflow.document_headers SET status = 'posted' WHERE id = :k"), {"k": kopf})
         db.commit()
-    client.put(f"{BASIS}/kan4/gebindefaktoren/3/PSM-5L", json={"faktor1": "6"})  # Stamm aendert sich spaeter
+    client.put(f"{BASIS}/kan4/gebindefaktoren/3/{artikel}", json={"faktor1": "6"})  # Stamm aendert sich spaeter
 
     with SessionLocal() as db:
-        neu = berechne_position(db, mandant, "kan4", D(4), artikel_id="PSM-5L")
+        neu = berechne_position(db, mandant, "kan4", D(5), artikel_id=artikel)
         abbild = abbild_der_position(db, mandant, position)
-        with pytest.raises(GebindeNichtRechenbar, match="festgeschrieben"):
-            halte_fest(db, mandant, position, neu)
+        versionen = abbild_versionen(db, mandant, position)
+        with pytest.raises(BelegGebucht):
+            schreibe_abbild(db, mandant, position, neu)
         with pytest.raises(Exception, match="festgeschrieben"):
             db.execute(text("UPDATE domain_docflow.document_items SET gebinde_berechnung = '{}'::jsonb "
                             "WHERE id = :id"), {"id": position})
         db.rollback()
+        with pytest.raises(Exception, match="unveraenderlich"):
+            db.execute(text("UPDATE domain_docflow.document_item_gebinde_abbilder SET version = 9 "
+                            "WHERE position_id = :id"), {"id": position})
+        db.rollback()
 
-    assert neu.ergebnis == "24.000"
+    assert (erste, wiederholt, zweite) == (1, 1, 2)
+    assert [v["abbild"]["ergebnis"] for v in versionen] == ["20.000", "25.000"]
+    assert neu.ergebnis == "30.000"
     assert (abbild["ergebnis"], abbild["faktoren"], abbild["herkunft_verwendet"], abbild["version"]) == \
-        ("20.000", ["5.000000"], 3, "gebinde-1")
+        ("25.000", ["5.000000"], 3, "gebinde-1")
 
 
 def test_ohne_faktor_im_pfad_kein_abbild(client, mandant):
+    artikel = _artikel(mandant, "PSM-Y")
     _einheit(client, "kan5", "Kanister", gebindetyp=1, faktorherkunft=2, ergebniseinheit="l")
-    client.put(f"{BASIS}/kan5/gebinde", json={"gebindetyp": 1, "faktorherkunft": 2})
 
     with SessionLocal() as db, pytest.raises(FaktorFehlt):
-        berechne_position(db, mandant, "kan5", D(1), artikel_id="egal", artikelstamm_id="FAM-1")
+        berechne_position(db, mandant, "kan5", D(1), artikel_id=artikel)  # Stufe 3 liegt oberhalb von Herkunft 2

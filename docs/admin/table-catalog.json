@@ -15659,6 +15659,7 @@
             "app/services/document_control_projection.py",
             "app/services/einkauf_compat_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/gutschrift_docflow.py",
             "app/services/ist_aggregation_service.py",
             "app/services/kontrollkorb.py",
@@ -15687,6 +15688,67 @@
             "app/services/mcp_execution_service.py",
             "app/services/settlement_document_archive_service.py",
             "app/services/wareneingang_avis_service.py"
+          ]
+        },
+        "document_item_gebinde_abbilder": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "position_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "abbild",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erstellt_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "position_id",
+              "references": "domain_docflow.document_items.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_items.tenant_id"
+            }
+          ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/gebinde_aufloesung.py"
+          ],
+          "written_by": [
+            "app/services/gebinde_aufloesung.py"
           ]
         },
         "document_items": {
@@ -49342,7 +49404,7 @@
               "type": "smallint"
             },
             {
-              "name": "bezug_id",
+              "name": "artikel_id",
               "nullable": false,
               "type": "character varying"
             },
@@ -49382,7 +49444,24 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "artikel_id",
+              "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "einheit_kuerzel",
+              "references": "domain_shared.artikel_mengeneinheiten.einheit_kuerzel"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.artikel_mengeneinheiten.tenant_id"
+            }
+          ],
           "owner_domain": "platform",
           "ownership_reason": "Custodian domain_shared / Domain platform.",
           "placement": "native",
