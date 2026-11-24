@@ -1040,3 +1040,5 @@ Frontend-Abnahme auf Komponentenebene: Umbenennen ueber echten Eingabedialog, Vo
 Ziel: direkten Rueckimport des Lese-Dialogs in das Mask-Builder-Paket aufloesen. Dateibesitz: ReadViewDialog.tsx. Abnahme: bestehender Test des Lese-Dialogs.
 
 Lese-Dialog importiert Renderer und Laufzeit direkt. 13 Vitest-Faelle bestanden. Weitere Rueckimporte und Auswirkungen auf die Rollup-Warnungen sind offen.
+
+Folgeschritt M2-READVIEW-IMPORT: direkter Import in UniversalNativeDetailPage und UniversalNativeCockpitPage; betroffene Vitest-Mocks auf dieselben Module umstellen.
