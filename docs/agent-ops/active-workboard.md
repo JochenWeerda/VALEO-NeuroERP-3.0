@@ -1083,3 +1083,7 @@ Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -
 main 4859a973d integriert. Dessen i18next-Aufloesung 26.7.2 uebernommen; Frozen-Lockfile-Installation und echter Sprachwechseltest gruen.
 
 Review PR 179: Rollenzuordnung aus dem Endpunkt erzeugt (admin erforderlich), HTTP prueft jetzt menschliche Identitaet entsprechend CLI und Studio. 10 HTTP-Tests, 17 Frontend-Rollentests sowie 11 Registrierungs- und OpenAPI-Vertraege bestanden. GitHub-Pflichtreview braucht eine berechtigte Kennung ausserhalb der PR-Autorenschaft.
+
+## M2-ADMIN-USERS-LIST - reserviert, Codex
+
+Ziel: /admin/users mit der bestehenden Studio-Benutzerliste verdrahten; keine zweite fachliche Liste. Dateibesitz: beide Definitionen, Routeneinstieg und abgeleitete Artefakte. Abnahme: gleiche Spalten, Datenquelle und Listenlaufzeit.
