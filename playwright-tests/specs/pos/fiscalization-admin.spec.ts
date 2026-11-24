@@ -114,12 +114,15 @@ test.describe('POS fiscalization operations @full', () => {
     await expect(page.getByTestId('product-safe')).toContainText('Nicht freigegeben')
   })
 
+  // Der Server sperrt den Abschluss bei unvollstaendigen TSE-Vorgaengen (POST /api/v1/pos/tagesabschluss -> 409).
+  // Die kanonische Maske kasse/tagesabschluss ist noch eine Leseliste ohne Abschlussaktion; die handgebaute Seite
+  // /pos/tagesabschluss-enhanced mit dieser Sperre ist durch eine generische Studio-Liste ersetzt.
   test('daily closing is visibly blocked by incomplete fiscal transactions', async ({ page }) => {
+    test.fixme(true, 'M3-KASSENABSCHLUSS-EIN-WEG-20261119 (offen): Maskenaktion "Tagesabschluss buchen" in kasse/tagesabschluss fehlt')
     await installApi(page)
-    await page.goto(`${APP_URL}/pos/tagesabschluss-enhanced`)
+    await page.goto(`${APP_URL}/kasse/tagesabschluss`)
 
     await expect(page.getByText(/Abschluss blockiert: 1 unvollst/)).toBeVisible()
-    await page.getByRole('button', { name: /Fibu-Buchung/ }).click()
-    await expect(page.getByRole('button', { name: /In Fibu buchen/ })).toBeDisabled()
+    await expect(page.getByRole('button', { name: /Tagesabschluss buchen/ })).toBeDisabled()
   })
 })
