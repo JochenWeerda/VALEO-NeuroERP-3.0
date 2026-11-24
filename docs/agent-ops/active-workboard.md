@@ -1004,3 +1004,5 @@ Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbe
 
 ## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Artikelstamm, Nutzerauftrag 24.11.2026: Mengeneinheiten nach a.eins, PR #186). Felder der Grundmengeneinheit (Nummer, Langtext, ISO-Name, DataNorm, Statistikkennzeichen, Rundung 0-4 nur nach oben bei aktiven Einheiten, Preisbezug, UN-Mengeneinheit Rec. 20), mitgelieferte Grundeinheiten, eRechnung liest den UN-Code aus dem Stamm, Maske stammdaten/mengeneinheit erweitert. Fachgrundlage docs/design/mengeneinheiten-aeins-uebernahme.md.
+## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitender Durchschnitt). Einstandspreis beim Lagerzugang aus DocFlow (unit_cost/total_cost, Storno zum Zugangspreis), app/services/bestandsbewertung.py: gleitender_durchschnitt und bewerte je Lagereinheit; nicht umrechenbare Einheit -> BewertungNichtBestimmbar. Schnitt 2 (Buchungsentwurf) gestapelt auf diesem Zweig.
