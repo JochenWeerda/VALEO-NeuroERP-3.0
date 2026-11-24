@@ -276,6 +276,7 @@ domains:
     service_prefixes:
       - inventory_
       - warehouse_
+      - bestandsbewertung
       - lagergeld_
       - articles_
       - article_
