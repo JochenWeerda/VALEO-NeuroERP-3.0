@@ -156335,6 +156335,19 @@
             "title": "Bin Id",
             "type": "string"
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
           "movement_type": {
             "title": "Movement Type",
             "type": "string"

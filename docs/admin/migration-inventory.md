@@ -119,6 +119,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `bank_legacy_retirement_20261001` | Remove the competing bank model and its development-only legacy records. |
 | `beleg_altspeicher_entfernen_20261117` | Die alten Belegspeicher entfallen - DocFlow ist der einzige Belegspeicher (BELEG-052 S5). |
 | `beleg_vordrucke_20260702` | admin: beleg_vordrucke — Druckvorlagen-Editor für Papier/PDF-Ausdrucke |
+| `bestandsbuchung_schluessel_20261124` | Buchungsschluessel fuer Bestandsbewegungen - doppelte Bewegungen technisch ausgeschlossen (24.11.2026). |
 | `bewerbung_einwilligung_20261006` | Das Verzeichnis der Aufbewahrungs-Einwilligungen — Nachweis und Widerruf. |
 | `bewerbung_erklaerung_fassung_20261006` | Die Einwilligungserklaerung in Fassungen — welchem Wortlaut zugestimmt wurde. |
 | `bewerbung_loeschlauf_20261006` | Der Loeschlauf fuer Bewerberdaten — Frist, Einwilligung und Nachweis. |

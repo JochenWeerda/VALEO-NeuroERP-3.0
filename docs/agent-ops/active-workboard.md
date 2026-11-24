@@ -1028,3 +1028,5 @@ Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Position
 
 ## M3-BERICHTE-NUR-GEBUCHT-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Bilanz, GuV und BWA (financial_reports.py) zaehlten Journalbuchungen ohne Status mit (je.status IS NULL); domain_erp.journal_entries.status ist auf frischer Installation nullbar ohne Vorgabe. Jetzt nur posted/reversed wie alle Journalleser (#164); Ratsche in tests/test_journal_storno_gebucht.py. Offen: status NOT NULL mit Vorgabe draft per Migration (Bestand pruefen).
+## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
