@@ -984,3 +984,6 @@ Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeff
 Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
 Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+## M0-VOR-PUSH-SPERRE-20261124 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. scripts/vor_push.py nimmt selbst die Pruefstand-Sperre (%TEMP%/valeo_vor_push.lock, PID-Pruefung, verwaiste Sperre wird uebernommen, Frist 45 min). Bisher sperrte nur der Claude-Code-Hook; eine Sitzung, die vor_push direkt aufrief, baute valeo_probe mitten in fremden Laeufen neu auf. Der Hook setzt VALEO_PRUEFSTAND_SPERRE=gehalten (keine Doppelsperre). Gilt damit fuer Claude, Cursor und Codex, sobald sie scripts/vor_push.py aus main nutzen.
