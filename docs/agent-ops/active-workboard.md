@@ -1033,3 +1033,6 @@ Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.besta
 
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
+
+## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
+Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
