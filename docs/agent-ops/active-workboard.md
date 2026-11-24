@@ -1053,3 +1053,5 @@ M2-READVIEW-IMPORT: Detail- und Cockpit-Maske verwenden direkte Modulimporte. Di
 Ziel: Auditbefund GHSA-6jcc-5g8w-32mx durch korrigierte i18next-Version schliessen. Dateibesitz: Frontend-Paket, pnpm-Lock und Migrationsnachweis. Abnahme: Installations- und i18n-Vertrag.
 
 GHSA-6jcc-5g8w-32mx behoben: i18next 26.3.4 im Frontend und Lockfile. Frozen-Lockfile-Installation, produktives Node-Audit (0 Befunde), TypeScript und zehn Frontend-Tests bestanden. GitHub-Nachlauf offen.
+
+Nachweis fuer den Major-Wechsel: Echter i18next-Laufzeittest mit Deutsch, Englisch und Spanisch inklusive Speicherung der Sprachauswahl. 19 Vitest-Faelle inklusive Bestellvorschlag und Prozessstudio bestanden.
