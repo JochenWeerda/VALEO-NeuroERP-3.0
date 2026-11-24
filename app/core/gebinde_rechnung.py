@@ -10,7 +10,8 @@ Disziplin wie ``app/core/agrar_units.py``, keine Umrechnung ohne belegten Faktor
 """
 from __future__ import annotations
 
-from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP, Decimal
+from dataclasses import dataclass
+from decimal import ROUND_CEILING, ROUND_FLOOR, ROUND_HALF_UP, Decimal, InvalidOperation
 from enum import Enum, IntEnum
 from typing import Mapping, Optional, Sequence
 
@@ -54,6 +55,22 @@ class GebindeNichtRechenbar(ValueError):
     """Typ deaktiv oder unbekannt, Faktor fehlt oder ungueltig - die Menge wird nicht geraten."""
 
 
+class FaktorFehlt(GebindeNichtRechenbar):
+    """Auf keiner zugelassenen Stufe ist ein Faktor hinterlegt. Ein fehlender Faktor wird nie durch 1 ersetzt."""
+
+
+class FaktorsatzUnvollstaendig(FaktorFehlt):
+    """Die gefundene Stufe hat Faktoren, aber nicht alle, die der Gebindetyp braucht."""
+
+
+class FaktorUngueltig(GebindeNichtRechenbar):
+    """Ein Faktor ist hinterlegt, aber nicht verwendbar (keine Zahl, null oder negativ)."""
+
+
+class FaktorpflegeNichtZulaessig(GebindeNichtRechenbar):
+    """Faktoren auf einer Stufe, die die Faktorherkunft der Mengeneinheit nicht zulaesst."""
+
+
 def _typ(typ: int | Gebindetyp) -> Gebindetyp:
     try:
         gt = Gebindetyp(int(typ))
@@ -68,10 +85,19 @@ def _faktoren(gt: Gebindetyp, faktoren: Sequence[Optional[Decimal]]) -> list[Dec
     n = BENOETIGTE_FAKTOREN[gt]
     benutzt = list(faktoren[:n])
     if len(benutzt) < n or any(f is None for f in benutzt):
-        raise GebindeNichtRechenbar(f"Gebindetyp {int(gt)} braucht {n} Faktor(en), hinterlegt: {list(faktoren)}.")
-    werte = [Decimal(str(f)) for f in benutzt]
-    if gt != Gebindetyp.SUBTRAKTION and any(f <= 0 for f in werte):
-        raise GebindeNichtRechenbar("Gebindefaktoren muessen positiv sein.")
+        raise FaktorsatzUnvollstaendig(f"Gebindetyp {int(gt)} braucht {n} Faktor(en), hinterlegt: {list(faktoren)}.")
+    try:
+        werte = [Decimal(str(f)) for f in benutzt]
+    except (InvalidOperation, ValueError) as fehler:
+        raise FaktorUngueltig(f"Gebindefaktor ist keine Zahl: {list(benutzt)}.") from fehler
+    if any(not w.is_finite() for w in werte):
+        raise FaktorUngueltig(f"Gebindefaktor ist keine endliche Zahl: {list(benutzt)}.")
+    # Subtraktion (Zaehlerstaende): die Staende duerfen 0 sein, aber nicht negativ.
+    if gt == Gebindetyp.SUBTRAKTION:
+        if any(w < 0 for w in werte):
+            raise FaktorUngueltig("Zaehlerstaende duerfen nicht negativ sein.")
+    elif any(w <= 0 for w in werte):
+        raise FaktorUngueltig("Gebindefaktoren muessen positiv sein.")
     return werte
 
 
@@ -114,18 +140,80 @@ def anzahl_aus_menge(typ: int | Gebindetyp, menge: Decimal, faktoren: Sequence[O
     return anzahl.quantize(Decimal(1).scaleb(-rundung), rounding=ROUND_HALF_UP)
 
 
+def suchpfad(herkunft: int | Faktorherkunft) -> tuple[Faktorherkunft, ...]:
+    """Stufen, die die Faktorherkunft zulaesst, in Suchreihenfolge (a.eins: auf der eingestellten Stufe beginnen,
+    bei "nicht gefunden" weiter unten suchen; bestaetigt 24.11.2026):
+
+    1 Mengeneinheit | 2 Artikelstamm -> Mengeneinheit | 3 Artikel -> Artikelstamm -> Mengeneinheit |
+    4 Auspraegung -> Artikel -> Artikelstamm -> Mengeneinheit.
+    Speziellere Stufen oberhalb der eingestellten werden nie beruecksichtigt.
+    """
+    try:
+        start = Faktorherkunft(int(herkunft))
+    except ValueError as fehler:
+        raise GebindeNichtRechenbar(f"Unbekannte Faktorherkunft {herkunft!r}.") from fehler
+    return tuple(sorted((s for s in Faktorherkunft if s <= start), reverse=True))
+
+
+def pruefe_faktorpflege(herkunft: int | Faktorherkunft, stufe: int | Faktorherkunft) -> None:
+    """Faktoren duerfen nur auf Stufen gepflegt werden, die im Suchpfad liegen (a.eins: bei Faktorherkunft
+    Mengeneinheit sind die Faktoren im Artikel nicht aenderbar). Fuer die serverseitige Pruefung der Stammpflege."""
+    if Faktorherkunft(int(stufe)) not in suchpfad(herkunft):
+        raise FaktorpflegeNichtZulaessig(
+            f"Faktorherkunft {Faktorherkunft(int(herkunft)).name.lower()} laesst keine Faktoren auf Stufe "
+            f"{Faktorherkunft(int(stufe)).name.lower()} zu.")
+
+
 def faktoren_nach_herkunft(herkunft: int | Faktorherkunft,
                            stufen: Mapping[Faktorherkunft, Optional[Sequence[Optional[Decimal]]]]
                            ) -> tuple[Faktorherkunft, Sequence[Optional[Decimal]]]:
-    """Faktoren suchen: auf der Stufe ``herkunft`` beginnen, bei "nicht gefunden" zur allgemeineren Stufe.
+    """Erste Stufe im Suchpfad, auf der mindestens ein Faktor hinterlegt ist, mit ihrem Faktorsatz.
 
-    Auslegung (a.eins: "bei nicht gefunden wird stets weiter unten weitergesucht"): die speziellere Stufe ueberstimmt
-    die allgemeinere, die Mengeneinheit ist die Grundlage. Beginnt die Suche beim Artikel, gilt Artikel ->
-    Artikelstamm -> Mengeneinheit. Gefunden heisst: mindestens ein Faktor hinterlegt.
+    Der Satz wird als Ganzes von einer Stufe genommen; Faktoren verschiedener Stufen werden nicht gemischt. Ist der
+    Satz der gefundenen Stufe fuer den Gebindetyp unvollstaendig, meldet ``berechne_gebinde`` das, statt auf der
+    naechsten Stufe weiterzusuchen oder Faktoren einzeln zusammenzusetzen: Ob a.eins einzeln oder satzweise aufloest,
+    ist nicht belegt (offen, s. docs/design/mengeneinheiten-aeins-uebernahme.md).
     """
-    start = Faktorherkunft(int(herkunft))
-    for stufe in sorted((s for s in Faktorherkunft if s <= start), reverse=True):
+    pfad = suchpfad(herkunft)
+    for stufe in pfad:
         werte = stufen.get(stufe)
         if werte and any(f is not None for f in werte):
             return stufe, werte
-    raise GebindeNichtRechenbar(f"Keine Gebindefaktoren ab Stufe {start.name.lower()} hinterlegt.")
+    raise FaktorFehlt(f"Keine Gebindefaktoren im Suchpfad {[s.name.lower() for s in pfad]} hinterlegt.")
+
+
+@dataclass(frozen=True)
+class Gebindeberechnung:
+    """Ergebnis mit allem, was der Beleg zur Nachvollziehbarkeit festhaelt: Typ, eingestellte und tatsaechlich
+    verwendete Herkunft, die verwendeten Faktoren, Anzahl, Rundung, Ergebnis. Ein Beleg rechnet spaeter aus diesem
+    Abbild, nicht aus dem dann geaenderten Stamm."""
+
+    gebindetyp: int
+    faktorherkunft: int
+    herkunft_verwendet: Optional[int]
+    faktoren: tuple[str, ...]
+    anzahl: str
+    rundung: int
+    ergebnis: str
+
+    def als_dict(self) -> dict:
+        return {"gebindetyp": self.gebindetyp, "faktorherkunft": self.faktorherkunft,
+                "herkunft_verwendet": self.herkunft_verwendet, "faktoren": list(self.faktoren),
+                "anzahl": self.anzahl, "rundung": self.rundung, "ergebnis": self.ergebnis}
+
+
+def berechne_gebinde(typ: int | Gebindetyp, anzahl: Decimal, herkunft: int | Faktorherkunft,
+                     stufen: Mapping[Faktorherkunft, Optional[Sequence[Optional[Decimal]]]],
+                     rundung: int = 3) -> Gebindeberechnung:
+    """Der eine Einstieg fuer Einkauf, Verkauf, Lager, Waage, Fakturierung und Bewertung."""
+    gt = _typ(typ)
+    if BENOETIGTE_FAKTOREN[gt] == 0:
+        verwendet, faktoren = None, []
+    else:
+        verwendet, roh = faktoren_nach_herkunft(herkunft, stufen)
+        faktoren = _faktoren(gt, roh)
+    ergebnis = ergebnismenge(gt, anzahl, faktoren, rundung)
+    return Gebindeberechnung(gebindetyp=int(gt), faktorherkunft=int(Faktorherkunft(int(herkunft))),
+                             herkunft_verwendet=None if verwendet is None else int(verwendet),
+                             faktoren=tuple(str(f) for f in faktoren), anzahl=str(Decimal(str(anzahl))),
+                             rundung=rundung, ergebnis=str(ergebnis))

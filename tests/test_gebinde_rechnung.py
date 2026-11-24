@@ -6,8 +6,12 @@ from decimal import Decimal as D
 import pytest
 
 from app.core.gebinde_rechnung import (
-    Anbruch, Faktorherkunft, GebindeNichtRechenbar, anzahl_aus_menge, ergebnismenge, faktoren_nach_herkunft,
+    Anbruch, FaktorFehlt, Faktorherkunft, FaktorpflegeNichtZulaessig, FaktorsatzUnvollstaendig, FaktorUngueltig,
+    GebindeNichtRechenbar, anzahl_aus_menge, berechne_gebinde, ergebnismenge, faktoren_nach_herkunft,
+    pruefe_faktorpflege, suchpfad,
 )
+
+H = Faktorherkunft
 
 pytestmark = pytest.mark.unit
 
@@ -57,3 +61,78 @@ def test_faktorherkunft_speziell_vor_allgemein():
     assert faktoren_nach_herkunft(Faktorherkunft.ARTIKELSTAMM, stufen) == (Faktorherkunft.MENGENEINHEIT, [D(25)])
     with pytest.raises(GebindeNichtRechenbar):
         faktoren_nach_herkunft(Faktorherkunft.MENGENEINHEIT, {Faktorherkunft.ARTIKEL: [D(50)]})
+
+
+# Pflanzenschutzmittel: auf allen vier Stufen ein Faktor (Liter je Kanister). Je nach Faktorherkunft ein anderes
+# Ergebnis - speziellere Stufen oberhalb der eingestellten zaehlen nicht (Fachentscheid 24.11.2026).
+PSM = {H.MENGENEINHEIT: [D(10)], H.ARTIKELSTAMM: [D(20)], H.ARTIKEL: [D(5)], H.AUSPRAEGUNG: [D(1)]}
+
+
+@pytest.mark.parametrize(("herkunft", "pfad", "liter"), [
+    (H.MENGENEINHEIT, (H.MENGENEINHEIT,), "30.000"),
+    (H.ARTIKELSTAMM, (H.ARTIKELSTAMM, H.MENGENEINHEIT), "60.000"),
+    (H.ARTIKEL, (H.ARTIKEL, H.ARTIKELSTAMM, H.MENGENEINHEIT), "15.000"),
+    (H.AUSPRAEGUNG, (H.AUSPRAEGUNG, H.ARTIKEL, H.ARTIKELSTAMM, H.MENGENEINHEIT), "3.000"),
+])
+def test_vier_suchpfade_mit_faktoren_auf_allen_stufen(herkunft, pfad, liter):
+    ergebnis = berechne_gebinde(1, D(3), herkunft, PSM)
+
+    assert suchpfad(herkunft) == pfad
+    assert (ergebnis.ergebnis, ergebnis.herkunft_verwendet) == (liter, int(herkunft))
+
+
+@pytest.mark.parametrize(("herkunft", "fehlend", "verwendet", "liter"), [
+    (H.ARTIKELSTAMM, {H.ARTIKELSTAMM}, H.MENGENEINHEIT, "30.000"),
+    (H.ARTIKEL, {H.ARTIKEL}, H.ARTIKELSTAMM, "60.000"),
+    (H.ARTIKEL, {H.ARTIKEL, H.ARTIKELSTAMM}, H.MENGENEINHEIT, "30.000"),
+    (H.AUSPRAEGUNG, {H.AUSPRAEGUNG}, H.ARTIKEL, "15.000"),
+    (H.AUSPRAEGUNG, {H.AUSPRAEGUNG, H.ARTIKEL, H.ARTIKELSTAMM}, H.MENGENEINHEIT, "30.000"),
+])
+def test_fehlende_stufe_sucht_weiter_unten(herkunft, fehlend, verwendet, liter):
+    stufen = {s: (None if s in fehlend else w) for s, w in PSM.items()}
+
+    ergebnis = berechne_gebinde(1, D(3), herkunft, stufen)
+
+    assert (ergebnis.herkunft_verwendet, ergebnis.ergebnis) == (int(verwendet), liter)
+
+
+@pytest.mark.parametrize("herkunft", list(H))
+def test_ohne_faktor_im_suchpfad_kein_ergebnis_und_keine_1(herkunft):
+    nur_oberhalb = {s: [D(7)] for s in H if s > herkunft}  # speziellere Stufen zaehlen nicht
+
+    with pytest.raises(FaktorFehlt):
+        berechne_gebinde(1, D(3), herkunft, nur_oberhalb)
+
+
+def test_fehlend_und_ungueltig_sind_unterscheidbar():
+    with pytest.raises(FaktorsatzUnvollstaendig):  # Stufe gefunden, Faktor 2 fehlt: nicht mischen, nicht weitersuchen
+        berechne_gebinde(2, D(1), H.ARTIKEL, {H.ARTIKEL: [D(24), None], H.MENGENEINHEIT: [D(24), D(6)]})
+    for falsch in ([D(0)], [D(-5)], ["abc"], [D("NaN")]):
+        with pytest.raises(FaktorUngueltig):
+            berechne_gebinde(1, D(1), H.MENGENEINHEIT, {H.MENGENEINHEIT: falsch})
+    assert not issubclass(FaktorUngueltig, FaktorFehlt)
+    assert berechne_gebinde(5, D(1), H.MENGENEINHEIT, {H.MENGENEINHEIT: [D(100), D(0)]}).ergebnis == "100.000"
+
+
+@pytest.mark.parametrize(("herkunft", "stufe", "erlaubt"), [
+    (H.MENGENEINHEIT, H.ARTIKEL, False),   # a.eins: bei Herkunft Mengeneinheit im Artikel nicht aenderbar
+    (H.MENGENEINHEIT, H.MENGENEINHEIT, True),
+    (H.ARTIKELSTAMM, H.ARTIKEL, False),
+    (H.ARTIKEL, H.ARTIKELSTAMM, True),
+    (H.ARTIKEL, H.AUSPRAEGUNG, False),
+    (H.AUSPRAEGUNG, H.AUSPRAEGUNG, True),
+])
+def test_faktorpflege_nur_im_suchpfad(herkunft, stufe, erlaubt):
+    if erlaubt:
+        pruefe_faktorpflege(herkunft, stufe)
+    else:
+        with pytest.raises(FaktorpflegeNichtZulaessig):
+            pruefe_faktorpflege(herkunft, stufe)
+
+
+def test_abbild_fuer_den_beleg_haelt_faktoren_und_herkunft_fest():
+    abbild = berechne_gebinde(2, D(10), H.ARTIKEL, {H.ARTIKEL: [D(24), D(6)]}, rundung=0).als_dict()
+
+    assert abbild == {"gebindetyp": 2, "faktorherkunft": 3, "herkunft_verwendet": 3, "faktoren": ["24", "6"],
+                      "anzahl": "10", "rundung": 0, "ergebnis": "1440"}
+    assert berechne_gebinde(0, D(4), H.MENGENEINHEIT, {}).herkunft_verwendet is None
