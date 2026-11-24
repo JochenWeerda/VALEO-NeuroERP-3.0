@@ -5,7 +5,7 @@ audience: [entwickler, fachbereich]
 owner: Claude Code
 status: aktiv
 last_reviewed: 2026-11-24
-version: 1.0.0
+version: 1.1.0
 description: Fachliche Vorgaben der a.eins-Hilfe zu Mengeneinheiten (Grundmengeneinheit, Gebinde, Gebindetypen, Faktorherkunft, LVS) und ihre Uebernahme in VALEO.
 ---
 
@@ -72,12 +72,35 @@ z. B. kg), **Ergebniseinheit** (Ergebnis der Gebindeberechnung), **Gebindetyp**,
 | 8 | Faktor1 x Faktor2 / Faktor3 | - | - |
 | 9 | Faktor1 x Faktor2 x Faktor3 x Faktor4 | - | Paletten mit Lagen mit Kartons mit Dosen, artikelspezifisches Gewicht je Dose |
 
-### 3.2 Faktorherkunft
+### 3.2 Faktorherkunft (Fachentscheid 24.11.2026, verbindlich)
 
-Gibt an, auf welcher Stufe die Suche nach den Gebindefaktoren beginnt; bei "nicht gefunden" wird stets weiter unten
-gesucht: 1 aus Mengeneinheit, 2 aus Artikelstamm, 3 aus dem Artikel, 4 aus Artikel-Auspraegung. Faktor in der
-Mengeneinheit, wenn er oft wiederverwendet wird; Faktoren im Artikel, wenn das Rechenschema gleich, die Faktoren aber
-verschieden sind. Im Artikel sind Gebindefaktoren nur eingebbar, wenn die Mengeneinheit das vorsieht.
+Die Faktorherkunft ist die **konfigurierbare Einstiegsstufe** der Faktorsuche, keine globale Prioritaet. Gesucht wird
+ab der eingestellten Stufe; bei "nicht gefunden" stets weiter unten. Speziellere Stufen oberhalb der eingestellten
+werden nie beruecksichtigt:
+
+| Faktorherkunft | Suchpfad |
+|---|---|
+| 1 Mengeneinheit | Mengeneinheit |
+| 2 Artikelstamm | Artikelstamm -> Mengeneinheit |
+| 3 Artikel | Artikel -> Artikelstamm -> Mengeneinheit |
+| 4 Artikel-Auspraegung | Auspraegung -> Artikel -> Artikelstamm -> Mengeneinheit |
+
+Beispiel Pflanzenschutzmittel mit Faktoren auf allen Stufen (ME 10 l, Stamm 20 l, Artikel 5 l, Auspraegung 1 l):
+3 Kanister ergeben je nach Faktorherkunft 30, 60, 15 oder 3 Liter.
+
+Faktorpflege nur auf Stufen im Suchpfad (a.eins: bei Herkunft Mengeneinheit sind die Faktoren im Artikel nicht
+aenderbar) - `pruefe_faktorpflege` im Rechenkern, serverseitig anzuwenden, sobald die Stufen Faktorfelder haben.
+
+Weitere Regeln des Rechenkerns `app/core/gebinde_rechnung.py`:
+
+- Fehlend (`FaktorFehlt`, `FaktorsatzUnvollstaendig`) und ungueltig (`FaktorUngueltig`: keine Zahl, 0, negativ)
+  sind getrennte Fehler. Ein fehlender Faktor wird nie durch 1 ersetzt.
+- Der Faktorsatz wird als Ganzes von **einer** Stufe genommen; Faktoren verschiedener Stufen werden nicht gemischt.
+  Ist der Satz der gefundenen Stufe unvollstaendig, wird das gemeldet, nicht weitergesucht. **Offen:** ob a.eins
+  einzeln oder satzweise aufloest, ist in der Hilfe nicht belegt; die strenge Regel gilt, bis das geklaert ist.
+- `berechne_gebinde` ist der eine Einstieg fuer Einkauf, Verkauf, Lager, Waage, Fakturierung und Bewertung und
+  liefert ein Abbild (Typ, eingestellte und verwendete Herkunft, Faktoren, Anzahl, Rundung, Ergebnis) zum Festhalten
+  im Beleg.
 
 ### 3.3 Weitere Felder (Tabreiter Allgemein/Zusatz)
 
@@ -89,16 +112,20 @@ Mengeneinheit Preisbezug (zusaetzliches Mengenfeld, wenn die gemessene von der b
 Gebindefaktoren 1-4 mit Einheit; Gebindetext; Gebinde aenderbar; Statistikkennzeichen; LVS-relevant; LVS-Default-
 Lokalitaet.
 
-### 3.4 LVS-relevant
+### 3.4 LVS-relevant (eigene Eigenschaft, unabhaengig von der Faktorherkunft)
 
-0 nicht relevant, 1 relevant, 2 buchend (relevant im Zusammenhang mit Buchen).
+0 nicht relevant, 1 relevant, 2 buchend (relevant im Zusammenhang mit Buchen). Bei "buchend" darf eine Menge nur
+einmal bestandswirksam werden - entweder ueber die ERP-Bestandsfuehrung oder ueber das LVS, nie ueber beide.
 
 ## 4. Zuordnung VALEO und naechste Schritte
 
 1. **Grundmengeneinheit** - umgesetzt (Migration `mengeneinheit_aeins_felder_20261124`, Stamm-Endpunkt, Studio-Maske
    `stammdaten/mengeneinheit`, Grundeinheiten, eRechnung aus dem Stamm).
-2. **Gebinde-Mengeneinheit**: Gebindetyp 0-9, Ergebniseinheit, Faktoren 1-4, Faktorherkunft (Mengeneinheit ->
-   Artikelstamm -> Artikel -> Auspraegung) als Rechenkern in `app/core/agrar_units.py` (bisher nur lineare Gebindeleiter
-   = Typ 1/2), Felder am Stamm, Anbruch- und Preisregeln. Die Disziplin "keine Umrechnung ohne belegten Faktor" bleibt.
+2. **Gebinde-Rechenkern** - umgesetzt (`app/core/gebinde_rechnung.py`, PR #187): Gebindetypen 0-9, Suchpfade der
+   Faktorherkunft, Fehlerarten, Pflegepruefung, Abbild fuer den Beleg.
+   **Offen (Schnitt 2b):** Gebindefelder am Stamm (Gebindetyp, Ergebniseinheit, Faktoren 1-4, Faktorherkunft) mit
+   serverseitiger Pflegepruefung; Abbild je Belegposition persistieren, damit historische Belege gegen spaetere
+   Stammaenderungen geschuetzt sind; Anbruch- und Preisregeln.
 3. **Mengeneinheitsgruppe** am Artikel an die Gebinde-Einheiten binden (Einkauf/Verkauf/Bestand/Preis).
-4. LVS-Relevanz und Default-Lokalitaet mit dem WMS verbinden.
+4. **Offen:** LVS-Relevanz 0/1/2 als eigenes Feld der Gebinde-Mengeneinheit, Default-Lokalitaet; Ausschluss von
+   Doppelbuchungen zwischen ERP-Bestand und LVS bei "buchend".
