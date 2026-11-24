@@ -217,6 +217,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `kunden_geocode_service` | Befüllt public.kunden_geo mit präzisen Koordinaten je Kunde. |
 | `kunden_merge` | Kunden/Business-Partner-Merge — Dry-Run / Reconciliation (Phase 2A). |
 | `l3_report_catalog_service` | Fixed L3 report catalog with shared sums, export and document drilldown. |
+| `lagergeld_rechnung` | Lagergeld als Ausgangsrechnung an den Einlagerer (M3, 24.11.2026). |
 | `legacy_interface_adapter_service` | Versioned, non-executing adapter framework for L3 Standard and Unimet. |
 | `lieferschein_pdf` | Lieferschein PDF Generator |
 | `list_experience_metrics` | Read-only list metrics shared across registered human/MCP/CLI projections. |
