@@ -64,8 +64,11 @@ def list_background_jobs(
     registry = get_background_job_registry()
     if tenant_id and tenant_id != active_tenant_id:
         raise HTTPException(403, "Requested tenant does not match the verified context")
-    status_enum = JobStatus(status) if status else None
-    typ_enum = JobTyp(typ) if typ else None
+    try:
+        status_enum = JobStatus(status) if status else None
+        typ_enum = JobTyp(typ) if typ else None
+    except ValueError as exc:
+        raise HTTPException(422, "Ungültiger Jobstatus oder Jobtyp") from exc
     jobs = registry.list(status=status_enum, tenant_id=active_tenant_id, typ=typ_enum)
     offset = (page - 1) * limit
     page_jobs = [job.as_dict() for job in jobs[offset:offset + limit]]

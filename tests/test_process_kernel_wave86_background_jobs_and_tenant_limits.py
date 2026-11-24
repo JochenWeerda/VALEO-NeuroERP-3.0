@@ -88,6 +88,9 @@ def test_background_job_listing_filters_by_tenant_and_status():
     assert next_page.status_code == 200
     assert next_page.json()["items"] == []
     assert next_page.json()["total"] == 1
+    for field in ("status", "typ"):
+        response = client.get("/process/background-jobs", params={field: "unbekannt"})
+        assert response.status_code == 422
     assert foreign.status_code == 201
     assert client.get("/process/background-jobs", params={"tenant_id": "tenant-b"}).status_code == 403
     rejected = client.post(

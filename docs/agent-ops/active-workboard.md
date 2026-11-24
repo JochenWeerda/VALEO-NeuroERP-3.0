@@ -1175,6 +1175,8 @@ Ziel: eigene Studio-Listenroute fuer Hintergrundjobs. Dateibesitz: ScreenDefinit
 
 Die Hintergrundjob-Worklist hat den eigenen Einstieg /admin/background-jobs und verwendet paginierte Jobzeilen aus dem mandantengebundenen Listenvertrag. Die wirkungslose Zeilenaktion wurde entfernt. Der bisherige Command-Monitor-Einstieg bleibt fachlich getrennt. Die Browser- und PostgreSQL-Abnahmen stehen aus.
 
+Unbekannte Werte fuer Jobstatus oder Jobtyp liefern HTTP 422. Wave 86 deckt beide Filter ab. Vier Tests unter der gemeinsamen Pruefsperre bestanden.
+
 ## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
 ## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
