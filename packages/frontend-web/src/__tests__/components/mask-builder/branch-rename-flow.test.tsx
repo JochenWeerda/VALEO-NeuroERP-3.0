@@ -4,11 +4,15 @@ import { expect, it, vi } from 'vitest'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 const { executeAction } = vi.hoisted(() => ({ executeAction: vi.fn() }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction }),
+}))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({
     plan: {}, entityData: { name: 'Nord', version: 123456 }, tableRows: {}, messages: [], refetch: vi.fn(),
   }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction }: { onAction: (key: string, payload: object) => void }) =>
     <button onClick={() => onAction('bearbeiten', { id: 'branch-1' })}>Umbenennen</button>,
 }))

@@ -21,11 +21,15 @@ vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: schema }
 vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({ useScreenPermissions: () => ['belege.bearbeiten'] }))
 vi.mock('@/lib/api-client', () => ({ apiClient: { get: mocks.get, post: vi.fn().mockResolvedValue({}) },
   getAxiosErrorMessage: (error: unknown) => error instanceof Error ? error.message : String(error) }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({ plan: {}, entityData: { belegart: 'sales_order', version: 4, aktion_umwandeln_sales_delivery: true },
     tableRows: {}, tableQueryStates: {}, tableTotals: {}, messages: [], lookupBindings: {},
     setTableQuery: vi.fn(), updateUserOverlay: vi.fn(), resetUserOverlay: vi.fn(), refetch: mocks.refetch }),
+}))
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction: mocks.execute }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction, messages }: { onAction: (key: string, payload: object) => void; messages: Array<{ key: string; message: string }> }) =>
     <><button onClick={() => onAction(action.key, { quantities_by_source_item_id: [{ source_item_id: 'paged-only' }] })}>Lieferschein erstellen</button>{messages.map(message => <p key={message.key}>{message.message}</p>)}</>,
 }))
