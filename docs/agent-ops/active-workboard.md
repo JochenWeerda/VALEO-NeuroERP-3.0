@@ -988,10 +988,10 @@ Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -
 ## M0-VOR-PUSH-SPERRE-20261124 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0. scripts/vor_push.py nimmt selbst die Pruefstand-Sperre (%TEMP%/valeo_vor_push.lock, PID-Pruefung, verwaiste Sperre wird uebernommen, Frist 45 min). Bisher sperrte nur der Claude-Code-Hook; eine Sitzung, die vor_push direkt aufrief, baute valeo_probe mitten in fremden Laeufen neu auf. Der Hook setzt VALEO_PRUEFSTAND_SPERRE=gehalten (keine Doppelsperre). Gilt damit fuer Claude, Cursor und Codex, sobald sie scripts/vor_push.py aus main nutzen.
 
-## M4-LO-P0-P1-LUECKEN-20261123 — reserviert, Cursor (M4, P0)
-Meilenstein: M4. Owner: Cursor. Stand: reserviert 2026-11-24.
+## M4-LO-P0-P1-LUECKEN-20261123 — zur Abnahme, Cursor (M4, P0)
+Meilenstein: M4. Owner: Cursor. Stand: zur Abnahme 2026-11-24 (P0 LO-02).
 Quelle: docs/abnahme/domaenen/logistik.md (D07) / Reifematrix 20261123 (PR #181).
-P0-Ziel: LO-02 Mandantenleck ops_fahrer / transporte.py schliessen (tenant_id, Filter, Fremdmandant-Tests).
+Fix P0: Migration `ops_fahrer_tenant_20261124` (tenant_id, Unique je Mandant, RLS); FahrerRepository mandantenpflichtig; transporte.py filtert ueber get_tenant_id.
 Dateibesitz: alembic/versions/ops_fahrer_tenant_20261124.py, app/domains/operations/models.py (Fahrer), app/domains/operations/repository.py (FahrerRepository), app/api/v1/endpoints/transporte.py, tests/test_m4_lo_p0_fahrer_mandant.py, QA docs/quality-assurance/m4-lo-p0-fahrer-mandant-20261124.md, Workboard.
-P1 bleiben offen fuer Bahn Logistik. M4-PM-P0 und fremde Claims unberuehrt.
-Abnahme: Integrationstest gegen valeo_probe mit Fremdmandant 404; Liste nur eigener Mandant.
+Abnahme: `pytest tests/test_m4_lo_p0_fahrer_mandant.py --no-cov` 5/5 gegen valeo_probe.
+P1 bleiben offen fuer Bahn Logistik. M4-PM-P0 unbeansprucht.
