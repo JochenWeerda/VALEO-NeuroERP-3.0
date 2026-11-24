@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from ....core.database import get_db
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
@@ -178,6 +179,18 @@ async def create_bestandskorrektur(
     movement_type = "adjustment"
     ref_number = f"KORR-{korrektur_id[:8].upper()}"
 
+    # Buchungsentwurf zum gleitenden Durchschnitt - vor der Bewegung, damit der Schnitt den Stand davor zeigt.
+    # Fehlt Bewertung oder Kontenzuordnung, bleibt die Korrektur operativ gebucht und die Luecke wird gemeldet.
+    from app.services.bestandsbewertung import BuchungNichtMoeglich, entwerfe_bestandsbuchung
+
+    journal_entry_id = None
+    try:
+        journal_entry_id = entwerfe_bestandsbuchung(
+            db, tid, ref_number, f"Bestandskorrektur {REASON_CODES[payload.grund]}", posting_date,
+            [(payload.article_id, Decimal(str(payload.menge)), "t")])
+    except BuchungNichtMoeglich as grund:
+        melde_fehlende_bewertung("inventory_operations_gl", f"{ref_number} ({grund})")
+
     # Insert stock movement
     db.execute(
         text("""
@@ -217,10 +230,6 @@ async def create_bestandskorrektur(
             """),
             {"delta": payload.menge, "article_id": payload.article_id},
         )
-
-    # Keine Buchung ohne Bewertung (s. melde_fehlende_bewertung).
-    journal_entry_id = None
-    melde_fehlende_bewertung("inventory_operations_gl", ref_number)
 
     db.commit()
 

@@ -18630,7 +18630,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/inventory_operations.py",
-            "app/infrastructure/models/einkauf_models.py"
+            "app/infrastructure/models/einkauf_models.py",
+            "app/services/bestandsbewertung.py"
           ]
         },
         "lieferanten": {
@@ -49416,6 +49417,46 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "nummer",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "langtext",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "iso_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "datanorm_kurz",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "statistikkennzeichen",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "preisbezug_einheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "preisbezug_menge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "un_code",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -49426,10 +49467,13 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/beleg_erechnung.py",
+            "app/services/mengeneinheiten_grund.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/mengeneinheiten_grund.py"
           ]
         },
         "artikel_mengeneinheitengruppen": {

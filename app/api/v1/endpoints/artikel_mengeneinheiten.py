@@ -34,11 +34,23 @@ router = APIRouter(prefix="/artikel/mengeneinheiten",
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
 class MengeneinheitCreate(BaseModel):
-    einheit_kuerzel: str = Field(..., max_length=10)
+    """Grundmengeneinheit nach a.eins (Nutzerauftrag 24.11.2026)."""
+
+    einheit_kuerzel: str = Field(..., max_length=10, description="Kurztext, wie er gedruckt wird (kg, Stück, Ltr.)")
     bezeichnung: str
     basis_einheit: Optional[str] = Field(None, max_length=10)
     umrechnungsfaktor: Optional[Decimal] = Field(None, gt=0)
-    dezimalstellen: int = Field(default=3, ge=0, le=6)
+    # Rundung bei Umrechnung: 0 bis 4; bei aktiven Einheiten nur nach oben aenderbar.
+    dezimalstellen: int = Field(default=3, ge=0, le=4)
+    nummer: Optional[int] = Field(None, ge=1, le=9999, description="Nummer der Mengeneinheit (hoechstens 4 Stellen)")
+    langtext: Optional[str] = Field(None, max_length=80, description="Langtext, der anstelle des Kurztexts gedruckt werden kann")
+    iso_name: Optional[str] = Field(None, max_length=20)
+    datanorm_kurz: Optional[str] = Field(None, max_length=10, description="Kurzbezeichnung im DataNorm-Verfahren")
+    statistikkennzeichen: Optional[str] = Field(None, max_length=20)
+    preisbezug_einheit: Optional[str] = Field(None, max_length=10, description="Mengeneinheit des Preisbezugs")
+    preisbezug_menge: Optional[Decimal] = Field(None, gt=0, description="Preisbezug, z. B. 100 bei Preis je 100 kg")
+    un_code: Optional[str] = Field(None, pattern=r"^[A-Z0-9]{2,3}$",
+                                   description="UN-Mengeneinheit (UN/ECE Rec. 20) fuer E-Rechnung und openTRANS")
 
 
 class MengeneinheitOut(BaseModel):
@@ -48,8 +60,20 @@ class MengeneinheitOut(BaseModel):
     basis_einheit: Optional[str]
     umrechnungsfaktor: Optional[Decimal]
     dezimalstellen: int
+    nummer: Optional[int] = None
+    langtext: Optional[str] = None
+    iso_name: Optional[str] = None
+    datanorm_kurz: Optional[str] = None
+    statistikkennzeichen: Optional[str] = None
+    preisbezug_einheit: Optional[str] = None
+    preisbezug_menge: Optional[Decimal] = None
+    un_code: Optional[str] = None
     aktiv: bool
     created_at: datetime
+
+
+ZUSATZFELDER = ("nummer", "langtext", "iso_name", "datanorm_kurz", "statistikkennzeichen", "preisbezug_einheit",
+                "preisbezug_menge", "un_code")
 
 
 class MengeneinheitengruppeCreate(BaseModel):
@@ -105,12 +129,15 @@ def create_mengeneinheit(
     db.execute(text("""
         INSERT INTO domain_shared.artikel_mengeneinheiten
             (id, tenant_id, einheit_kuerzel, bezeichnung, basis_einheit,
-             umrechnungsfaktor, dezimalstellen, aktiv)
-        VALUES (:id, :tid, :kz, :bez, :basis, :faktor, :dez, true)
+             umrechnungsfaktor, dezimalstellen, nummer, langtext, iso_name, datanorm_kurz,
+             statistikkennzeichen, preisbezug_einheit, preisbezug_menge, un_code, aktiv)
+        VALUES (:id, :tid, :kz, :bez, :basis, :faktor, :dez, :nummer, :langtext, :iso_name, :datanorm_kurz,
+                :statistikkennzeichen, :preisbezug_einheit, :preisbezug_menge, :un_code, true)
     """), {
         "id": new_id, "tid": tenant_id, "kz": payload.einheit_kuerzel,
         "bez": payload.bezeichnung, "basis": payload.basis_einheit,
         "faktor": payload.umrechnungsfaktor, "dez": payload.dezimalstellen,
+        **{feld: getattr(payload, feld) for feld in ZUSATZFELDER},
     })
     db.commit()
     row = db.execute(text(
@@ -127,21 +154,29 @@ def update_mengeneinheit(
     tenant_id: str = Depends(get_tenant_id),
 ):
     row = db.execute(text("""
-        SELECT id FROM domain_shared.artikel_mengeneinheiten
+        SELECT id, dezimalstellen, aktiv FROM domain_shared.artikel_mengeneinheiten
         WHERE tenant_id = :tid AND einheit_kuerzel = :kz
     """), {"tid": tenant_id, "kz": einheit_kuerzel}).fetchone()
     if not row:
         raise HTTPException(404, "Mengeneinheit nicht gefunden.")
+    if row.aktiv and payload.dezimalstellen < int(row.dezimalstellen or 0):
+        # a.eins: bei aktiven Einheiten nur nach oben, damit geschriebene Belege nicht nachtraeglich anders runden.
+        raise HTTPException(409, f"Rundung einer aktiven Mengeneinheit nur nach oben aenderbar "
+                                 f"(bisher {row.dezimalstellen}).")
 
     db.execute(text("""
         UPDATE domain_shared.artikel_mengeneinheiten
         SET bezeichnung = :bez, basis_einheit = :basis,
-            umrechnungsfaktor = :faktor, dezimalstellen = :dez
+            umrechnungsfaktor = :faktor, dezimalstellen = :dez,
+            nummer = :nummer, langtext = :langtext, iso_name = :iso_name, datanorm_kurz = :datanorm_kurz,
+            statistikkennzeichen = :statistikkennzeichen, preisbezug_einheit = :preisbezug_einheit,
+            preisbezug_menge = :preisbezug_menge, un_code = :un_code
         WHERE tenant_id = :tid AND einheit_kuerzel = :kz
     """), {
         "tid": tenant_id, "kz": einheit_kuerzel, "bez": payload.bezeichnung,
         "basis": payload.basis_einheit, "faktor": payload.umrechnungsfaktor,
         "dez": payload.dezimalstellen,
+        **{feld: getattr(payload, feld) for feld in ZUSATZFELDER},
     })
     db.commit()
     updated = db.execute(text("""
@@ -164,6 +199,20 @@ def delete_mengeneinheit(
     """), {"tid": tenant_id, "kz": einheit_kuerzel})
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/stamm/grundeinheiten", response_model=list[str], status_code=201,
+             summary="Mitgelieferte Grundeinheiten einrichten", dependencies=SCHREIBEN["STAMMDATEN"])
+def grundeinheiten_einrichten(
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Legt die gaengigen Grundmengeneinheiten (Stueck, kg, dt, t, l ... mit UN/ECE-Code) an, soweit sie fehlen."""
+    from app.services.mengeneinheiten_grund import richte_grundeinheiten_ein
+
+    angelegt = richte_grundeinheiten_ein(db, tenant_id)
+    db.commit()
+    return angelegt
 
 
 @router.get("/stamm/umrechnen", summary="Umrechnen",
