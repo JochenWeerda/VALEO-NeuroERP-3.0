@@ -247,6 +247,13 @@ def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
         # Annahme-Wizards (LKW-Registrierung, Qualitaetspruefung) stehen in der Registry, sind aber
         # gefuehrte Formulare ohne Objektquelle; fuer sie gelten nur Bereitschaft und Aktionsrechte.
         assert screen.get("mode") == "wizard", screen_id
+    elif screen["layout"].get("floorplan") == "worklist":
+        assert screen["mode"] == "list", screen_id
+        sources = {source["key"]: source["endpoint"] for source in screen["dataSources"]}
+        assert screen["tables"], screen_id
+        for table in screen["tables"]:
+            endpoint = sources[table["dataSourceKey"]]
+            assert endpoint.startswith("/api/") and "{" not in endpoint, screen_id
     else:
         entity = next(ds for ds in screen["dataSources"] if ds["key"] == "entity")
         assert "{entity_id}" in entity["endpoint"] or "{id}" in entity["endpoint"]
