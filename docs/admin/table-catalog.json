@@ -15869,6 +15869,11 @@
               "type": "character varying"
             },
             {
+              "name": "price_unit_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
               "name": "gebinde_berechnung",
               "nullable": true,
               "type": "jsonb"

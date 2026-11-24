@@ -1,7 +1,7 @@
 """Gebinde-Mengeneinheit am Stamm, Gebindefaktoren je Artikel, versionierte Berechnungsabbilder (24.11.2026).
 
 Revision ID: gebinde_stamm_beleg_20261124
-Revises: mengeneinheit_aeins_felder_20261124
+Revises: position_preisbezug_20261124
 
 Schnitt 2b-1 der Mengeneinheiten nach a.eins (docs/design/mengeneinheiten-aeins-uebernahme.md, Abschnitt 3 und 4):
 
@@ -22,7 +22,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "gebinde_stamm_beleg_20261124"
-down_revision = "mengeneinheit_aeins_felder_20261124"
+down_revision = "position_preisbezug_20261124"
 branch_labels = None
 depends_on = None
 
