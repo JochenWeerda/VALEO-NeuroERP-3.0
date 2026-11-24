@@ -107932,6 +107932,7 @@
         "type": "object"
       },
       "MengeneinheitCreate": {
+        "description": "Grundmengeneinheit nach a.eins (Nutzerauftrag 24.11.2026).",
         "properties": {
           "basis_einheit": {
             "anyOf": [
@@ -107949,17 +107950,111 @@
             "title": "Bezeichnung",
             "type": "string"
           },
+          "datanorm_kurz": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kurzbezeichnung im DataNorm-Verfahren",
+            "title": "Datanorm Kurz"
+          },
           "dezimalstellen": {
             "default": 3,
-            "maximum": 6.0,
+            "maximum": 4.0,
             "minimum": 0.0,
             "title": "Dezimalstellen",
             "type": "integer"
           },
           "einheit_kuerzel": {
+            "description": "Kurztext, wie er gedruckt wird (kg, Stück, Ltr.)",
             "maxLength": 10,
             "title": "Einheit Kuerzel",
             "type": "string"
+          },
+          "iso_name": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iso Name"
+          },
+          "langtext": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Langtext, der anstelle des Kurztexts gedruckt werden kann",
+            "title": "Langtext"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "maximum": 9999.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nummer der Mengeneinheit (hoechstens 4 Stellen)",
+            "title": "Nummer"
+          },
+          "preisbezug_einheit": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mengeneinheit des Preisbezugs",
+            "title": "Preisbezug Einheit"
+          },
+          "preisbezug_menge": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preisbezug, z. B. 100 bei Preis je 100 kg",
+            "title": "Preisbezug Menge"
+          },
+          "statistikkennzeichen": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statistikkennzeichen"
           },
           "umrechnungsfaktor": {
             "anyOf": [
@@ -107975,6 +108070,19 @@
               }
             ],
             "title": "Umrechnungsfaktor"
+          },
+          "un_code": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z0-9]{2,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "UN-Mengeneinheit (UN/ECE Rec. 20) fuer E-Rechnung und openTRANS",
+            "title": "Un Code"
           }
         },
         "required": [
@@ -108010,6 +108118,17 @@
             "title": "Created At",
             "type": "string"
           },
+          "datanorm_kurz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datanorm Kurz"
+          },
           "dezimalstellen": {
             "title": "Dezimalstellen",
             "type": "integer"
@@ -108022,6 +108141,72 @@
             "title": "Id",
             "type": "string"
           },
+          "iso_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iso Name"
+          },
+          "langtext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Langtext"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "preisbezug_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preisbezug Einheit"
+          },
+          "preisbezug_menge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preisbezug Menge"
+          },
+          "statistikkennzeichen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statistikkennzeichen"
+          },
           "umrechnungsfaktor": {
             "anyOf": [
               {
@@ -108032,6 +108217,17 @@
               }
             ],
             "title": "Umrechnungsfaktor"
+          },
+          "un_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Un Code"
           }
         },
         "required": [
@@ -236383,6 +236579,37 @@
           }
         ],
         "summary": "Mengeneinheit anlegen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/grundeinheiten": {
+      "post": {
+        "description": "Legt die gaengigen Grundmengeneinheiten (Stueck, kg, dt, t, l ... mit UN/ECE-Code) an, soweit sie fehlen.",
+        "operationId": "grundeinheiten_einrichten_api_v1_artikel_mengeneinheiten_stamm_grundeinheiten_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Grundeinheiten Einrichten Api V1 Artikel Mengeneinheiten Stamm Grundeinheiten Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mitgelieferte Grundeinheiten einrichten",
         "tags": [
           "Artikelstamm - Mengeneinheiten & Gruppen"
         ]

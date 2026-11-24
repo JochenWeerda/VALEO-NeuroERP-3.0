@@ -366,6 +366,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `mcp_tool_executions_20260921` | Transactional replay journal for authenticated ERP tool calls. |
 | `mde_inbox_hardening_20260821` | Harden the existing mobile sync queue for the MDE operator inbox. |
 | `meldewesen_lifecycle_20260623` | DOM-MEL-004 — Meldewesen Lifecycle Tabellen (Intrastat/ELSTER/ATLAS) |
+| `mengeneinheit_aeins_felder_20261124` | Mengeneinheiten-Stamm mit den Feldern der Grundmengeneinheit nach a.eins (24.11.2026). |
 | `merge_agent_job_runner_20260626` | Merge Alembic heads: agent_proposals + job_runner_tables_repair. |
 | `merge_crm_capture_pos_fiscal_20260609` | Merge CRM capture inbox and POS fiscal provider branches. |
 | `merge_crm_ownership_prod_20260610` | Merge CRM ownership and production-readiness migration branches. |

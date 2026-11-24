@@ -1,7 +1,7 @@
 """Belegposition mit Preisbezugsmenge - Preis je 100 Liter, ohne die Menge umzurechnen (24.11.2026).
 
 Revision ID: position_preisbezug_20261124
-Revises: mahnstufen_verlauf_entfernen_20261123
+Revises: mengeneinheit_aeins_felder_20261124
 
 Bisher galt der Positionspreis immer je Mengeneinheit; "Preis je 100 kg" wurde durch Umrechnen der Menge in die
 Preiseinheit abgebildet (``beleg_anlage.position_in_preiseinheit``: Menge in dt). Fuer Liter mit Preis je 100 Liter
@@ -15,7 +15,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "position_preisbezug_20261124"
-down_revision = "mahnstufen_verlauf_entfernen_20261123"
+down_revision = "mengeneinheit_aeins_felder_20261124"
 branch_labels = None
 depends_on = None
 
