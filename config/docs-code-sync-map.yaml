@@ -101,6 +101,8 @@ critical_paths:
       - docs/architecture/
       - docs/agent-ops/
       - docs/entwickler/
+      - docs/abnahme/
+      - docs/gap/
     generated_artifacts:
       - config/architecture-index.yaml
       - docs/architecture/views/c4-01-system-context.md
