@@ -22392,7 +22392,7 @@
     },
     {
       "mask_id": "process/background-jobs",
-      "title": "Hintergrund-Jobs",
+      "title": "Hintergrundjobs",
       "domain": "platform",
       "process_keys": [],
       "rollout_route": "/mask-rollout/process__background-jobs/:entityId",

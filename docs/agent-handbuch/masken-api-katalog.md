@@ -669,7 +669,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `preise/rabattgruppen` | Neue Rabattgruppe [RAG] | preise | niedrig | — | `GET /api/v1/masks/preise/rabattgruppen/agent-contract` |
 | `preise/zu-abschlaggruppen` | Neue Zu-/Abschlaggruppe [ZAGR] | preise | niedrig | — | `GET /api/v1/masks/preise/zu-abschlaggruppen/agent-contract` |
 | `process/approval-density` | Freigabe-Dichte | platform | niedrig | — | `GET /api/v1/masks/process/approval-density/agent-contract` |
-| `process/background-jobs` | Hintergrund-Jobs | platform | niedrig | — | `GET /api/v1/masks/process/background-jobs/agent-contract` |
+| `process/background-jobs` | Hintergrundjobs | platform | niedrig | — | `GET /api/v1/masks/process/background-jobs/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/mischfutter-produktion` | Mischfutter-Produktion | futtermittel | niedrig | — | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
 | `produktion/produktions-dokumente-drucken` | Produktions dokumente drucken | produktion | niedrig | — | `GET /api/v1/masks/produktion/produktions-dokumente-drucken/agent-contract` |
@@ -22703,9 +22703,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `process/background-jobs` — Hintergrund-Jobs
+### `process/background-jobs` — Hintergrundjobs
 
-**Zweck:** Hintergrundverarbeitung ueberwachen und nachsteuern.
+**Zweck:** Hintergrundjobs im aktiven Mandanten überwachen.
 
 | | |
 |---|---|
@@ -22717,7 +22717,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `queue` → `/api/v1/process/background-jobs/queue`
+- `jobs` → `/api/v1/process/background-jobs`
 
 **MCP-Tools (Domäne):**
 
@@ -22725,7 +22725,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Welche Jobs sind in der Queue fehlgeschlagen?
+- Welche Hintergrundjobs sind fehlgeschlagen?
 
 ---
 
