@@ -601,7 +601,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.artikel_bestandteile_zuordnung` | `app/api/v1/endpoints/artikel_bestandteile.py` | `app/api/v1/endpoints/artikel_bestandteile.py` | — |
 | `domain_shared.artikel_folgeartikel` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
 | `domain_shared.artikel_inventurgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
-| `domain_shared.artikel_mengeneinheiten` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | — |
+| `domain_shared.artikel_mengeneinheiten` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/beleg_erechnung.py`, `app/services/mengeneinheiten_grund.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/mengeneinheiten_grund.py` | — |
 | `domain_shared.artikel_mengeneinheitengruppen` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | — |
 | `domain_shared.artikel_sperren` | `app/api/v1/endpoints/compliance.py` | `app/api/v1/endpoints/compliance.py` | — |
 | `domain_shared.artikel_stoffstrom` | `app/api/v1/endpoints/artikel_stoffstrom.py` | `app/api/v1/endpoints/artikel_stoffstrom.py` | — |

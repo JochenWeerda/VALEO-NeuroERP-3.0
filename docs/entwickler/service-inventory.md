@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-24
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -245,6 +245,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `mcp_tool_registry_service` | MCP-ERP-TOOLS-001 — Rollenbasierter ERP-Tool-Katalog fuer Agent-Zugriff. |
 | `mcp_write_capability` | Freigabe generischer Agenten-Schreibwege (MCP ``mask.action.execute`` und Kommandowege mit Agentenpruefung). |
 | `meldewesen_lifecycle_service` | DOM-MEL-004.2 — Meldewesen Lifecycle (Intrastat/ELSTER/ATLAS — extern gegated). |
+| `mengeneinheiten_grund` | Mitgelieferte Grundmengeneinheiten (a.eins: "die gaengigsten Mengeneinheiten werden als Grundeinheit mit |
 | `milchvieh_crosssell_service` | Cross-Sell-Auswertung Milchvieh: Hygiene-Bedarf + Kraftfutter-Potenzial. |
 | `mobile_sync_service` | MOB-SYNC-001: Mobile Offline-Sync Service. |
 | `nats_event_handlers` | NC-G3 -- Core NATS event handlers. |
