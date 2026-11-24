@@ -1001,3 +1001,6 @@ Befund aus M0-E2E-FULL-UAT: finance/bank-abgleich (bank-surface.tsx) kann Kontoa
 
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
+
+## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
