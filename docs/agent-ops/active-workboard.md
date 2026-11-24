@@ -762,7 +762,7 @@ Keine neuen Testdatenbanken/Container, keine fremden Prozesse abbrechen.
 
 M0-CI-GESAMTBASIS-20261115 Erweiterung vor … (gekuerzt; Volltext unter M0-CI-GESAMTBASIS-20261115 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
-## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — zur Abnahme, Claude Code (M1)
+## BELEG-052-ALTSPEICHER-DROP-S5-20261117 — abgeschlossen (PR #157 gemergt), Claude Code (M1)
 
 Owner: Claude Code. Stand: in Arbeit; PR nach Merge von S4. Meilenstein: M1 laut docs/roadmap/fahrplan-verkaufsprodukt.md.
 Ziel: DocFlow ist der einzige Belegspeicher. Migration beleg_altspeicher_entfernen_20261117 entfernt die Sichten domain_crm.sales_orders/_items und die Tabellen der alten Speicher (Lieferschein, Quittung, Rechnung, Gutschrift, Bestellung, Auftrags-Ursprungsdaten) - Inhalt laut Nutzerentscheidung 10.11.2026 Testdaten; haelt an bei gebuchten Altrechnungen/-gutschriften bestehender Mandanten. Rueckweg legt die Speicher leer wieder an (DDL per pg_dump aus frischer DB, beleg_altspeicher_entfernen_20261117.sql).
@@ -892,14 +892,14 @@ bleibt auf aktuellem Mergecommit zu beobachten.
 
 RUNTIME-FIVE-503 Erweiterung vor Edit: runtime_503_audit besitzt ausschliesslich Dockerfile (echten Driftbericht im Backendimage verfuegbar machen), channels.py (korrekte Eingabevalidierung des … (gekuerzt; Volltext unter RUNTIME-FIVE-503-20261117 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
-## M0-VOR-PUSH-PRUEFKETTE-20261119 — zur Abnahme, Claude Code (M0)
+## M0-VOR-PUSH-PRUEFKETTE-20261119 — abgeschlossen (PR #159 gemergt), Claude Code (M0)
 
 Owner: Claude Code. Meilenstein: M0 (gruene Basis). Nutzerauftrag 19.11.2026: wiederkehrende CI-Rotursachen (nicht registrierte Routen/Tabellen/Masken, nicht aktualisierte Verzeichnisse, Drift der Test-DB) nicht mehr vergessen.
 Ergebnis: scripts/vor_push.py (Pruefstand wie CI, alle Register, betroffene Tests gestaffelt, stiller DB-Skip = Fehler), scripts/tabellenkatalog_lineage.py (Lineage ohne DB), tests/test_vor_push.py, CLAUDE.md-Abschnitt. Ein lokaler Claude-Code-Hook blockiert jeden Push bei Rot.
 Befund dabei: valeo_probe nur aus Alembic (ohne Seed und Rollen) liess Inventur- und POS-Retoure-Tests lokal scheitern, die als "Umgebung" galten.
 Dateibesitz: scripts/vor_push.py, scripts/tabellenkatalog_lineage.py, tests/test_vor_push.py, CLAUDE.md (Abschnitt).
 
-## M3-JOURNAL-SCHREIBER-20261119 — zur Abnahme, Claude Code (M3)
+## M3-JOURNAL-SCHREIBER-20261119 — abgeschlossen (PR #158 gemergt), Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3 laut docs/roadmap/fahrplan-verkaufsprodukt.md (Integritaet: Periodensteuerung fuer alle Schreiber).
 Ziel erreicht: Das Journal wird nur ueber FinanceTransactionService geschrieben. Ratsche tests/test_journal_schreiber_ratsche.py: Rohschreiber 9 -> 0.
@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-#165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-#167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+PR 165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+PR 167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -927,7 +927,7 @@ Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (
 Meilenstein: M2. Aus #165: Sieben Masken lasen ihre Liste aus dem entfernten Altweg /api/v1/fibu/anlagen bzw. /fibu/kreditoren, obwohl sie fachlich anderes zeigen (Bilanz und GuV zeigten Anlagen): fibu/atlas, fibu/bilanz, fibu/guv, fibu/monatswerte, fibu/sachkonto, fibu/sicherheiten, rezepte/editor. Gate C entfaellt dort ehrlich (studio_screen_versions.json); Eintraege stehen in config/mask_endpoint_altlast.json.
 Ziel: Bilanz/GuV an /api/v1/financial-reports/balance-sheet bzw. /profit-loss mit passendem Berichts-Maskentyp (kein Listenmuster), Sachkonto an /chart-of-accounts, die uebrigen an ihren Fachweg anbinden oder entfernen. fibu/anlagen ist in #165 bereits an /finance/asset-accounting/assets angebunden.
 
-## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — zur Abnahme, Claude Code (M2, Codex-Pause)
+## CUSTOMER-MASTER-PROFILE-UEBERNAHME-20261119 — abgeschlossen (PR #160 gemergt), Claude Code (M2, Codex-Pause)
 
 Owner: Claude Code (uebernommen von Codex, PR #153, Codex ruht 19.-22.11.2026). Branch claude/uebernahme-kundenstamm-20261119.
 Codex' Stand unveraendert uebernommen; dazu: main eingemergt; ADR in die Pflichtform gebracht (Status/Datum, Kontext, Entscheidung, Konsequenzen); Aktion stammdaten_pflegen als high mit Bestaetigung (Server verlangt Begruendung; aendert Bank/Steuer); Reiter-Vertrag auf die kanonischen partner_*-Gruppen; Zahlungsbedingung/Standardtour/Spediteur bis zum Lookup in unsupportedFields (keine Eingabe technischer Schluessel); USt-IdNr./EU-Betriebsnummer als fachliche Kennung freigegeben.
@@ -937,7 +937,7 @@ Mitbehoben, weil Codex' strengerer Feldvertrag (produktive OpenAPI statt Test-Ap
 
 Seit der Feldvertrag gegen die produktive OpenAPI prueft (PR #153): crm/betriebsprofil (vvvo_nr, ort, status fehlen in BetriebsProfil und in der Tabelle), crm/kontakt (position fehlt), finance/bank-stamm (Kopf liest die Nebenbuchabstimmung statt des Bankstamms). In config/mask_field_contract_altlast.json als Abweichung gefuehrt, darf nur schrumpfen. Dazu Lookups fuer Zahlungsbedingung, Standardtour, Spediteur im Kundenprofil.
 
-## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — zur Abnahme, Claude Code (M3, Codex-Pause)
+## M3-KASSENABSCHLUSS-EIN-WEG-20261119 — abgeschlossen (PR #161 gemergt; Rest offen: Maskenaktion, USt je Satz), Claude Code (M3, Codex-Pause)
 
 Owner: Claude Code (Kasse ist sonst Codex' Bahn, FIN-CONTROL-001; Codex ruht 19.-22.11.2026). Meilenstein M3 (echter Kassen-/Tagesabschluss).
 Ein Weg: POST /pos/tagesabschluss (fiskalischer Abschluss, Buchung ueber den Buchungsdienst) schreibt jetzt auch den Stand des Kassentags in domain_pos.pos_tagesabschluesse (Z-Bon zeigte nach echtem Abschluss "offen").
@@ -978,14 +978,15 @@ Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. RE
 Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "posted" ohne Rechnung, Erloes oder offenen Posten. Neu: POST /api/v1/inventory/storage-fees/runs/{run_id}/rechnungen legt je Einlagerer einen DocFlow-Rechnungsentwurf (sales_invoice, Quelle lagergeld) mit einer Position je Lagergeld-Zeile an; Verkaufs-Steuerschluessel ausdruecklich (keine Vorgabe), wiederholbar ohne Doppel. Freigabe und Buchung ueber die Belegmaske.
 Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
 
-## M4-DOMAENEN-ABNAHME-20261123 — in arbeit, Cursor (M4)
+## M4-DOMAENEN-ABNAHME-20261123 — zur Abnahme, Cursor (M4)
 Meilenstein: M4 (Domaenenabnahme). Owner: Cursor (Bahn laut Fahrplan: M4-Abnahmeblaetter).
 Ziel: je Domaene ein Abnahmeblatt nach Fahrplan M4 (Prozessliste aus der L3-Referenz, Maskenabnahme, keine Demo- oder Festwerte, Rollen geprueft), zuerst die im L3-Betrieb genutzten Domaenen (Verkauf, Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM). Prozessliste je Domaene als YAML, Belege maschinell erhoben und mit --check gegen Drift gesichert; danach Reifematrix unter docs/gap/ neu erheben und Luecken als Workboard-Eintraege mit Prioritaet anlegen.
 Abgrenzung: keine Fachumsetzung in diesem Slice; gefundene Luecken gehen als eigene Eintraege an die Bahn-Besitzer. VALEO-ERP-REFERENCE-AUDIT-001 bleibt eigenes Paket.
 Dateibesitz: docs/abnahme/domaenen/**, scripts/domaenen_abnahme.py, tests/test_domaenen_abnahme.py, scripts/vor_push.py (nur Register Domaenenabnahme), docs/gap/domain-maturity-matrix-*.csv (neue Erhebung), docs/gap/README.md.
 Abnahme: Abnahmeblatt je Domaene vorhanden und per python scripts/domaenen_abnahme.py --check aktuell; Reifematrix neu erhoben; Lueckenliste mit Prioritaeten im Workboard.
-Stand 23.11.2026: Generator und Pruefregeln (abgenommen nur mit Nachweis, ohne P0/P1, ohne Platzhaltermaske) mit Vertragstest; Register in vor_push. Erstes Blatt Verkauf: 10 Prozesse, 9 teilweise, 1 fehlt (Sammelfakturierung P1), 8 Platzhaltermasken. Naechste Blaetter in L3-Reihenfolge: Einkauf, Lager, Annahme/Waage, Kontrakte, Strecke, Produktion/Muehle, Logistik, CRM.
-Stand 23.11.2026 abends: Blaetter Einkauf, Lager, Annahme/Waage und Kontrakte/Strecke erhoben (Subagenten, Stichprobe und EW-12 vom Lead nachgeprueft): Einkauf 9 Prozesse (0 abgenommen, 9 teilweise, 0 fehlt, 2 P1); Lager 12 Prozesse (0 abgenommen, 12 teilweise, 0 fehlt, 9 P1); Annahme, Waage und Ernte 13 Prozesse (0 abgenommen, 13 teilweise, 0 fehlt, 3 P1); Kontrakte und Streckengeschaeft 23 Prozesse (2 abgenommen, 19 teilweise, 2 fehlt, 8 P1). P1-Luecken als M4-EK/LG/EW/KS-P1-LUECKEN-20261123 eingetragen. Naechste Blaetter: Produktion/Muehle, Logistik, CRM.
+Stand 23.11.2026: Generator und Pruefregeln (abgenommen nur mit Nachweis, ohne P0/P1, ohne Platzhaltermaske) mit Vertragstest; Register in vor_push. Erstes Blatt Verkauf: 10 Prozesse, 9 teilweise, 1 fehlt (Sammelfakturierung P1), 8 Platzhaltermasken.
+Stand 23.11.2026 abends: Blaetter Einkauf, Lager, Annahme/Waage und Kontrakte/Strecke erhoben: Einkauf 9/0/9/0 (2 P1); Lager 12/0/12/0 (9 P1); Ernte-Waage 13/0/13/0 (3 P1); Kontrakte/Strecke 23/2/19/2 (8 P1).
+Stand 24.11.2026: Blaetter Produktion/Muehle (15 Prozesse, 0/13/2, 3 P0 + 12 P1), Logistik (13, 0/12/1, 1 P0 + 18 P1) und CRM (13, 0/11/2, 5 P0 + 7 P1) erhoben; Reifematrix docs/gap/domain-maturity-matrix-20261123.csv neu; P0/P1 als M4-CR/LO/PM-*-LUECKEN eingetragen. Kern-L3-Domaenen der ersten Welle damit vollstaendig (8 Blaetter). Nachzug laut Fahrplan: POS/TSE, Portal, Personal, Compliance/EUDR, Fuetterung, Ackerschlagkartei, KI/MCP.
 
 ## M4-VK-SAMMELFAKTURIERUNG — offen (M4, P1)
 Meilenstein: M4. Owner: offen. Quelle: docs/abnahme/domaenen/verkauf.md (VK-05).
@@ -1018,3 +1019,28 @@ Abnahme: je Luecke Integrationstest gegen PostgreSQL bzw. Browserkette laut Abna
 Meilenstein: M4. Owner: offen (Bahn Kontrakte/Strecke). Quelle: docs/abnahme/domaenen/kontrakte-strecke.md (D11).
 P1-Luecken: KS-01: Kontrakt-Anlagemaske fehlt (Kopf, Partner, Positionen, Preisbildung); kontrakte/neu und einkauf/kontrakt-anlage legen nichts an, obwohl der Endpunkt besteht; KS-02: Kontraktvergleich EK/VK und Kontrakt-Ertrag (Long/Short je Artikel, gewichteter Preis je Seite, Spread) in der Oberflaeche nicht vorhanden; Positionsmonitor ist Platzhaltermaske; KS-04: Detailmaske eines bestehenden Kontrakts erscheint nur hinter einem Build-Schalter, im Standard zeigt kontrakte/:id die Absicherungsliste statt des Kontrakts; KS-14: Kundenseite des Streckengeschaefts fehlt (Kunde, Verkaufskontrakt, VK-Menge und -Preis, Be-/Entladestelle, Spedition); das Modell kennt nur den Lieferanten; KS-14: Streckengeschaeft laesst sich in der Maske nicht erfassen oder bearbeiten (strecke/streckengeschaeft ist eine Liste ohne Aktionen); KS-17: Margenueberwachung je Strecke (EK gegen VK, Deckungsbeitrag, Rest-Menge/-Wert, Fracht Soll/Ist, Warnung bei negativer Marge) fehlt vollstaendig; KS-20: Druck und Erzeugung der Streckenbelege (Lieferung, Rechnung, Frachtauftrag) aus dem Streckengeschaeft fehlt; Masken sind leere Huellen; KS-22: NaWaRo-Uebersicht, Ernteerklaerung und Lieferungen zeigen leere Huellen oder fachfremde Daten (Frachttarife, Touren); Druckweg der Mitteilung nicht lauffaehig belegt.
 Abnahme: je Luecke Integrationstest gegen PostgreSQL bzw. Browserkette laut Abnahmeblatt; Prozess im Blatt mindestens teilweise ohne P1; Teilschliessungen je Prozess erlaubt.
+
+## M4-CR-P0-MANDANTENLECK-20261123 — offen (M4, P0)
+Meilenstein: M4. Owner: offen (Bahn CRM/Sicherheit). Quelle: docs/abnahme/domaenen/crm.md (D04).
+P0-Luecken: CR-01: Kundenliste /crm/customers/lookup liest public.kunden_lookup ohne tenant_id — Mandantenleck lesend; CR-01: KIM /crm/kim/customers liest und aendert public.kunden/kunden_crm360 per kunden_nr ohne Mandantenfilter; CR-03: KIM-Ansprechpartner ohne Mandantenfilter; CR-04: Kundenakte _kunde_finden Fallback 3 auf public.kunden ohne Mandant; CR-11: Zusammenfuehren verschiebt/loescht public.* ueber kunden_nr ohne tenant_id.
+Abnahme: je Luecke Integrationstest gegen PostgreSQL mit Fremdmandant 404/403; P0 im Blatt geschlossen.
+
+## M4-CR-P1-LUECKEN-20261123 — offen (M4, P1)
+Meilenstein: M4. Owner: offen (Bahn CRM). Quelle: docs/abnahme/domaenen/crm.md (D04).
+P1-Luecken: CR-01: Kundenlistenzeile oeffnet Akte nicht (Lookup ohne id); Spalten Telefon/E-Mail/Status leer; Pflegeweg public.kunden ohne Mandantenbezug (Test schreibt Fehlverhalten als Soll fest); CR-03: Ansprechpartner-Detail in der Akte fehlt; CR-04: Akte ohne Drucken/Waehlen/TAPI/KI/Angebot-Kontext/Beleg-oeffnen/OP-Sprung (M4-CRM-KUNDENAKTE-PARITAET); Kennzahl Kunden-Nr. zeigt -; CR-05: create_activity 422 ohne _idempotencyKey; CR-09: Lead-Liste auf tote Routen (/crm/leads/{id}, /crm/leads/neu).
+Abnahme: je Luecke Integrationstest bzw. Browserkette; Prozess ohne P1.
+
+## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen (M4, P1)
+Meilenstein: M4. Owner: offen (Bahn CRM/UIX). Quelle: Full-UAT Specs und docs/abnahme/domaenen/crm.md CR-04.
+Befund: Native Kundenakte ohne L3-Paritaet fuer Drucken, Waehlen/TAPI, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot mit Kundenkontext, Beleg aus Register oeffnen, Sprung in OP-Debitoren, Unterlagenablage. E2E markiert fehlende Aktionen als test.fixme mit dieser Luecken-ID.
+Abnahme: Aktionen in der Akte bedienbar; fixme entfernt; CR-04 ohne diese P1.
+
+## M4-LO-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
+Meilenstein: M4. Owner: offen (Bahn Logistik/Fuhrpark). Quelle: docs/abnahme/domaenen/logistik.md (D07).
+P0: LO-02 Mandantenleck ops_fahrer ohne tenant_id und transporte.py ohne Filter. P1: LO-01 Fahrzeug-Loeschen kaskadiert Touren ohne Sperre; LO-02 Fahrer im Browser nicht anlegbar; LO-03 Tour nicht aenderbar, kunden_geo ohne Mandant; LO-04 kein Tourstatusfluss, Stoppstatus-Vokabular gespalten; LO-05 Frachtauftrag nicht aus Beleg, Platzhalterliste; LO-06 kein Frachtbrief-Druck; LO-07 Verladung nur Platzhalter; LO-08 Avis ohne Belegverknuepfung; LO-09 Frachtermittlung nicht angebunden; LO-10 Spediteur-Rechnung ohne Maske; LO-11 ePOD-Abrechnung unerreichbar (ABGELIEFERT vs GELIEFERT).
+Abnahme: P0 zuerst mit Fremdmandant-Test; je P1 Integrationstest/Browserkette.
+
+## M4-PM-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
+Meilenstein: M4. Owner: offen (Bahn Produktion/Futtermittel). Quelle: docs/abnahme/domaenen/produktion-muehle.md (D13).
+P0: PM-06 Schnellerfassung freigibt ohne Bestandsabzug; PM-11 Freigabeentscheidung ohne tenant_id; PM-11 Charge hart loeschen ohne Pruefung/Audit. P1: PM-01 Rezeptur-Maske Platzhalter/Summe ungeprueft; PM-04 Auftrag nicht bedienbar, Rezeptsumme/Lager fail-soft; PM-05 Fertigmeldung ohne Warenzugang; PM-07 Leitstand und Auftrag laufen auseinander; PM-08 Mahlbuchung fehlt; PM-11 Freigabe ohne Prueflauf; PM-12 Trace-Kette unvollstaendig; PM-13 Etikett nicht an Charge/Rezept; PM-14 bewertete Produktion fehlt.
+Abnahme: P0 zuerst; je P1 Integrationstest gegen PostgreSQL bzw. Browserkette.
