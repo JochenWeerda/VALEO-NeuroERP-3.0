@@ -1,7 +1,7 @@
 """Buchungsschluessel fuer Bestandsbewegungen - doppelte Bewegungen technisch ausgeschlossen (24.11.2026).
 
 Revision ID: bestandsbuchung_schluessel_20261124
-Revises: mengeneinheit_aeins_felder_20261124
+Revises: position_preisbezug_20261124
 
 Nutzerauftrag 24.11.2026 (Schnitt 2b-2): dauerhafte Idempotenz der Bestandsbuchung; wiederholte Ereignisse,
 parallele Buchungen und Transaktionsabbrueche duerfen keine zweite Bewegung erzeugen. ``inventory_stock_movements``
@@ -15,7 +15,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "bestandsbuchung_schluessel_20261124"
-down_revision = "mengeneinheit_aeins_felder_20261124"
+down_revision = "position_preisbezug_20261124"
 branch_labels = None
 depends_on = None
 
