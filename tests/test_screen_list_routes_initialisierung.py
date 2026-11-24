@@ -36,3 +36,22 @@ def test_admin_users_reuses_the_canonical_user_list():
     assert alias["actions"] == canonical["actions"]
     assert alias["dataSources"] == canonical["dataSources"]
     assert {column["key"] for column in alias["tables"][0]["columns"]} <= AdminUserOut.model_fields.keys()
+
+
+def test_admin_tenant_list_binds_the_paginated_contract():
+    from app.api.v1.endpoints.tenants import list_tenants
+    from app.api.v1.schemas.shared import Tenant
+
+    definition = screens.get_screen_definition("admin/tenants")
+    assert definition["mode"] == "list"
+    source, = definition["dataSources"]
+    assert source["endpoint"] == "/api/v1/tenants/"
+    table, = definition["tables"]
+    assert table["dataSourceKey"] == source["key"]
+    assert table["serverPagination"] is False
+    fields = {column["key"] for column in table["columns"]}
+    assert fields == {"name", "domain", "is_active"}
+    assert fields <= Tenant.model_fields.keys()
+    assert list_tenants.__annotations__["return"].model_fields["items"].annotation == list[Tenant]
+    assert set(definition["listExperience"]["searchFields"]) <= fields
+    assert definition["actions"] == table["rowActions"] == []

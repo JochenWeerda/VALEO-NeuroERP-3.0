@@ -6,7 +6,6 @@
     "admin/berechtigungen-matrix",
     "admin/command-monitor",
     "admin/system-einstellungen",
-    "admin/tenants",
     "admin/zeitachsen-editor",
     "agrar/ernte-annahme-abrechnung",
     "agrar/lieferschein-erstellen",

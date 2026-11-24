@@ -1093,3 +1093,5 @@ Ziel: /admin/users mit der bestehenden Studio-Benutzerliste verdrahten; keine zw
 ## M2-ADMIN-TENANTS-LIST - reserviert, Codex
 
 Ziel: Mandanteneinstieg als Studio-Liste ueber den kanonischen, serverseitig autorisierten Leseweg. Dateibesitz: ScreenDefinition, Einstieg und erzeugte Kataloge. Abnahme: Felder und paginierter GET-Vertrag.
+
+Mandanteneinstieg als Studio-Liste umgesetzt. Der bestehende Lifecycle-Dienst bestimmt weiterhin den sichtbaren Verwaltungsbereich. Die Liste zeigt Name, Domain und Aktivstatus und verwendet die gemeinsame Projektion fuer Pagination. Drei Vertragspruefungen und Studio-Inventar gruen. Browserabnahme und Lifecycle-Aktionen in Studio offen.

@@ -5,6 +5,7 @@ from typing import Any
 
 from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
 
+from app.core.stamm_list_parent import build_stamm_list_screen
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
@@ -158,9 +159,31 @@ def build_admin_tankstelle_evb() -> dict[str, Any]:
         edit_permission="admin.tankstelle-evb.update", bearbeiten_endpoint=None)
 
 def build_admin_tenants() -> dict[str, Any]:
-    return _batch13_stamm("admin/tenants", domain="admin", title="Tenants",
-        entity_endpoint="/api/v1/tenants/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.tenants.update", bearbeiten_endpoint=None)
+    definition = build_stamm_list_screen(
+        screen_id="admin/tenants", domain="admin", title="Mandanten",
+        subtitle="Mandanten im berechtigten Verwaltungsbereich",
+        endpoint="/api/v1/tenants/", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Mandant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "domain", "label": "Domain", "sortable": True, "filterable": True, "priority": "secondary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "priority": "secondary"},
+        ],
+        actions=[], row_actions=[],
+        purpose="Die vom Mandantendienst erlaubten Mandanten anzeigen.",
+        prompts=["Welche Mandanten darf ich administrieren?"],
+        no_workflow="Die Liste zeigt den aktuellen Verwaltungsbereich.",
+    )
+    definition["listExperience"] = {
+        "searchFields": ["name", "domain"],
+        "aggregates": [],
+        "export": {
+            "filenamePrefix": "Mandanten_",
+            "delimiter": ";",
+            "columns": [{"key": column["key"], "label": column["label"]} for column in definition["tables"][0]["columns"]],
+        },
+    }
+    return definition
+
 
 def build_admin_users() -> dict[str, Any]:
     from app.core.screen_definitions_listen import build_admin_benutzer_liste

@@ -1445,7 +1445,7 @@
     },
     {
       "mask_id": "admin/tenants",
-      "title": "Tenants",
+      "title": "Mandanten",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__tenants/:entityId",
@@ -1453,19 +1453,7 @@
       "screen_definition_url": "/api/v1/masks/admin/tenants/screen-definition",
       "readiness_url": "/api/v1/masks/admin/tenants/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "admin.tenants.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },

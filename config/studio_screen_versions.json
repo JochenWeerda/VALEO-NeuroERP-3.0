@@ -421,7 +421,7 @@
       "version": "1.0.0"
     },
     "admin/tenants": {
-      "definition_hash": "92a5ad3d786edbc8edfcac4c7552d8b52b70a21a3f83419001a8d070d5d766b1",
+      "definition_hash": "039050e6156c1ad21c4963049f1e7548e0f29e507eb953f09c7200f0a573f1d4",
       "gates_passed": [
         "A",
         "B",

@@ -55,7 +55,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/rollen-verwaltung` | Rollen | platform | mittel | — | `GET /api/v1/masks/admin/rollen-verwaltung/agent-contract` |
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
-| `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
+| `admin/tenants` | Mandanten | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
 | `admin/terminologie` | Terminologie | platform | niedrig | — | `GET /api/v1/masks/admin/terminologie/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
 | `admin/users` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
@@ -1555,9 +1555,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/tenants` — Tenants
+### `admin/tenants` — Mandanten
 
-**Zweck:** Stamm- und Fachmaske fuer Tenants (admin/tenants).
+**Zweck:** Die vom Mandantendienst erlaubten Mandanten anzeigen.
 
 | | |
 |---|---|
@@ -1569,17 +1569,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/tenants/{entity_id}`
+- `list` → `/api/v1/tenants/`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Tenants {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+- Welche Mandanten darf ich administrieren?
 
 ---
 

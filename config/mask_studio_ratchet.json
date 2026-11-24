@@ -46,7 +46,6 @@
   "mask:admin/omnichannel-handelskonflikt:open",
   "mask:admin/system-einstellungen:bearbeiten",
   "mask:admin/tankstelle-evb:bearbeiten",
-  "mask:admin/tenants:bearbeiten",
   "mask:admin/workflow-editor:bearbeiten",
   "mask:admin/zeitachsen-editor:bearbeiten",
   "mask:agrar/annahme-abrechnung:bearbeiten",
