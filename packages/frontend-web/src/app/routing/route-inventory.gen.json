@@ -91,6 +91,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/background-jobs",
+      "path": "admin/background-jobs",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/backup-restore",
       "path": "admin/backup-restore",
       "source": "alias"

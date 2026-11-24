@@ -1165,3 +1165,5 @@ Studio-Folgebefund: process/background-jobs liest bisher den Metadatenknoten que
 ## M2-BACKGROUND-JOBS-STUDIO - reserviert, Codex
 
 Ziel: eigene Studio-Listenroute fuer Hintergrundjobs. Dateibesitz: ScreenDefinition, Routeneinstieg und abgeleitete Kataloge. Abnahme: echte mandantengebundene Jobzeilen, keine Scheinaktionen und keine Doppelbelegung der Monitorroute.
+
+Die Hintergrundjob-Worklist hat den eigenen Einstieg /admin/background-jobs und verwendet paginierte Jobzeilen aus dem mandantengebundenen Listenvertrag. Die wirkungslose Zeilenaktion wurde entfernt. Der bisherige Command-Monitor-Einstieg bleibt fachlich getrennt. Die Browser- und PostgreSQL-Abnahmen stehen aus.

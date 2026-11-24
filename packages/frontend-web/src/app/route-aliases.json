@@ -2037,6 +2037,10 @@
       "path": "admin/command-monitor"
     },
     {
+      "module": "@/pages/admin/background-jobs",
+      "path": "admin/background-jobs"
+    },
+    {
       "module": "@/pages/wissen/wissensbasis",
       "path": "wissen/wissensbasis"
     },

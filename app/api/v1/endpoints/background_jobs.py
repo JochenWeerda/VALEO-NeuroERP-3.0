@@ -58,6 +58,7 @@ def list_background_jobs(
     tenant_id: str = "",
     typ: str = "",
     limit: int = Query(default=100, ge=1, le=500),
+    page: int = Query(default=1, ge=1),
     active_tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     registry = get_background_job_registry()
@@ -65,12 +66,16 @@ def list_background_jobs(
         raise HTTPException(403, "Requested tenant does not match the verified context")
     status_enum = JobStatus(status) if status else None
     typ_enum = JobTyp(typ) if typ else None
-    jobs = registry.list(status=status_enum, tenant_id=active_tenant_id, typ=typ_enum, limit=limit)
+    jobs = registry.list(status=status_enum, tenant_id=active_tenant_id, typ=typ_enum)
+    offset = (page - 1) * limit
+    page_jobs = [job.as_dict() for job in jobs[offset:offset + limit]]
     return {
         "schema_version": 1,
         "summary": registry.summary(tenant_id=active_tenant_id),
-        "job_count": len(jobs),
-        "jobs": [job.as_dict() for job in jobs],
+        "job_count": len(page_jobs),
+        "total": len(jobs),
+        "items": page_jobs,
+        "jobs": page_jobs,
     }
 
 

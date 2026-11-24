@@ -255,7 +255,6 @@
   "mask:preise/rabattgruppen:edit",
   "mask:preise/zu-abschlaggruppen:edit",
   "mask:process/approval-density:open_source",
-  "mask:process/background-jobs:open_source",
   "mask:produktion/chargen-bearbeiten:edit_metadata",
   "mask:produktion/chargen-bearbeiten:open_source",
   "mask:produktion/produktionsleitstand:complete",
