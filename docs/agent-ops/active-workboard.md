@@ -1145,3 +1145,5 @@ Command-Monitor-Overview zeigt Store-Zaehler und ausgefuehrte Kommandos des gepr
 Einzelabrufe nach Ausfuehrungs-ID und Idempotenzschluessel sind an den aktiven Mandanten gebunden. Eigene Eintraege bleiben in beiden Abrufen verfuegbar; fremde und unbekannte Eintraege liefern HTTP 404.
 
 Der Ausfuehrungs-Endpunkt weist einen abweichenden Mandanten im Request vor dem Idempotenz-Lookup und vor der Kommandoausfuehrung mit HTTP 403 ab. Der HTTP-Vertrag prueft auch den abgewiesenen Replay nach einem Mandantenwechsel.
+
+Abnahme: gezielter Lauf fuer Wave 17/18/85 mit 27 bestandenen und einem uebersprungenen Test. Studio-Folgebefund: /admin/command-monitor verwendet eine generische Artikel-Detaildefinition mit unwirksamer Bearbeiten-Aktion, obwohl die vorhandene Ansicht den Idempotenz-Overview liest. Die separate Definition process/background-jobs beansprucht dieselbe Browserroute, zeigt jedoch die Job-Queue. Bei der Migration getrennte fachliche Routen und einen gleichwertigen Monitor-Nachweis vorsehen.
