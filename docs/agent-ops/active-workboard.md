@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-#165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-#167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -980,3 +980,9 @@ Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/stora
 
 ## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — in Arbeit, Claude Code (M3)
 Meilenstein: M3 (Bestandsbewertung). Nutzerentscheid 24.11.2026: gleitender Durchschnittspreis. Schnitt 1 (dieser PR): DocFlow-Einlagern schreibt den Einstandspreis (Nettowert der Position je Lagereinheit) und den Gesamtwert in die Lagerbewegung, der Storno den Preis seines Zugangs; app/services/bestandsbewertung.py ist die eine Bewertungsfunktion (gleitender Durchschnitt aus der Bewegungshistorie, Stichtag, Einheiten ueber agrar_units, ohne Einstandspreis kein Wert). Schnitt 2 (folgt): Bestandskorrektur, Schwund, MHD-Abschreibung und Inventur buchen den Wert ueber den Buchungsdienst statt melde_fehlende_bewertung.
+## M0-I18NEXT-GHSA-6JCC-20261123 — in arbeit, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
