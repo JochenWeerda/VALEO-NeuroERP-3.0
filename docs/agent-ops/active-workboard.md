@@ -1036,3 +1036,5 @@ Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-d
 
 ## M4-BUCHUNGSDIENST-SCHLUESSEL-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung, Schritt 1). InventoryService.process_stock_movement nimmt buchungsschluessel (bestandsbuchung_schluessel, PR #194) und commit=False (Transaktion beim Aufrufer) - Voraussetzung, damit die 13 Direktschreiber auf den einen Dienst umgestellt werden koennen.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
