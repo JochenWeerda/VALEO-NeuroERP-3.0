@@ -117,7 +117,37 @@ Lokalitaet.
 0 nicht relevant, 1 relevant, 2 buchend (relevant im Zusammenhang mit Buchen). Bei "buchend" darf eine Menge nur
 einmal bestandswirksam werden - entweder ueber die ERP-Bestandsfuehrung oder ueber das LVS, nie ueber beide.
 
-## 4. Zuordnung VALEO und naechste Schritte
+## 4. Stufenzuordnung zum VALEO-Artikelmodell (Stand 24.11.2026)
+
+Analyse des Modells: VALEO fuehrt **eine** Artikelebene, `domain_inventory.articles` (Schluessel `(id, tenant_id)`).
+Eine Artikelfamilie bzw. ein Artikelstamm darueber gibt es nicht, ebenso keine Varianten-/Auspraegungstabelle;
+Warengruppen (`domain_shared.warengruppen` usw.) und Sorten (`agrar_sorten`) sind fachlich etwas anderes und keine
+Gebindestufe.
+
+| a.eins-Stufe | VALEO | Pflege |
+|---|---|---|
+| 1 Mengeneinheit | `domain_shared.artikel_mengeneinheiten` (Faktoren am Stammsatz) | ja |
+| 2 Artikelstamm | kein Gegenstueck | **nein** - 422, bis fachlich zugeordnet |
+| 3 Artikel | `domain_inventory.articles`, Fremdschluessel `(artikel_id, tenant_id)` | ja |
+| 4 Artikel-Auspraegung | kein Gegenstueck | **nein** - 422, bis fachlich zugeordnet |
+
+Keine parallele Stammdatenstruktur und kein freier Bezug: Faktoren der Stufe 3 haengen per zusammengesetztem
+Fremdschluessel am Artikel und an der Mengeneinheit desselben Mandanten. Faktorherkunft 2 und 4 bleiben einstellbar;
+ihr Suchpfad laeuft ueber die vorhandenen Stufen nach unten. **Offen:** Bedeutung von Artikelstamm und Auspraegung
+in a.eins (Hilfeseite "Artikelstamm und Artikel - Uebersicht" angefragt), danach Zuordnung oder bewusster Verzicht.
+
+## 5. Berechnungsabbild je Belegposition (Nutzervorgabe 24.11.2026)
+
+- Jede geaenderte Berechnung einer Position ist eine **neue, unveraenderliche Version**
+  (`domain_docflow.document_item_gebinde_abbilder`, nur anfuegen). `document_items.gebinde_berechnung` traegt die
+  geltende Version.
+- Bearbeitbar, solange der Beleg nicht verbindlich gebucht ist (z. B. Verwiegung aendert die Liefermenge). Ab Status
+  `posted`, `completed`, `reversed`, `cancelled` sperrt die Datenbank (Trigger) - Korrektur nur ueber Storno.
+- Gleiches Abbild erneut schreiben erzeugt keine Version (Wiederholung harmlos); parallele Schreiber laufen ueber die
+  Zeilensperre der Position nacheinander.
+- Storno und Retoure rechnen aus dem geltenden Abbild, nicht aus dem spaeter geaenderten Stamm.
+
+## 6. Zuordnung VALEO und naechste Schritte
 
 1. **Grundmengeneinheit** - umgesetzt (Migration `mengeneinheit_aeins_felder_20261124`, Stamm-Endpunkt, Studio-Maske
    `stammdaten/mengeneinheit`, Grundeinheiten, eRechnung aus dem Stamm).
