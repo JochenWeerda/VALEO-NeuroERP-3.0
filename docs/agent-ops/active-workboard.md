@@ -1055,3 +1055,7 @@ Ziel: Auditbefund GHSA-6jcc-5g8w-32mx durch korrigierte i18next-Version schliess
 GHSA-6jcc-5g8w-32mx behoben: i18next 26.3.4 im Frontend und Lockfile. Frozen-Lockfile-Installation, produktives Node-Audit (0 Befunde), TypeScript und zehn Frontend-Tests bestanden. GitHub-Nachlauf offen.
 
 Nachweis fuer den Major-Wechsel: Echter i18next-Laufzeittest mit Deutsch, Englisch und Spanisch inklusive Speicherung der Sprachauswahl. 19 Vitest-Faelle inklusive Bestellvorschlag und Prozessstudio bestanden.
+
+## M0-KI-ROUTER-DUPLIKAT - reserviert, Codex
+
+Ziel: zweiten Mount desselben KI-Usability-Routers unter /api/v1 entfernen. Dateibesitz: KI-Mount in main.py und generierte API-Doku. Abnahme: bestehende Pfade bleiben erhalten, doppelte OpenAPI-Operationen der KI entfallen.
