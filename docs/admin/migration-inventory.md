@@ -282,6 +282,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
+| `folgeartikel_fremdschluessel_20261124` | Folgeartikel referenziell: Artikel und Folgeartikel muessen im selben Mandanten existieren (24.11.2026). |
 | `foreign_goods_worklist_20260821` | Audit trail for the foreign-goods operator worklist. |
 | `fuhrpark_tables_speditionen_20260225` | Add Fuhrpark sub-tables and Speditionen Frachttarife |
 | `fuhrpark_tenant_ce_20261009` | Fuhrpark: additive tenant_id fuer Masken-CRUD (CE+MCP Isolation). |
