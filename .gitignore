@@ -186,6 +186,8 @@ evidence/screenshots/
 *_leads.json
 playwright-results.json
 playwright-results.json/
+# Playwright-Sitzungen mit echten Tokens (playwright.anmeldung.mjs)
+playwright/.auth/
 ostfriesland_*.json
 
 .claude/settings.local.json
