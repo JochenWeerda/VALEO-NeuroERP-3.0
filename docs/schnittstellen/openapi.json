@@ -361804,7 +361804,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PosPaymentsPromotionsOut"
+                  "items": {
+                    "$ref": "#/components/schemas/PosPaymentOut"
+                  },
+                  "title": "Response List Payment Methods Api V1 Pos Payment Methods Get",
+                  "type": "array"
                 }
               }
             },
@@ -361818,9 +361822,6 @@
         ],
         "summary": "Payment methods auflisten",
         "tags": [
-          "pos",
-          "payments",
-          "promotions",
           "pos",
           "payments",
           "promotions"
@@ -385270,33 +385271,32 @@
     },
     "/api/v1/reports/export/{report_type}": {
       "get": {
-        "description": "Stub: Export-Endpunkt für Berichte. Gibt leere Erfolgsmeldung zurück.",
+        "description": "Export report data in various formats",
         "operationId": "export_report_api_v1_reports_export__report_type__get",
         "parameters": [
           {
-            "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
             "in": "path",
             "name": "report_type",
             "required": true,
             "schema": {
-              "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
               "title": "Report Type",
               "type": "string"
             }
           },
           {
-            "description": "Ausgabeformat: xlsx, csv, pdf",
+            "description": "Export format: json, csv",
             "in": "query",
             "name": "format",
             "required": false,
             "schema": {
-              "default": "xlsx",
-              "description": "Ausgabeformat: xlsx, csv, pdf",
+              "default": "json",
+              "description": "Export format: json, csv",
               "title": "Format",
               "type": "string"
             }
           },
           {
+            "description": "Start date (YYYY-MM-DD)",
             "in": "query",
             "name": "start_date",
             "required": false,
@@ -385309,10 +385309,12 @@
                   "type": "null"
                 }
               ],
+              "description": "Start date (YYYY-MM-DD)",
               "title": "Start Date"
             }
           },
           {
+            "description": "End date (YYYY-MM-DD)",
             "in": "query",
             "name": "end_date",
             "required": false,
@@ -385325,6 +385327,7 @@
                   "type": "null"
                 }
               ],
+              "description": "End date (YYYY-MM-DD)",
               "title": "End Date"
             }
           }
@@ -385334,7 +385337,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "additionalProperties": true,
+                  "title": "Response Export Report Api V1 Reports Export  Report Type  Get",
+                  "type": "object"
                 }
               }
             },
@@ -385356,12 +385361,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Bericht exportieren",
+        "summary": "Export Report",
         "tags": [
           "reports",
-          "export",
-          "reports",
-          "export"
+          "analytics",
+          "dashboard",
+          "reports"
         ]
       }
     },

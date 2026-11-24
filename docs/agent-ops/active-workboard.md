@@ -1065,3 +1065,5 @@ Doppelten KI-Usability-Mount entfernt. 4.052 HTTP-Operationen behalten unveraend
 ## M0-POS-REPORTS-ROUTER-DUPLIKATE - reserviert, Codex
 
 Ziel: zwei verdeckte Platzhalter fuer Zahlarten und Berichtsexport entfernen. Dateibesitz: deren Routendeklarationen und OpenAPI. Abnahme: fuehrende Handler und Pfade bleiben erhalten.
+
+Verdeckten statischen Zahlarten-Handler und leeren Berichtsexport entfernt. OpenAPI beschreibt jetzt die bereits wirksamen Handler. Abgleich: 3.221 Pfade, unveraenderte Methoden und Operation-IDs; nur die beiden erwarteten GET-Vertraege geaendert. Sechs CRM-Duplikatwarnungen offen.
