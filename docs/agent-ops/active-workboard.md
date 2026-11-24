@@ -983,6 +983,9 @@ Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
 Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrte den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
 Ergebnis: Herstellerfix (ADR-080) — i18next ^26.3.4, Lock 26.7.2; gemergt als #183 (4859a973d).
 
+## M0-VOR-PUSH-SPERRE-20261124 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. scripts/vor_push.py nimmt selbst die Pruefstand-Sperre (%TEMP%/valeo_vor_push.lock, PID-Pruefung, verwaiste Sperre wird uebernommen, Frist 45 min). Bisher sperrte nur der Claude-Code-Hook; eine Sitzung, die vor_push direkt aufrief, baute valeo_probe mitten in fremden Laeufen neu auf. Der Hook setzt VALEO_PRUEFSTAND_SPERRE=gehalten (keine Doppelsperre). Gilt damit fuer Claude, Cursor und Codex, sobald sie scripts/vor_push.py aus main nutzen.
+
 ## M0-E2E-FULL-UAT-20261123 — in arbeit, Cursor (M0)
 Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor. Abgegrenzter Teil aus M0-CI-GESAMTBASIS-20261115 (Codex); Sonar-Abdeckung und Runtime API Sweep bleiben bei Codex. Handshake: docs/agent-ops/handshakes/cursor-an-codex-m0-e2e-full-uat-20261123.md.
 Befund (Lauf 45156197226, main bbe18fb8f): alle 21 roten @full-Tests (CRM 360 16, Zahlungsabgleich 3, POS-Fiskalisierung 2) stehen auf der SSO-Anmeldeseite. .github/workflows/e2e-full.yml startet weder Test-Keycloak noch Postgres/Redis, installiert keine Python-Abhaengigkeiten und migriert nicht; seit dem Wegfall des Dev-Tokens (12.10.2026) ist der Lauf deshalb unangemeldet. Workflow rot seit mindestens 09.11.2026.
