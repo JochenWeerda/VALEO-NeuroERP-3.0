@@ -30,6 +30,22 @@ def test_kein_journalleser_zaehlt_nur_posted():
     assert not treffer, "Journal gebucht = status IN ('posted', 'reversed'):\n" + "\n".join(treffer)
 
 
+#: Eine Buchung ohne Status ist nicht gebucht (24.11.2026: Bilanz, GuV und BWA zaehlten ``je.status IS NULL`` mit;
+#: die Spalte ist auf frischer Installation nullbar und ohne Vorgabe).
+OHNE_STATUS = re.compile(r"je\.status\s+IS\s+NULL", re.IGNORECASE)
+
+
+def test_kein_journalleser_zaehlt_buchungen_ohne_status():
+    treffer = [
+        f"{pfad.relative_to(APP.parent)}:{nr}"
+        for pfad in APP.rglob("*.py")
+        for nr, zeile in enumerate(pfad.read_text(encoding="utf-8", errors="ignore").splitlines(), start=1)
+        if OHNE_STATUS.search(zeile)
+    ]
+    assert not treffer, "Ohne Status ist nicht gebucht:\n" + "\n".join(treffer)
+    assert OHNE_STATUS.search("AND (je.status IN ('posted', 'reversed') OR je.status IS NULL)")
+
+
 def test_ratschenmuster_trifft_den_alten_filter():
     assert NUR_POSTED.search("WHERE je.tenant_id = :t AND je.status = 'posted'")
     assert NUR_POSTED.search("SELECT COUNT(*) FILTER (WHERE status = 'posted') AS gebucht")
