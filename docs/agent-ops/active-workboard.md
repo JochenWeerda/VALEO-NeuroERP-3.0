@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-#165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-#167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -984,3 +984,21 @@ Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeff
 Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
 Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
 Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+## M4-CR-P0-MANDANTENLECK-20261123 — reserviert, Cursor (M4, P0)
+Meilenstein: M4. Owner: Cursor. Stand: reserviert 2026-11-24.
+Quelle: docs/abnahme/domaenen/crm.md (D04) / Reifematrix 20261123 (PR #181).
+P0-Luecken: CR-01 lookup ohne tenant_id; CR-01 KIM customers ohne Mandantenfilter; CR-03 KIM-Ansprechpartner ohne Filter; CR-04 _kunde_finden Fallback public.kunden ohne Mandant; CR-11 CrmMergeService ohne tenant_id; zusaetzlich CustomerService.get_from_db_any_key Altbestand-Fallback (gleicher Leak).
+Dateibesitz: app/core/public_kunden_mandant.py (neu), app/services/business_partner_service.py (search_lookup), app/api/v1/endpoints/crm_kim.py, app/api/v1/endpoints/crm_360_sql.py, app/services/crm_merge_service.py, app/services/customer_service.py (Altbestand-Fallback), tests/test_m4_cr_p0_mandantenleck.py, QA, Workboard.
+Abnahme: Integrationstest gegen PostgreSQL mit Fremdmandant 404/leere Liste; eigener Mandant bleibt lesbar.
+Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion — kein Claim hier.
+
+## M4-LO-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
+Meilenstein: M4. Owner: offen (Bahn Logistik/Fuhrpark). Quelle: PR #181 / docs/abnahme/domaenen/logistik.md.
+P0: LO-02 Mandantenleck ops_fahrer ohne tenant_id und transporte.py ohne Filter. P1 siehe Abnahmeblatt.
+Hinweis 2026-11-24: P0 unbeansprucht; Cursor arbeitet zuerst M4-CR-P0.
+
+## M4-PM-P0-P1-LUECKEN-20261123 — offen (M4, P0/P1)
+Meilenstein: M4. Owner: offen (Bahn Produktion/Futtermittel). Quelle: PR #181 / docs/abnahme/domaenen/produktion-muehle.md.
+P0: PM-06 Schnellerfassung ohne Bestandsabzug; PM-11 Freigabe ohne tenant_id; PM-11 Charge hart loeschen ohne Pruefung/Audit.
+Hinweis 2026-11-24: P0 unbeansprucht; Cursor arbeitet zuerst M4-CR-P0.
