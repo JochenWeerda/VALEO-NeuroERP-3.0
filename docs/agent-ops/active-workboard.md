@@ -1157,3 +1157,5 @@ PostgreSQL-CI zu PR 179: Acht Fehler liefen ueber einen Test-Adapter, der execut
 ## M0-BACKGROUND-JOBS-TENANT - reserviert, Codex
 
 Ziel: Hintergrundjob-Daten und Statuswechsel ueber HTTP an den verifizierten Mandanten binden. Dateibesitz: Background-Job-Router, Registry und Wave-86-Vertrag. Abnahme: tenantgebundene Listen, Zaehler, Einzelabrufe und Statuswechsel; bestehende interne Aufrufer vor der Umstellung pruefen.
+
+HTTP-Liste und Queue-Statistik, Einreihen, Entnahme, Einzelabruf, Abschluss und Fehlerstatus verwenden den geprueften Mandanten. Fremde Selektoren liefern 403, fremde Job-IDs 404. Die Wave-86-Faelle wurden um zwei Mandanten erweitert. Syntax und Diff geprueft; Testabnahme und Push stehen aus.
