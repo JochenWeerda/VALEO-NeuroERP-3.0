@@ -679,7 +679,11 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
   ]
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Annahme-Abrechnung Arbeitsbereich"
+    >
     <div className="space-y-6 p-3 md:p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>

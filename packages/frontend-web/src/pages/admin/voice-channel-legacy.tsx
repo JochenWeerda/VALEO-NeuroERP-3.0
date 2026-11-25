@@ -100,7 +100,11 @@ export default function VoiceChannelPage(): JSX.Element {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-3xl">
+    <div
+      className="p-6 space-y-6 max-w-3xl"
+      role="region"
+      aria-label="Voice-Kanal Arbeitsbereich"
+    >
       <div className="flex items-center gap-3">
         <Volume2 className="h-6 w-6 text-muted-foreground" />
         <div>

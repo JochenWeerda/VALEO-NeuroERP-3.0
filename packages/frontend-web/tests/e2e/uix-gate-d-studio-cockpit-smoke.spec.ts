@@ -359,6 +359,31 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Wiegungen Arbeitsbereich',
   },
+  {
+    label: 'annahme/abrechnung',
+    path: '/annahme/abrechnung',
+    screenId: 'annahme/abrechnung',
+    testId: 'screen-annahme/abrechnung',
+    title: 'Annahme-Abrechnung',
+    specializedType: 'agrar_workbench',
+    specializedFields: [
+      { key: 'settlement_count', label: 'Abrechnungen' },
+    ],
+    specializedLandmark: 'Annahme-Abrechnung Arbeitsbereich',
+  },
+  {
+    label: 'admin/voice-channel',
+    path: '/admin/voice-channel',
+    screenId: 'admin/voice-channel',
+    testId: 'native-cockpit-admin-voice-channel',
+    title: 'Voice-Kanal',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'enabled', label: 'Aktiv' },
+      { key: 'last_utterance', label: 'Letzte Äußerung' },
+    ],
+    specializedLandmark: 'Voice-Kanal Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -626,6 +651,21 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ items: [] }),
+      })
+    })
+  }
+  if (c.screenId === 'annahme/abrechnung') {
+    await page.route(/\/api\/v1\/agrar\/settlements(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+  }
+  if (c.specializedType === 'admin_workbench') {
+    // Nur Voice-Stack-API — nicht Masken-URLs mit "voice" im Screen-Id abfangen.
+    await page.route(/\/api\/v1\/voice\/(?:status|resolve|polish|summary|synthesize|pipeline|transcribe)(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ enabled: false, ready: false, last_utterance: null }),
       })
     })
   }
