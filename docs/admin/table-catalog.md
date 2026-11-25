@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 698 Tabellen, 9141 Spalten.**
+**31 Schemas, 700 Tabellen, 9162 Spalten.**
 
 ## Schemas
 
@@ -38,7 +38,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_futtermittel` | `agrar` | 8 | 83 |
 | `domain_hr` | `hr` | 30 | 361 |
 | `domain_hrm` | `hr` | 3 | 32 |
-| `domain_integration` | `platform` | 4 | 46 |
+| `domain_integration` | `platform` | 6 | 67 |
 | `domain_inventory` | `inventory` | 80 | 1141 |
 | `domain_log` | `platform` | 4 | 60 |
 | `domain_logistics` | `logistics` | 8 | 92 |
@@ -378,9 +378,11 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_hrm.hrm_mitarbeiter_konten` | `app/services/hrm_zeiterfassung_service.py` | — | — |
 | `domain_hrm.hrm_zeitbuchungen` | `app/services/hrm_zeiterfassung_service.py` | `app/services/hrm_zeiterfassung_service.py` | — |
 | `domain_integration.legacy_adapter_audit` | — | `app/services/legacy_interface_adapter_service.py` | — |
-| `domain_integration.legacy_adapter_batches` | `app/api/v1/endpoints/legacy_interface_adapters.py`, `app/api/v1/schemas/legacy_interface_adapters_schemas.py`, `app/services/legacy_interface_adapter_service.py` | `app/services/legacy_interface_adapter_service.py` | — |
+| `domain_integration.legacy_adapter_batches` | `app/api/v1/endpoints/legacy_interface_adapters.py`, `app/api/v1/schemas/legacy_interface_adapters_schemas.py`, `app/services/legacy_interface_adapter_service.py`, `app/services/spiegel_uebernahme.py` | `app/services/legacy_interface_adapter_service.py` | — |
 | `domain_integration.legacy_adapter_profiles` | `app/services/legacy_interface_adapter_service.py` | `app/services/legacy_interface_adapter_service.py` | — |
-| `domain_integration.legacy_adapter_staging` | `app/services/legacy_interface_adapter_service.py` | `app/services/legacy_interface_adapter_service.py` | — |
+| `domain_integration.legacy_adapter_staging` | `app/services/legacy_interface_adapter_service.py`, `app/services/spiegel_uebernahme.py` | `app/services/legacy_interface_adapter_service.py` | — |
+| `domain_integration.spiegel_protokoll` | `app/services/spiegel_uebernahme.py` | `app/services/spiegel_uebernahme.py` | — |
+| `domain_integration.spiegel_quellreferenzen` | `app/services/spiegel_uebernahme.py` | `app/services/spiegel_uebernahme.py` | — |
 | `domain_inventory.agrar_contract_allocations` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.agrar_contracts` | `app/api/v1/endpoints/crm_360.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/core/database.py`, `app/documents/inbox_service.py`, `app/infrastructure/models/l3c_models.py`, `app/services/customer_reference.py`, `app/services/mcp_execution_service.py`, `app/workspace/agrar_chain.py` | — | — |
 | `domain_inventory.agrar_settlement_deductions` | `app/core/database.py`, `app/infrastructure/models/l3c_models.py`, `app/services/mask_rollout_summary_service.py` | — | — |
@@ -394,7 +396,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_inventory.article_selections` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.article_suppliers` | `app/api/v1/endpoints/einkauf_ab_erfassung.py`, `app/infrastructure/models/__init__.py`, `app/services/rations_readiness_service.py` | — | — |
 | `domain_inventory.article_units` | `app/infrastructure/models/__init__.py` | — | — |
-| `domain_inventory.articles` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/dms_images.py`, `app/api/v1/endpoints/einkauf_ab_erfassung.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/preis_kalkulation_bridge.py`, `app/api/v1/endpoints/scan.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/futtermittel_models.py`, `app/infrastructure/models/l3c_models.py`, `app/seeds/inventory_seed.py`, `app/services/agri_flush_booking.py`, `app/services/bestandsbewertung.py`, `app/services/customer_reference.py`, `app/services/docflow_lagerzugang.py`, `app/services/feed_inventory_link_service.py`, `app/services/gebinde_aufloesung.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_count_sheet_command.py`, `app/services/ist_aggregation_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/preisfindung_service.py`, `app/services/procurement_service.py`, `app/services/warehouse_service.py`, `app/services/whatsapp_intake_service.py` | `app/api/v1/endpoints/inventory_counts.py`, `app/seeds/inventory_seed.py`, `app/services/docflow_lagerzugang.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_compat_service.py`, `app/services/inventory_correction_service.py`, `app/services/warehouse_service.py` | — |
+| `domain_inventory.articles` | `app/api/v1/endpoints/admin_monitoring.py`, `app/api/v1/endpoints/articles.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/compliance.py`, `app/api/v1/endpoints/dms_images.py`, `app/api/v1/endpoints/einkauf_ab_erfassung.py`, `app/api/v1/endpoints/einkauf_lieferschein.py`, `app/api/v1/endpoints/export_service.py`, `app/api/v1/endpoints/inventory_counts.py`, `app/api/v1/endpoints/inventory_operations.py`, `app/api/v1/endpoints/mask_frontend_bridges.py`, `app/api/v1/endpoints/pos_retoure.py`, `app/api/v1/endpoints/preis_kalkulation_bridge.py`, `app/api/v1/endpoints/scan.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/stmd_duplikat.py`, `app/api/v1/endpoints/supplier_portal.py`, `app/infrastructure/models/__init__.py`, `app/infrastructure/models/einkauf_models.py`, `app/infrastructure/models/futtermittel_models.py`, `app/infrastructure/models/l3c_models.py`, `app/seeds/inventory_seed.py`, `app/services/agri_flush_booking.py`, `app/services/bestandsbewertung.py`, `app/services/customer_reference.py`, `app/services/docflow_lagerzugang.py`, `app/services/feed_inventory_link_service.py`, `app/services/gebinde_aufloesung.py`, `app/services/inventory_auxiliary_service.py`, `app/services/inventory_count_sheet_command.py`, `app/services/ist_aggregation_service.py`, `app/services/mask_rollout_summary_service.py`, `app/services/mcp_execution_service.py`, `app/services/preisfindung_service.py`, `app/services/procurement_service.py`, `app/services/spiegel_uebernahme.py`, `app/services/warehouse_service.py`, `app/services/whatsapp_intake_service.py` | `app/api/v1/endpoints/inventory_counts.py`, `app/seeds/inventory_seed.py`, `app/services/docflow_lagerzugang.py`, `app/services/feed_inventory_link_service.py`, `app/services/inventory_compat_service.py`, `app/services/inventory_correction_service.py`, `app/services/spiegel_uebernahme.py`, `app/services/warehouse_service.py` | — |
 | `domain_inventory.bestandsbuchung_schluessel` | `app/services/bestandsbuchung_schluessel.py` | `app/services/bestandsbuchung_schluessel.py` | — |
 | `domain_inventory.bin_locations` | `app/infrastructure/models/l3c_models.py` | — | — |
 | `domain_inventory.bin_stock` | `app/infrastructure/models/wms_models.py`, `app/services/mask_rollout_summary_service.py`, `app/services/warehouse_service.py` | `app/api/v1/endpoints/pos_retoure.py`, `app/services/warehouse_service.py` | — |
@@ -604,7 +606,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.artikel_folgeartikel` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
 | `domain_shared.artikel_gebindefaktoren` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/gebinde_aufloesung.py` | `app/services/gebinde_aufloesung.py` | — |
 | `domain_shared.artikel_inventurgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
-| `domain_shared.artikel_mengeneinheiten` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/beleg_erechnung.py`, `app/services/gebinde_aufloesung.py`, `app/services/mengeneinheiten_grund.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/mengeneinheiten_grund.py` | — |
+| `domain_shared.artikel_mengeneinheiten` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/beleg_erechnung.py`, `app/services/gebinde_aufloesung.py`, `app/services/mengeneinheiten_grund.py`, `app/services/spiegel_uebernahme.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py`, `app/services/mengeneinheiten_grund.py` | — |
 | `domain_shared.artikel_mengeneinheitengruppen` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | `app/api/v1/endpoints/artikel_mengeneinheiten.py` | — |
 | `domain_shared.artikel_sperren` | `app/api/v1/endpoints/compliance.py` | `app/api/v1/endpoints/compliance.py` | — |
 | `domain_shared.artikel_stoffstrom` | `app/api/v1/endpoints/artikel_stoffstrom.py` | `app/api/v1/endpoints/artikel_stoffstrom.py` | — |
@@ -728,7 +730,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.vertreter_staffel_zeilen` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | `app/api/v1/endpoints/vertreterprovisionen.py`, `app/api/v1/endpoints/vertreterprovisionen_kommandos.py` | — |
 | `domain_shared.waage_hofliste` | `app/api/v1/endpoints/hofliste.py` | `app/api/v1/endpoints/hofliste.py` | — |
 | `domain_shared.waage_wiegungsgruppen` | `app/api/v1/endpoints/artikel_stamm_ext.py` | `app/api/v1/endpoints/artikel_stamm_ext.py` | — |
-| `domain_shared.warengruppen` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `artikel/kategorien` |
+| `domain_shared.warengruppen` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py`, `app/services/spiegel_uebernahme.py` | `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/api/v1/endpoints/warengruppen.py` | `artikel/kategorien` |
 | `domain_shared.webhook_deliveries` | `app/api/v1/endpoints/webhook_system.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webhook_registrations` | `app/api/v1/endpoints/webhook_system.py`, `app/infrastructure/models/l3c_models.py`, `app/services/webhook_service.py` | `app/services/webhook_service.py` | — |
 | `domain_shared.webshop_bestellungen` | `app/api/v1/endpoints/webshop_kommandos.py`, `app/services/webshop_integration_service.py` | `app/services/webshop_integration_service.py` | — |
@@ -1143,6 +1145,8 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `legacy_adapter_batches` | `platform` | native | `id` | id, tenant_id, profile_key, external_id, payload_hash, raw_payload, mapping_version, status, record_count, staged_count, mismatch_count, error_code, error_message, created_at, updated_at |
 | `legacy_adapter_profiles` | `platform` | native | `id` | id, tenant_id, profile_key, format_version, mapping_version, status, format_contract, field_mapping, approved_by, approved_at, created_at, updated_at |
 | `legacy_adapter_staging` | `platform` | native | `id` | id, tenant_id, batch_id, line_no, record_type, source_ref, canonical_payload, validation_status, error_message, created_at |
+| `spiegel_protokoll` | `platform` | native | `id` | id, tenant_id, batch_id, line_no, objektart, quellschluessel, ergebnis, differenzen, fehler, erstellt_am |
+| `spiegel_quellreferenzen` | `platform` | native | `tenant_id`, `quellsystem`, `objektart`, `quellschluessel` | tenant_id, quellsystem, objektart, quellschluessel, ziel_tabelle, ziel_id, payload_hash, batch_id, version, erstmals_am, zuletzt_am |
 
 ## `domain_inventory`
 

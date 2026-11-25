@@ -29,6 +29,11 @@ ADAPTER_SPECS = {
             ("encoding", "delimiter", "record_types", "sample_hash"),
         ),
         AdapterSpec(
+            "l3_spiegel",
+            "L3 Spiegelabzug (Datenbankexport, nur lesend; M6)",
+            ("encoding", "record_types", "sample_hash", "export_stand"),
+        ),
+        AdapterSpec(
             "unimet",
             "Unimet",
             (

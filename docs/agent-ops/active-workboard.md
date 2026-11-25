@@ -1228,3 +1228,6 @@ Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.
 
 ## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.
+
+## M6-SPIEGEL-UEBERNAHME-20261125 — zur Abnahme, Claude Code (M6)
+Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandenen Adapterstrecke (legacy_adapter_*): Profil l3_spiegel, Uebernahme freigegebener Batches in die Fachtabellen mit Quellreferenz (spiegel_quellreferenzen, Pruefsumme -> idempotent) und fortgeschriebenem Protokoll (spiegel_protokoll) samt Differenzbericht; erste Objektart Artikel. Unbekannte Bezuege und Fremdbestand = Fehlerzeilen, kein Raten. Plan, L3-Tabellen je Objektart (WWS_*), Abnahmekriterien, Blocker: docs/migration/m6-spiegelbetrieb-l3.md. Dateibesitz: app/services/spiegel_uebernahme.py, alembic spiegel_quellreferenz_20261125, tests/test_spiegel_uebernahme.py.

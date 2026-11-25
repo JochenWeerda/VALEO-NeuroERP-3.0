@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-24
+last_reviewed: 2026-11-25
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -492,6 +492,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
 | `service_anfragen_20261027` | Service-Anfragen und ihre Rueckmeldungen liegen in der Datenbank. |
+| `spiegel_quellreferenz_20261125` | Spiegelbetrieb L3: Quellreferenz je uebernommenem Datensatz und Uebernahmeprotokoll (M6, 25.11.2026). |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
 | `steuerschluessel_aufwandskonto_20261013` | Steuerschluessel tragen ein Aufwandskonto fuer Eingangsbelege. |
 | `steuerschluessel_einheit_20261012` | Steuerschluessel: eine Quelle. Erloeskonto und Paragraf-24-Kennzeichen an ``tax_keys``. |

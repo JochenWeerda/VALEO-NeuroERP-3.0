@@ -64,6 +64,12 @@ Recherche, Rennerlisten-Auswertung 03.09.2025). Das gehoert in die **L3-Uebernah
 Import), nicht als Pflichtregel in VALEO - andere Mandanten nummerieren anders. Im gewachsenen Bestand von
 `valeo_neuro_erp` (Testdaten, 132 Artikel) kommt die Konvention nicht vor.
 
+L3-Tabellenverzeichnis (25.11.2026, `docs/migration/m6-spiegelbetrieb-l3.md`): `WWS_ARTIKELGRP` fuehrt je
+Gruppe einen Artikelnummernkreis (`ARTNRVON`, `ARTNRBIS`, `ARTNRLFD`) sowie Einkaufs- und Erloeskonto (`EINKKONTO`,
+`ERLKONTO`) und eine Umsatzgruppe. Die Praefix-Konvention ist damit in L3 als Nummernkreis je Gruppe hinterlegt.
+`WWS_ARTIKEL.HAUPTARTIKELNR` ist der einzige Haupt-Artikel-Verweis; eine Variantentabelle gibt es nicht (Bedeutung des
+Reiters VARIANTEN weiter offen).
+
 ## 5. Offene Punkte (fachlich zu klaeren)
 
 1. **Artikelstamm und Auspraegung in a.eins** - Bedeutung laut Hilfe ("Artikelstamm und Artikel - Uebersicht",

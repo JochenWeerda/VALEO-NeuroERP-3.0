@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-25
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-25T05:14:46Z'
+generated_at: '2026-11-25T06:52:17Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2397,13 +2397,14 @@ domains:
 mapping_stats:
   frontend_routes_total: 1147
   frontend_routes_mapped: 1147
-  backend_services_total: 353
+  backend_services_total: 354
   backend_services_mapped: 353
   backend_endpoints_total: 474
   backend_endpoints_mapped: 474
 unmapped:
   frontend_routes: []
-  backend_services: []
+  backend_services:
+  - spiegel_uebernahme
   backend_endpoints: []
 status:
   architecture_os_mvp: active
