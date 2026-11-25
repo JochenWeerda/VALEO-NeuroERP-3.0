@@ -151,6 +151,44 @@ def test_nur_freigegebene_batches_werden_uebernommen(mandant):
         uebernehme(db, mandant, batch, actor="test", reason="M6")
 
 
+def test_nur_l3_spiegel_profil_wird_uebernommen(mandant):
+    LegacyInterfaceAdapterService(SessionLocal(), mandant).configure(
+        "l3_standard",
+        {"format_contract": {**VERTRAG, "delimiter": ";"}, "field_mapping": MAPPING},
+        actor="test", reason="M6-Profilguard")
+    with SessionLocal() as db:
+        dienst = LegacyInterfaceAdapterService(db, mandant)
+        batch = dienst.intake("l3_standard", "abzug-fremd", {"records": [_artikel("151704", "x")]}, actor="test")["id"]
+        dienst.stage(batch, actor="test", reason="M6")
+        dienst.reconcile(batch, actor="test", reason="M6")
+        dienst.approve(batch, actor="test", reason="M6")
+    with SessionLocal() as db, pytest.raises(LegacyAdapterError, match="l3_spiegel"):
+        uebernehme(db, mandant, batch, actor="test", reason="M6")
+
+
+def test_soft_delete_wird_bei_gleichem_l3_inhalt_wiederbelebt(mandant):
+    _lauf(mandant, "abzug-1", [_artikel("151704", "ZINTAN PLATIN")])
+    with SessionLocal() as db:
+        db.execute(text(
+            "UPDATE domain_inventory.articles SET deleted_at = now(), is_active = false WHERE tenant_id = :t "
+            "AND article_number = '151704'"), {"t": mandant})
+        db.commit()
+
+    ergebnis = _lauf(mandant, "abzug-2", [_artikel("151704", "ZINTAN PLATIN")])
+
+    with SessionLocal() as db:
+        zeile = db.execute(text(
+            "SELECT name, is_active, deleted_at FROM domain_inventory.articles WHERE tenant_id = :t "
+            "AND article_number = '151704'"), {"t": mandant}).mappings().one()
+        bericht = differenzbericht(db, mandant, db.execute(text(
+            "SELECT id FROM domain_integration.legacy_adapter_batches WHERE tenant_id = :t AND external_id = "
+            "'abzug-2'"), {"t": mandant}).scalar_one())
+
+    assert (ergebnis["geaendert"], ergebnis["unveraendert"], ergebnis["fehler"]) == (1, 0, 0)
+    assert zeile["deleted_at"] is None and zeile["is_active"] is True
+    assert "deleted_at" in bericht["geaendert"][0]["felder"]
+
+
 def test_protokoll_ist_unveraenderlich(mandant):
     _lauf(mandant, "abzug-1", [_artikel("151704", "x")])
     with SessionLocal() as db, pytest.raises(Exception, match="unveraenderlich"):

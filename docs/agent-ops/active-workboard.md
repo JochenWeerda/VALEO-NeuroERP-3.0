@@ -1315,5 +1315,8 @@ Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBU
 
 ## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
 Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
+
+## M6-SPIEGEL-UEBERNAHME-20261125 — zur Abnahme, Claude Code (M6)
+Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandenen Adapterstrecke (legacy_adapter_*): Profil l3_spiegel, Uebernahme freigegebener Batches in die Fachtabellen mit Quellreferenz (spiegel_quellreferenzen, Pruefsumme -> idempotent) und fortgeschriebenem Protokoll (spiegel_protokoll) samt Differenzbericht; erste Objektart Artikel. Unbekannte Bezuege und Fremdbestand = Fehlerzeilen, kein Raten. Plan, L3-Tabellen je Objektart (WWS_*), Abnahmekriterien, Blocker: docs/migration/m6-spiegelbetrieb-l3.md. Dateibesitz: app/services/spiegel_uebernahme.py, alembic spiegel_quellreferenz_20261125, tests/test_spiegel_uebernahme.py.
 ## M7-M8-VORARBEITEN-20261125 — zur Abnahme, Claude Code (M7/M8)
 Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. Ohne M6 startbar: Loeschkonzept, Installationsprobe, Demo-Mandant, Lizenzpruefung, Helm. Pruefpunkte Aufbewahrungsfristen (gobd_retention: Buchungsbelege 8 statt 10 Jahre seit BEG IV, PSM 3, DueV 7, Fristbeginn Kalenderjahresende) - Bestaetigung durch Steuerberater/Fachbereich offen, kein Code geaendert.

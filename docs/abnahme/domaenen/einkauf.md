@@ -68,10 +68,9 @@ Erzeugt mit `python scripts/domaenen_abnahme.py` aus [`einkauf.yaml`](einkauf.ya
 
 Bereiche im Inventar: einkauf. Routen: 69 — screen_definition 3, studio_versioniert 66.
 
-Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 3:
+Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 2:
 
 - `einkauf/frachtauftraege-liste` — Frachtauftraege
-- `einkauf/service-entry-sheets` — Service entry sheets
 - `einkauf/wareneingangsabgleich` — Wareneingangsabgleich
 
 Aktionen der Domaenenmasken: 158, davon serverwirksam 74; ohne CLI 0; nicht verfuegbar 0; nicht deklariert 0.
