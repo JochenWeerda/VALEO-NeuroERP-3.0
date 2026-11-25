@@ -140,11 +140,39 @@ export default function MobileFuetterungsdokumentation() {
   const shakerRemainder = 100 - topPct - middlePct
   const canSave = Boolean(ration?.components.length && ration.components.every((item) => item.soll_kg != null) && shakerRemainder >= 0 && tmPct > 0 && tmPct <= 100 && (cause !== 'other' || comment.trim().length >= 10))
 
-  if (!ration && currentPlans.isLoading) return <main className="mx-auto min-h-screen max-w-md bg-slate-50 p-6 text-sm text-slate-600">Aktueller Fuetterungsplan wird geladen…</main>
+  if (!ration && currentPlans.isLoading) {
+    return (
+      <main
+        className="mx-auto min-h-screen max-w-md bg-slate-50 p-6 text-sm text-slate-600"
+        role="region"
+        aria-label="Mobile Fütterungsdokumentation Arbeitsbereich"
+      >
+        Aktueller Fuetterungsplan wird geladen…
+      </main>
+    )
+  }
 
-  if (!ration) return <main className="mx-auto min-h-screen max-w-md bg-slate-50 p-4 text-slate-900">
-    <section className="mt-12 rounded-2xl border bg-white p-6 text-center shadow-sm"><Wheat className="mx-auto mb-4 h-10 w-10 text-status-success" /><h1 className="text-xl font-bold">Kein aktueller Fuetterungsplan</h1><p className="mt-2 text-sm text-slate-600">Eine freigegebene Ration muss zuerst als Planversion publiziert werden. Geplante oder veraltete Versionen werden hier nicht als aktuelle Stallanweisung angeboten.</p><Button className="mt-5 w-full" asChild><a href="/futtermittel/rationsoptimierung">Zur Rationsoptimierung</a></Button></section>
-  </main>
+  if (!ration) {
+    return (
+      <main
+        className="mx-auto min-h-screen max-w-md bg-slate-50 p-4 text-slate-900"
+        role="region"
+        aria-label="Mobile Fütterungsdokumentation Arbeitsbereich"
+      >
+        <section className="mt-12 rounded-2xl border bg-white p-6 text-center shadow-sm">
+          <Wheat className="mx-auto mb-4 h-10 w-10 text-status-success" />
+          <h1 className="text-xl font-bold">Kein aktueller Fuetterungsplan</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Eine freigegebene Ration muss zuerst als Planversion publiziert werden. Geplante oder veraltete
+            Versionen werden hier nicht als aktuelle Stallanweisung angeboten.
+          </p>
+          <Button className="mt-5 w-full" asChild>
+            <a href="/futtermittel/rationsoptimierung">Zur Rationsoptimierung</a>
+          </Button>
+        </section>
+      </main>
+    )
+  }
 
   const submit = () => save.mutate({
     plan_version_id: ration.planVersionId,
@@ -157,7 +185,7 @@ export default function MobileFuetterungsdokumentation() {
     components: ration.components.map((item) => ({ feed_id: item.feed_id, actual_kg: actual[item.feed_id] ?? 0 })),
   })
 
-  return <main className="mx-auto min-h-screen w-full max-w-md overflow-x-hidden bg-slate-50 pb-28 text-slate-900">
+  return <main className="mx-auto min-h-screen w-full max-w-md overflow-x-hidden bg-slate-50 pb-28 text-slate-900" role="region" aria-label="Mobile Fütterungsdokumentation Arbeitsbereich">
     <header className="sticky top-0 z-20 border-b bg-status-success px-4 py-3 text-white shadow-sm"><div className="flex items-center gap-3"><a aria-label="Zurück" href="/futtermittel/rationsoptimierung" className="rounded-full p-2 hover:bg-white/10"><ChevronLeft /></a><div><p className="text-xs text-white/90">Jetzt füttern</p><h1 className="font-bold">{ration.group.name}</h1></div></div></header>
     <div className="space-y-4 p-4">
       <section className="rounded-2xl border bg-white p-4 shadow-sm"><div className="flex items-center justify-between text-xs text-slate-500"><span>{ration.group.count} Tiere</span><span>Plan v{ration.planVersionNo} · {new Date(ration.updatedAt).toLocaleString('de-DE')}</span></div><div className="mt-3 grid grid-cols-3 gap-2 text-center"><div><b className="block text-lg">{totalSoll.toFixed(0)}</b><span className="text-2xs text-slate-500">kg FM SOLL</span></div><div><b className="block text-lg">{ration.components.length}</b><span className="text-2xs text-slate-500">Komponenten</span></div><div><b className="block text-lg">{ration.dosingStepKg.toLocaleString('de-DE')}</b><span className="text-2xs text-slate-500">kg Dosierschritt</span></div></div></section>

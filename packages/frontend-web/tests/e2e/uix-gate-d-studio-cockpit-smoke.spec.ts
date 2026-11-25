@@ -197,6 +197,37 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Milchvieh-Karte Arbeitsbereich',
   },
+  {
+    label: 'futtermittel/fuetterungsdokumentation-mobil',
+    path: '/futtermittel/fuetterungsdokumentation-mobil',
+    screenId: 'futtermittel/fuetterungsdokumentation-mobil',
+    testId: 'feed-mobile-documentation',
+    title: 'Fütterungsdokumentation mobil',
+    specializedType: 'feed_workbench',
+    specializedFields: [
+      { key: 'plan_version_id', label: 'Planversion' },
+      { key: 'group_id', label: 'Gruppe' },
+      { key: 'actual_kg', label: 'Ist-Menge' },
+      { key: 'rest_kg', label: 'Restfutter' },
+      { key: 'tm_pct', label: 'TM' },
+    ],
+    specializedLandmark: 'Mobile Fütterungsdokumentation Arbeitsbereich',
+  },
+  {
+    label: 'futtermittel/rationseditor',
+    path: '/futtermittel/rationseditor',
+    screenId: 'futtermittel/rationseditor',
+    testId: 'feed-ration-editor',
+    title: 'Rationseditor',
+    specializedType: 'feed_workbench',
+    specializedFields: [
+      { key: 'ration_id', label: 'Ration' },
+      { key: 'group_id', label: 'Gruppe' },
+      { key: 'version_no', label: 'Version' },
+      { key: 'status', label: 'Status' },
+    ],
+    specializedLandmark: 'Rationseditor Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -419,6 +450,26 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         body: JSON.stringify({ massnahmen: [], count: 0 }),
       })
     })
+  }
+  if (c.specializedType === 'feed_workbench') {
+    await page.route(
+      /\/api\/v1\/agrar\/rations-optimization\/feeding\/plans\/current(?:\?.*)?$/,
+      async (route) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      },
+    )
+    await page.route(
+      /\/api\/v1\/agrar\/rations-optimization\/lifecycle\/rations(?:\?.*)?$/,
+      async (route) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      },
+    )
+    await page.route(
+      /\/api\/v1\/agrar\/rations-optimization\/feeding\/actuals(?:\?.*)?$/,
+      async (route) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      },
+    )
   }
 }
 
