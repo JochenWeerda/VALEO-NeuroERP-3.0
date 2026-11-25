@@ -30304,7 +30304,6 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/inventory_counts.py",
-            "app/api/v1/endpoints/inventory_operations.py",
             "app/seeds/inventory_seed.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",

@@ -17,7 +17,7 @@ DIREKT = re.compile(r"INSERT\s+INTO\s+domain_inventory\.inventory_stock_movement
 BASELINE = {
     "app/api/v1/endpoints/compat.py": 2,
     "app/api/v1/endpoints/inventory_counts.py": 1,
-    "app/api/v1/endpoints/inventory_operations.py": 2,
+    "app/api/v1/endpoints/inventory_operations.py": 1,
     "app/api/v1/endpoints/pos_retoure.py": 1,
     "app/api/v1/endpoints/warehouse_transfers.py": 2,
     "app/services/agri_flush_booking.py": 1,
