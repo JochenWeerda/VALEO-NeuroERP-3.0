@@ -3001,7 +3001,55 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, Any]:
+    return build_stamm_object_page(
+        screen_id="agribusiness/field-service-tasks/neu",
+        domain="agribusiness",
+        title="Field-Service Aufgabe neu",
+        subtitle="agribusiness",
+        identity_field="id",
+        data_sources=[stamm_entity_source("/api/v1/agribusiness/field-service-tasks/{entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "id", "label": "ID", "type": "text"},
+            {"key": "taskNumber", "label": "Aufgaben-Nr.", "type": "text"},
+            {"key": "title", "label": "Titel", "type": "text"},
+            {"key": "taskType", "label": "Typ", "type": "text"},
+            {"key": "priority", "label": "Prioritaet", "type": "text"},
+            {"key": "status", "label": "Status", "type": "text"},
+        ])],
+        edit_permission="agribusiness.write",
+        creation={
+            "endpoint": "/api/v1/agribusiness/field-service-tasks",
+            "permission": "agribusiness.field_service.create",
+            "detailRoute": "/agribusiness/field-service-tasks/{entity_id}",
+            "defaults": {"taskType": "FIELD_SERVICE", "priority": "MEDIUM"},
+            "fields": [
+                {"key": "title", "label": "Titel", "type": "text", "required": True},
+                {"key": "taskType", "label": "Typ", "type": "select",
+                 "options": [
+                     {"value": "FIELD_SERVICE", "label": "Field Service"},
+                     {"value": "INSPECTION", "label": "Inspection"},
+                     {"value": "MAINTENANCE", "label": "Maintenance"},
+                     {"value": "EMERGENCY", "label": "Emergency"},
+                 ]},
+                {"key": "priority", "label": "Prioritaet", "type": "select",
+                 "options": [
+                     {"value": "LOW", "label": "Niedrig"},
+                     {"value": "MEDIUM", "label": "Mittel"},
+                     {"value": "HIGH", "label": "Hoch"},
+                     {"value": "URGENT", "label": "Dringend"},
+                 ]},
+            ],
+        },
+        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        business_purpose="Field-Service Aufgabe neu anlegen.",
+        example_prompts=["Oeffne Field-Service Aufgabe neu.", "Lege einen Field-Service-Einsatz an."],
+        test_id="agribusiness-field-service-tasks-neu",
+    )
+
+
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
+    "agribusiness/field-service-tasks/neu": build_agribusiness_field_service_tasks_neu_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,

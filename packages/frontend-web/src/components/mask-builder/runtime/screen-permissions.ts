@@ -172,6 +172,16 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('lager.piv.')) {
       return roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN') || roles.has('manager')
     }
+    // Field-Service Create mirrors SCHREIBEN["AGRAR"].
+    if (permission.startsWith('agribusiness.field_service.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
+        || roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }
