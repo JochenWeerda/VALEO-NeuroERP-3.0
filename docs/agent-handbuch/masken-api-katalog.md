@@ -1728,8 +1728,8 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/agent/integrations/providers/superglue/tenants/default/admin-state`
-- `wizard` → `/api/v1/agent/integrations/providers/superglue/tenants/default/wizard`
+- `entity` → `/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/admin-state`
+- `wizard` → `/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard`
 
 **Beispiel-Prompts:**
 
@@ -1743,9 +1743,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `refresh` | Aktualisieren | safe | nein | `—` |
-| `connector_override` | Connector Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/connectors/{connector_key}/config` |
-| `policy_override` | Policy Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/policy` |
-| `wizard_apply` | Wizard-Schritt anwenden | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply` |
+| `connector_override` | Connector Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config` |
+| `policy_override` | Policy Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/policy` |
+| `wizard_apply` | Wizard-Schritt anwenden | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard/apply` |
 
 ---
 
@@ -6828,7 +6828,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `supply` → `/api/v1/supply-chain/overview`
+- `supply` → `/api/v1/annahme/warteschlange`
 - `articles` → `/api/v1/articles?limit=100`
 
 **MCP-Tools (Domäne):**
@@ -15084,7 +15084,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -15113,7 +15113,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -15258,7 +15258,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -15345,7 +15345,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -15460,7 +15460,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -15489,7 +15489,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/anlagen`
+- `list` → `/api/v1/finance/asset-accounting/assets`
 
 **Beispiel-Prompts:**
 
@@ -16337,7 +16337,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/finance/kostenstellen`
+- `list` → `/api/v1/kostenrechnung/kostenstellen`
 
 **MCP-Tools (Domäne):**
 
@@ -26254,7 +26254,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/fibu/kreditoren`
+- `list` → `/api/v1/futtermittel/rezepte`
 
 **Beispiel-Prompts:**
 

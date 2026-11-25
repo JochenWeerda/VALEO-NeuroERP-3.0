@@ -67,7 +67,7 @@ def test_superglue_admin_workbench_parity():
     assert sd["specialized"]["id"] == "admin/control-center/superglue"
     assert not validate_runtime_surface(sd)
     actions = {a["key"]: a for a in sd["actions"]}
-    base = "/api/v1/agent/integrations/providers/superglue/tenants/default"
+    base = "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}"
     assert actions["connector_override"]["commandEndpoint"] == f"{base}/connectors/{{connector_key}}/config"
     assert actions["policy_override"]["commandEndpoint"] == f"{base}/policy"
     assert actions["wizard_apply"]["commandEndpoint"] == f"{base}/wizard/apply"

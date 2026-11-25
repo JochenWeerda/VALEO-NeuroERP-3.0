@@ -245,6 +245,8 @@ def build_admin_command_monitor() -> dict[str, Any]:
                 "pageSize": 50,
                 "columns": [
                     {"key": "name", "label": "Command", "filterable": True, "priority": "primary"},
+                    {"key": "idempotent", "label": "Idempotent", "renderKind": "boolean", "priority": "secondary"},
+                    {"key": "human_confirmation", "label": "Human Confirm", "renderKind": "boolean", "priority": "tertiary"},
                 ],
                 "rowActions": [],
             },
@@ -255,6 +257,8 @@ def build_admin_command_monitor() -> dict[str, Any]:
                 "pageSize": 50,
                 "columns": [
                     {"key": "name", "label": "Aggregate", "filterable": True, "priority": "primary"},
+                    {"key": "kind", "label": "Art", "filterable": True, "priority": "secondary"},
+                    {"key": "record_count", "label": "Records", "priority": "tertiary"},
                 ],
                 "rowActions": [],
             },
@@ -265,6 +269,8 @@ def build_admin_command_monitor() -> dict[str, Any]:
                 "pageSize": 20,
                 "columns": [
                     {"key": "path", "label": "Pfad", "filterable": True, "priority": "primary"},
+                    {"key": "purpose", "label": "Zweck", "priority": "secondary"},
+                    {"key": "method", "label": "Methode", "priority": "tertiary"},
                 ],
                 "rowActions": [],
             },

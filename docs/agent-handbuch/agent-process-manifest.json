@@ -1776,7 +1776,7 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "studio.admin-control-center.superglue",
-          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/default/connectors/{connector_key}/config",
+          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config",
           "method": "POST",
           "stubReason": null
         },
@@ -1787,7 +1787,7 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "studio.admin-control-center.superglue",
-          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/default/policy",
+          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/policy",
           "method": "POST",
           "stubReason": null
         },
@@ -1798,7 +1798,7 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "studio.admin-control-center.superglue",
-          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply",
+          "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard/apply",
           "method": "POST",
           "stubReason": null
         }

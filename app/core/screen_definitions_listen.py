@@ -1111,7 +1111,8 @@ def build_admin_control_center_agent_ops_workbench() -> dict[str, Any]:
 
 def build_admin_control_center_superglue_workbench() -> dict[str, Any]:
     """Superglue Unterseite — Connector-/Policy-Surface mit denselben Commands wie Legacy."""
-    base = "/api/v1/agent/integrations/providers/superglue/tenants/default"
+    # OpenAPI deklariert {tenant_id}; Laufzeit nutzt denselben Pfad (z. B. tenant_id=default).
+    base = "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}"
     return {
         "schemaVersion": 1,
         "id": "admin/control-center/superglue",
@@ -2905,7 +2906,7 @@ def build_fibu_zahlungslaeufe_liste() -> dict[str, Any]:
 def build_fibu_kostenstellen_liste() -> dict[str, Any]:
     return _liste(
         screen_id="fibu/kostenstellen-liste", domain="finance", title="Kostenstellen", subtitle="Kostenstellen und Zuordnungen",
-        endpoint="/api/v1/finance/kostenstellen", row_route=None, bundle="finance",
+        endpoint="/api/v1/kostenrechnung/kostenstellen", row_route=None, bundle="finance",
         columns=[
             {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
             {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},

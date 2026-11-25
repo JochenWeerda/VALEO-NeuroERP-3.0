@@ -74,7 +74,8 @@ def build_intake_rohware() -> dict[str, Any]:
             _action("billing", "Zur Abrechnung"),
             _action("cancel", "Zur Warteschlange"),
         ],
-        [("supply", "/api/v1/supply-chain/overview"), ("articles", "/api/v1/articles?limit=100")],
+        # Kein /supply-chain/overview in OpenAPI — Legacy aggregiert Warteschlange(+Waage/Charge/Fracht).
+        [("supply", "/api/v1/annahme/warteschlange"), ("articles", "/api/v1/articles?limit=100")],
     )
 
 

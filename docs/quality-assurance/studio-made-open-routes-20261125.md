@@ -295,8 +295,13 @@ Nav-`preferredPath` ohne Route-Inventory: **0** (ausser `/` als leerer Pfad).
 
 Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdrahtete Kanäle
 (`finance/bankkonto`, `crm/customer-360`, `beleg-liste/sales-order`, `zertifikate/liste`).
-Verifier: **E 829/829**. Gate C weiter 23× `endpoint_nicht_in_openapi` (kanonisches
-`docs/schnittstellen/openapi.json` Drift; Regen braucht `prometheus_client` / `generate_openapi.py`).
+
+### Batch 32 — Gate C OpenAPI + Endpoint-Korrekturen
+
+- `docs/schnittstellen/openapi.json` regeneriert (`generate_openapi.py`, 3247 Pfade)
+- SD-Fixes: Superglue `{tenant_id}`, Rohware→Warteschlange, FiBu→asset-accounting,
+  Kostenstellen→kostenrechnung, Rezepte→futtermittel/rezepte, Command-Monitor Tabellen-Spalten
+- Verifier: **A/B/C/E = 829/829** (`scripts/verify_made_by_studio_gates.py`)
 
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
