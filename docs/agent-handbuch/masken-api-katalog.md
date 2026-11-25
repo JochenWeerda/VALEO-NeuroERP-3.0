@@ -11,14 +11,28 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (780 Masken).
+> Generiert aus `app/core/screen_definitions.py` (820 Masken).
 
 ## Übersicht
 
 | mask_id | Titel | Domäne | Risiko | Prozessketten | Agent-Contract |
 |---|---|---|---|---|---|
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
-| `admin/agenten-integration` | Agenten integration | admin | niedrig | — | `GET /api/v1/masks/admin/agenten-integration/agent-contract` |
+| `admin-suite` | VALEO Admin Suite | admin | niedrig | — | `GET /api/v1/masks/admin-suite/agent-contract` |
+| `admin-suite/compliance` | Compliance Evidence | admin | niedrig | — | `GET /api/v1/masks/admin-suite/compliance/agent-contract` |
+| `admin-suite/connectoren` | Auto-Capture-Connectoren | admin | mittel | — | `GET /api/v1/masks/admin-suite/connectoren/agent-contract` |
+| `admin-suite/connectors` | Connector Hub | admin | niedrig | — | `GET /api/v1/masks/admin-suite/connectors/agent-contract` |
+| `admin-suite/devices` | Hardware Center | admin | niedrig | — | `GET /api/v1/masks/admin-suite/devices/agent-contract` |
+| `admin-suite/diagnostics` | Diagnosepaket | admin | niedrig | — | `GET /api/v1/masks/admin-suite/diagnostics/agent-contract` |
+| `admin-suite/ki-anbieter` | KI-Anbieter (NeuroAI) | admin | mittel | — | `GET /api/v1/masks/admin-suite/ki-anbieter/agent-contract` |
+| `admin-suite/migration` | Migration Cockpit | admin | niedrig | — | `GET /api/v1/masks/admin-suite/migration/agent-contract` |
+| `admin-suite/operations` | Operations Center | admin | niedrig | — | `GET /api/v1/masks/admin-suite/operations/agent-contract` |
+| `admin-suite/pos-fiscalization` | POS-Fiskalisierung | admin | mittel | — | `GET /api/v1/masks/admin-suite/pos-fiscalization/agent-contract` |
+| `admin-suite/security` | Security und Agent Governance | admin | niedrig | — | `GET /api/v1/masks/admin-suite/security/agent-contract` |
+| `admin-suite/setup` | Ersteinrichtungs-Assistent | admin | niedrig | — | `GET /api/v1/masks/admin-suite/setup/agent-contract` |
+| `admin-suite/system-status` | System Status | admin | niedrig | — | `GET /api/v1/masks/admin-suite/system-status/agent-contract` |
+| `admin/GapPipelineConsole` | GAP Pipeline Console | admin | mittel | — | `GET /api/v1/masks/admin/GapPipelineConsole/agent-contract` |
+| `admin/agenten-integration` | Agenten-Integration | admin | niedrig | — | `GET /api/v1/masks/admin/agenten-integration/agent-contract` |
 | `admin/ai-approvals` | AI-Freigaben | admin | niedrig | — | `GET /api/v1/masks/admin/ai-approvals/agent-contract` |
 | `admin/api-keys` | API-Schlüssel | admin | niedrig | — | `GET /api/v1/masks/admin/api-keys/agent-contract` |
 | `admin/audit-log` | Audit log | admin | niedrig | — | `GET /api/v1/masks/admin/audit-log/agent-contract` |
@@ -29,18 +43,21 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/berechtigungen-matrix` | Berechtigungen matrix | admin | niedrig | — | `GET /api/v1/masks/admin/berechtigungen-matrix/agent-contract` |
 | `admin/branches` | Niederlassungen | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
 | `admin/branches/detail` | Niederlassung | admin | mittel | — | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
-| `admin/command-monitor` | Command monitor | admin | niedrig | — | `GET /api/v1/masks/admin/command-monitor/agent-contract` |
+| `admin/command-monitor` | Command Monitor | admin | niedrig | — | `GET /api/v1/masks/admin/command-monitor/agent-contract` |
 | `admin/compliance-dashboard` | Compliance-Dashboard | compliance | niedrig | — | `GET /api/v1/masks/admin/compliance-dashboard/agent-contract` |
 | `admin/control-center` | Admin Kontrollzentrum | admin | mittel | — | `GET /api/v1/masks/admin/control-center/agent-contract` |
+| `admin/control-center/agent-ops` | Admin Kontrollzentrum: Agent Ops | admin | niedrig | — | `GET /api/v1/masks/admin/control-center/agent-ops/agent-contract` |
 | `admin/control-center/ai-approvals` | Ai approvals | admin | niedrig | — | `GET /api/v1/masks/admin/control-center/ai-approvals/agent-contract` |
 | `admin/control-center/incident-response` | Incident response | admin | niedrig | — | `GET /api/v1/masks/admin/control-center/incident-response/agent-contract` |
 | `admin/control-center/operations` | Operations | admin | niedrig | — | `GET /api/v1/masks/admin/control-center/operations/agent-contract` |
 | `admin/control-center/security` | Security | admin | niedrig | — | `GET /api/v1/masks/admin/control-center/security/agent-contract` |
+| `admin/control-center/superglue` | Admin Kontrollzentrum: Superglue | admin | mittel | — | `GET /api/v1/masks/admin/control-center/superglue/agent-contract` |
 | `admin/core/audit-governance` | Audit governance | admin | niedrig | — | `GET /api/v1/masks/admin/core/audit-governance/agent-contract` |
 | `admin/data-quality` | Data quality | admin | niedrig | — | `GET /api/v1/masks/admin/data-quality/agent-contract` |
 | `admin/devices` | Devices | admin | niedrig | — | `GET /api/v1/masks/admin/devices/agent-contract` |
 | `admin/dms-integration` | Dms integration | admin | niedrig | — | `GET /api/v1/masks/admin/dms-integration/agent-contract` |
 | `admin/erntepeak-stabilitaet` | Erntepeak stabilitaet | admin | niedrig | — | `GET /api/v1/masks/admin/erntepeak-stabilitaet/agent-contract` |
+| `admin/externe-gates` | Externe Gates | admin | niedrig | — | `GET /api/v1/masks/admin/externe-gates/agent-contract` |
 | `admin/forst/kalkulation` | Kalkulation | admin | niedrig | — | `GET /api/v1/masks/admin/forst/kalkulation/agent-contract` |
 | `admin/identity-budgets` | Nutzer- und Agentenkontingente | platform | mittel | — | `GET /api/v1/masks/admin/identity-budgets/agent-contract` |
 | `admin/integrationen-quarantaene` | Integrationen quarantaene | admin | niedrig | — | `GET /api/v1/masks/admin/integrationen-quarantaene/agent-contract` |
@@ -50,21 +67,28 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/nummernkreise` | Nummernkreise | platform | mittel | — | `GET /api/v1/masks/admin/nummernkreise/agent-contract` |
 | `admin/omnichannel-handelskonflikt` | Omnichannel handelskonflikt | admin | niedrig | — | `GET /api/v1/masks/admin/omnichannel-handelskonflikt/agent-contract` |
 | `admin/postfaecher` | Postfächer | platform | niedrig | — | `GET /api/v1/masks/admin/postfaecher/agent-contract` |
+| `admin/postfaecher-anmeldung-rueckruf` | Postfaecher Anmeldung Rueckruf | admin | mittel | — | `GET /api/v1/masks/admin/postfaecher-anmeldung-rueckruf/agent-contract` |
 | `admin/qualitaets-cockpit` | Qualitaets-Cockpit | qualitaet | niedrig | — | `GET /api/v1/masks/admin/qualitaets-cockpit/agent-contract` |
 | `admin/report-berechtigungen` | Report-Berechtigungen | platform | mittel | — | `GET /api/v1/masks/admin/report-berechtigungen/agent-contract` |
 | `admin/rollen-verwaltung` | Rollen | platform | mittel | — | `GET /api/v1/masks/admin/rollen-verwaltung/agent-contract` |
+| `admin/screen-studio` | Screen Studio | admin | niedrig | — | `GET /api/v1/masks/admin/screen-studio/agent-contract` |
+| `admin/setup` | Admin Setup | admin | niedrig | — | `GET /api/v1/masks/admin/setup/agent-contract` |
+| `admin/setup/dms-integration` | Setup DMS-Integration | admin | mittel | — | `GET /api/v1/masks/admin/setup/dms-integration/agent-contract` |
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
 | `admin/tenants` | Mandanten | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
 | `admin/terminologie` | Terminologie | platform | niedrig | — | `GET /api/v1/masks/admin/terminologie/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
 | `admin/users` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
+| `admin/voice-channel` | Voice-Kanal | admin | niedrig | — | `GET /api/v1/masks/admin/voice-channel/agent-contract` |
+| `admin/vordruck-editor` | Vordruck-Editor | admin | mittel | — | `GET /api/v1/masks/admin/vordruck-editor/agent-contract` |
 | `admin/webhooks-liste` | Webhook-Verwaltung | admin | mittel | — | `GET /api/v1/masks/admin/webhooks-liste/agent-contract` |
 | `admin/webshop` | Webshop-Anbindungen | sales | mittel | — | `GET /api/v1/masks/admin/webshop/agent-contract` |
 | `admin/webshop-bestellungen` | Webshop-Bestellungen | sales | niedrig | — | `GET /api/v1/masks/admin/webshop-bestellungen/agent-contract` |
 | `admin/workflow-editor` | Workflow editor | admin | niedrig | — | `GET /api/v1/masks/admin/workflow-editor/agent-contract` |
 | `admin/zeitachsen-editor` | Zeitachsen editor | admin | niedrig | — | `GET /api/v1/masks/admin/zeitachsen-editor/agent-contract` |
 | `agrar/annahme-abrechnung` | Annahme abrechnung | agrar | niedrig | — | `GET /api/v1/masks/agrar/annahme-abrechnung/agent-contract` |
+| `agrar/annahmen-qualitaet-nachtrag` | Qualitaets-Nachtrag | agrar | niedrig | — | `GET /api/v1/masks/agrar/annahmen-qualitaet-nachtrag/agent-contract` |
 | `agrar/biostimulanzien-liste` | Biostimulanzien | agrar | niedrig | — | `GET /api/v1/masks/agrar/biostimulanzien-liste/agent-contract` |
 | `agrar/bodenproben-liste` | Bodenproben | agrar | niedrig | — | `GET /api/v1/masks/agrar/bodenproben-liste/agent-contract` |
 | `agrar/daily-prices` | Daily prices | agrar | niedrig | — | `GET /api/v1/masks/agrar/daily-prices/agent-contract` |
@@ -73,10 +97,12 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/duenger-rechner` | Duenger rechner | agrar | niedrig | — | `GET /api/v1/masks/agrar/duenger-rechner/agent-contract` |
 | `agrar/ernte-annahme-abrechnung` | Ernte annahme abrechnung | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte-annahme-abrechnung/agent-contract` |
 | `agrar/ernte-annahme-energiemais-liste` | Ernte Annahme Energiemais | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte-annahme-energiemais-liste/agent-contract` |
+| `agrar/ernte-annahme-erfassung` | Ernte-Annahme-Erfassung | agrar | mittel | — | `GET /api/v1/masks/agrar/ernte-annahme-erfassung/agent-contract` |
 | `agrar/ernte-kampagne-erfassung` | Ernte kampagne erfassung | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte-kampagne-erfassung/agent-contract` |
 | `agrar/ernte-liste` | Ernte | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte-liste/agent-contract` |
 | `agrar/ernte-qualitaetsfreigabe` | Ernte qualitaetsfreigabe | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte-qualitaetsfreigabe/agent-contract` |
 | `agrar/ernte/kampagnenabschluss` | Kampagnenabschluss | agrar | niedrig | — | `GET /api/v1/masks/agrar/ernte/kampagnenabschluss/agent-contract` |
+| `agrar/erntefenster-konfig` | Erntefenster-Konfiguration | agrar | niedrig | — | `GET /api/v1/masks/agrar/erntefenster-konfig/agent-contract` |
 | `agrar/feed-advice` | Fuetterungsberatung | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-advice/agent-contract` |
 | `agrar/feed-controlling` | Fuetterungscontrolling | agrar | niedrig | — | `GET /api/v1/masks/agrar/feed-controlling/agent-contract` |
 | `agrar/feed-readiness` | Futterversorgung | agrar | mittel | — | `GET /api/v1/masks/agrar/feed-readiness/agent-contract` |
@@ -98,10 +124,13 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/kontrakte/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/kontrakte/formular/agent-contract` |
 | `agrar/kultur-stamm-liste` | Kulturen | agrar | niedrig | — | `GET /api/v1/masks/agrar/kultur-stamm-liste/agent-contract` |
 | `agrar/kulturpflanzen-liste` | Kulturpflanzen | agrar | niedrig | — | `GET /api/v1/masks/agrar/kulturpflanzen-liste/agent-contract` |
+| `agrar/kunden-schlagkartei` | Kundenschlagkartei | agrar | mittel | — | `GET /api/v1/masks/agrar/kunden-schlagkartei/agent-contract` |
 | `agrar/lieferschein-erstellen` | Lieferschein erstellen | agrar | niedrig | — | `GET /api/v1/masks/agrar/lieferschein-erstellen/agent-contract` |
 | `agrar/maschinen-auslastung-liste` | Maschinenauslastung | agrar | niedrig | — | `GET /api/v1/masks/agrar/maschinen-auslastung-liste/agent-contract` |
 | `agrar/maschinen/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/maschinen/formular/agent-contract` |
 | `agrar/maschinen/wartung` | Wartung | agrar | niedrig | — | `GET /api/v1/masks/agrar/maschinen/wartung/agent-contract` |
+| `agrar/milchvieh-crosssell` | Milchvieh Cross-Sell | agrar | niedrig | — | `GET /api/v1/masks/agrar/milchvieh-crosssell/agent-contract` |
+| `agrar/milchvieh-karte` | Milchvieh-Karte | agrar | niedrig | — | `GET /api/v1/masks/agrar/milchvieh-karte/agent-contract` |
 | `agrar/nachhaltigkeit-eudr-liste` | EUDR Nachhaltigkeit | agrar | niedrig | — | `GET /api/v1/masks/agrar/nachhaltigkeit-eudr-liste/agent-contract` |
 | `agrar/nawaro-erntemeldung` | Nawaro erntemeldung | agrar | niedrig | — | `GET /api/v1/masks/agrar/nawaro-erntemeldung/agent-contract` |
 | `agrar/nawaro-kaskade` | Nawaro kaskade | agrar | niedrig | — | `GET /api/v1/masks/agrar/nawaro-kaskade/agent-contract` |
@@ -127,6 +156,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/ration` | Rationsfreigabe | agrar | hoch | — | `GET /api/v1/masks/agrar/ration/agent-contract` |
 | `agrar/rations-lifecycle` | Rationen und Freigaben | agrar | niedrig | — | `GET /api/v1/masks/agrar/rations-lifecycle/agent-contract` |
 | `agrar/rechnungen-erstellen` | Rechnungen erstellen | agrar | niedrig | — | `GET /api/v1/masks/agrar/rechnungen-erstellen/agent-contract` |
+| `agrar/rohwarengruppen` | Rohwarengruppe anlegen | agrar | niedrig | — | `GET /api/v1/masks/agrar/rohwarengruppen/agent-contract` |
 | `agrar/saatgut` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/agent-contract` |
 | `agrar/saatgut-bestellungen-liste` | Saatgut-Bestellungen | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut-bestellungen-liste/agent-contract` |
 | `agrar/saatgut-liste` | Saatgut | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut-liste/agent-contract` |
@@ -138,6 +168,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/saatgut/sorte` | Sorte | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/sorte/agent-contract` |
 | `agrar/saatgut/vermehrung` | Vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatgut/vermehrung/agent-contract` |
 | `agrar/saatzucht-partien-liste` | Saatzucht-Partien | agrar | niedrig | — | `GET /api/v1/masks/agrar/saatzucht-partien-liste/agent-contract` |
+| `agrar/sammelabrechnung` | Rohware-Sammelabrechnung | agrar | niedrig | — | `GET /api/v1/masks/agrar/sammelabrechnung/agent-contract` |
 | `agrar/schlaege-karte-liste` | Schlagkarte | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-karte-liste/agent-contract` |
 | `agrar/schlaege-kulturhistorie-liste` | Kulturhistorie | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-kulturhistorie-liste/agent-contract` |
 | `agrar/schlaege-liste` | Schlaege | agrar | niedrig | — | `GET /api/v1/masks/agrar/schlaege-liste/agent-contract` |
@@ -157,24 +188,29 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `agrar/sorten-vermehrung` | Sorten vermehrung | agrar | niedrig | — | `GET /api/v1/masks/agrar/sorten-vermehrung/agent-contract` |
 | `agrar/trocknungsregeln` | Trocknungsregeln | agrar | niedrig | — | `GET /api/v1/masks/agrar/trocknungsregeln/agent-contract` |
 | `agrar/umwelt/nitrat` | Nitrat | agrar | niedrig | — | `GET /api/v1/masks/agrar/umwelt/nitrat/agent-contract` |
+| `agrar/vermehrungsvertraege` | Vermehrungsvertrag anlegen | agrar | niedrig | — | `GET /api/v1/masks/agrar/vermehrungsvertraege/agent-contract` |
 | `agrar/vermehrungsvertraege-liste` | Vermehrungsvertraege | agrar | niedrig | — | `GET /api/v1/masks/agrar/vermehrungsvertraege-liste/agent-contract` |
 | `agrar/vertraege/formular` | Formular | agrar | niedrig | — | `GET /api/v1/masks/agrar/vertraege/formular/agent-contract` |
 | `agrar/vertrag-kontingente-liste` | Vertrag-Kontingente | agrar | niedrig | — | `GET /api/v1/masks/agrar/vertrag-kontingente-liste/agent-contract` |
 | `agrar/wetter` | Wetter | agrar | niedrig | — | `GET /api/v1/masks/agrar/wetter/agent-contract` |
 | `agrar/wetterwarnung` | Wetterwarnungen | agrar | niedrig | — | `GET /api/v1/masks/agrar/wetterwarnung/agent-contract` |
 | `agrar/wiegeschein-detail` | Wiegeschein detail | agrar | niedrig | — | `GET /api/v1/masks/agrar/wiegeschein-detail/agent-contract` |
+| `agrar/zinsabrechnung` | Zinsabrechnung | agrar | niedrig | — | `GET /api/v1/masks/agrar/zinsabrechnung/agent-contract` |
 | `agribusiness/farmers` | Landwirte | agrar | niedrig | — | `GET /api/v1/masks/agribusiness/farmers/agent-contract` |
+| `agribusiness/field-service-tasks/neu` | Field-Service Aufgabe neu | agribusiness | niedrig | — | `GET /api/v1/masks/agribusiness/field-service-tasks/neu/agent-contract` |
 | `aktien/dividenden` | Dividenden | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/dividenden/agent-contract` |
 | `aktien/hauptversammlung` | Hauptversammlung | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/hauptversammlung/agent-contract` |
 | `aktien/mitglieder` | Mitglieder | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/mitglieder/agent-contract` |
 | `aktien/stimmrechte` | Stimmrechte | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/stimmrechte/agent-contract` |
 | `aktien/zeichnungen` | Zeichnungen | genossenschaft | niedrig | — | `GET /api/v1/masks/aktien/zeichnungen/agent-contract` |
 | `analysis/what-if-simulator` | What if simulator | reporting | niedrig | — | `GET /api/v1/masks/analysis/what-if-simulator/agent-contract` |
+| `annahme/abrechnung` | Annahme-Abrechnung | agrar | mittel | — | `GET /api/v1/masks/annahme/abrechnung/agent-contract` |
 | `annahme/erfassung` | Erfassung | agrar | niedrig | — | `GET /api/v1/masks/annahme/erfassung/agent-contract` |
 | `annahme/labor` | Laborauftrag | agrar | niedrig | — | `GET /api/v1/masks/annahme/labor/agent-contract` |
 | `annahme/lkw-registrierung` | LKW-Registrierung | agrar | niedrig | — | `GET /api/v1/masks/annahme/lkw-registrierung/agent-contract` |
 | `annahme/muster` | Muster | agrar | niedrig | — | `GET /api/v1/masks/annahme/muster/agent-contract` |
 | `annahme/qualitaets-check` | Qualitätsprüfung | agrar | niedrig | — | `GET /api/v1/masks/annahme/qualitaets-check/agent-contract` |
+| `annahme/rohware` | Rohware-Annahme | agrar | niedrig | — | `GET /api/v1/masks/annahme/rohware/agent-contract` |
 | `annahme/rohwaren-annahme` | Rohwaren annahme | agrar | niedrig | — | `GET /api/v1/masks/annahme/rohwaren-annahme/agent-contract` |
 | `annahme/silo-zuweisung` | Silo zuweisung | agrar | niedrig | — | `GET /api/v1/masks/annahme/silo-zuweisung/agent-contract` |
 | `annahme/trocknung` | Trocknung | agrar | niedrig | — | `GET /api/v1/masks/annahme/trocknung/agent-contract` |
@@ -415,7 +451,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `einkauf/anfrage-erstellen` | Anfrage erstellen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfrage-erstellen/agent-contract` |
 | `einkauf/anfragen` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen/agent-contract` |
 | `einkauf/anfragen-create-liste` | Anfragen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/anfragen-create-liste/agent-contract` |
-| `einkauf/angebot` | Lieferantenangebot | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
+| `einkauf/angebot` | Lieferantenangebot | einkauf | mittel | — | `GET /api/v1/masks/einkauf/angebot/agent-contract` |
 | `einkauf/angebot-erfassen` | Angebot erfassen | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebot-erfassen/agent-contract` |
 | `einkauf/angebote` | Angebote | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebote/agent-contract` |
 | `einkauf/angebote-vergleich-liste` | Angebotsvergleich | einkauf | niedrig | — | `GET /api/v1/masks/einkauf/angebote-vergleich-liste/agent-contract` |
@@ -528,6 +564,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `fuhrpark/auswertung-kosten` | Fuhrpark-Kostenauswertung | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/auswertung-kosten/agent-contract` |
 | `fuhrpark/auswertungen-menu` | Fuhrpark-Auswertungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/auswertungen-menu/agent-contract` |
 | `fuhrpark/fahrzeug-stamm` | Fahrzeug-Stamm | logistics | hoch | — | `GET /api/v1/masks/fuhrpark/fahrzeug-stamm/agent-contract` |
+| `fuhrpark/fahrzeug-vertiefung` | Fahrzeug-Vertiefung | logistik | mittel | — | `GET /api/v1/masks/fuhrpark/fahrzeug-vertiefung/agent-contract` |
 | `fuhrpark/fahrzeuge` | Fahrzeuge | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge/agent-contract` |
 | `fuhrpark/fahrzeuge-liste` | Fuhrpark | logistik | niedrig | — | `GET /api/v1/masks/fuhrpark/fahrzeuge-liste/agent-contract` |
 | `fuhrpark/rechnungen` | Fuhrpark-Rechnungen | logistics | niedrig | — | `GET /api/v1/masks/fuhrpark/rechnungen/agent-contract` |
@@ -564,6 +601,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `inventory-reports` | Inventory reports | workspace | niedrig | — | `GET /api/v1/masks/inventory-reports/agent-contract` |
 | `inventory/epcis` | Index | inventory | niedrig | — | `GET /api/v1/masks/inventory/epcis/agent-contract` |
 | `kasse/tagesabschluss` | Tagesabschluss | kasse | niedrig | — | `GET /api/v1/masks/kasse/tagesabschluss/agent-contract` |
+| `konditionen/konditionssystem` | Konditionssystem | agrar | mittel | — | `GET /api/v1/masks/konditionen/konditionssystem/agent-contract` |
 | `kontrakt-liste/abrechnung` | Abrechnung | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/abrechnung/agent-contract` |
 | `kontrakt-liste/alarme` | Kontrakt-Alarme | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/alarme/agent-contract` |
 | `kontrakt-liste/engagement-artikel` | Engagement je Artikel | agrar | niedrig | — | `GET /api/v1/masks/kontrakt-liste/engagement-artikel/agent-contract` |
@@ -578,7 +616,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `kontrakte/FrmKontraktProtokoll` | Kontraktprotokoll | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/FrmKontraktProtokoll/agent-contract` |
 | `kontrakte/kontraktklassen` | Kontraktklassen | agrar | niedrig | — | `GET /api/v1/masks/kontrakte/kontraktklassen/agent-contract` |
 | `kontrakte/kontraktklassen-liste` | Kontraktklassen | agrar | niedrig | — | `GET /api/v1/masks/kontrakte/kontraktklassen-liste/agent-contract` |
-| `kontrakte/mengenzeitraeume` | Kontrakt wählen | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/mengenzeitraeume/agent-contract` |
+| `kontrakte/mengenzeitraeume` | Kontrakt-Mengenzeiträume und Zu-/Abschläge | kontrakte | mittel | — | `GET /api/v1/masks/kontrakte/mengenzeitraeume/agent-contract` |
 | `kontrakte/positionen` | KontraktPositionsmonitor | kontrakte | niedrig | — | `GET /api/v1/masks/kontrakte/positionen/agent-contract` |
 | `labor/proben-liste` | Laborproben | qualitaet | niedrig | — | `GET /api/v1/masks/labor/proben-liste/agent-contract` |
 | `lager/article-stock` | Artikelbestand | lager | niedrig | `inventory-to-settlement` | `GET /api/v1/masks/lager/article-stock/agent-contract` |
@@ -599,6 +637,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `lager/lagerplaetze` | Lagerplaetze | lager | niedrig | — | `GET /api/v1/masks/lager/lagerplaetze/agent-contract` |
 | `lager/leitstand` | Lager-Leitstand | lager | niedrig | — | `GET /api/v1/masks/lager/leitstand/agent-contract` |
 | `lager/massebilanz` | Neue Massebilanz anlegen | lager | niedrig | — | `GET /api/v1/masks/lager/massebilanz/agent-contract` |
+| `lager/materialfluss` | Agrar-Materialfluss | lager | mittel | — | `GET /api/v1/masks/lager/materialfluss/agent-contract` |
 | `lager/materialfluss-visualisierung` | Materialfluss visualisierung | lager | niedrig | — | `GET /api/v1/masks/lager/materialfluss-visualisierung/agent-contract` |
 | `lager/partiestamm-liste` | Partiestamm | lager | niedrig | — | `GET /api/v1/masks/lager/partiestamm-liste/agent-contract` |
 | `lager/permanente-inventur` | Abschlüsse | lager | niedrig | — | `GET /api/v1/masks/lager/permanente-inventur/agent-contract` |
@@ -664,7 +703,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `pos/tse-journal` | Tse journal | pos | niedrig | — | `GET /api/v1/masks/pos/tse-journal/agent-contract` |
 | `pos/uebernahme-kasse` | Uebernahme kasse | pos | niedrig | — | `GET /api/v1/masks/pos/uebernahme-kasse/agent-contract` |
 | `preise/historie` | Historie | preise | niedrig | — | `GET /api/v1/masks/preise/historie/agent-contract` |
-| `preise/individualpreise` | Neuer {label} [PRI{preisTyp === 'EK' ? 'E' : ''}] | preise | niedrig | — | `GET /api/v1/masks/preise/individualpreise/agent-contract` |
+| `preise/individualpreise` | Neuer Individualpreis [PRI] | preise | niedrig | — | `GET /api/v1/masks/preise/individualpreise/agent-contract` |
 | `preise/konditionen` | Konditionen | preise | niedrig | — | `GET /api/v1/masks/preise/konditionen/agent-contract` |
 | `preise/rabattgruppen` | Neue Rabattgruppe [RAG] | preise | niedrig | — | `GET /api/v1/masks/preise/rabattgruppen/agent-contract` |
 | `preise/zu-abschlaggruppen` | Neue Zu-/Abschlaggruppe [ZAGR] | preise | niedrig | — | `GET /api/v1/masks/preise/zu-abschlaggruppen/agent-contract` |
@@ -731,6 +770,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `strecke/speditionen-fracht-preise` | Speditionen fracht preise | strecke | niedrig | — | `GET /api/v1/masks/strecke/speditionen-fracht-preise/agent-contract` |
 | `strecke/streckengeschaeft` | Streckengeschäft | logistics | niedrig | — | `GET /api/v1/masks/strecke/streckengeschaeft/agent-contract` |
 | `strecke/vorlaeufig` | Vorläufige Streckengeschäfte | logistics | niedrig | — | `GET /api/v1/masks/strecke/vorlaeufig/agent-contract` |
+| `studio/workspace-composition-preview` | Workspace-Composition Preview | studio | niedrig | — | `GET /api/v1/masks/studio/workspace-composition-preview/agent-contract` |
 | `subventionen/dashboard` | Foerder-Dashboard | foerderung | niedrig | — | `GET /api/v1/masks/subventionen/dashboard/agent-contract` |
 | `system/live-monitor` | Live monitor | system | niedrig | — | `GET /api/v1/masks/system/live-monitor/agent-contract` |
 | `tankstelle/adapter-inbox` | Tankanlagen-Eingang | agrar | niedrig | — | `GET /api/v1/masks/tankstelle/adapter-inbox/agent-contract` |
@@ -802,9 +842,426 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ## Domäne: admin
 
-### `admin/agenten-integration` — Agenten integration
+### `admin-suite` — VALEO Admin Suite
 
-**Zweck:** Stamm- und Fachmaske fuer Agenten integration (admin/agenten-integration).
+**Zweck:** Go-Live-Readiness und Bereichsnachweise der Admin Suite beobachten (dieselbe Datenquelle wie die Legacy-Readiness-Karten).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin-suite/readiness`
+- `evidence` → `/api/v1/admin-suite/readiness/evidence`
+
+**Beispiel-Prompts:**
+
+- Wie hoch ist der Go-Live-Readiness-Score?
+- Welche Evidenzbereiche sind blockiert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `admin-suite/compliance` — Compliance Evidence
+
+**Zweck:** Compliance-Evidenzmetadaten ohne externe Live-Erfolgsannahmen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/compliance/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/compliance/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/compliance/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__compliance/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/compliance`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von Compliance Evidence.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/connectoren` — Auto-Capture-Connectoren
+
+**Zweck:** STT- und IMAP-Connectoren pro Mandant konfigurieren, testen und IMAP abrufen; Secrets werden nie ausgegeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/connectoren/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/connectoren/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/connectoren/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__connectoren/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin-suite/capture-connectors/overview`
+
+**Beispiel-Prompts:**
+
+- Ist der STT-Server konfiguriert?
+- Teste das IMAP-Postfach.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `stt_speichern` | STT speichern | moderate | nein | `/api/v1/admin-suite/capture-connectors/stt` |
+| `stt_testen` | STT testen | safe | nein | `/api/v1/admin-suite/capture-connectors/stt/test` |
+| `imap_speichern` | IMAP speichern | moderate | nein | `/api/v1/admin-suite/capture-connectors/imap` |
+| `imap_testen` | IMAP testen | safe | nein | `/api/v1/admin-suite/capture-connectors/imap/test` |
+| `imap_abrufen` | IMAP jetzt abrufen | moderate | nein | `/api/v1/admin-suite/capture-connectors/imap/poll` |
+
+---
+
+### `admin-suite/connectors` — Connector Hub
+
+**Zweck:** Redigierte Connector-Metadaten ohne Secrets oder Live-Probes.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/connectors/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/connectors/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/connectors/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__connectors/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/connectors`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von Connector Hub.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/devices` — Hardware Center
+
+**Zweck:** Hardware-Capabilities und Registry-Status der Admin Suite.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/devices/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/devices/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/devices/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__devices/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/devices`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von Hardware Center.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/diagnostics` — Diagnosepaket
+
+**Zweck:** Diagnose-Manifest ohne automatische Datensammlung.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/diagnostics/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/diagnostics/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/diagnostics/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__diagnostics/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/diagnostics`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von Diagnosepaket.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/ki-anbieter` — KI-Anbieter (NeuroAI)
+
+**Zweck:** LLM-Gateway (Anthropic / OpenAI-kompatibel / Ollama) konfigurieren und testen; API-Keys werden nie ausgegeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/ki-anbieter/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/ki-anbieter/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/ki-anbieter/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__ki-anbieter/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin-suite/llm-gateway`
+
+**Beispiel-Prompts:**
+
+- Welcher KI-Anbieter ist aktiv?
+- Teste die LLM-Verbindung.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `speichern` | Speichern | moderate | nein | `/api/v1/admin-suite/llm-gateway` |
+| `testen` | Verbindung testen | safe | nein | `/api/v1/admin-suite/llm-gateway/test` |
+
+---
+
+### `admin-suite/migration` — Migration Cockpit
+
+**Zweck:** Import-Profile und Dry-Run-Batches der Admin Suite beobachten und freigeben; Produktivimport bleibt gesperrt bis Reconciliation abgenommen ist.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/migration/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/migration/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/migration/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__migration/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin-suite/migration/overview`
+- `profiles` → `/api/v1/admin-suite/migration/profiles`
+- `batches` → `/api/v1/admin-suite/migration/batches`
+
+**Beispiel-Prompts:**
+
+- Welche Migrationsprofile sind verfuegbar?
+- Lege einen Dry-Run-Batch fuer Profil l3 an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `dry_run_anlegen` | Dry-Run anlegen | safe | nein | `/api/v1/admin-suite/migration/batches` |
+
+---
+
+### `admin-suite/operations` — Operations Center
+
+**Zweck:** Operations-Evidenz ohne Live-Probes.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/operations/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/operations/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/operations/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__operations/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/operations`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von Operations Center.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/pos-fiscalization` — POS-Fiskalisierung
+
+**Zweck:** Mandantenkonfiguration der POS-Fiskalisierung speichern und Readiness (TSE, DSFinV-K, optionale Produkte) beobachten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/pos-fiscalization/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/pos-fiscalization/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/pos-fiscalization/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__pos-fiscalization/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/pos/fiscalization/overview`
+- `products` → `/api/v1/pos/fiscalization/products`
+
+**Beispiel-Prompts:**
+
+- Ist die POS-Fiskalisierung bereit?
+- Speichere die TSE-Konfiguration.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `speichern` | Konfiguration speichern | moderate | nein | `/api/v1/pos/fiscalization/config` |
+
+---
+
+### `admin-suite/security` — Security und Agent Governance
+
+**Zweck:** Bestehende Menschen- und Agentenrollen einsehen und effektive Rechte serverseitig simulieren (SoD-Warnungen), ohne Rechte zu veraendern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/security/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/security/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/security/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__security/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin-suite/security/overview`
+- `roles` → `/api/v1/admin-suite/security/roles`
+- `agent_roles` → `/api/v1/admin-suite/security/agent-roles`
+
+**Beispiel-Prompts:**
+
+- Welche Agentenrollen gibt es?
+- Simuliere effektive Rechte fuer admin und agent_readonly.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `simulieren` | Rechte simulieren | safe | nein | `/api/v1/admin-suite/security/simulate` |
+
+---
+
+### `admin-suite/setup` — Ersteinrichtungs-Assistent
+
+**Zweck:** Setup-Schritte explizit pruefen und dokumentiert abschliessen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/setup/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/setup/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/setup/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__setup/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/setup/steps`
+
+**Beispiel-Prompts:**
+
+- Welche Setup-Schritte sind noch offen?
+- Schließe Setup-Schritt {entity_id} ab.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin-suite/system-status` — System Status
+
+**Zweck:** Runtime-Probe-Metadaten der Admin Suite.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin-suite/system-status/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin-suite/system-status/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin-suite/system-status/readiness` |
+| Rollout-Route | `/mask-rollout/admin-suite__system-status/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin-suite/system-status`
+
+**Beispiel-Prompts:**
+
+- Zeig die Eintraege von System Status.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin/GapPipelineConsole` — GAP Pipeline Console
+
+**Zweck:** GAP-Pipeline starten und Status einsehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/GapPipelineConsole/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/GapPipelineConsole/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/GapPipelineConsole/readiness` |
+| Rollout-Route | `/mask-rollout/admin__GapPipelineConsole/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/gap/pipeline/status`
+
+**Beispiel-Prompts:**
+
+- Wie ist der GAP-Pipeline-Status?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `run_pipeline` | Pipeline starten | moderate | nein | `/api/v1/gap/pipeline/run-year` |
+| `import_pipeline` | Import | moderate | nein | `/api/v1/gap/pipeline/import` |
+
+---
+
+### `admin/agenten-integration` — Agenten-Integration
+
+**Zweck:** Agenten-Integrationsleitstand bedienen.
 
 | | |
 |---|---|
@@ -814,19 +1271,15 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | Rollout-Route | `/mask-rollout/admin__agenten-integration/:entityId` |
 | Adapter | `native` (temporary=nein) |
 
-**Data Sources:**
-
-- `entity` → `/api/v1/agent/integrations/providers/superglue/tenants/{entity_id}/admin-state`
-
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Agenten integration {entity_id}.
+- Zeig den Agenten-Integrationsstand.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -1078,9 +1531,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/command-monitor` — Command monitor
+### `admin/command-monitor` — Command Monitor
 
-**Zweck:** Stamm- und Fachmaske fuer Command monitor (admin/command-monitor).
+**Zweck:** Idempotente Process-Kernel-Commands und Replay-Schutz beobachten (dieselbe Datenquelle wie das Legacy-IdempotencyMonitoringPanel).
 
 | | |
 |---|---|
@@ -1092,17 +1545,21 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/articles/{entity_id}`
+- `entity` → `/api/v1/process/actions/idempotency/overview`
+- `commands` → `/api/v1/process/actions/idempotency/commands`
+- `aggregates` → `/api/v1/process/actions/idempotency/aggregates`
+- `lookup_paths` → `/api/v1/process/actions/idempotency/lookup-paths`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Command monitor {entity_id}.
+- Wie hoch ist die Idempotenz-Abdeckung?
+- Welche Commands und Aggregate werden beobachtet?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -1130,6 +1587,34 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `escalate` | Vorfall eskalieren | moderate | nein | `—` |
 | `resolve` | Vorfall erledigen | moderate | nein | `—` |
 | `retry` | Erneut versuchen | moderate | nein | `—` |
+
+---
+
+### `admin/control-center/agent-ops` — Admin Kontrollzentrum: Agent Ops
+
+**Zweck:** Agent-Ops-Zustand und Persistenznachweis einsehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/control-center/agent-ops/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/control-center/agent-ops/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/control-center/agent-ops/readiness` |
+| Rollout-Route | `/mask-rollout/admin__control-center__agent-ops/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agents/neuroassist/ops/persistence`
+
+**Beispiel-Prompts:**
+
+- Ist Agent Ops persistiert?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -1226,6 +1711,41 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige offene Security.
 - Was ist in Security faellig?
+
+---
+
+### `admin/control-center/superglue` — Admin Kontrollzentrum: Superglue
+
+**Zweck:** Superglue-Connector- und Policy-Overrides steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/control-center/superglue/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/control-center/superglue/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/control-center/superglue/readiness` |
+| Rollout-Route | `/mask-rollout/admin__control-center__superglue/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agent/integrations/providers/superglue/tenants/default/admin-state`
+- `wizard` → `/api/v1/agent/integrations/providers/superglue/tenants/default/wizard`
+
+**Beispiel-Prompts:**
+
+- Zeig den Superglue-Status.
+- Speichere einen Connector-Override.
+
+**Sensible Felder:** `require_tenant_secrets, system_url`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `connector_override` | Connector Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/connectors/{connector_key}/config` |
+| `policy_override` | Policy Override speichern | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/policy` |
+| `wizard_apply` | Wizard-Schritt anwenden | moderate | nein | `/api/v1/agent/integrations/providers/superglue/tenants/default/wizard/apply` |
 
 ---
 
@@ -1346,6 +1866,36 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige offene Erntepeak stabilitaet.
 - Was ist in Erntepeak stabilitaet faellig?
+
+---
+
+### `admin/externe-gates` — Externe Gates
+
+**Zweck:** Status externer Integrationssysteme beobachten (dieselbe Datenquelle wie die Legacy-Gate-Karten).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/externe-gates/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/externe-gates/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/externe-gates/readiness` |
+| Rollout-Route | `/mask-rollout/admin__externe-gates/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/external-gates/overview`
+- `gates` → `/api/v1/external-gates/items`
+
+**Beispiel-Prompts:**
+
+- Welche externen Gates haben Handlungsbedarf?
+- Ist DATEV OK?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -1493,6 +2043,109 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `admin/postfaecher-anmeldung-rueckruf` — Postfaecher Anmeldung Rueckruf
+
+**Zweck:** Postfach-OAuth-Anmeldung abschliessen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/postfaecher-anmeldung-rueckruf/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/postfaecher-anmeldung-rueckruf/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/postfaecher-anmeldung-rueckruf/readiness` |
+| Rollout-Route | `/mask-rollout/admin__postfaecher-anmeldung-rueckruf/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Schliesse die Postfach-Anmeldung ab.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `callback` | Anmeldung abschliessen | moderate | nein | `/api/v1/admin/postfaecher/anmeldung/abschluss` |
+
+---
+
+### `admin/screen-studio` — Screen Studio
+
+**Zweck:** ScreenDefinitions im Studio bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/screen-studio/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/screen-studio/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/screen-studio/readiness` |
+| Rollout-Route | `/mask-rollout/admin__screen-studio/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Oeffne das Screen Studio.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `admin/setup` — Admin Setup
+
+**Zweck:** Admin-Setup-Schritte einsehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/setup/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/setup/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/setup/readiness` |
+| Rollout-Route | `/mask-rollout/admin__setup/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Welcher Setup-Schritt ist offen?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `admin/setup/dms-integration` — Setup DMS-Integration
+
+**Zweck:** DMS-Integration im Setup steuern.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/setup/dms-integration/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/setup/dms-integration/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/setup/dms-integration/readiness` |
+| Rollout-Route | `/mask-rollout/admin__setup__dms-integration/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin/dms/status`
+
+**Beispiel-Prompts:**
+
+- Ist DMS verbunden?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `bootstrap` | DMS bootstrap | moderate | nein | `/api/v1/admin/dms/bootstrap` |
+| `test` | Verbindung testen | safe | nein | `/api/v1/admin/dms/test` |
+
+---
+
 ### `admin/system-einstellungen` — System einstellungen
 
 **Zweck:** Stamm- und Fachmaske fuer System einstellungen (admin/system-einstellungen).
@@ -1597,6 +2250,63 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `admin/voice-channel` — Voice-Kanal
+
+**Zweck:** Voice-Kanal Konfiguration und Test.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/voice-channel/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/voice-channel/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/voice-channel/readiness` |
+| Rollout-Route | `/mask-rollout/admin__voice-channel/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Beispiel-Prompts:**
+
+- Teste den Voice-Kanal.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `admin/vordruck-editor` — Vordruck-Editor
+
+**Zweck:** Beleg-Vordrucke verwalten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/vordruck-editor/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/vordruck-editor/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/vordruck-editor/readiness` |
+| Rollout-Route | `/mask-rollout/admin__vordruck-editor/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/admin/vordrucke`
+
+**Beispiel-Prompts:**
+
+- Welche Vordrucke gibt es?
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+| `anlegen` | Vordruck anlegen | moderate | nein | `/api/v1/admin/vordrucke` |
+| `speichern` | Vordruck speichern | moderate | nein | `/api/v1/admin/vordrucke/{entity_id}` |
+| `duplizieren` | Duplizieren | safe | nein | `/api/v1/admin/vordrucke/{entity_id}/duplizieren` |
+| `loeschen` | Loeschen | critical | ja | `/api/v1/admin/vordrucke/{entity_id}` |
+| `seed_standard` | Standard-Vordrucke seeden | moderate | nein | `/api/v1/admin/vordrucke/seed-standard` |
 
 ---
 
@@ -1724,6 +2434,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `bearbeiten` | Bearbeiten | safe | nein | `—` |
+
+---
+
+### `agrar/annahmen-qualitaet-nachtrag` — Qualitaets-Nachtrag
+
+**Zweck:** Laborwerte aus dem Laborbuch auf Annahmen ohne Qualitaetsprotokoll nachtragen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/annahmen-qualitaet-nachtrag/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/annahmen-qualitaet-nachtrag/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/annahmen-qualitaet-nachtrag/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__annahmen-qualitaet-nachtrag/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/harvest-acceptance/?missing_quality=true`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Annahmen haben noch keine Qualitaetswerte?
+- Trage Qualitaet fuer Annahme {entity_id} nach.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `batch_nachtragen` | Batch speichern | safe | nein | `/api/v1/agrar/harvest-acceptance/quality-batch` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -2032,6 +2782,47 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/ernte-annahme-erfassung` — Ernte-Annahme-Erfassung
+
+**Zweck:** Ernte-Annahmen anlegen, speichern, berechnen und freigeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/ernte-annahme-erfassung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/ernte-annahme-erfassung/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/ernte-annahme-erfassung/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__ernte-annahme-erfassung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege eine Ernte-Annahme an.
+- Berechne Annahme {entity_id}.
+
+**Sensible Felder:** `customer_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Annahme anlegen | moderate | nein | `/api/v1/agrar/harvest-acceptance` |
+| `speichern` | Annahme speichern | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}` |
+| `berechnen` | Berechnen | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}/calculate` |
+| `freigeben` | Freigeben | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}/release` |
+| `loeschen` | Loeschen | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}` |
+
+---
+
 ### `agrar/ernte-kampagne-erfassung` — Ernte kampagne erfassung
 
 **Zweck:** Ernte kampagne erfassung mandantensicher als Kontroll-Worklist abarbeiten.
@@ -2171,6 +2962,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige offene Kampagnenabschluss.
 - Was ist in Kampagnenabschluss faellig?
+
+---
+
+### `agrar/erntefenster-konfig` — Erntefenster-Konfiguration
+
+**Zweck:** Erntefenster-Kampagnen aus Vorlagen anlegen, Settlements pruefen und Alt-Daten zuordnen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/erntefenster-konfig/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/erntefenster-konfig/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/erntefenster-konfig/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__erntefenster-konfig/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/admin/erntefenster-campaigns`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege eine Erntefenster-Kampagne an.
+- Ordne Alt-Settlements der Kampagne {entity_id} zu.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Kampagne aus Vorlage | safe | nein | `/api/v1/admin/erntefenster-from-template` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -3019,6 +3850,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/kunden-schlagkartei` — Kundenschlagkartei
+
+**Zweck:** Kundenschlaege und Massnahmen einsehen; Lohndienst und Ankaufsangebote ausloesen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/kunden-schlagkartei/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/kunden-schlagkartei/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/kunden-schlagkartei/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__kunden-schlagkartei/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege einen Lohnspritz-Auftrag an.
+- Erstelle Ankaufsangebote fuer die Schlagkartei.
+
+**Sensible Felder:** `kunden_nr`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `lohn_spritz` | Lohnspritz-Auftrag | moderate | nein | `/api/v1/portal/lohndienste` |
+| `mahl_misch` | Mahl+Misch-Termin | moderate | nein | `/api/v1/portal/lohndienste` |
+| `ankaufsangebot` | Ankaufsangebot erstellen | moderate | nein | `/api/v1/portal/empfehlungen/generieren/schlagkartei` |
+
+---
+
 ### `agrar/lieferschein-erstellen` — Lieferschein erstellen
 
 **Zweck:** Stamm- und Fachmaske fuer Lieferschein erstellen (agrar/lieferschein-erstellen).
@@ -3164,6 +4034,85 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Zeige offene Wartung.
 - Was ist in Wartung faellig?
+
+---
+
+### `agrar/milchvieh-crosssell` — Milchvieh Cross-Sell
+
+**Zweck:** Landhandel-Umsatzpotenzial, Kraftfutter und Eutergesundheit/Hygiene je Milchvieh-Kunde auswerten (Read-Model).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/milchvieh-crosssell/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/milchvieh-crosssell/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/milchvieh-crosssell/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__milchvieh-crosssell/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/milchvieh-crosssell/summary`
+- `kunden` → `/api/v1/agrar/milchvieh-crosssell`
+- `produktgruppen` → `/api/v1/agrar/milchvieh-crosssell/produktgruppen`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Milchvieh-Kunden haben hohen Hygiene-Bedarf?
+- Zeig das Cross-Sell-Potenzial nach Produktgruppe.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+### `agrar/milchvieh-karte` — Milchvieh-Karte
+
+**Zweck:** Milchvieh-Betriebe geografisch nach Hygiene- und Cross-Sell-Signalen einsehen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/milchvieh-karte/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/milchvieh-karte/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/milchvieh-karte/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__milchvieh-karte/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agrar/milchvieh-crosssell/map`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Zeig die Milchvieh-Karte mit Hygiene-Filter.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -4090,6 +5039,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/rohwarengruppen` — Rohwarengruppe anlegen
+
+**Zweck:** Rohwarengruppe als Stammblatt pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/rohwarengruppen/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/rohwarengruppen/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/rohwarengruppen/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__rohwarengruppen/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/rohware/gruppen/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Oeffne Rohwarengruppen.
+- Lege eine Rohwarengruppe an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
 ### `agrar/saatgut` — Saatgut
 
 **Zweck:** Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung.
@@ -4502,6 +5490,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `agrar/sammelabrechnung` — Rohware-Sammelabrechnung
+
+**Zweck:** Mehrere Ernteannahmen zu einer Sammelabrechnung zusammenfassen, berechnen und buchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/sammelabrechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/sammelabrechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/sammelabrechnung/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__sammelabrechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/agrar/sammelabrechnung`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege eine Sammelabrechnung an.
+- Berechne Sammelabrechnung {entity_id}.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Anlegen | safe | nein | `/api/v1/agrar/sammelabrechnung` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
@@ -5196,6 +6224,45 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/vermehrungsvertraege` — Vermehrungsvertrag anlegen
+
+**Zweck:** Vermehrungsvertrag als Stammblatt pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/vermehrungsvertraege/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/vermehrungsvertraege/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/vermehrungsvertraege/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__vermehrungsvertraege/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/saatzucht/vermehrungsvertraege/{entity_id}`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Oeffne Vermehrungsvertraege.
+- Lege einen Vermehrungsvertrag an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `—` |
+
+---
+
 ### `agrar/vermehrungsvertraege-liste` — Vermehrungsvertraege
 
 **Zweck:** Vermehrungsvertraege: Eintraege finden und Details oeffnen.
@@ -5422,6 +6489,46 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `agrar/zinsabrechnung` — Zinsabrechnung
+
+**Zweck:** Zinsen auf Rohware-Einlagerungskontrakte berechnen, buchen und stornieren.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agrar/zinsabrechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agrar/zinsabrechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/agrar/zinsabrechnung/readiness` |
+| Rollout-Route | `/mask-rollout/agrar__zinsabrechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `list` → `/api/v1/zinsabrechnung`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Zinsabrechnungen sind noch nicht gebucht?
+- Buche Zinsabrechnung {entity_id}.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `anlegen` | Anlegen | safe | nein | `/api/v1/zinsabrechnung` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
 ### `agribusiness/farmers` — Landwirte
 
 **Zweck:** Landwirte finden und pruefen, wer Zugang zum Portal hat.
@@ -5458,6 +6565,53 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `annahme/abrechnung` — Annahme-Abrechnung
+
+**Zweck:** Selbstabrechner-Abrechnungen berechnen, anlegen, verbuchen und freigeben.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/annahme/abrechnung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/annahme/abrechnung/agent-contract` |
+| Readiness | `GET /api/v1/masks/annahme/abrechnung/readiness` |
+| Rollout-Route | `/mask-rollout/annahme__abrechnung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `settlements` → `/api/v1/agrar/settlements`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege eine Annahme-Abrechnung an.
+- Buche Settlement {entity_id} in die FiBu.
+
+**Sensible Felder:** `supplier_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `billing_preview` | Abrechnungsgewicht Vorschau | moderate | nein | `/api/v1/agrar/settlements/billing-weight/preview` |
+| `drying_compute` | Trocknung berechnen | moderate | nein | `/api/v1/agrar/settlements/drying/compute` |
+| `settlement_preview` | Abrechnung Vorschau | moderate | nein | `/api/v1/agrar/settlements/preview` |
+| `anlegen` | Abrechnung anlegen | moderate | nein | `/api/v1/agrar/settlements` |
+| `post_fibu` | FiBu buchen | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/post-fibu` |
+| `freigabe` | Freigabe | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/freigabe` |
+| `stornieren` | Stornieren | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/cancel` |
 
 ---
 
@@ -5655,6 +6809,49 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `save` | Qualitätsprüfung speichern | safe | nein | `—` |
 | `start` | Prüfung beginnen | safe | nein | `—` |
+| `billing` | Zur Abrechnung | safe | nein | `—` |
+| `cancel` | Zur Warteschlange | safe | nein | `—` |
+
+---
+
+### `annahme/rohware` — Rohware-Annahme
+
+**Zweck:** Rohware-Annahme über die vorhandenen Fachverträge bearbeiten.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/annahme/rohware/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/annahme/rohware/agent-contract` |
+| Readiness | `GET /api/v1/masks/annahme/rohware/readiness` |
+| Rollout-Route | `/mask-rollout/annahme__rohware/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `supply` → `/api/v1/supply-chain/overview`
+- `articles` → `/api/v1/articles?limit=100`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Welche Eingaben und Aktionen sind verfügbar?
+
+**Sensible Felder:** `lieferant, kennzeichen, lieferscheinNr, datum, artikel, bruttoKg, taraKg, lagerZiel, feuchtePct, besatzPct, fallzahl, customer_id`
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `submit` | Rohware annehmen | safe | nein | `—` |
 | `billing` | Zur Abrechnung | safe | nein | `—` |
 | `cancel` | Zur Warteschlange | safe | nein | `—` |
 
@@ -6124,6 +7321,59 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 |---|---|---|---|---|
 | `neu` | Neuer Antrag | safe | nein | `Oeffnet die Anlage; Rechte prueft deren Anlageweg.` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+### `konditionen/konditionssystem` — Konditionssystem
+
+**Zweck:** Preislisten, Rabattgruppen/-klassen/-saetze und Individualpreise pflegen sowie Preise finden.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/konditionen/konditionssystem/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/konditionen/konditionssystem/agent-contract` |
+| Readiness | `GET /api/v1/masks/konditionen/konditionssystem/readiness` |
+| Rollout-Route | `/mask-rollout/konditionen__konditionssystem/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `preislisten` → `/api/v1/price-lists/`
+- `rabattgruppen` → `/api/v1/preise/rabatte/gruppen`
+- `rabattklassen` → `/api/v1/preise/rabatte/klassen`
+- `rabattsaetze` → `/api/v1/preise/rabatte/saetze`
+- `individualpreise` → `/api/v1/preise/individualpreise`
+
+**MCP-Tools (Domäne):**
+
+- `agrar.contract.get` — scope `agrar:read`, Risiko niedrig
+- `agrar.weighing_ticket.list` — scope `agrar:read`, Risiko niedrig
+- `agrar.ration.transition` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.supply_handoff` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.actual_measure` — scope `agrar:write`, Risiko mittel
+- `agrar.feeding.configure_threshold` — scope `agrar:write`, Risiko mittel
+- `agrar.feed_analysis.transition` — scope `agrar:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege eine Preisliste an.
+- Berechne den Preis fuer Artikel X.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `preisliste_anlegen` | Preisliste anlegen | moderate | nein | `/api/v1/price-lists/` |
+| `preisliste_loeschen` | Preisliste loeschen | moderate | nein | `/api/v1/price-lists/{id}` |
+| `rabattgruppe_anlegen` | Rabattgruppe anlegen | moderate | nein | `/api/v1/preise/rabatte/gruppen` |
+| `rabattgruppe_loeschen` | Rabattgruppe loeschen | moderate | nein | `/api/v1/preise/rabatte/gruppen/{id}` |
+| `rabattklasse_anlegen` | Rabattklasse anlegen | moderate | nein | `/api/v1/preise/rabatte/klassen` |
+| `rabattklasse_loeschen` | Rabattklasse loeschen | moderate | nein | `/api/v1/preise/rabatte/klassen/{id}` |
+| `rabattsatz_anlegen` | Rabattsatz anlegen | moderate | nein | `/api/v1/preise/rabatte/saetze` |
+| `rabattsatz_loeschen` | Rabattsatz loeschen | moderate | nein | `/api/v1/preise/rabatte/saetze/{id}` |
+| `individualpreis_anlegen` | Individualpreis anlegen | moderate | nein | `/api/v1/preise/individualpreise` |
+| `individualpreis_loeschen` | Individualpreis loeschen | moderate | nein | `/api/v1/preise/individualpreise/{id}` |
+| `preis_berechnen` | Preis berechnen | safe | nein | `/api/v1/pricing/calculate` |
 
 ---
 
@@ -7282,6 +8532,37 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `close` | Ticket schließen | safe | nein | `—` |
 | `allocate` | Kontrakt zuordnen | safe | nein | `—` |
 | `refresh` | Aktualisieren | safe | nein | `—` |
+
+---
+
+## Domäne: agribusiness
+
+### `agribusiness/field-service-tasks/neu` — Field-Service Aufgabe neu
+
+**Zweck:** Field-Service Aufgabe neu anlegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/agribusiness/field-service-tasks/neu/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/agribusiness/field-service-tasks/neu/agent-contract` |
+| Readiness | `GET /api/v1/masks/agribusiness/field-service-tasks/neu/readiness` |
+| Rollout-Route | `/mask-rollout/agribusiness__field-service-tasks__neu/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `entity` → `/api/v1/agribusiness/field-service-tasks/{entity_id}`
+
+**Beispiel-Prompts:**
+
+- Oeffne Field-Service Aufgabe neu.
+- Lege einen Field-Service-Einsatz an.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -12589,7 +13870,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `einkauf/angebot` — Lieferantenangebot
 
-**Zweck:** Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.
+**Zweck:** Lieferantenangebot: Stammdaten, Angebotsdetails, Konditionen und Bestellueberfuehrung — gleiche Wege fuer Human, CI und MCP.
 
 | | |
 |---|---|
@@ -12603,6 +13884,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `entity` → `/api/v1/einkauf/angebote/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen`
+- `anfragen` → `/api/v1/einkauf/anfragen?status=FREIGEGEBEN`
+- `lieferanten` → `/api/v1/crm/business-partners?type=supplier`
+- `artikel` → `/api/v1/articles`
 
 **MCP-Tools (Domäne):**
 
@@ -12615,14 +13899,19 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Wie lange ist Angebot {entity_id} gueltig?
 - Zeige alle Positionen und Preise von Angebot {entity_id}.
+- Genehmige Angebot {entity_id} und erzeuge eine Bestellung.
 
-**Sensible Felder:** `gesamtbetrag, einzelpreis`
+**Sensible Felder:** `preis, mindestabnahme, zahlungsbedingungen`
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bestellen` | Bestellung erstellen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/actions/bestellen` |
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/angebote/{entity_id}` |
+| `pruefen` | Pruefen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/review` |
+| `genehmigen` | Genehmigen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/approve` |
+| `ablehnen` | Ablehnen | destructive | nein | `/api/v1/einkauf/angebote/{entity_id}/reject` |
+| `inBestellung` | In Bestellung | moderate | nein | `/api/v1/einkauf/angebote/{entity_id}/convert-to-order` |
 
 ---
 
@@ -12736,7 +14025,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `einkauf/anlieferavis` — Anlieferavis
 
-**Zweck:** Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.
+**Zweck:** Anlieferavis: Bestellung, Fahrzeug, Positionen und Wareneingang — gleiche Wege fuer Human, CI und MCP.
 
 | | |
 |---|---|
@@ -12750,6 +14039,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - `entity` → `/api/v1/einkauf/anlieferavis/{entity_id}`
 - `positionen` → `/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen`
+- `bestellungen` → `/api/v1/belege/purchase_order?status=open`
 
 **MCP-Tools (Domäne):**
 
@@ -12762,11 +14052,16 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Wann ist Avis {entity_id} angekuendigt?
 - Zeige alle Positionen von Avis {entity_id}.
+- Bestaetige Avis {entity_id} und buche den Wareneingang.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
+| `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}` |
+| `senden` | Avis senden | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/send` |
+| `bestaetigen` | Bestaetigen | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/confirm` |
+| `stornieren` | Stornieren | destructive | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/cancel` |
 | `wareneingang` | Wareneingang buchen | moderate | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang` |
 
 ---
@@ -18444,9 +19739,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `kontrakte/mengenzeitraeume` — Kontrakt wählen
+### `kontrakte/mengenzeitraeume` — Kontrakt-Mengenzeiträume und Zu-/Abschläge
 
-**Zweck:** Kontrakt wählen als Stammblatt pflegen.
+**Zweck:** Abnahme-Staffeln je Kontrakt pflegen und Zu-/Abschläge zuordnen.
 
 | | |
 |---|---|
@@ -18458,18 +19753,22 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/kontrakte/{entity_id}`
+- `list` → `/api/v1/kontrakte/zuabschlagsgruppen`
 
 **Beispiel-Prompts:**
 
-- Oeffne Kontrakt wählen.
-- Bearbeite Stammdaten.
+- Lege Mengenzeitraum fuer Kontrakt an.
+- Generiere monatliche Staffeln.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
+| `zeitraum_anlegen` | Mengenzeitraum anlegen | safe | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume` |
+| `zeitraeume_generieren` | Mengenzeiträume generieren | moderate | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren` |
+| `gruppe_anlegen` | Zu-/Abschlagsgruppe anlegen | safe | nein | `/api/v1/kontrakte/zuabschlagsgruppen` |
+| `zeitraum_loeschen` | Mengenzeitraum loeschen | destructive | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -19864,6 +21163,49 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
+### `lager/materialfluss` — Agrar-Materialfluss
+
+**Zweck:** Agrar-Materialflussknoten und -kanten pflegen sowie Transfers buchen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/lager/materialfluss/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/lager/materialfluss/agent-contract` |
+| Readiness | `GET /api/v1/masks/lager/materialfluss/readiness` |
+| Rollout-Route | `/mask-rollout/lager__materialfluss/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `nodes` → `/api/v1/lager/wms/agri/material-flow/nodes`
+- `edges` → `/api/v1/lager/wms/agri/material-flow/edges`
+- `silo_cells` → `/api/v1/lager/wms/agri/silo-cells`
+
+**MCP-Tools (Domäne):**
+
+- `lager.bestand.get` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.status` — scope `lager:read`, Risiko niedrig
+- `lager.inventur.propose_opening` — scope `lager:write`, Risiko hoch
+- `lager.stock_movement.stornieren` — scope `lager:write`, Risiko mittel
+
+**Beispiel-Prompts:**
+
+- Lege einen Flow-Knoten an.
+- Transferiere Material zwischen zwei Knoten.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `node_anlegen` | Knoten anlegen | moderate | nein | `/api/v1/lager/wms/agri/material-flow/nodes` |
+| `edge_anlegen` | Kante anlegen | moderate | nein | `/api/v1/lager/wms/agri/material-flow/edges` |
+| `zelle_anlegen` | Silo-Zelle anlegen | moderate | nein | `/api/v1/lager/wms/agri/silo-cells` |
+| `route_pruefen` | Route pruefen | moderate | nein | `/api/v1/lager/wms/agri/material-flow/validate-route` |
+| `transfer` | Material transferieren | moderate | nein | `/api/v1/lager/wms/agri/material-flow/transfer` |
+| `lot_link` | Charge verknuepfen | moderate | nein | `/api/v1/lager/wms/agri/material-flow/lot-link` |
+
+---
+
 ### `lager/materialfluss-visualisierung` — Materialfluss visualisierung
 
 **Zweck:** Materialfluss visualisierung im lager-Bereich finden und auswerten.
@@ -19950,7 +21292,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/inventory/counts/{entity_id}`
+- `entity` → `/api/v1/inventur/piv/{entity_id}`
 
 **MCP-Tools (Domäne):**
 
@@ -21348,6 +22690,43 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 ---
 
 ## Domäne: logistik
+
+### `fuhrpark/fahrzeug-vertiefung` — Fahrzeug-Vertiefung
+
+**Zweck:** Fahrzeugstatus, Schaeden, Bussgelder und Leasing-Rueckgabe pflegen.
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/fuhrpark/fahrzeug-vertiefung/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/fuhrpark/fahrzeug-vertiefung/agent-contract` |
+| Readiness | `GET /api/v1/masks/fuhrpark/fahrzeug-vertiefung/readiness` |
+| Rollout-Route | `/mask-rollout/fuhrpark__fahrzeug-vertiefung/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
+- `historie` → `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/status-historie`
+- `schaeden` → `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden`
+- `bussgeld` → `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld`
+- `wartung` → `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/wartung-vorhersage`
+
+**Beispiel-Prompts:**
+
+- Wechsle den Fahrzeugstatus.
+- Melde ein Bussgeld als bezahlt.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `status_wechseln` | Status wechseln | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/status` |
+| `schaden_anlegen` | Schaden anlegen | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden` |
+| `schaden_abschliessen` | Schaden abschliessen | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden/{schaden_id}` |
+| `bussgeld_anlegen` | Bussgeld anlegen | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld` |
+| `bussgeld_bezahlt` | Bussgeld bezahlt | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld/{bg_id}` |
+| `leasing_rueckgabe` | Leasing-Rueckgabe | moderate | nein | `/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe` |
+
+---
 
 ### `fuhrpark/fahrzeuge-liste` — Fuhrpark
 
@@ -23617,9 +24996,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `preise/individualpreise` — Neuer {label} [PRI{preisTyp === 'EK' ? 'E' : ''}]
+### `preise/individualpreise` — Neuer Individualpreis [PRI]
 
-**Zweck:** Neuer {label} [PRI{preisTyp === 'EK' ? 'E' : ''}] als Stammblatt pflegen.
+**Zweck:** Neuer Individualpreis [PRI] als Stammblatt pflegen.
 
 | | |
 |---|---|
@@ -23635,7 +25014,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Oeffne Neuer {label} [PRI{preisTyp === 'EK' ? 'E' : ''}].
+- Oeffne Neuer Individualpreis.
 - Bearbeite Stammdaten.
 
 **Actions:**
@@ -25779,7 +27158,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/artikel/stoffstrom/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -25808,7 +27187,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/artikel/bestandteile/stamm/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -25837,7 +27216,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/artikel/verpackungen/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -25895,7 +27274,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/stammdaten/hausbanken/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -25924,7 +27303,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/artikel/individuelle-nummern/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -25953,7 +27332,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/stammdaten/betriebsstaetten/{entity_id}`
+- `entity` → `/api/v1/artikel/mengeneinheiten/stamm/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -26025,6 +27404,40 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
+
+---
+
+## Domäne: studio
+
+### `studio/workspace-composition-preview` — Workspace-Composition Preview
+
+**Zweck:** Studio-Arbeitsraum lokal vorschauen (kein Server-Write).
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/studio/workspace-composition-preview/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/studio/workspace-composition-preview/agent-contract` |
+| Readiness | `GET /api/v1/masks/studio/workspace-composition-preview/readiness` |
+| Rollout-Route | `/mask-rollout/studio__workspace-composition-preview/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**MCP-Tools (Domäne):**
+
+- `studio.catalog.read` — scope `masks:read`, Risiko niedrig
+- `studio.definition.validate` — scope `masks:read`, Risiko niedrig
+- `studio.draft.save` — scope `belege:write`, Risiko niedrig
+- `studio.draft.submit_review` — scope `belege:write`, Risiko niedrig
+- `studio.migration.plan` — scope `belege:write`, Risiko niedrig
+
+**Beispiel-Prompts:**
+
+- Zeig die Workspace-Composition-Vorschau.
+
+**Actions:**
+
+| key | label | danger | Human-Approval | commandEndpoint |
+|---|---|---|---|---|
+| `refresh` | Aktualisieren | safe | nein | `—` |
 
 ---
 
@@ -26195,7 +27608,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/verkauf/kunden/{entity_id}`
+- `entity` → `/api/v1/dauerauftraege/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -26281,7 +27694,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/verkauf/kunden/{entity_id}`
+- `entity` → `/api/v1/crm/customers/{entity_id}`
 
 **Beispiel-Prompts:**
 
@@ -26339,7 +27752,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/verkauf/kunden/{entity_id}`
+- `entity` → `/api/v1/crm/customers/{entity_id}`
 
 **Beispiel-Prompts:**
 
