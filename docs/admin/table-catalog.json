@@ -12184,6 +12184,7 @@
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
             "app/services/rfq_service.py",
+            "app/services/spiegel_op_abgleich.py",
             "app/services/whatsapp_intake_service.py"
           ],
           "screens": [
@@ -22320,6 +22321,7 @@
             "app/services/open_item_read_source.py",
             "app/services/sales_posting_service.py",
             "app/services/scheduler_service.py",
+            "app/services/spiegel_op_abgleich.py",
             "app/services/wf_trigger_service.py"
           ],
           "screens": [
@@ -28294,6 +28296,7 @@
             "app/api/v1/endpoints/legacy_interface_adapters.py",
             "app/api/v1/schemas/legacy_interface_adapters_schemas.py",
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -28439,6 +28442,7 @@
           ],
           "read_by": [
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -28518,6 +28522,7 @@
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
+            "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ]
         },
