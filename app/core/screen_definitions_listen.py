@@ -94,6 +94,227 @@ def build_agrar_zinsabrechnung_liste() -> dict[str, Any]:
     )
 
 
+def build_agrar_sammelabrechnung_liste() -> dict[str, Any]:
+    """Rohware-Sammelabrechnung — Paritaet zur Wizard-Legacy-Maske.
+
+    Create-Felder und berechnen/buchen/loeschen nutzen dieselben Endpunkte wie
+    ``sammelabrechnung-legacy.tsx`` (Human/CI/MCP).
+    """
+    _create_fields = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "abrechnungsperiode", "label": "Abrechnungsperiode (YYYY-MM)", "type": "period", "required": True},
+        {"key": "sammeldatum", "label": "Sammeldatum", "type": "date"},
+        {"key": "abrechnungsschema_id", "label": "Abrechnungsschema-ID", "type": "text"},
+        {
+            "key": "harvest_acceptance_ids",
+            "label": "Ernteannahme-IDs (mind. 2)",
+            "type": "multiselect",
+            "required": True,
+            "optionsEndpoint": "/api/v1/agrar/harvest-acceptance/",
+            "optionValueKey": "id",
+            "optionLabelKey": "acceptance_number",
+        },
+    ]
+    return _liste(
+        screen_id="agrar/sammelabrechnung", domain="agrar", title="Rohware-Sammelabrechnung",
+        subtitle="Ernteannahmen sammeln, berechnen und buchen",
+        endpoint="/api/v1/agrar/sammelabrechnung", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "abrechnungsperiode", "label": "Periode", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "summe_menge_kg", "label": "Menge kg", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "summe_betrag_eur", "label": "Betrag €", "numeric": True, "renderKind": "currency",
+             "sortable": True, "priority": "secondary"},
+            {"key": "erstellt_am", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "agrar.sammelabrechnung.create",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "berechnen", "label": "Berechnen", "dangerLevel": "moderate",
+             "permission": "agrar.sammelabrechnung.berechnen",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/berechnen", "method": "POST",
+             "visibleWhen": {"field": "status", "values": ["ENTWURF", "entwurf"]}},
+            {"key": "buchen", "label": "Buchen", "dangerLevel": "moderate",
+             "permission": "agrar.sammelabrechnung.buchen",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/buchen", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["BERECHNET", "berechnet"]}},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "destructive",
+             "permission": "agrar.sammelabrechnung.delete",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["ENTWURF", "entwurf"]}},
+        ],
+        dangerous=[
+            {"key": "loeschen", "reason": "Loescht den Entwurf unwiderruflich."},
+            {"key": "buchen", "reason": "Bucht die Sammelabrechnung fest."},
+        ],
+        purpose="Mehrere Ernteannahmen zu einer Sammelabrechnung zusammenfassen, berechnen und buchen.",
+        prompts=["Lege eine Sammelabrechnung an.", "Berechne Sammelabrechnung {entity_id}."],
+        no_workflow="Status steht an der Sammelabrechnung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_agrar_qualitaet_nachtrag_liste() -> dict[str, Any]:
+    """Unterbrochene Annahmen — Laborwerte nachtragen (Paritaet zur Legacy-Worklist)."""
+    _quality_fields = [
+        {"key": "feuchte_prozent", "label": "Feuchte %", "type": "number"},
+        {"key": "hektolitergewicht_kg_hl", "label": "hl-Gewicht kg/hl", "type": "number"},
+        {"key": "besatz", "label": "Besatz %", "type": "number"},
+        {"key": "protein_prozent", "label": "Protein %", "type": "number"},
+        {"key": "fallzahl", "label": "Fallzahl", "type": "number"},
+        {"key": "bemerkungen", "label": "Bemerkung", "type": "textarea"},
+        {"key": "labor_code", "label": "Labor / Geraet", "type": "text"},
+        {"key": "analysendatum", "label": "Analysendatum", "type": "date"},
+    ]
+    return _liste(
+        screen_id="agrar/annahmen-qualitaet-nachtrag", domain="agrar",
+        title="Qualitaets-Nachtrag",
+        subtitle="Annahmescheine ohne Laborwerte — zeilenweise oder per Batch",
+        endpoint="/api/v1/agrar/harvest-acceptance/?missing_quality=true",
+        row_route=None, bundle="agrar",
+        columns=[
+            {"key": "acceptance_number", "label": "Annahme-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "delivery_date", "label": "Lieferdatum", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "customer_id", "label": "Kunde", "filterable": True, "priority": "secondary"},
+            {"key": "release_status", "label": "Status", "renderKind": "status", "filterable": True,
+             "priority": "primary"},
+            {"key": "vehicle_plate", "label": "Kennzeichen", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {
+                "key": "batch_nachtragen",
+                "label": "Batch speichern",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "permission": "agrar.qualitaet_nachtrag.create",
+                "commandEndpoint": "/api/v1/agrar/harvest-acceptance/quality-batch",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "labor_code", "label": "Labor / Geraet", "type": "text"},
+                    {"key": "analysendatum", "label": "Analysendatum", "type": "date"},
+                    {
+                        "key": "rows",
+                        "label": "Zeilen (JSON: acceptance_id + Messwerte)",
+                        "type": "textarea",
+                        "required": True,
+                    },
+                ],
+            },
+            _EXPORT,
+        ],
+        row_actions=[
+            {
+                "key": "nachtragen",
+                "label": "Nachtragen",
+                "dangerLevel": "safe",
+                "permission": "agrar.qualitaet_nachtrag.create",
+                "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}/qualitaetsprotokoll",
+                "method": "POST",
+                "inputFields": _quality_fields,
+            },
+        ],
+        purpose="Laborwerte aus dem Laborbuch auf Annahmen ohne Qualitaetsprotokoll nachtragen.",
+        prompts=["Welche Annahmen haben noch keine Qualitaetswerte?", "Trage Qualitaet fuer Annahme {entity_id} nach."],
+        no_workflow="Worklist ohne eigenen Ablauf; Nachtrag setzt das Qualitaetsprotokoll.",
+    )
+
+
+def build_kontrakte_mengenzeitraeume_liste() -> dict[str, Any]:
+    """Kontrakt-Mengenzeiträume + Zu-/Abschläge — volle Legacy-Aktionsparitaet.
+
+    Ersetzt den reduzierten Stamm-Stub; Human/CI/MCP nutzen dieselben pfadgebundenen
+    Endpunkte wie ``mengenzeitraeume-legacy.tsx``.
+    """
+    _zeitraum_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "zeitraum_von", "label": "Von", "type": "date", "required": True},
+        {"key": "zeitraum_bis", "label": "Bis", "type": "date", "required": True},
+        {"key": "menge_t", "label": "Menge t", "type": "number", "required": True},
+        {"key": "variante", "label": "Variante", "type": "text"},
+        {"key": "bemerkung", "label": "Bemerkung", "type": "textarea"},
+    ]
+    _gen_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "von_datum", "label": "Von Datum", "type": "date", "required": True},
+        {"key": "bis_datum", "label": "Bis Datum", "type": "date", "required": True},
+        {"key": "gesamt_menge_t", "label": "Gesamtmenge t", "type": "number", "required": True},
+        {"key": "variante", "label": "Variante", "type": "text"},
+    ]
+    _gruppe_fields = [
+        {"key": "gruppe_nr", "label": "Gruppe-Nr.", "type": "text", "required": True},
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "typ", "label": "Typ", "type": "text", "required": True},
+    ]
+    _abschlag_fields = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "betrag_eur", "label": "Betrag €", "type": "currency"},
+        {"key": "prozent", "label": "Prozent", "type": "number"},
+        {"key": "einheit", "label": "Einheit", "type": "text"},
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr. (optional)", "type": "text"},
+    ]
+    return _liste(
+        screen_id="kontrakte/mengenzeitraeume", domain="kontrakte",
+        title="Kontrakt-Mengenzeiträume und Zu-/Abschläge",
+        subtitle="Abnahme-Staffeln und kontraktbezogene Zu-/Abschläge",
+        endpoint="/api/v1/kontrakte/zuabschlagsgruppen", row_route=None, bundle="kontrakte",
+        columns=[
+            {"key": "gruppe_nr", "label": "Gruppe-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "aktiv", "label": "Aktiv", "renderKind": "boolean", "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "zeitraum_anlegen", "label": "Mengenzeitraum anlegen", "kind": "primary",
+             "dangerLevel": "safe", "zone": "header",
+             "permission": "kontrakte.mengenzeitraum.create",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume", "method": "POST",
+             "inputFields": _zeitraum_fields},
+            {"key": "zeitraeume_generieren", "label": "Mengenzeiträume generieren",
+             "dangerLevel": "moderate", "zone": "header",
+             "permission": "kontrakte.mengenzeitraum.create",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren",
+             "method": "POST", "inputFields": _gen_fields},
+            {"key": "gruppe_anlegen", "label": "Zu-/Abschlagsgruppe anlegen",
+             "dangerLevel": "safe", "zone": "header",
+             "permission": "kontrakte.zuabschlag.create",
+             "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen", "method": "POST",
+             "inputFields": _gruppe_fields},
+            {"key": "zeitraum_loeschen", "label": "Mengenzeitraum loeschen",
+             "dangerLevel": "destructive", "zone": "header",
+             "permission": "kontrakte.mengenzeitraum.delete",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",
+             "method": "DELETE", "requiresConfirmation": True,
+             "inputFields": [
+                 {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+                 {"key": "zeitraum_id", "label": "Zeitraum-ID", "type": "text", "required": True},
+             ]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "abschlag_anlegen", "label": "Zu-/Abschlag anlegen", "dangerLevel": "safe",
+             "permission": "kontrakte.zuabschlag.create",
+             "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen/{entity_id}/positionen",
+             "method": "POST", "inputFields": _abschlag_fields},
+        ],
+        dangerous=[
+            {"key": "zeitraum_loeschen", "reason": "Loescht einen offenen Mengenzeitraum."},
+        ],
+        purpose="Abnahme-Staffeln je Kontrakt pflegen und Zu-/Abschläge zuordnen.",
+        prompts=["Lege Mengenzeitraum fuer Kontrakt an.", "Generiere monatliche Staffeln."],
+        no_workflow="Workspace ohne eigenen Ablauf; Aktionen schreiben direkt auf die Kontrakt-APIs.",
+    )
+
+
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
     """Bedarfsanforderungen: senden, in Bestellung ueberfuehren, Entwurf loeschen."""
     return _liste(
@@ -3112,6 +3333,9 @@ LISTEN_SCREEN_BUILDERS = {
     "admin/audit-log-liste": build_admin_audit_log_liste,
     "admin/webhooks-liste": build_admin_webhooks_liste,
     "agrar/zinsabrechnung": build_agrar_zinsabrechnung_liste,
+    "agrar/sammelabrechnung": build_agrar_sammelabrechnung_liste,
+    "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
+    "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
     "agrar/saatzucht-partien-liste": build_agrar_saatzucht_partien_liste,
@@ -3217,6 +3441,9 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/bodenproben-liste": "/agrar/bodenproben/liste",
                 "agrar/ernte-annahme-energiemais-liste": "/agrar/ernte-annahme-energiemais",
                 "agrar/zinsabrechnung": "/agrar/zinsabrechnung",
+                "agrar/sammelabrechnung": "/agrar/sammelabrechnung",
+                "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
+                "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
                 "agrar/kultur-stamm-liste": "/agrar/kultur-stamm",
@@ -3266,6 +3493,9 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "fibu/verbindlichkeiten-liste": "/fibu/verbindlichkeiten",
                 "fibu/zahlungslaeufe-liste": "/fibu/zahlungslaeufe"}
 LISTEN_SYNONYME = {"agrar/zinsabrechnung": ["zinsabrechnung", "zib", "kontraktzinsen"],
+                   "agrar/sammelabrechnung": ["sammelabrechnung", "rohware sammelabrechnung", "ernte sammeln"],
+                   "agrar/annahmen-qualitaet-nachtrag": ["qualitaets nachtrag", "laborbuch nachtrag", "fehlende qualitaet"],
+                   "kontrakte/mengenzeitraeume": ["mengenzeitraum", "zu abschlag", "abnahme staffel"],
                    "einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],

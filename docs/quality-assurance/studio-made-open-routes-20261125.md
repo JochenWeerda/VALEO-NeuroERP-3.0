@@ -173,6 +173,18 @@ Inventar: `belegSeite(...)` zaehlt als `runtime_wired` (`mask_runtime_evidence`)
 
 Inventar nach Batch 18: `hand_built`-Routen ~50 (Domain), `legacy_wrapper` 0.
 
+## Neunzehnte Hebung (Batch 19) — Paritaet Human/CI/MCP
+
+| Maske | Nachher |
+|-------|---------|
+| `agrar/sammelabrechnung` | `NativeListPage` + Create (alle Wizard-Felder inkl. `harvest_acceptance_ids`) + berechnen/buchen/löschen |
+| `agrar/annahmen-qualitaet-nachtrag` | Worklist `missing_quality` + Zeilen-Nachtrag (`/qualitaetsprotokoll`) + Batch (`/quality-batch`, JSON-rows) |
+| `kontrakte/mengenzeitraeume` | Stub-SD ersetzt: volle Aktionsmenge (Zeitraum anlegen/generieren/löschen, Gruppe, Abschlag); JSON-Body fuer `/generieren` |
+| Redirects (`verkauf/kunden-stamm`, `crm/kunden-cockpit`, …) | Inventar `technical_page` via programmatisches `navigate(…, {replace:true})` |
+| `NativeListPage` | Pfad-Platzhalter aus Eingabewerten (Header-Aktionen pfadgebunden) |
+
+Inventar nach Batch 19: `runtime_wired` ~1088, `hand_built` ~38, `legacy_wrapper` 0.
+
 ## Noch offen (Folge)
 
 - `hand_built` Prozessmasken (u. a. `annahme/rohware`, `lager/materialfluss`, Agrar-Ops-Legacy) — **nur mit Feld-/Aktionsparitaet**
@@ -181,7 +193,8 @@ Inventar nach Batch 18: `hand_built`-Routen ~50 (Domain), `legacy_wrapper` 0.
 ## Tests
 
 ```bash
-python -m pytest tests/test_stamm_object_page_parent.py -q --noconftest -o addopts=
+python -m pytest tests/test_studio_parity_batch19.py tests/test_zinsabrechnung_studio_parity.py \
+  tests/test_einkauf_studio_field_parity.py -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
   src/__tests__/pages/mask-objectpage-stamm-native-route.test.ts \
   src/__tests__/bank-account-form-contract.test.tsx \

@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1085 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1088 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
-| technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 11 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 49 |
+| technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 38 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 898 |
+| runtime_wired | 901 |
 | legacy_mask_pattern | 13 |
-| hand_built | 137 |
+| hand_built | 129 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 49 |
+| handgebaute Routen | 442 | 38 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1085 |
+| Runtime-verdrahtet | — | 1088 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -106,6 +106,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/workflow-editor` ← `src/pages/admin/workflow-editor.tsx`
 - `admin/zeitachsen-editor` ← `src/pages/admin/zeitachsen-editor.tsx`
 - `agrar` ← `src/pages/agrar/aussaat/liste.tsx`
+- `agrar/annahmen-qualitaet-nachtrag` ← `src/pages/agrar/annahmen-qualitaet-nachtrag.tsx`
 - `agrar/aussaat` ← `src/pages/agrar/aussaat/liste.tsx`
 - `agrar/aussaat/:id` ← `src/pages/agrar/aussaat/liste.tsx`
 - `agrar/aussaat/liste` ← `src/pages/agrar/aussaat/liste.tsx`
@@ -206,6 +207,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/saatgut/stamm` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `agrar/saatgut/stamm/:id` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `agrar/saatzucht` ← `src/pages/agrar/saatzucht.tsx`
+- `agrar/sammelabrechnung` ← `src/pages/agrar/sammelabrechnung.tsx`
 - `agrar/schlaege/karte` ← `src/pages/agrar/schlaege/karte.tsx`
 - `agrar/schlaege/kulturhistorie` ← `src/pages/agrar/schlaege/kulturhistorie.tsx`
 - `agrar/sektion-auswahl` ← `src/pages/agrar/sektion-auswahl.tsx`
@@ -829,6 +831,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `kontrakte/kontrakt-uebersicht` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
 - `kontrakte/kontraktklassen` ← `src/pages/kontrakte/kontraktklassen.tsx`
 - `kontrakte/listen/:variante` ← `src/pages/kontrakte/listen.tsx`
+- `kontrakte/mengenzeitraeume` ← `src/pages/kontrakte/mengenzeitraeume.tsx`
 - `kontrakte/neu` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`
 - `kontrakte/positionen` ← `src/pages/kontrakte/KontraktPositionsmonitor.tsx`
 - `kontrakte/vorgang/:variante/:id` ← `src/pages/kontrakte/vorgang.tsx`
@@ -1173,7 +1176,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
 - `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
 - `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
-- `agrar/annahmen-qualitaet-nachtrag` ← `src/pages/agrar/annahmen-qualitaet-nachtrag.tsx`
 - `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
@@ -1184,7 +1186,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
 - `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
-- `agrar/sammelabrechnung` ← `src/pages/agrar/sammelabrechnung.tsx`
 - `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
 - `auth/callback` ← `src/pages/auth/Callback.tsx`
@@ -1197,7 +1198,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `errors/NotFound` ← `src/pages/errors/NotFound.tsx`
 - `finance` ← `src/pages/finance/index.tsx`
 - `hilfe` ← `src/pages/hilfe.tsx`
-- `kontrakte/mengenzeitraeume` ← `src/pages/kontrakte/mengenzeitraeume.tsx`
 - `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
 - `login` ← `src/pages/auth/Login.tsx`
 - `pricing` ← `src/pages/pricing.tsx`

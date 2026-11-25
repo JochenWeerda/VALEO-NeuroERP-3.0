@@ -52,7 +52,12 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
-    if (permission.startsWith('agrar.saatgut.') || permission.startsWith('agrar.duenger.')) {
+    if (
+      permission.startsWith('agrar.saatgut.')
+      || permission.startsWith('agrar.duenger.')
+      || permission.startsWith('agrar.sammelabrechnung.')
+      || permission.startsWith('agrar.qualitaet_nachtrag.')
+    ) {
       return (
         roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
         || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
@@ -60,6 +65,13 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
         || roles.has('manager')
       )
+    }
+    // Mengenzeitraum / Zu-Abschlag mirrors SCHREIBEN["KONTRAKT"].
+    if (
+      permission.startsWith('kontrakte.mengenzeitraum.')
+      || permission.startsWith('kontrakte.zuabschlag.')
+    ) {
+      return roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN') || roles.has('manager')
     }
     // Finance Stamm-Create / Zinsabrechnung mirrors SCHREIBEN["FINANZ"] until projection covers POST.
     if (

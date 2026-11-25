@@ -554,10 +554,25 @@ class QualityBatchRowIn(BaseModel):
 
 
 class QualityBatchIn(BaseModel):
-    """Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch."""
+    """Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch.
+
+    ``rows`` darf eine JSON-Zeichenkette sein (NativeListPage-Textarea / MCP).
+    """
     rows: list[QualityBatchRowIn] = Field(..., min_length=1)
     labor_code: Optional[str] = Field(None, description="Labor/Gerät, gilt für alle Zeilen")
     analysendatum: Optional[str] = Field(None, description="ISO-Datum der Analyse, gilt für alle Zeilen")
+
+    @field_validator("rows", mode="before")
+    @classmethod
+    def _coerce_rows_json(cls, value: object) -> object:
+        if isinstance(value, str):
+            import json
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError as exc:
+                raise ValueError("rows muss gültiges JSON sein") from exc
+            return parsed
+        return value
 
 
 class QualityBatchRowResult(BaseModel):

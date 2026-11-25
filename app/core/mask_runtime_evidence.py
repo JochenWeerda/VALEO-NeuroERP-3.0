@@ -21,11 +21,19 @@ def has_visible_runtime(source: str) -> bool:
 
 
 def is_navigate_only_redirect(source: str, *, filename: str = '') -> bool:
-    """Reine ``<Navigate … replace />``-Seiten sind keine Altmasken (technische Umleitung)."""
+    """Reine Umleitungsseiten sind keine Altmasken (technische Redirects).
+
+    Dececkt ``<Navigate … replace />`` und programmatische ``navigate(…, { replace: true })``
+    ohne Runtime-Host und ohne Legacy-ObjectPage/ListReport/Wizard.
+    """
     if filename in ('NotFound.tsx', 'Login.tsx', 'Callback.tsx'):
         return False
     code = _HIDDEN.sub('', _COMMENTS.sub('', source))
-    if not re.search(r'\bNavigate\b', code):
+    has_jsx_navigate = bool(re.search(r'\bNavigate\b', code))
+    has_prog_navigate = bool(
+        re.search(r'\bnavigate\s*\([^)]*\{\s*replace\s*:\s*true\s*\}', code)
+    )
+    if not has_jsx_navigate and not has_prog_navigate:
         return False
     # Kein Runtime-Host und keine Legacy-ObjectPage — nur Umleitung.
     if has_visible_runtime(code) or re.search(r'\bObjectPage\b|\bListReport\b|\bWizard\b', code):

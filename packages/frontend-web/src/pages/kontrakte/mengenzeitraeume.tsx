@@ -1,5 +1,11 @@
+import { NativeListPage } from '@/components/mask-builder'
+
 /**
- * Mengenzeiträume / Zu-Abschläge: Workspace mit pfadgebundenen POSTs
- * (`/kontrakte/{kontrakt_nr}/mengenzeitraeume`) — kein flaches Stamm-Create.
+ * Native Workspace: ScreenDefinition kontrakte/mengenzeitraeume
+ * Mengenzeiträume anlegen/generieren/löschen + Zu-/Abschläge — volle Legacy-Parität.
  */
-export { default } from './mengenzeitraeume-legacy'
+export default function KontraktMengenzeitraeumePage(): JSX.Element {
+  return (
+    <NativeListPage screenId="kontrakte/mengenzeitraeume" testId="screen-kontrakte/mengenzeitraeume" />
+  )
+}

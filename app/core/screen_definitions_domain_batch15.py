@@ -994,20 +994,9 @@ def build_kontrakte_frmkontraktprotokoll_screen_definition() -> dict[str, Any]:
 
 
 def build_kontrakte_mengenzeitraeume_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
-        screen_id="kontrakte/mengenzeitraeume",
-        domain="kontrakte",
-        title="Kontrakt wählen",
-        subtitle="kontrakte",
-        identity_field="id",
-        data_sources=[stamm_entity_source("/api/v1/kontrakte/{entity_id}")],
-        tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
-        edit_permission="kontrakte.write",
-        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
-        business_purpose="Kontrakt wählen als Stammblatt pflegen.",
-        example_prompts=["Oeffne Kontrakt wählen.", "Bearbeite Stammdaten."],
-        test_id="kontrakte-mengenzeitraeume",
-    )
+    """Delegiert an die Listen-SD mit voller Legacy-Aktionsparitaet (kein Stub mehr)."""
+    from app.core.screen_definitions_listen import build_kontrakte_mengenzeitraeume_liste
+    return build_kontrakte_mengenzeitraeume_liste()
 
 
 def build_kontrakte_positionen_screen_definition() -> dict[str, Any]:

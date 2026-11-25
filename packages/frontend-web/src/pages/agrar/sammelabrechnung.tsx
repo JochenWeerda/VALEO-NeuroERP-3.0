@@ -1,2 +1,9 @@
-/** Sammelabrechnung-Workspace — Prozessmaske ohne flaches Stamm-Create. */
-export { default } from './sammelabrechnung-legacy'
+import { NativeListPage } from '@/components/mask-builder'
+
+/**
+ * Native Liste: ScreenDefinition agrar/sammelabrechnung
+ * (POST anlegen, berechnen/buchen/löschen) — Feld-/Aktionsparität zur Legacy-Wizard-Maske.
+ */
+export default function SammelabrechnungPage(): JSX.Element {
+  return <NativeListPage screenId="agrar/sammelabrechnung" testId="screen-agrar/sammelabrechnung" />
+}
