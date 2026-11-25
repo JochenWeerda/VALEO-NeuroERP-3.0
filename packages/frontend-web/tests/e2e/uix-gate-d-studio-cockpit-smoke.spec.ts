@@ -502,6 +502,33 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'WorkspaceComposition Studio Arbeitsbereich',
   },
+  {
+    label: 'admin/control-center/agent-ops',
+    path: '/admin/control-center/agent-ops',
+    screenId: 'admin/control-center/agent-ops',
+    testId: 'native-cockpit-admin-control-center-agent-ops',
+    title: 'Admin Kontrollzentrum: Agent Ops',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'persisted', label: 'Persistiert' },
+      { key: 'history_count', label: 'Historie' },
+      { key: 'state_path', label: 'State-Pfad' },
+    ],
+    specializedLandmark: 'Admin Kontrollzentrum: Agent Ops Arbeitsbereich',
+  },
+  {
+    label: 'admin/control-center/superglue',
+    path: '/admin/control-center/superglue',
+    screenId: 'admin/control-center/superglue',
+    testId: 'native-cockpit-admin-control-center-superglue',
+    title: 'Admin Kontrollzentrum: Superglue',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'tenant_id', label: 'Mandant' },
+      { key: 'storage_path', label: 'Storage' },
+    ],
+    specializedLandmark: 'Admin Kontrollzentrum: Superglue Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -843,7 +870,12 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
       })
     })
   }
-  if (c.screenId === 'admin/control-center' || c.screenId === 'admin/agenten-integration') {
+  if (
+    c.screenId === 'admin/control-center'
+    || c.screenId === 'admin/control-center/agent-ops'
+    || c.screenId === 'admin/control-center/superglue'
+    || c.screenId === 'admin/agenten-integration'
+  ) {
     const tenantId = '00000000-0000-0000-0000-000000000001'
     await page.route(/\/api\/v1\/admin\/agent-manifest(?:\?.*)?$/, async (route) => {
       await route.fulfill({
@@ -895,6 +927,51 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
             review_ticket_count: 0,
             journal_error_count: 0,
             incidents: [],
+          }),
+        })
+      })
+    }
+    if (c.screenId === 'admin/control-center/agent-ops') {
+      await page.route(/\/api\/v1\/agents\/neuroassist\/ops\/persistence(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            tenant_id: tenantId,
+            state_path: 'runtime/agent-ops/state.json',
+            history_path: 'runtime/agent-ops/history.jsonl',
+            persisted: false,
+            history_count: 0,
+            recent_events: [],
+            snapshot_counts: {},
+          }),
+        })
+      })
+    }
+    if (c.screenId === 'admin/control-center/superglue') {
+      await page.route(/\/api\/v1\/agent\/integrations\/providers\/superglue\/tenants\/default\/admin-state(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            tenant_id: 'default',
+            storage_path: 'runtime/superglue/admin-state.json',
+            connector_overrides: {},
+            policy_overrides: {},
+            wizard: { current_step: 'credentials', completed_steps: [] },
+          }),
+        })
+      })
+      await page.route(/\/api\/v1\/agent\/integrations\/providers\/superglue\/tenants\/default\/wizard(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            tenant_id: 'default',
+            current_step: 'credentials',
+            completed_steps: [],
+            recommended_actions: [],
+            steps: [],
           }),
         })
       })
