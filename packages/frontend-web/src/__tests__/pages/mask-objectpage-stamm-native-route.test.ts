@@ -37,6 +37,12 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     { file: 'crm/lieferanten-stamm.tsx', screenId: 'einkauf/supplier', kind: 'native' },
     { file: 'crm/kunden-stamm.tsx', screenId: 'crm/customer-360', kind: 'native' },
     { file: 'qualitaet/reklamation-detail.tsx', screenId: 'qualitaet/reklamation', kind: 'native' },
+    { file: 'stammdaten/artikelbestandteile.tsx', screenId: 'stammdaten/artikelbestandteile', kind: 'native' },
+    { file: 'stammdaten/artikelverpackung.tsx', screenId: 'stammdaten/artikelverpackung', kind: 'native' },
+    { file: 'stammdaten/artikel-stoffstrom.tsx', screenId: 'stammdaten/artikel-stoffstrom', kind: 'native' },
+    { file: 'stammdaten/individuelle-artikelnummern.tsx', screenId: 'stammdaten/individuelle-artikelnummern', kind: 'native' },
+    { file: 'verkauf/kunde-neu.tsx', screenId: 'verkauf/kunde-neu', kind: 'native' },
+    { file: 'verkauf/kunden-stamm-enhanced.tsx', screenId: 'verkauf/kunden-stamm-enhanced', kind: 'native' },
   ]
 
   it('CRM-Kunden- und Lieferanten-Listen laufen ueber NativeListPage', () => {
@@ -67,9 +73,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
   })
 
-  it('alle 17 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
+  it('alle 23 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
     const routeTree = readFileSync(resolve(__dirname, '../../app/routing/route-tree.gen.tsx'), 'utf8')
-    expect(migrated).toHaveLength(17)
+    expect(migrated).toHaveLength(23)
     for (const { file } of migrated) {
       expect(routeTree).toContain(`renderPage("@/pages/${file.replace(/\.tsx$/, '')}")`)
     }

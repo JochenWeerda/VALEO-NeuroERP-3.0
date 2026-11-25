@@ -97,16 +97,28 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('personal.mitarbeiter.')) {
       return roles.has('PERSONAL_BEARBEITEN') || roles.has('PERSONAL_ADMIN') || roles.has('manager')
     }
-    // Betriebsstaetten/Hausbank/Mengeneinheit Create mirrors SCHREIBEN["STAMMDATEN"].
+    // Betriebsstaetten/Hausbank/Mengeneinheit/Artikel-Stamm Create mirrors SCHREIBEN["STAMMDATEN"].
     if (
       permission.startsWith('stammdaten.betriebsstaette.')
       || permission.startsWith('stammdaten.hausbank.')
       || permission.startsWith('stammdaten.mengeneinheit.')
+      || permission.startsWith('stammdaten.stoffstrom.')
+      || permission.startsWith('stammdaten.bestandteil.')
+      || permission.startsWith('stammdaten.verpackung.')
+      || permission.startsWith('stammdaten.indiv_artikel.')
     ) {
       return (
         roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN')
         || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')
         || roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN')
+        || roles.has('manager')
+      )
+    }
+    // Verkauf Kunde Create mirrors SCHREIBEN["CRM"] / customers POST (CRM + SALES).
+    if (permission.startsWith('verkauf.kunde.')) {
+      return (
+        roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN')
+        || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')
         || roles.has('manager')
       )
     }

@@ -78,6 +78,20 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(labor, user([], ['CRM_BEARBEITEN']))).toEqual([])
     expect(getScreenPermissions(labor, user([], ['AGRAR_BEARBEITEN']))).toEqual(['qualitaet.labor.create'])
   })
+  it('matches STAMMDATEN write roles for Artikel-Stamm creation', () => {
+    const stoff: ScreenDefinition = { ...screen, id: 'stammdaten/artikel-stoffstrom', domain: 'stammdaten', actions: [],
+      creation: { endpoint: '/api/v1/artikel/stoffstrom', permission: 'stammdaten.stoffstrom.create', detailRoute: '/stammdaten/artikel-stoffstrom/{entity_id}' } }
+    expect(getScreenPermissions(stoff, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(stoff, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['stammdaten.stoffstrom.create'])
+    expect(getScreenPermissions(stoff, user([], ['LAGER_ADMIN']))).toEqual(['stammdaten.stoffstrom.create'])
+  })
+  it('matches CRM/SALES write roles for Verkauf-Kunde creation', () => {
+    const kunde: ScreenDefinition = { ...screen, id: 'verkauf/kunde-neu', domain: 'verkauf', actions: [],
+      creation: { endpoint: '/api/v1/crm/customers/', permission: 'verkauf.kunde.create', detailRoute: '/crm/customer-360/{entity_id}' } }
+    expect(getScreenPermissions(kunde, user([], ['EINKAUF_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(kunde, user([], ['SALES_BEARBEITEN']))).toEqual(['verkauf.kunde.create'])
+    expect(getScreenPermissions(kunde, user([], ['CRM_ADMIN']))).toEqual(['verkauf.kunde.create'])
+  })
 })
 
 

@@ -112,6 +112,49 @@ def get_stoffstrom_fuer_artikel(
     return [StoffstromOut(**dict(r._mapping)) for r in rows]
 
 
+@router.get("/report/thg-summary", summary="Summary thg",
+    response_model=None
+)
+def thg_summary(
+    anbauland: Optional[str] = Query(None),
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """THG-Zusammenfassung: CO2-Äquivalente je Rohstoffkategorie und Anbauland."""
+    sql = """
+        SELECT rohstoff_kategorie, anbauland,
+               COUNT(*) as anzahl_artikel,
+               AVG(co2_aequivalent_kg_per_t) as avg_co2,
+               AVG(thg_wert) as avg_thg,
+               SUM(CASE WHEN iscc_zertifiziert THEN 1 ELSE 0 END) as iscc_count,
+               SUM(CASE WHEN red_konform THEN 1 ELSE 0 END) as red_count
+        FROM domain_shared.artikel_stoffstrom
+        WHERE tenant_id = :tid AND nachhaltig = true
+    """
+    params: dict = {"tid": tenant_id}
+    if anbauland:
+        sql += " AND anbauland = :anbauland"
+        params["anbauland"] = anbauland
+    sql += " GROUP BY rohstoff_kategorie, anbauland ORDER BY rohstoff_kategorie"
+    rows = db.execute(text(sql), params).fetchall()
+    return [dict(r._mapping) for r in rows]
+
+
+@router.get("/{stoffstrom_id}", response_model=StoffstromOut, summary="Stoffstrom abrufen")
+def get_stoffstrom(
+    stoffstrom_id: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.artikel_stoffstrom
+        WHERE id = :id AND tenant_id = :tid
+    """), {"id": stoffstrom_id, "tid": tenant_id}).fetchone()
+    if not row:
+        raise HTTPException(404, "Stoffstrom-Eintrag nicht gefunden.")
+    return StoffstromOut(**dict(row._mapping))
+
+
 @router.post("", response_model=StoffstromOut, status_code=201, summary="Stoffstrom anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_stoffstrom(
     payload: StoffstromCreate,
@@ -192,31 +235,3 @@ def delete_stoffstrom(
     """), {"id": stoffstrom_id, "tid": tenant_id})
     db.commit()
     return Response(status_code=204)
-
-
-@router.get("/report/thg-summary", summary="Summary thg",
-    response_model=None
-)
-def thg_summary(
-    anbauland: Optional[str] = Query(None),
-    db=Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """THG-Zusammenfassung: CO2-Äquivalente je Rohstoffkategorie und Anbauland."""
-    sql = """
-        SELECT rohstoff_kategorie, anbauland,
-               COUNT(*) as anzahl_artikel,
-               AVG(co2_aequivalent_kg_per_t) as avg_co2,
-               AVG(thg_wert) as avg_thg,
-               SUM(CASE WHEN iscc_zertifiziert THEN 1 ELSE 0 END) as iscc_count,
-               SUM(CASE WHEN red_konform THEN 1 ELSE 0 END) as red_count
-        FROM domain_shared.artikel_stoffstrom
-        WHERE tenant_id = :tid AND nachhaltig = true
-    """
-    params: dict = {"tid": tenant_id}
-    if anbauland:
-        sql += " AND anbauland = :anbauland"
-        params["anbauland"] = anbauland
-    sql += " GROUP BY rohstoff_kategorie, anbauland ORDER BY rohstoff_kategorie"
-    rows = db.execute(text(sql), params).fetchall()
-    return [dict(r._mapping) for r in rows]
