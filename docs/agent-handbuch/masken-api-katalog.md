@@ -13910,7 +13910,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/angebote/{entity_id}` |
 | `pruefen` | Pruefen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/review` |
 | `genehmigen` | Genehmigen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/approve` |
-| `ablehnen` | Ablehnen | destructive | nein | `/api/v1/einkauf/angebote/{entity_id}/reject` |
+| `ablehnen` | Ablehnen | critical | ja | `/api/v1/einkauf/angebote/{entity_id}/reject` |
 | `inBestellung` | In Bestellung | moderate | nein | `/api/v1/einkauf/angebote/{entity_id}/convert-to-order` |
 
 ---
@@ -14061,7 +14061,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `bearbeiten` | Bearbeiten | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}` |
 | `senden` | Avis senden | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/send` |
 | `bestaetigen` | Bestaetigen | safe | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/confirm` |
-| `stornieren` | Stornieren | destructive | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/cancel` |
+| `stornieren` | Stornieren | critical | ja | `/api/v1/einkauf/anlieferavis/{entity_id}/cancel` |
 | `wareneingang` | Wareneingang buchen | moderate | nein | `/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang` |
 
 ---
@@ -19767,7 +19767,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `zeitraum_anlegen` | Mengenzeitraum anlegen | safe | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume` |
 | `zeitraeume_generieren` | Mengenzeiträume generieren | moderate | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren` |
 | `gruppe_anlegen` | Zu-/Abschlagsgruppe anlegen | safe | nein | `/api/v1/kontrakte/zuabschlagsgruppen` |
-| `zeitraum_loeschen` | Mengenzeitraum loeschen | destructive | nein | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}` |
+| `zeitraum_loeschen` | Mengenzeitraum loeschen | critical | ja | `/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}` |
 | `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---

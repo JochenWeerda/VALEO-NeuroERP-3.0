@@ -14604,8 +14604,8 @@
         {
           "key": "ablehnen",
           "label": "Ablehnen",
-          "dangerLevel": "destructive",
-          "humanApprovalRequired": false,
+          "dangerLevel": "critical",
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "einkauf.angebot.update",
           "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/reject",
@@ -14787,8 +14787,8 @@
         {
           "key": "stornieren",
           "label": "Stornieren",
-          "dangerLevel": "destructive",
-          "humanApprovalRequired": false,
+          "dangerLevel": "critical",
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "einkauf.anlieferavis.update",
           "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/cancel",
@@ -20257,8 +20257,8 @@
         {
           "key": "zeitraum_loeschen",
           "label": "Mengenzeitraum loeschen",
-          "dangerLevel": "destructive",
-          "humanApprovalRequired": false,
+          "dangerLevel": "critical",
+          "humanApprovalRequired": true,
           "requiresConfirmation": true,
           "permission": "kontrakte.mengenzeitraum.delete",
           "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",

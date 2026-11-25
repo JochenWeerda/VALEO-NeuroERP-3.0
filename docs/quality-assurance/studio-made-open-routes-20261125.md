@@ -303,6 +303,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
   Kostenstellen→kostenrechnung, Rezepte→futtermittel/rezepte, Command-Monitor Tabellen-Spalten
 - Verifier: **A/B/C/E = 829/829** (`scripts/verify_made_by_studio_gates.py`)
 
+### Batch 33 — Draft-clean + Permission-Projektion
+
+- Ungültiges `dangerLevel: destructive` → `critical` (6 Masken + Capture-Spiegel)
+- Flow-Spine-Katalog: Draft-Projektion akzeptiert `baseScreenId` (822→**829 Draft-clean**)
+- `generate_action_permission_projection.py`: Leaf-APIRoute unter FastAPI-Include-Routern;
+  Projektion neu geschrieben (231 Aktionsrechte), `--check` grün
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -322,7 +329,7 @@ Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind keine Route
 
 - Gate D SSO Hell+Dunkel + Image-CI `table-catalog` → Codex `STUDIO-ENTITY-RELEASE` (oder Freigabe Dateibesitz)
 - Playwright Gate-D-Smoke einmal gegen laufendes Frontend ausfuehren
-- Permission-Projektion nach Generatorlauf; Goal-Complete erst nach Gate-D-Image/SSO-Beleg
+- Goal-Complete erst nach Gate-D-Image/SSO-Beleg
 
 ## Tests
 

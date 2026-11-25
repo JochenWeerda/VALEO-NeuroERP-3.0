@@ -41,16 +41,38 @@ def _rollen_gruppen(dependant) -> list[list[str]]:  # noqa: ANN001
 
 
 def _route(app, pfad: str, methode: str):  # noqa: ANN001
-    from starlette.routing import Match
+    """Leaf-APIRoute mit ``dependant`` finden (FastAPI ≥0.165: ``matches`` trifft oft nur den Include-Router)."""
+    from fastapi.routing import APIRoute
 
     konkret = re.sub(r"\{[^}]+\}", "X", pfad)
-    scope = {"type": "http", "path": konkret, "method": methode, "root_path": "", "query_string": b"",
-             "headers": []}
-    for route in app.router.routes:
-        treffer, _ = route.matches(scope)
-        if treffer == Match.FULL:
-            return route
-    return None
+    methode_u = methode.upper()
+
+    def _walk(routes, prefix: str = ""):  # noqa: ANN001
+        for route in routes:
+            if isinstance(route, APIRoute) and hasattr(route, "dependant"):
+                full = prefix + route.path
+                if methode_u in (route.methods or set()) and re.sub(r"\{[^}]+\}", "X", full) == konkret:
+                    return route
+                continue
+            nested = getattr(route, "routes", None)
+            if nested:
+                found = _walk(nested, prefix + (getattr(route, "path", None) or ""))
+                if found is not None:
+                    return found
+            orig = getattr(route, "original_router", None)
+            if orig is not None and hasattr(orig, "routes"):
+                ctx = getattr(route, "include_context", None)
+                found = _walk(orig.routes, prefix + (getattr(ctx, "prefix", "") if ctx else ""))
+                if found is not None:
+                    return found
+            app_obj = getattr(route, "app", None)
+            if app_obj is not None and hasattr(app_obj, "routes"):
+                found = _walk(app_obj.routes, prefix + (getattr(route, "path", None) or ""))
+                if found is not None:
+                    return found
+        return None
+
+    return _walk(app.router.routes)
 
 
 def render() -> str:

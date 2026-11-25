@@ -2044,7 +2044,7 @@ export const frachttabellenScreen = {
         {
           "key": "loeschen",
           "label": "Löschen",
-          "dangerLevel": "destructive",
+          "dangerLevel": "critical",
           "permission": "logistics.frachttabelle.delete",
           "commandEndpoint": "/api/v1/logistik/frachttabellen/{entity_id}",
           "method": "DELETE",
