@@ -59,17 +59,26 @@ Vorhanden: Fristenregeln `app/core/gobd_retention.py` (`build_default_retention_
 Art. 17 und Anonymisierung von Klarnamen, GoBD-Loeschsperren, Verarbeitungsverzeichnis mit Loeschfrist je Taetigkeit
 (Art. 30), beschlossene Aufbewahrungsfrist fuer Bewerberdaten (kein Standardwert).
 
-Pruefpunkte - die hinterlegten Fristen weichen vom Rechtsstand ab, den ich kenne. **Vor einer Aenderung durch
-Steuerberater bzw. Fachbereich bestaetigen lassen.** Zu lange Aufbewahrung personenbezogener Daten ist ein
-DSGVO-Thema, zu kurze ein AO-Thema.
+**Umgesetzt am 25.11.2026 (Nutzerauftrag "nach geltendem Recht umsetzen"):** Der Katalog
+`app/core/gobd_retention.py` ist die einzige Quelle; Finance-Fristberechnung, Standardrichtlinien
+(`gobd_aufbewahrungsrichtlinien`, Migration `aufbewahrung_geltendes_recht_20261125`), Mandanten-Governance und
+Personalakte folgen ihm. Ratsche: `tests/test_aufbewahrungsfristen_recht.py`.
 
-| Regel im Code | Hinterlegt | Abweichung |
+| Kategorie | Frist | Rechtsgrundlage |
 |---|---|---|
-| `ap_invoice`, `payment_run` (Buchungsbelege) | 10 Jahre | Seit 01.01.2025 (Buerokratieentlastungsgesetz IV) gelten fuer Buchungsbelege nach § 147 Abs. 1 Nr. 4 AO **8 Jahre** (§ 147 Abs. 3 AO); Buecher und Jahresabschluesse bleiben bei 10 |
-| alle AO-Fristen | Beginn mit Jahresabschluss, Buchungs- oder Erstellungsdatum | § 147 Abs. 4 AO: Frist beginnt mit dem **Schluss des Kalenderjahres** der Entstehung |
-| `psm_protokoll` | 10 Jahre (§ 11 PflSchG) | § 11 PflSchG i. V. m. Art. 67 VO (EG) 1107/2009 verlangt **mindestens 3 Jahre** |
-| `duenge_bilanz` | 10 Jahre (§ 10 DueV) | § 10 DueV: Aufzeichnungen **7 Jahre** |
-| `reklamation` | 6 Jahre (§ 195 BGB) | § 195 BGB ist die dreijaehrige Verjaehrung; 6 Jahre ergaeben sich aus § 257 HGB (Handelsbriefe) - Rechtsgrundlage klaeren |
+| Buecher, Journal, Jahresabschluss, Inventar, Verfahrensdokumentation | 10 Jahre | § 147 Abs. 1 Nr. 1, Abs. 3 AO; § 257 HGB |
+| Buchungsbelege, Rechnungen, Gutschriften, Zahlungsbelege, Lohnabrechnungen | 8 Jahre | § 147 Abs. 1 Nr. 4, Abs. 3 AO; § 14b UStG (BEG IV, ab 01.01.2025; Art. 97 § 19a EGAO) |
+| Handels- und Geschaeftsbriefe, Vertraege, Reklamationen, Arbeitsvertrag | 6 Jahre | § 147 Abs. 1 Nr. 2, 3, 5 AO; § 257 HGB |
+| Lieferscheine ohne Belegfunktion | bis Erhalt/Versand der Rechnung | § 147 Abs. 3 Satz 3, 4 AO |
+| Pflanzenschutz-Aufzeichnungen | mind. 3 Jahre | § 11 PflSchG, Art. 67 VO (EG) 1107/2009 |
+| Duengungsaufzeichnungen | 7 Jahre | § 10 Abs. 5 DueV |
+| Fristbeginn | Schluss des Kalenderjahres | § 147 Abs. 4 AO, § 257 Abs. 5 HGB |
+| Ablaufhemmung | solange Festsetzungsfrist offen | § 147 Abs. 3 Satz 5 AO |
 
-Naechster Schritt nach Bestaetigung: Fristen korrigieren (Ratschen-Test gegen die bestaetigte Tabelle), Loeschkonzept
-je Datenkategorie (Stammdaten, Belege, Protokolle, Portal, Personal) mit Loeschlauf und Nachweis.
+Ohne gesetzliche Mindestfrist und deshalb als betriebliche Festlegung gekennzeichnet: Siloreinigung (6 Jahre),
+Qualitaetsprotokolle (5 Jahre). Kundenstammdaten haben keine eigene Frist; sie sind zu loeschen, sobald kein Beleg mit
+laufender Frist mehr auf sie verweist. Die Archivklassen fuer Workflow-Instanzen (`process_archive_contracts`) sind
+keine rechtlichen Dokumentarten und bleiben unveraendert.
+
+Naechster Schritt: Loeschkonzept je Datenkategorie mit Loeschlauf und Nachweis, Pruefung der offenen Festsetzungsfrist
+vor jeder Loeschung.

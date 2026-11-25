@@ -434,29 +434,22 @@ async def calculate_retention_date(
     ).scalar_one_or_none()
     
     if not policy:
-        # Default: 10 Jahre (GoBD Standard)
-        jahre = 10
-        trigger = "FISCAL_YEAR_END"
-        legal = "§147 AO (Standard)"
+        # Keine Mandanten-/Standardrichtlinie in der Tabelle: Katalog nach geltendem Recht (app/core/gobd_retention.py)
+        from app.core.gobd_retention import RICHTLINIE_ZU_DOKUMENTTYP, regel_fuer
+        regel = regel_fuer(RICHTLINIE_ZU_DOKUMENTTYP.get(dokument_typ.upper(), dokument_typ.lower()))
+        if regel is None:
+            raise HTTPException(status_code=404, detail=f"Keine Aufbewahrungsregel fuer Dokumenttyp {dokument_typ}")
+        jahre = regel.aufbewahrungsjahre
+        legal = regel.rechtsgrundlage
     else:
         jahre = policy.aufbewahrungs_jahre
-        trigger = policy.frist_trigger
         legal = policy.gesetzliche_grundlage
-    
-    # Berechne Fristende basierend auf Trigger
-    if trigger == "FISCAL_YEAR_END":
-        # Geschäftsjahresende
-        frist_datum = date(dokument_datum.year + jahre, 12, 31)
-    elif trigger == "CALENDAR_YEAR_END":
-        # Kalenderjahresende
-        frist_datum = date(dokument_datum.year + jahre, 12, 31)
-    elif trigger == "CONTRACT_END":
-        # Vertragsende (hier vereinfacht)
-        frist_datum = date(dokument_datum.year + jahre, dokument_datum.month, dokument_datum.day)
-    else:
-        # Default: creation date + jahre
-        frist_datum = date(dokument_datum.year + jahre, dokument_datum.month, dokument_datum.day)
-    
+
+    # § 147 Abs. 4 AO / § 257 Abs. 5 HGB: Frist beginnt mit Schluss des Kalenderjahres der Entstehung (bzw. des
+    # Vertragsendes - dann ist dokument_datum das Vertragsende). 0 Jahre = Lieferschein ohne Belegfunktion: endet mit
+    # Erhalt/Versand der Rechnung (dokument_datum = Rechnungsdatum), § 147 Abs. 3 Satz 3/4 AO.
+    frist_datum = dokument_datum if jahre == 0 else date(dokument_datum.year + jahre, 12, 31)
+
     # Prüfe auf aktive Löschsperren
     holds = db.execute(
         select(DocumentHold).where(
@@ -482,6 +475,7 @@ async def calculate_retention_date(
         "frist_datum": frist_datum.isoformat(),
         "gesetzliche_grundlage": legal,
         "loeschsperren": active_holds,
+        # Ablaufhemmung (§ 147 Abs. 3 Satz 5 AO, offene Festsetzungsfrist) ist zusaetzlich vor einer Loeschung zu pruefen.
         "loeschbar": len(active_holds) == 0 and frist_datum < date.today()
     }
 
