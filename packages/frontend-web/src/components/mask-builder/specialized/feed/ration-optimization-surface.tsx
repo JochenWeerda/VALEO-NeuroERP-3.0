@@ -742,7 +742,7 @@ function RationWarningAdjustmentsPanel({
                     type="button"
                     disabled={isOptimizing}
                     onClick={onGoWizard}
-                    className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-white/80"
+                    className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-card/80"
                     style={{ borderColor: C.border, color: C.dark }}
                   >
                     Eigene Anpassung
@@ -752,7 +752,7 @@ function RationWarningAdjustmentsPanel({
                       type="button"
                       disabled={isOptimizing}
                       onClick={onReoptimizeSame}
-                      className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-white/80"
+                      className="px-3 py-1.5 rounded text-xs font-semibold border transition-colors hover:bg-card/80"
                       style={{ borderColor: C.border, color: C.dark }}
                     >
                       Nur erneut optimieren
@@ -1311,7 +1311,7 @@ function DemoLoadingOverlay({ scenario, onDone }: { scenario: typeof DEMO_SCENAR
                   ? <Check size={14} className="text-status-success" />
                   : i === phase
                   ? <Loader2 size={14} className="text-white animate-spin" />
-                  : <div className="w-2 h-2 rounded-full bg-white opacity-30" />
+                  : <div className="w-2 h-2 rounded-full bg-card opacity-30" />
                 }
               </div>
               <div className="text-left">
@@ -1380,7 +1380,7 @@ function DemoBanner({
 
       {/* Tour nav */}
       {tourStep !== null && (
-        <div className="flex items-center gap-2 bg-white/15 rounded-lg px-3 py-1.5 ml-3">
+        <div className="flex items-center gap-2 bg-card/15 rounded-lg px-3 py-1.5 ml-3">
           <button onClick={onPrevTour} disabled={tourStep === 0}><ChevronLeft size={12} /></button>
           <span className="text-2xs font-bold opacity-90">{TOUR_STEPS[tourStep].title}</span>
           <button onClick={onNextTour} disabled={tourStep === TOUR_STEPS.length - 1}><ChevronRightIcon size={12} /></button>
@@ -1442,7 +1442,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
   return (
     <div className="p-10 space-y-10 max-w-[1200px] mx-auto w-full">
       {/* Hero */}
-      <section className="bg-white p-10 rounded-xl border shadow-sm space-y-8" style={{ borderColor: C.border }}>
+      <section className="bg-card p-10 rounded-xl border shadow-sm space-y-8" style={{ borderColor: C.border }}>
         <div className="space-y-3">
           <h1 className="text-3xl font-bold tracking-tight" style={{ color: C.dark }}>
             Willkommen bei der Rations<span style={{ color: C.accent }}>optimierung</span>
@@ -1494,7 +1494,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               onChange={(e) => setAiPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && aiPrompt.trim() && onStart()}
               placeholder='"Baue eine günstigere Ration für 38 kg Milch, gleiche Struktur, weniger Soja..."'
-              className="flex-1 bg-white border rounded-md px-4 py-3 text-sm outline-hidden focus:border-status-info transition-colors"
+              className="flex-1 bg-card border rounded-md px-4 py-3 text-sm outline-hidden focus:border-status-info transition-colors"
               style={{ borderColor: C.aiBorder }}
             />
             <button
@@ -1518,7 +1518,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               <button
                 key={a.label}
                 onClick={onStart}
-                className="flex items-center justify-between p-4 rounded-lg border text-sm font-semibold transition-all shadow-sm hover:shadow-md bg-white"
+                className="flex items-center justify-between p-4 rounded-lg border text-sm font-semibold transition-all shadow-sm hover:shadow-md bg-card"
                 style={{ borderColor: C.border, color: C.dark }}
               >
                 {a.label}
@@ -1542,7 +1542,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
                 onKeyDown={tastenKlick}
                 key={r.name}
                 onClick={onStart}
-                className="bg-white p-5 rounded-lg border shadow-sm cursor-pointer group transition-all hover:shadow-md"
+                className="bg-card p-5 rounded-lg border shadow-sm cursor-pointer group transition-all hover:shadow-md"
                 style={{ borderColor: C.border }}
               >
                 <div className="flex justify-between items-start mb-3">
@@ -1566,7 +1566,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               tabIndex={0}
               onKeyDown={tastenKlick}
               onClick={onStart}
-              className="bg-muted p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-white"
+              className="bg-muted p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-card"
               style={{ borderColor: C.border }}
             >
               <Plus size={24} className="mb-2 opacity-40" />
@@ -1607,7 +1607,7 @@ function GfaPickerModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.4)' }}>
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
+      <div className="bg-card rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col overflow-hidden">
         <div className="px-6 py-4 border-b flex items-center justify-between" style={{ borderColor: C.border }}>
           <div>
             <h3 className="font-bold text-base" style={{ color: C.dark }}>Betriebseigene Grundfutteranalyse hinzufügen</h3>
@@ -1890,7 +1890,7 @@ function Wizard({
       </div>
 
       {/* Card */}
-      <div className="flex-1 bg-white rounded-lg border shadow-sm overflow-hidden flex flex-col" style={{ borderColor: C.border }}>
+      <div className="flex-1 bg-card rounded-lg border shadow-sm overflow-hidden flex flex-col" style={{ borderColor: C.border }}>
         {/* Step 1: Group & Goal */}
         {step === 1 && (
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-2">
@@ -1946,7 +1946,7 @@ function Wizard({
                       onClick={() => setMode(m)}
                       className={cn(
                         'px-3 py-2.5 rounded-lg text-xs font-bold border transition-all text-left',
-                        mode === m ? 'text-white shadow-sm' : 'bg-white hover:border-primary',
+                        mode === m ? 'text-white shadow-sm' : 'bg-card hover:border-primary',
                       )}
                       style={{
                         background: mode === m ? C.dark : undefined,
@@ -2324,7 +2324,7 @@ function Wizard({
                 <button
                   onClick={() => dlgRefreshMut.mutate()}
                   disabled={dlgRefreshMut.isPending}
-                  className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-semibold hover:bg-white transition-all"
+                  className="ml-auto flex items-center gap-1 px-2 py-0.5 rounded border text-xs font-semibold hover:bg-card transition-all"
                   style={{ borderColor: 'currentColor', opacity: dlgRefreshMut.isPending ? 0.5 : 1 }}
                 >
                   <RefreshCw size={11} className={dlgRefreshMut.isPending ? 'animate-spin' : ''} />
@@ -2406,7 +2406,7 @@ function Wizard({
                 {compoundFeeds.map((doc) => {
                   const compoundId = String((doc.optimizer_feed as Record<string, unknown>).id ?? '')
                   return (
-                    <div key={compoundId} className="rounded-lg border bg-white px-3 py-2 flex items-start gap-3" style={{ borderColor: C.border }}>
+                    <div key={compoundId} className="rounded-lg border bg-card px-3 py-2 flex items-start gap-3" style={{ borderColor: C.border }}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <div className="text-sm font-semibold" style={{ color: C.dark }}>{doc.product_name}</div>
@@ -2746,7 +2746,7 @@ function Wizard({
                     { key: 'maximizeNEfficiencyRmd' as const, label: 'N-Effizienz maximieren (RMD)' },
                     { key: 'preferHomegrown' as const, label: 'Hofeigene Komponenten bevorzugen' },
                   ]).map((item) => (
-                    <label key={item.key} className="flex items-center gap-3 p-3 bg-muted border border-border rounded-xl cursor-pointer hover:bg-white transition-colors">
+                    <label key={item.key} className="flex items-center gap-3 p-3 bg-muted border border-border rounded-xl cursor-pointer hover:bg-card transition-colors">
                       <input
                         type="checkbox"
                         checked={wizardSoftGoals[item.key]}
@@ -2822,7 +2822,7 @@ function Wizard({
         )}
 
         {/* Footer Nav */}
-        <div className="h-20 border-t bg-white px-8 flex items-center justify-between sticky bottom-0" style={{ borderColor: C.border }}>
+        <div className="h-20 border-t bg-card px-8 flex items-center justify-between sticky bottom-0" style={{ borderColor: C.border }}>
           <button
             onClick={step === 1 ? onCancel : () => setStep((s) => s - 1)}
             className="px-6 py-2.5 border font-bold rounded-xl hover:bg-muted transition-all flex items-center gap-2"
@@ -4912,7 +4912,7 @@ function Workbench({
               <button
                 key={p}
                 onClick={() => { setAiMessage(p); }}
-                className="text-2xs px-2 py-0.5 rounded border transition-colors hover:bg-white"
+                className="text-2xs px-2 py-0.5 rounded border transition-colors hover:bg-card"
                 style={{ borderColor: C.aiBorder, color: C.aiText }}
               >
                 {p}
@@ -5162,7 +5162,7 @@ function Review({
           <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.dark }}>Rationsvorschlag</h3>
           <ul className="space-y-2">
             {changeLog.map((item, i) => (
-              <li key={i} className="flex items-center gap-3 p-3 bg-white border rounded-xl" style={{ borderColor: C.border }}>
+              <li key={i} className="flex items-center gap-3 p-3 bg-card border rounded-xl" style={{ borderColor: C.border }}>
                 <TrendingUp size={16} style={{ color: C.accent }} />
                 <span className="text-sm font-medium text-muted-foreground">
                   {item.name}: {fmt(item.kgfm, 1)} kg FM / {fmt(item.kgdm, 2)} kg TM
@@ -5190,7 +5190,7 @@ function Review({
                 { text: 'Biologische Plausibilität geprüft (Pansen/RMD)', defaultChecked: false },
               ] as const
             ).map((check, i) => (
-              <label key={i} className="flex items-center gap-3 p-3 bg-muted rounded-xl cursor-pointer group hover:bg-white border border-transparent hover:border-border transition-all">
+              <label key={i} className="flex items-center gap-3 p-3 bg-muted rounded-xl cursor-pointer group hover:bg-card border border-transparent hover:border-border transition-all">
                 <input type="checkbox" defaultChecked={check.defaultChecked} className="w-5 h-5 rounded border-border" style={{ accentColor: C.accent }} />
                 <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{check.text}</span>
               </label>
@@ -5212,7 +5212,7 @@ function Review({
           <ArrowLeft size={18} /> Zurück editieren
         </button>
         <div className="flex gap-4">
-          <button className="px-6 py-3 bg-white border font-bold rounded-xl flex items-center gap-2 hover:bg-muted transition-all" style={{ borderColor: C.border, color: C.dark }}>
+          <button className="px-6 py-3 bg-card border font-bold rounded-xl flex items-center gap-2 hover:bg-muted transition-all" style={{ borderColor: C.border, color: C.dark }}>
             <FileText size={18} /> PDF speichern
           </button>
           <button
@@ -6280,7 +6280,7 @@ export default function Rationsoptimierung() {
 
       {/* Nav */}
       <nav
-        className="h-[40px] bg-white border-b flex px-5 gap-[30px] items-center sticky z-40"
+        className="h-[40px] bg-card border-b flex px-5 gap-[30px] items-center sticky z-40"
         style={{ top: 50, borderColor: C.border }}
       >
         {TABS.map((tab) => (

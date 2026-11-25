@@ -363,7 +363,7 @@ export default function VordruckEditorPage(): JSX.Element {
                   <div
                     ref={canvasRef}
                     data-testid="vordruck-canvas"
-                    className="relative border bg-white shadow"
+                    className="relative border bg-card shadow"
                     style={{ width: seiteBreite * scale, height: seiteHoehe * scale }}
                     onPointerMove={onCanvasPointerMove}
                     onPointerUp={() => { dragRef.current = null }}
