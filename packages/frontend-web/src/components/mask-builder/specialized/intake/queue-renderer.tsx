@@ -103,7 +103,12 @@ export function QueueRenderer({ state }: { state: QueueState }): JSX.Element {
 
   if (isLoading) {
     return (
-      <PageSurface data-page-surface="annahme-warteschlange-loading" contentClassName="space-y-4">
+      <PageSurface
+        data-page-surface="annahme-warteschlange-loading"
+        contentClassName="space-y-4"
+        role="region"
+        aria-label="Annahme-Warteschlange Arbeitsbereich"
+      >
         <div className="space-y-2">
           <Skeleton className="h-8 w-56" />
           <Skeleton className="h-4 w-32" />
@@ -117,7 +122,12 @@ export function QueueRenderer({ state }: { state: QueueState }): JSX.Element {
   }
 
   return (
-    <PageSurface data-page-surface="annahme-warteschlange" contentClassName="space-y-6">
+    <PageSurface
+      data-page-surface="annahme-warteschlange"
+      contentClassName="space-y-6"
+      role="region"
+      aria-label="Annahme-Warteschlange Arbeitsbereich"
+    >
 
       <OperationalCaseHeader
         title="Annahme-Warteschlange"

@@ -126,6 +126,18 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       'finance/bankkonten-stamm-legacy.tsx',
       'agrar/duenger/stamm-legacy.tsx',
       'agrar/saatgut/stamm-legacy.tsx',
+      'artikel/stamm-legacy.tsx',
+      'charge/stamm-legacy.tsx',
+      'finance/stamm-legacy.tsx',
+      'personal/stamm-legacy.tsx',
+      'futter/einzel/stamm-legacy.tsx',
+      'futter/misch/stamm-legacy.tsx',
+      'agrar/psm/stamm-legacy.tsx',
+      'crm/detail-legacy.tsx',
+      'fibu/detail-legacy.tsx',
+      'qualitaet/detail-legacy.tsx',
+      'service/detail-legacy.tsx',
+      'waage/detail-legacy.tsx',
     ]) {
       expect(existsSync(resolve(pages, file))).toBe(false)
     }

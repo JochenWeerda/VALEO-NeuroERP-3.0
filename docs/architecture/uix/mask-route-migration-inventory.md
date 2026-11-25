@@ -22,10 +22,10 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1053 |
-| runtime_wired | 938 |
+| Gesamt TSX-Seiten | 983 |
+| runtime_wired | 930 |
 | legacy_mask_pattern | 0 |
-| hand_built | 98 |
+| hand_built | 38 |
 
 ## ScreenDefinitions / Studio
 

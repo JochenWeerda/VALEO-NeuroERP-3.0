@@ -26,6 +26,7 @@ type CockpitCase = {
     | 'feed_workbench'
     | 'admin_workbench'
     | 'weighing'
+    | 'intake'
   specializedFields?: Array<{ key: string; label: string }>
   /** ARIA tablist name inside the specialized surface (Studio Tabs-Invariante). */
   specializedTablist?: string
@@ -256,6 +257,24 @@ const COCKPIT_CASES: CockpitCase[] = [
       { key: 'importRetryCount', label: 'Import-Retries' },
     ],
     specializedLandmark: 'Waagenliste Arbeitsbereich',
+  },
+  {
+    label: 'annahme/warteschlange',
+    path: '/annahme/warteschlange',
+    screenId: 'annahme/warteschlange',
+    testId: 'native-cockpit-annahme-warteschlange',
+    title: 'Annahme-Warteschlange',
+    specializedType: 'intake',
+    specializedFields: [
+      { key: 'kennzeichen', label: 'Kennzeichen' },
+      { key: 'lieferant', label: 'Lieferant' },
+      { key: 'artikel', label: 'Artikel' },
+      { key: 'status', label: 'Status' },
+      { key: 'ankunft', label: 'Ankunft' },
+      { key: 'wartezeit', label: 'Wartezeit' },
+      { key: 'lieferschein_nr', label: 'Lieferschein' },
+    ],
+    specializedLandmark: 'Annahme-Warteschlange Arbeitsbereich',
   },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
@@ -503,6 +522,15 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
   if (c.specializedType === 'weighing') {
     await page.route(/\/api\/v1\/waage\/waagen(?:\?.*)?$/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+  }
+  if (c.specializedType === 'intake') {
+    await page.route(/\/api\/v1\/annahme\/warteschlange(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0 }),
+      })
     })
   }
 }
