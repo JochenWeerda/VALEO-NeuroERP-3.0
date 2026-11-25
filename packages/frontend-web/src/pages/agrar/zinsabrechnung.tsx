@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./zinsabrechnung-legacy'))
+/** Prozess-/Ops-Maske — kein Stamm-Create-Factory. */
+export { default } from './zinsabrechnung-legacy'

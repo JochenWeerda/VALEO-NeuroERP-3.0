@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./erntefenster-konfig-legacy'))
+/** Prozess-/Ops-Maske — kein Stamm-Create-Factory. */
+export { default } from './erntefenster-konfig-legacy'

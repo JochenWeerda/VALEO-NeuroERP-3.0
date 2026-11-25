@@ -13,9 +13,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Gesamt Routen | 1147 |
 | runtime_wired (UniversalMaskRuntime-Pfad) | 1035 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
-| legacy_wrapper (laedt weiter die Altoberflaeche) | 33 |
+| legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 73 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 106 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -25,7 +25,7 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Gesamt TSX-Seiten | 1060 |
 | runtime_wired | 874 |
 | legacy_mask_pattern | 16 |
-| hand_built | 133 |
+| hand_built | 167 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,7 +37,7 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 73 |
+| handgebaute Routen | 442 | 106 |
 | Routen mit alten Maskenmustern | 80 | 0 |
 | Runtime-verdrahtet | — | 1035 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |

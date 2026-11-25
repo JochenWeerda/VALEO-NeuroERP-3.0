@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./milchvieh-karte-legacy'))
+/** Prozess-/Ops-Maske — kein Stamm-Create-Factory. */
+export { default } from './milchvieh-karte-legacy'

@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./sammelabrechnung-legacy'))
+/** Sammelabrechnung-Workspace — Prozessmaske ohne flaches Stamm-Create. */
+export { default } from './sammelabrechnung-legacy'

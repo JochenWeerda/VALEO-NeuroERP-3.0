@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./postfaecher-anmeldung-rueckruf-legacy'))
+/** Admin Ops — kein Stamm-Create. */
+export { default } from './postfaecher-anmeldung-rueckruf-legacy'

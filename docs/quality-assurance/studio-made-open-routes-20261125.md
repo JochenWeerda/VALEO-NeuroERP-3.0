@@ -123,11 +123,23 @@ Ops-/Workspace-Masken vom falschen `createStammNativeDetailPage`-Factory geloest
 |-------|--------|---------|
 | `agrar/rohwarengruppen` | `createLegacyMaskPage` | SD + POST `/api/v1/rohware/gruppen` (`responseIdKey=gruppe_nr`); GET `/{nr}` |
 
+## Vierzehnte Hebung (Batch 14)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `agrar/vermehrungsvertraege` | `createLegacyMaskPage` | SD + POST `/api/v1/saatzucht/vermehrungsvertraege` (`responseIdKey=vertrag_nr`) |
+
+## Fuenfzehnte Hebung (Batch 15)
+
+Alle verbleibenden `createLegacyMaskPage`-Wrapper (Admin-Suite, Admin-Ops, Agrar-Prozess,
+Home, Konditionen, KIM-Panels) auf direkte Re-Exports umgestellt.
+Inventar: `legacy_wrapper` **0** (vorher 35).
+
 ## Noch offen (Folge)
 
-- ~34 `legacy_wrapper`-Routen (`createLegacyMaskPage`, Admin-Suite/Agrar-Prozess)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST — Factory+Legacy bis API
 - `fibu/abschluss-checklist-detail`: Prozessmaske, Create weiter Legacy
+- `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

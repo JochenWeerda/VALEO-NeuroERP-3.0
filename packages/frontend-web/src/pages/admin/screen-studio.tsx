@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./screen-studio-legacy'))
+/** Admin Ops — kein Stamm-Create. */
+export { default } from './screen-studio-legacy'

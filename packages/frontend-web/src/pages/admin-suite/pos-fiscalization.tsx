@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./pos-fiscalization-legacy'))
+/** Admin-Suite Ops-Oberflaeche — kein Stamm-Create. */
+export { default } from './pos-fiscalization-legacy'

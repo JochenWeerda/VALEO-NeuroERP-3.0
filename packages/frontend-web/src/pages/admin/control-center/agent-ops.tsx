@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./agent-ops-legacy'))
+/** Admin Ops — kein Stamm-Create. */
+export { default } from './agent-ops-legacy'
