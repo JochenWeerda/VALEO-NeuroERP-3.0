@@ -16,7 +16,6 @@ DIREKT = re.compile(r"INSERT\s+INTO\s+domain_inventory\.inventory_stock_movement
 #: Datei -> Anzahl direkter INSERTs (Stand 24.11.2026). Nur senken.
 BASELINE = {
     "app/api/v1/endpoints/compat.py": 2,
-    "app/api/v1/endpoints/inventory_counts.py": 1,
     "app/api/v1/endpoints/inventory_operations.py": 1,
     "app/api/v1/endpoints/pos_retoure.py": 1,
     "app/api/v1/endpoints/warehouse_transfers.py": 2,
@@ -24,7 +23,6 @@ BASELINE = {
     "app/services/agri_lot_link_booking_service.py": 1,
     "app/services/agri_silo_material_flow_service.py": 2,
     "app/services/docflow_lagerzugang.py": 1,
-    "app/services/feed_inventory_link_service.py": 1,
     "app/services/inventory_correction_service.py": 1,
     "app/services/inventory_count_close_service.py": 1,
     "app/services/mobile_sync_service.py": 1,

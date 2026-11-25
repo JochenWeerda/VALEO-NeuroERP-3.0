@@ -30466,7 +30466,6 @@
             "app/services/whatsapp_intake_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/inventory_counts.py",
             "app/seeds/inventory_seed.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
@@ -32865,7 +32864,6 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/warehouse_transfers.py",
@@ -32874,7 +32872,6 @@
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/docflow_lagerzugang.py",
-            "app/services/feed_inventory_link_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
             "app/services/mobile_sync_service.py",
