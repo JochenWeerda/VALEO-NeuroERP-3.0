@@ -56,6 +56,10 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Einkauf Anfrage Create mirrors SCHREIBEN["EINKAUF"].
+    if (permission.startsWith('einkauf.anfrage.')) {
+      return roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN') || roles.has('manager')
+    }
     return false
   })
 }

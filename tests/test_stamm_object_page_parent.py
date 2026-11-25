@@ -211,6 +211,19 @@ def test_bankkonto_kreditor_opportunity_have_native_creation() -> None:
         assert "tenant_id" not in keys
 
 
+def test_einkauf_anfrage_has_native_creation() -> None:
+    """Batch 3: Einkaufsanfrage Create ohne Legacy-ObjectPage."""
+    screen = get_screen_definition("einkauf/anfrage")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/einkauf/anfragen"
+    assert creation["detailRoute"] == "/einkauf/anfrage/{entity_id}"
+    assert creation["permission"] == "einkauf.anfrage.create"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"typ", "anforderer"} <= keys
+    assert any(field.get("required") and field["key"] == "anforderer" for field in creation["fields"])
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

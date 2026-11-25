@@ -30,7 +30,7 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
     { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
     { file: 'agrar/saatgut-stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
-    { file: 'einkauf/anfrage-stamm.tsx', screenId: 'einkauf/anfrage', kind: 'factory' },
+    { file: 'einkauf/anfrage-stamm.tsx', screenId: 'einkauf/anfrage', kind: 'native' },
     { file: 'einkauf/angebot-stamm.tsx', screenId: 'einkauf/angebot', kind: 'factory' },
     { file: 'einkauf/anlieferavis.tsx', screenId: 'einkauf/anlieferavis', kind: 'factory' },
     { file: 'einkauf/auftragsbestaetigung.tsx', screenId: 'einkauf/auftragsbestaetigung', kind: 'native' },

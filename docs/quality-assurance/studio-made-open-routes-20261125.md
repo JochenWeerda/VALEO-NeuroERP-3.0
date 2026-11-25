@@ -42,10 +42,18 @@ Qualitaetskatalog: [made-by-studio-qualitaetsversprechen.md](../architecture/uix
 
 Permission-Projektion (UI): `finance.bankkonto.*` / `finance.kreditor.*` → FINANCE_*; `crm.opportunity.*` → CRM_* / SALES_*.
 
+## Dritte Hebung (Batch 3)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `einkauf/anfrage` (`anfrage-stamm`) | Create → ObjectPage-Legacy | `creation` → POST `/api/v1/einkauf/anfragen` |
+
 ## Noch offen (Folge)
 
 - 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
-- Restliche `createStammNativeDetailPage(..., legacyImport)` (Einkauf-Anfrage/Angebot/Anlieferavis, Reklamation, …)
+- `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
+- Reklamation: Create braucht `positionen[]` und Antwort-ID `reklamation_id` (nicht `id`) — UniversalNativeCreatePage noch nicht passend
+- Weitere Stamm-Factories mit Legacy (Kontakt, Labor, Stammdaten/*, Admin, …)
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

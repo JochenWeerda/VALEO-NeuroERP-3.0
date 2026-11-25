@@ -53,6 +53,12 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(opp, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.opportunity.create'])
     expect(getScreenPermissions(opp, user([], ['SALES_ADMIN']))).toEqual(['crm.opportunity.create'])
   })
+  it('matches EINKAUF write roles for Anfrage creation', () => {
+    const anfrage: ScreenDefinition = { ...screen, id: 'einkauf/anfrage', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/anfragen', permission: 'einkauf.anfrage.create', detailRoute: '/einkauf/anfrage/{entity_id}' } }
+    expect(getScreenPermissions(anfrage, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(anfrage, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.anfrage.create'])
+  })
 })
 
 
