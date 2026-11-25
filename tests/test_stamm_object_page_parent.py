@@ -258,6 +258,18 @@ def test_qualitaet_labor_has_native_creation() -> None:
     assert {"chargenId", "labor"} <= keys
 
 
+def test_service_anfrage_has_native_creation() -> None:
+    """Batch 3: Service-Anfrage Create (neu + detail)."""
+    for screen_id in ("service/anfrage/neu", "service/anfrage-detail"):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == "/api/v1/service/anfragen"
+        assert creation["detailRoute"] == "/service/anfrage/{entity_id}"
+        keys = {field["key"] for field in creation["fields"]}
+        assert {"kunde", "betreff"} <= keys
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

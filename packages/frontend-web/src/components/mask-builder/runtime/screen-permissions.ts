@@ -81,6 +81,14 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Service Anfrage Create mirrors SCHREIBEN["FACHLICH"].
+    if (permission.startsWith('service.anfrage.')) {
+      const fachlich = [
+        'SALES', 'CRM', 'EINKAUF', 'LAGER', 'AGRAR', 'HARVEST', 'KONTRAKT',
+        'FUTTERMITTEL', 'FINANCE', 'PERSONAL',
+      ]
+      return fachlich.some(b => roles.has(`${b}_BEARBEITEN`) || roles.has(`${b}_ADMIN`)) || roles.has('manager')
+    }
     return false
   })
 }

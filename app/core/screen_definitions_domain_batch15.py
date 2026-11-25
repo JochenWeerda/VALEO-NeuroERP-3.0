@@ -1908,6 +1908,23 @@ def build_service_abschluss_screen_definition() -> dict[str, Any]:
     )
 
 
+_SERVICE_ANFRAGE_CREATION = {
+    "endpoint": "/api/v1/service/anfragen",
+    "permission": "service.anfrage.create",
+    "detailRoute": "/service/anfrage/{entity_id}",
+    "defaults": {"prioritaet": "normal"},
+    "fields": [
+        {"key": "kunde", "label": "Kunde", "type": "text", "required": True},
+        {"key": "betreff", "label": "Betreff", "type": "text", "required": True},
+        {"key": "beschreibung", "label": "Beschreibung", "type": "textarea"},
+        {"key": "prioritaet", "label": "Prioritaet", "type": "select",
+         "options": [{"value": "niedrig", "label": "niedrig"}, {"value": "normal", "label": "normal"},
+                     {"value": "hoch", "label": "hoch"}, {"value": "dringend", "label": "dringend"}]},
+        {"key": "kategorie", "label": "Kategorie", "type": "text"},
+    ],
+}
+
+
 def build_service_anfrage_detail_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="service/anfrage-detail",
@@ -1918,6 +1935,7 @@ def build_service_anfrage_detail_screen_definition() -> dict[str, Any]:
         data_sources=[stamm_entity_source("/api/v1/service/anfragen/{entity_id}")],
         tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
         edit_permission="service.write",
+        creation=dict(_SERVICE_ANFRAGE_CREATION),
         no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
         business_purpose="Anfrage detail als Stammblatt pflegen.",
         example_prompts=["Oeffne Anfrage detail.", "Bearbeite Stammdaten."],
@@ -1935,6 +1953,7 @@ def build_service_anfrage_neu_screen_definition() -> dict[str, Any]:
         data_sources=[stamm_entity_source("/api/v1/service/anfragen/{entity_id}")],
         tabs=[stamm_kopf_tab([{"key": "id", "label": "Id", "type": "text"}, {"key": "name", "label": "Name", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "updated_at", "label": "Updated At", "type": "text"}])],
         edit_permission="service.write",
+        creation=dict(_SERVICE_ANFRAGE_CREATION),
         no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
         business_purpose="Anfrage erstellt als Stammblatt pflegen.",
         example_prompts=["Oeffne Anfrage erstellt.", "Bearbeite Stammdaten."],
