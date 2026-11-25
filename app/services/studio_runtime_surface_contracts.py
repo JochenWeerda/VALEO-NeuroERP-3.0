@@ -11,6 +11,7 @@ SPECIALIZED_SCREENS = {
     "intake": frozenset({"annahme/lkw-registrierung", "annahme/qualitaets-check", "annahme/warteschlange", "annahme/rohware"}),
     "weighing": frozenset({"waage/liste", "waage/neu", "waage/waagen-liste", "waage/wiegungen", "waage/wiegungen-liste"}),
     "feed_workbench": frozenset({"futtermittel/rationseditor", "futtermittel/rationsoptimierung", "portal/rationsoptimierung", "futtermittel/fuetterungsdokumentation-mobil"}),
+    "agrar_workbench": frozenset({"agrar/kunden-schlagkartei", "agrar/milchvieh-karte"}),
 }
 
 

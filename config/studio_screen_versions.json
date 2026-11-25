@@ -1050,6 +1050,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agrar/kunden-schlagkartei": {
+      "definition_hash": "1be8693ddde37769e68fc81ce9fbda9d42c50e816500f31bf3eaf8c27de28a17",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "agrar/lieferschein-erstellen": {
       "definition_hash": "66dfe5b2a1194da160710ef80417a46d2f630b92c911b0da97e7c38f127f31c5",
       "gates_passed": [
@@ -1099,6 +1110,17 @@
       "gates_passed": [
         "A",
         "B",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "agrar/milchvieh-karte": {
+      "definition_hash": "f4f2807fe68f069e00ce3441093974ea981aa4cfbe590ead62f427805edb563e",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
         "E"
       ],
       "studio_draft_clean": true,

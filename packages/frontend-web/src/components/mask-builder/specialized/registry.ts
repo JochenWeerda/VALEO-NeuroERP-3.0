@@ -5,6 +5,7 @@ import { Weighing } from './weighing/weighing'
 import { FinanceWorkbench } from './finance/finance-workbench'
 import { AdminWorkbench } from './admin/admin-workbench'
 import { FeedWorkbench } from './feed/feed-workbench'
+import { AgrarWorkbench } from './agrar/agrar-workbench'
 import type { SpecializedComponentModule } from './types'
 
 const REGISTRY: Record<SpecializedComponentType, SpecializedComponentModule> = {
@@ -14,6 +15,7 @@ const REGISTRY: Record<SpecializedComponentType, SpecializedComponentModule> = {
   finance_workbench: FinanceWorkbench,
   admin_workbench: AdminWorkbench,
   feed_workbench: FeedWorkbench,
+  agrar_workbench: AgrarWorkbench,
 }
 
 export function resolveSpecializedComponent(

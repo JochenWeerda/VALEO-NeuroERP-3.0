@@ -952,6 +952,18 @@ def build_admin_suite_pos_fiscalization_cockpit() -> dict[str, Any]:
     )
 
 
+def build_agrar_kunden_schlagkartei_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_agrar_kunden_schlagkartei
+
+    return build_agrar_kunden_schlagkartei()
+
+
+def build_agrar_milchvieh_karte_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_agrar_milchvieh_karte
+
+    return build_agrar_milchvieh_karte()
+
+
 def build_agrar_milchvieh_crosssell_cockpit() -> dict[str, Any]:
     """Milchvieh Cross-Sell — KPI-Summary + Kundenliste + Produktgruppen (Legacy-Paritaet)."""
     from app.core.cockpit_overview_parent import (
@@ -4211,6 +4223,8 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
     "agrar/erntefenster-konfig": build_agrar_erntefenster_konfig_liste,
     "agrar/milchvieh-crosssell": build_agrar_milchvieh_crosssell_cockpit,
+    "agrar/kunden-schlagkartei": build_agrar_kunden_schlagkartei_workbench,
+    "agrar/milchvieh-karte": build_agrar_milchvieh_karte_workbench,
     "admin-suite": build_admin_suite_home_cockpit,
     "admin-suite/connectors": build_admin_suite_connectors_liste,
     "admin-suite/devices": build_admin_suite_devices_liste,
@@ -4334,6 +4348,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
                 "agrar/erntefenster-konfig": "/agrar/erntefenster-konfig",
                 "agrar/milchvieh-crosssell": "/agrar/milchvieh-crosssell",
+                "agrar/kunden-schlagkartei": "/agrar/kunden-schlagkartei",
+                "agrar/milchvieh-karte": "/agrar/milchvieh-karte",
                 "admin-suite": "/admin-suite",
                 "admin-suite/connectors": "/admin-suite/connectors",
                 "admin-suite/devices": "/admin-suite/devices",

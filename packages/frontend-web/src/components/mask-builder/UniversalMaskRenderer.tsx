@@ -451,7 +451,7 @@ function RenderFromPlan({
       <SpecializedComponentHost specialized={plan.specialized} plan={plan} onAction={dispatchAction} />
       {plan.sourceProposals ? <SourceProposalRenderer context={effectivePayload[plan.sourceProposals.contextKey]} /> : null}
 
-      {deriveColumns || plan.specialized?.type === 'intake' || plan.specialized?.type === 'weighing' || plan.specialized?.type === 'finance_workbench' || plan.specialized?.type === 'feed_workbench' || plan.specialized?.type === 'admin_workbench' ? null : (
+      {deriveColumns || plan.specialized?.type === 'intake' || plan.specialized?.type === 'weighing' || plan.specialized?.type === 'finance_workbench' || plan.specialized?.type === 'feed_workbench' || plan.specialized?.type === 'admin_workbench' || plan.specialized?.type === 'agrar_workbench' ? null : (
         <>
       <FastFormRenderer
         fieldKeys={plan.rootFieldKeys}

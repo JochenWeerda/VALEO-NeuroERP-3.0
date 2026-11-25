@@ -98,6 +98,14 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('admin.admin_suite.')) {
       return roles.has('ADMIN') || roles.has('manager')
     }
+    // Agrar-Arbeitsplaetze (Schlagkartei / Milchvieh-Karte).
+    if (permission.startsWith('agrar.schlagkartei.') || permission.startsWith('agrar.milchvieh.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN') || roles.has('AGRAR_LESEN')
+        || roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN')
+        || roles.has('manager') || roles.has('ADMIN')
+      )
+    }
     // Opportunity Create mirrors SCHREIBEN["CRM"] (CRM + SALES write roles).
     if (permission.startsWith('crm.opportunity.')) {
       return (
