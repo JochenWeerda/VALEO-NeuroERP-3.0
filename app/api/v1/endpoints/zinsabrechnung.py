@@ -111,13 +111,12 @@ def list_zinsabrechnungen(
     return [ZinsabrechnungOut(**dict(r._mapping)) for r in rows]
 
 
-@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung berechne", dependencies=SCHREIBEN["FINANZ"])
-def berechne_zinsabrechnung(
+def _lege_zinsabrechnung_an(
     payload: ZinsabrechnungCreate,
-    db=Depends(get_db),
-    tenant_id: str = Depends(get_tenant_id),
-):
-    """Zinsabrechnung berechnen und als Entwurf anlegen."""
+    db,
+    tenant_id: str,
+) -> ZinsabrechnungOut:
+    """Gemeinsamer Create-Pfad fuer POST ``/`` und ``/berechnen`` (Human/CI/MCP)."""
     try:
         tage, zinsbetrag, mwst = _berechne_zins(
             payload.basisbetrag_eur, payload.zinssatz_prozent,
@@ -127,6 +126,7 @@ def berechne_zinsabrechnung(
         raise HTTPException(422, str(e)) from e
 
     new_id = uuid7()
+    # Status ``berechnet``: Legacy-UI und Buchen-Gate erwarten diesen Wert (nicht ``offen``).
     db.execute(text("""
         INSERT INTO domain_shared.kontrakt_zinsabrechnungen
             (id, tenant_id, kontrakt_nr, lieferant_nr, lieferant_name,
@@ -136,7 +136,7 @@ def berechne_zinsabrechnung(
         VALUES (:id, :tid, :ktr_nr, :lief_nr, :lief_name,
                 :zinssatz, :basis, :von, :bis,
                 :tage, :zins, :mwst_satz, :mwst_betrag,
-                'offen', :periode, :bem)
+                'berechnet', :periode, :bem)
     """), {
         "id": new_id, "tid": tenant_id,
         "ktr_nr": payload.kontrakt_nr, "lief_nr": payload.lieferant_nr,
@@ -152,6 +152,26 @@ def berechne_zinsabrechnung(
         SELECT * FROM domain_shared.kontrakt_zinsabrechnungen WHERE id = :id
     """), {"id": new_id}).fetchone()
     return ZinsabrechnungOut(**dict(row._mapping))
+
+
+@router.post("", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung anlegen", dependencies=SCHREIBEN["FINANZ"])
+def create_zinsabrechnung(
+    payload: ZinsabrechnungCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Flaches POST — gleicher Vertrag wie ``/berechnen`` (Maske/CLI/MCP)."""
+    return _lege_zinsabrechnung_an(payload, db, tenant_id)
+
+
+@router.post("/berechnen", response_model=ZinsabrechnungOut, status_code=201, summary="Zinsabrechnung berechne", dependencies=SCHREIBEN["FINANZ"])
+def berechne_zinsabrechnung(
+    payload: ZinsabrechnungCreate,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Zinsabrechnung berechnen und als Entwurf anlegen."""
+    return _lege_zinsabrechnung_an(payload, db, tenant_id)
 
 
 @router.post("/{zins_id}/drucken", summary="Zinsabrechnung drucke",

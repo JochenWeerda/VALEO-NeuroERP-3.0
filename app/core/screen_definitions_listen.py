@@ -30,6 +30,70 @@ def _liste(**kwargs: Any) -> dict[str, Any]:
     return build_stamm_list_screen(**kwargs)
 
 
+def build_agrar_zinsabrechnung_liste() -> dict[str, Any]:
+    """Zinsabrechnung: anlegen (alle Legacy-Felder), buchen, stornieren, drucken.
+
+    Paritaet zur handgebauten Maske ``agrar/zinsabrechnung-legacy.tsx`` —
+    Human/CI/MCP nutzen dieselben Endpunkte.
+    """
+    _create_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "lieferant_nr", "label": "Lieferant-Nr.", "type": "text", "required": True},
+        {"key": "lieferant_name", "label": "Lieferant-Name", "type": "text"},
+        {"key": "zinssatz_prozent", "label": "Zinssatz (%)", "type": "number", "required": True},
+        {"key": "basisbetrag_eur", "label": "Basisbetrag (€)", "type": "currency", "required": True},
+        {"key": "mwst_satz", "label": "MwSt-Satz (%)", "type": "number"},
+        {"key": "von_datum", "label": "Von Datum", "type": "date", "required": True},
+        {"key": "bis_datum", "label": "Bis Datum", "type": "date", "required": True},
+        {"key": "buchungs_periode", "label": "Buchungs-Periode (YYYY-MM)", "type": "period"},
+        {"key": "bemerkung", "label": "Bemerkung", "type": "textarea"},
+    ]
+    return _liste(
+        screen_id="agrar/zinsabrechnung", domain="agrar", title="Zinsabrechnung",
+        subtitle="Zinsen auf Kontrakte berechnen, buchen und stornieren",
+        endpoint="/api/v1/zinsabrechnung", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "lieferant_name", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "basisbetrag_eur", "label": "Basis €", "numeric": True, "renderKind": "currency", "sortable": True, "priority": "secondary"},
+            {"key": "zinssatz_prozent", "label": "Zinssatz %", "numeric": True, "priority": "secondary"},
+            {"key": "tage", "label": "Tage", "numeric": True, "priority": "tertiary"},
+            {"key": "zinsbetrag_eur", "label": "Zinsbetrag €", "numeric": True, "renderKind": "currency", "sortable": True, "priority": "primary"},
+            {"key": "mwst_betrag_eur", "label": "MwSt €", "numeric": True, "renderKind": "currency", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "finance.zinsabrechnung.create",
+             "commandEndpoint": "/api/v1/zinsabrechnung", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "buchen", "label": "Buchen", "dangerLevel": "moderate",
+             "permission": "finance.zinsabrechnung.buchen",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/buchen", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt"]}},
+            {"key": "drucken", "label": "Drucken", "dangerLevel": "safe",
+             "permission": "finance.zinsabrechnung.drucken",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/drucken", "method": "POST",
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt", "gebucht"]}},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "destructive",
+             "permission": "finance.zinsabrechnung.stornieren",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/stornieren", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt", "gebucht"]}},
+        ],
+        dangerous=[
+            {"key": "stornieren", "reason": "Erzeugt Stornobeleg und setzt Status storniert."},
+        ],
+        purpose="Zinsen auf Rohware-Einlagerungskontrakte berechnen, buchen und stornieren.",
+        prompts=["Welche Zinsabrechnungen sind noch nicht gebucht?", "Buche Zinsabrechnung {entity_id}."],
+        no_workflow="Status steht an der Zinsabrechnung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
     """Bedarfsanforderungen: senden, in Bestellung ueberfuehren, Entwurf loeschen."""
     return _liste(
@@ -3047,6 +3111,7 @@ LISTEN_SCREEN_BUILDERS = {
     "compliance/saatgut-nachbau-liste": build_compliance_saatgut_nachbau_liste,
     "admin/audit-log-liste": build_admin_audit_log_liste,
     "admin/webhooks-liste": build_admin_webhooks_liste,
+    "agrar/zinsabrechnung": build_agrar_zinsabrechnung_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
     "agrar/saatzucht-partien-liste": build_agrar_saatzucht_partien_liste,
@@ -3151,6 +3216,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "admin/audit-log-liste": "/admin/audit-log",
                 "agrar/bodenproben-liste": "/agrar/bodenproben/liste",
                 "agrar/ernte-annahme-energiemais-liste": "/agrar/ernte-annahme-energiemais",
+                "agrar/zinsabrechnung": "/agrar/zinsabrechnung",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
                 "agrar/kultur-stamm-liste": "/agrar/kultur-stamm",
@@ -3199,7 +3265,8 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "fibu/schnittstelle-fibu-liste": "/fibu/schnittstelle-fibu",
                 "fibu/verbindlichkeiten-liste": "/fibu/verbindlichkeiten",
                 "fibu/zahlungslaeufe-liste": "/fibu/zahlungslaeufe"}
-LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
+LISTEN_SYNONYME = {"agrar/zinsabrechnung": ["zinsabrechnung", "zib", "kontraktzinsen"],
+                   "einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
                    "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],

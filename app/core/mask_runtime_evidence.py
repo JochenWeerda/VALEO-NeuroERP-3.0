@@ -20,6 +20,19 @@ def has_visible_runtime(source: str) -> bool:
     return bool(_VISIBLE_RUNTIME.search(_HIDDEN.sub('', code)))
 
 
+def is_navigate_only_redirect(source: str, *, filename: str = '') -> bool:
+    """Reine ``<Navigate … replace />``-Seiten sind keine Altmasken (technische Umleitung)."""
+    if filename in ('NotFound.tsx', 'Login.tsx', 'Callback.tsx'):
+        return False
+    code = _HIDDEN.sub('', _COMMENTS.sub('', source))
+    if not re.search(r'\bNavigate\b', code):
+        return False
+    # Kein Runtime-Host und keine Legacy-ObjectPage — nur Umleitung.
+    if has_visible_runtime(code) or re.search(r'\bObjectPage\b|\bListReport\b|\bWizard\b', code):
+        return False
+    return not re.search(r'\bcreateLegacyMaskPage\s*\(', code)
+
+
 def bound_domain_runtime_ids(source: str, *, root: Path | None = None) -> frozenset[str]:
     """Evidence for the fixed specialist host, including its actual runtime chain.
 

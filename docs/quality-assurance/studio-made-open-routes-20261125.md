@@ -163,9 +163,19 @@ und keine fehlenden Datenfelder** haben. Human, CI und MCP bedienen dieselben
 
 Inventar: `belegSeite(...)` zaehlt als `runtime_wired` (`mask_runtime_evidence`).
 
+## Achtzehnte Hebung (Batch 18)
+
+| Maske / Thema | Nachher |
+|---------------|---------|
+| `agrar/zinsabrechnung` | `NativeListPage` + SD mit Anlegen (alle Legacy-Formfelder) + buchen/stornieren/drucken |
+| Kundenakte / Kontrakt-Detail | Universal-Mask Standard (Opt-out statt Opt-in) |
+| Reine `<Navigate replace>`-Seiten | Inventar-Klasse `technical_page` (keine Altmasken) |
+
+Inventar nach Batch 18: `hand_built`-Routen ~50 (Domain), `legacy_wrapper` 0.
+
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben — **nur mit Feld-/Aktionsparitaet**
+- `hand_built` Prozessmasken (u. a. `annahme/rohware`, `lager/materialfluss`, Agrar-Ops-Legacy) — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

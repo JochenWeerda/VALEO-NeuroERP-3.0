@@ -17,11 +17,17 @@ OUT = ROOT / "docs" / "architecture" / "uix" / "mask-route-migration-inventory.m
 
 
 def classify_source(text: str, *, filename: str = "") -> str:
-    from app.core.mask_runtime_evidence import has_visible_runtime, bound_domain_runtime_ids
+    from app.core.mask_runtime_evidence import (
+        has_visible_runtime,
+        bound_domain_runtime_ids,
+        is_navigate_only_redirect,
+    )
     # A lazy wrapper still runs the previous page; its name proves no migration.
     if "createLegacyMaskPage" in text:
         return "legacy_wrapper"
     if filename in ("NotFound.tsx", "Login.tsx", "Callback.tsx"):
+        return "technical_page"
+    if is_navigate_only_redirect(text, filename=filename):
         return "technical_page"
     if filename == "FibuSuiteRuntime.tsx":
         return "runtime_wired"
@@ -29,10 +35,48 @@ def classify_source(text: str, *, filename: str = "") -> str:
         return "runtime_wired"
     if has_visible_runtime(text) or bound_domain_runtime_ids(text, root=ROOT):
         return "runtime_wired"
-    if re.search(r"\bObjectPage\b", text) or re.search(r"\bListReport\b", text):
+    # Einstufiger Re-Export einer Runtime-Seite zaehlt als verdrahtet.
+    m_re = re.search(
+        r"export\s+\{\s*default\s*\}\s+from\s+['\"](\./[^'\"]+)['\"]",
+        text,
+    )
+    if m_re:
+        rel = m_re.group(1)
+        # filename is only the basename; resolve against common pages root via caller cache later —
+        # here we only look next to a known pages tree when the import is relative.
+        # classify_source is file-content only; re-export follow-up happens in classify_page_file.
+        pass
+    # Kommentare zaehlen nicht als ObjectPage/ListReport-Beweis.
+    code = re.sub(r"/\*.*?\*/|^\s*//[^\n]*", "", text, flags=re.S | re.M)
+    if re.search(r"\bObjectPage\b", code) or re.search(r"\bListReport\b", code):
         return "legacy_mask_pattern"
     # thin re-exports / redirects still count as hand-built until runtime-wired
     return "hand_built"
+
+
+def classify_page_file(path: Path) -> str:
+    """Klassifiziert eine Page-Datei inkl. einstufigem Re-Export auf Runtime."""
+    text = path.read_text(encoding="utf-8", errors="replace")
+    klass = classify_source(text, filename=path.name)
+    if klass != "hand_built":
+        return klass
+    m_re = re.search(
+        r"export\s+\{\s*default\s*\}\s+from\s+['\"](\./[^'\"]+)['\"]",
+        text,
+    )
+    if not m_re:
+        return klass
+    target = (path.parent / m_re.group(1)).with_suffix(".tsx")
+    if not target.exists():
+        target = (path.parent / m_re.group(1)).with_suffix(".ts")
+    if target.exists():
+        nested = classify_source(
+            target.read_text(encoding="utf-8", errors="replace"),
+            filename=target.name,
+        )
+        if nested == "runtime_wired":
+            return "runtime_wired"
+    return klass
 
 
 RUNTIME_MODULE_FILES: dict[str, Path] = {
@@ -77,7 +121,7 @@ def main() -> None:
             continue
         if src not in file_cache:
             file_cache[src] = src.read_text(encoding="utf-8", errors="replace")
-        klass = classify_source(file_cache[src], filename=src.name)
+        klass = classify_page_file(src)
         by_class[klass] += 1
         entry = {"path": path or "/", "module": module, "file": str(src.relative_to(FE)).replace("\\", "/")}
         if klass == "runtime_wired":
@@ -95,7 +139,7 @@ def main() -> None:
     ]
     page_by = Counter()
     for p in page_files:
-        page_by[classify_source(p.read_text(encoding="utf-8", errors="replace"), filename=p.name)] += 1
+        page_by[classify_page_file(p)] += 1
 
     # ScreenDefinition registry keys in screen_definitions.py
     sd_text = (ROOT / "app" / "core" / "screen_definitions.py").read_text(encoding="utf-8", errors="replace")
