@@ -1226,6 +1226,8 @@ Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 S
 ## M0-JOURNALTEST-OHNE-DDL-20261125 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.py (aus PR #196) spielte die Migration auf der echten domain_erp.journal_entries zurueck und vor; ALTER TABLE wartete in der vollen CI-Suite hinter offenen Transaktionen frueherer Tests ohne Ende (#201, Backend 90 min, abgebrochen). Jetzt Einordnungslogik an einer temporaeren Kopie, lock_timeout 5 s; mit gleichzeitig offener Lesetransaktion auf der Journaltabelle gruen.
 
+## M4-KONSOLIDIERUNG-INVENTUR-20261125 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Inventurverbuchung (inventory_counts.post_inventory_count) ueber InventoryService.process_stock_movement mit Buchungsschluessel inventur:<zaehlung>:<zeile>: echter Bestandsverlauf statt 0/0, Artikelbestand mandantengebunden (vorher WHERE id ohne Mandant), kein Phantomlager 'INVENTUR' mehr (422). Ratsche: inventory_counts 1->0.
 ## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.
 
