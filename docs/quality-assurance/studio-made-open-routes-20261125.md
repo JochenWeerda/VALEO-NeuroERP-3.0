@@ -274,20 +274,26 @@ setup/dms, voice, vordruck, postfaecher-rueckruf, studio workspace-preview) auf
 
 Inventar nach 28b: Routen-`hand_built` **0** (Dlg*/Charts bleiben Nicht-Routen-Module).
 
-### Gate D Browser (Teilbeleg)
+### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
-- Playwright: `packages/frontend-web/tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts`
-  (native-cockpit Runtime + Titel fuer externe-gates und weitere Studio-Cockpits)
-- Image-/CI-Nachlauf mit kanonischem `table-catalog.json` bleibt Codex Entity-Release
-  (Generator deckt Gate D nicht ab; siehe `made-by-studio-gate-report.md`)
+Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
+`scripts/verify_made_by_studio_gates.py` / `generate_studio_screen_versions.py` pruefen Gate D **nicht**.
+
+| Gate-D-Teil | Stand | Beleg / Blocker |
+|-------------|-------|-----------------|
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg vorhanden** | `packages/frontend-web/tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts` — Spec committed; Lauf braucht Dev-Server + Playwright-Browser (hier kein Frontend auf :3001) |
+| Reale SSO-Bedienung + Hell/Dunkel Screenshots | **blockiert** | Kein SSO-/OIDC-Live-Mandant in diesem Agent-Environment; Qualitaetsversprechen verlangt reale SSO + Theme-Screenshots der *publizierten* Maske |
+| Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
+
+**Was dieser PR bewusst nicht anfasst:** `docs/admin/table-catalog.json` / `.md` (Codex-Besitz), kein Image-Rebuild, kein SSO-Mock als „Gate D gruen“.
 
 Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind keine Routenmodule.
 
-## Noch offen (Folge)
+## Noch offen (Folge / Goal)
 
-- Gate D Image/SSO Hell+Dunkel Screenshots + table-catalog CI (nicht nur Vite-Smoke)
-- Permission-Projektion nach Generatorlauf nachziehen
-- Vollstaendiger Inventar-/Test-Abschlussbeleg vor Goal-Complete
+- Gate D SSO Hell+Dunkel + Image-CI `table-catalog` → Codex `STUDIO-ENTITY-RELEASE` (oder Freigabe Dateibesitz)
+- Playwright Gate-D-Smoke einmal gegen laufendes Frontend ausfuehren
+- Permission-Projektion nach Generatorlauf; Goal-Complete erst nach Gate-D-Image/SSO-Beleg
 
 ## Tests
 
