@@ -89,12 +89,20 @@ Permission-Projektion (UI): `stammdaten.stoffstrom|bestandteil|verpackung|indiv_
 | `lager/massebilanz` | Legacy-ObjectPage | POST `/api/v1/massebilanz` |
 | `lager/permanente-inventur` | Legacy-ObjectPage | POST `/api/v1/inventur/piv`; GET `/{id}` |
 
+## Neunte Hebung (Batch 9)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `fibu/zahlungsmeldungen` | Legacy-ObjectPage | POST `/api/v1/fibu/zahlungsmeldungen` |
+| `fibu/op-skonto-auszifferung` | Legacy-ObjectPage | POST `/api/v1/fibu/op-auszifferung` |
+| `fibu/stammdaten` | Legacy-ObjectPage | POST `/api/v1/fibu/stammdaten/zahlungsformulare` |
+
 ## Noch offen (Folge)
 
 - 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
 - `personal/schulung-neu`: Training-API erwartet Payload-Hülle `{data:…}` — Legacy bis Adapter
-- Weitere Stamm-Factories (Admin, restliche FiBu, bank-stamm, …)
+- Weitere Stamm-Factories (Admin, bank-stamm, abschluss-checklist, field-service, Mengenzeitraeume, …)
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

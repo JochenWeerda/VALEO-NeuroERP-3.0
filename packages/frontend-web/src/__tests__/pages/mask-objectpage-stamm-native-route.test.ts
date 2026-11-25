@@ -51,6 +51,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     { file: 'fibu/geschaeftsjahre.tsx', screenId: 'fibu/geschaeftsjahre', kind: 'native' },
     { file: 'lager/massebilanz.tsx', screenId: 'lager/massebilanz', kind: 'native' },
     { file: 'lager/permanente-inventur.tsx', screenId: 'lager/permanente-inventur', kind: 'native' },
+    { file: 'fibu/zahlungsmeldungen.tsx', screenId: 'fibu/zahlungsmeldungen', kind: 'native' },
+    { file: 'fibu/op-skonto-auszifferung.tsx', screenId: 'fibu/op-skonto-auszifferung', kind: 'native' },
+    { file: 'fibu/stammdaten.tsx', screenId: 'fibu/stammdaten', kind: 'native' },
   ]
 
   it('CRM-Kunden- und Lieferanten-Listen laufen ueber NativeListPage', () => {
@@ -81,9 +84,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
   })
 
-  it('alle 31 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
+  it('alle 34 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
     const routeTree = readFileSync(resolve(__dirname, '../../app/routing/route-tree.gen.tsx'), 'utf8')
-    expect(migrated).toHaveLength(31)
+    expect(migrated).toHaveLength(34)
     for (const { file } of migrated) {
       expect(routeTree).toContain(`renderPage("@/pages/${file.replace(/\.tsx$/, '')}")`)
     }

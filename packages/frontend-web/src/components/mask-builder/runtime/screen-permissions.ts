@@ -151,6 +151,14 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('fibu.geschaeftsjahr.')) {
       return roles.has('FINANCE_ADMIN') || roles.has('admin') || roles.has('manager')
     }
+    // FiBu Zahlungsmeldung/Auszifferung/Zahlungsformular Create mirrors finance_write.
+    if (
+      permission.startsWith('fibu.zahlungsmeldung.')
+      || permission.startsWith('fibu.op_auszifferung.')
+      || permission.startsWith('fibu.zahlungsformular.')
+    ) {
+      return roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN') || roles.has('manager')
+    }
     // Massebilanz Create mirrors SCHREIBEN["AGRAR"]; PIV mirrors SCHREIBEN["LAGER"].
     if (permission.startsWith('lager.massebilanz.')) {
       return (
