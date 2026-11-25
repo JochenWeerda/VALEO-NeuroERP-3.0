@@ -28,6 +28,9 @@ from pathlib import Path
 REPO = Path(os.environ.get("VOR_PUSH_REPO") or Path(__file__).resolve().parents[1]).resolve()
 HIER = Path(__file__).resolve().parent
 BLOCK = 6  # Testdateien je pytest-Prozess (mehr legte Docker Desktop lahm)
+# Read-only-Pruefstand (M0-PROBE-SAFETY): wird nie gesetzt. Stelle_pruefstand_zurueck bleibt no-op,
+# damit Merges mit main (die die Funktion mitbringen) nicht NameError werfen.
+RUECKWEG: str | None = None
 #: Tabellen, die die Branch-Migrationen entfernen: Tests, die sie nennen, laufen mit (19.11.2026: S5 entfernte
 #: domain_einkauf.bestellungen; der RLS-Test nannte sie, aber keines der geaenderten Module - lokal gruen, CI rot).
 ENTFERNTE_TABELLEN: set[str] = set()
