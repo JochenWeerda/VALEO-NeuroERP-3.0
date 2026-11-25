@@ -1199,7 +1199,32 @@ Meilenstein: M3. Bilanz, GuV und BWA (financial_reports.py) zaehlten Journalbuch
 ## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
 
+## M4-FOLGEARTIKEL-FK-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Coverage-Matrix Artikelmodell, Punkt Beziehungen referenziell). domain_shared.artikel_folgeartikel: zusammengesetzte Fremdschluessel (tenant_id, artikel_nr|folge_artikel_nr) auf articles (tenant_id, article_number), ON UPDATE/DELETE CASCADE, Pruefbedingung verschieden; Anlageweg antwortet 404 statt 500. Bestand frisch und gewachsen: 0 Zeilen.
+## M3-JOURNAL-STATUS-PFLICHT-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Folge aus PR #195). domain_erp.journal_entries.status: Vorgabe draft, NOT NULL, Pruefbedingung auf die vier Status des Buchungsdienstes (draft/posted/cancelled/reversed). Gewachsener Bestand: 0 Eintraege ohne Status, Migration in zurueckgerollter Transaktion geprueft.
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
 
-PR 179, CI-Lauf 45472996604: Die Kontaktmaske liest die kanonische CRM-Route mit einer typisierten data-Huelle. Die gemeinsame Entity-Projektion uebernimmt die Kontakt-ID und die vier Kopffelder; position stammt aus job_title. Der Feldvertrag prueft die deklarierten Projektionspfade. Kontakt aus der Altlastenliste entfernt; Generator- und Testnachlauf offen.
+PR 179, CI-Lauf 45472996604: Die Kontaktmaske liest die kanonische CRM-Route mit einer typisierten data-Huelle. Die gemeinsame Entity-Projektion uebernimmt die Kontakt-ID und die vier Kopffelder; position stammt aus job_title. Der Feldvertrag prueft die deklarierten Projektionspfade. Kontakt aus der Altlastenliste entfernt. Sechs Feldvertrags- und HTTP-Tests unter der gemeinsamen Pruefsperre bestanden.
+
+## M4-BUCHUNGSDIENST-SCHLUESSEL-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung, Schritt 1). InventoryService.process_stock_movement nimmt buchungsschluessel (bestandsbuchung_schluessel, PR #194) und commit=False (Transaktion beim Aufrufer) - Voraussetzung, damit die 13 Direktschreiber auf den einen Dienst umgestellt werden koennen.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
+
+## M4-KONSOLIDIERUNG-KORREKTUR-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung Schritt 2, gestapelt auf PR #200 und #201). Bestandskorrektur/Schwund/MHD (inventory_operations.create_bestandskorrektur) bucht ueber InventoryService.process_stock_movement mit Buchungsschluessel korrektur:<id>: echter Vorher-/Nachherbestand statt 0, Unterdeckung 422. Ratsche-Baseline inventory_operations 2->1.
+
+## M4-STORNO-BEWERTUNG-KONSISTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4/M3 (Bestandsbuchung und Bewertung, gestapelt auf PR #202). inventory_correction_service.storno_korrektur markierte auch das Original mit storno_ref; die Bestandsbewertung las das als Storno - ein stornierter Zugang ergab Bestand -10 statt 10. Rueckverweis entfernt (storno_ref nur vorwaerts). Umstellung des Storno-Dienstes auf InventoryService folgt (Mock-Tests in test_dom_inv_004 vorher auf echte DB umstellen).
+## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
+Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
+
+## M0-JOURNALTEST-OHNE-DDL-20261125 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.py (aus PR #196) spielte die Migration auf der echten domain_erp.journal_entries zurueck und vor; ALTER TABLE wartete in der vollen CI-Suite hinter offenen Transaktionen frueherer Tests ohne Ende (#201, Backend 90 min, abgebrochen). Jetzt Einordnungslogik an einer temporaeren Kopie, lock_timeout 5 s; mit gleichzeitig offener Lesetransaktion auf der Journaltabelle gruen.
+
+## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.

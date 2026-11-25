@@ -143,6 +143,7 @@ def test_ohne_genau_entwicklung_bleibt_es_geschlossen(monkeypatch, phase):
     assert not capability_enabled('test.delete.v1', ENDPOINT, SCREEN, 'delete')
 
 
-def test_registry_schaltet_die_entwicklungsphase_sichtbar():
+def test_entwicklungsfreigabe_ist_geschlossen():
+    """M5 (Nutzer 24.11.2026): Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene Wege (Default Deny)."""
     from app.services.mcp_write_capability import development_release
-    assert development_release(), 'config/mcp_erp_tools.yaml: agent_write_phase: entwicklung (vor Go-Live entfernen)'
+    assert not development_release(), 'config/mcp_erp_tools.yaml: agent_write_phase darf nicht wieder gesetzt werden'

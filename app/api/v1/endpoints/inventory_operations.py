@@ -174,7 +174,6 @@ async def create_bestandskorrektur(
         raise HTTPException(400, f"Unbekannter Grund-Code: {payload.grund}. Erlaubt: {list(REASON_CODES.keys())}")
 
     korrektur_id = str(uuid4())
-    movement_id = str(uuid4())
     posting_date = payload.buchungsdatum or date.today()
     movement_type = "adjustment"
     ref_number = f"KORR-{korrektur_id[:8].upper()}"
@@ -191,45 +190,20 @@ async def create_bestandskorrektur(
     except BuchungNichtMoeglich as grund:
         melde_fehlende_bewertung("inventory_operations_gl", f"{ref_number} ({grund})")
 
-    # Insert stock movement
-    db.execute(
-        text("""
-            INSERT INTO domain_inventory.inventory_stock_movements
-            (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
-             reference_number, movement_date, movement_time,
-             notes, booking_user, auto_created, ownership_type, tenant_id,
-             previous_stock, new_stock, created_at)
-            VALUES (:id, :article_id, :warehouse_id, :movement_type, :quantity, 't', :charge,
-                    :ref, :date, NOW()::time,
-                    :notes, 'system', false, 'owned', :tenant_id,
-                    0, 0, NOW())
-        """),
-        {
-            "id": movement_id,
-            "article_id": payload.article_id,
-            "warehouse_id": payload.warehouse_id,
-            "movement_type": movement_type,
-            "quantity": payload.menge,
-            "charge": payload.charge,
-            "ref": ref_number,
-            "date": posting_date,
-            "notes": f"{REASON_CODES[payload.grund]}: {payload.bemerkung or ''}".strip(),
-            "tenant_id": tid,
-        },
-    )
+    # Bewegung ueber den kanonischen Buchungsdienst (Konsolidierung, 24.11.2026): Richtung, Vorher-/Nachherbestand
+    # aus dem Journal, Artikelbestand, Unterdeckung - bis dahin schrieb die Korrektur previous/new_stock = 0.
+    from app.domains.inventory.application.services.inventory_service import InventoryService
 
-    # Update article stock
-    if payload.menge != 0:
-        db.execute(
-            text("""
-                UPDATE domain_inventory.articles
-                SET current_stock = COALESCE(current_stock, 0) + :delta,
-                    available_stock = COALESCE(available_stock, 0) + :delta,
-                    updated_at = NOW()
-                WHERE id = :article_id
-            """),
-            {"delta": payload.menge, "article_id": payload.article_id},
-        )
+    try:
+        bewegung = InventoryService(db).process_stock_movement(
+            payload.article_id, payload.warehouse_id, movement_type, Decimal(str(payload.menge)), unit="t",
+            movement_date=posting_date, reference_number=ref_number, charge=payload.charge, booking_user="system",
+            notes=f"{REASON_CODES[payload.grund]}: {payload.bemerkung or ''}".strip(), tenant_id=tid,
+            buchungsschluessel=f"korrektur:{korrektur_id}", commit=False)
+    except ValueError as fehler:
+        db.rollback()
+        raise HTTPException(422, str(fehler)) from fehler
+    movement_id = str(bewegung.id)
 
     db.commit()
 
