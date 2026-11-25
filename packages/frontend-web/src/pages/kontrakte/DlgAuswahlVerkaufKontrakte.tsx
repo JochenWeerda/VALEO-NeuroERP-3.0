@@ -74,7 +74,7 @@ export default function DlgAuswahlVerkaufKontrakte({ open, onOpenChange, onSelec
               {items.map((item) => (
                 <TableRow
                   key={`${item.contract_id}:${item.line_id}`}
-                  className={selected?.line_id === item.line_id ? 'bg-green-50' : 'cursor-pointer'}
+                  className={selected?.line_id === item.line_id ? 'bg-status-success/10' : 'cursor-pointer'}
                   onClick={() => setSelected(item)}
                 >
                   <TableCell className="font-mono">{item.contract_no}</TableCell>

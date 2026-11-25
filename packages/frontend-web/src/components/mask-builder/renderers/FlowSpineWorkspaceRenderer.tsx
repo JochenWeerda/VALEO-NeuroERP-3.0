@@ -74,15 +74,15 @@ const ICONS = {
 function toneClasses(tone: string): string {
   switch (tone) {
     case 'ok':
-      return 'border-emerald-500/50 bg-emerald-500/12 text-emerald-200'
+      return 'border-status-success/50 bg-status-success/15 text-status-success'
     case 'warning':
-      return 'border-amber-500/50 bg-amber-500/12 text-amber-100'
+      return 'border-status-warning/50 bg-status-warning/15 text-status-warning'
     case 'critical':
-      return 'border-rose-500/60 bg-rose-500/12 text-rose-100'
+      return 'border-status-error/60 bg-status-error/15 text-status-error'
     case 'active':
-      return 'border-indigo-400/70 bg-indigo-400/15 text-indigo-100 shadow-[0_0_40px_rgba(99,102,241,0.28)]'
+      return 'border-status-info/70 bg-status-info/15 text-status-info'
     default:
-      return 'border-slate-500/40 bg-slate-500/10 text-slate-200'
+      return 'border-muted-foreground/40 bg-muted/40 text-muted-foreground'
   }
 }
 
@@ -143,7 +143,7 @@ function EmptyOperationalField({
  */
 function CatalogContentNotice(): JSX.Element {
   return (
-    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-dashed border-amber-400/25 bg-amber-500/5 px-4 py-3">
+    <div className="mb-4 flex items-start gap-3 rounded-2xl border border-dashed border-status-warning/25 bg-status-warning/5 px-4 py-3">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
       <div className="text-sm text-slate-300">
         <span className="font-medium text-slate-100">Beispielinhalt</span> — es ist kein
@@ -390,7 +390,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
               <div className="space-y-2">
                 {processNavItems.length === 0 ? (
-                  <p className="rounded-2xl border border-amber-400/20 bg-amber-500/10 px-3 py-2 text-xs text-amber-100/90">
+                  <p className="rounded-2xl border border-status-warning/20 bg-status-warning/10 px-3 py-2 text-xs text-status-warning">
                     Keine Prozesslinks geladen. Backend pruefen (Workspace + Katalog) oder Seite neu laden.
                   </p>
                 ) : null}
@@ -437,7 +437,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     <div className="flex items-center justify-between gap-2">
                       <div className="text-xs font-medium truncate">{inst.case_number}</div>
                       {inst.lifecycle_status ? (
-                        <span className={cn('shrink-0 rounded-full border px-1.5 py-0.5 text-[10px]', LIFECYCLE_TONE_CLASSES[inst.lifecycle_status])}>
+                        <span className={cn('shrink-0 rounded-full border px-1.5 py-0.5 text-2xs uppercase tracking-wide', LIFECYCLE_TONE_CLASSES[inst.lifecycle_status])}>
                           {LIFECYCLE_LABELS[inst.lifecycle_status]}
                         </span>
                       ) : null}
@@ -465,7 +465,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               </div>
               <div className="flex items-center gap-2">
                 {workspace.badges.map((badge) => (
-                  <Badge key={badge.label} className={cn('hover:bg-transparent', badge.tone === 'ok' ? 'bg-emerald-500/15 text-emerald-200' : 'bg-amber-500/15 text-amber-100')}>
+                  <Badge key={badge.label} className={cn('hover:bg-transparent', badge.tone === 'ok' ? 'bg-status-success/15 text-status-success' : 'bg-status-warning/15 text-status-warning')}>
                     {badge.label}
                   </Badge>
                 ))}
@@ -584,7 +584,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       variant="outline"
                       onClick={() => openLifecycleDialog('complete')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch border-emerald-400/20 bg-emerald-500/10 text-emerald-100 hover:bg-emerald-500/15"
+                      className="min-h-touch border-status-success/20 bg-status-success/10 text-status-success hover:bg-status-success/15"
                     >
                       <CheckCircle2 className="mr-1.5 h-4 w-4" />
                       Abschliessen
@@ -593,7 +593,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       variant="outline"
                       onClick={() => openLifecycleDialog('cancel')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch border-rose-400/20 bg-rose-500/10 text-rose-100 hover:bg-rose-500/15"
+                      className="min-h-touch border-status-error/20 bg-status-error/10 text-status-error hover:bg-status-error/15"
                     >
                       <XCircle className="mr-1.5 h-4 w-4" />
                       Abbrechen
@@ -602,7 +602,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       variant="outline"
                       onClick={() => openLifecycleDialog('fail')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch border-red-400/20 bg-red-500/10 text-red-100 hover:bg-red-500/15"
+                      className="min-h-touch border-status-error/20 bg-status-error/10 text-status-error hover:bg-status-error/15"
                     >
                       <CircleAlert className="mr-1.5 h-4 w-4" />
                       Scheitern
@@ -615,7 +615,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
               <div className="relative mb-8">
                 <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
-                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-linear-to-r from-emerald-400 via-indigo-400 to-amber-400" style={{ width: progressWidth }} />
+                <div className="absolute left-8 top-10 h-[2px] rounded-full bg-linear-to-r from-status-success via-status-info to-status-warning" style={{ width: progressWidth }} />
                 <div className={cn('relative grid gap-4', nodes.length === 4 ? 'grid-cols-4' : nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
                   {nodes.map((node) => {
                     const Icon = ICONS[node.icon as keyof typeof ICONS] ?? Sparkles

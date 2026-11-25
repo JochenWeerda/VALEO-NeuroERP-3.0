@@ -193,7 +193,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                         aria-required="true"
                         className={cn(
                           'border-white/10 bg-white/5 text-slate-100',
-                          !lifecycleDialog.reasonCategory && 'border-rose-400/40',
+                          !lifecycleDialog.reasonCategory && 'border-status-error/40',
                         )}
                       >
                         <SelectValue placeholder="Kategorie waehlen …" />
@@ -219,7 +219,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                       placeholder="z.B. customer_order_cancelled"
                       className={cn(
                         'border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500',
-                        !lifecycleDialog.reasonCode.trim() && 'border-rose-400/40',
+                        !lifecycleDialog.reasonCode.trim() && 'border-status-error/40',
                       )}
                     />
                     {!lifecycleDialog.reasonCode.trim() && (

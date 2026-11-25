@@ -324,6 +324,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Document-Screen-Versions **1.14.0** (9 Belegvarianten)
 - Prioritäre ProcessBand-Abdeckung: Belegfamilie + Prozessketten-Masken (Stammdaten mit `noWorkflowReason` bewusst ohne Band)
 
+### Batch 36 — Design-Token-Invarianten (Mask-Builder)
+
+- Flow-Spine-Renderer/Dialoge: Rohpalette → `text/border/bg-status-*`
+- Waage-Tickets + Mobile-Fütterung: Statusfarben semantisch
+- Rationsoptimierung: `text-[10px]` → `text-2xs` (64×)
+- Mask-Builder-Tree: 0 Treffer auf Rohpalette/`text-[10px]` (Scan)
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

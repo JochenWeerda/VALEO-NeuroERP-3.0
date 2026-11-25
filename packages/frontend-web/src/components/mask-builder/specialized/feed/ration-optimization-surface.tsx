@@ -482,9 +482,9 @@ function RationBlocksPanel({
   const fs = blocks.feeding_system
   const blk = (label: string, b: RationBlocks['tmr_block']) => (
     <div className="rounded-lg border px-3 py-2" style={{ borderColor: C.border }}>
-      <div className="text-[10px] uppercase font-bold" style={{ color: C.muted }}>{label}</div>
+      <div className="text-2xs uppercase font-bold" style={{ color: C.muted }}>{label}</div>
       <div className="text-sm font-bold" style={{ color: C.dark }}>{fmt(b.dmi_kg, 2)} kg TM</div>
-      <div className="text-[10px]" style={{ color: C.muted }}>{fmt(b.dmi_share_pct, 0)} % der Ration</div>
+      <div className="text-2xs" style={{ color: C.muted }}>{fmt(b.dmi_share_pct, 0)} % der Ration</div>
     </div>
   )
 
@@ -582,13 +582,13 @@ function ForagePerformancePanel({
       )}
 
       {compact && (
-        <p className="text-[10px] leading-snug" style={{ color: C.muted }}>
+        <p className="text-2xs leading-snug" style={{ color: C.muted }}>
           E/P-Abgleich: Überhang Protein vs. Energie max. {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l). Ziel-Spalte = Profil-Leistung.
         </p>
       )}
 
       <div className="grid gap-2">
-        <div className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 px-1 text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>
+        <div className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 px-1 text-2xs font-bold uppercase tracking-wide" style={{ color: C.muted }}>
           <span>Kennzahl</span>
           <span className="text-right">IST</span>
           <span className="text-right">Ziel (Profil)</span>
@@ -611,7 +611,7 @@ function ForagePerformancePanel({
         >
           <div className="font-semibold" style={{ color: C.dark }}>
             Mehr „Milch aus Protein“ vs. „Milch aus Energie“
-            <span className="block font-normal text-[10px] font-mono mt-0.5" style={{ color: C.muted }}>
+            <span className="block font-normal text-2xs font-mono mt-0.5" style={{ color: C.muted }}>
               Orientierung ≤ {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l)
             </span>
           </div>
@@ -684,7 +684,7 @@ function RationWarningAdjustmentsPanel({
       style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
     >
       <div className="text-[11px] font-bold uppercase tracking-wider">Hinweise &amp; Rationsanpassung</div>
-      <p className="text-[10px] leading-snug opacity-90">
+      <p className="text-2xs leading-snug opacity-90">
         Vorschlag übernehmen wendet den Patch an und startet die Optimierung erneut. Eigene Anpassung öffnet den Assistenten.
         {wizardData ? ' Ohne Änderung erneut rechnen ist nur sinnvoll nach manuellen Schritten.' : ' Ohne Assistenten-Daten (z. B. reine Demo) zuerst „Neue Ration“ oder Demo mit Profil nutzen.'}
       </p>
@@ -700,7 +700,7 @@ function RationWarningAdjustmentsPanel({
       )}
       {suggestions.length > 0 && (
         <div className="space-y-2 border-t pt-2" style={{ borderColor: C.deltaBorder }}>
-          <div className="text-[10px] font-bold uppercase" style={{ color: C.muted }}>
+          <div className="text-2xs font-bold uppercase" style={{ color: C.muted }}>
             Vorschläge zur Anpassung
           </div>
           {suggestions.map((s) => {
@@ -936,7 +936,7 @@ function ConcentrateCallUpPanel({
               {['Milch (kg/d)', 'Zusatzmilch', 'Konz. low', 'Konz. mid', 'Konz. high', 'je Abruf', 'Status'].map((h) => (
                 <th
                   key={h}
-                  className="py-2 px-2 border-b text-[10px] font-semibold text-[#4B5563] text-right first:text-left"
+                  className="py-2 px-2 border-b text-2xs font-semibold text-[#4B5563] text-right first:text-left"
                   style={{ borderColor: C.border }}
                 >
                   {h}
@@ -986,7 +986,7 @@ function ConcentrateCallUpPanel({
         </div>
       )}
 
-      <p className="text-[10px] italic" style={{ color: C.muted }}>
+      <p className="text-2xs italic" style={{ color: C.muted }}>
         Praxisrichtwert 0,45-0,50 kg Konzentrat je kg Zusatzmilch (entspricht ~1 l
         Konzentrat / 2 l Milch). Keine KI-Bildwerte. Annahme TM-Gehalt
         Konzentrat: {fmt(callUp.basis.assumed_concentrate_dm_frac * 100, 0)} %.
@@ -1050,7 +1050,7 @@ function MixingProtocolPanel({
               {['Schritt', 'Gruppe', 'Futtermittel', 'kg FM', 'kg TM', 'Anteil'].map((h) => (
                 <th
                   key={h}
-                  className="py-2 px-2 border-b text-[10px] font-semibold text-[#4B5563] text-right first:text-left"
+                  className="py-2 px-2 border-b text-2xs font-semibold text-[#4B5563] text-right first:text-left"
                   style={{ borderColor: C.border }}
                 >
                   {h}
@@ -1120,7 +1120,7 @@ function MixingProtocolPanel({
         </div>
       )}
 
-      <p className="text-[10px] italic" style={{ color: C.muted }}>
+      <p className="text-2xs italic" style={{ color: C.muted }}>
         Reihenfolge und Wasserzugabe sind Praxis-Richtwerte (Vertikalmischer:
         Strukturfutter zuerst, Mineral/Konzentrat zuletzt; Wasser zur
         Ziel-TM 38-42 %). Uebermenge +{fmt(protocol.basis.overfill_pct, 0)} %
@@ -1171,7 +1171,7 @@ function FeedingControlPanel({ protocol, wizardData, result }: { protocol: Mixin
       <div>Mischgenauigkeit <b>{latest.mischgenauigkeit_pct ?? '–'} %</b></div><div>TM-Verzehr <b>{latest.tm_verzehr_kg_kuh ?? '–'} kg/Kuh</b></div><div>IOFC <b>{latest.iofc_eur_kuh ?? '–'} €/Kuh</b></div><div>peNDF IST <b>{latest.schuettelbox?.pendf_ist_g_kgdm ?? '–'} g/kg TM</b></div>
     </div>}
     {latest?.anpassungsvorschlaege?.map((item) => <div key={item} className="text-xs rounded border p-2" style={{ background: C.deltaBg, borderColor: C.deltaBorder }}>{item}</div>)}
-    <p className="text-[10px]" style={{ color: C.muted }}>Zeitreihe: {history.data?.length ?? 0} Protokolle · DLG-Toleranz Mischgenauigkeit ≤ 5 %. peNDF-Ist ist ein Schüttelbox-/NDF-Proxy, keine Laboranalyse.</p>
+    <p className="text-2xs" style={{ color: C.muted }}>Zeitreihe: {history.data?.length ?? 0} Protokolle · DLG-Toleranz Mischgenauigkeit ≤ 5 %. peNDF-Ist ist ein Schüttelbox-/NDF-Proxy, keine Laboranalyse.</p>
   </div>
 }
 // ---------------------------------------------------------------------------
@@ -1494,7 +1494,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               onChange={(e) => setAiPrompt(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && aiPrompt.trim() && onStart()}
               placeholder='"Baue eine günstigere Ration für 38 kg Milch, gleiche Struktur, weniger Soja..."'
-              className="flex-1 bg-white border rounded-md px-4 py-3 text-sm outline-hidden focus:border-sky-400 transition-colors"
+              className="flex-1 bg-white border rounded-md px-4 py-3 text-sm outline-hidden focus:border-status-info transition-colors"
               style={{ borderColor: C.aiBorder }}
             />
             <button
@@ -1547,7 +1547,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               >
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-bold group-hover:text-[#88B04B] transition-colors" style={{ color: C.dark }}>{r.name}</h3>
-                  <span className="text-[10px] font-bold uppercase bg-slate-50 px-1.5 py-0.5 rounded border" style={{ color: C.muted, borderColor: C.border }}>
+                  <span className="text-2xs font-bold uppercase bg-slate-50 px-1.5 py-0.5 rounded border" style={{ color: C.muted, borderColor: C.border }}>
                     {r.status}
                   </span>
                 </div>
@@ -2211,7 +2211,7 @@ function Wizard({
                 {showFanAdvanced && (
                   <div className="space-y-2 pt-2">
                     <div>
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
                         Relaxation (weiche Grenzen)
                       </label>
                       <div className="flex gap-2">
@@ -2238,7 +2238,7 @@ function Wizard({
                       </div>
                     </div>
                     <div>
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
                         Weide-/Saisonprofil
                       </label>
                       <select
@@ -2260,7 +2260,7 @@ function Wizard({
                     </div>
                     {/* DLG 01|2025 Tab. 13-15: Leistungs-/Physiologiestufe */}
                     <div>
-                      <label className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
                         Leistungsstufe (DLG 01|2025 Tab. 13-15)
                       </label>
                       <select
@@ -2289,7 +2289,7 @@ function Wizard({
                           <option value="pmr_pasture_autumn">PMR + Weide Herbst</option>
                         </optgroup>
                       </select>
-                      <div className="text-[10px] mt-1" style={{ color: C.muted }}>
+                      <div className="text-2xs mt-1" style={{ color: C.muted }}>
                         Bei Auswahl greift die DLG-01|2025-Bandauswertung als
                         <em> weiche </em> Constraint (Klasse B, relaxation-policy-skaliert).
                       </div>
@@ -2410,10 +2410,10 @@ function Wizard({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <div className="text-sm font-semibold" style={{ color: C.dark }}>{doc.product_name}</div>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: '#ECFDF5', color: '#047857' }}>
+                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#ECFDF5', color: '#047857' }}>
                             Match {fmt(doc.gfe2023_estimate.match_coverage_pct, 0)}%
                           </span>
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
+                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
                             {doc.source_type === 'image_ocr' ? 'Foto/OCR' : 'PDF'}
                           </span>
                         </div>
@@ -2564,7 +2564,7 @@ function Wizard({
                         <td className="px-4 py-3 font-bold text-sm" style={{ color: C.dark }}>
                           <span>{f.name}</span>
                           {isCustom && (
-                            <span className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
+                            <span className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
                               Betrieb
                             </span>
                           )}
@@ -2879,7 +2879,7 @@ function FanCalibrationPanel({
           FAN-Kalibrierung (GfE 2023)
         </div>
         <span
-          className="text-[10px] font-bold px-2 py-0.5 rounded border"
+          className="text-2xs font-bold px-2 py-0.5 rounded border"
           style={{ background: '#F9FAFB', borderColor: badgeColor, color: badgeColor }}
         >
           bewertet bei FAN {ref != null ? ref.toFixed(2) : '–'}
@@ -2906,19 +2906,19 @@ function FanCalibrationPanel({
         {fan.precision_summary && (
           <div className="col-span-2 mt-1 rounded border p-2" style={{ borderColor: C.border, background: '#F8FAFC' }}>
             <div className="mb-1 flex justify-between font-semibold"><span>DLG-FAN-Präzision</span><span>Kap. 4.3 / 6.2</span></div>
-            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-[10px]">
+            <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-2xs">
               <span>Passage k</span><span className="text-right">{fan.precision_summary.passage_rate_pct_h?.toFixed(2) ?? '–'} %/h</span>
               <span>OMD FAN1 → FANi</span><span className="text-right">{fan.precision_summary.omd_fan1_pct?.toFixed(1) ?? '–'} → {fan.precision_summary.omd_fani_pct?.toFixed(1) ?? '–'} %</span>
               <span>ME FAN1 → FANi</span><span className="text-right">{fan.precision_summary.me_fan1_mj_kgdm?.toFixed(2) ?? '–'} → {fan.precision_summary.me_fani_mj_kgdm?.toFixed(2) ?? '–'}</span>
               <span>EDG FAN1 → FANi</span><span className="text-right">{fan.precision_summary.edg_fan1_pct?.toFixed(1) ?? '–'} → {fan.precision_summary.edg_fani_pct?.toFixed(1) ?? '–'} %</span>
               <span>UDP FANi</span><span className="text-right">{fan.precision_summary.udp_fani_pct?.toFixed(1) ?? '–'} %</span>
             </div>
-            {fan.precision_summary.fallback_items > 0 && <p className="mt-1 text-[10px]" style={{ color: C.warn }}>{fan.precision_summary.fallback_items} Position(en) ohne vollständige Analytik: konservativer Fallback.</p>}
+            {fan.precision_summary.fallback_items > 0 && <p className="mt-1 text-2xs" style={{ color: C.warn }}>{fan.precision_summary.fallback_items} Position(en) ohne vollständige Analytik: konservativer Fallback.</p>}
           </div>
         )}        {(policyProfile || seasonProfile || relaxationPolicy) && (
           <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
             <span style={{ color: C.muted }}>Policy</span>
-            <span className="font-mono text-[10px]">
+            <span className="font-mono text-2xs">
               {policyProfile ?? '–'}
               {seasonProfile ? ` · ${seasonProfile}` : ''}
               {relaxationPolicy ? ` · ${relaxationPolicy}` : ''}
@@ -2927,21 +2927,21 @@ function FanCalibrationPanel({
         )}
       </div>
       {warnOpen && (
-        <div className="mt-2 text-[10px] px-2 py-1 rounded" style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}>
+        <div className="mt-2 text-2xs px-2 py-1 rounded" style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}>
           Hinweis: letzte Iteration hatte |dFANi|={lastDelta.toFixed(3)} (&gt; {warnTol.toFixed(2)}). Ergebnis weiter stabil, aber pruefen.
         </div>
       )}
       {fan.fallback_warning && (
-        <div className="mt-2 text-[10px] px-2 py-1 rounded" style={{ background: '#FEF2F2', borderColor: '#FECACA', color: C.error }}>
+        <div className="mt-2 text-2xs px-2 py-1 rounded" style={{ background: '#FEF2F2', borderColor: '#FECACA', color: C.error }}>
           {fan.fallback_warning}
         </div>
       )}
       {fan.iterations && fan.iterations.length > 1 && (
         <details className="mt-2">
-          <summary className="text-[10px] cursor-pointer" style={{ color: C.muted }}>
+          <summary className="text-2xs cursor-pointer" style={{ color: C.muted }}>
             Iterationsverlauf anzeigen
           </summary>
-          <div className="mt-1 text-[10px] font-mono space-y-0.5">
+          <div className="mt-1 text-2xs font-mono space-y-0.5">
             {fan.iterations.map((it, i) => (
               <div key={i} className="flex justify-between">
                 <span>#{it.i + 1}</span>
@@ -2973,7 +2973,7 @@ function ConstraintStatusPanel({
         <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Constraint-Status
         </div>
-        <div className="text-[10px]" style={{ color: C.muted }}>
+        <div className="text-2xs" style={{ color: C.muted }}>
           {ok.length} OK · {softViolations.length} weich · {hardViolations.length} hart
         </div>
       </div>
@@ -3031,7 +3031,7 @@ function ConstraintStatusPanel({
             <span className="font-semibold font-mono">{totalPenalty.toFixed(2)}</span>
           </div>
           {summary?.by_class && (
-            <div className="flex justify-between text-[10px] mt-0.5 font-mono" style={{ color: C.muted }}>
+            <div className="flex justify-between text-2xs mt-0.5 font-mono" style={{ color: C.muted }}>
               <span>Klassen A / B / C</span>
               <span>
                 {summary.by_class.A.toFixed(2)} · {summary.by_class.B.toFixed(2)} · {summary.by_class.C.toFixed(2)}
@@ -3140,7 +3140,7 @@ function NutrientGauge({ band }: { band: PolicyProfileBand }) {
   const shortName = band.name.replace(/^DLG-Policy:\s*/, '')
   return (
     <div className="flex flex-col items-center">
-      <div className="text-[10px] font-semibold text-center leading-tight h-7 flex items-end justify-center" style={{ color: C.dark }} title={band.name}>
+      <div className="text-2xs font-semibold text-center leading-tight h-7 flex items-end justify-center" style={{ color: C.dark }} title={band.name}>
         {shortName}
       </div>
       <svg viewBox="0 0 104 56" className="w-full max-w-[120px]" role="img" aria-label={`${band.name} ${gaugeValueFmt(band.actual, band.unit)} ${band.unit}`}>
@@ -3285,7 +3285,7 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
           Erreichbare Leistung
         </div>
         <span
-          className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded"
+          className="text-2xs uppercase font-bold px-1.5 py-0.5 rounded"
           style={{ color: toneColor(st.tone), background: `color-mix(in srgb, ${toneColor(st.tone)} 12%, transparent)` }}
         >
           {st.label}
@@ -3379,7 +3379,7 @@ function MassnahmenPanel({ result }: { result: OptimizationResult | null }) {
             <span className="mt-0.5" style={{ color: C.accent }}>›</span>
             <div>
               <div className="text-[12px] font-semibold" style={{ color: C.dark }}>{s.title}</div>
-              <div className="text-[10px]" style={{ color: C.muted }}>{s.detail}</div>
+              <div className="text-2xs" style={{ color: C.muted }}>{s.detail}</div>
             </div>
           </div>
         ))}
@@ -3403,7 +3403,7 @@ function PreflightPanel({ result }: { result: OptimizationResult | null }) {
         <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Hinweise &amp; Warnungen
         </div>
-        <div className="text-[10px]" style={{ color: C.muted }}>
+        <div className="text-2xs" style={{ color: C.muted }}>
           {pf.blocker_count ?? 0} Blocker · {pf.warning_count ?? 0} Warnung
         </div>
       </div>
@@ -3414,7 +3414,7 @@ function PreflightPanel({ result }: { result: OptimizationResult | null }) {
             <div>
               <div className="font-medium">{f.cause}</div>
               {f.remediation && (
-                <div className="text-[10px]" style={{ color: C.muted }}>→ {f.remediation}</div>
+                <div className="text-2xs" style={{ color: C.muted }}>→ {f.remediation}</div>
               )}
             </div>
           </div>
@@ -3474,7 +3474,7 @@ function BestAttainablePanel({ result }: { result: OptimizationResult | null }) 
           {att.target_gap != null && Math.abs(att.target_gap) > 0.05 && (
             <div className="flex justify-between"><span style={{ color: C.muted }}>Ziellücke{att.limiting_axis ? ` (${att.limiting_axis === 'energy' ? 'Energie' : 'Protein'})` : ''}</span><span className="font-mono font-semibold" style={{ color: att.target_gap > 0 ? C.warn : C.success }}>{att.target_gap > 0 ? '−' : '+'}{fmt(Math.abs(att.target_gap), 1)} kg</span></div>
           )}
-          <div className="pt-1 text-[10px]" style={{ color: C.muted }}>Best-Attainable-Lauf verfügbar über „Best Attainable" (oben).</div>
+          <div className="pt-1 text-2xs" style={{ color: C.muted }}>Best-Attainable-Lauf verfügbar über „Best Attainable" (oben).</div>
         </div>
       )}
     </div>
@@ -3548,7 +3548,7 @@ function VariantComparisonPanel({
         </table>
       </div>
       {variants.length === 0 && (
-        <div className="mt-2 text-[10px]" style={{ color: C.muted }}>
+        <div className="mt-2 text-2xs" style={{ color: C.muted }}>
           Mit „Variante speichern" (oben) weitere Spalten zum Vergleich hinzufügen.
         </div>
       )}
@@ -3616,7 +3616,7 @@ function SensitivityPanel({
         Sensitivität — parametrische Analyse
       </div>
       <div className="flex flex-wrap items-end gap-2 mb-2">
-        <label className="text-[10px]" style={{ color: C.muted }}>
+        <label className="text-2xs" style={{ color: C.muted }}>
           Größe
           <select
             value={parameter}
@@ -3630,7 +3630,7 @@ function SensitivityPanel({
           </select>
         </label>
         {needsFeed && (
-          <label className="text-[10px]" style={{ color: C.muted }}>
+          <label className="text-2xs" style={{ color: C.muted }}>
             Futtermittel
             <select
               value={effFeedId}
@@ -3646,7 +3646,7 @@ function SensitivityPanel({
         )}
         {([['von', start, setStart], ['bis', stop, setStop], ['Schritt', step, setStep]] as const).map(
           ([lbl, val, setter]) => (
-            <label key={lbl} className="text-[10px]" style={{ color: C.muted }}>
+            <label key={lbl} className="text-2xs" style={{ color: C.muted }}>
               {lbl}
               <input
                 type="number"
@@ -3696,7 +3696,7 @@ function SensitivityPanel({
                   <td className="px-2 py-1 text-right font-mono font-semibold" style={{ color: s.status === 'optimal' ? C.dark : C.warn }}>
                     {s.attainable_output_kg != null ? fmt(s.attainable_output_kg, 1) : (s.technical_max_kg != null ? `≤${fmt(s.technical_max_kg, 1)}` : '–')}
                   </td>
-                  <td className="px-2 py-1 text-[10px]" style={{ color: C.muted }}>
+                  <td className="px-2 py-1 text-2xs" style={{ color: C.muted }}>
                     {s.binding_constraints.length ? s.binding_constraints.join(', ') : '—'}
                   </td>
                 </tr>
@@ -3951,13 +3951,13 @@ function Workbench({
           <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Rahmenbedingungen</div>
           <div className="space-y-2.5">
             <div>
-              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Herde / Gruppe</label>
+              <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Herde / Gruppe</label>
               <div className="mt-0.5 rounded border px-2 py-1.5 text-[13px] font-medium" style={{ borderColor: C.border, color: C.dark, background: '#F9FAFB' }}>
                 {wizardData ? `Laktierende Kühe · ${wizardData.group.count ?? '–'} Tiere` : 'Laktierende Kühe'}
               </div>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Leistungsniveau (kg ECM/Kuh/Tag)</label>
+              <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Leistungsniveau (kg ECM/Kuh/Tag)</label>
               <input
                 type="number"
                 step={0.5}
@@ -3978,7 +3978,7 @@ function Workbench({
               />
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Fütterungssystem</label>
+              <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Fütterungssystem</label>
               <select
                 value={wizardData?.feedingType ?? 'TMR'}
                 disabled={!canEditRation}
@@ -3992,7 +3992,7 @@ function Workbench({
               </select>
             </div>
             <div>
-              <label className="text-[10px] uppercase tracking-wide" style={{ color: C.muted }}>Modus</label>
+              <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Modus</label>
               <div className="mt-0.5 grid grid-cols-3 gap-1">
                 {(['Bewertung', 'Assistent', 'Optimierung'] as const).map((m) => (
                   <button
@@ -4227,12 +4227,12 @@ function Workbench({
             {/* RATION-WB-20: Vorlaeufig-Zustand explizit ausweisen — lokal skalierte Werte
                 sind noch nicht gegen die GfE-Restriktionen geprueft (Skill §11.2). */}
             {hasDraft ? (
-              <div className="flex items-center gap-1.5 text-[10px] font-medium" role="status" style={{ color: C.warn }}>
+              <div className="flex items-center gap-1.5 text-2xs font-medium" role="status" style={{ color: C.warn }}>
                 <Loader2 size={11} className="animate-spin" aria-hidden="true" />
                 Vorläufige Werte · verbindliche Neuberechnung läuft
               </div>
             ) : (
-              <div className="text-[10px]" style={{ color: C.muted }}>Live-Neuberechnung bei jeder Änderung · Grenzen öffnen/verdichten über Min/Max</div>
+              <div className="text-2xs" style={{ color: C.muted }}>Live-Neuberechnung bei jeder Änderung · Grenzen öffnen/verdichten über Min/Max</div>
             )}
           </div>
           {/* RATION-WB-20: Der Vollbild-Spinner darf die Tabelle beim Tippen nicht ersetzen —
@@ -4396,7 +4396,7 @@ function Workbench({
                           disabled={!canEditRation}
                           aria-label={`${item.name} aus der Ration entfernen und neu optimieren`}
                           title="Zutat entfernen und neu optimieren"
-                          className="rounded p-1 text-slate-400 hover:bg-red-50 hover:text-status-error disabled:opacity-40"
+                          className="rounded p-1 text-muted-foreground hover:bg-status-error/10 hover:text-status-error disabled:opacity-40"
                         >
                           <XIcon size={12} />
                         </button>
@@ -4535,10 +4535,10 @@ function Workbench({
           <div className="grid grid-cols-2 gap-2">
             {kpis.map((kpi, i) => (
               <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={stringValue('title' in kpi ? kpi.title : undefined)}>
-                <div className="text-[10px] uppercase mb-1" style={{ color: C.muted }}>{kpi.label}</div>
+                <div className="text-2xs uppercase mb-1" style={{ color: C.muted }}>{kpi.label}</div>
                 <div className="text-[15px] font-bold">{kpi.value}</div>
                 <div
-                  className="text-[10px] uppercase font-bold"
+                  className="text-2xs uppercase font-bold"
                   style={{ color: kpi.status === 'success' ? C.success : kpi.status === 'warn' ? C.warn : C.error }}
                 >
                   {kpi.status === 'success' ? '✓ OK' : kpi.status === 'warn' ? '⚠ Grenze' : '✗ Fehlt'} {kpi.unit}
@@ -4591,7 +4591,7 @@ function Workbench({
         {dlg && (
           <div id="dlg-panel" className={card()} style={tourRing('dlg-panel')}>
             <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>DLG 01|25 / GfE-Workshop 2023</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.4px] mb-1" style={{ color: C.muted }}>
+            <div className="text-2xs font-semibold uppercase tracking-[0.4px] mb-1" style={{ color: C.muted }}>
               Planung (primaer)
             </div>
             {[
@@ -4652,12 +4652,12 @@ function Workbench({
               </div>
             ))}
 
-            <div className="text-[10px] font-semibold uppercase tracking-[0.4px] mt-2 mb-1" style={{ color: C.muted }}>
+            <div className="text-2xs font-semibold uppercase tracking-[0.4px] mt-2 mb-1" style={{ color: C.muted }}>
               Kontrolle / Validierung (DLG 01|2023)
             </div>
             {/* peNDF-Status-Zeile: peNDF-Modell im kalibrierten Bereich oder Fallback. */}
             {dlg.pendf_model_status && (
-              <div className="flex items-start gap-1.5 text-[10px] mb-1" style={{ color: C.muted }}>
+              <div className="flex items-start gap-1.5 text-2xs mb-1" style={{ color: C.muted }}>
                 <span
                   className="inline-block h-2 w-2 rounded-full mt-0.5"
                   style={{ background: dlg.pendf_model_calibrated === false ? '#f59e0b' : '#94a3b8' }}
@@ -4715,7 +4715,7 @@ function Workbench({
                 Leistungsstufen-Check (DLG 01|2025)
               </div>
               <span
-                className="text-[10px] font-bold px-2 py-0.5 rounded border"
+                className="text-2xs font-bold px-2 py-0.5 rounded border"
                 style={{
                   background: '#F9FAFB',
                   borderColor: result.policy_profile_evaluation.violation_count === 0 ? C.success : '#f59e0b',
@@ -4734,7 +4734,7 @@ function Workbench({
               <span className="font-mono">{(result.policy_profile_evaluation.penalty_total ?? 0).toFixed(2)}</span>
               {result.policy_profile_lp_mode === 'stage2_cost_plus_policy_slack' && (
                 <span
-                  className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                  className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded border"
                   title="Die Policy-Baender sind als native Slack-Variablen im LP gebunden. Der Solver minimiert Kosten und Korridor-Abweichung gemeinsam."
                   style={{ background: '#ECFDF5', borderColor: C.success, color: C.success }}
                 >
@@ -4743,7 +4743,7 @@ function Workbench({
               )}
               {result.concentrate_max_lp_slack_kg != null && result.concentrate_max_lp_slack_kg > 0 && (
                 <span
-                  className="ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded border"
+                  className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded border"
                   title="Empfohlenes Konzentrat-Tagesmaximum wurde im Stage-2-LP mit einer Slack-Variable weich überschritten."
                   style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}
                 >
@@ -4763,7 +4763,7 @@ function Workbench({
                       <span className="inline-block h-2 w-2 rounded-full" style={{ background: dotBg }} />
                       {band.name.replace(/^DLG-Policy:\s*/, '')}
                     </span>
-                    <span className="font-mono text-[10px]">
+                    <span className="font-mono text-2xs">
                       {fmt(band.actual, 1)} {band.unit}
                       {' · Ziel '}
                       {range} {band.unit}
@@ -4780,7 +4780,7 @@ function Workbench({
             {/* LP-Slack-Details: welche Baender hat der Solver selbst relaxiert? */}
             {Array.isArray(result.policy_profile_lp_slacks) && result.policy_profile_lp_slacks.length > 0 && (
               <div className="mt-3 pt-2 border-t" style={{ borderColor: '#E5E7EB' }}>
-                <div className="text-[10px] uppercase font-bold tracking-[0.5px] mb-1" style={{ color: C.muted }}>
+                <div className="text-2xs uppercase font-bold tracking-[0.5px] mb-1" style={{ color: C.muted }}>
                   LP-Solver-Slacks (aktive Korridor-Verletzungen)
                 </div>
                 {(() => {
@@ -4895,7 +4895,7 @@ function Workbench({
               onChange={(e) => setAiMessage(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAiSend()}
               placeholder="Frage den Copiloten…"
-              className="flex-1 p-2 rounded border text-[12px] outline-hidden focus:border-sky-400 transition-all"
+              className="flex-1 p-2 rounded border text-[12px] outline-hidden focus:border-status-info transition-all"
               style={{ borderColor: C.aiBorder }}
             />
             <button
@@ -4912,7 +4912,7 @@ function Workbench({
               <button
                 key={p}
                 onClick={() => { setAiMessage(p); }}
-                className="text-[10px] px-2 py-0.5 rounded border transition-colors hover:bg-white"
+                className="text-2xs px-2 py-0.5 rounded border transition-colors hover:bg-white"
                 style={{ borderColor: C.aiBorder, color: C.aiText }}
               >
                 {p}
@@ -5020,7 +5020,7 @@ function Review({
         </div>
         {result?.status === 'optimal' && (
           <div
-            className="px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest border flex items-center gap-2"
+            className="px-3 py-1 rounded text-2xs font-bold uppercase tracking-widest border flex items-center gap-2"
             style={{ background: C.activeBg, color: C.dark, borderColor: C.accent }}
           >
             <Sparkles size={14} /> Solver: Optimal
@@ -5041,7 +5041,7 @@ function Review({
           <p className="text-xs" style={{ color: C.muted }}>{wizardData?.milkYield} kg Ziel-Milch · {wizardData?.feedingType}</p>
         </div>
         <div className="p-5 rounded-lg text-white shadow-md space-y-2" style={{ background: C.dark }}>
-          <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest">Futterkosten/Kuh/Tag</p>
+          <p className="text-2xs font-bold opacity-70 uppercase tracking-widest">Futterkosten/Kuh/Tag</p>
           <p className="text-2xl font-black">{result ? `${fmt(result.total_cost_eur_day ?? 0)} €` : '–'}</p>
           {result?.total_cost_eur_100kg_milk && (
             <p className="text-[11px] opacity-80">{fmt(result.total_cost_eur_100kg_milk)} € / 100 kg Milch</p>
@@ -5746,7 +5746,7 @@ function IntentSuggestionsPanel({
 
       {preview && previewResult && (
         <div className="rounded-lg border p-3 space-y-2" style={{ background: C.deltaBg, borderColor: C.deltaBorder }}>
-          <div className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 text-[10px] font-bold uppercase tracking-wide" style={{ color: C.muted }}>
+          <div className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 text-2xs font-bold uppercase tracking-wide" style={{ color: C.muted }}>
             <span>Vorschlag: {activeIntentLabel}</span>
             <span className="text-right">Aktiv</span>
             <span className="text-right">Neu</span>
@@ -5866,12 +5866,12 @@ function RationSummaryBar({ result, milkPriceEur }: { result: OptimizationResult
 
   const tile = (label: string, value: string, sub: string, ampel?: AmpelState) => (
     <div className="flex-1 min-w-[120px] px-3 py-2">
-      <div className="text-[10px] uppercase font-bold tracking-[0.4px] flex items-center gap-1.5" style={{ color: C.muted }}>
+      <div className="text-2xs uppercase font-bold tracking-[0.4px] flex items-center gap-1.5" style={{ color: C.muted }}>
         {ampel && ampelDot(ampel)}
         {label}
       </div>
       <div className="text-lg font-bold leading-tight" style={{ color: C.dark }}>{value}</div>
-      <div className="text-[10px]" style={{ color: C.muted }}>{sub}</div>
+      <div className="text-2xs" style={{ color: C.muted }}>{sub}</div>
     </div>
   )
 
@@ -6389,7 +6389,7 @@ export default function Rationsoptimierung() {
 
       <StatusBar result={result} />
 
-      <p className="text-center text-[10px] pb-1 pt-0" style={{ color: C.muted }}>
+      <p className="text-center text-2xs pb-1 pt-0" style={{ color: C.muted }}>
         Entscheidungshilfe · ersetzt keine fachliche Beratung · GfE-2023 · DLG-Information 01|25
       </p>
     </div>
