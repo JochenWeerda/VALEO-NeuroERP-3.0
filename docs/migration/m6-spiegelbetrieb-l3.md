@@ -58,7 +58,8 @@ unten beruht auf Tabellen- und Spaltennamen, die **Bedeutung der Spalten ist am 
 | Kunden | `KUNDEN` (KUNDENNR, KUNDNAME, USTID, SPERRE; Anschrift ueber ADRNR1 aus `ADRESSEN`, im Abzug verbunden) | `domain_crm.customers` (fuehrt die Debitoren im Uebergang) | **umgesetzt** (Kernfelder); DEBITORKTO ohne Ziel bis ADR Stufe 3b (`business_partners.debtor_account`), im Differenzbericht als nicht zugeordnet |
 | Lieferanten | `KUNDEN` mit KREDITORKTO, `WWS_ARTLIEF`, `WWS_LIEFERANTEN_PREISE` | Lieferantenstamm, Ziel Geschaeftspartner | offen - Zielstamm im Partnermodell klaeren |
 | Preise / Konditionen | `WWS_ARTPREIS1/2`, `WWS_PREISTAB1/2`, `WWS_KUNDEN_PREISE`, `WWS_PREISLISTE1-3`, `WWS_AKTIONSPREISE`, `KONDITIONEN`, `WWS_RABATTSTAFFEL1/2` | Preisfindung (pricing) | offen |
-| Bestaende / Bewegungen | `WWS_ARTBESTAND`, `WWS_LAGERBESTAND`, `WWS_ARTBEWEGUNG*`, `WWS_LAGERPLATZ` | Bestandsjournal ueber den Buchungsdienst | offen - Anfangsbestand als Bestandsvortrag (#206) |
+| Bestaende | `WWS_ARTBESTAND`, `WWS_LAGERBESTAND` (je Artikel und Lager) | Bestandsjournal ueber den Buchungsdienst | **umgesetzt**: erster Abzug bucht den Anfangsbestand (`opening_balance`, Schluessel `spiegel:bestand:`), jeder weitere Abzug vergleicht nur - Abweichung = Felddifferenz `menge`, keine Korrekturbuchung |
+| Bewegungen | `WWS_ARTBEWEGUNG*`, `WWS_LAGERPLATZ` | Belege des Spiegelzeitraums | offen - entstehen in VALEO aus den nachvollzogenen Belegen |
 | Angebote | `WWS_ANGEBOT`, `WWS_ANGEBOT_POS`, `WWS_KAUFANGEBOT*` | DocFlow | offen |
 | Auftraege | `WWS_VERKAUF1/2`, `AUFTRAG` | DocFlow | offen |
 | Lieferscheine | `WWS_VLIEFER1/2` (Verkauf), `WWS_ELIEFER1/2` (Einkauf) | DocFlow | offen |

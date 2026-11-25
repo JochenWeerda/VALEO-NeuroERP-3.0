@@ -1323,3 +1323,6 @@ Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. O
 
 ## M6-SPIEGEL-KUNDEN-20261125 — zur Abnahme, Claude Code (M6)
 Objektart kunde in der Spiegeluebernahme (domain_crm.customers): Kundennummer, Name, Anschrift, USt-ID, Sperre; wiederholbar, Aenderungen mit Felddifferenz, Fremdbestand als Fehlerzeile. L3-Debitorennummer ohne Ziel bis ADR Stufe 3b - im Differenzbericht 'nicht_zugeordnet'. Dateibesitz: app/services/spiegel_uebernahme.py, tests/test_spiegel_uebernahme.py.
+
+## M6-SPIEGEL-BESTAND-20261125 — zur Abnahme, Claude Code (M6)
+Objektart bestand: erster Abzug bucht Anfangsbestand ueber InventoryService (opening_balance, Schluessel spiegel:bestand:<artikel>:<lager>); Folgeabzuege vergleichen L3-Bestand mit dem Lagersaldo aus dem Bestandsjournal (direction_sql) und melden Abweichungen, ohne zu buchen (auch bei unveraendertem L3-Inhalt). Fremdbestand ohne Quellreferenz, unbekannter Artikel/Lager = Fehlerzeile. Gestapelt auf #212.
