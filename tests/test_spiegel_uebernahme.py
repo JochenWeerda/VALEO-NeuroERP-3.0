@@ -52,6 +52,7 @@ def mandant():
                         "DELETE FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
                         "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                        "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.warehouses WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_staging WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_audit WHERE tenant_id = :t",
@@ -205,7 +206,7 @@ def test_protokoll_ist_unveraenderlich(mandant):
 
 def _kunde(nr: str, name: str, **mehr) -> dict:
     return {"TYP": "kunde", "QUELLE": nr, "KUNDENNR": nr, "KUNDNAME": name, "STRASSE": "Hauptstr. 1", "PLZ": "26721",
-            "ORT": "Emden", "STAAT": "D", "DEBITORKTO": "10001", **mehr}
+            "ORT": "Emden", "STAAT": "D", "DEBITORKTO": nr, **mehr}
 
 
 def _kundenzeilen(t: str) -> list[tuple]:
@@ -215,7 +216,7 @@ def _kundenzeilen(t: str) -> list[tuple]:
             "FROM domain_crm.customers WHERE tenant_id = :t ORDER BY customer_number"), {"t": t})]
 
 
-def test_kunden_werden_angelegt_wiederholt_unveraendert_und_debitor_nicht_zugeordnet(mandant):
+def test_kunden_werden_angelegt_wiederholt_unveraendert_mit_l3_debitorenkonto(mandant):
     records = [_kunde("10001", "Hof Janssen"), _kunde("10002", "Hof Meyer", SPERRE="1")]
 
     erster = _lauf(mandant, "kd-1", records)
@@ -228,7 +229,19 @@ def test_kunden_werden_angelegt_wiederholt_unveraendert_und_debitor_nicht_zugeor
     assert (erster["neu"], zweiter["unveraendert"]) == (2, 2)
     assert _kundenzeilen(mandant) == [("10001", "Hof Janssen", "Hauptstr. 1", "26721", "Emden", True),
                                       ("10002", "Hof Meyer", "Hauptstr. 1", "26721", "Emden", False)]
-    assert "debitorkonto" in bericht["nicht_zugeordnet"]["kunde"]
+    assert bericht["nicht_zugeordnet"] == {}
+    with SessionLocal() as db:  # Nutzerentscheid 25.11.2026: L3-Debitorennummer = Konto am Geschaeftspartner
+        konten = [tuple(r) for r in db.execute(text(
+            "SELECT c.customer_number, bp.debtor_account FROM domain_crm.customers c JOIN domain_crm.business_partners "
+            "bp ON bp.partner_id::text = c.business_partner_id::text WHERE c.tenant_id = :t ORDER BY 1"), {"t": mandant})]
+    assert konten == [("10001", "10001"), ("10002", "10002")]
+
+
+def test_vergebenes_debitorenkonto_wird_fehlerzeile(mandant):
+    ergebnis = _lauf(mandant, "kd-1", [_kunde("10001", "Hof Janssen"), _kunde("10003", "Hof Ohne", DEBITORKTO="10001")])
+
+    assert (ergebnis["neu"], ergebnis["fehler"]) == (1, 1)
+    assert [z[0] for z in _kundenzeilen(mandant)] == ["10001"]
 
 
 def test_kundenaenderung_und_fremdbestand(mandant):

@@ -116,13 +116,14 @@ def _artikel_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
 # --- Objektart kunde (L3 KUNDEN mit Anschrift aus ADRESSEN, im Abzug verbunden) ------------------------------------
 #
 # Ziel ist der Kundenstamm domain_crm.customers (fuehrt die Debitoren im Uebergang, Entscheidung 01.11.2026). Die
-# L3-Debitorennummer ist nicht die Kundennummer. Ihr Ziel ist business_partners.debtor_account (ADR Stufe 3b, seit
-# 02.11.2026). Offen ist die fachliche Entscheidung, ob die L3-Nummern als Konten uebernommen werden oder der
-# Nummernkreis neu vergibt. Bis dahin bleibt sie im Quellinhalt (Pruefsumme) und wird im Differenzbericht als
-# nicht zugeordnet ausgewiesen.
+# L3-Debitorennummer ist nicht die Kundennummer: Sie wird das Konto des Geschaeftspartners
+# (business_partners.debtor_account, ADR Stufe 3b) - Nutzerentscheid 25.11.2026: L3-Nummern uebernehmen, damit offene
+# Posten und Journal Konto fuer Konto gegen L3 abgleichbar sind. Der Partner entsteht ueber die Partnerbruecke
+# (BusinessPartnerService.partner_fuer_rolle); ein schon vergebenes, abweichendes Konto oder eine im Mandanten
+# vergebene Nummer wird Fehlerzeile.
 
 KUNDE_FELDER = ("customer_number", "company_name", "address", "postal_code", "city", "country", "tax_id", "phone",
-                "email", "is_active")
+                "email", "is_active", "debitorkonto")
 
 
 def _kunde_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
@@ -138,13 +139,16 @@ def _kunde_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str
         "phone": _text(p, "telefon"),
         "email": _text(p, "email"),
         "is_active": not _ja(p, "gesperrt"),
+        "debitorkonto": _text(p, "debitorkonto"),
     }
 
 
 def _kunde_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
     zeile = db.execute(text(
-        "SELECT customer_number, company_name, address, postal_code, city, country, tax_id, phone, email, is_active, "
-        "deleted_at FROM domain_crm.customers WHERE tenant_id = :t AND id = :id"),
+        "SELECT c.customer_number, c.company_name, c.address, c.postal_code, c.city, c.country, c.tax_id, c.phone, "
+        "c.email, c.is_active, c.deleted_at, bp.debtor_account AS debitorkonto FROM domain_crm.customers c "
+        "LEFT JOIN domain_crm.business_partners bp ON bp.partner_id::text = c.business_partner_id::text "
+        "AND bp.tenant_id = c.tenant_id WHERE c.tenant_id = :t AND c.id = :id"),
         {"t": tenant_id, "id": ziel_id}).mappings().first()
     if not zeile:
         return None
@@ -152,6 +156,24 @@ def _kunde_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | 
     if werte["address"] is not None:  # jsonb kommt als dict; Vergleich mit dem serialisierten Zielwert
         werte["address"] = json.dumps(werte["address"], ensure_ascii=False)
     return werte
+
+
+def _kunde_partner(db: Session, tenant_id: str, werte: dict[str, Any], partner_id: str | None) -> str:
+    from app.core.exceptions import ConflictError
+    from app.services.business_partner_service import BusinessPartnerService
+
+    strasse = json.loads(werte["address"]).get("street") if werte["address"] else None
+    try:
+        return BusinessPartnerService(db, tenant_id).partner_fuer_rolle(
+            "kunde", name=werte["company_name"], vat_id=werte["tax_id"], street=strasse,
+            postal_code=werte["postal_code"], city=werte["city"], country=werte["country"], email=werte["email"],
+            phone=werte["phone"], partner_id=partner_id, konto=werte["debitorkonto"])
+    except ConflictError as fehler:
+        raise ZeilenFehler(f"Debitorenkonto: {fehler}") from fehler
+
+
+def _kunde_spalten(werte: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in werte.items() if k != "debitorkonto"}
 
 
 def _kunde_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
@@ -164,16 +186,24 @@ def _kunde_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
         "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, address, postal_code, city, "
         "country, tax_id, phone, email, is_active) VALUES (:id, :t, :customer_number, :company_name, "
         "CAST(:address AS JSONB), :postal_code, :city, :country, :tax_id, :phone, :email, :is_active)"),
-        {"id": ziel_id, "t": tenant_id, **werte})
+        {"id": ziel_id, "t": tenant_id, **_kunde_spalten(werte)})
+    partner = _kunde_partner(db, tenant_id, werte, None)
+    db.execute(text("UPDATE domain_crm.customers SET business_partner_id = :p WHERE tenant_id = :t AND id = :id"),
+               {"p": partner, "t": tenant_id, "id": ziel_id})
     return ziel_id
 
 
 def _kunde_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    partner = db.execute(text("SELECT business_partner_id FROM domain_crm.customers WHERE tenant_id = :t AND id = :id"),
+                         {"t": tenant_id, "id": ziel_id}).scalar()
+    partner = _kunde_partner(db, tenant_id, werte, str(partner) if partner else None)
+    db.execute(text("UPDATE domain_crm.customers SET business_partner_id = :p WHERE tenant_id = :t AND id = :id"),
+               {"p": partner, "t": tenant_id, "id": ziel_id})
     db.execute(text(
         "UPDATE domain_crm.customers SET customer_number = :customer_number, company_name = :company_name, "
         "address = CAST(:address AS JSONB), postal_code = :postal_code, city = :city, country = :country, "
         "tax_id = :tax_id, phone = :phone, email = :email, is_active = :is_active, deleted_at = NULL, "
-        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **_kunde_spalten(werte)})
 
 
 # --- Objektart bestand (L3 WWS_ARTBESTAND/WWS_LAGERBESTAND je Artikel und Lager) ---------------------------------
@@ -270,8 +300,6 @@ def _bestand_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
 
 #: Quellfelder ohne VALEO-Ziel je Objektart - im Differenzbericht ausgewiesen, nicht verworfen.
 NICHT_ZUGEORDNET: dict[str, dict[str, str]] = {
-    "kunde": {"debitorkonto": "Ziel business_partners.debtor_account vorhanden; Entscheidung offen: L3-Nummer "
-                              "uebernehmen oder aus dem Nummernkreis neu vergeben"},
 }
 
 
