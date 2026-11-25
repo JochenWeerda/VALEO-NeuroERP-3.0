@@ -26,13 +26,13 @@ MAPPING = {
     "ARTNR": "artikelnummer", "BEZEICHN1": "bezeichnung", "BEZEICHN2": "bezeichnung2", "ARTIKELGRP": "artikelgruppe",
     "ME1": "mengeneinheit_nr", "GESPERRT": "gesperrt",
     "KUNDENNR": "kundennummer", "KUNDNAME": "name", "PLZ": "plz", "STAAT": "land", "DEBITORKTO": "debitorkonto",
-    "SPERRE": "gesperrt",
+    "SPERRE": "gesperrt", "LIEFERANTENNR": "lieferantennummer", "KREDITORKTO": "kreditorkonto",
     "LAGER": "lager", "BESTAND": "menge",
     "KONTONR": "konto", "RECHNNR": "rechnungsnr", "OFFENBETRAG": "offener_betrag",
 }
-REIHENFOLGE = ("artikel", "kunde", "bestand", "offener_posten")
+REIHENFOLGE = ("artikel", "kunde", "lieferant", "bestand", "offener_posten")
 #: Schluesselspalten werden nicht auf Klartext geprueft (Nummern, keine Personendaten).
-SCHLUESSEL = {"TYP", "QUELLE", "ARTNR", "ARTIKELGRP", "ME1", "KUNDENNR", "DEBITORKTO", "LAGER", "KONTONR", "RECHNNR",
+SCHLUESSEL = {"TYP", "QUELLE", "ARTNR", "ARTIKELGRP", "ME1", "KUNDENNR", "DEBITORKTO", "LIEFERANTENNR", "KREDITORKTO", "LAGER", "KONTONR", "RECHNNR",
               "BESTAND", "OFFENBETRAG", "RECHNBETRAG", "OFFEN", "MAHNSTUFE", "PLZ", "GESPERRT", "SPERRE", "STAAT", "KZSH",
               "RECHNDATUM"}
 KLARTEXT = {
@@ -150,7 +150,7 @@ def einlesen(ordner: Path, mandant: str) -> int:
 LOESCHEN = (
     "domain_integration.spiegel_protokoll", "domain_integration.spiegel_quellreferenzen",
     "domain_inventory.bestandsbuchung_schluessel", "domain_inventory.inventory_stock_movements",
-    "domain_erp.offene_posten", "domain_crm.customers", "domain_crm.business_partners",
+    "domain_erp.offene_posten", "domain_crm.customers", "domain_einkauf.lieferanten", "domain_crm.business_partners",
     "domain_inventory.articles", "domain_inventory.warehouses",
     "domain_integration.legacy_adapter_staging", "domain_integration.legacy_adapter_audit",
     "domain_integration.legacy_adapter_batches", "domain_integration.legacy_adapter_profiles",

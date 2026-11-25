@@ -18889,10 +18889,12 @@
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
-            "app/services/rfq_service.py"
+            "app/services/rfq_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/stammdaten_bearbeiten.py"
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
+            "app/services/spiegel_uebernahme.py"
           ]
         },
         "paletten_konto_buchungen": {
