@@ -274,6 +274,14 @@ setup/dms, voice, vordruck, postfaecher-rueckruf, studio workspace-preview) auf
 
 Inventar nach 28b: Routen-`hand_built` **0** (Dlg*/Charts bleiben Nicht-Routen-Module).
 
+### Batch 29 — Konditionssystem + tote Altmasken
+
+| Route / Artefakt | Aenderung |
+|------------------|-----------|
+| `konditionen/konditionssystem` | Neu in Route-Tree (`auto-groups/generated/konditionen.ts`); `pricing_workbench` + Legacy-Surface; Commands Preislisten/Rabatte/Individualpreise/Pricing (MCP-WRITE-015) |
+| Tote Nested-Altmasken | Entfernt: `kunden-stamm-modern/{Legacy,CustomerMaskEdit}`, `kunde-neu/KundeNeuMaskBuilderPage`, `lead-detail/{LeadMask,LegacyLead}` — Routen waren bereits native |
+| Switch-Test | `kunden-stamm-modern-switch` prueft Re-Export auf `customer-360-native` |
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -302,14 +310,17 @@ python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_ba
   tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
   tests/test_studio_parity_batch26.py tests/test_studio_parity_batch27.py \
   tests/test_studio_parity_batch28.py tests/test_studio_parity_batch28b.py \
+  tests/test_studio_parity_batch29.py \
   tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
   -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
   src/__tests__/pages/mask-objectpage-stamm-native-route.test.ts \
+  src/__tests__/pages/crm/kunden-stamm-modern-switch.test.tsx \
   src/__tests__/bank-account-form-contract.test.tsx \
   src/__tests__/components/mask-builder/screen-permissions.test.ts
 # Gate D Browser (wenn Playwright/Frontend bereit):
 # npx playwright test tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts
 ```
+
 
 

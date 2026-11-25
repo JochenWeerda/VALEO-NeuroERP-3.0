@@ -10,8 +10,8 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1126 |
+| Gesamt Routen | 1148 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1127 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
@@ -22,10 +22,10 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1064 |
+| Gesamt TSX-Seiten | 1059 |
 | runtime_wired | 936 |
-| legacy_mask_pattern | 13 |
-| hand_built | 98 |
+| legacy_mask_pattern | 9 |
+| hand_built | 97 |
 
 ## ScreenDefinitions / Studio
 
@@ -39,11 +39,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|---------|---------------------|
 | handgebaute Routen | 442 | 0 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1126 |
+| Runtime-verdrahtet | — | 1127 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
-aktuell sind **1147** generierte Routen inventarisiert. Die Absolute `hand_built`
+aktuell sind **1148** generierte Routen inventarisiert. Die Absolute `hand_built`
 ist deshalb nicht 1:1 vergleichbar, aber die Luecke zur Runtime bleibt gross.
 
 ## Dual-Pfad (Native Wrapper existiert, Primaernav oft Legacy)
@@ -854,6 +854,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `inventory/epcis` ← `src/pages/inventory/epcis/index.tsx`
 - `kasse/historie` ← `src/pages/kasse/tagesabschluss.tsx`
 - `kasse/tagesabschluss` ← `src/pages/kasse/tagesabschluss.tsx`
+- `konditionen/konditionssystem` ← `src/pages/konditionen/konditionssystem.tsx`
 - `kontrakte` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
 - `kontrakte/:id` ← `src/pages/kontrakte/KontraktDetailRoute.tsx`
 - `kontrakte/FrmKontraktDetail` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`

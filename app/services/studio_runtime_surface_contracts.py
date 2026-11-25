@@ -32,6 +32,7 @@ SPECIALIZED_SCREENS = {
         "annahme/abrechnung",
     }),
     "lager_workbench": frozenset({"lager/materialfluss"}),
+    "pricing_workbench": frozenset({"konditionen/konditionssystem"}),
 }
 
 

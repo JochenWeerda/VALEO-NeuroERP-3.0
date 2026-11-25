@@ -4036,6 +4036,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/konditionen/konditionssystem",
+      "path": "konditionen/konditionssystem",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/kontrakte/LstKontraktUebersicht",
       "path": "kontrakte",
       "source": "alias"
