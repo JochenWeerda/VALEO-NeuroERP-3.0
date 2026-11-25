@@ -1,12 +1,16 @@
 """ops_fahrer bekommt tenant_id (M4-LO-P0 Mandantenleck).
 
 Revision ID: ops_fahrer_tenant_20261124
-Revises: mahnstufen_verlauf_entfernen_20261123
+Revises: folgeartikel_fremdschluessel_20261124
 
 ``domain_ops.ops_fahrer`` hatte keinen Mandanten; ``transporte.py`` las und schrieb alle Fahrer
 aller Mandanten (personenbezogene Daten). Spalte kommt nach Rueckfuellung aus Fahrzeug/Tour;
 nicht zuordenbare Bestandszeilen bleiben NULL und sind in der App unsichtbar (fail-closed).
 Personalnummer wird je Mandant eindeutig statt systemweit.
+
+Nach dem Merge von main (#178ff) haengt die Nov-2026-Kette an
+``folgeartikel_fremdschluessel_20261124``; Parent darf nicht parallel zu
+``mengeneinheit_aeins_felder_20261124`` auf ``mahnstufen_…`` stehen (MultipleHeads).
 """
 from __future__ import annotations
 
@@ -15,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision = "ops_fahrer_tenant_20261124"
-down_revision = "mahnstufen_verlauf_entfernen_20261123"
+down_revision = "folgeartikel_fremdschluessel_20261124"
 branch_labels = None
 depends_on = None
 
