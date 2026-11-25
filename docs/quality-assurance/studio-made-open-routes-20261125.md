@@ -266,6 +266,14 @@ Inventar nach Batch 27: die drei schweren Prioritaetsmasken runtime_wired. Verbl
 | `admin/control-center/agent-ops` | `admin_workbench` + Legacy-Surface; Persistence-Read `/agents/neuroassist/ops/persistence` |
 | `admin/control-center/superglue` | `admin_workbench` + Legacy-Surface; Commands connector/policy/wizard/apply (MCP-WRITE-015) |
 
+### Batch 28b — restliche duenne Admin/Meta-Routen
+
+Alle verbleibenden Routen-`hand_built` (GapPipeline, agenten-integration, screen-studio,
+setup/dms, voice, vordruck, postfaecher-rueckruf, studio workspace-preview) auf
+`admin_workbench` + Legacy-Surface; Commands wo API vorhanden (Vordruck/DMS/GAP/Postfach).
+
+Inventar nach 28b: Routen-`hand_built` **0** (Dlg*/Charts bleiben Nicht-Routen-Module).
+
 ### Gate D Browser (Teilbeleg)
 
 - Playwright: `packages/frontend-web/tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts`
@@ -273,15 +281,13 @@ Inventar nach Batch 27: die drei schweren Prioritaetsmasken runtime_wired. Verbl
 - Image-/CI-Nachlauf mit kanonischem `table-catalog.json` bleibt Codex Entity-Release
   (Generator deckt Gate D nicht ab; siehe `made-by-studio-gate-report.md`)
 
-Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind oft keine Routenmodule;
-echte Rest-Routen u. a. screen-studio, GapPipeline, voice-channel, setup/dms, vordruck,
-postfaecher-anmeldung-rueckruf, agenten-integration.
+Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind keine Routenmodule.
 
 ## Noch offen (Folge)
 
-- Restliche duenne Admin-Routen (Studio/Gap/Voice/Setup/Vordruck) — nur mit Paritaet
 - Gate D Image/SSO Hell+Dunkel Screenshots + table-catalog CI (nicht nur Vite-Smoke)
 - Permission-Projektion nach Generatorlauf nachziehen
+- Vollstaendiger Inventar-/Test-Abschlussbeleg vor Goal-Complete
 
 ## Tests
 
@@ -289,7 +295,7 @@ postfaecher-anmeldung-rueckruf, agenten-integration.
 python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_batch23.py \
   tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
   tests/test_studio_parity_batch26.py tests/test_studio_parity_batch27.py \
-  tests/test_studio_parity_batch28.py \
+  tests/test_studio_parity_batch28.py tests/test_studio_parity_batch28b.py \
   tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
   -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \

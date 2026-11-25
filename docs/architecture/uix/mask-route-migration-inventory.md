@@ -11,21 +11,21 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1116 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1126 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 10 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 0 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1063 |
-| runtime_wired | 927 |
+| Gesamt TSX-Seiten | 1064 |
+| runtime_wired | 936 |
 | legacy_mask_pattern | 13 |
-| hand_built | 106 |
+| hand_built | 98 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 10 |
+| handgebaute Routen | 442 | 0 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1116 |
+| Runtime-verdrahtet | — | 1126 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -73,6 +73,8 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
 - `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
 - `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
+- `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
+- `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
 - `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
 - `admin/api-keys` ← `src/pages/admin/api-keys.tsx`
 - `admin/audit-log` ← `src/pages/admin/audit-log.tsx`
@@ -99,6 +101,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/dms-integration` ← `src/pages/admin/dms-integration.tsx`
 - `admin/erntepeak-stabilitaet` ← `src/pages/admin/erntepeak-stabilitaet.tsx`
 - `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
+- `admin/gap-pipeline` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/identity-budgets` ← `src/pages/admin/identity-budgets.tsx`
 - `admin/integrationen-quarantaene` ← `src/pages/admin/integrationen-quarantaene.tsx`
 - `admin/monitoring/alerting` ← `src/pages/admin/monitoring/alerting.tsx`
@@ -107,16 +110,22 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/nummernkreise` ← `src/pages/admin/nummernkreise.tsx`
 - `admin/omnichannel-handelskonflikt` ← `src/pages/admin/omnichannel-handelskonflikt.tsx`
 - `admin/postfaecher` ← `src/pages/admin/postfaecher.tsx`
+- `admin/postfaecher/anmeldung-rueckruf` ← `src/pages/admin/postfaecher-anmeldung-rueckruf.tsx`
 - `admin/qualitaets-cockpit` ← `src/pages/admin/qualitaets-cockpit.tsx`
 - `admin/report-berechtigungen` ← `src/pages/admin/report-berechtigungen.tsx`
 - `admin/rolle/:id` ← `src/pages/admin/rollen-verwaltung.tsx`
 - `admin/rolle/neu` ← `src/pages/admin/rollen-verwaltung.tsx`
 - `admin/rollen-verwaltung` ← `src/pages/admin/rollen-verwaltung.tsx`
+- `admin/screen-studio` ← `src/pages/admin/screen-studio.tsx`
+- `admin/setup` ← `src/pages/admin/setup/index.tsx`
+- `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
 - `admin/tankstelle-evb` ← `src/pages/admin/tankstelle-evb.tsx`
 - `admin/tenants` ← `src/pages/admin/tenants.tsx`
 - `admin/terminologie` ← `src/pages/admin/terminologie.tsx`
 - `admin/token-consumption` ← `src/pages/admin/token-consumption.tsx`
 - `admin/users` ← `src/pages/admin/users.tsx`
+- `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
+- `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
 - `admin/webhooks` ← `src/pages/admin/webhooks.tsx`
 - `admin/webshop` ← `src/pages/admin/webshop.tsx`
 - `admin/webshop/bestellungen` ← `src/pages/admin/webshop-bestellungen.tsx`
@@ -1086,6 +1095,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `strecke/streckengeschaeft` ← `src/pages/strecke/streckengeschaeft.tsx`
 - `strecke/vorlaeufige-streckengeschaefte` ← `src/pages/strecke/vorlaeufige-streckengeschaefte.tsx`
 - `studio/run/:screenId` ← `src/pages/admin/studio-run.tsx`
+- `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`
 - `subventionen/dashboard` ← `src/pages/subventionen/dashboard.tsx`
 - `system/live-monitor` ← `src/pages/system/live-monitor.tsx`
 - `tankstelle` ← `src/pages/tankstelle/zapfungen.tsx`
@@ -1178,13 +1188,3 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 ## Handgebaut — Migrationskandidaten (erste 60, alphabetisch)
 
-- `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
-- `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
-- `admin/gap-pipeline` ← `src/pages/admin/GapPipelineConsole.tsx`
-- `admin/postfaecher/anmeldung-rueckruf` ← `src/pages/admin/postfaecher-anmeldung-rueckruf.tsx`
-- `admin/screen-studio` ← `src/pages/admin/screen-studio.tsx`
-- `admin/setup` ← `src/pages/admin/setup/index.tsx`
-- `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
-- `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
-- `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
-- `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`

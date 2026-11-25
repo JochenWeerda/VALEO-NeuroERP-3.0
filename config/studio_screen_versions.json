@@ -150,12 +150,24 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
-    "admin/agenten-integration": {
-      "definition_hash": "90d37acce4531d1ce850caf9ba2f4ba482be39ca40778713a1b33b1cae6fa769",
+    "admin/GapPipelineConsole": {
+      "definition_hash": "6826cb8e80221b852f76a965e935cd05ea16d39c1aaf16c5c6df3e20cd63ebd2",
       "gates_passed": [
         "A",
         "B",
-        "C"
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/agenten-integration": {
+      "definition_hash": "817bbaa359920ff65ed12924b2aa1145d7adafd543559849eda0cada6650e491",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
@@ -531,6 +543,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/postfaecher-anmeldung-rueckruf": {
+      "definition_hash": "29555983786904f2f8037d3eaecd96d17fcb139b1f20a9155e903c346b2186af",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/qualitaets-cockpit": {
       "definition_hash": "e455a93be44baece2a94eae8cf2e7644217642ee2e6952440c41d63035620b15",
       "gates_passed": [
@@ -555,6 +578,39 @@
     },
     "admin/rollen-verwaltung": {
       "definition_hash": "167f0e8d4ee6b844762694c686a9cb46546812d02345ffe3573a88f45bca86aa",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/screen-studio": {
+      "definition_hash": "8d5900ee83b4634e1ae78a62a7c482bbd839bb4665b9ceb4338fd810b28c727d",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/setup": {
+      "definition_hash": "426293d650c0f5e9a7886a7c0152412c14d230efc13c077ff859212af703deef",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/setup/dms-integration": {
+      "definition_hash": "dfce9cc2cf9b7cc056ae68c2bab5ab666dca8db5c310de7dc1c1bda60a00f4b5",
       "gates_passed": [
         "A",
         "B",
@@ -621,6 +677,28 @@
     },
     "admin/users": {
       "definition_hash": "d7502a6401ba65f4a34ad7f6e07d131a6275e23b3779ac1967afea1d82feb382",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/voice-channel": {
+      "definition_hash": "32967a52bb1764c3ed2a23848cff5d8fd4064b178c97e75567814b97f667eb38",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/vordruck-editor": {
+      "definition_hash": "db6e524a5f22c3f0a8e7aae002775ede444cddb8763a9c180f55afe292ba9d43",
       "gates_passed": [
         "A",
         "B",
@@ -7877,6 +7955,17 @@
     },
     "strecke/vorlaeufig": {
       "definition_hash": "dba075a8d5c88745517cc0956984c8d665510ec28e8597f25f584a728057a744",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "studio/workspace-composition-preview": {
+      "definition_hash": "2da4c1e52a5bb26ef0a8ddc6e84c82c302df0d1aa03a5cac32972bf3a862c6eb",
       "gates_passed": [
         "A",
         "B",
