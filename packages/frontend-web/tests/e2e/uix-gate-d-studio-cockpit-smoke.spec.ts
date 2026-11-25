@@ -231,6 +231,21 @@ const COCKPIT_CASES: CockpitCase[] = [
     specializedLandmark: 'Rationseditor Arbeitsbereich',
   },
   {
+    label: 'futtermittel/rationsoptimierung',
+    path: '/futtermittel/rationsoptimierung',
+    screenId: 'futtermittel/rationsoptimierung',
+    testId: 'feed-ration-optimization',
+    title: 'Willkommen bei der Rationsoptimierung',
+    specializedType: 'feed_workbench',
+    specializedFields: [
+      { key: 'feed_id', label: 'Futter' },
+      { key: 'cow_profile', label: 'Kuhprofil' },
+      { key: 'optimization_result', label: 'Ergebnis' },
+      { key: 'review_status', label: 'Review' },
+    ],
+    specializedLandmark: 'Rationsoptimierung Arbeitsbereich',
+  },
+  {
     label: 'waage/liste',
     path: '/waage/liste',
     screenId: 'waage/liste',
@@ -767,6 +782,12 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
     )
     await page.route(
       /\/api\/v1\/agrar\/rations-optimization\/feeding\/actuals(?:\?.*)?$/,
+      async (route) => {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+      },
+    )
+    await page.route(
+      /\/api\/v1\/agrar\/rations-optimization\/feeds(?:\?.*)?$/,
       async (route) => {
         await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
       },

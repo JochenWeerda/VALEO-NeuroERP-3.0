@@ -491,14 +491,14 @@ function RationBlocksPanel({
   return (
     <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
       <div>
-        <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Fütterungssystem & Blöcke
         </p>
         <p className="text-sm font-semibold" style={{ color: C.dark }}>
           {fs.system ?? '–'} · {fs.concentrate_distribution ?? '–'}
         </p>
         {fs.auto_promoted_from_tmr && (
-          <p className="text-[11px] mt-1 px-2 py-1 rounded border" style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}>
+          <p className="text-2xs mt-1 px-2 py-1 rounded border" style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}>
             Automatisch von TMR auf PMR+Weide angehoben: Weide liegt in der Lösung, wird nicht im Mischwagen geführt.
           </p>
         )}
@@ -551,7 +551,7 @@ function ForagePerformancePanel({
     <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
             Grundfutterleistung {performance.feeding_type}
           </p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>
@@ -565,7 +565,7 @@ function ForagePerformancePanel({
       </div>
 
       {!compact && (
-        <div className="rounded-lg border px-3 py-2.5 text-[11px] leading-relaxed space-y-1.5" style={{ borderColor: C.border, background: '#F8FAFC', color: C.muted }}>
+        <div className="rounded-lg border px-3 py-2.5 text-2xs leading-relaxed space-y-1.5" style={{ borderColor: C.border, background: '#F8FAFC', color: C.muted }}>
           <p>
             <span className="font-semibold" style={{ color: C.dark }}>Priorität:</span>{' '}
             Zuerst fachliche und tiergesundheitliche Grenzen (GfE/DLG, Aufnahme, Struktur). Wirtschaftliche Optimierung nur innerhalb dieser Grenzen — niedrigere Kosten ersetzen keine sichere Fütterung.
@@ -683,7 +683,7 @@ function RationWarningAdjustmentsPanel({
       className="p-3 rounded-lg border text-[12px] space-y-3"
       style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-wider">Hinweise &amp; Rationsanpassung</div>
+      <div className="text-2xs font-bold uppercase tracking-wider">Hinweise &amp; Rationsanpassung</div>
       <p className="text-2xs leading-snug opacity-90">
         Vorschlag übernehmen wendet den Patch an und startet die Optimierung erneut. Eigene Anpassung öffnet den Assistenten.
         {wizardData ? ' Ohne Änderung erneut rechnen ist nur sinnvoll nach manuellen Schritten.' : ' Ohne Assistenten-Daten (z. B. reine Demo) zuerst „Neue Ration“ oder Demo mit Profil nutzen.'}
@@ -714,7 +714,7 @@ function RationWarningAdjustmentsPanel({
                 <div className="font-semibold" style={{ color: C.dark }}>
                   {s.title}
                 </div>
-                <div className="text-[11px] leading-snug" style={{ color: '#374151' }}>
+                <div className="text-2xs leading-snug" style={{ color: '#374151' }}>
                   {s.detail}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -790,7 +790,7 @@ function PastureRiskPanel({
     <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
             Weide-Risiko &amp; Milch aus Weide/Grassilage
           </p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>
@@ -901,20 +901,20 @@ function ConcentrateCallUpPanel({
     <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
             Futterabruf-Staffel Konzentrat
           </p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>
             Leistungsabhaengige Konzentratgabe ({distLabel})
           </p>
-          <p className="text-[11px]" style={{ color: C.muted }}>
+          <p className="text-2xs" style={{ color: C.muted }}>
             Basis: Milch aus Grobfutter = {fmt(callUp.basis.milk_from_forage_kg, 1)} kg; Ziel =
             {' '}{fmt(callUp.basis.target_milk_kg, 1)} kg; Band{' '}
             {fmt(callUp.basis.kg_conc_per_additional_milk_low, 2)}-
             {fmt(callUp.basis.kg_conc_per_additional_milk_high, 2)} kg FM/kg Zusatzmilch.
           </p>
         </div>
-        <div className="text-right text-[11px]" style={{ color: C.muted }}>
+        <div className="text-right text-2xs" style={{ color: C.muted }}>
           {callUp.basis.concentrate_max_per_serving_kg_fm != null && (
             <div>Einzelgabe max: {fmt(callUp.basis.concentrate_max_per_serving_kg_fm, 1)} kg FM</div>
           )}
@@ -930,7 +930,7 @@ function ConcentrateCallUpPanel({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-[11px]">
+        <table className="w-full text-2xs">
           <thead>
             <tr style={{ background: '#F9FAFB' }}>
               {['Milch (kg/d)', 'Zusatzmilch', 'Konz. low', 'Konz. mid', 'Konz. high', 'je Abruf', 'Status'].map((h) => (
@@ -1016,18 +1016,18 @@ function MixingProtocolPanel({
     <div className={card(compact ? 'space-y-3' : 'space-y-4')}>
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
             Mischprotokoll (TMR-Mischmasse)
           </p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>
             Reihenfolge Mischwagen, Wasserzugabe, Uebermenge
           </p>
-          <p className="text-[11px]" style={{ color: C.muted }}>
+          <p className="text-2xs" style={{ color: C.muted }}>
             System: {protocol.basis.feeding_system}; TMR-Block: {fmt(protocol.totals.tmr_kgfm_without_water, 1)} kg FM /{' '}
             {fmt(protocol.totals.tmr_kgdm, 1)} kg TM.
           </p>
           {protocol.excluded_pasture && protocol.excluded_pasture.kgdm > 0.001 && (
-            <p className="text-[11px] mt-1 font-medium" style={{ color: C.deltaText }}>
+            <p className="text-2xs mt-1 font-medium" style={{ color: C.deltaText }}>
               Nicht im Mischwagen: Weide gesamt {fmt(protocol.excluded_pasture.kgdm, 2)} kg TM
               {protocol.excluded_pasture.items?.length
                 ? ` (${protocol.excluded_pasture.items.map((i) => i.name).join(', ')})`
@@ -1036,7 +1036,7 @@ function MixingProtocolPanel({
             </p>
           )}
         </div>
-        <div className="text-right text-[11px]" style={{ color: C.muted }}>
+        <div className="text-right text-2xs" style={{ color: C.muted }}>
           <div>Ziel-TM Mischung: ~{fmt(protocol.basis.target_dm_frac * 100, 0)} %</div>
           <div>Wasser: +{fmt(protocol.water_addition_kg_fm, 1)} kg FM</div>
           <div>Uebermenge (+{fmt(protocol.basis.overfill_pct, 0)} %): {fmt(protocol.overfill_kg_fm, 1)} kg FM</div>
@@ -1044,7 +1044,7 @@ function MixingProtocolPanel({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-[11px]">
+        <table className="w-full text-2xs">
           <thead>
             <tr style={{ background: '#F9FAFB' }}>
               {['Schritt', 'Gruppe', 'Futtermittel', 'kg FM', 'kg TM', 'Anteil'].map((h) => (
@@ -1157,7 +1157,7 @@ function FeedingControlPanel({ protocol, wizardData, result }: { protocol: Mixin
       pendf_soll_g_kgdm: result.dlg_indicators?.pendf_kgdm ?? null, ndf_g_kgdm: result.dlg_indicators?.andfom_gf_kgdm ?? null },
   })
   return <div className={card('space-y-3')}>
-    <div><p className="text-[11px] uppercase font-bold" style={{ color: C.muted }}>Fütterungscontrolling · SOLL → IST → Anpassung</p><p className="text-sm font-semibold">Tagesprotokoll {wizardData.group.name}</p></div>
+    <div><p className="text-2xs uppercase font-bold" style={{ color: C.muted }}>Fütterungscontrolling · SOLL → IST → Anpassung</p><p className="text-sm font-semibold">Tagesprotokoll {wizardData.group.name}</p></div>
     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
       <label>Beladung IST %<input className="w-full border rounded p-1" type="number" value={loadPct} onChange={e => setLoadPct(Number(e.target.value))} /></label>
       <label>Restfutter kg<input className="w-full border rounded p-1" type="number" value={restKg} onChange={e => setRestKg(Number(e.target.value))} /></label>
@@ -1181,7 +1181,7 @@ function FeedingControlPanel({ protocol, wizardData, result }: { protocol: Mixin
 function StatusBar({ result }: { result: OptimizationResult | null }) {
   return (
     <footer
-      className="h-[30px] border-t flex items-center gap-5 px-5 text-[11px]"
+      className="h-[30px] border-t flex items-center gap-5 px-5 text-2xs"
       style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}
     >
       <span className="font-semibold" style={{ color: C.dark }}>
@@ -1316,7 +1316,7 @@ function DemoLoadingOverlay({ scenario, onDone }: { scenario: typeof DEMO_SCENAR
               </div>
               <div className="text-left">
                 <div className="text-sm font-semibold text-white">{s.label}</div>
-                <div className="text-[11px] opacity-50 text-white">{s.sub}</div>
+                <div className="text-2xs opacity-50 text-white">{s.sub}</div>
               </div>
             </div>
           ))}
@@ -1360,7 +1360,7 @@ function DemoBanner({
       style={{ top: 90, background: '#B8860B', color: 'white' }}
     >
       <Zap size={14} className="shrink-0" />
-      <span className="font-bold uppercase tracking-widest text-[11px] opacity-80">Demo-Modus</span>
+      <span className="font-bold uppercase tracking-widest text-2xs opacity-80">Demo-Modus</span>
       <span className="opacity-60">·</span>
       <span className="opacity-90 font-normal truncate hidden sm:block">{scenario.farm} · {scenario.group}</span>
 
@@ -1370,7 +1370,7 @@ function DemoBanner({
           <button
             key={s.id}
             onClick={() => onScenario(i)}
-            className="px-3 py-1 rounded text-[11px] font-bold transition-all"
+            className="px-3 py-1 rounded text-2xs font-bold transition-all"
             style={{ background: i === scenarioIdx ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.08)' }}
           >
             {s.emoji} {s.label}
@@ -1382,14 +1382,14 @@ function DemoBanner({
       {tourStep !== null && (
         <div className="flex items-center gap-2 bg-white/15 rounded-lg px-3 py-1.5 ml-3">
           <button onClick={onPrevTour} disabled={tourStep === 0}><ChevronLeft size={12} /></button>
-          <span className="text-[11px] font-bold opacity-90">{TOUR_STEPS[tourStep].title}</span>
+          <span className="text-2xs font-bold opacity-90">{TOUR_STEPS[tourStep].title}</span>
           <button onClick={onNextTour} disabled={tourStep === TOUR_STEPS.length - 1}><ChevronRightIcon size={12} /></button>
         </div>
       )}
 
       <button
         onClick={onExit}
-        className="ml-2 opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1 text-[11px]"
+        className="ml-2 opacity-70 hover:opacity-100 transition-opacity flex items-center gap-1 text-2xs"
       >
         <XIcon size={12} /> Demo beenden
       </button>
@@ -1422,7 +1422,7 @@ function TourTooltip({ step, onNext, onClose }: { step: typeof TOUR_STEPS[0]; on
         </div>
         <button
           onClick={onNext}
-          className="px-3 py-1 rounded text-[11px] font-bold transition-all"
+          className="px-3 py-1 rounded text-2xs font-bold transition-all"
           style={{ background: C.accent }}
         >
           {TOUR_STEPS.indexOf(step) < TOUR_STEPS.length - 1 ? 'Weiter →' : 'Tour beenden'}
@@ -1476,7 +1476,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
             { label: '3. Fachlich freigeben', text: 'Review oeffnen, Nachweis exportieren und Umsetzung dokumentieren.' },
           ].map((step) => (
             <div key={step.label} className="rounded-lg border bg-slate-50 p-3" style={{ borderColor: C.border }}>
-              <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: C.dark }}>{step.label}</p>
+              <p className="text-2xs font-bold uppercase tracking-wide" style={{ color: C.dark }}>{step.label}</p>
               <p className="mt-1 text-[12px] leading-relaxed" style={{ color: C.muted }}>{step.text}</p>
             </div>
           ))}
@@ -1551,11 +1551,11 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
                     {r.status}
                   </span>
                 </div>
-                <div className="space-y-1.5 pt-2 border-t text-[11px]" style={{ borderColor: '#F3F4F6' }}>
+                <div className="space-y-1.5 pt-2 border-t text-2xs" style={{ borderColor: '#F3F4F6' }}>
                   <div className="flex justify-between"><span style={{ color: C.muted }}>Gruppe:</span><span className="font-semibold">{r.group}</span></div>
                   <div className="flex justify-between"><span style={{ color: C.muted }}>Ziel-Milch:</span><span className="font-semibold">{r.milk} kg</span></div>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-[11px] font-bold border-t pt-3" style={{ borderColor: '#F3F4F6', color: C.dark }}>
+                <div className="mt-4 flex items-center justify-between text-2xs font-bold border-t pt-3" style={{ borderColor: '#F3F4F6', color: C.dark }}>
                   <span>{fmt(r.ctPerEcm, 1)} ct/kg ECM</span>
                   <span className="flex items-center gap-1" style={{ color: C.accent }}>Öffnen <ChevronRight size={10} /></span>
                 </div>
@@ -2013,7 +2013,7 @@ function Wizard({
                 </div>
                 {feedingType === 'PMR+Weide' && (
                   <div
-                    className="text-[11px] leading-tight mt-1 px-2 py-1.5 rounded border space-y-1"
+                    className="text-2xs leading-tight mt-1 px-2 py-1.5 rounded border space-y-1"
                     style={{ background: '#F0F7ED', borderColor: C.accent, color: C.dark }}
                   >
                     <div>
@@ -2057,14 +2057,14 @@ function Wizard({
                   <button
                     type="button"
                     onClick={() => setShowFsAdvanced((v) => !v)}
-                    className="text-[11px] font-semibold underline-offset-2 hover:underline"
+                    className="text-2xs font-semibold underline-offset-2 hover:underline"
                     style={{ color: C.muted }}
                   >
                     {showFsAdvanced ? 'weniger' : 'Details'}
                   </button>
                 </div>
                 {/* Kurzinfo immer sichtbar */}
-                <div className="text-[11px] px-2 py-1 rounded border" style={{ background: '#F8F8F8', borderColor: C.border, color: C.muted }}>
+                <div className="text-2xs px-2 py-1 rounded border" style={{ background: '#F8F8F8', borderColor: C.border, color: C.muted }}>
                   System: <strong>{feedingSystemConfig.system}</strong> &middot; KF-Verteilung:{' '}
                   <strong>
                     {{ included_in_tmr: 'In TMR', transponder: 'Transponder', ams: 'AMS', milkparlor: 'Melkstand' }[feedingSystemConfig.concentrate_distribution]}
@@ -2089,7 +2089,7 @@ function Wizard({
                             key={opt.key}
                             type="button"
                             onClick={() => setFeedingSystemConfig((prev) => ({ ...prev, concentrate_distribution: opt.key }))}
-                            className="px-2 py-1 rounded border text-[11px] font-semibold transition-all"
+                            className="px-2 py-1 rounded border text-2xs font-semibold transition-all"
                             style={{
                               background: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : '#fff',
                               borderColor: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : C.border,
@@ -2151,7 +2151,7 @@ function Wizard({
                   <button
                     type="button"
                     onClick={() => setShowFanAdvanced((v) => !v)}
-                    className="text-[11px] font-semibold underline-offset-2 hover:underline"
+                    className="text-2xs font-semibold underline-offset-2 hover:underline"
                     style={{ color: C.muted }}
                   >
                     {showFanAdvanced ? 'weniger' : 'mehr Optionen'}
@@ -2168,7 +2168,7 @@ function Wizard({
                       type="button"
                       onClick={() => setFanMode(opt.key)}
                       title={opt.hint}
-                      className="flex-1 py-1.5 rounded-lg text-[11px] font-bold border transition-all"
+                      className="flex-1 py-1.5 rounded-lg text-2xs font-bold border transition-all"
                       style={{
                         background: fanMode === opt.key ? C.dark : '#fff',
                         borderColor: fanMode === opt.key ? C.dark : C.border,
@@ -2186,7 +2186,7 @@ function Wizard({
                         key={preset}
                         type="button"
                         onClick={() => setFanReference(preset)}
-                        className="px-2.5 py-1 rounded text-[11px] font-semibold border transition-all"
+                        className="px-2.5 py-1 rounded text-2xs font-semibold border transition-all"
                         style={{
                           background: Math.abs(fanReference - preset) < 1e-6 ? C.accent : '#fff',
                           borderColor: Math.abs(fanReference - preset) < 1e-6 ? C.accent : C.border,
@@ -2203,7 +2203,7 @@ function Wizard({
                       max={5}
                       value={fanReference}
                       onChange={(e) => setFanReference(parseFloat(e.target.value) || 3.0)}
-                      className="w-20 px-2 py-1 rounded border text-[11px]"
+                      className="w-20 px-2 py-1 rounded border text-2xs"
                       style={{ borderColor: C.border }}
                     />
                   </div>
@@ -2225,7 +2225,7 @@ function Wizard({
                             type="button"
                             onClick={() => setRelaxationPolicy(opt.key)}
                             title={opt.hint}
-                            className="flex-1 py-1.5 rounded text-[11px] font-semibold border transition-all"
+                            className="flex-1 py-1.5 rounded text-2xs font-semibold border transition-all"
                             style={{
                               background: relaxationPolicy === opt.key ? C.dark : '#fff',
                               borderColor: relaxationPolicy === opt.key ? C.dark : C.border,
@@ -2425,7 +2425,7 @@ function Wizard({
                           <span>Datei {doc.source_filename}</span>
                         </div>
                         {doc.warnings.length > 0 && (
-                          <div className="mt-1 text-[11px]" style={{ color: '#92400E' }}>
+                          <div className="mt-1 text-2xs" style={{ color: '#92400E' }}>
                             {doc.warnings[0]}
                           </div>
                         )}
@@ -2448,7 +2448,7 @@ function Wizard({
                     </div>
                   )
                 })}
-                <div className="text-[11px]" style={{ color: C.muted }}>
+                <div className="text-2xs" style={{ color: C.muted }}>
                   Uploads liefern eine Alt-/Neu-System-Brücke aus Deklaration und DLG-Match. Foto-Uploads werden per OCR ausgelesen und sollten fachlich gegengeprüft werden.
                 </div>
               </div>
@@ -2474,7 +2474,7 @@ function Wizard({
                 ))}
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-medium" style={{ color: C.muted }}>Grenzen eingeben in:</span>
+                <span className="text-2xs font-medium" style={{ color: C.muted }}>Grenzen eingeben in:</span>
                 <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: C.border }}>
                   {(['TM', 'FM'] as FeedLimitUnit[]).map((u) => (
                     <button
@@ -2769,7 +2769,7 @@ function Wizard({
                 <p className="text-xs" style={{ color: C.muted }}>
                   Gewichtung per Schieberegler (0–100). Aus den Werten wird eine Solver-Stufe abgeleitet (
                   <span className="font-semibold text-slate-600">{deriveObjectiveStrategy(mode, priorityWeights)}</span>
-                  ); Details werden zusätzlich unter <code className="text-[11px]">policy_overrides.wizard_priorities</code> mitgeschickt.
+                  ); Details werden zusätzlich unter <code className="text-2xs">policy_overrides.wizard_priorities</code> mitgeschickt.
                 </p>
                 {PRIORITY_SLIDER_ROWS.map(({ key, label }) => {
                   const val = priorityWeights[key]
@@ -2875,7 +2875,7 @@ function FanCalibrationPanel({
   return (
     <div className={card()}>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           FAN-Kalibrierung (GfE 2023)
         </div>
         <span
@@ -2885,7 +2885,7 @@ function FanCalibrationPanel({
           bewertet bei FAN {ref != null ? ref.toFixed(2) : '–'}
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-1.5 text-[11px]">
+      <div className="grid grid-cols-2 gap-1.5 text-2xs">
         <div className="flex justify-between"><span style={{ color: C.muted }}>Modus</span><span className="font-semibold">{modeLabel}</span></div>
         <div className="flex justify-between"><span style={{ color: C.muted }}>Iterationen</span><span className="font-semibold">{fan.iteration_count ?? fan.iterations?.length ?? 0}</span></div>
         <div className="flex justify-between"><span style={{ color: C.muted }}>Toleranz</span><span className="font-mono">{fan.tolerance?.toFixed(3)}</span></div>
@@ -2970,7 +2970,7 @@ function ConstraintStatusPanel({
   return (
     <div className={card()}>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Constraint-Status
         </div>
         <div className="text-2xs" style={{ color: C.muted }}>
@@ -2987,7 +2987,7 @@ function ConstraintStatusPanel({
           return (
             <div
               key={i}
-              className="flex justify-between items-center text-[11px] py-1 border-b"
+              className="flex justify-between items-center text-2xs py-1 border-b"
               style={{ borderColor: '#F3F4F6' }}
             >
               <span className="flex items-center gap-1.5">
@@ -3026,7 +3026,7 @@ function ConstraintStatusPanel({
       </div>
       {totalPenalty > 0 && (
         <div className="mt-2 pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
-          <div className="flex justify-between text-[11px]">
+          <div className="flex justify-between text-2xs">
             <span style={{ color: C.muted }}>Summe Strafkosten</span>
             <span className="font-semibold font-mono">{totalPenalty.toFixed(2)}</span>
           </div>
@@ -3174,7 +3174,7 @@ function NutrientGaugeRow({ result, compact = false, stale = false }: { result: 
   return (
     <div className={card()}>
       <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Live-Ergebnisse (Cockpit)
         </div>
         {/* RATION-WB-20: Bei laufender Bearbeitung zeigen die Tachos noch den zuletzt
@@ -3281,7 +3281,7 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
   return (
     <div id="attainability-cockpit" className={card()}>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Erreichbare Leistung
         </div>
         <span
@@ -3314,7 +3314,7 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
       </div>
 
       {att.target_gap != null && Math.abs(att.target_gap) > 0.05 && (
-        <div className="mt-2 flex justify-between items-center text-[11px]">
+        <div className="mt-2 flex justify-between items-center text-2xs">
           <span style={{ color: C.muted }}>
             Ziellücke{axisLabel ? ` · limitiert durch ${axisLabel}` : ''}
           </span>
@@ -3326,7 +3326,7 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
 
       {rec?.triggered && (
         <div
-          className="mt-2 rounded border p-2 text-[11px]"
+          className="mt-2 rounded border p-2 text-2xs"
           style={{ borderColor: C.warn, background: `color-mix(in srgb, ${C.warn} 8%, transparent)` }}
         >
           <div className="font-bold mb-0.5" style={{ color: C.warn }}>Best-Attainable statt Solver-Abbruch</div>
@@ -3353,7 +3353,7 @@ function RationCostPanel({ result }: { result: OptimizationResult | null }) {
   ]
   return (
     <div className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Rationskosten</div>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Rationskosten</div>
       <div className="space-y-1">
         {rows.map((r) => (
           <div key={r.label} className="flex justify-between items-center text-[12px] py-0.5">
@@ -3372,7 +3372,7 @@ function MassnahmenPanel({ result }: { result: OptimizationResult | null }) {
   if (sugg.length === 0) return null
   return (
     <div className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Maßnahmenvorschläge</div>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Maßnahmenvorschläge</div>
       <div className="space-y-2">
         {sugg.slice(0, 4).map((s) => (
           <div key={s.id} className="flex gap-1.5">
@@ -3400,7 +3400,7 @@ function PreflightPanel({ result }: { result: OptimizationResult | null }) {
   return (
     <div className={card()}>
       <div className="flex items-center justify-between mb-2">
-        <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+        <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
           Hinweise &amp; Warnungen
         </div>
         <div className="text-2xs" style={{ color: C.muted }}>
@@ -3409,7 +3409,7 @@ function PreflightPanel({ result }: { result: OptimizationResult | null }) {
       </div>
       <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
         {findings.map((f, i) => (
-          <div key={`${f.code}-${i}`} className="flex gap-1.5 text-[11px]">
+          <div key={`${f.code}-${i}`} className="flex gap-1.5 text-2xs">
             <span className="inline-block h-2 w-2 rounded-full mt-1 shrink-0" style={{ background: sevColor(f.severity) }} />
             <div>
               <div className="font-medium">{f.cause}</div>
@@ -3447,11 +3447,11 @@ function BestAttainablePanel({ result }: { result: OptimizationResult | null }) 
   const rec = result?.best_attainable_recovery
   return (
     <div className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
         {rec?.triggered ? 'Best-Attainable statt Solver-Abbruch' : 'Erreichbarkeit'}
       </div>
       {!att ? (
-        <div className="text-[11px]" style={{ color: C.muted }}>Noch keine Ergebnisse.</div>
+        <div className="text-2xs" style={{ color: C.muted }}>Noch keine Ergebnisse.</div>
       ) : rec?.triggered ? (
         <div className="text-[12px] space-y-1.5">
           <div style={{ color: C.dark }}>
@@ -3515,11 +3515,11 @@ function VariantComparisonPanel({
   ]
   return (
     <div className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
         Variantenvergleich — wichtige Kennzahlen
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-[11px]">
+        <table className="w-full text-2xs">
           <thead>
             <tr style={{ background: '#F9FAFB' }}>
               <th className="py-1.5 px-2 border-b text-left font-semibold text-[#4B5563]">Kennzahl</th>
@@ -3612,7 +3612,7 @@ function SensitivityPanel({
 
   return (
     <div id="sensitivity-panel" className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
         Sensitivität — parametrische Analyse
       </div>
       <div className="flex flex-wrap items-end gap-2 mb-2">
@@ -3671,12 +3671,12 @@ function SensitivityPanel({
       </div>
 
       {error && (
-        <div className="text-[11px] mb-2" style={{ color: C.error }}>{error}</div>
+        <div className="text-2xs mb-2" style={{ color: C.error }}>{error}</div>
       )}
 
       {data && data.steps.length > 0 && (
         <div className="overflow-x-auto">
-          <table className="w-full text-[11px]">
+          <table className="w-full text-2xs">
             <thead>
               <tr style={{ background: '#F9FAFB' }}>
                 {[`${paramLabel[data.parameter]} (${data.unit})`, 'ME MJ/kg TM', 'sidP g/kg TM', 'Kosten €/Kuh/Tag', 'Erreichbar kg', 'Bindende Grenzen'].map((h, i) => (
@@ -3706,7 +3706,7 @@ function SensitivityPanel({
         </div>
       )}
       {data && data.steps.length === 0 && (
-        <div className="text-[11px]" style={{ color: C.muted }}>Keine Schritte berechnet.</div>
+        <div className="text-2xs" style={{ color: C.muted }}>Keine Schritte berechnet.</div>
       )}
     </div>
   )
@@ -3948,7 +3948,7 @@ function Workbench({
       <aside className="flex flex-col gap-[15px] overflow-y-auto">
         {/* RATION-WB-10: Rahmenbedingungen (Herde, Leistung, System, Modus) */}
         <div className={card()}>
-          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Rahmenbedingungen</div>
+          <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Rahmenbedingungen</div>
           <div className="space-y-2.5">
             <div>
               <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Herde / Gruppe</label>
@@ -3999,7 +3999,7 @@ function Workbench({
                     key={m}
                     type="button"
                     onClick={() => setWorkbenchMode(m)}
-                    className="rounded px-1 py-1 text-[11px] font-semibold border transition-colors"
+                    className="rounded px-1 py-1 text-2xs font-semibold border transition-colors"
                     style={{
                       background: workbenchMode === m ? C.accent : 'transparent',
                       color: workbenchMode === m ? C.accentOnDark : C.muted,
@@ -4030,7 +4030,7 @@ function Workbench({
           if (factors.length === 0) return null
           return (
             <div className={card()}>
-              <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Limitierende Faktoren</div>
+              <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Limitierende Faktoren</div>
               <div className="space-y-1">
                 {factors.map((f) => (
                   <div key={f.label} className="flex items-center gap-1.5 text-[12px]">
@@ -4046,16 +4046,16 @@ function Workbench({
         {/* RATION-WB-10: Hinweise & Warnungen (aus warnings + Best-Attainable-Signal) */}
         {result && ((result.warnings?.length ?? 0) > 0 || result.best_attainable_recovery?.triggered) && (
           <div className={card()}>
-            <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Hinweise &amp; Warnungen</div>
+            <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>Hinweise &amp; Warnungen</div>
             <div className="space-y-1.5 max-h-40 overflow-y-auto">
               {result.best_attainable_recovery?.triggered && (
-                <div className="flex gap-1.5 text-[11px]">
+                <div className="flex gap-1.5 text-2xs">
                   <span style={{ color: C.accent }}>ℹ</span>
                   <span style={{ color: C.dark }}>Best-Attainable verfügbar (Ziel technisch nicht voll erreichbar).</span>
                 </div>
               )}
               {(result.warnings ?? []).slice(0, 6).map((w, i) => (
-                <div key={i} className="flex gap-1.5 text-[11px]">
+                <div key={i} className="flex gap-1.5 text-2xs">
                   <span style={{ color: C.warn }}>⚠</span>
                   <span style={{ color: C.muted }}>{w}</span>
                 </div>
@@ -4065,7 +4065,7 @@ function Workbench({
         )}
 
         <div className={card()}>
-          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Varianten</div>
+          <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Varianten</div>
           {[
             { name: 'Ist-Ration', price: '–' },
             { name: 'Entwurf A', price: result ? (feedCostCtPerKgEcm != null ? `${fmt(feedCostCtPerKgEcm, 1)} ct/kg` : `${fmt(result.total_cost_eur_day ?? 0)} €`) : '…' },
@@ -4092,7 +4092,7 @@ function Workbench({
         </div>
 
         <div className={card()}>
-          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Gruppeninfo</div>
+          <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>Gruppeninfo</div>
           {[
             { label: 'Kühe', val: wizardData?.group.count ?? '–' },
             { label: 'Ziel-Milch', val: wizardData ? `${wizardData.milkYield} kg` : '–' },
@@ -4283,7 +4283,7 @@ function Workbench({
                       <td className="p-2 font-medium whitespace-nowrap" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
                         {item.name}
                         {dupName ? (
-                          <span className="text-slate-400 font-normal text-[11px] ml-1">({item.feed_id})</span>
+                          <span className="text-slate-400 font-normal text-2xs ml-1">({item.feed_id})</span>
                         ) : null}
                       </td>
                       <td className="p-2 text-right">
@@ -4357,7 +4357,7 @@ function Workbench({
                             if ((minFm ?? 0) === v) return
                             onApplySuggestionPatch({ set_feed_min_fm: { [item.feed_id]: v } })
                           }}
-                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-[11px] focus-visible:ring-1 disabled:opacity-60"
+                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-2xs focus-visible:ring-1 disabled:opacity-60"
                           style={{ borderColor: C.border }}
                         />
                       </td>
@@ -4382,7 +4382,7 @@ function Workbench({
                             if ((maxFm ?? 0) === v) return
                             onApplySuggestionPatch({ set_feed_max_fm: { [item.feed_id]: v } })
                           }}
-                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-[11px] focus-visible:ring-1 disabled:opacity-60"
+                          className="w-14 rounded border bg-transparent px-1 py-0.5 text-right font-mono text-2xs focus-visible:ring-1 disabled:opacity-60"
                           style={{ borderColor: C.border }}
                         />
                       </td>
@@ -4434,13 +4434,13 @@ function Workbench({
                   {/* RATION-WB-06: „reicht für Milch nach ME/sidP" (aus dem kanonischen Vertrag) */}
                   {result?.forage_performance?.supplemented && (
                     <>
-                      <tr className="text-[11px]" style={{ color: C.muted }}>
+                      <tr className="text-2xs" style={{ color: C.muted }}>
                         <td className="px-2 py-1" colSpan={4}>reicht für Milch nach ME</td>
                         <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={8} style={{ color: C.dark }}>
                           {fmt(result.forage_performance.supplemented.milk_from_energy_kg, 1)} l
                         </td>
                       </tr>
-                      <tr className="text-[11px]" style={{ color: C.muted }}>
+                      <tr className="text-2xs" style={{ color: C.muted }}>
                         <td className="px-2 py-1" colSpan={4}>reicht für Milch nach sidP</td>
                         <td className="px-2 py-1 text-right font-mono font-semibold" colSpan={8} style={{ color: C.dark }}>
                           {fmt(result.forage_performance.supplemented.milk_from_protein_kg, 1)} l
@@ -4485,7 +4485,7 @@ function Workbench({
                 type="button"
                 disabled={!canEditRation}
                 onClick={() => onApplySuggestionPatch({ fix_feed_fm: Object.fromEntries(rationItems.map((it) => [it.feed_id, Number(it.kgfm.toFixed(2))])) })}
-                className="rounded border px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
                 style={{ borderColor: C.border, color: C.dark }}
                 title="Alle aktuellen Mengen fixieren (Min=Max)"
               >
@@ -4495,7 +4495,7 @@ function Workbench({
                 type="button"
                 disabled={!canEditRation}
                 onClick={() => onApplySuggestionPatch({ unfix_feed_ids: rationItems.map((it) => it.feed_id) })}
-                className="rounded border px-2.5 py-1 text-[11px] font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
                 style={{ borderColor: C.border, color: C.dark }}
                 title="Alle Fixierungen und Min/Max-Grenzen zurücksetzen"
               >
@@ -4531,7 +4531,7 @@ function Workbench({
 
         {/* KPI */}
         <div id="kpi-bar" className={card()} style={tourRing('kpi-bar')}>
-          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>
+          <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>
           <div className="grid grid-cols-2 gap-2">
             {kpis.map((kpi, i) => (
               <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={stringValue('title' in kpi ? kpi.title : undefined)}>
@@ -4590,7 +4590,7 @@ function Workbench({
             peNDF ist eine KONTROLL-/VALIDIERUNGSGROESSE (darunter gruppiert). */}
         {dlg && (
           <div id="dlg-panel" className={card()} style={tourRing('dlg-panel')}>
-            <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>DLG 01|25 / GfE-Workshop 2023</div>
+            <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>DLG 01|25 / GfE-Workshop 2023</div>
             <div className="text-2xs font-semibold uppercase tracking-[0.4px] mb-1" style={{ color: C.muted }}>
               Planung (primaer)
             </div>
@@ -4643,7 +4643,7 @@ function Workbench({
                   }]
                 : []),
             ].map((row) => (
-              <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? '#94a3b8' : row.ok ? C.success : C.error }} />
                   {row.label}
@@ -4694,7 +4694,7 @@ function Workbench({
                   }]
                 : []),
             ].map((row) => (
-              <div key={row.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                 <span className="flex items-center gap-1.5">
                   <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? '#94a3b8' : row.ok ? C.success : C.error }} />
                   {row.label}
@@ -4711,7 +4711,7 @@ function Workbench({
         {result?.policy_profile_evaluation && (
           <div className={card()}>
             <div className="flex items-center justify-between mb-2">
-              <div className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
+              <div className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>
                 Leistungsstufen-Check (DLG 01|2025)
               </div>
               <span
@@ -4727,7 +4727,7 @@ function Workbench({
                 : `${result.policy_profile_evaluation.violation_count} Abweichung(en)`}
               </span>
             </div>
-            <div className="text-[11px] mb-2" style={{ color: C.muted }}>
+            <div className="text-2xs mb-2" style={{ color: C.muted }}>
               Profil: <span className="font-semibold">{result.policy_profile_evaluation.label ?? result.active_policy_profile}</span>
               {' · '}
               Strafe gesamt (Klasse B):{' '}
@@ -4758,7 +4758,7 @@ function Workbench({
                   ? `${band.target_min != null ? fmt(band.target_min, 1) : '–'} … ${band.target_max != null ? fmt(band.target_max, 1) : '–'}`
                   : fmt(band.target, 1)
                 return (
-                  <div key={band.name} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+                  <div key={band.name} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
                     <span className="flex items-center gap-1.5">
                       <span className="inline-block h-2 w-2 rounded-full" style={{ background: dotBg }} />
                       {band.name.replace(/^DLG-Policy:\s*/, '')}
@@ -4787,7 +4787,7 @@ function Workbench({
                   const active = (result.policy_profile_lp_slacks ?? []).filter((s) => s.active)
                   if (active.length === 0) {
                     return (
-                      <div className="text-[11px]" style={{ color: C.muted }}>
+                      <div className="text-2xs" style={{ color: C.muted }}>
                         keine – alle Slacks sind 0 (Korridore eingehalten).
                       </div>
                     )
@@ -4795,7 +4795,7 @@ function Workbench({
                   return (
                     <div className="space-y-0.5">
                       {active.map((s) => (
-                        <div key={s.name} className="flex justify-between text-[11px] font-mono">
+                        <div key={s.name} className="flex justify-between text-2xs font-mono">
                           <span>{s.name.replace(/^DLG-Policy:\s*/, '')}</span>
                           <span>
                             slack {fmt(s.slack_value, 2)} {s.unit}
@@ -4803,7 +4803,7 @@ function Workbench({
                           </span>
                         </div>
                       ))}
-                      <div className="flex justify-between text-[11px] font-mono pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+                      <div className="flex justify-between text-2xs font-mono pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
                         <span className="font-semibold">Summe LP-Penalty</span>
                         <span>{fmt(result.policy_profile_lp_total_penalty ?? 0, 2)}</span>
                       </div>
@@ -4831,24 +4831,24 @@ function Workbench({
                 className="inline-block h-2.5 w-2.5 rounded-full"
                 style={{ background: result.sara_safety_reopt.resolved ? '#f59e0b' : '#dc2626' }}
               />
-              <div className="text-[11px] uppercase font-bold tracking-[0.5px]">
+              <div className="text-2xs uppercase font-bold tracking-[0.5px]">
                 SARA-Safety-Reopt {result.sara_safety_reopt.resolved ? 'aktiv (geloest)' : 'aktiv (ungeloest)'}
               </div>
             </div>
             {result.sara_safety_reopt.reason && (
-              <div className="text-[11px] mb-2" style={{ color: C.muted }}>
+              <div className="text-2xs mb-2" style={{ color: C.muted }}>
                 Ausloeser: {result.sara_safety_reopt.reason}
               </div>
             )}
             {(result.sara_safety_reopt.actions ?? []).length > 0 && (
-              <ul className="text-[11px] list-disc pl-4 mb-2 space-y-0.5">
+              <ul className="text-2xs list-disc pl-4 mb-2 space-y-0.5">
                 {(result.sara_safety_reopt.actions ?? []).map((a, i) => (
                   <li key={i}>{a}</li>
                 ))}
               </ul>
             )}
             {result.sara_safety_reopt.metrics_before && result.sara_safety_reopt.metrics_after && (
-              <div className="grid grid-cols-2 gap-1 text-[11px] font-mono">
+              <div className="grid grid-cols-2 gap-1 text-2xs font-mono">
                 <div className="font-semibold">vorher</div>
                 <div className="font-semibold">nachher</div>
                 <div>pH {result.sara_safety_reopt.metrics_before.ph_predicted ?? '–'}</div>
@@ -4860,7 +4860,7 @@ function Workbench({
               </div>
             )}
             {result.sara_safety_reopt.resolution_note && (
-              <div className="text-[11px] mt-2" style={{ color: C.muted }}>
+              <div className="text-2xs mt-2" style={{ color: C.muted }}>
                 {result.sara_safety_reopt.resolution_note}
               </div>
             )}
@@ -4873,7 +4873,7 @@ function Workbench({
           className="flex flex-col grow p-3 rounded-lg border"
           style={{ background: C.aiBg, borderColor: C.aiBorder, ...tourRing('ai-copilot') }}
         >
-          <div className="text-[11px] uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.aiText }}>AI-Copilot</div>
+          <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.aiText }}>AI-Copilot</div>
           <div className="grow overflow-y-auto pr-1 flex flex-col gap-2 max-h-48">
             {chatLog.map((msg, i) => (
               <div
@@ -5031,12 +5031,12 @@ function Review({
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className={card('space-y-2')}>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Gruppe</p>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Gruppe</p>
           <p className="text-lg font-bold" style={{ color: C.dark }}>{wizardData?.group.name ?? '–'}</p>
           <p className="text-xs" style={{ color: C.muted }}>{wizardData?.group.count} Kühe · {wizardData?.group.location}</p>
         </div>
         <div className={card('space-y-2')}>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Primärziel</p>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Primärziel</p>
           <p className="text-lg font-bold" style={{ color: C.dark }}>{wizardData?.mode ?? '–'}</p>
           <p className="text-xs" style={{ color: C.muted }}>{wizardData?.milkYield} kg Ziel-Milch · {wizardData?.feedingType}</p>
         </div>
@@ -5044,14 +5044,14 @@ function Review({
           <p className="text-2xs font-bold opacity-70 uppercase tracking-widest">Futterkosten/Kuh/Tag</p>
           <p className="text-2xl font-black">{result ? `${fmt(result.total_cost_eur_day ?? 0)} €` : '–'}</p>
           {result?.total_cost_eur_100kg_milk && (
-            <p className="text-[11px] opacity-80">{fmt(result.total_cost_eur_100kg_milk)} € / 100 kg Milch</p>
+            <p className="text-2xs opacity-80">{fmt(result.total_cost_eur_100kg_milk)} € / 100 kg Milch</p>
           )}
         </div>
       </div>
 
       {/* KPI Comparison */}
       <div className={card('overflow-hidden p-0')}>
-        <div className="px-5 py-3 border-b flex justify-between font-bold text-[11px] uppercase tracking-widest" style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}>
+        <div className="px-5 py-3 border-b flex justify-between font-bold text-2xs uppercase tracking-widest" style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}>
           <span>Kennzahl-Vergleich</span>
           <span>Ergebnisse</span>
         </div>
@@ -5091,10 +5091,10 @@ function Review({
       {forageComparison.length > 0 && (
         <div className={card('overflow-hidden p-0')}>
           <div className="px-5 py-3 border-b space-y-1" style={{ background: '#F9FAFB', borderColor: C.border }}>
-            <div className="font-bold text-[11px] uppercase tracking-widest" style={{ color: C.muted }}>
+            <div className="font-bold text-2xs uppercase tracking-widest" style={{ color: C.muted }}>
               Grundfutterleistung und Ergänzung
             </div>
-            <p className="text-[11px] leading-snug max-w-3xl" style={{ color: C.muted }}>
+            <p className="text-2xs leading-snug max-w-3xl" style={{ color: C.muted }}>
               Ziel (Profil) = gewünschte Milchleistung. E/P-Orientierung: Überhang Protein vs. Energie höchstens{' '}
               {MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG} kg (≈ l). Fachliche Sicherheit vor Kosten.
             </p>
@@ -5367,7 +5367,7 @@ function Diagnose({
               </div>
             ))}
           </div>
-          <p className="text-[11px] mt-3" style={{ color: C.muted }}>
+          <p className="text-2xs mt-3" style={{ color: C.muted }}>
             „Die Ration soll wiederkäuergerecht sein — der Erfolg zeigt sich in der Reaktion des Tieres." (DLG 01|25)
           </p>
         </div>
@@ -5399,7 +5399,7 @@ function Diagnose({
                 </div>
               ))}
               {warnings.length > 5 && (
-                <div className="text-[11px]" style={{ color: C.muted }}>+{warnings.length - 5} weitere Warnungen</div>
+                <div className="text-2xs" style={{ color: C.muted }}>+{warnings.length - 5} weitere Warnungen</div>
               )}
             </div>
           )}
@@ -5423,7 +5423,7 @@ function Diagnose({
             </div>
           )}
           {dlg && (
-            <div className="mt-3 pt-3 border-t text-[11px] space-y-0.5" style={{ color: C.muted, borderColor: C.border }}>
+            <div className="mt-3 pt-3 border-t text-2xs space-y-0.5" style={{ color: C.muted, borderColor: C.border }}>
               <div>pabKH: {fmt(dlg.pabkh_kgdm * 1000, 0)} g/kg TM (Limit ≤ 210)</div>
               <div>aNDFom-GF: {fmt(dlg.andfom_gf_kgdm * 1000, 0)} g/kg TM (Ziel ≥ 200)</div>
               {dlg.rmd_gn_kgdm != null && <div>RMD: {fmt(dlg.rmd_gn_kgdm * 1000, 1)} g N/kg TM (Ziel −1 bis +1)</div>}
@@ -5456,7 +5456,7 @@ function Diagnose({
             </div>
           )}
           {result && (
-            <div className="mt-3 pt-3 border-t text-[11px]" style={{ color: C.muted, borderColor: C.border }}>
+            <div className="mt-3 pt-3 border-t text-2xs" style={{ color: C.muted, borderColor: C.border }}>
               {result.ration_items?.length ?? 0} Futtermittel · Solver-Status: {result.status}
             </div>
           )}
@@ -5714,7 +5714,7 @@ function IntentSuggestionsPanel({
       <div className="flex items-center gap-2">
         <Sparkles size={16} style={{ color: C.accent }} />
         <div>
-          <p className="text-[11px] uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Vorschläge</p>
+          <p className="text-2xs uppercase font-bold tracking-[0.5px]" style={{ color: C.muted }}>Vorschläge</p>
           <p className="text-sm font-semibold" style={{ color: C.dark }}>Ein Klick — Vorschau mit Auswirkung, dann übernehmen</p>
         </div>
       </div>
@@ -5757,7 +5757,7 @@ function IntentSuggestionsPanel({
           {deltaRow('IOFC', '€/Tag', base.iofc, preview.iofc, false, 2)}
           {deltaRow('Warnungen', '', base.warnings, preview.warnings, true, 0)}
           {previewResult.status !== 'optimal' && (
-            <p className="text-[11px] font-medium" style={{ color: C.error }}>
+            <p className="text-2xs font-medium" style={{ color: C.error }}>
               Solver-Status: {previewResult.status} — Vorschlag ggf. nicht vollständig erfüllbar.
             </p>
           )}
@@ -5839,11 +5839,11 @@ function EfficiencyPanel({ result }: { result: OptimizationResult | null }) {
   ]
   return (
     <div className={card()}>
-      <div className="text-[11px] uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
+      <div className="text-2xs uppercase font-bold mb-2 tracking-[0.5px]" style={{ color: C.muted }}>
         Effizienz (DLG 01|25, Kap. 10)
       </div>
       {rows.map((r) => (
-        <div key={r.label} className="flex justify-between items-center text-[11px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+        <div key={r.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
           <span className="flex items-center gap-1.5">
             <span className="inline-block h-2 w-2 rounded-full" style={{ background: r.ok === null ? '#94a3b8' : r.ok ? C.success : C.error }} />
             {r.label}
@@ -6232,7 +6232,12 @@ export default function Rationsoptimierung() {
   ]
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: C.bg }}>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ background: C.bg }}
+      role="region"
+      aria-label="Rationsoptimierung Arbeitsbereich"
+    >
       {/* Demo Lade-Overlay */}
       {demoOverlay && (
         <DemoLoadingOverlay
@@ -6263,7 +6268,7 @@ export default function Rationsoptimierung() {
           onClick={() => setView('dashboard')}
         >
           Rations<span style={{ color: C.accentOnDark }}>optimierung</span>
-          <span className="ml-3 text-[11px] font-normal opacity-60 normal-case tracking-normal">· VALEO NeuroERP</span>
+          <span className="ml-3 text-2xs font-normal opacity-60 normal-case tracking-normal">· VALEO NeuroERP</span>
         </div>
         <div className="flex items-center gap-5 text-[13px] opacity-90 font-medium">
           <span>GfE-2023 · HiGHS-Solver</span>

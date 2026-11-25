@@ -5,7 +5,6 @@ import { describe, expect, it } from 'vitest'
 /**
  * Studio Design-Token-Invariante (Micro-Labels): keine arbiträren 10/11px-Textklassen
  * in pages/ und zentralen Mask-Builder-/Patterns-Pfaden.
- * Ausnahme: Feed-Rationsoptimierung (eigene Visual-Surface, Nachzug).
  */
 const ROOTS = [
   join(__dirname, '../../pages'),
@@ -16,10 +15,6 @@ const ROOTS = [
   join(__dirname, '../../components/policy'),
   join(__dirname, '../../components/ui'),
 ]
-
-const ALLOWLIST = new Set([
-  'components/mask-builder/specialized/feed/ration-optimization-surface.tsx',
-])
 
 const FORBIDDEN = new RegExp(String.raw`text-\[(?:10|11)px\]`)
 
@@ -38,13 +33,12 @@ function walkTsx(dir: string, out: string[] = []): string[] {
 }
 
 describe('Design-Token Micro-Label Ratsche', () => {
-  it('keine arbiträren 10/11px-Textklassen außerhalb der Allowlist', () => {
+  it('keine arbiträren 10/11px-Textklassen in pages/mask-builder/patterns', () => {
     const base = join(__dirname, '../..')
     const hits: string[] = []
     for (const root of ROOTS) {
       for (const file of walkTsx(root)) {
         const rel = relative(base, file).replace(/\\/g, '/')
-        if (ALLOWLIST.has(rel)) continue
         const text = readFileSync(file, 'utf8')
         if (FORBIDDEN.test(text)) hits.push(rel)
       }
