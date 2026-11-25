@@ -65,7 +65,7 @@ unten beruht auf Tabellen- und Spaltennamen, die **Bedeutung der Spalten ist am 
 | Lieferscheine | `WWS_VLIEFER1/2` (Verkauf), `WWS_ELIEFER1/2` (Einkauf) | DocFlow | offen |
 | Bestellungen | `WWS_BESTELLUNG1-3` | DocFlow | offen |
 | Rechnungen | `WWS_ARECHNUNG1-5` (Ausgang), `WWS_EINKAUF1/2`, `RECHNUNG_EINGANG` | DocFlow, Buchung ueber Finance | offen |
-| Offene Posten | `FIBU*`-Tabellen (u. a. `FIBUKUNDEN`), genaue Tabelle ungeklaert | Debitoren-/Kreditoren-OP | offen - Tabelle bestimmen |
+| Offene Posten | `FIBU_OP1` (KONTONR, RECHNNR, RECHNBETRAG, KZSH, OFFEN, MAHNSTUFE); Kontensalden je Jahr/Monat in `DEBITOREN`/`KREDITOREN` (EBVORTRAG, SIST01-12) | `domain_erp.offene_posten` ueber das Partnerkonto | **Abgleich umgesetzt** (`app/services/spiegel_op_abgleich.py`, liest nur): gleich / Betrag abweichend / fehlt in VALEO / fehlt in L3, Salden je Konto. Uebernahme der Anfangs-OPs offen - gehoert zum Saldenvortrag unter Finance |
 | Kontrakte | `WWS_KONTRAKT1-6`, `WWS_KS_KONTRAKT*` | Kontrakte (Agrar) | offen |
 | Dokumente | `DOKUVERWALTUNG`, `DOKVERW_DOCS`, `WWS_ARTIKEL_UNTERLAGEN`, `*_UNTERLAGEN` | DMS (Paperless) mit Belegbezug | offen |
 
