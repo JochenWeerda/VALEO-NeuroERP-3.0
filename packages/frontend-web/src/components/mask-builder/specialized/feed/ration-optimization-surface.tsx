@@ -401,7 +401,7 @@ function limitDisplayToFm(entered: number, dmFrac: number, unit: FeedLimitUnit):
 }
 
 function card(extra = '') {
-  return `bg-white border border-[${C.border}] rounded-[6px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${extra}`
+  return `bg-card border border-border rounded-[6px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${extra}`
 }
 
 function compoundFeedToDisplayFeed(doc: UploadedCompoundFeed): FeedIngredient & {
@@ -498,7 +498,7 @@ function RationBlocksPanel({
           {fs.system ?? '–'} · {fs.concentrate_distribution ?? '–'}
         </p>
         {fs.auto_promoted_from_tmr && (
-          <p className="text-2xs mt-1 px-2 py-1 rounded border" style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}>
+          <p className="text-2xs mt-1 px-2 py-1 rounded border" style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}>
             Automatisch von TMR auf PMR+Weide angehoben: Weide liegt in der Lösung, wird nicht im Mischwagen geführt.
           </p>
         )}
@@ -565,7 +565,7 @@ function ForagePerformancePanel({
       </div>
 
       {!compact && (
-        <div className="rounded-lg border px-3 py-2.5 text-2xs leading-relaxed space-y-1.5" style={{ borderColor: C.border, background: '#F8FAFC', color: C.muted }}>
+        <div className="rounded-lg border px-3 py-2.5 text-2xs leading-relaxed space-y-1.5" style={{ borderColor: C.border, background: C.card, color: C.muted }}>
           <p>
             <span className="font-semibold" style={{ color: C.dark }}>Priorität:</span>{' '}
             Zuerst fachliche und tiergesundheitliche Grenzen (GfE/DLG, Aufnahme, Struktur). Wirtschaftliche Optimierung nur innerhalb dieser Grenzen — niedrigere Kosten ersetzen keine sichere Fütterung.
@@ -595,7 +595,7 @@ function ForagePerformancePanel({
           <span className="text-right">NEU</span>
         </div>
         {rows.map((row) => (
-          <div key={row.label} className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 rounded-lg border px-3 py-2 text-xs" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+          <div key={row.label} className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 rounded-lg border px-3 py-2 text-xs" style={{ borderColor: C.border, background: C.card }}>
             <div className="font-semibold" style={{ color: C.dark }}>{row.label}</div>
             <div className="text-right" style={{ color: C.muted }}>{row.ist}</div>
             <div className="text-right" style={{ color: C.deltaText }}>{row.soll}</div>
@@ -606,7 +606,7 @@ function ForagePerformancePanel({
           className="grid grid-cols-[1.7fr_0.8fr_0.8fr_0.8fr] gap-2 rounded-lg border px-3 py-2 text-xs"
           style={{
             borderColor: epIstOk && epNeuOk ? C.border : C.deltaBorder,
-            background: epIstOk && epNeuOk ? '#F0FDF4' : C.deltaBg,
+            background: epIstOk && epNeuOk ? C.aiBg : C.deltaBg,
           }}
         >
           <div className="font-semibold" style={{ color: C.dark }}>
@@ -714,7 +714,7 @@ function RationWarningAdjustmentsPanel({
                 <div className="font-semibold" style={{ color: C.dark }}>
                   {s.title}
                 </div>
-                <div className="text-2xs leading-snug" style={{ color: '#374151' }}>
+                <div className="text-2xs leading-snug" style={{ color: C.dark }}>
                   {s.detail}
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -839,7 +839,7 @@ function PastureRiskPanel({
           <div
             key={row.label}
             className="grid grid-cols-[1.6fr_1fr_1fr_1fr] gap-2 rounded-lg border px-3 py-2 text-xs"
-            style={{ borderColor: C.border, background: '#F9FAFB' }}
+            style={{ borderColor: C.border, background: C.card }}
           >
             <div className="font-semibold" style={{ color: C.dark }}>{row.label}</div>
             <div className="text-right" style={{ color: C.muted }}>
@@ -932,11 +932,11 @@ function ConcentrateCallUpPanel({
       <div className="overflow-x-auto">
         <table className="w-full text-2xs">
           <thead>
-            <tr style={{ background: '#F9FAFB' }}>
+            <tr style={{ background: C.card }}>
               {['Milch (kg/d)', 'Zusatzmilch', 'Konz. low', 'Konz. mid', 'Konz. high', 'je Abruf', 'Status'].map((h) => (
                 <th
                   key={h}
-                  className="py-2 px-2 border-b text-2xs font-semibold text-[#4B5563] text-right first:text-left"
+                  className="py-2 px-2 border-b text-2xs font-semibold text-muted-foreground text-right first:text-left"
                   style={{ borderColor: C.border }}
                 >
                   {h}
@@ -952,7 +952,7 @@ function ConcentrateCallUpPanel({
                 ? 'warn'
                 : 'ok'
               return (
-                <tr key={r.milk_kg_day} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                <tr key={r.milk_kg_day} className="border-b" style={{ borderColor: C.border }}>
                   <td className="p-2 font-medium" style={{ color: C.dark }}>
                     {fmt(r.milk_kg_day, 1)}
                   </td>
@@ -1046,11 +1046,11 @@ function MixingProtocolPanel({
       <div className="overflow-x-auto">
         <table className="w-full text-2xs">
           <thead>
-            <tr style={{ background: '#F9FAFB' }}>
+            <tr style={{ background: C.card }}>
               {['Schritt', 'Gruppe', 'Futtermittel', 'kg FM', 'kg TM', 'Anteil'].map((h) => (
                 <th
                   key={h}
-                  className="py-2 px-2 border-b text-2xs font-semibold text-[#4B5563] text-right first:text-left"
+                  className="py-2 px-2 border-b text-2xs font-semibold text-muted-foreground text-right first:text-left"
                   style={{ borderColor: C.border }}
                 >
                   {h}
@@ -1060,7 +1060,7 @@ function MixingProtocolPanel({
           </thead>
           <tbody>
             {protocol.steps.map((item) => (
-              <tr key={item.feed_id ?? item.name} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+              <tr key={item.feed_id ?? item.name} className="border-b" style={{ borderColor: C.border }}>
                 <td className="p-2 font-medium" style={{ color: C.dark }}>
                   {item.step}
                 </td>
@@ -1075,7 +1075,7 @@ function MixingProtocolPanel({
                 <td className="p-2 text-right font-mono">{fmt(item.share_fm_pct, 1)}%</td>
               </tr>
             ))}
-            <tr style={{ background: '#F9FAFB' }} className="font-semibold">
+            <tr style={{ background: C.card }} className="font-semibold">
               <td className="p-2" style={{ color: C.dark }}>
                 +
               </td>
@@ -1091,7 +1091,7 @@ function MixingProtocolPanel({
             </tr>
           </tbody>
           <tfoot>
-            <tr className="font-bold" style={{ background: '#F9FAFB' }}>
+            <tr className="font-bold" style={{ background: C.card }}>
               <td className="p-2" style={{ color: C.dark }} colSpan={3}>
                 Mischung gesamt (je Kuh · Tag)
               </td>
@@ -1182,12 +1182,12 @@ function StatusBar({ result }: { result: OptimizationResult | null }) {
   return (
     <footer
       className="h-[30px] border-t flex items-center gap-5 px-5 text-2xs"
-      style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}
+      style={{ background: C.card, borderColor: C.border, color: C.muted }}
     >
       <span className="font-semibold" style={{ color: C.dark }}>
         Status: {result ? (result.status === 'optimal' ? 'Solver-Feasible ✓' : result.status) : 'Bereit'}
       </span>
-      <span className="w-px h-3 bg-[#D1D5DB]" />
+      <span className="w-px h-3 bg-border" />
       <span>Warnungen: {result?.warnings?.length ?? 0}</span>
       <span className="flex-1 text-right">GfE-2023 · HiGHS-Solver</span>
     </footer>
@@ -1357,7 +1357,7 @@ function DemoBanner({
   return (
     <div
       className="sticky z-30 flex items-center gap-4 px-5 py-2 text-sm font-semibold shadow-md"
-      style={{ top: 90, background: '#B8860B', color: 'white' }}
+      style={{ top: 90, background: C.warn, color: 'white' }}
     >
       <Zap size={14} className="shrink-0" />
       <span className="font-bold uppercase tracking-widest text-2xs opacity-80">Demo-Modus</span>
@@ -1463,7 +1463,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
           <button
             onClick={onDemo}
             className="px-8 py-3 text-base font-semibold rounded-lg border transition-all hover:shadow-md flex items-center gap-2"
-            style={{ borderColor: '#7A5600', color: '#7A5600', background: '#FFFBEB' }}
+            style={{ borderColor: C.warn, color: C.warn, background: C.deltaBg }}
           >
             <Play size={16} /> Demo starten
           </button>
@@ -1546,16 +1546,16 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
                 style={{ borderColor: C.border }}
               >
                 <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-bold group-hover:text-[#88B04B] transition-colors" style={{ color: C.dark }}>{r.name}</h3>
+                  <h3 className="font-bold group-hover:text-primary transition-colors" style={{ color: C.dark }}>{r.name}</h3>
                   <span className="text-2xs font-bold uppercase bg-slate-50 px-1.5 py-0.5 rounded border" style={{ color: C.muted, borderColor: C.border }}>
                     {r.status}
                   </span>
                 </div>
-                <div className="space-y-1.5 pt-2 border-t text-2xs" style={{ borderColor: '#F3F4F6' }}>
+                <div className="space-y-1.5 pt-2 border-t text-2xs" style={{ borderColor: C.border }}>
                   <div className="flex justify-between"><span style={{ color: C.muted }}>Gruppe:</span><span className="font-semibold">{r.group}</span></div>
                   <div className="flex justify-between"><span style={{ color: C.muted }}>Ziel-Milch:</span><span className="font-semibold">{r.milk} kg</span></div>
                 </div>
-                <div className="mt-4 flex items-center justify-between text-2xs font-bold border-t pt-3" style={{ borderColor: '#F3F4F6', color: C.dark }}>
+                <div className="mt-4 flex items-center justify-between text-2xs font-bold border-t pt-3" style={{ borderColor: C.border, color: C.dark }}>
                   <span>{fmt(r.ctPerEcm, 1)} ct/kg ECM</span>
                   <span className="flex items-center gap-1" style={{ color: C.accent }}>Öffnen <ChevronRight size={10} /></span>
                 </div>
@@ -1626,7 +1626,7 @@ function GfaPickerModal({
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Bezeichnung, Probenart oder Probe-Nr. suchen…"
-              className="w-full border rounded-lg pl-9 pr-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-[#88B04B]"
+              className="w-full border rounded-lg pl-9 pr-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary"
               style={{ borderColor: C.border }}
             />
           </div>
@@ -1651,7 +1651,7 @@ function GfaPickerModal({
               <div
                 key={a.id}
                 className="px-6 py-4 border-b flex items-center gap-4 hover:bg-slate-50 transition-colors"
-                style={{ borderColor: '#F3F4F6' }}
+                style={{ borderColor: C.border }}
               >
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate" style={{ color: C.dark }}>{a.bezeichnung}</div>
@@ -1673,8 +1673,8 @@ function GfaPickerModal({
                   onClick={() => { onAdd(a); onClose() }}
                   className="px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
                   style={already
-                    ? { background: '#F3F4F6', color: C.muted, cursor: 'default' }
-                    : { background: C.dark, color: '#fff' }
+                    ? { background: C.border, color: C.muted, cursor: 'default' }
+                    : { background: C.dark, color: C.card }
                   }
                 >
                   {already ? 'Hinzugefügt' : 'Hinzufügen'}
@@ -1867,7 +1867,7 @@ function Wizard({
     },
   })
 
-  const inputCls = 'w-full border rounded-lg px-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-[#88B04B] transition-all'
+  const inputCls = 'w-full border rounded-lg px-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary transition-all'
   const labelCls = 'text-xs font-semibold text-slate-500 block mb-1'
 
   return (
@@ -1883,7 +1883,7 @@ function Wizard({
             <div
               key={s}
               className="h-2 w-12 rounded-full transition-all duration-300"
-              style={{ background: step >= s ? C.dark : '#D1D5DB' }}
+              style={{ background: step >= s ? C.dark : C.border }}
             />
           ))}
         </div>
@@ -1903,7 +1903,7 @@ function Wizard({
                     value={group.id}
                     onChange={(e) => setGroup(GROUPS.find((g) => g.id === e.target.value) ?? GROUPS[0])}
                     className={inputCls}
-                    style={{ borderColor: C.border, background: '#F9FAFB' }}
+                    style={{ borderColor: C.border, background: C.card }}
                   >
                     {GROUPS.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
                   </select>
@@ -1946,12 +1946,12 @@ function Wizard({
                       onClick={() => setMode(m)}
                       className={cn(
                         'px-3 py-2.5 rounded-lg text-xs font-bold border transition-all text-left',
-                        mode === m ? 'text-white shadow-sm' : 'bg-white hover:border-[#88B04B]',
+                        mode === m ? 'text-white shadow-sm' : 'bg-white hover:border-primary',
                       )}
                       style={{
                         background: mode === m ? C.dark : undefined,
                         borderColor: mode === m ? C.dark : C.border,
-                        color: mode === m ? '#fff' : C.muted,
+                        color: mode === m ? C.card : C.muted,
                       }}
                     >
                       {m}
@@ -2002,9 +2002,9 @@ function Wizard({
                       title={opt.hint}
                       className="flex-1 py-2 rounded-lg text-xs font-bold border transition-all"
                       style={{
-                        background: feedingType === opt.key ? C.dark : '#fff',
+                        background: feedingType === opt.key ? C.dark : C.card,
                         borderColor: feedingType === opt.key ? C.dark : C.border,
-                        color: feedingType === opt.key ? '#fff' : C.muted,
+                        color: feedingType === opt.key ? C.card : C.muted,
                       }}
                     >
                       {opt.label}
@@ -2014,7 +2014,7 @@ function Wizard({
                 {feedingType === 'PMR+Weide' && (
                   <div
                     className="text-2xs leading-tight mt-1 px-2 py-1.5 rounded border space-y-1"
-                    style={{ background: '#F0F7ED', borderColor: C.accent, color: C.dark }}
+                    style={{ background: C.activeBg, borderColor: C.accent, color: C.dark }}
                   >
                     <div>
                       Weide-/Frischgrasaufnahme wird separat bilanziert (DLG 417/443).
@@ -2064,7 +2064,7 @@ function Wizard({
                   </button>
                 </div>
                 {/* Kurzinfo immer sichtbar */}
-                <div className="text-2xs px-2 py-1 rounded border" style={{ background: '#F8F8F8', borderColor: C.border, color: C.muted }}>
+                <div className="text-2xs px-2 py-1 rounded border" style={{ background: C.aiBg, borderColor: C.border, color: C.muted }}>
                   System: <strong>{feedingSystemConfig.system}</strong> &middot; KF-Verteilung:{' '}
                   <strong>
                     {{ included_in_tmr: 'In TMR', transponder: 'Transponder', ams: 'AMS', milkparlor: 'Melkstand' }[feedingSystemConfig.concentrate_distribution]}
@@ -2091,9 +2091,9 @@ function Wizard({
                             onClick={() => setFeedingSystemConfig((prev) => ({ ...prev, concentrate_distribution: opt.key }))}
                             className="px-2 py-1 rounded border text-2xs font-semibold transition-all"
                             style={{
-                              background: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : '#fff',
+                              background: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : C.card,
                               borderColor: feedingSystemConfig.concentrate_distribution === opt.key ? C.dark : C.border,
-                              color: feedingSystemConfig.concentrate_distribution === opt.key ? '#fff' : C.muted,
+                              color: feedingSystemConfig.concentrate_distribution === opt.key ? C.card : C.muted,
                             }}
                           >
                             {opt.label}
@@ -2170,9 +2170,9 @@ function Wizard({
                       title={opt.hint}
                       className="flex-1 py-1.5 rounded-lg text-2xs font-bold border transition-all"
                       style={{
-                        background: fanMode === opt.key ? C.dark : '#fff',
+                        background: fanMode === opt.key ? C.dark : C.card,
                         borderColor: fanMode === opt.key ? C.dark : C.border,
-                        color: fanMode === opt.key ? '#fff' : C.muted,
+                        color: fanMode === opt.key ? C.card : C.muted,
                       }}
                     >
                       {opt.label}
@@ -2188,9 +2188,9 @@ function Wizard({
                         onClick={() => setFanReference(preset)}
                         className="px-2.5 py-1 rounded text-2xs font-semibold border transition-all"
                         style={{
-                          background: Math.abs(fanReference - preset) < 1e-6 ? C.accent : '#fff',
+                          background: Math.abs(fanReference - preset) < 1e-6 ? C.accent : C.card,
                           borderColor: Math.abs(fanReference - preset) < 1e-6 ? C.accent : C.border,
-                          color: Math.abs(fanReference - preset) < 1e-6 ? '#fff' : C.dark,
+                          color: Math.abs(fanReference - preset) < 1e-6 ? C.card : C.dark,
                         }}
                       >
                         FAN {preset.toFixed(1)}
@@ -2227,9 +2227,9 @@ function Wizard({
                             title={opt.hint}
                             className="flex-1 py-1.5 rounded text-2xs font-semibold border transition-all"
                             style={{
-                              background: relaxationPolicy === opt.key ? C.dark : '#fff',
+                              background: relaxationPolicy === opt.key ? C.dark : C.card,
                               borderColor: relaxationPolicy === opt.key ? C.dark : C.border,
-                              color: relaxationPolicy === opt.key ? '#fff' : C.muted,
+                              color: relaxationPolicy === opt.key ? C.card : C.muted,
                             }}
                           >
                             {opt.label}
@@ -2310,9 +2310,9 @@ function Wizard({
               <div
                 className="px-4 py-2 flex items-center gap-3 text-xs border-b"
                 style={{
-                  background: dlgInfo.needs_update ? '#FFFBEB' : '#F0F9F4',
-                  borderColor: dlgInfo.needs_update ? '#FEF3C7' : '#D1FAE5',
-                  color: dlgInfo.needs_update ? '#92400E' : '#065F46',
+                  background: dlgInfo.needs_update ? C.deltaBg : C.aiBg,
+                  borderColor: dlgInfo.needs_update ? C.deltaBg : C.aiBg,
+                  color: dlgInfo.needs_update ? C.warn : C.success,
                 }}
               >
                 <Database size={13} />
@@ -2342,7 +2342,7 @@ function Wizard({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Futtermittel suchen..."
-                  className="w-full border rounded-lg pl-10 pr-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-[#88B04B]"
+                  className="w-full border rounded-lg pl-10 pr-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary"
                   style={{ borderColor: C.border }}
                 />
               </div>
@@ -2350,12 +2350,12 @@ function Wizard({
                 {feedsLoading ? <Loader2 size={16} className="animate-spin" /> : null}
                 {selectedFeedIds.size} / {allDisplayFeeds.length} ausgewählt
                 {customFeeds.length > 0 && (
-                  <span className="ml-1 text-xs px-1.5 py-0.5 rounded font-bold" style={{ background: '#EEF2FF', color: '#4338CA' }}>
+                  <span className="ml-1 text-xs px-1.5 py-0.5 rounded font-bold" style={{ background: C.aiBg, color: C.aiText }}>
                     +{customFeeds.length} Betrieb
                   </span>
                 )}
                 {compoundFeeds.length > 0 && (
-                  <span className="ml-1 text-xs px-1.5 py-0.5 rounded font-bold" style={{ background: '#ECFDF5', color: '#047857' }}>
+                  <span className="ml-1 text-xs px-1.5 py-0.5 rounded font-bold" style={{ background: C.aiBg, color: C.success }}>
                     +{compoundFeeds.length} Kraftfutter
                   </span>
                 )}
@@ -2371,7 +2371,7 @@ function Wizard({
                 </button>
                 <button
                   className="text-xs px-3 py-1.5 border rounded-lg hover:bg-slate-50 flex items-center gap-1.5 font-semibold"
-                  style={{ borderColor: '#0F766E', color: '#0F766E' }}
+                  style={{ borderColor: C.success, color: C.success }}
                   onClick={() => compoundUploadRef.current?.click()}
                   disabled={compoundUploadMut.isPending}
                 >
@@ -2396,7 +2396,7 @@ function Wizard({
             </div>
 
             {(compoundUploadMut.isError || compoundFeeds.length > 0) && (
-              <div className="px-4 py-3 border-b space-y-2" style={{ borderColor: C.border, background: '#F8FAFC' }}>
+              <div className="px-4 py-3 border-b space-y-2" style={{ borderColor: C.border, background: C.card }}>
                 {compoundUploadMut.isError && (
                   <div className="text-xs flex items-start gap-2" style={{ color: C.error }}>
                     <AlertCircle size={14} className="mt-0.5 shrink-0" />
@@ -2406,14 +2406,14 @@ function Wizard({
                 {compoundFeeds.map((doc) => {
                   const compoundId = String((doc.optimizer_feed as Record<string, unknown>).id ?? '')
                   return (
-                    <div key={compoundId} className="rounded-lg border bg-white px-3 py-2 flex items-start gap-3" style={{ borderColor: '#DCE7E4' }}>
+                    <div key={compoundId} className="rounded-lg border bg-white px-3 py-2 flex items-start gap-3" style={{ borderColor: C.border }}>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <div className="text-sm font-semibold" style={{ color: C.dark }}>{doc.product_name}</div>
-                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#ECFDF5', color: '#047857' }}>
+                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: C.aiBg, color: C.success }}>
                             Match {fmt(doc.gfe2023_estimate.match_coverage_pct, 0)}%
                           </span>
-                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
+                          <span className="text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: C.aiBg, color: C.aiText }}>
                             {doc.source_type === 'image_ocr' ? 'Foto/OCR' : 'PDF'}
                           </span>
                         </div>
@@ -2425,7 +2425,7 @@ function Wizard({
                           <span>Datei {doc.source_filename}</span>
                         </div>
                         {doc.warnings.length > 0 && (
-                          <div className="mt-1 text-2xs" style={{ color: '#92400E' }}>
+                          <div className="mt-1 text-2xs" style={{ color: C.warn }}>
                             {doc.warnings[0]}
                           </div>
                         )}
@@ -2464,7 +2464,7 @@ function Wizard({
                     type="button"
                     onClick={() => setFeedView(value)}
                     className="px-3 py-1 text-xs font-semibold transition-colors"
-                    style={{ background: feedView === value ? C.accent : '#fff', color: feedView === value ? '#fff' : C.dark }}
+                    style={{ background: feedView === value ? C.accent : C.card, color: feedView === value ? C.card : C.dark }}
                     title={value === 'bereiche'
                       ? 'Futtermittel je Bereich über eine leere Zeile hinzufügen (Rauhfutter, Feuchtfutter, Schrote, …)'
                       : 'Vollständige DLG-Katalogtabelle mit Suche und Alle/Keine'}
@@ -2482,7 +2482,7 @@ function Wizard({
                       type="button"
                       onClick={() => setFeedLimitUnit(u)}
                       className="px-3 py-1 text-xs font-semibold transition-colors"
-                      style={{ background: feedLimitUnit === u ? C.accent : '#fff', color: feedLimitUnit === u ? '#fff' : C.dark }}
+                      style={{ background: feedLimitUnit === u ? C.accent : C.card, color: feedLimitUnit === u ? C.card : C.dark }}
                       title={u === 'TM' ? 'Grenzen in kg Trockenmasse/Tag eingeben' : 'Grenzen in kg Frischmasse/Tag eingeben'}
                     >
                       {u === 'TM' ? 'kg TM' : 'kg FM'}
@@ -2522,18 +2522,18 @@ function Wizard({
             {/* Feed-Tabelle */}
             <div className="flex-1 overflow-auto" style={{ display: feedView === 'tabelle' ? undefined : 'none' }}>
               <table className="w-full text-left border-collapse">
-                <thead className="sticky top-0 z-10" style={{ background: '#F9FAFB' }}>
+                <thead className="sticky top-0 z-10" style={{ background: C.card }}>
                   <tr>
-                    <th className="px-4 py-3 border-b text-xs font-semibold w-10" style={{ borderColor: C.border, color: '#4B5563' }} />
-                    <th className="px-4 py-3 border-b text-xs font-semibold" style={{ borderColor: C.border, color: '#4B5563' }}>Futtermittel</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold" style={{ borderColor: C.border, color: '#4B5563' }}>Kategorie</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>TM %</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>ME</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>sidP</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>Stärke</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>€/kg TM</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title={`Mindestverzehr in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = keine Untergrenze).`}>Min {feedLimitUnit} kg/d</th>
-                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }} title={`Max. Verzehrsgrenze in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = unbegrenzt). Sinnvoll bei saisonal begrenzten Vorräten.`}>Max {feedLimitUnit} kg/d</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold w-10" style={{ borderColor: C.border, color: C.muted }} />
+                    <th className="px-4 py-3 border-b text-xs font-semibold" style={{ borderColor: C.border, color: C.muted }}>Futtermittel</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold" style={{ borderColor: C.border, color: C.muted }}>Kategorie</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>TM %</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>ME</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>sidP</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>Stärke</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>€/kg TM</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }} title={`Mindestverzehr in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = keine Untergrenze).`}>Min {feedLimitUnit} kg/d</th>
+                    <th className="px-4 py-3 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }} title={`Max. Verzehrsgrenze in kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = unbegrenzt). Sinnvoll bei saisonal begrenzten Vorräten.`}>Max {feedLimitUnit} kg/d</th>
                     <th className="px-4 py-3 border-b text-xs font-semibold w-8" style={{ borderColor: C.border }} />
                   </tr>
                 </thead>
@@ -2551,20 +2551,20 @@ function Wizard({
                           setSelectedFeedIds(next)
                         }}
                         className="cursor-pointer border-b transition-colors hover:bg-slate-50"
-                        style={{ background: checked ? C.activeBg : undefined, borderColor: '#F3F4F6' }}
+                        style={{ background: checked ? C.activeBg : undefined, borderColor: C.border }}
                       >
                         <td className="px-4 py-3">
                           <div
                             className="w-4 h-4 rounded border flex items-center justify-center transition-all"
-                            style={{ background: checked ? C.accent : '#fff', borderColor: checked ? C.accent : C.border }}
+                            style={{ background: checked ? C.accent : C.card, borderColor: checked ? C.accent : C.border }}
                           >
-                            {checked && <Check size={10} strokeWidth={4} color="#fff" />}
+                            {checked && <Check size={10} strokeWidth={4} color={C.card} />}
                           </div>
                         </td>
                         <td className="px-4 py-3 font-bold text-sm" style={{ color: C.dark }}>
                           <span>{f.name}</span>
                           {isCustom && (
-                            <span className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: '#EEF2FF', color: '#4338CA' }}>
+                            <span className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded" style={{ background: C.aiBg, color: C.aiText }}>
                               Betrieb
                             </span>
                           )}
@@ -2591,7 +2591,7 @@ function Wizard({
                               })
                             }}
                             placeholder="—"
-                            className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-hidden focus:ring-1 focus:ring-[#88B04B]"
+                            className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-hidden focus:ring-1 focus:ring-primary"
                             style={{ borderColor: feedMinFm[f.id] ? C.accent : C.border }}
                             title={`Min. kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = keine Untergrenze)`}
                           />
@@ -2612,7 +2612,7 @@ function Wizard({
                               })
                             }}
                             placeholder="∞"
-                            className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-hidden focus:ring-1 focus:ring-[#88B04B]"
+                            className="w-16 border rounded px-2 py-0.5 text-xs text-right outline-hidden focus:ring-1 focus:ring-primary"
                             style={{ borderColor: feedMaxFm[f.id] ? C.accent : C.border }}
                             title={`Max. kg ${feedLimitUnit === 'TM' ? 'Trockenmasse' : 'Frischmasse'}/Tag (leer = unbegrenzt)`}
                           />
@@ -2789,16 +2789,16 @@ function Wizard({
                           const n = Number(e.target.value)
                           setPriorityWeights((prev) => ({ ...prev, [key]: Number.isFinite(n) ? n : prev[key] }))
                         }}
-                        className="w-full h-2 rounded-full appearance-none cursor-pointer bg-slate-100
+                        className="w-full h-2 rounded-full appearance-none cursor-pointer bg-muted
                           [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4
-                          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white
-                          [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:bg-[#88B04B]
+                          [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-background
+                          [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:bg-primary
                           [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2
-                          [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:bg-[#88B04B]"
+                          [&::-moz-range-thumb]:border-background [&::-moz-range-thumb]:shadow-sm [&::-moz-range-thumb]:bg-primary"
                         style={{ accentColor: C.accent }}
                         aria-label={`${label}: ${val} Prozent`}
                       />
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden -mt-1 pointer-events-none">
+                      <div className="h-1.5 bg-muted rounded-full overflow-hidden -mt-1 pointer-events-none">
                         <div className="h-full rounded-full transition-[width] duration-75" style={{ width: `${val}%`, background: C.accent }} />
                       </div>
                     </div>
@@ -2806,7 +2806,7 @@ function Wizard({
                 })}
               </div>
 
-              <div className="p-6 rounded-2xl text-white space-y-4" style={{ background: '#1B3022' }}>
+              <div className="p-6 rounded-2xl text-white space-y-4" style={{ background: C.dark }}>
                 <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-widest" style={{ color: C.accent }}>
                   <Sparkles size={16} /> AI-Vorschau
                 </div>
@@ -2826,7 +2826,7 @@ function Wizard({
           <button
             onClick={step === 1 ? onCancel : () => setStep((s) => s - 1)}
             className="px-6 py-2.5 border font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-            style={{ borderColor: C.border, color: '#374151' }}
+            style={{ borderColor: C.border, color: C.dark }}
           >
             <ArrowLeft size={18} /> {step === 1 ? 'Abbrechen' : 'Zurück'}
           </button>
@@ -2880,7 +2880,7 @@ function FanCalibrationPanel({
         </div>
         <span
           className="text-2xs font-bold px-2 py-0.5 rounded border"
-          style={{ background: '#F9FAFB', borderColor: badgeColor, color: badgeColor }}
+          style={{ background: C.card, borderColor: badgeColor, color: badgeColor }}
         >
           bewertet bei FAN {ref != null ? ref.toFixed(2) : '–'}
         </span>
@@ -2896,7 +2896,7 @@ function FanCalibrationPanel({
           </span>
         </div>
         {totalCount > 0 && (
-          <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+          <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: C.border }}>
             <span style={{ color: C.muted }}>Futterwert-Quelle</span>
             <span className="font-mono">
               {fan.feeds_exact ?? 0} exakt · {fan.feeds_mapped ?? 0} gemappt · {fallbackCount} fallback
@@ -2904,7 +2904,7 @@ function FanCalibrationPanel({
           </div>
         )}
         {fan.precision_summary && (
-          <div className="col-span-2 mt-1 rounded border p-2" style={{ borderColor: C.border, background: '#F8FAFC' }}>
+          <div className="col-span-2 mt-1 rounded border p-2" style={{ borderColor: C.border, background: C.card }}>
             <div className="mb-1 flex justify-between font-semibold"><span>DLG-FAN-Präzision</span><span>Kap. 4.3 / 6.2</span></div>
             <div className="grid grid-cols-2 gap-x-3 gap-y-0.5 font-mono text-2xs">
               <span>Passage k</span><span className="text-right">{fan.precision_summary.passage_rate_pct_h?.toFixed(2) ?? '–'} %/h</span>
@@ -2916,7 +2916,7 @@ function FanCalibrationPanel({
             {fan.precision_summary.fallback_items > 0 && <p className="mt-1 text-2xs" style={{ color: C.warn }}>{fan.precision_summary.fallback_items} Position(en) ohne vollständige Analytik: konservativer Fallback.</p>}
           </div>
         )}        {(policyProfile || seasonProfile || relaxationPolicy) && (
-          <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+          <div className="col-span-2 flex justify-between pt-1 border-t" style={{ borderColor: C.border }}>
             <span style={{ color: C.muted }}>Policy</span>
             <span className="font-mono text-2xs">
               {policyProfile ?? '–'}
@@ -2932,7 +2932,7 @@ function FanCalibrationPanel({
         </div>
       )}
       {fan.fallback_warning && (
-        <div className="mt-2 text-2xs px-2 py-1 rounded" style={{ background: '#FEF2F2', borderColor: '#FECACA', color: C.error }}>
+        <div className="mt-2 text-2xs px-2 py-1 rounded" style={{ background: C.aiBg, borderColor: C.border, color: C.error }}>
           {fan.fallback_warning}
         </div>
       )}
@@ -2988,7 +2988,7 @@ function ConstraintStatusPanel({
             <div
               key={i}
               className="flex justify-between items-center text-2xs py-1 border-b"
-              style={{ borderColor: '#F3F4F6' }}
+              style={{ borderColor: C.border }}
             >
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-2 w-2 rounded-full" style={{ background: color }} />
@@ -3025,7 +3025,7 @@ function ConstraintStatusPanel({
         })}
       </div>
       {totalPenalty > 0 && (
-        <div className="mt-2 pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+        <div className="mt-2 pt-1 border-t" style={{ borderColor: C.border }}>
           <div className="flex justify-between text-2xs">
             <span style={{ color: C.muted }}>Summe Strafkosten</span>
             <span className="font-semibold font-mono">{totalPenalty.toFixed(2)}</span>
@@ -3295,19 +3295,19 @@ function AttainabilityCockpit({ result }: { result: OptimizationResult | null })
       <PerformanceGauge value={safe} target={target} max={scaleMax} ok={att.meets_target} />
 
       <div className="grid grid-cols-4 gap-1.5 mt-2 text-center">
-        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: C.card }}>
           <div className="text-[9px] uppercase" style={{ color: C.muted }}>Aktuell</div>
           <div className="text-[13px] font-bold font-mono">{att.baseline_supported != null ? att.baseline_supported.toFixed(1) : '—'}</div>
         </div>
-        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: C.card }}>
           <div className="text-[9px] uppercase" style={{ color: C.muted }}>Solver err.</div>
           <div className="text-[13px] font-bold font-mono">{safe != null ? safe.toFixed(1) : '–'}</div>
         </div>
-        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: C.card }}>
           <div className="text-[9px] uppercase" style={{ color: C.muted }}>Techn. max.</div>
           <div className="text-[13px] font-bold font-mono">{techMax != null ? techMax.toFixed(1) : '—'}</div>
         </div>
-        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: '#F9FAFB' }}>
+        <div className="rounded border p-1.5" style={{ borderColor: C.border, background: C.card }}>
           <div className="text-[9px] uppercase" style={{ color: C.muted }}>Ziel</div>
           <div className="text-[13px] font-bold font-mono">{target != null ? target.toFixed(1) : '—'}</div>
         </div>
@@ -3521,18 +3521,18 @@ function VariantComparisonPanel({
       <div className="overflow-x-auto">
         <table className="w-full text-2xs">
           <thead>
-            <tr style={{ background: '#F9FAFB' }}>
-              <th className="py-1.5 px-2 border-b text-left font-semibold text-[#4B5563]">Kennzahl</th>
-              <th className="py-1.5 px-2 border-b text-left font-semibold text-[#4B5563]">Einheit</th>
+            <tr style={{ background: C.card }}>
+              <th className="py-1.5 px-2 border-b text-left font-semibold text-muted-foreground">Kennzahl</th>
+              <th className="py-1.5 px-2 border-b text-left font-semibold text-muted-foreground">Einheit</th>
               {cols.map((c, i) => (
-                <th key={`${c.name}-${i}`} className="py-1.5 px-2 border-b text-right font-semibold text-[#4B5563] whitespace-nowrap">{c.name}</th>
+                <th key={`${c.name}-${i}`} className="py-1.5 px-2 border-b text-right font-semibold text-muted-foreground whitespace-nowrap">{c.name}</th>
               ))}
-              <th className="py-1.5 px-2 border-b text-right font-semibold text-[#4B5563]">Zielbereich</th>
+              <th className="py-1.5 px-2 border-b text-right font-semibold text-muted-foreground">Zielbereich</th>
             </tr>
           </thead>
           <tbody>
             {metrics.map((m) => (
-              <tr key={m.label} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+              <tr key={m.label} className="border-b" style={{ borderColor: C.border }}>
                 <td className="px-2 py-1 font-medium" style={{ color: C.dark }}>{m.label}</td>
                 <td className="px-2 py-1" style={{ color: C.muted }}>{m.unit}</td>
                 {cols.map((c, i) => {
@@ -3678,9 +3678,9 @@ function SensitivityPanel({
         <div className="overflow-x-auto">
           <table className="w-full text-2xs">
             <thead>
-              <tr style={{ background: '#F9FAFB' }}>
+              <tr style={{ background: C.card }}>
                 {[`${paramLabel[data.parameter]} (${data.unit})`, 'ME MJ/kg TM', 'sidP g/kg TM', 'Kosten €/Kuh/Tag', 'Erreichbar kg', 'Bindende Grenzen'].map((h, i) => (
-                  <th key={h} className={cn('py-1.5 px-2 border-b font-semibold text-[#4B5563] whitespace-nowrap', i === 0 || i === 5 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
+                  <th key={h} className={cn('py-1.5 px-2 border-b font-semibold text-muted-foreground whitespace-nowrap', i === 0 || i === 5 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
                     {h}
                   </th>
                 ))}
@@ -3688,7 +3688,7 @@ function SensitivityPanel({
             </thead>
             <tbody>
               {data.steps.map((s) => (
-                <tr key={s.value} className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                <tr key={s.value} className="border-b" style={{ borderColor: C.border }}>
                   <td className="px-2 py-1 font-mono font-semibold">{fmt(s.value, 2)}</td>
                   <td className="px-2 py-1 text-right font-mono">{s.me_density_mj_kgdm != null ? fmt(s.me_density_mj_kgdm, 2) : '–'}</td>
                   <td className="px-2 py-1 text-right font-mono">{s.sidp_density_g_kgdm != null ? fmt(s.sidp_density_g_kgdm, 0) : '–'}</td>
@@ -3952,7 +3952,7 @@ function Workbench({
           <div className="space-y-2.5">
             <div>
               <label className="text-2xs uppercase tracking-wide" style={{ color: C.muted }}>Herde / Gruppe</label>
-              <div className="mt-0.5 rounded border px-2 py-1.5 text-[13px] font-medium" style={{ borderColor: C.border, color: C.dark, background: '#F9FAFB' }}>
+              <div className="mt-0.5 rounded border px-2 py-1.5 text-[13px] font-medium" style={{ borderColor: C.border, color: C.dark, background: C.card }}>
                 {wizardData ? `Laktierende Kühe · ${wizardData.group.count ?? '–'} Tiere` : 'Laktierende Kühe'}
               </div>
             </div>
@@ -4104,7 +4104,7 @@ function Workbench({
               'Nur Bewertung'
             ) : '–' },
           ].map((row) => (
-            <div key={row.label} className="flex justify-between text-[12px] py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+            <div key={row.label} className="flex justify-between text-[12px] py-1 border-b" style={{ borderColor: C.border }}>
               <span style={{ color: C.muted }}>{row.label}</span>
               <span className="font-bold">{row.val}</span>
             </div>
@@ -4199,7 +4199,7 @@ function Workbench({
 
         {/* Error */}
         {error && (
-          <div className="p-3 rounded-lg border text-sm flex items-start gap-2" style={{ background: '#FEF2F2', borderColor: '#FECACA', color: C.error }}>
+          <div className="p-3 rounded-lg border text-sm flex items-start gap-2" style={{ background: C.aiBg, borderColor: C.border, color: C.error }}>
             <AlertCircle size={16} className="mt-0.5 shrink-0" />
             {error}
           </div>
@@ -4247,9 +4247,9 @@ function Workbench({
             <div className="overflow-x-auto">
             <table className="w-full text-[12px]">
               <thead>
-                <tr style={{ background: '#F9FAFB' }}>
+                <tr style={{ background: C.card }}>
                   {['Aktiv', 'Futtermittel', 'kg FM', 'kg TM', 'Roth %', 'Struktur', 'Min', 'Max', 'ME (MJ)', 'sidP (g)', '€/Tag', ''].map((h, hi) => (
-                    <th key={`${h}-${hi}`} className={cn('py-2.5 px-2 border-b text-xs font-semibold text-[#4B5563] whitespace-nowrap', hi === 0 ? 'text-center' : hi === 1 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
+                    <th key={`${h}-${hi}`} className={cn('py-2.5 px-2 border-b text-xs font-semibold text-muted-foreground whitespace-nowrap', hi === 0 ? 'text-center' : hi === 1 ? 'text-left' : 'text-right')} style={{ borderColor: C.border }}>
                       {h}
                     </th>
                   ))}
@@ -4267,7 +4267,7 @@ function Workbench({
                   const isFixed = minFm != null && minFm === maxFm
                   const rothPct = item.cp_g != null && item.kgdm > 0 ? item.cp_g / item.kgdm / 10 : null
                   return (
-                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: '#F3F4F6' }}>
+                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: C.border }}>
                       {/* RATION-WB-11: Aktiv-Checkbox (Abwählen entfernt die Zutat und rechnet neu) */}
                       <td className="p-2 text-center">
                         <input
@@ -4414,7 +4414,7 @@ function Workbench({
               </tbody>
               {rationItems.length > 0 && (
                 <tfoot>
-                  <tr className="font-bold" style={{ background: '#F9FAFB' }}>
+                  <tr className="font-bold" style={{ background: C.card }}>
                     <td />
                     <td className="p-2 text-sm" style={{ color: C.dark }}>Rationssumme</td>
                     <td className="p-2 text-right font-mono text-xs">{fmt(rationItems.reduce((s, r) => s + r.kgfm, 0), 1)}</td>
@@ -4534,7 +4534,7 @@ function Workbench({
           <div className="text-2xs uppercase font-bold mb-2.5 tracking-[0.5px]" style={{ color: C.muted }}>KPI Status</div>
           <div className="grid grid-cols-2 gap-2">
             {kpis.map((kpi, i) => (
-              <div key={i} className="border p-2 rounded text-center" style={{ background: '#F9FAFB', borderColor: C.border }} title={stringValue('title' in kpi ? kpi.title : undefined)}>
+              <div key={i} className="border p-2 rounded text-center" style={{ background: C.card, borderColor: C.border }} title={stringValue('title' in kpi ? kpi.title : undefined)}>
                 <div className="text-2xs uppercase mb-1" style={{ color: C.muted }}>{kpi.label}</div>
                 <div className="text-[15px] font-bold">{kpi.value}</div>
                 <div
@@ -4643,9 +4643,9 @@ function Workbench({
                   }]
                 : []),
             ].map((row) => (
-              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: C.border }}>
                 <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? '#94a3b8' : row.ok ? C.success : C.error }} />
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? C.muted : row.ok ? C.success : C.error }} />
                   {row.label}
                 </span>
                 <span className="font-mono font-medium">{row.val}</span>
@@ -4660,7 +4660,7 @@ function Workbench({
               <div className="flex items-start gap-1.5 text-2xs mb-1" style={{ color: C.muted }}>
                 <span
                   className="inline-block h-2 w-2 rounded-full mt-0.5"
-                  style={{ background: dlg.pendf_model_calibrated === false ? '#f59e0b' : '#94a3b8' }}
+                  style={{ background: dlg.pendf_model_calibrated === false ? C.warn : C.muted }}
                 />
                 <span>{dlg.pendf_model_status}</span>
               </div>
@@ -4694,9 +4694,9 @@ function Workbench({
                   }]
                 : []),
             ].map((row) => (
-              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+              <div key={row.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: C.border }}>
                 <span className="flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? '#94a3b8' : row.ok ? C.success : C.error }} />
+                  <span className="inline-block h-2 w-2 rounded-full" style={{ background: row.ok === null ? C.muted : row.ok ? C.success : C.error }} />
                   {row.label}
                 </span>
                 <span className="font-mono font-medium">{row.val}</span>
@@ -4717,9 +4717,9 @@ function Workbench({
               <span
                 className="text-2xs font-bold px-2 py-0.5 rounded border"
                 style={{
-                  background: '#F9FAFB',
-                  borderColor: result.policy_profile_evaluation.violation_count === 0 ? C.success : '#f59e0b',
-                  color: result.policy_profile_evaluation.violation_count === 0 ? C.success : '#b45309',
+                  background: C.card,
+                  borderColor: result.policy_profile_evaluation.violation_count === 0 ? C.success : C.warn,
+                  color: result.policy_profile_evaluation.violation_count === 0 ? C.success : C.warn,
                 }}
               >
               {result.policy_profile_evaluation.violation_count === 0
@@ -4736,7 +4736,7 @@ function Workbench({
                 <span
                   className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded border"
                   title="Die Policy-Baender sind als native Slack-Variablen im LP gebunden. Der Solver minimiert Kosten und Korridor-Abweichung gemeinsam."
-                  style={{ background: '#ECFDF5', borderColor: C.success, color: C.success }}
+                  style={{ background: C.aiBg, borderColor: C.success, color: C.success }}
                 >
                   LP-Slack aktiv
                 </span>
@@ -4745,7 +4745,7 @@ function Workbench({
                 <span
                   className="ml-2 text-2xs font-bold px-1.5 py-0.5 rounded border"
                   title="Empfohlenes Konzentrat-Tagesmaximum wurde im Stage-2-LP mit einer Slack-Variable weich überschritten."
-                  style={{ background: '#FFFBEB', borderColor: C.deltaBorder, color: C.deltaText }}
+                  style={{ background: C.deltaBg, borderColor: C.deltaBorder, color: C.deltaText }}
                 >
                   KF-Tagesmax-Slack {fmt(result.concentrate_max_lp_slack_kg, 3)} kg TM
                 </span>
@@ -4753,12 +4753,12 @@ function Workbench({
             </div>
             <div className="space-y-0.5">
               {result.policy_profile_evaluation.bands.map((band) => {
-                const dotBg = band.status === 'ok' ? C.success : '#f59e0b'
+                const dotBg = band.status === 'ok' ? C.success : C.warn
                 const range = (band.target_min != null || band.target_max != null)
                   ? `${band.target_min != null ? fmt(band.target_min, 1) : '–'} … ${band.target_max != null ? fmt(band.target_max, 1) : '–'}`
                   : fmt(band.target, 1)
                 return (
-                  <div key={band.name} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+                  <div key={band.name} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: C.border }}>
                     <span className="flex items-center gap-1.5">
                       <span className="inline-block h-2 w-2 rounded-full" style={{ background: dotBg }} />
                       {band.name.replace(/^DLG-Policy:\s*/, '')}
@@ -4768,7 +4768,7 @@ function Workbench({
                       {' · Ziel '}
                       {range} {band.unit}
                       {band.status !== 'ok' && (
-                        <span className="ml-1" style={{ color: '#b45309' }}>
+                        <span className="ml-1" style={{ color: C.warn }}>
                           (dev {fmt(band.deviation_norm ?? 0, 2)})
                         </span>
                       )}
@@ -4779,7 +4779,7 @@ function Workbench({
             </div>
             {/* LP-Slack-Details: welche Baender hat der Solver selbst relaxiert? */}
             {Array.isArray(result.policy_profile_lp_slacks) && result.policy_profile_lp_slacks.length > 0 && (
-              <div className="mt-3 pt-2 border-t" style={{ borderColor: '#E5E7EB' }}>
+              <div className="mt-3 pt-2 border-t" style={{ borderColor: C.border }}>
                 <div className="text-2xs uppercase font-bold tracking-[0.5px] mb-1" style={{ color: C.muted }}>
                   LP-Solver-Slacks (aktive Korridor-Verletzungen)
                 </div>
@@ -4803,7 +4803,7 @@ function Workbench({
                           </span>
                         </div>
                       ))}
-                      <div className="flex justify-between text-2xs font-mono pt-1 border-t" style={{ borderColor: '#F3F4F6' }}>
+                      <div className="flex justify-between text-2xs font-mono pt-1 border-t" style={{ borderColor: C.border }}>
                         <span className="font-semibold">Summe LP-Penalty</span>
                         <span>{fmt(result.policy_profile_lp_total_penalty ?? 0, 2)}</span>
                       </div>
@@ -4822,14 +4822,14 @@ function Workbench({
           <div
             className={card()}
             style={{
-              borderColor: result.sara_safety_reopt.resolved ? '#f59e0b' : '#dc2626',
-              background: result.sara_safety_reopt.resolved ? '#fffbeb' : '#fef2f2',
+              borderColor: result.sara_safety_reopt.resolved ? C.warn : C.error,
+              background: result.sara_safety_reopt.resolved ? C.deltaBg : C.aiBg,
             }}
           >
             <div className="flex items-center gap-2 mb-2">
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: result.sara_safety_reopt.resolved ? '#f59e0b' : '#dc2626' }}
+                style={{ background: result.sara_safety_reopt.resolved ? C.warn : C.error }}
               />
               <div className="text-2xs uppercase font-bold tracking-[0.5px]">
                 SARA-Safety-Reopt {result.sara_safety_reopt.resolved ? 'aktiv (geloest)' : 'aktiv (ungeloest)'}
@@ -4880,8 +4880,8 @@ function Workbench({
                 key={i}
                 className="p-2 rounded text-[12px] border-l-[3px] shadow-sm leading-relaxed"
                 style={{
-                  background: '#fff',
-                  borderColor: msg.role === 'ai' ? '#0EA5E9' : C.accent,
+                  background: C.card,
+                  borderColor: msg.role === 'ai' ? C.aiText : C.accent,
                 }}
               >
                 {msg.text}
@@ -5051,22 +5051,22 @@ function Review({
 
       {/* KPI Comparison */}
       <div className={card('overflow-hidden p-0')}>
-        <div className="px-5 py-3 border-b flex justify-between font-bold text-2xs uppercase tracking-widest" style={{ background: '#F9FAFB', borderColor: C.border, color: C.muted }}>
+        <div className="px-5 py-3 border-b flex justify-between font-bold text-2xs uppercase tracking-widest" style={{ background: C.card, borderColor: C.border, color: C.muted }}>
           <span>Kennzahl-Vergleich</span>
           <span>Ergebnisse</span>
         </div>
         <table className="w-full text-left border-collapse text-[12px]">
           <thead>
             <tr>
-              <th className="px-4 py-2.5 border-b text-xs font-semibold" style={{ borderColor: C.border, color: '#4B5563' }}>Kennzahl</th>
-              <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>IST</th>
-              <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>NEU</th>
+              <th className="px-4 py-2.5 border-b text-xs font-semibold" style={{ borderColor: C.border, color: C.muted }}>Kennzahl</th>
+              <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>IST</th>
+              <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>NEU</th>
             </tr>
           </thead>
           <tbody>
             {comparison.map((row, i) => (
-              <tr key={i} className="border-b hover:bg-slate-50 transition-colors" style={{ borderColor: '#F3F4F6' }}>
-                <td className="px-4 py-2.5 font-bold text-[#374151]">{row.label}</td>
+              <tr key={i} className="border-b hover:bg-slate-50 transition-colors" style={{ borderColor: C.border }}>
+                <td className="px-4 py-2.5 font-bold text-foreground">{row.label}</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>{row.ist}</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs font-bold" style={{ color: C.accent }}>{row.neu}</td>
               </tr>
@@ -5090,7 +5090,7 @@ function Review({
 
       {forageComparison.length > 0 && (
         <div className={card('overflow-hidden p-0')}>
-          <div className="px-5 py-3 border-b space-y-1" style={{ background: '#F9FAFB', borderColor: C.border }}>
+          <div className="px-5 py-3 border-b space-y-1" style={{ background: C.card, borderColor: C.border }}>
             <div className="font-bold text-2xs uppercase tracking-widest" style={{ color: C.muted }}>
               Grundfutterleistung und Ergänzung
             </div>
@@ -5102,10 +5102,10 @@ function Review({
           <table className="w-full text-left border-collapse text-[12px]">
             <thead>
               <tr>
-                <th className="px-4 py-2.5 border-b text-xs font-semibold" style={{ borderColor: C.border, color: '#4B5563' }}>Kennzahl</th>
-                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>IST Grundfutter</th>
-                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>Ziel (Profil)</th>
-                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: '#4B5563' }}>NEU mit Kraftfutter</th>
+                <th className="px-4 py-2.5 border-b text-xs font-semibold" style={{ borderColor: C.border, color: C.muted }}>Kennzahl</th>
+                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>IST Grundfutter</th>
+                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>Ziel (Profil)</th>
+                <th className="px-4 py-2.5 border-b text-xs font-semibold text-right" style={{ borderColor: C.border, color: C.muted }}>NEU mit Kraftfutter</th>
               </tr>
             </thead>
             <tbody>
@@ -5118,11 +5118,11 @@ function Review({
                     key={row.label}
                     className="border-b hover:bg-slate-50 transition-colors"
                     style={{
-                      borderColor: '#F3F4F6',
+                      borderColor: C.border,
                       background: isEpRow && (!epOkIst || !epOkNeu) ? C.deltaBg : undefined,
                     }}
                   >
-                    <td className="px-4 py-2.5 font-bold text-[#374151]">{row.label}</td>
+                    <td className="px-4 py-2.5 font-bold text-foreground">{row.label}</td>
                     <td
                       className="px-4 py-2.5 text-right font-mono text-xs"
                       style={{ color: isEpRow && !epOkIst ? C.deltaText : C.muted }}
@@ -5139,8 +5139,8 @@ function Review({
                   </tr>
                 )
               })}
-              <tr className="border-b" style={{ borderColor: '#F3F4F6' }}>
-                <td className="px-4 py-2.5 font-bold text-[#374151]">Kraftfutter / Verdrängung</td>
+              <tr className="border-b" style={{ borderColor: C.border }}>
+                <td className="px-4 py-2.5 font-bold text-foreground">Kraftfutter / Verdrängung</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>–</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.deltaText }}>
                   {result?.forage_performance?.feeding_type}
@@ -5162,7 +5162,7 @@ function Review({
           <h3 className="text-sm font-bold uppercase tracking-widest" style={{ color: C.dark }}>Rationsvorschlag</h3>
           <ul className="space-y-2">
             {changeLog.map((item, i) => (
-              <li key={i} className="flex items-center gap-3 p-3 bg-white border rounded-xl" style={{ borderColor: '#E5E7EB' }}>
+              <li key={i} className="flex items-center gap-3 p-3 bg-white border rounded-xl" style={{ borderColor: C.border }}>
                 <TrendingUp size={16} style={{ color: C.accent }} />
                 <span className="text-sm font-medium text-slate-600">
                   {item.name}: {fmt(item.kgfm, 1)} kg FM / {fmt(item.kgdm, 2)} kg TM
@@ -5207,7 +5207,7 @@ function Review({
         <button
           onClick={onBack}
           className="px-6 py-3 border font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
-          style={{ borderColor: C.border, color: '#374151' }}
+          style={{ borderColor: C.border, color: C.dark }}
         >
           <ArrowLeft size={18} /> Zurück editieren
         </button>
@@ -5314,12 +5314,12 @@ function Diagnose({
     : []
 
   const riskColor = (r: 'ok' | 'warn' | 'crit') =>
-    r === 'ok' ? '#22c55e' : r === 'warn' ? '#f59e0b' : '#ef4444'
+    r === 'ok' ? C.success : r === 'warn' ? C.warn : C.error
   const riskLabel = (r: 'ok' | 'warn' | 'crit') =>
     r === 'ok' ? 'OK' : r === 'warn' ? 'Warnung' : 'Kritisch'
 
   const tw = tierwohl
-  const tierwohlColor = tw.status === 'green' ? '#22c55e' : tw.status === 'yellow' ? '#f59e0b' : '#ef4444'
+  const tierwohlColor = tw.status === 'green' ? C.success : tw.status === 'yellow' ? C.warn : C.error
 
   return (
     <div className="flex-1 overflow-auto p-4 max-w-5xl mx-auto w-full">
@@ -5362,8 +5362,8 @@ function Diagnose({
           <div className="space-y-1.5">
             {tw.criteria.map((c) => (
               <div key={c.label} className="flex items-center gap-2 text-sm">
-                <span style={{ color: c.ok ? '#22c55e' : '#ef4444' }}>{c.ok ? '✓' : '✗'}</span>
-                <span style={{ color: c.ok ? C.dark : '#ef4444' }}>{c.label}</span>
+                <span style={{ color: c.ok ? C.success : C.error }}>{c.ok ? '✓' : '✗'}</span>
+                <span style={{ color: c.ok ? C.dark : C.error }}>{c.label}</span>
               </div>
             ))}
           </div>
@@ -5373,16 +5373,16 @@ function Diagnose({
         </div>
 
         {/* Verletzte Nebenbedingungen */}
-        <div className={card()} style={{ borderTop: `4px solid ${violated.length === 0 ? '#22c55e' : '#ef4444'}` }}>
+        <div className={card()} style={{ borderTop: `4px solid ${violated.length === 0 ? C.success : C.error}` }}>
           <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>
             Nebenbedingungen ({violated.length} verletzt)
           </h3>
           {violated.length === 0 ? (
-            <p className="text-sm" style={{ color: '#22c55e' }}>Alle Nebenbedingungen erfüllt ✓</p>
+            <p className="text-sm" style={{ color: C.success }}>Alle Nebenbedingungen erfüllt ✓</p>
           ) : (
             <div className="space-y-2">
               {violated.map((c, i) => (
-                <div key={i} className="text-sm p-2 rounded" style={{ background: c.status === 'hard_violated' ? '#fef2f2' : '#fffbeb', border: `1px solid ${c.status === 'hard_violated' ? '#fca5a5' : '#fcd34d'}` }}>
+                <div key={i} className="text-sm p-2 rounded" style={{ background: c.status === 'hard_violated' ? C.aiBg : C.deltaBg, border: `1px solid ${c.status === 'hard_violated' ? C.error : C.warn}` }}>
                   <div className="font-medium">{c.name}</div>
                   <div style={{ color: C.muted }}>
                     Ist: {fmt(c.actual, 2)} {c.unit} · Ziel: {fmt(c.target, 2)} {c.unit} · Δ {fmt(Math.abs(c.difference ?? c.actual - c.target), 2)}
@@ -5394,7 +5394,7 @@ function Diagnose({
           {warnings.length > 0 && (
             <div className="mt-3 space-y-1">
               {warnings.slice(0, 5).map((w, i) => (
-                <div key={i} className="text-[12px] flex items-start gap-1" style={{ color: '#92400e' }}>
+                <div key={i} className="text-[12px] flex items-start gap-1" style={{ color: C.warn }}>
                   <AlertTriangle size={12} className="mt-0.5 shrink-0" />{w}
                 </div>
               ))}
@@ -5406,7 +5406,7 @@ function Diagnose({
         </div>
 
         {/* Biologische Risiken */}
-        <div className={card()} style={{ borderTop: '4px solid #f59e0b' }}>
+        <div className={card()} style={{ borderTop: '4px solid C.warn' }}>
           <h3 className="font-semibold text-sm mb-3" style={{ color: C.dark }}>Biologische Risiken</h3>
           {bioRisks.length === 0 ? (
             <p className="text-sm" style={{ color: C.muted }}>Kein Ergebnis vorhanden.</p>
@@ -5700,7 +5700,7 @@ function IntentSuggestionsPanel({
     const color = better ? C.success : worse ? C.error : C.muted
     const sign = diff > 1e-6 ? '+' : ''
     return (
-      <div key={label} className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 items-center text-xs py-1.5 border-b" style={{ borderColor: '#F3F4F6' }}>
+      <div key={label} className="grid grid-cols-[1.4fr_0.9fr_0.9fr_0.9fr] gap-2 items-center text-xs py-1.5 border-b" style={{ borderColor: C.border }}>
         <span className="font-medium" style={{ color: C.dark }}>{label}</span>
         <span className="text-right font-mono" style={{ color: C.muted }}>{fmt(baseVal, digits)} {unit}</span>
         <span className="text-right font-mono font-bold" style={{ color: C.dark }}>{fmt(newVal, digits)} {unit}</span>
@@ -5731,8 +5731,8 @@ function IntentSuggestionsPanel({
               title={intent.hint}
               className="px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors disabled:opacity-40"
               style={{
-                background: isActive ? C.accent : '#fff',
-                color: isActive ? '#fff' : C.dark,
+                background: isActive ? C.accent : C.card,
+                color: isActive ? C.card : C.dark,
                 borderColor: isActive ? C.accent : C.border,
               }}
             >
@@ -5843,9 +5843,9 @@ function EfficiencyPanel({ result }: { result: OptimizationResult | null }) {
         Effizienz (DLG 01|25, Kap. 10)
       </div>
       {rows.map((r) => (
-        <div key={r.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: '#F3F4F6' }}>
+        <div key={r.label} className="flex justify-between items-center text-2xs py-1 border-b" style={{ borderColor: C.border }}>
           <span className="flex items-center gap-1.5">
-            <span className="inline-block h-2 w-2 rounded-full" style={{ background: r.ok === null ? '#94a3b8' : r.ok ? C.success : C.error }} />
+            <span className="inline-block h-2 w-2 rounded-full" style={{ background: r.ok === null ? C.muted : r.ok ? C.success : C.error }} />
             {r.label}
           </span>
           <span className="text-right">
