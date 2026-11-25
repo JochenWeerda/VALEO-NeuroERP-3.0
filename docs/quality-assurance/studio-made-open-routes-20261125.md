@@ -49,13 +49,14 @@ Permission-Projektion (UI): `finance.bankkonto.*` / `finance.kreditor.*` → FIN
 | `einkauf/anfrage` (`anfrage-stamm`) | Create → ObjectPage-Legacy | `creation` → POST `/api/v1/einkauf/anfragen` |
 | `qualitaet/reklamation` | Create → ObjectPage-Legacy | `creation` → POST `/api/v1/reklamationen` (`responseIdKey=reklamation_id`, Positionen-Tabelle) |
 | `crm/kontakt` (`kontakt-detail`) | ScreenId `crm/kontakte/new` + Legacy | `crm/kontakt` + POST `/api/v1/crm/contacts/` (nested `data.id`) |
+| `qualitaet/labor-detail` | Legacy-ObjectPage | `creation` → POST `/api/v1/qualitaet/labor-auftraege` |
 | `UniversalNativeCreatePage` | nur `response.data.id` | `responseIdKey` + Defaults ausserhalb der Formularfelder + nested `data.id` |
 
 ## Noch offen (Folge)
 
 - 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
-- Weitere Stamm-Factories mit Legacy (Labor, Stammdaten/*, Admin, Preise, …)
+- Weitere Stamm-Factories mit Legacy (Stammdaten/*, Admin, Preise, Service, …)
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests
