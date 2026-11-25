@@ -39,8 +39,6 @@ _PARTNER = {"kunde": "Kunde", "lieferant": "Lieferant"}
 
 
 def _build_via_parent(belegart: str) -> dict[str, Any]:
-    from app.core.beleg_maske_parent import _PRODUCTION_NO_WORKFLOW_REASON
-
     variante = BELEGARTEN[belegart]
     partner = _PARTNER[variante.partnerrolle]
     slug = belegart.replace("_", "-")
@@ -70,7 +68,7 @@ def _build_via_parent(belegart: str) -> dict[str, Any]:
             "screenRoot": f"[data-testid='beleg-{slug}']",
             "summaryArea": "[data-testid='mask-summary']",
         },
-        no_workflow_reason=_PRODUCTION_NO_WORKFLOW_REASON,
+        # ProcessBand (FSX-030): Default-Phasen aus BelegMaskeParent; Stand zur Laufzeit aus WorkflowState.
     )
 
 

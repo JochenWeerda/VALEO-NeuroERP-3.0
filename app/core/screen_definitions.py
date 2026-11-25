@@ -5763,6 +5763,53 @@ def _ensure_table_query_flags(definition: dict[str, Any]) -> None:
             target["filterable"] = True
 
 
+_DEFAULT_DOCUMENT_PHASES = (
+    {"key": "ERFASST", "label": "Erfasst"},
+    {"key": "FREIGEGEBEN", "label": "Freigegeben"},
+    {"key": "GEBUCHT", "label": "Gebucht"},
+)
+
+
+def _ensure_process_band_phases(definition: dict[str, Any]) -> None:
+    """FSX-030: Beleg-/Kettenmasken ohne workflow.phases erhalten die DocFlow-Phasen."""
+    mode = definition.get("mode")
+    floor = (definition.get("layout") or {}).get("floorplan")
+    needs = mode in ("detail", "transaction") or floor in ("objectPage", "transaction")
+    if not needs:
+        return
+    workflow = definition.get("workflow")
+    if isinstance(workflow, dict) and workflow.get("phases"):
+        return
+    screen_id = str(definition.get("id") or "")
+    belegart = ((definition.get("variant") or {}).get("belegart")
+                or (definition.get("documentVariant") or {}).get("variantId"))
+    is_beleg = screen_id.startswith("beleg/") or bool(belegart)
+    if definition.get("noWorkflowReason") and not definition.get("processChain") and not is_beleg:
+        return
+    if not (definition.get("processChain") or (isinstance(workflow, dict) and workflow.get("processKey"))
+            or is_beleg):
+        return
+    process_key = (
+        (workflow or {}).get("processKey")
+        if isinstance(workflow, dict)
+        else None
+    ) or (f"beleg.{belegart}" if belegart else f"document.{screen_id or 'mask'}")
+    document_type = (workflow or {}).get("documentType") if isinstance(workflow, dict) else None
+    if not document_type and belegart:
+        document_type = belegart
+    phases = [dict(p) for p in _DEFAULT_DOCUMENT_PHASES]
+    variant = definition.get("variant") or {}
+    if is_beleg and "bucht" in variant and not variant.get("bucht"):
+        phases = [p for p in phases if p["key"] != "GEBUCHT"]
+    definition["workflow"] = {
+        **(workflow if isinstance(workflow, dict) else {}),
+        "processKey": process_key,
+        "phases": phases,
+        **({"documentType": document_type} if document_type else {}),
+    }
+    definition.pop("noWorkflowReason", None)
+
+
 def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
     definition = _with_meridian_action_contract(_with_meridian_identity(_with_meridian_layout(definition)))
     contract = definition.setdefault("agentContract", {})
@@ -5783,11 +5830,12 @@ def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: 
     if not selectors.get("screenRoot"):
         selectors["screenRoot"] = f"[data-testid='screen-{mask_id}']"
     _ensure_table_query_flags(definition)
-    _resolve_tile_routes(definition)
-    _apply_season_profile(definition, today)
     from app.core.process_chains import attach_process_chain
 
     attach_process_chain(definition, get_screen_list_route)
+    _ensure_process_band_phases(definition)
+    _resolve_tile_routes(definition)
+    _apply_season_profile(definition, today)
     return definition
 
 

@@ -317,6 +317,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - `workflow_declared` akzeptiert `flowSpineWorkspace.processKey`
 - Verifier: **A/B/C/E = 829/829**, Draft-clean **829/829**, advisory Ø **1.0**
 
+### Batch 35 — ProcessBand (FSX-030) auf Beleg-/Kettenmasken
+
+- `BelegMaskeParent`: Default-`workflow.phases` (Erfasst → Freigegeben → ggf. Gebucht) + `documentType`
+- Hydrate ergänzt Phasen für Beleg- und `processChain`-Detailmasken
+- Document-Screen-Versions **1.14.0** (9 Belegvarianten)
+- Prioritäre ProcessBand-Abdeckung: Belegfamilie + Prozessketten-Masken (Stammdaten mit `noWorkflowReason` bewusst ohne Band)
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
