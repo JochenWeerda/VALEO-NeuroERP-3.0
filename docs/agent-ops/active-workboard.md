@@ -1058,3 +1058,9 @@ Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.
 
 ## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.
+
+## M5-UMGEBUNG-AGENTENMATRIX-20261125 — zur Abnahme, Claude Code (M5)
+Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBUNG local|ci|staging|production, nicht gesetzt = production (geschlossen). Agenten schreiben autonom nur in LOCAL/CI ueber alle deklarierten Kommandowege; STAGING/PRODUCTION Freigabe je Aktion; Fachregeln der Maske gelten ueberall. docker-compose.yml setzt local. Fiskaly-Werte aus .env.example entfernt (Werte nicht ausgegeben). Bestand der Umgebungen: docs/security/umgebungen-und-agentenrechte.md (nur LOCAL und CI in Betrieb).
+
+## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
+Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
