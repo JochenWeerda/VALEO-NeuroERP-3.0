@@ -7,6 +7,7 @@ import pytest
 
 from app.core.screen_definitions_listen import (
     build_agrar_erntefenster_konfig_liste,
+    build_agrar_milchvieh_crosssell_cockpit,
     build_agrar_qualitaet_nachtrag_liste,
     build_agrar_sammelabrechnung_liste,
     build_kontrakte_mengenzeitraeume_liste,
@@ -161,3 +162,31 @@ def test_erntefenster_konfig_parity():
     assert {"anlegen", "alt_daten_zuordnen", "settlement_pruefen", "sandbox"}.issubset(keys)
     anlegen = next(a for a in sd["actions"] if a["key"] == "anlegen")
     assert anlegen["commandEndpoint"] == "/api/v1/admin/erntefenster-from-template"
+
+
+@pytest.mark.unit
+def test_milchvieh_crosssell_cockpit_parity():
+    src = (PAGES / "agrar/milchvieh-crosssell.tsx").read_text(encoding="utf-8")
+    assert "UniversalNativeCockpitPage" in src
+    assert "agrar/milchvieh-crosssell" in src
+    assert "-legacy" not in src
+
+    sd = build_agrar_milchvieh_crosssell_cockpit()
+    assert sd["mode"] == "cockpit"
+    summary_keys = {s["key"] for s in sd.get("summary") or []}
+    assert {"kunden", "crosssell_eur_jahr_ziel", "dippmittel_l_jahr_gesamt"}.issubset(summary_keys)
+    tables = {t["key"]: t for t in sd.get("tables") or []}
+    assert "kunden" in tables and "produktgruppen" in tables
+    kunden_cols = {c["key"] for c in tables["kunden"]["columns"]}
+    assert {
+        "name",
+        "herd_size_kuehe",
+        "milchmenge_l_jahr",
+        "zellzahl_tsd_ml",
+        "hygiene_bedarf",
+        "kraftfutter_t_jahr_min",
+        "kraftfutter_t_jahr_max",
+        "crosssell_ziel_eur",
+        "crosssell_gewinnbar_eur_min",
+        "crosssell_gewinnbar_eur_max",
+    }.issubset(kunden_cols)

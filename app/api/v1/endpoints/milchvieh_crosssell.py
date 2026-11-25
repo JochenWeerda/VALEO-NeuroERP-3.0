@@ -60,6 +60,14 @@ def crosssell_summary(db: Session = Depends(get_db)) -> dict[str, Any]:
     return MilchviehCrossSellService(db).summary()
 
 
+@router.get("/produktgruppen", summary="Potenzial nach Produktgruppe (gesamt)")
+def crosssell_produktgruppen(db: Session = Depends(get_db)) -> list[dict[str, Any]]:
+    """Flache Liste fuer Cockpit-Tabelle — dieselben Daten wie ``summary.produktgruppen``."""
+    summary = MilchviehCrossSellService(db).summary()
+    groups = summary.get("produktgruppen") if isinstance(summary, dict) else None
+    return list(groups) if isinstance(groups, list) else []
+
+
 @router.get("/map", response_model=TypedObjectOut, summary="Betriebe als GeoJSON (Karte + Kennzahlen-Flyover)")
 def crosssell_map(
     hygiene_bedarf: Optional[str] = Query(None),

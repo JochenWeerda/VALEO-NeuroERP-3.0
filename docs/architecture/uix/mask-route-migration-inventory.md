@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1089 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1090 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 37 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 36 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 902 |
+| runtime_wired | 903 |
 | legacy_mask_pattern | 13 |
-| hand_built | 128 |
+| hand_built | 127 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 37 |
+| handgebaute Routen | 442 | 36 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1089 |
+| Runtime-verdrahtet | — | 1090 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -164,6 +164,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/lieferschein-erstellen` ← `src/pages/agrar/LieferscheinErstellen.tsx`
 - `agrar/maschinen-auslastung` ← `src/pages/agrar/maschinen-auslastung.tsx`
 - `agrar/maschinenauslastung` ← `src/pages/agrar/maschinenauslastung.tsx`
+- `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
 - `agrar/nachhaltigkeit-eudr` ← `src/pages/agrar/nachhaltigkeit-eudr.tsx`
 - `agrar/nawaro-erntemeldung` ← `src/pages/agrar/nawaro-erntemeldung.tsx`
 - `agrar/nawaro-kaskade` ← `src/pages/agrar/nawaro-kaskade.tsx`
@@ -1182,7 +1183,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
-- `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
 - `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
 - `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/rohware` ← `src/pages/annahme/rohware.tsx`

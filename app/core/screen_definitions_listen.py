@@ -229,6 +229,102 @@ def build_agrar_qualitaet_nachtrag_liste() -> dict[str, Any]:
     )
 
 
+def build_agrar_milchvieh_crosssell_cockpit() -> dict[str, Any]:
+    """Milchvieh Cross-Sell — KPI-Summary + Kundenliste + Produktgruppen (Legacy-Paritaet)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="agrar/milchvieh-crosssell",
+        domain="agrar",
+        title="Milchvieh Cross-Sell",
+        subtitle="Hygiene-Bedarf, Kraftfutter- und Umsatzpotenzial",
+        business_purpose=(
+            "Landhandel-Umsatzpotenzial, Kraftfutter und Eutergesundheit/Hygiene "
+            "je Milchvieh-Kunde auswerten (Read-Model)."
+        ),
+        example_prompts=[
+            "Welche Milchvieh-Kunden haben hohen Hygiene-Bedarf?",
+            "Zeig das Cross-Sell-Potenzial nach Produktgruppe.",
+        ],
+        test_id="agrar-milchvieh-crosssell",
+        summary=[
+            {"key": "kunden", "label": "Milchvieh-Kunden", "tone": "info"},
+            {"key": "milchmenge_l_jahr_gesamt", "label": "Milch l/Jahr", "tone": "neutral"},
+            {"key": "crosssell_eur_jahr_ziel", "label": "Cross-Sell Ziel €", "tone": "success"},
+            {"key": "dippmittel_l_jahr_gesamt", "label": "Dippmittel L/Jahr", "tone": "neutral"},
+            {"key": "kraftfutter_t_jahr_gesamt_min", "label": "Kraftfutter t min", "tone": "neutral"},
+            {"key": "kraftfutter_t_jahr_gesamt_max", "label": "Kraftfutter t max", "tone": "neutral"},
+            {"key": "crosssell_eur_jahr_gewinnbar_min", "label": "Gewinnbar € min", "tone": "warning"},
+            {"key": "crosssell_eur_jahr_gewinnbar_max", "label": "Gewinnbar € max", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/agrar/milchvieh-crosssell/summary"),
+            cockpit_list_source("kunden", "/api/v1/agrar/milchvieh-crosssell", page_size=100),
+            cockpit_list_source(
+                "produktgruppen",
+                "/api/v1/agrar/milchvieh-crosssell/produktgruppen",
+                page_size=50,
+            ),
+        ],
+        tables=[
+            {
+                "key": "kunden",
+                "label": "Kunden",
+                "dataSourceKey": "kunden",
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 40,
+                "columns": [
+                    {"key": "name", "label": "Betrieb", "filterable": True, "priority": "primary"},
+                    {"key": "kunden_nr", "label": "Kunden-Nr.", "filterable": True, "priority": "secondary"},
+                    {"key": "plz", "label": "PLZ", "filterable": True, "priority": "tertiary"},
+                    {"key": "ort", "label": "Ort", "filterable": True, "priority": "secondary"},
+                    {"key": "herd_size_kuehe", "label": "Kühe", "numeric": True, "sortable": True,
+                     "priority": "primary"},
+                    {"key": "milchmenge_l_jahr", "label": "Milch l/J", "numeric": True, "sortable": True,
+                     "priority": "secondary"},
+                    {"key": "zellzahl_tsd_ml", "label": "Zellzahl", "numeric": True, "priority": "secondary"},
+                    {"key": "hygiene_bedarf", "label": "Hygiene", "filterable": True, "renderKind": "status",
+                     "priority": "primary"},
+                    {"key": "kraftfutter_t_jahr_min", "label": "KF t min", "numeric": True, "priority": "tertiary"},
+                    {"key": "kraftfutter_t_jahr_max", "label": "KF t max", "numeric": True, "priority": "tertiary"},
+                    {"key": "crosssell_ziel_eur", "label": "Ziel €", "numeric": True, "renderKind": "currency",
+                     "sortable": True, "priority": "primary"},
+                    {"key": "crosssell_gewinnbar_eur_min", "label": "Gewinnbar min", "numeric": True,
+                     "renderKind": "currency", "priority": "secondary"},
+                    {"key": "crosssell_gewinnbar_eur_max", "label": "Gewinnbar max", "numeric": True,
+                     "renderKind": "currency", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "produktgruppen",
+                "label": "Produktgruppen",
+                "dataSourceKey": "produktgruppen",
+                "pageSize": 25,
+                "columns": [
+                    {"key": "label", "label": "Produktgruppe", "filterable": True, "priority": "primary"},
+                    {"key": "key", "label": "Key", "filterable": True, "priority": "tertiary"},
+                    {"key": "eur_jahr_min", "label": "€/Jahr min", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "eur_jahr_max", "label": "€/Jahr max", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="agrar.milchvieh_crosssell.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
 def build_agrar_erntefenster_konfig_liste() -> dict[str, Any]:
     """Erntefenster-Kampagnen — Paritaet zur Legacy-Konfig-Maske."""
     _create_fields = [
@@ -3391,6 +3487,7 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/sammelabrechnung": build_agrar_sammelabrechnung_liste,
     "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
     "agrar/erntefenster-konfig": build_agrar_erntefenster_konfig_liste,
+    "agrar/milchvieh-crosssell": build_agrar_milchvieh_crosssell_cockpit,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
@@ -3500,6 +3597,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/sammelabrechnung": "/agrar/sammelabrechnung",
                 "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
                 "agrar/erntefenster-konfig": "/agrar/erntefenster-konfig",
+                "agrar/milchvieh-crosssell": "/agrar/milchvieh-crosssell",
                 "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
@@ -3553,6 +3651,7 @@ LISTEN_SYNONYME = {"agrar/zinsabrechnung": ["zinsabrechnung", "zib", "kontraktzi
                    "agrar/sammelabrechnung": ["sammelabrechnung", "rohware sammelabrechnung", "ernte sammeln"],
                    "agrar/annahmen-qualitaet-nachtrag": ["qualitaets nachtrag", "laborbuch nachtrag", "fehlende qualitaet"],
                    "agrar/erntefenster-konfig": ["erntefenster", "erntekampagne", "saisonale kampagne"],
+                   "agrar/milchvieh-crosssell": ["milchvieh cross sell", "kraftfutter potenzial", "hygiene bedarf"],
                    "kontrakte/mengenzeitraeume": ["mengenzeitraum", "zu abschlag", "abnahme staffel"],
                    "einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],

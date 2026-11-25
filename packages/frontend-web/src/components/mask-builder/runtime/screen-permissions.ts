@@ -58,6 +58,7 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
       || permission.startsWith('agrar.sammelabrechnung.')
       || permission.startsWith('agrar.qualitaet_nachtrag.')
       || permission.startsWith('agrar.erntefenster.')
+      || permission.startsWith('agrar.milchvieh_crosssell.')
     ) {
       return (
         roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
