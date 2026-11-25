@@ -28291,7 +28291,8 @@
           "read_by": [
             "app/api/v1/endpoints/legacy_interface_adapters.py",
             "app/api/v1/schemas/legacy_interface_adapters_schemas.py",
-            "app/services/legacy_interface_adapter_service.py"
+            "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/services/legacy_interface_adapter_service.py"
@@ -28435,10 +28436,171 @@
             "id"
           ],
           "read_by": [
-            "app/services/legacy_interface_adapter_service.py"
+            "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/services/legacy_interface_adapter_service.py"
+          ]
+        },
+        "spiegel_protokoll": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "batch_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "line_no",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "objektart",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "quellschluessel",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "ergebnis",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "differenzen",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "fehler",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "batch_id",
+              "references": "domain_integration.legacy_adapter_batches.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/spiegel_uebernahme.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_uebernahme.py"
+          ]
+        },
+        "spiegel_quellreferenzen": {
+          "columns": [
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "quellsystem",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "objektart",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "quellschluessel",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "ziel_tabelle",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "ziel_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "payload_hash",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "batch_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "erstmals_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "zuletzt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "batch_id",
+              "references": "domain_integration.legacy_adapter_batches.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_integration / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "quellsystem",
+            "objektart",
+            "quellschluessel"
+          ],
+          "read_by": [
+            "app/services/spiegel_uebernahme.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_uebernahme.py"
           ]
         }
       }
@@ -30301,6 +30463,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/preisfindung_service.py",
             "app/services/procurement_service.py",
+            "app/services/spiegel_uebernahme.py",
             "app/services/warehouse_service.py",
             "app/services/whatsapp_intake_service.py"
           ],
@@ -30310,6 +30473,7 @@
             "app/services/feed_inventory_link_service.py",
             "app/services/inventory_compat_service.py",
             "app/services/inventory_correction_service.py",
+            "app/services/spiegel_uebernahme.py",
             "app/services/warehouse_service.py"
           ]
         },
@@ -49749,7 +49913,8 @@
             "app/api/v1/endpoints/artikel_mengeneinheiten.py",
             "app/services/beleg_erechnung.py",
             "app/services/gebinde_aufloesung.py",
-            "app/services/mengeneinheiten_grund.py"
+            "app/services/mengeneinheiten_grund.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_mengeneinheiten.py",
@@ -60242,7 +60407,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
-            "app/api/v1/endpoints/warengruppen.py"
+            "app/api/v1/endpoints/warengruppen.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "screens": [
             "artikel/kategorien"
