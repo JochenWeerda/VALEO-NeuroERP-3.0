@@ -227,17 +227,30 @@ Inventar: Command-Monitor und Rohware runtime_wired über Studio-Hosts.
 
 Inventar nach Batch 24: `runtime_wired` ~1101, `hand_built` ~25.
 
+## Fuenfundzwanzigste Hebung (Batch 25)
+
+| Maske | Nachher |
+|-------|---------|
+| `admin-suite/migration` | `UniversalNativeCockpitPage`: Profile/Batches-Tabellen, Dry-Run anlegen (POST `/migration/batches`), Freigabe-Row-Action; GET `/migration/overview\|profiles\|batches` |
+| `admin-suite/security` | `UniversalNativeCockpitPage`: Menschen-/Agentenrollen + SoD-Simulation (POST `/security/simulate`, kommagetrennte Rollen); GET `/security/overview\|roles\|agent-roles` |
+| `admin-suite/ki-anbieter` | `UniversalNativeCockpitPage`: PUT `/llm-gateway` + POST `/llm-gateway/test` (gleiche commandEndpoints Human/CI/MCP) |
+| `admin-suite/connectoren` | `UniversalNativeCockpitPage`: flache PUT `/capture-connectors/stt\|imap` + Test/Poll; GET `/capture-connectors/overview` |
+| `admin-suite/pos-fiscalization` | `UniversalNativeCockpitPage`: PUT `/pos/fiscalization/config` (+ `terminal_id`→settings); GET `/pos/fiscalization/overview\|products` |
+
+Inventar nach Batch 25: Admin-Suite Rest runtime_wired; verbleibende schwere `hand_built`: materialfluss, abrechnung, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte.
+
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte, Rest Admin-Suite migration/security/ki) — **nur mit Feld-/Aktionsparitaet**
+- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte) — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests
 
 ```bash
 python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_batch23.py \
-  tests/test_studio_parity_batch24.py tests/test_zinsabrechnung_studio_parity.py \
-  tests/test_einkauf_studio_field_parity.py -q --noconftest -o addopts=
+  tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
+  tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
+  -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
   src/__tests__/pages/mask-objectpage-stamm-native-route.test.ts \
   src/__tests__/bank-account-form-contract.test.tsx \

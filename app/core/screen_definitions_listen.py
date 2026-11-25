@@ -286,6 +286,9 @@ def build_admin_suite_home_cockpit() -> dict[str, Any]:
             cockpit_nav_tile("migration", "Migration", target_route="/admin-suite/migration", tone="warning"),
             cockpit_nav_tile("security", "Security", target_route="/admin-suite/security", tone="neutral"),
             cockpit_nav_tile("connectors", "Connectors", target_route="/admin-suite/connectors", tone="neutral"),
+            cockpit_nav_tile("connectoren", "Auto-Capture", target_route="/admin-suite/connectoren", tone="neutral"),
+            cockpit_nav_tile("ki_anbieter", "KI-Anbieter", target_route="/admin-suite/ki-anbieter", tone="info"),
+            cockpit_nav_tile("pos_fiscalization", "POS-Fiskal", target_route="/admin-suite/pos-fiscalization", tone="warning"),
             cockpit_nav_tile("devices", "Hardware", target_route="/admin-suite/devices", tone="neutral"),
             cockpit_nav_tile("compliance", "Compliance", target_route="/admin-suite/compliance", tone="neutral"),
             cockpit_nav_tile("operations", "Operations", target_route="/admin-suite/operations", tone="neutral"),
@@ -477,6 +480,475 @@ def build_admin_suite_setup_liste() -> dict[str, Any]:
         prompts=["Welche Setup-Schritte sind noch offen?", "Schließe Setup-Schritt {entity_id} ab."],
         no_workflow="Setup-Fortschritt wird am Tenant gespeichert; die Liste fuehrt keinen eigenen Workflow.",
         table_profile="audit",
+    )
+
+
+def build_admin_suite_migration_cockpit() -> dict[str, Any]:
+    """Migration Cockpit — Profile + Batches + Dry-Run-Anlage (Paritaet Legacy)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/migration",
+        domain="admin",
+        title="Migration Cockpit",
+        subtitle="Dry Run, Mapping-Version und Reconciliation vor jeder produktiven Freigabe",
+        business_purpose=(
+            "Import-Profile und Dry-Run-Batches der Admin Suite beobachten und freigeben; "
+            "Produktivimport bleibt gesperrt bis Reconciliation abgenommen ist."
+        ),
+        example_prompts=[
+            "Welche Migrationsprofile sind verfuegbar?",
+            "Lege einen Dry-Run-Batch fuer Profil l3 an.",
+        ],
+        test_id="admin-suite-migration",
+        summary=[
+            {"key": "profile_count", "label": "Profile", "tone": "neutral"},
+            {"key": "available_profiles", "label": "Verfuegbar", "tone": "success"},
+            {"key": "blocked_profiles", "label": "Gesperrt", "tone": "warning"},
+            {"key": "batch_count", "label": "Batches", "tone": "info"},
+            {"key": "approved_batches", "label": "Freigegeben", "tone": "success"},
+            {"key": "execute_locked", "label": "Execute gesperrt", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/migration/overview"),
+            cockpit_list_source("profiles", "/api/v1/admin-suite/migration/profiles", page_size=50),
+            cockpit_list_source("batches", "/api/v1/admin-suite/migration/batches", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "profiles",
+                "label": "Profile",
+                "dataSourceKey": "profiles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "Profil", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "adapter", "label": "Adapter", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "batches",
+                "label": "Batches",
+                "dataSourceKey": "batches",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "source_profile", "label": "Profil", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "mapping_version", "label": "Mapping", "priority": "secondary"},
+                    {"key": "source_hash", "label": "Hash", "priority": "tertiary"},
+                    {"key": "reconciliation_ok", "label": "Recon OK", "priority": "secondary"},
+                ],
+                "rowActions": [
+                    {
+                        "key": "freigeben",
+                        "label": "Freigeben",
+                        "dangerLevel": "moderate",
+                        "permission": "admin.admin_suite.migration",
+                        "commandEndpoint": "/api/v1/admin-suite/migration/batches/{entity_id}/approve",
+                        "method": "POST",
+                        "requiresConfirmation": True,
+                    },
+                ],
+            },
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "dry_run_anlegen",
+                "label": "Dry-Run anlegen",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.migration",
+                "commandEndpoint": "/api/v1/admin-suite/migration/batches",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "source_profile", "label": "Profil-Key", "type": "text", "required": True},
+                    {"key": "source_ref", "label": "Quellen-Referenz", "type": "text", "required": True},
+                    {"key": "source_hash", "label": "Quellen-Hash", "type": "text", "required": True},
+                    {"key": "mapping_version", "label": "Mapping-Version", "type": "text", "required": True},
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Migration-Cockpit ohne eigenen Objekt-Lebenszyklus; Execute bleibt gesperrt.",
+    )
+
+
+def build_admin_suite_security_cockpit() -> dict[str, Any]:
+    """Security Governance — Menschen-/Agentenrollen + SoD-Simulation."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/security",
+        domain="admin",
+        title="Security und Agent Governance",
+        subtitle="Lesende Sicht auf RBAC-Pakete; Simulationen aendern keine Rechte",
+        business_purpose=(
+            "Bestehende Menschen- und Agentenrollen einsehen und effektive Rechte "
+            "serverseitig simulieren (SoD-Warnungen), ohne Rechte zu veraendern."
+        ),
+        example_prompts=[
+            "Welche Agentenrollen gibt es?",
+            "Simuliere effektive Rechte fuer admin und agent_readonly.",
+        ],
+        test_id="admin-suite-security",
+        summary=[
+            {"key": "human_role_count", "label": "Menschenrollen", "tone": "info"},
+            {"key": "agent_role_count", "label": "Agentenrollen", "tone": "neutral"},
+            {"key": "role_count", "label": "Rollen gesamt", "tone": "neutral"},
+            {"key": "sod_simulation_only", "label": "Nur Simulation", "tone": "warning"},
+            {"key": "agent_admin_blocked", "label": "Agent-Admin gesperrt", "tone": "success"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/security/overview"),
+            cockpit_list_source("roles", "/api/v1/admin-suite/security/roles", page_size=100),
+            cockpit_list_source("agent_roles", "/api/v1/admin-suite/security/agent-roles", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "roles",
+                "label": "Menschenrollen",
+                "dataSourceKey": "roles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "key", "label": "Rolle", "filterable": True, "priority": "primary"},
+                    {"key": "permission_count", "label": "Rechte", "priority": "secondary"},
+                    {"key": "permissions_text", "label": "Permissions", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "agent_roles",
+                "label": "Agentenrollen",
+                "dataSourceKey": "agent_roles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "key", "label": "Rolle", "filterable": True, "priority": "primary"},
+                    {"key": "permission_count", "label": "Rechte", "priority": "secondary"},
+                    {"key": "permissions_text", "label": "Permissions", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "simulieren",
+                "label": "Rechte simulieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.security",
+                "commandEndpoint": "/api/v1/admin-suite/security/simulate",
+                "method": "POST",
+                "inputFields": [
+                    {
+                        "key": "roles",
+                        "label": "Rollen (kommagetrennt)",
+                        "type": "text",
+                        "required": True,
+                        "helpText": "Beispiel: admin,agent_readonly — Server splittet und validiert.",
+                    },
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Security-Cockpit ist Read-Model; Simulation aendert keine Rechte.",
+    )
+
+
+def build_admin_suite_ki_anbieter_cockpit() -> dict[str, Any]:
+    """KI-Anbieter (NeuroAI) — LLM-Gateway speichern/testen."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/ki-anbieter",
+        domain="admin",
+        title="KI-Anbieter (NeuroAI)",
+        subtitle="Anbieterunabhaengige LLM-Konfiguration fuer NeuroAI",
+        business_purpose=(
+            "LLM-Gateway (Anthropic / OpenAI-kompatibel / Ollama) konfigurieren und testen; "
+            "API-Keys werden nie ausgegeben."
+        ),
+        example_prompts=[
+            "Welcher KI-Anbieter ist aktiv?",
+            "Teste die LLM-Verbindung.",
+        ],
+        test_id="admin-suite-ki-anbieter",
+        summary=[
+            {"key": "provider", "label": "Anbieter", "tone": "info"},
+            {"key": "model", "label": "Modell", "tone": "neutral"},
+            {"key": "enabled", "label": "Aktiviert", "tone": "success"},
+            {"key": "available", "label": "Einsatzbereit", "tone": "success"},
+            {"key": "api_key_set", "label": "API-Key gesetzt", "tone": "neutral"},
+            {"key": "temperature", "label": "Temperatur", "tone": "neutral"},
+            {"key": "base_url", "label": "Base-URL", "tone": "tertiary"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/llm-gateway"),
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "speichern",
+                "label": "Speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.ki",
+                "commandEndpoint": "/api/v1/admin-suite/llm-gateway",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "provider", "label": "Anbieter", "type": "text", "required": True,
+                     "helpText": "anthropic | openai_compatible | ollama"},
+                    {"key": "base_url", "label": "Base-URL", "type": "text", "required": False},
+                    {"key": "model", "label": "Modell", "type": "text", "required": False},
+                    {"key": "api_key", "label": "API-Key (leer = behalten)", "type": "password", "required": False},
+                    {"key": "temperature", "label": "Temperatur", "type": "number", "required": False, "defaultValue": 0.2},
+                    {"key": "enabled", "label": "Aktiviert", "type": "boolean", "required": False, "defaultValue": True},
+                ],
+            },
+            {
+                "key": "testen",
+                "label": "Verbindung testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.ki",
+                "commandEndpoint": "/api/v1/admin-suite/llm-gateway/test",
+                "method": "POST",
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=False,
+        no_workflow_reason="Konfigurations-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_suite_connectoren_cockpit() -> dict[str, Any]:
+    """Auto-Capture-Connectoren (STT + IMAP) — flache PUT/Test/Poll-Aktionen."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/connectoren",
+        domain="admin",
+        title="Auto-Capture-Connectoren",
+        subtitle="STT- und IMAP-Einstellungen fuer automatische Kontakt-Erfassung",
+        business_purpose=(
+            "STT- und IMAP-Connectoren pro Mandant konfigurieren, testen und IMAP abrufen; "
+            "Secrets werden nie ausgegeben."
+        ),
+        example_prompts=[
+            "Ist der STT-Server konfiguriert?",
+            "Teste das IMAP-Postfach.",
+        ],
+        test_id="admin-suite-connectoren",
+        summary=[
+            {"key": "stt_configured", "label": "STT bereit", "tone": "success"},
+            {"key": "stt_enabled", "label": "STT aktiv", "tone": "info"},
+            {"key": "stt_model", "label": "STT-Modell", "tone": "neutral"},
+            {"key": "imap_configured", "label": "IMAP bereit", "tone": "success"},
+            {"key": "imap_enabled", "label": "IMAP aktiv", "tone": "info"},
+            {"key": "imap_host", "label": "IMAP-Host", "tone": "neutral"},
+            {"key": "imap_user", "label": "IMAP-User", "tone": "tertiary"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/capture-connectors/overview"),
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "stt_speichern",
+                "label": "STT speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "enabled", "label": "STT aktiviert", "type": "boolean", "required": False, "defaultValue": True},
+                    {"key": "base_url", "label": "Base-URL", "type": "text", "required": False},
+                    {"key": "model", "label": "Modell", "type": "text", "required": False},
+                    {"key": "language", "label": "Sprache", "type": "text", "required": False, "defaultValue": "de"},
+                    {"key": "api_key", "label": "API-Key (leer = behalten)", "type": "password", "required": False},
+                ],
+            },
+            {
+                "key": "stt_testen",
+                "label": "STT testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt/test",
+                "method": "POST",
+            },
+            {
+                "key": "imap_speichern",
+                "label": "IMAP speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "enabled", "label": "IMAP aktiviert", "type": "boolean", "required": False},
+                    {"key": "host", "label": "Host", "type": "text", "required": False},
+                    {"key": "port", "label": "Port", "type": "number", "required": False, "defaultValue": 993},
+                    {"key": "ssl", "label": "SSL", "type": "boolean", "required": False, "defaultValue": True},
+                    {"key": "user", "label": "Benutzer", "type": "text", "required": False},
+                    {"key": "password", "label": "Passwort (leer = behalten)", "type": "password", "required": False},
+                    {"key": "inbox", "label": "Posteingang", "type": "text", "required": False, "defaultValue": "INBOX"},
+                    {"key": "sent", "label": "Gesendet-Ordner", "type": "text", "required": False},
+                    {"key": "own_addresses", "label": "Eigene Adressen", "type": "text", "required": False},
+                    {"key": "poll_seconds", "label": "Poll-Intervall (s)", "type": "number", "required": False, "defaultValue": 60},
+                ],
+            },
+            {
+                "key": "imap_testen",
+                "label": "IMAP testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/test",
+                "method": "POST",
+            },
+            {
+                "key": "imap_abrufen",
+                "label": "IMAP jetzt abrufen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/poll",
+                "method": "POST",
+                "requiresConfirmation": True,
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=False,
+        no_workflow_reason="Connector-Konfiguration ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_suite_pos_fiscalization_cockpit() -> dict[str, Any]:
+    """POS-Fiskalisierung — Config speichern + Produkt-Readiness."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/pos-fiscalization",
+        domain="admin",
+        title="POS-Fiskalisierung",
+        subtitle="fiskaly oder Swissbit als TSE; DSFinV-K getrennt konfiguriert",
+        business_purpose=(
+            "Mandantenkonfiguration der POS-Fiskalisierung speichern und Readiness "
+            "(TSE, DSFinV-K, optionale Produkte) beobachten."
+        ),
+        example_prompts=[
+            "Ist die POS-Fiskalisierung bereit?",
+            "Speichere die TSE-Konfiguration.",
+        ],
+        test_id="admin-suite-pos-fiscalization",
+        summary=[
+            {"key": "ready", "label": "Bereit", "tone": "success"},
+            {"key": "configured", "label": "Konfiguriert", "tone": "info"},
+            {"key": "provider", "label": "TSE-Provider", "tone": "neutral"},
+            {"key": "dsfinvk_provider", "label": "DSFinV-K", "tone": "neutral"},
+            {"key": "sign_ready", "label": "Signatur bereit", "tone": "success"},
+            {"key": "dsfinvk_ready", "label": "DSFinV-K bereit", "tone": "success"},
+            {"key": "blocker_text", "label": "Blocker", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/pos/fiscalization/overview"),
+            cockpit_list_source("products", "/api/v1/pos/fiscalization/products", page_size=20),
+        ],
+        tables=[
+            {
+                "key": "products",
+                "label": "Optionale fiskaly-Produkte",
+                "dataSourceKey": "products",
+                "pageSize": 20,
+                "columns": [
+                    {"key": "label", "label": "Produkt", "filterable": True, "priority": "primary"},
+                    {"key": "ready", "label": "Bereit", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "blockers", "label": "Blocker", "priority": "secondary"},
+                    {"key": "execution_note", "label": "Hinweis", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "speichern",
+                "label": "Konfiguration speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.pos",
+                "commandEndpoint": "/api/v1/pos/fiscalization/config",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "provider", "label": "TSE-Provider", "type": "text", "required": True,
+                     "helpText": "fiskaly | swissbit_cloud | swissbit_gateway | simulation"},
+                    {"key": "dsfinvk_provider", "label": "DSFinV-K-Provider", "type": "text", "required": True,
+                     "defaultValue": "fiskaly"},
+                    {"key": "cash_register_id", "label": "Kassen-/TSS-ID", "type": "text", "required": True},
+                    {"key": "client_id", "label": "Client-ID", "type": "text", "required": True},
+                    {"key": "terminal_id", "label": "Terminal-ID", "type": "text", "required": False},
+                    {"key": "simulation_allowed", "label": "Simulation freigeben", "type": "boolean",
+                     "required": False, "defaultValue": False},
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Fiskalisierungs-Konfiguration ohne eigenen Objekt-Lebenszyklus.",
     )
 
 
@@ -3747,6 +4219,11 @@ LISTEN_SCREEN_BUILDERS = {
     "admin-suite/system-status": build_admin_suite_system_status_liste,
     "admin-suite/diagnostics": build_admin_suite_diagnostics_liste,
     "admin-suite/setup": build_admin_suite_setup_liste,
+    "admin-suite/migration": build_admin_suite_migration_cockpit,
+    "admin-suite/security": build_admin_suite_security_cockpit,
+    "admin-suite/ki-anbieter": build_admin_suite_ki_anbieter_cockpit,
+    "admin-suite/connectoren": build_admin_suite_connectoren_cockpit,
+    "admin-suite/pos-fiscalization": build_admin_suite_pos_fiscalization_cockpit,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
@@ -3865,6 +4342,11 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "admin-suite/system-status": "/admin-suite/system-status",
                 "admin-suite/diagnostics": "/admin-suite/diagnostics",
                 "admin-suite/setup": "/admin-suite/setup",
+                "admin-suite/migration": "/admin-suite/migration",
+                "admin-suite/security": "/admin-suite/security",
+                "admin-suite/ki-anbieter": "/admin-suite/ki-anbieter",
+                "admin-suite/connectoren": "/admin-suite/connectoren",
+                "admin-suite/pos-fiscalization": "/admin-suite/pos-fiscalization",
                 "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
