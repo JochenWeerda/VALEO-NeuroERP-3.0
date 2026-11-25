@@ -396,6 +396,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Gate-D Smoke + Kundenschlagkartei / Ernte-Annahme-Erfassung (agrar_workbench + Tabs)
 - Portal-Kundenkonten-Mock fuer Schlagkartei-Surface → **20/20 passed**
 
+### Batch 47 — Component TabsList + Finance Gate-D
+
+- `TabsList` aria-label in Mask-Builder/Patterns ObjectPage, LazyTabs, FlowSpine, DMS, Sales-Dialoge
+- DMS-Badges: `text-2xs` + `text-status-warning` (keine Rohpalette/`text-[10px]`)
+- Gate-D + `finance/bank-abgleich` (finance_workbench Surface) → **22/22 passed**
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -403,7 +409,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-25)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **20/20 passed** (10 Masken × Hell/Dunkel; inkl. Agrar-Workbenches); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-25)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **22/22 passed** (11 Masken × Hell/Dunkel; inkl. Agrar-/Finance-Workbenches); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 

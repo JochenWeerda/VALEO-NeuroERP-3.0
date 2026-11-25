@@ -28,6 +28,8 @@ type CockpitCase = {
   specializedFields?: Array<{ key: string; label: string }>
   /** ARIA tablist name inside the specialized surface (Studio Tabs-Invariante). */
   specializedTablist?: string
+  /** Accessible name / text proving the specialized surface mounted. */
+  specializedLandmark?: string
 }
 
 const COCKPIT_CASES: CockpitCase[] = [
@@ -127,6 +129,31 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     // Ohne Annahme-ID erscheint oft die Listen-/Ansichts-Registerleiste zuerst.
     specializedTablist: 'Annahme-Ansichten',
+  },
+  {
+    label: 'finance/bank-abgleich',
+    path: '/finance/bank-abgleich',
+    screenId: 'finance/bank-abgleich',
+    testId: 'native-cockpit-finance-bank-abgleich',
+    title: 'Bankabgleich',
+    specializedType: 'finance_workbench',
+    specializedFields: [
+      { key: 'kontoId', label: 'Bankkonto' },
+      { key: 'camtFile', label: 'Kontoauszug' },
+      { key: 'statementId', label: 'Statement' },
+      { key: 'startSaldo', label: 'Startsaldo' },
+      { key: 'endSaldo', label: 'Endsaldo' },
+      { key: 'gebuchteUmsaetze', label: 'Umsätze' },
+      { key: 'zugeordnet', label: 'Zugeordnet' },
+      { key: 'nichtZugeordnet', label: 'Nicht zugeordnet' },
+      { key: 'abgleichsDifferenz', label: 'Differenz' },
+      { key: 'accountingBalance', label: 'Hauptbuchsaldo' },
+      { key: 'zuordnungData', label: 'Umsatzzeilen' },
+      { key: 'importErrors', label: 'Importprotokoll' },
+      { key: 'differences', label: 'Differenzen' },
+      { key: 'comparisonState', label: 'Nachweisstatus' },
+    ],
+    specializedLandmark: 'Bankabgleich Arbeitsbereich',
   },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
@@ -280,6 +307,22 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
       })
     })
   }
+  if (c.specializedType === 'finance_workbench') {
+    await page.route(/\/api\/v1\/banken\/konten(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0 }),
+      })
+    })
+    await page.route(/\/api\/v1\/finance\/bank-accounts(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([]),
+      })
+    })
+  }
   if (c.screenId === 'agrar/kunden-schlagkartei') {
     // PortalKontoGate: ein Konto → Auto-Wahl → Tabs der Specialized-Surface.
     await page.route(/\/api\/v1\/portal\/kundenkonten(?:\?.*)?$/, async (route) => {
@@ -354,6 +397,10 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
 
         if (c.specializedTablist) {
           await expect(page.getByRole('tablist', { name: c.specializedTablist })).toBeVisible({
+            timeout: 30_000,
+          })
+        } else if (c.specializedLandmark) {
+          await expect(page.getByRole('region', { name: c.specializedLandmark })).toBeVisible({
             timeout: 30_000,
           })
         } else if (c.specializedType === 'lager_workbench') {

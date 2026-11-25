@@ -873,7 +873,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             {copilotOpen ? (
             <>
             <Tabs defaultValue="agent" className="flex h-full flex-col">
-              <TabsList className="grid w-full grid-cols-5 bg-white/5">
+              <TabsList aria-label="Prozessraum" className="grid w-full grid-cols-5 bg-white/5">
                 <TabsTrigger value="agent">Agent</TabsTrigger>
                 <TabsTrigger value="actions">Aktionen</TabsTrigger>
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>

@@ -17,9 +17,11 @@ interface LazyTabsProps {
   className?: string
   /** "register" = Belegregister-Optik (Akten/Belege); "default" = Segmented-Control. */
   variant?: 'default' | 'register'
+  /** Accessible name for the tablist (Studio Tabs-Invariante). */
+  ariaLabel?: string
 }
 
-export function LazyTabs({ value, tabs, defaultValue, onValueChange, className, variant = 'default' }: LazyTabsProps): JSX.Element {
+export function LazyTabs({ value, tabs, defaultValue, onValueChange, className, variant = 'default', ariaLabel = 'Register' }: LazyTabsProps): JSX.Element {
   const firstKey = tabs[0]?.key ?? ''
   const [internalTab, setActiveTab] = useState(defaultValue ?? firstKey)
   const activeTab = value ?? internalTab
@@ -49,6 +51,7 @@ export function LazyTabs({ value, tabs, defaultValue, onValueChange, className, 
     <Tabs value={activeTab} onValueChange={handleChange} className={className}>
       <TabsList
         variant={variant}
+        aria-label={ariaLabel}
         className={variant === 'register' ? undefined : 'grid w-full'}
         style={variant === 'register' ? undefined : { gridTemplateColumns: columnsClass }}
       >

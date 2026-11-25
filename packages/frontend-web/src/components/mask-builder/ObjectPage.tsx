@@ -534,7 +534,7 @@ const ObjectPage: React.FC<ObjectPageProps> = ({
         <Tabs value={activeTab} onValueChange={handleTabChange}>
           {/* Register-Look als Standard der ObjectPage (Gewohnheits-Prinzip);
               das starre grid-cols-4 brach bei ≠4 Tabs. */}
-          <TabsList variant="register">
+          <TabsList variant="register" aria-label={`${config.title} Register`}>
             {config.tabs.map(tab => (
               <TabsTrigger key={tab.key} value={tab.key}>
                 {tab.label}

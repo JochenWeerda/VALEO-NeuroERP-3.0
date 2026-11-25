@@ -221,7 +221,7 @@ export function ObjectPage({
 
         {safeSections.length > 0 ? (
           <Tabs value={activeSection} onValueChange={handleSectionChange} className="space-y-4">
-            <TabsList className="w-full justify-start overflow-x-auto">
+            <TabsList aria-label={`${title} Abschnitte`} className="w-full justify-start overflow-x-auto">
               {safeSections.map((section) => (
                 <TabsTrigger
                   key={section.id}

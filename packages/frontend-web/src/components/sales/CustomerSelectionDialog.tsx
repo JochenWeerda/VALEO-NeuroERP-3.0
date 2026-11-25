@@ -219,7 +219,7 @@ export function CustomerSelectionDialog({
           </div>
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-            <TabsList>
+            <TabsList aria-label="Kundenfilter">
               <TabsTrigger value="all">ALLE</TabsTrigger>
               <TabsTrigger value="prospects">INTERESSENTEN</TabsTrigger>
               <TabsTrigger value="active">AKTIVE KUNDEN</TabsTrigger>
