@@ -974,6 +974,14 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
 
+## M2-NAVIGATION-CONTRACTS - reserviert, Codex Lead
+Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen Maskendefinitionen und deren erzeugte Register. Nur bereits verdrahtete UI-Aktionen deklarieren; Funktionsumfang und Ratschenabnahme pruefen.
+
+M2-NAVIGATION-CONTRACTS: DMS-Vorschau und Artikelnavigation sowie Duengemittel-Quellbeleg als bestehende lokale Effekte deklariert. Inventar auf Basis 602394bd9 gruen: genau drei undeclarierte Eintraege entfallen, 292 -> 289. Andere Listen unveraendert. Studio-Katalog synchron; kein neuer Serverbefehl. Browserabnahme offen.
+M2-NAVIGATION-CONTRACTS: Besitz erweitert auf vorhandene Quellspruenge in Dokumentenruecklauf, Produktionsleitstand, Chargenbearbeitung, Inventurnebenlaeufen, Fremdware und Rechnungstapel.
+
+M2-NAVIGATION-CONTRACTS: sieben vorhandene Quellspruenge deklariert, Inventar gruen 289 -> 282. Uebrige Ratschen unveraendert. GitHub-/Browserabnahme offen. PR163 inzwischen konfliktbehaftet und Sonar weiterhin rot; separat an aktuellen main-Stand angleichen.
+
 ## M2-HARVEST-INSPECT - reserviert, Codex Lead
 Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
 
@@ -1235,3 +1243,5 @@ Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory
 
 ## M6-SPIEGEL-UEBERNAHME-20261125 — zur Abnahme, Claude Code (M6)
 Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandenen Adapterstrecke (legacy_adapter_*): Profil l3_spiegel, Uebernahme freigegebener Batches in die Fachtabellen mit Quellreferenz (spiegel_quellreferenzen, Pruefsumme -> idempotent) und fortgeschriebenem Protokoll (spiegel_protokoll) samt Differenzbericht; erste Objektart Artikel. Unbekannte Bezuege und Fremdbestand = Fehlerzeilen, kein Raten. Plan, L3-Tabellen je Objektart (WWS_*), Abnahmekriterien, Blocker: docs/migration/m6-spiegelbetrieb-l3.md. Dateibesitz: app/services/spiegel_uebernahme.py, alembic spiegel_quellreferenz_20261125, tests/test_spiegel_uebernahme.py.
+## M7-M8-VORARBEITEN-20261125 — zur Abnahme, Claude Code (M7/M8)
+Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. Ohne M6 startbar: Loeschkonzept, Installationsprobe, Demo-Mandant, Lizenzpruefung, Helm. Pruefpunkte Aufbewahrungsfristen (gobd_retention: Buchungsbelege 8 statt 10 Jahre seit BEG IV, PSM 3, DueV 7, Fristbeginn Kalenderjahresende) - Bestaetigung durch Steuerberater/Fachbereich offen, kein Code geaendert.
