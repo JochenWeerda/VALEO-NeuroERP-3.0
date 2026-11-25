@@ -974,6 +974,14 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
 
+## M2-NAVIGATION-CONTRACTS - reserviert, Codex Lead
+Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen Maskendefinitionen und deren erzeugte Register. Nur bereits verdrahtete UI-Aktionen deklarieren; Funktionsumfang und Ratschenabnahme pruefen.
+
+M2-NAVIGATION-CONTRACTS: DMS-Vorschau und Artikelnavigation sowie Duengemittel-Quellbeleg als bestehende lokale Effekte deklariert. Inventar auf Basis 602394bd9 gruen: genau drei undeclarierte Eintraege entfallen, 292 -> 289. Andere Listen unveraendert. Studio-Katalog synchron; kein neuer Serverbefehl. Browserabnahme offen.
+M2-NAVIGATION-CONTRACTS: Besitz erweitert auf vorhandene Quellspruenge in Dokumentenruecklauf, Produktionsleitstand, Chargenbearbeitung, Inventurnebenlaeufen, Fremdware und Rechnungstapel.
+
+M2-NAVIGATION-CONTRACTS: sieben vorhandene Quellspruenge deklariert, Inventar gruen 289 -> 282. Uebrige Ratschen unveraendert. GitHub-/Browserabnahme offen. PR163 inzwischen konfliktbehaftet und Sonar weiterhin rot; separat an aktuellen main-Stand angleichen.
+
 ## M2-HARVEST-INSPECT - reserviert, Codex Lead
 Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
 
@@ -1238,3 +1246,5 @@ Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBU
 
 ## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
 Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
+## M7-M8-VORARBEITEN-20261125 — zur Abnahme, Claude Code (M7/M8)
+Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. Ohne M6 startbar: Loeschkonzept, Installationsprobe, Demo-Mandant, Lizenzpruefung, Helm. Pruefpunkte Aufbewahrungsfristen (gobd_retention: Buchungsbelege 8 statt 10 Jahre seit BEG IV, PSM 3, DueV 7, Fristbeginn Kalenderjahresende) - Bestaetigung durch Steuerberater/Fachbereich offen, kein Code geaendert.
