@@ -868,7 +868,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     const nativeBindings: Record<string, string[]> = {
       intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange', 'annahme/rohware'],
       finance_workbench: ['finance/bank-abgleich', 'mahnwesen/mahnlauf'],
-      admin_workbench: ['admin/webhooks-liste', 'admin/control-center'],
+      admin_workbench: ['admin/webhooks-liste', 'admin/control-center', 'admin/control-center/agent-ops', 'admin/control-center/superglue'],
       feed_workbench: ['futtermittel/rationseditor', 'futtermittel/rationsoptimierung', 'portal/rationsoptimierung', 'futtermittel/fuetterungsdokumentation-mobil'],
       weighing: ['waage/liste', 'waage/neu', 'waage/waagen-liste', 'waage/wiegungen', 'waage/wiegungen-liste'],
       agrar_workbench: ['agrar/kunden-schlagkartei', 'agrar/milchvieh-karte', 'agrar/ernte-annahme-erfassung', 'annahme/abrechnung'],

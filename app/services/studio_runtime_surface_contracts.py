@@ -7,7 +7,12 @@ FLOW_PROCESSES = frozenset({
 })
 SPECIALIZED_SCREENS = {
     "finance_workbench": frozenset({"finance/bank-abgleich", "mahnwesen/mahnlauf"}),
-    "admin_workbench": frozenset({"admin/webhooks-liste", "admin/control-center"}),
+    "admin_workbench": frozenset({
+        "admin/webhooks-liste",
+        "admin/control-center",
+        "admin/control-center/agent-ops",
+        "admin/control-center/superglue",
+    }),
     "intake": frozenset({"annahme/lkw-registrierung", "annahme/qualitaets-check", "annahme/warteschlange", "annahme/rohware"}),
     "weighing": frozenset({"waage/liste", "waage/neu", "waage/waagen-liste", "waage/wiegungen", "waage/wiegungen-liste"}),
     "feed_workbench": frozenset({"futtermittel/rationseditor", "futtermittel/rationsoptimierung", "portal/rationsoptimierung", "futtermittel/fuetterungsdokumentation-mobil"}),

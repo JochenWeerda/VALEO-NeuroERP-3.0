@@ -982,6 +982,228 @@ def build_lager_materialfluss_workbench() -> dict[str, Any]:
     return build_lager_materialfluss()
 
 
+def build_admin_externe_gates_cockpit() -> dict[str, Any]:
+    """Externe Gates — DATEV/ELSTER/TSE/DMS/Bank Status (Paritaet Legacy-Karten)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin/externe-gates",
+        domain="admin",
+        title="Externe Gates",
+        subtitle="Integrationsstatus: DATEV · ELSTER · TSE · DMS · Bank/SEPA",
+        business_purpose=(
+            "Status externer Integrationssysteme beobachten "
+            "(dieselbe Datenquelle wie die Legacy-Gate-Karten)."
+        ),
+        example_prompts=[
+            "Welche externen Gates haben Handlungsbedarf?",
+            "Ist DATEV OK?",
+        ],
+        test_id="admin-externe-gates",
+        summary=[
+            {"key": "gesamt", "label": "Systeme", "tone": "neutral"},
+            {"key": "ok_count", "label": "OK", "tone": "success"},
+            {"key": "warning_count", "label": "Warnungen", "tone": "warning"},
+            {"key": "faellig_count", "label": "Faellig", "tone": "warning"},
+            {"key": "fehler_count", "label": "Fehler", "tone": "warning"},
+            {"key": "problem_count", "label": "Handlungsbedarf", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/external-gates/overview"),
+            cockpit_list_source("gates", "/api/v1/external-gates/items", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "gates",
+                "label": "Systeme",
+                "dataSourceKey": "gates",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "System", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "kategorie", "label": "Kategorie", "filterable": True, "priority": "secondary"},
+                    {"key": "hinweis", "label": "Hinweis", "priority": "secondary"},
+                    {"key": "simulated", "label": "Simuliert", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="admin.externe_gates.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Dashboard ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_control_center_agent_ops_workbench() -> dict[str, Any]:
+    """Agent Ops Unterseite — Surface + Persistence-Read-Model (Paritaet Legacy)."""
+    return {
+        "schemaVersion": 1,
+        "id": "admin/control-center/agent-ops",
+        "domain": "admin",
+        "mode": "cockpit",
+        "title": "Admin Kontrollzentrum: Agent Ops",
+        "subtitle": "Ticket-Steuerung, Chain of Command und Persistenz-Nachweis",
+        "adapter": {"type": "native", "sourceId": "admin/control-center/agent-ops", "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "dataSources": [
+            {
+                "key": "entity",
+                "endpoint": "/api/v1/agents/neuroassist/ops/persistence",
+                "staleTimeMs": 15_000,
+            },
+        ],
+        "fields": [
+            {"key": "tenant_id", "label": "Mandant", "type": "text", "readOnly": True},
+            {"key": "persisted", "label": "Persistiert", "type": "boolean", "readOnly": True},
+            {"key": "history_count", "label": "History", "type": "number", "readOnly": True},
+            {"key": "state_path", "label": "State-Pfad", "type": "text", "readOnly": True},
+            {"key": "history_path", "label": "History-Pfad", "type": "text", "readOnly": True},
+            {"key": "persisted_at", "label": "Persistiert am", "type": "text", "readOnly": True},
+        ],
+        "actions": [
+            {
+                "key": "refresh",
+                "label": "Aktualisieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "studio.admin-control-center.read",
+                "localEffect": "refetch",
+            },
+        ],
+        "specialized": {"type": "admin_workbench", "id": "admin/control-center/agent-ops"},
+        "noWorkflowReason": "Ops-Read-Model ohne eigenen Beleg-Lebenszyklus.",
+        "noProcessChainReason": "Agent-Ops ist Leitstand, keine Belegkette.",
+        "performance": {
+            "initialPayloadBudgetKb": 100,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "admin",
+        },
+        "agentContract": {
+            "businessPurpose": "Agent-Ops-Zustand und Persistenznachweis einsehen.",
+            "examplePrompts": ["Ist Agent Ops persistiert?"],
+            "sensitiveFields": [],
+            "forbiddenAgentTasks": ["Agent-Ops-Zustand ohne Audit aendern"],
+            "testSelectors": {"screenRoot": "[data-testid='native-cockpit-admin-control-center-agent-ops']"},
+        },
+    }
+
+
+def build_admin_control_center_superglue_workbench() -> dict[str, Any]:
+    """Superglue Unterseite — Connector-/Policy-Surface mit denselben Commands wie Legacy."""
+    base = "/api/v1/agent/integrations/providers/superglue/tenants/default"
+    return {
+        "schemaVersion": 1,
+        "id": "admin/control-center/superglue",
+        "domain": "admin",
+        "mode": "cockpit",
+        "title": "Admin Kontrollzentrum: Superglue",
+        "subtitle": "Connector- und Policy-Overrides fuer Integrationen",
+        "adapter": {"type": "native", "sourceId": "admin/control-center/superglue", "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "dataSources": [
+            {"key": "entity", "endpoint": f"{base}/admin-state", "staleTimeMs": 15_000},
+            {"key": "wizard", "endpoint": f"{base}/wizard", "staleTimeMs": 15_000},
+        ],
+        "fields": [
+            {"key": "tenant_id", "label": "Mandant", "type": "text", "readOnly": True},
+            {"key": "storage_path", "label": "Storage", "type": "text", "readOnly": True},
+            {"key": "connector_key", "label": "Connector", "type": "text"},
+            {"key": "system_url", "label": "System-URL", "type": "text"},
+            {"key": "run_retention_days", "label": "Run-Retention (Tage)", "type": "number"},
+            {"key": "artifact_retention_days", "label": "Artifact-Retention (Tage)", "type": "number"},
+            {"key": "execution_enabled", "label": "Execution aktiv", "type": "boolean"},
+            {"key": "require_tenant_secrets", "label": "Tenant-Secrets Pflicht", "type": "boolean"},
+        ],
+        "actions": [
+            {
+                "key": "refresh",
+                "label": "Aktualisieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "studio.admin-control-center.read",
+                "localEffect": "refetch",
+            },
+            {
+                "key": "connector_override",
+                "label": "Connector Override speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/connectors/{{connector_key}}/config",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "connector_key", "label": "Connector", "type": "text", "required": True},
+                    {"key": "system_url", "label": "System-URL", "type": "text", "required": True},
+                ],
+            },
+            {
+                "key": "policy_override",
+                "label": "Policy Override speichern",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/policy",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "execution_enabled", "label": "Execution aktiv", "type": "boolean"},
+                    {"key": "require_tenant_secrets", "label": "Tenant-Secrets Pflicht", "type": "boolean"},
+                    {"key": "run_retention_days", "label": "Run-Retention", "type": "number"},
+                    {"key": "artifact_retention_days", "label": "Artifact-Retention", "type": "number"},
+                ],
+            },
+            {
+                "key": "wizard_apply",
+                "label": "Wizard-Schritt anwenden",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/wizard/apply",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "completed_step", "label": "Abgeschlossener Schritt", "type": "text", "required": True},
+                    {"key": "next_step", "label": "Naechster Schritt", "type": "text"},
+                ],
+            },
+        ],
+        "specialized": {"type": "admin_workbench", "id": "admin/control-center/superglue"},
+        "noWorkflowReason": "Integrations-Leitstand ohne eigenen Beleg-Lebenszyklus.",
+        "noProcessChainReason": "Superglue ist Connector-Steuerung, keine Belegkette.",
+        "performance": {
+            "initialPayloadBudgetKb": 100,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "admin",
+        },
+        "agentContract": {
+            "businessPurpose": "Superglue-Connector- und Policy-Overrides steuern.",
+            "examplePrompts": ["Zeig den Superglue-Status.", "Speichere einen Connector-Override."],
+            "sensitiveFields": ["system_url"],
+            "forbiddenAgentTasks": ["Connector-Overrides ohne Audit aendern"],
+            "testSelectors": {"screenRoot": "[data-testid='native-cockpit-admin-control-center-superglue']"},
+        },
+    }
+
+
 def build_agrar_milchvieh_crosssell_cockpit() -> dict[str, Any]:
     """Milchvieh Cross-Sell — KPI-Summary + Kundenliste + Produktgruppen (Legacy-Paritaet)."""
     from app.core.cockpit_overview_parent import (
@@ -4246,6 +4468,9 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/ernte-annahme-erfassung": build_agrar_ernte_annahme_erfassung_workbench,
     "annahme/abrechnung": build_annahme_abrechnung_workbench,
     "lager/materialfluss": build_lager_materialfluss_workbench,
+    "admin/externe-gates": build_admin_externe_gates_cockpit,
+    "admin/control-center/agent-ops": build_admin_control_center_agent_ops_workbench,
+    "admin/control-center/superglue": build_admin_control_center_superglue_workbench,
     "admin-suite": build_admin_suite_home_cockpit,
     "admin-suite/connectors": build_admin_suite_connectors_liste,
     "admin-suite/devices": build_admin_suite_devices_liste,
@@ -4374,6 +4599,9 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/ernte-annahme-erfassung": "/agrar/ernte-annahme-erfassung",
                 "annahme/abrechnung": "/annahme/abrechnung",
                 "lager/materialfluss": "/lager/materialfluss",
+                "admin/externe-gates": "/admin/externe-gates",
+                "admin/control-center/agent-ops": "/admin/control-center/agent-ops",
+                "admin/control-center/superglue": "/admin/control-center/superglue",
                 "admin-suite": "/admin-suite",
                 "admin-suite/connectors": "/admin-suite/connectors",
                 "admin-suite/devices": "/admin-suite/devices",

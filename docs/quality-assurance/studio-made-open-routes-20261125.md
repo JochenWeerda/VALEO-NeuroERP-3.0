@@ -258,10 +258,30 @@ Inventar nach Batch 26: Schlagkartei und Milchvieh-Karte runtime_wired; verbleib
 
 Inventar nach Batch 27: die drei schweren Prioritaetsmasken runtime_wired. Verbleibend u. a. duenne Admin-Ops-Seiten und Dialog-Hilfsmodule; Gate D Browser.
 
+## Achtundzwanzigste Hebung (Batch 28)
+
+| Maske | Nachher |
+|-------|---------|
+| `admin/externe-gates` | Cockpit: Overview/Items flach (`/external-gates/overview`, `/items`) — Paritaet Legacy-Karten |
+| `admin/control-center/agent-ops` | `admin_workbench` + Legacy-Surface; Persistence-Read `/agents/neuroassist/ops/persistence` |
+| `admin/control-center/superglue` | `admin_workbench` + Legacy-Surface; Commands connector/policy/wizard/apply (MCP-WRITE-015) |
+
+### Gate D Browser (Teilbeleg)
+
+- Playwright: `packages/frontend-web/tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts`
+  (native-cockpit Runtime + Titel fuer externe-gates und weitere Studio-Cockpits)
+- Image-/CI-Nachlauf mit kanonischem `table-catalog.json` bleibt Codex Entity-Release
+  (Generator deckt Gate D nicht ab; siehe `made-by-studio-gate-report.md`)
+
+Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind oft keine Routenmodule;
+echte Rest-Routen u. a. screen-studio, GapPipeline, voice-channel, setup/dms, vordruck,
+postfaecher-anmeldung-rueckruf, agenten-integration.
+
 ## Noch offen (Folge)
 
-- Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
-- Restliche duenne `hand_built` (Admin-Konsolen, Dialoge, Report-Charts) — nur mit Paritaet wo Fachmaske
+- Restliche duenne Admin-Routen (Studio/Gap/Voice/Setup/Vordruck) — nur mit Paritaet
+- Gate D Image/SSO Hell+Dunkel Screenshots + table-catalog CI (nicht nur Vite-Smoke)
+- Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests
 
@@ -269,12 +289,15 @@ Inventar nach Batch 27: die drei schweren Prioritaetsmasken runtime_wired. Verbl
 python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_batch23.py \
   tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
   tests/test_studio_parity_batch26.py tests/test_studio_parity_batch27.py \
+  tests/test_studio_parity_batch28.py \
   tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
   -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
   src/__tests__/pages/mask-objectpage-stamm-native-route.test.ts \
   src/__tests__/bank-account-form-contract.test.tsx \
   src/__tests__/components/mask-builder/screen-permissions.test.ts
+# Gate D Browser (wenn Playwright/Frontend bereit):
+# npx playwright test tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts
 ```
 
 

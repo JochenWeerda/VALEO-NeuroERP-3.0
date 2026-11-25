@@ -11,21 +11,21 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1101 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1116 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 25 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 10 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1061 |
-| runtime_wired | 914 |
+| Gesamt TSX-Seiten | 1063 |
+| runtime_wired | 927 |
 | legacy_mask_pattern | 13 |
-| hand_built | 117 |
+| hand_built | 106 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 25 |
+| handgebaute Routen | 442 | 10 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1101 |
+| Runtime-verdrahtet | — | 1116 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -66,7 +66,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
 - `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
 - `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
+- `admin-suite/ki-anbieter` ← `src/pages/admin-suite/ki-anbieter.tsx`
+- `admin-suite/migration` ← `src/pages/admin-suite/migration.tsx`
 - `admin-suite/operations` ← `src/pages/admin-suite/operations.tsx`
+- `admin-suite/pos-fiscalization` ← `src/pages/admin-suite/pos-fiscalization.tsx`
+- `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
 - `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
 - `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
 - `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
@@ -86,12 +90,15 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/compliance` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/compliance-dashboard` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/control-center` ← `src/pages/admin/control-center/index.tsx`
+- `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
 - `admin/control-center/incident-response` ← `src/pages/admin/control-center/incident-response.tsx`
 - `admin/control-center/security` ← `src/pages/admin/control-center/security.tsx`
+- `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
 - `admin/core/audit-governance` ← `src/pages/admin/core/audit-governance.tsx`
 - `admin/data-quality` ← `src/pages/admin/data-quality.tsx`
 - `admin/dms-integration` ← `src/pages/admin/dms-integration.tsx`
 - `admin/erntepeak-stabilitaet` ← `src/pages/admin/erntepeak-stabilitaet.tsx`
+- `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
 - `admin/identity-budgets` ← `src/pages/admin/identity-budgets.tsx`
 - `admin/integrationen-quarantaene` ← `src/pages/admin/integrationen-quarantaene.tsx`
 - `admin/monitoring/alerting` ← `src/pages/admin/monitoring/alerting.tsx`
@@ -146,8 +153,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/ernte` ← `src/pages/agrar/ernte/liste.tsx`
 - `agrar/ernte-annahme-abrechnung` ← `src/pages/agrar/ernte-annahme-abrechnung.tsx`
 - `agrar/ernte-annahme-energiemais` ← `src/pages/agrar/ernte-annahme-energiemais.tsx`
+- `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
+- `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte-kampagne-erfassung` ← `src/pages/agrar/ernte-kampagne-erfassung.tsx`
 - `agrar/ernte-qualitaetsfreigabe` ← `src/pages/agrar/ernte-qualitaetsfreigabe.tsx`
+- `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte/kampagnenabschluss` ← `src/pages/agrar/ernte/kampagnenabschluss.tsx`
 - `agrar/ernte/liste` ← `src/pages/agrar/ernte/liste.tsx`
 - `agrar/erntefenster-konfig` ← `src/pages/agrar/erntefenster-konfig.tsx`
@@ -171,10 +181,13 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/kulturpflanzen/:id` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
 - `agrar/kulturpflanzen/liste` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
 - `agrar/kulturpflanzen/neu` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
+- `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
+- `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/lieferschein-erstellen` ← `src/pages/agrar/LieferscheinErstellen.tsx`
 - `agrar/maschinen-auslastung` ← `src/pages/agrar/maschinen-auslastung.tsx`
 - `agrar/maschinenauslastung` ← `src/pages/agrar/maschinenauslastung.tsx`
 - `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
+- `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
 - `agrar/nachhaltigkeit-eudr` ← `src/pages/agrar/nachhaltigkeit-eudr.tsx`
 - `agrar/nawaro-erntemeldung` ← `src/pages/agrar/nawaro-erntemeldung.tsx`
 - `agrar/nawaro-kaskade` ← `src/pages/agrar/nawaro-kaskade.tsx`
@@ -250,6 +263,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `alerts` ← `src/pages/workflow/workflow-monitoring.tsx`
 - `analysis/what-if-simulator` ← `src/pages/analysis/WhatIfSimulator.tsx`
 - `analytics` ← `src/pages/analytics.tsx`
+- `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/annahme-qr` ← `src/pages/annahme/annahme-qr.tsx`
 - `annahme/klaerung-gesperrt` ← `src/pages/annahme/klaerung-gesperrt.tsx`
 - `annahme/lkw-registrierung` ← `src/pages/annahme/lkw-registrierung.tsx`
@@ -868,6 +882,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `lager/lagerbewegungen` ← `src/pages/lager/lagerbewegungen.tsx`
 - `lager/lagerplaetze` ← `src/pages/lager/lagerplaetze.tsx`
 - `lager/massebilanz` ← `src/pages/lager/massebilanz.tsx`
+- `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
 - `lager/materialfluss-visualisierung` ← `src/pages/lager/materialfluss-visualisierung.tsx`
 - `lager/partiestamm` ← `src/pages/lager/partiestamm.tsx`
 - `lager/permanente-inventur` ← `src/pages/lager/permanente-inventur.tsx`
@@ -1163,15 +1178,8 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 ## Handgebaut — Migrationskandidaten (erste 60, alphabetisch)
 
-- `admin-suite/ki-anbieter` ← `src/pages/admin-suite/ki-anbieter.tsx`
-- `admin-suite/migration` ← `src/pages/admin-suite/migration.tsx`
-- `admin-suite/pos-fiscalization` ← `src/pages/admin-suite/pos-fiscalization.tsx`
-- `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
 - `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
-- `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
-- `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
-- `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
 - `admin/gap-pipeline` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/postfaecher/anmeldung-rueckruf` ← `src/pages/admin/postfaecher-anmeldung-rueckruf.tsx`
 - `admin/screen-studio` ← `src/pages/admin/screen-studio.tsx`
@@ -1179,12 +1187,4 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
 - `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
 - `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
-- `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
-- `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
-- `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
-- `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
-- `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
 - `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`

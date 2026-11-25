@@ -302,6 +302,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "admin/control-center/agent-ops": {
+      "definition_hash": "ef9d42a7c9c032ba3fd33656c8e483a398daa338b38ec0686d0e2bcfdf5c56f6",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "admin/control-center/ai-approvals": {
       "definition_hash": "a7f7f3d3167147652d38a88559d2a43faa4ab87b7437e6197b05e306eca37e52",
       "gates_passed": [
@@ -341,6 +352,16 @@
         "A",
         "B",
         "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/control-center/superglue": {
+      "definition_hash": "e31ce77eb91279254f4c937de2e6352ac7e27bc0157b840c1393965f61435494",
+      "gates_passed": [
+        "A",
+        "B",
         "E"
       ],
       "studio_draft_clean": true,
@@ -396,6 +417,16 @@
         "A",
         "B",
         "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/externe-gates": {
+      "definition_hash": "8b115f90e9f810893daf4e3d388545aa1224318cfa01c255ceb745155b50a273",
+      "gates_passed": [
+        "A",
+        "B",
         "E"
       ],
       "studio_draft_clean": true,
