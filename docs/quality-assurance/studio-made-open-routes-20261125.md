@@ -141,9 +141,17 @@ Inventar: `legacy_wrapper` **0** (vorher 35).
 |-------|--------|---------|
 | `fibu/abschluss-checklist-detail` | Factory+Legacy | POST `/api/v1/finance/closing-checklists` |
 
+## Siebzehnte Hebung (Batch 17)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `einkauf/angebot` | Factory+Legacy (kein POST) | POST `/api/v1/einkauf/angebote` + SD `creation` |
+| `einkauf/anlieferavis` | Factory+Legacy (kein POST) | POST `/api/v1/einkauf/anlieferavis` + SD `creation` |
+
+Live `createStammNativeDetailPage` + `legacyImport`: **0**.
+
 ## Noch offen (Folge)
 
-- `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST — Factory+Legacy bis API
 - `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 

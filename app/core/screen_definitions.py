@@ -2020,6 +2020,19 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                          ]}]},
         ],
         "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST", "requiresConfirmation": True}],
+        "creation": {
+            "endpoint": "/api/v1/einkauf/angebote",
+            "permission": "einkauf.angebot.create",
+            "detailRoute": "/einkauf/angebot/{entity_id}",
+            "defaults": {"status": "ENTWURF", "waehrung": "EUR"},
+            "fields": [
+                {"key": "lieferant", "label": "Lieferant", "type": "text", "required": True},
+                {"key": "artikel", "label": "Artikel", "type": "text"},
+                {"key": "preis", "label": "Gesamtbetrag", "type": "currency"},
+                {"key": "gueltigBis", "label": "Gueltig bis", "type": "date"},
+                {"key": "angebotNummer", "label": "Angebot-Nr. (optional)", "type": "text"},
+            ],
+        },
         "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
         "agentContract": {
             "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
@@ -2069,6 +2082,19 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
                 {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
                  "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
             ]}],
+        "creation": {
+            "endpoint": "/api/v1/einkauf/anlieferavis",
+            "permission": "einkauf.anlieferavis.create",
+            "detailRoute": "/einkauf/anlieferavis/{entity_id}",
+            "defaults": {"status": "ENTWURF"},
+            "fields": [
+                {"key": "lieferant", "label": "Lieferant", "type": "text", "required": True},
+                {"key": "bestellung", "label": "Bestellung", "type": "text"},
+                {"key": "geplantesAnlieferDatum", "label": "Lieferdatum", "type": "date"},
+                {"key": "kennzeichen", "label": "Kennzeichen", "type": "text"},
+                {"key": "avisNummer", "label": "Avis-Nr. (optional)", "type": "text"},
+            ],
+        },
         "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
         "agentContract": {
             "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",

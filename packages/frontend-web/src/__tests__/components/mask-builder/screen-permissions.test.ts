@@ -65,6 +65,15 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(anfrage, user([], ['CRM_BEARBEITEN']))).toEqual([])
     expect(getScreenPermissions(anfrage, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.anfrage.create'])
   })
+  it('matches EINKAUF write roles for Angebot and Anlieferavis creation', () => {
+    const angebot: ScreenDefinition = { ...screen, id: 'einkauf/angebot', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/angebote', permission: 'einkauf.angebot.create', detailRoute: '/einkauf/angebot/{entity_id}' } }
+    const avis: ScreenDefinition = { ...screen, id: 'einkauf/anlieferavis', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/anlieferavis', permission: 'einkauf.anlieferavis.create', detailRoute: '/einkauf/anlieferavis/{entity_id}' } }
+    expect(getScreenPermissions(angebot, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(angebot, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.angebot.create'])
+    expect(getScreenPermissions(avis, user([], ['EINKAUF_ADMIN']))).toEqual(['einkauf.anlieferavis.create'])
+  })
   it('matches QUALITAET write roles for Reklamation creation', () => {
     const rek: ScreenDefinition = { ...screen, id: 'qualitaet/reklamation', domain: 'qualitaet', actions: [],
       creation: { endpoint: '/api/v1/reklamationen', permission: 'qualitaet.reklamation.create', detailRoute: '/qualitaet/reklamation/{entity_id}', responseIdKey: 'reklamation_id' } }

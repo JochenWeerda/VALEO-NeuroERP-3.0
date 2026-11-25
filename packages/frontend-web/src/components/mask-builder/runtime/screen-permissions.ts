@@ -73,8 +73,14 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
-    // Einkauf Anfrage Create mirrors SCHREIBEN["EINKAUF"].
-    if (permission.startsWith('einkauf.anfrage.')) {
+    // Einkauf Create mirrors SCHREIBEN["EINKAUF"] (Anfrage/Angebot/Avis/AB/Supplier).
+    if (
+      permission.startsWith('einkauf.anfrage.')
+      || permission.startsWith('einkauf.angebot.')
+      || permission.startsWith('einkauf.anlieferavis.')
+      || permission.startsWith('einkauf.auftragsbestaetigung.')
+      || permission.startsWith('einkauf.supplier.')
+    ) {
       return roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN') || roles.has('manager')
     }
     // Reklamation Create mirrors SCHREIBEN["QUALITAET"] (Lager/Einkauf/Sales/Agrar/Futtermittel).

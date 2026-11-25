@@ -297,6 +297,32 @@ class EinkaufCompatService:
             raise EntityNotFoundError("Angebot", angebot_id)
         return self._angebot_row_to_dict(row._mapping)
 
+    def create_angebot(self, payload: dict[str, Any]) -> dict:
+        """Legt einen Angebots-Entwurf an (Kopf; Positionen folgen in der Maske)."""
+        from sqlalchemy import text
+        new_id = uuid7()
+        nummer = str(payload.get("angebotNummer") or payload.get("angebotsnummer") or f"ANG-{new_id[:8].upper()}")
+        lieferant_name = str(payload.get("lieferant") or payload.get("lieferant_name") or "").strip() or None
+        lieferant_id = payload.get("lieferant_id") or payload.get("lieferantId")
+        gueltig_bis = payload.get("gueltigBis") or payload.get("gueltig_bis")
+        waehrung = str(payload.get("waehrung") or payload.get("currency") or "EUR")
+        gesamt = safe_float(payload.get("preis") or payload.get("gesamtbetrag") or 0)
+        self.db.execute(text("""
+            INSERT INTO einkauf_angebote
+                (id, tenant_id, angebotsnummer, lieferant_id, lieferant_name,
+                 gesamtbetrag, waehrung, gueltig_bis, status, created_at, updated_at)
+            VALUES
+                (:id, :tid, :nr, :lid, :lname, :betrag, :whr, :gueltig, 'ENTWURF',
+                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """), {
+            "id": new_id, "tid": self.tenant_id, "nr": nummer,
+            "lid": str(lieferant_id) if lieferant_id else None,
+            "lname": lieferant_name, "betrag": gesamt, "whr": waehrung, "gueltig": gueltig_bis,
+        })
+        self.db.commit()
+        self._invalidate()
+        return self.get_angebot(new_id)
+
     def _load_angebot_raw_row(self, angebot_id: str) -> Any:
         from sqlalchemy import text
         return self.db.execute(text(
@@ -402,6 +428,30 @@ class EinkaufCompatService:
         if row is None:
             raise EntityNotFoundError("Anlieferavis", avis_id)
         return self._anlieferavis_row_to_dict(row._mapping)
+
+    def create_anlieferavis(self, payload: dict[str, Any]) -> dict:
+        """Legt einen Anlieferavis-Entwurf an."""
+        from sqlalchemy import text
+        new_id = uuid7()
+        nummer = str(payload.get("avisNummer") or payload.get("avis_nummer") or f"AVIS-{new_id[:8].upper()}")
+        lieferant_name = str(payload.get("lieferant") or payload.get("lieferant_name") or "").strip() or None
+        bestell_nr = payload.get("bestellung") or payload.get("bestell_nr") or payload.get("bestellung_id")
+        erwartetes = payload.get("geplantesAnlieferDatum") or payload.get("erwartetes_datum")
+        self.db.execute(text("""
+            INSERT INTO einkauf_anlieferavis
+                (id, tenant_id, avis_nummer, bestell_nr, lieferant_name,
+                 erwartetes_datum, status, created_at, updated_at)
+            VALUES
+                (:id, :tid, :nr, :bestell, :lname, :datum, 'ENTWURF',
+                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """), {
+            "id": new_id, "tid": self.tenant_id, "nr": nummer,
+            "bestell": str(bestell_nr) if bestell_nr else None,
+            "lname": lieferant_name, "datum": erwartetes,
+        })
+        self.db.commit()
+        self._invalidate()
+        return self.get_anlieferavis(new_id)
 
     def transition_anlieferavis(self, avis_id: str, action: str) -> dict:
         from sqlalchemy import text
