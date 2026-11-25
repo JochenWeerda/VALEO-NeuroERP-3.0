@@ -6,7 +6,6 @@ GET/POST/PATCH/DELETE for inventory count headers and lines.
 from typing import Optional
 from datetime import date
 from decimal import Decimal
-from uuid import uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -293,45 +292,25 @@ async def post_inventory_count(
             continue
 
         adjustments += 1
-        movement_id = str(uuid4())
         ref = f"INV-{count_id[:8].upper()}-{adjustments}"
+        lager = line.warehouse_id or getattr(count, "warehouse_id", None)
+        if not lager:
+            db.rollback()
+            raise HTTPException(422, f"Inventurzeile {line.id}: kein Lager - Differenz nicht buchbar.")
 
-        db.execute(
-            text("""
-                INSERT INTO domain_inventory.inventory_stock_movements
-                (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
-                 reference_number, movement_date, movement_time,
-                 notes, booking_user, auto_created, ownership_type, tenant_id,
-                 previous_stock, new_stock, created_at)
-                VALUES (:id, :article_id, :warehouse_id, 'adjustment', :quantity, 't', :charge,
-                        :ref, :date, NOW()::time,
-                        :notes, 'inventur', true, 'owned', :tenant_id,
-                        0, 0, NOW())
-            """),
-            {
-                "id": movement_id,
-                "article_id": line.article_id,
-                "warehouse_id": line.warehouse_id or (count.warehouse_id if hasattr(count, 'warehouse_id') else 'INVENTUR'),
-                "quantity": diff,
-                "charge": line.batch_number,
-                "ref": ref,
-                "date": posting_date,
-                "notes": f"Inventur-Differenz: Soll={line.expected_qty}, Ist={line.counted_qty}",
-                "tenant_id": tid,
-            },
-        )
+        # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Vorher-/Nachherbestand statt 0, Artikelbestand
+        # mandantengebunden (bis dahin WHERE id ohne Mandant), Unterdeckung, Buchungsschluessel je Inventurzeile.
+        from app.domains.inventory.application.services.inventory_service import InventoryService
 
-        # Update article stock
-        db.execute(
-            text("""
-                UPDATE domain_inventory.articles
-                SET current_stock = COALESCE(current_stock, 0) + :delta,
-                    available_stock = COALESCE(available_stock, 0) + :delta,
-                    updated_at = NOW()
-                WHERE id = :article_id
-            """),
-            {"delta": diff, "article_id": line.article_id},
-        )
+        try:
+            InventoryService(db).process_stock_movement(
+                str(line.article_id), str(lager), "adjustment", Decimal(str(diff)), unit="t",
+                movement_date=posting_date, reference_number=ref, charge=line.batch_number, booking_user="inventur",
+                auto_created=True, notes=f"Inventur-Differenz: Soll={line.expected_qty}, Ist={line.counted_qty}",
+                tenant_id=tid, buchungsschluessel=f"inventur:{count_id}:{line.id}", commit=False)
+        except ValueError as fehler:
+            db.rollback()
+            raise HTTPException(422, f"Inventurzeile {line.id}: {fehler}") from fehler
 
         if diff > 0:
             total_positive += Decimal(str(diff))
