@@ -21,22 +21,10 @@ down_revision = "ops_fahrer_tenant_20261124"
 branch_labels = None
 depends_on = None
 
-REFERENZ = "domain_integration.spiegel_quellreferenzen"
-PROTOKOLL = "domain_integration.spiegel_protokoll"
-OWN = "(tenant_id)::text = public.rls_current_tenant()"
-
-
-def _rls(tabelle: str) -> None:
-    op.execute(f"ALTER TABLE {tabelle} ENABLE ROW LEVEL SECURITY")
-    op.execute(f"CREATE POLICY tenant_isolation_select ON {tabelle} FOR SELECT USING ({OWN})")
-    op.execute(f"CREATE POLICY tenant_isolation_insert ON {tabelle} FOR INSERT WITH CHECK ({OWN})")
-    op.execute(f"CREATE POLICY tenant_isolation_update ON {tabelle} FOR UPDATE USING ({OWN}) WITH CHECK ({OWN})")
-    op.execute(f"CREATE POLICY tenant_isolation_delete ON {tabelle} FOR DELETE USING ({OWN})")
-
 
 def upgrade() -> None:
-    op.execute(f"""
-        CREATE TABLE {REFERENZ} (
+    op.execute("""
+        CREATE TABLE domain_integration.spiegel_quellreferenzen (
             tenant_id text NOT NULL REFERENCES domain_shared.tenants (id),
             quellsystem text NOT NULL,
             objektart text NOT NULL,
@@ -52,9 +40,13 @@ def upgrade() -> None:
             CONSTRAINT uq_spiegel_quellreferenz_ziel UNIQUE (tenant_id, ziel_tabelle, ziel_id)
         )
     """)
-    _rls(REFERENZ)
-    op.execute(f"""
-        CREATE TABLE {PROTOKOLL} (
+    op.execute("ALTER TABLE domain_integration.spiegel_quellreferenzen ENABLE ROW LEVEL SECURITY")
+    op.execute("CREATE POLICY tenant_isolation_select ON domain_integration.spiegel_quellreferenzen FOR SELECT USING ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_insert ON domain_integration.spiegel_quellreferenzen FOR INSERT WITH CHECK ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_update ON domain_integration.spiegel_quellreferenzen FOR UPDATE USING ((tenant_id)::text = public.rls_current_tenant()) WITH CHECK ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_delete ON domain_integration.spiegel_quellreferenzen FOR DELETE USING ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("""
+        CREATE TABLE domain_integration.spiegel_protokoll (
             id text PRIMARY KEY,
             tenant_id text NOT NULL REFERENCES domain_shared.tenants (id),
             batch_id text NOT NULL REFERENCES domain_integration.legacy_adapter_batches (id),
@@ -62,13 +54,17 @@ def upgrade() -> None:
             objektart text NOT NULL,
             quellschluessel text,
             ergebnis text NOT NULL CHECK (ergebnis IN ('neu', 'geaendert', 'unveraendert', 'fehler')),
-            differenzen jsonb NOT NULL DEFAULT '{{}}'::jsonb,
+            differenzen jsonb NOT NULL DEFAULT '{}'::jsonb,
             fehler text,
             erstellt_am timestamptz NOT NULL DEFAULT now()
         )
     """)
-    op.execute(f"CREATE INDEX ix_spiegel_protokoll_lauf ON {PROTOKOLL} (tenant_id, batch_id, ergebnis)")
-    _rls(PROTOKOLL)
+    op.execute("CREATE INDEX ix_spiegel_protokoll_lauf ON domain_integration.spiegel_protokoll (tenant_id, batch_id, ergebnis)")
+    op.execute("ALTER TABLE domain_integration.spiegel_protokoll ENABLE ROW LEVEL SECURITY")
+    op.execute("CREATE POLICY tenant_isolation_select ON domain_integration.spiegel_protokoll FOR SELECT USING ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_insert ON domain_integration.spiegel_protokoll FOR INSERT WITH CHECK ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_update ON domain_integration.spiegel_protokoll FOR UPDATE USING ((tenant_id)::text = public.rls_current_tenant()) WITH CHECK ((tenant_id)::text = public.rls_current_tenant())")
+    op.execute("CREATE POLICY tenant_isolation_delete ON domain_integration.spiegel_protokoll FOR DELETE USING ((tenant_id)::text = public.rls_current_tenant())")
     # Protokollzeilen sind unveraenderlich (Korrektur = neuer Lauf). Loeschen bleibt fuer die Mandantenaufloesung moeglich.
     op.execute("""
         CREATE OR REPLACE FUNCTION domain_integration.spiegel_protokoll_unveraenderlich() RETURNS trigger
@@ -78,11 +74,11 @@ def upgrade() -> None:
         END;
         $$
     """)
-    op.execute(f"CREATE TRIGGER trg_spiegel_protokoll_unveraenderlich BEFORE UPDATE ON {PROTOKOLL} "
+    op.execute("CREATE TRIGGER trg_spiegel_protokoll_unveraenderlich BEFORE UPDATE ON domain_integration.spiegel_protokoll "
                "FOR EACH ROW EXECUTE FUNCTION domain_integration.spiegel_protokoll_unveraenderlich()")
 
 
 def downgrade() -> None:
-    op.execute(f"DROP TABLE IF EXISTS {PROTOKOLL}")
+    op.execute("DROP TABLE IF EXISTS domain_integration.spiegel_protokoll")
     op.execute("DROP FUNCTION IF EXISTS domain_integration.spiegel_protokoll_unveraenderlich()")
-    op.execute(f"DROP TABLE IF EXISTS {REFERENZ}")
+    op.execute("DROP TABLE IF EXISTS domain_integration.spiegel_quellreferenzen")
