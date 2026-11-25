@@ -1,42 +1,20 @@
-import { act, render, waitFor } from '@testing-library/react'
-import { expect, it, vi } from 'vitest'
-import BankKontenStammPage from '@/pages/finance/bankkonten-stamm'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { expect, it } from 'vitest'
 
-const mocks = vi.hoisted(() => ({
-  saveData: vi.fn(), setData: vi.fn(),
-  onLookup: undefined as undefined | ((result: { valid: boolean; bank_name: string; bic: string }) => void),
-}))
-vi.mock('@/components/navigation/ModuleToolbar', () => ({ ModuleToolbar: () => null }))
-vi.mock('@/hooks/useUnsavedChanges', () => ({ useUnsavedChanges: () => ({ state: 'unblocked' }) }))
-vi.mock('@/app/routing/typed-router', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/app/routing/typed-router')>(),
-  useNavigate: () => vi.fn(),
-  useParams: () => ({}),
-}))
-vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }))
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock('@/features/crud/utils/i18n-helpers', () => ({ getEntityTypeLabel: () => 'Bankkonto' }))
-vi.mock('@/features/finance/useBankOptions', () => ({ useBankLedgerOptions: () => ({ data: [] }) }))
-vi.mock('@/components/mask-builder', async (importOriginal) => ({
-  ...await importOriginal<typeof import('@/components/mask-builder')>(),
-  ObjectPage: () => <div>Bankkonto</div>,
-}))
-vi.mock('@/components/mask-builder/hooks', () => ({
-  useMaskData: () => ({ data: null, loading: false, saveData: mocks.saveData,
-    updateData: mocks.saveData, setData: mocks.setData }),
-  useMaskActions: (handler: unknown) => ({ handleAction: handler }),
-}))
-vi.mock('@/hooks/useIbanLookup', () => ({
-  useIbanLookup: ({ onSuccess }: { onSuccess: typeof mocks.onLookup }) => {
-    mocks.onLookup = onSuccess
-    return { performLookup: vi.fn(), isLoading: false, lookupData: null }
-  },
-}))
-
-it('bank lookup fills a draft locally and never implicitly saves an account', async () => {
-  render(<BankKontenStammPage />)
-  await waitFor(() => expect(mocks.onLookup).toBeTypeOf('function'))
-  act(() => mocks.onLookup?.({ valid: true, bank_name: 'Bank', bic: 'COBADEFFXXX' }))
-  expect(mocks.setData).toHaveBeenCalledWith(expect.objectContaining({ bank_name: 'Bank', bic: 'COBADEFFXXX' }))
-  expect(mocks.saveData).not.toHaveBeenCalled()
+/**
+ * Bankkonto-Neuanlage laeuft native (UniversalNativeCreatePage).
+ * Server validiert IBAN bei POST /api/v1/banken/konten; der Legacy-Client-
+ * Lookup (useIbanLookup) gehoerte zur ObjectPage-Altmaske und ist absichtlich
+ * nicht mehr Teil der produktiven Stamm-Route.
+ */
+it('bankkonten-stamm uses native create without legacy ObjectPage', () => {
+  const src = readFileSync(
+    resolve(__dirname, '../pages/finance/bankkonten-stamm.tsx'),
+    'utf8',
+  )
+  expect(src).toContain('createStammNativeDetailPage')
+  expect(src).toContain("'finance/bankkonto'")
+  expect(src).not.toContain('-legacy')
+  expect(src).not.toContain('useIbanLookup')
 })

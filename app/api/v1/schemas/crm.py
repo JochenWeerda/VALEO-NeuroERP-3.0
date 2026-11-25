@@ -397,7 +397,9 @@ class OpportunityBase(BaseSchema):
 
 class OpportunityCreate(OpportunityBase):
     """Schema for creating opportunities"""
-    tenant_id: str = Field(..., max_length=64, description="Tenant identifier")
+    # Mandant kommt aus dem Request-Kontext (create_opportunity ueberschreibt ihn).
+    # Optional halten, damit Studio-Create ohne tenant_id-Feld validiert.
+    tenant_id: Optional[str] = Field(None, max_length=64, description="Tenant identifier (Kontext ist massgeblich)")
 
 
 class OpportunityUpdate(BaseSchema):

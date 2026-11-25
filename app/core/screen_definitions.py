@@ -938,6 +938,24 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="crm.opportunity.update",
+        creation={
+            "endpoint": "/api/v1/crm/opportunities/",
+            "permission": "crm.opportunity.create",
+            "detailRoute": "/crm/opportunity/{entity_id}",
+            "defaults": {"status": "prospecting", "stage": "initial_contact"},
+            "fields": [
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "customer_id", "label": "Kunden-ID", "type": "text"},
+                {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
+                {"key": "stage", "label": "Phase", "type": "text"},
+                {"key": "amount", "label": "Wert", "type": "currency"},
+                {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
+                {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
+                {"key": "lead_source", "label": "Quelle", "type": "text"},
+                {"key": "status", "label": "Status", "type": "text"},
+                {"key": "description", "label": "Beschreibung", "type": "textarea"},
+            ],
+        },
         extra_actions=[
             {
                 "key": "create_activity",
@@ -1723,6 +1741,31 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="finance.kreditor.update",
+        creation={
+            # CreditorWrite-API (/finance/creditors) — Feldnamen 1:1 wie Backend-Schema.
+            "endpoint": "/api/v1/finance/creditors",
+            "permission": "finance.kreditor.create",
+            "detailRoute": "/finance/kreditor/{entity_id}",
+            "defaults": {"country": "Deutschland", "is_active": True},
+            "fields": [
+                {"key": "creditor_number", "label": "Kreditoren-Nr.", "type": "text", "required": True},
+                {"key": "company_name", "label": "Firmenname", "type": "text", "required": True},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "street", "label": "Strasse", "type": "text"},
+                {"key": "postal_code", "label": "PLZ", "type": "text"},
+                {"key": "city", "label": "Ort", "type": "text"},
+                {"key": "country", "label": "Land", "type": "text"},
+                {"key": "tax_number", "label": "Steuernummer", "type": "text"},
+                {"key": "vat_id", "label": "USt-IdNr.", "type": "text"},
+                {"key": "payment_terms_days", "label": "Zahlungsziel (Tage)", "type": "number"},
+                {"key": "iban", "label": "IBAN", "type": "text"},
+                {"key": "bic", "label": "BIC", "type": "text"},
+                {"key": "bank_name", "label": "Bank", "type": "text"},
+                {"key": "is_active", "label": "Aktiv", "type": "boolean"},
+            ],
+        },
         no_workflow_reason="Kreditorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
         business_purpose=(
             "Kreditoren-Stammdaten: Zahlungsbedingungen, offene Posten und Bestellhistorie fuer Kreditorenbuchhaltung."
@@ -1808,6 +1851,20 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="finance.bankkonto.update",
+        creation={
+            "endpoint": "/api/v1/banken/konten",
+            "permission": "finance.bankkonto.create",
+            "detailRoute": "/finance/bankkonto/{entity_id}",
+            "defaults": {"waehrung": "EUR", "ist_aktiv": True, "saldo": 0},
+            "fields": [
+                {"key": "iban", "label": "IBAN", "type": "text", "required": True},
+                {"key": "bic", "label": "BIC", "type": "text", "required": True},
+                {"key": "bank_name", "label": "Bank", "type": "text", "required": True},
+                {"key": "kontoart", "label": "Kontoart", "type": "text", "required": True},
+                {"key": "waehrung", "label": "Waehrung", "type": "text"},
+                {"key": "ist_aktiv", "label": "Aktiv", "type": "boolean"},
+            ],
+        },
         no_workflow_reason="Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose="Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
         example_prompts=[

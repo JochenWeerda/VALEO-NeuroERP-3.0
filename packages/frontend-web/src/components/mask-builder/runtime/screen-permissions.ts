@@ -44,6 +44,18 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Finance Stamm-Create mirrors SCHREIBEN["FINANZ"] / finance_write until projection covers POST.
+    if (permission.startsWith('finance.bankkonto.') || permission.startsWith('finance.kreditor.')) {
+      return roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN') || roles.has('manager')
+    }
+    // Opportunity Create mirrors SCHREIBEN["CRM"] (CRM + SALES write roles).
+    if (permission.startsWith('crm.opportunity.')) {
+      return (
+        roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN')
+        || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }

@@ -178,6 +178,39 @@ def test_agrar_saatgut_and_duenger_have_native_creation() -> None:
         assert any(field["required"] for field in creation["fields"])
 
 
+def test_bankkonto_kreditor_opportunity_have_native_creation() -> None:
+    """Batch 2 Create-Paritaet: Bankkonto/Kreditor/Opportunity ohne Legacy-Anlage."""
+    for screen_id, endpoint, detail, required_keys in (
+        (
+            "finance/bankkonto",
+            "/api/v1/banken/konten",
+            "/finance/bankkonto/{entity_id}",
+            {"iban", "bic", "bank_name", "kontoart"},
+        ),
+        (
+            "finance/kreditor",
+            "/api/v1/finance/creditors",
+            "/finance/kreditor/{entity_id}",
+            {"creditor_number", "company_name"},
+        ),
+        (
+            "crm/opportunity",
+            "/api/v1/crm/opportunities/",
+            "/crm/opportunity/{entity_id}",
+            {"name"},
+        ),
+    ):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        assert creation["detailRoute"] == detail
+        assert creation["permission"].endswith(".create")
+        keys = {field["key"] for field in creation["fields"]}
+        assert required_keys <= keys
+        assert "tenant_id" not in keys
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

@@ -40,6 +40,19 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(saatgut, user([], ['AGRAR_BEARBEITEN']))).toEqual(['agrar.saatgut.create'])
     expect(getScreenPermissions(saatgut, user([], ['HARVEST_ADMIN']))).toEqual(['agrar.saatgut.create'])
   })
+  it('matches FINANCE write roles for Bankkonto/Kreditor creation', () => {
+    const bank: ScreenDefinition = { ...screen, id: 'finance/bankkonto', domain: 'finance', actions: [],
+      creation: { endpoint: '/api/v1/banken/konten', permission: 'finance.bankkonto.create', detailRoute: '/finance/bankkonto/{entity_id}' } }
+    expect(getScreenPermissions(bank, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(bank, user([], ['FINANCE_BEARBEITEN']))).toEqual(['finance.bankkonto.create'])
+  })
+  it('matches CRM/SALES write roles for Opportunity creation', () => {
+    const opp: ScreenDefinition = { ...screen, id: 'crm/opportunity', domain: 'crm', actions: [],
+      creation: { endpoint: '/api/v1/crm/opportunities/', permission: 'crm.opportunity.create', detailRoute: '/crm/opportunity/{entity_id}' } }
+    expect(getScreenPermissions(opp, user([], ['FINANCE_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(opp, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.opportunity.create'])
+    expect(getScreenPermissions(opp, user([], ['SALES_ADMIN']))).toEqual(['crm.opportunity.create'])
+  })
 })
 
 

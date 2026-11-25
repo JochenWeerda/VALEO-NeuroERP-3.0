@@ -21,11 +21,11 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
 
   const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' | 'native' | 'create-capture' }> = [
     { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'create-capture' },
-    { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'factory' },
-    { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'factory' },
+    { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'native' },
+    { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'native' },
     { file: 'futtermittel/einzelfuttermittel-stamm.tsx', screenId: 'futtermittel/einzelfuttermittel', kind: 'native-create' },
     { file: 'futtermittel/mischfuttermittel-stamm.tsx', screenId: 'futtermittel/mischfuttermittel', kind: 'native-create' },
-    { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'factory' },
+    { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'native' },
     { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
     { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
     { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
