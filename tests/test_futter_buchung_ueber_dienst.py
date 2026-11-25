@@ -77,3 +77,12 @@ def test_verbrauch_ueber_den_lagerbestand_blockiert_die_futterkette_nicht(haus):
     _verbrauch(haus, "12", auftrag="PA-2")
 
     assert _verlauf(haus) == [(D("10"), D("-2"))]
+
+
+def test_unbekanntes_lager_meldet_fachlichen_fehler(haus):
+    from app.services.feed_inventory_link_service import FeedInventoryLinkError
+
+    with SessionLocal() as db, pytest.raises(FeedInventoryLinkError, match="not found"):
+        FeedInventoryLinkService(db, haus["t"]).book_snapshot_movements(
+            snapshot=[{"einzelfutter_id": "EF-SOJA", "name": "Sojaschrot", "menge_t": "1"}], direction=-1,
+            production_order_id="PA-3", booked_by="mischer", warehouse_id=str(uuid.uuid4()))
