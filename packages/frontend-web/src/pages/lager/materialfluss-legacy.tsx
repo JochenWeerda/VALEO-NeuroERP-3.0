@@ -132,7 +132,7 @@ const demoEdges: Edge[] = [
     source: 'n-elev',
     target: 'n-cell-a2',
     label: 'Ziel gesperrt',
-    style: { stroke: '#b91c1c', strokeDasharray: '5 4' },
+    style: { stroke: 'hsl(var(--status-error-hsl))', strokeDasharray: '5 4' },
     animated: false,
   },
   { id: 'e5', source: 'n-cell-a1', target: 'n-mixer', animated: true },

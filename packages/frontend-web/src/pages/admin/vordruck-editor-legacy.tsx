@@ -385,8 +385,11 @@ export default function VordruckEditorPage(): JSX.Element {
                           fontSize: Math.max(el.font_size * scale * 0.35, 6),
                           fontWeight: el.bold ? 700 : 400,
                           textAlign: el.align,
-                          background: el.typ === 'qrcode' ? 'repeating-linear-gradient(45deg,#ddd,#ddd 2px,#fff 2px,#fff 4px)' : undefined,
-                          borderColor: el.typ === 'rechteck' ? '#666' : undefined,
+                          background:
+                            el.typ === 'qrcode'
+                              ? 'repeating-linear-gradient(45deg,hsl(var(--muted)),hsl(var(--muted)) 2px,hsl(var(--card)) 2px,hsl(var(--card)) 4px)'
+                              : undefined,
+                          borderColor: el.typ === 'rechteck' ? 'hsl(var(--muted-foreground))' : undefined,
                           borderStyle: el.typ === 'rechteck' ? 'solid' : undefined,
                         }}
                       >
