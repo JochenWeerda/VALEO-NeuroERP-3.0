@@ -50,7 +50,6 @@
     "auswertungen/lieferantenbewertung",
     "auswertungen/rohertrag",
     "crm/betriebsprofil",
-    "crm/kontakt",
     "crm/lieferant",
     "fibu/abschluss-checklist",
     "finance/bank-account",

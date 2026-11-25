@@ -1201,3 +1201,5 @@ Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.besta
 
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
+
+PR 179, CI-Lauf 45472996604: Die Kontaktmaske liest die kanonische CRM-Route mit einer typisierten data-Huelle. Die gemeinsame Entity-Projektion uebernimmt die Kontakt-ID und die vier Kopffelder; position stammt aus job_title. Der Feldvertrag prueft die deklarierten Projektionspfade. Kontakt aus der Altlastenliste entfernt; Generator- und Testnachlauf offen.

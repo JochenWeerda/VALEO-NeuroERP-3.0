@@ -36589,6 +36589,95 @@
         "title": "ContactData",
         "type": "object"
       },
+      "ContactDetail": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "null"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "createdAt": {
+            "title": "Createdat",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "updatedAt": {
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "company",
+          "email",
+          "phone",
+          "type",
+          "address",
+          "notes",
+          "position",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ContactDetail",
+        "type": "object"
+      },
+      "ContactDetailOut": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ContactDetail"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "ContactDetailOut",
+        "type": "object"
+      },
       "ContactDoc": {
         "properties": {
           "amount": {
@@ -258030,7 +258119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ContactsOut"
+                  "$ref": "#/components/schemas/ContactDetailOut"
                 }
               }
             },

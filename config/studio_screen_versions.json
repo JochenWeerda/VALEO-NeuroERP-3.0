@@ -3600,7 +3600,7 @@
       "version": "1.0.0"
     },
     "crm/kontakt": {
-      "definition_hash": "4bda06010d4167f29c171549b61ed54d48b04398eedb81b9c7000e7716846ae8",
+      "definition_hash": "b138778265d738df32e015ec51e8218b9b6517785952106f0c0ad0a263be6bbb",
       "gates_passed": [
         "A",
         "B",

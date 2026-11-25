@@ -720,7 +720,8 @@ def test_kontakte_aus_crm_core_nur_ueber_den_kunden_des_mandanten(engine, monkey
                        "(:a, :ha, :na, 'Hof A'), (:b, :hb, :nb, 'Hof B')"),
                   {"a": eigener, "ha": HAUS_A, "na": f"K-{eigener[:6]}", "b": fremder, "hb": HAUS_B,
                    "nb": f"K-{fremder[:6]}"})
-    kontakte = {k: crm_core_client.CRMCoreContact(id=k, customer_id=kunde, first_name="Max", last_name=k)
+    kontakte = {k: crm_core_client.CRMCoreContact(
+        id=k, customer_id=kunde, first_name="Max", last_name=k, job_title="Einkauf")
                 for k, kunde in (("k-eigen", eigener), ("k-fremd", fremder))}
     geloescht: list[str] = []
 
@@ -741,7 +742,9 @@ def test_kontakte_aus_crm_core_nur_ueber_den_kunden_des_mandanten(engine, monkey
     antwort = client.get("/api/v1/crm/contacts/", headers=kopf).json()
     assert [k["id"] for k in antwort["data"]] == ["k-eigen"] and antwort["total"] == 1
     assert client.get("/api/v1/crm/contacts/k-fremd", headers=kopf).status_code == 404
-    assert client.get("/api/v1/crm/contacts/k-eigen", headers=kopf).status_code == 200
+    detail = client.get("/api/v1/crm/contacts/k-eigen", headers=kopf)
+    assert detail.status_code == 200
+    assert detail.json()["data"]["position"] == "Einkauf"
     assert client.delete("/api/v1/crm/contacts/k-fremd", headers=kopf).status_code == 404
     assert geloescht == []
 

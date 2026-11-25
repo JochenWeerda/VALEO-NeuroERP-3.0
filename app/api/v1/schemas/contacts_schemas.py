@@ -13,3 +13,21 @@ from pydantic import ConfigDict
 class ContactsOut(BaseSchema):
     """Response schema for contacts endpoints."""
     model_config = ConfigDict(extra="allow")
+
+
+class ContactDetail(BaseSchema):
+    id: str
+    name: str
+    company: str
+    email: str
+    phone: str
+    type: str
+    address: None
+    notes: str | None
+    position: str | None
+    createdAt: str
+    updatedAt: str
+
+
+class ContactDetailOut(BaseSchema):
+    data: ContactDetail
