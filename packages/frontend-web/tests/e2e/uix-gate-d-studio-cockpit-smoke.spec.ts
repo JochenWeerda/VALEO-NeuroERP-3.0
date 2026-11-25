@@ -16,6 +16,18 @@ type CockpitCase = {
   title: string
   listEndpoint?: string
   overviewEndpoint?: string
+  /** Specialized workbench contract — mounts Fach-Surface inside native-cockpit. */
+  specializedType?:
+    | 'pricing_workbench'
+    | 'fleet_workbench'
+    | 'lager_workbench'
+    | 'agrar_workbench'
+    | 'finance_workbench'
+    | 'feed_workbench'
+    | 'admin_workbench'
+  specializedFields?: Array<{ key: string; label: string }>
+  /** ARIA tablist name inside the specialized surface (Studio Tabs-Invariante). */
+  specializedTablist?: string
 }
 
 const COCKPIT_CASES: CockpitCase[] = [
@@ -49,6 +61,12 @@ const COCKPIT_CASES: CockpitCase[] = [
     screenId: 'lager/materialfluss',
     testId: 'screen-lager/materialfluss',
     title: 'Materialfluss',
+    specializedType: 'lager_workbench',
+    specializedFields: [
+      { key: 'warehouse_id', label: 'Lager' },
+      { key: 'node_count', label: 'Knoten' },
+      { key: 'edge_count', label: 'Kanten' },
+    ],
   },
   {
     label: 'konditionen/konditionssystem',
@@ -56,6 +74,13 @@ const COCKPIT_CASES: CockpitCase[] = [
     screenId: 'konditionen/konditionssystem',
     testId: 'screen-konditionen/konditionssystem',
     title: 'Konditionssystem',
+    specializedType: 'pricing_workbench',
+    specializedFields: [
+      { key: 'preisliste_count', label: 'Preislisten' },
+      { key: 'rabattgruppe_count', label: 'Rabattgruppen' },
+      { key: 'individualpreis_count', label: 'Individualpreise' },
+    ],
+    specializedTablist: 'Konditionssystem',
   },
   {
     label: 'fuhrpark/fahrzeug-vertiefung',
@@ -63,6 +88,14 @@ const COCKPIT_CASES: CockpitCase[] = [
     screenId: 'fuhrpark/fahrzeug-vertiefung',
     testId: 'screen-fuhrpark/fahrzeug-vertiefung',
     title: 'Fahrzeug-Vertiefung',
+    specializedType: 'fleet_workbench',
+    specializedFields: [
+      { key: 'fahrzeug_id', label: 'Fahrzeug' },
+      { key: 'status', label: 'Status' },
+      { key: 'schaden_offen', label: 'Offene Schäden' },
+      { key: 'bussgeld_offen', label: 'Offene Bußgelder' },
+    ],
+    specializedTablist: 'Fahrzeug-Vertiefung',
   },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
@@ -86,6 +119,12 @@ function maskPath(screenId: string): string {
 }
 
 function minimalCockpitDefinition(c: CockpitCase) {
+  const contractFields = (c.specializedFields ?? []).map((field) => ({
+    key: field.key,
+    label: field.label,
+    type: 'number' as const,
+    readOnly: true,
+  }))
   return {
     schemaVersion: 1,
     id: c.screenId,
@@ -96,6 +135,7 @@ function minimalCockpitDefinition(c: CockpitCase) {
     fields: [
       { key: 'label', label: 'Name', type: 'text', readOnly: true },
       { key: 'status', label: 'Status', type: 'text', readOnly: true },
+      ...contractFields,
     ],
     dataSources: [
       ...(c.overviewEndpoint
@@ -148,6 +188,14 @@ function minimalCockpitDefinition(c: CockpitCase) {
       lookupMinChars: 2,
     },
     noWorkflowReason: 'Gate-D-Smoke ohne Beleg-Lebenszyklus.',
+    ...(c.specializedType
+      ? {
+          specialized: {
+            type: c.specializedType,
+            id: c.screenId,
+          },
+        }
+      : {}),
   }
 }
 
@@ -164,7 +212,7 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
   })
 
   const overviewPath = c.overviewEndpoint ?? `/api/v1/masks/${encoded}/overview`
-  await page.route(`**${overviewPath}`, async (route) => {
+  await page.route(new RegExp(`${overviewPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\?.*)?$`), async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -173,13 +221,34 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
   })
 
   const listPath = c.listEndpoint ?? `/api/v1/masks/${encoded}/items`
-  await page.route(`**${listPath}`, async (route) => {
+  await page.route(new RegExp(`${listPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\?.*)?$`), async (route) => {
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([{ id: 'smoke-1', label: c.title, status: 'ok' }]),
     })
   })
+
+  // Overlay ohne Backend — leeres Overlay, kein Crash in der Runtime.
+  await page.route(new RegExp(`/api/v1/ux/overlays/${c.screenId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/json', body: 'null' })
+  })
+
+  // Specialized-Surface-Fetches: Arrays (nicht {items}), sonst crasht z. B. Konditionen-Map.
+  if (c.specializedType === 'pricing_workbench') {
+    await page.route(/\/api\/v1\/price-lists\/?(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+  }
+  if (c.specializedType === 'lager_workbench') {
+    await page.route(/\/api\/v1\/inventory\/warehouses(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [], total: 0 }),
+      })
+    })
+  }
 }
 
 async function applyTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
@@ -219,6 +288,14 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
         await expect(page.getByRole('heading', { name: c.title }).first()).toBeVisible({
           timeout: 30_000,
         })
+
+        if (c.specializedTablist) {
+          await expect(page.getByRole('tablist', { name: c.specializedTablist })).toBeVisible({
+            timeout: 30_000,
+          })
+        } else if (c.specializedType === 'lager_workbench') {
+          await expect(page.getByText('Hinweis Prototyp')).toBeVisible({ timeout: 30_000 })
+        }
 
         await page.screenshot({
           path: `test-results/gate-d-${c.screenId.replace(/\//g, '_')}-${theme}.png`,
