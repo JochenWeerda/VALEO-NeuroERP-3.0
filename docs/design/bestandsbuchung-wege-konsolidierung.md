@@ -73,3 +73,10 @@ mit eigener Silobestandsfuehrung), ist je Weg zu pruefen - nicht pauschal anzune
    Kompatibilitaet).
 4. LVS 2 "buchend": Belegweg erzeugt Lagerauftrag statt Buchung; Lagerplatzbestaetigung bucht mit dem
    Belegschluessel.
+
+## 5. Offene Doppelfuehrung (Stand 25.11.2026)
+
+- **Futterkette:** Der Komponentenbestand `verfuegbar_t` am Einzelfuttermittel fuehrt und wird vor der Freigabe
+  geprueft; das Bestandsjournal spiegelt ihn. Die Futterbuchung laeuft deshalb mit
+  `unterdeckung_pruefen=False` - das Journal darf dort negativ werden und zeigt die Luecke. Ziel: eine Fuehrung
+  (Journal), `verfuegbar_t` als Ableitung; danach die Pruefung einschalten.
