@@ -847,8 +847,8 @@ def test_postfach_und_geo_kommen_aus_dem_migrierten_stamm(client, kunde) -> None
             )
 
 
-def test_ein_reiner_bestandskunde_oeffnet_die_akte(client, kunde) -> None:
-    """public.kunden fuehrt name1 und tel. Daraus wird die Akte, auch ohne CRM-Satz."""
+def test_ein_reiner_bestandskunde_ohne_mandant_ist_404(client, kunde) -> None:
+    """public.kunden ohne Partner-/Customers-Bezug gehoert keinem Mandanten (M4-CR-P0)."""
     from sqlalchemy import create_engine, text
 
     nummer = f"KD-{uuid.uuid4().hex[:6].upper()}"
@@ -865,12 +865,7 @@ def test_ein_reiner_bestandskunde_oeffnet_die_akte(client, kunde) -> None:
         stamm = client.get(
             f"/api/v1/crm/customers/{nummer}", headers=kopf(kunde["mandant"])
         )
-        assert stamm.status_code == 200, stamm.text
-        daten = stamm.json()
-        assert daten["firma"] == "Hof Altbestand"
-        assert daten["kunden_nr"] == nummer
-        assert daten["strasse"] == "Dorfstr. 4"
-        assert daten["telefon"] == "05841-100"
+        assert stamm.status_code == 404, stamm.text
     finally:
         with engine.begin() as verbindung:
             verbindung.execute(

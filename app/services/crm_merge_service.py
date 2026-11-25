@@ -41,12 +41,9 @@ class CrmMergeService:
         self.tenant_id = tenant_id
 
     def _kunde(self, nr: str) -> Optional[dict]:
-        r = self.db.execute(
-            text("SELECT kunden_nr, name1, plz, ort, COALESCE(geloescht,false) AS geloescht, merged_into "
-                 "FROM public.kunden WHERE kunden_nr = :nr"),
-            {"nr": nr},
-        ).mappings().first()
-        return dict(r) if r else None
+        from app.core.public_kunden_mandant import public_kunde_im_mandanten
+
+        return public_kunde_im_mandanten(db=self.db, kunden_nr=nr, tenant_id=self.tenant_id)
 
     def _count(self, table: str, nr: str) -> int:
         try:
