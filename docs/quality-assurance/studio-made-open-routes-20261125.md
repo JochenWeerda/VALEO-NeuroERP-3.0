@@ -291,6 +291,13 @@ Inventar nach 28b: Routen-`hand_built` **0** (Dlg*/Charts bleiben Nicht-Routen-M
 
 Nav-`preferredPath` ohne Route-Inventory: **0** (ausser `/` als leerer Pfad).
 
+### Batch 31 — Gate E Ablöse-Aliase
+
+Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdrahtete Kanäle
+(`finance/bankkonto`, `crm/customer-360`, `beleg-liste/sales-order`, `zertifikate/liste`).
+Verifier: **E 829/829**. Gate C weiter 23× `endpoint_nicht_in_openapi` (kanonisches
+`docs/schnittstellen/openapi.json` Drift; Regen braucht `prometheus_client` / `generate_openapi.py`).
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

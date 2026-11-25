@@ -59,6 +59,12 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "agrar/feldbuch-massnahmen-liste": "agrar/feldbuch/massnahmen",
     "agrar/saatzucht-partien-liste": "agrar/saatzucht",
     "finance/payments": "finance/payment-matching-liste",
+    # Ablösung: Alt-Screen-IDs → bereits runtime_wired Kanäle (Batch 31 / Studio-Made Gate E)
+    "finance/bank-stamm": "finance/bankkonto",
+    "verkauf/kunde": "crm/customer-360",
+    "verkauf/kunden-stamm": "crm/customer-360",
+    "verkauf/auftraege/neu": "beleg-liste/sales-order",
+    "zertifikate/neu": "zertifikate/liste",
 }
 
 
