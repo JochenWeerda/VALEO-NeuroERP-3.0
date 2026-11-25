@@ -1,4 +1,5 @@
 import { type JSX } from 'react'
+import { CHART_NEGATIVE, CHART_POSITIVE } from '@/components/charts/chart-palette'
 
 interface FinancialCardSparklineProps {
   sparkline: Array<{ period: string; value: number }>
@@ -25,7 +26,7 @@ export default function FinancialCardSparkline({ sparkline, deltaPositive }: Fin
     <svg viewBox={`0 0 ${width} ${height}`} className="h-full w-full overflow-visible">
       <polyline
         fill="none"
-        stroke={deltaPositive ? '#0EA870' : '#D94A66'}
+        stroke={deltaPositive ? CHART_POSITIVE : CHART_NEGATIVE}
         strokeWidth="2.5"
         points={points}
         strokeLinejoin="round"

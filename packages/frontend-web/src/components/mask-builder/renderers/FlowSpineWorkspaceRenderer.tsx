@@ -212,9 +212,9 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
     return (
       <PageSurface
         data-page-surface={`flow-spine-${processKey}`}
-        className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+        className="bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--card)))]"
       >
-        <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0">
+        <PageSection className="overflow-hidden border-border bg-card/70 p-0">
           {/* Header skeleton */}
           <div className="flex h-16 items-center justify-between border-b border-white/5 px-5 gap-4">
             <div className="h-4 w-48 rounded-full bg-white/10 animate-pulse" />
@@ -311,9 +311,9 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
   return (
     <PageSurface
       data-page-surface={`flow-spine-${processKey}`}
-      className="bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.12),transparent_28%),linear-gradient(180deg,#08101f,#0d1528)]"
+      className="bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--card)))]"
     >
-      <PageSection className="overflow-hidden border-white/10 bg-slate-950/70 p-0 shadow-2xl shadow-indigo-950/20">
+      <PageSection className="overflow-hidden border-border bg-card/70 p-0 shadow-sm">
         <header className="flex h-16 items-center justify-between border-b border-white/5 px-5">
           <div className="flex items-center gap-4">
             <div className="text-sm font-semibold tracking-wide text-slate-100">{workspace.breadcrumb[0]}</div>

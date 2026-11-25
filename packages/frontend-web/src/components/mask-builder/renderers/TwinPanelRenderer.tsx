@@ -46,7 +46,7 @@ export const TwinPanelRenderer = memo(function TwinPanelRenderer({
       >
         <defs>
           <pattern id="twin-lock-hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <line x1="0" y1="0" x2="0" y2="6" stroke="#64748b" strokeWidth="1.5" />
+            <line x1="0" y1="0" x2="0" y2="6" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" />
           </pattern>
         </defs>
         {plan.cells.map((cell) => {
