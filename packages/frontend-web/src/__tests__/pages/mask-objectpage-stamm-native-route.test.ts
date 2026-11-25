@@ -58,6 +58,7 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     { file: 'agribusiness/field-service-task-neu.tsx', screenId: 'agribusiness/field-service-tasks/neu', kind: 'native' },
     { file: 'personal/schulung-neu.tsx', screenId: 'personal/schulung-neu', kind: 'native' },
     { file: 'agrar/rohwarengruppen.tsx', screenId: 'agrar/rohwarengruppen', kind: 'native' },
+    { file: 'agrar/vermehrungsvertraege.tsx', screenId: 'agrar/vermehrungsvertraege', kind: 'native' },
   ]
 
   it('CRM-Kunden- und Lieferanten-Listen laufen ueber NativeListPage', () => {
@@ -88,9 +89,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
   })
 
-  it('alle 38 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
+  it('alle 39 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
     const routeTree = readFileSync(resolve(__dirname, '../../app/routing/route-tree.gen.tsx'), 'utf8')
-    expect(migrated).toHaveLength(38)
+    expect(migrated).toHaveLength(39)
     for (const { file } of migrated) {
       expect(routeTree).toContain(`renderPage("@/pages/${file.replace(/\.tsx$/, '')}")`)
     }

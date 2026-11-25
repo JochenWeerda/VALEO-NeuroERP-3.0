@@ -3019,6 +3019,51 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_agrar_vermehrungsvertraege_screen_definition() -> dict[str, Any]:
+    return build_stamm_object_page(
+        screen_id="agrar/vermehrungsvertraege",
+        domain="agrar",
+        title="Vermehrungsvertrag anlegen",
+        subtitle="agrar",
+        identity_field="id",
+        data_sources=[stamm_entity_source("/api/v1/saatzucht/vermehrungsvertraege/{entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "id", "label": "ID", "type": "text"},
+            {"key": "vertrag_nr", "label": "Vertrags-Nr.", "type": "text"},
+            {"key": "erntejahr", "label": "Erntejahr", "type": "number"},
+            {"key": "vermehrer_kunden_nr", "label": "Vermehrer", "type": "text"},
+            {"key": "sorte_bezeichnung", "label": "Sorte", "type": "text"},
+            {"key": "status", "label": "Status", "type": "text"},
+        ])],
+        edit_permission="agrar.write",
+        creation={
+            "endpoint": "/api/v1/saatzucht/vermehrungsvertraege",
+            "permission": "agrar.vermehrungsvertrag.create",
+            "detailRoute": "/agrar/vermehrungsvertraege/{entity_id}",
+            "responseIdKey": "vertrag_nr",
+            "fields": [
+                {"key": "vertrag_nr", "label": "Vertrags-Nr.", "type": "text", "required": True},
+                {"key": "erntejahr", "label": "Erntejahr", "type": "number", "required": True},
+                {"key": "vermehrer_kunden_nr", "label": "Vermehrer-Kunden-Nr.", "type": "text", "required": True},
+                {"key": "sorte_nr", "label": "Sorte-Nr.", "type": "text"},
+                {"key": "sorte_bezeichnung", "label": "Sorte", "type": "text"},
+                {"key": "kategorie", "label": "Kategorie", "type": "text"},
+                {"key": "vertragsart", "label": "Vertragsart", "type": "text"},
+                {"key": "vertrags_menge_t", "label": "Menge t", "type": "number"},
+                {"key": "anbauflaeche_ha", "label": "Flaeche ha", "type": "number"},
+                {"key": "lwk_anerkennungsstelle", "label": "LWK-Stelle", "type": "text"},
+                {"key": "vmkz", "label": "VMKZ", "type": "text"},
+                {"key": "registriernummer", "label": "Registriernummer", "type": "text"},
+                {"key": "bemerkung", "label": "Bemerkung", "type": "textarea"},
+            ],
+        },
+        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        business_purpose="Vermehrungsvertrag als Stammblatt pflegen.",
+        example_prompts=["Oeffne Vermehrungsvertraege.", "Lege einen Vermehrungsvertrag an."],
+        test_id="agrar-vermehrungsvertraege",
+    )
+
+
 def build_agrar_rohwarengruppen_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="agrar/rohwarengruppen",
@@ -3109,6 +3154,7 @@ def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "agribusiness/field-service-tasks/neu": build_agribusiness_field_service_tasks_neu_screen_definition,
     "agrar/rohwarengruppen": build_agrar_rohwarengruppen_screen_definition,
+    "agrar/vermehrungsvertraege": build_agrar_vermehrungsvertraege_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,

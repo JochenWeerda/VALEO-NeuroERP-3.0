@@ -39,9 +39,18 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     ) {
       return roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN') || roles.has('manager')
     }
-    // Agrar Saatgut/Duenger/Rohwarengruppe Create mirrors SCHREIBEN["AGRAR"] / SCHREIBEN["LAGER"] for Rohware.
+    // Agrar Saatgut/Duenger/Rohwarengruppe/Vermehrung Create mirrors SCHREIBEN["AGRAR"] / LAGER for Rohware.
     if (permission.startsWith('agrar.rohwarengruppe.')) {
       return roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN') || roles.has('manager')
+    }
+    if (permission.startsWith('agrar.vermehrungsvertrag.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
+        || roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
     }
     if (permission.startsWith('agrar.saatgut.') || permission.startsWith('agrar.duenger.')) {
       return (

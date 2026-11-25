@@ -11,9 +11,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1033 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1035 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
-| legacy_wrapper (laedt weiter die Altoberflaeche) | 35 |
+| legacy_wrapper (laedt weiter die Altoberflaeche) | 33 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
 | hand_built (weder Runtime noch ObjectPage/ListReport) | 73 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
@@ -23,7 +23,7 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 872 |
+| runtime_wired | 874 |
 | legacy_mask_pattern | 16 |
 | hand_built | 133 |
 
@@ -39,7 +39,7 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|---------|---------------------|
 | handgebaute Routen | 442 | 73 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1033 |
+| Runtime-verdrahtet | — | 1035 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -191,6 +191,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/qualitaet/laborwerte` ← `src/pages/agrar/qualitaet/laborwerte.tsx`
 - `agrar/qualitaet/mykotoxine` ← `src/pages/agrar/qualitaet/mykotoxine.tsx`
 - `agrar/rechnungen-erstellen` ← `src/pages/agrar/rechnungen-erstellen.tsx`
+- `agrar/rohwarengruppen` ← `src/pages/agrar/rohwarengruppen.tsx`
 - `agrar/saatgut` ← `src/pages/agrar/saatgut-liste.tsx`
 - `agrar/saatgut-liste` ← `src/pages/agrar/saatgut-liste.tsx`
 - `agrar/saatgut-stamm` ← `src/pages/agrar/saatgut-stamm.tsx`
@@ -216,6 +217,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/sorten-vermehrung` ← `src/pages/agrar/sorten-vermehrung.tsx`
 - `agrar/trocknungsregeln` ← `src/pages/agrar/trocknungsregeln.tsx`
 - `agrar/umwelt/nitrat` ← `src/pages/agrar/umwelt/nitrat.tsx`
+- `agrar/vermehrungsvertraege` ← `src/pages/agrar/vermehrungsvertraege.tsx`
 - `agrar/vertrag-kontingente` ← `src/pages/agrar/vertrag-kontingente.tsx`
 - `agrar/wetter/prognose` ← `src/pages/agrar/wetter/prognose.tsx`
 - `agrar/wetterwarnung` ← `src/pages/agrar/wetterwarnung.tsx`
@@ -1132,9 +1134,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
 - `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
-- `agrar/rohwarengruppen` ← `src/pages/agrar/rohwarengruppen.tsx`
 - `agrar/sammelabrechnung` ← `src/pages/agrar/sammelabrechnung.tsx`
-- `agrar/vermehrungsvertraege` ← `src/pages/agrar/vermehrungsvertraege.tsx`
 - `agrar/zinsabrechnung` ← `src/pages/agrar/zinsabrechnung.tsx`
 - `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
@@ -1155,3 +1155,5 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `einkauf/lieferschein-erfassen` ← `src/pages/einkauf/lieferschein-erfassen.tsx`
 - `einkauf/lieferschein-erfassung` ← `src/pages/einkauf/lieferschein-erfassung.tsx`
 - `einkauf/rechnung-eingang-erfassung` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
+- `einkauf/rechnungen/:id` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
+- `einkauf/rechnungseingaenge/:id` ← `src/pages/einkauf/rechnungseingang.tsx`
