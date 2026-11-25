@@ -248,17 +248,27 @@ Inventar nach Batch 25: Admin-Suite Rest runtime_wired; verbleibende schwere `ha
 
 Inventar nach Batch 26: Schlagkartei und Milchvieh-Karte runtime_wired; verbleibend u. a. materialfluss, abrechnung, Ernte-Erfassung.
 
+## Siebenundzwanzigste Hebung (Batch 27)
+
+| Maske | Nachher |
+|-------|---------|
+| `agrar/ernte-annahme-erfassung` | `agrar_workbench`: Legacy-Surface + POST/PUT/calculate/release/DELETE `/agrar/harvest-acceptance` |
+| `annahme/abrechnung` | `agrar_workbench`: Legacy-Surface + Settlement preview/create/post-fibu/freigabe/cancel |
+| `lager/materialfluss` | neuer Typ `lager_workbench`: ReactFlow-Surface + WMS-Agri nodes/edges/transfer/lot-link |
+
+Inventar nach Batch 27: die drei schweren Prioritaetsmasken runtime_wired. Verbleibend u. a. duenne Admin-Ops-Seiten und Dialog-Hilfsmodule; Gate D Browser.
+
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung) — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
+- Restliche duenne `hand_built` (Admin-Konsolen, Dialoge, Report-Charts) — nur mit Paritaet wo Fachmaske
 
 ## Tests
 
 ```bash
 python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_batch23.py \
   tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
-  tests/test_studio_parity_batch26.py \
+  tests/test_studio_parity_batch26.py tests/test_studio_parity_batch27.py \
   tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
   -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
@@ -266,4 +276,5 @@ cd packages/frontend-web && npx vitest run \
   src/__tests__/bank-account-form-contract.test.tsx \
   src/__tests__/components/mask-builder/screen-permissions.test.ts
 ```
+
 

@@ -98,11 +98,24 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('admin.admin_suite.')) {
       return roles.has('ADMIN') || roles.has('manager')
     }
-    // Agrar-Arbeitsplaetze (Schlagkartei / Milchvieh-Karte).
-    if (permission.startsWith('agrar.schlagkartei.') || permission.startsWith('agrar.milchvieh.')) {
+    // Agrar-Arbeitsplaetze (Schlagkartei / Milchvieh / Ernte / Settlement).
+    if (
+      permission.startsWith('agrar.schlagkartei.')
+      || permission.startsWith('agrar.milchvieh.')
+      || permission.startsWith('agrar.ernte_annahme.')
+      || permission.startsWith('agrar.settlement.')
+    ) {
       return (
         roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN') || roles.has('AGRAR_LESEN')
         || roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN')
+        || roles.has('manager') || roles.has('ADMIN')
+      )
+    }
+    // Lager Materialfluss.
+    if (permission.startsWith('lager.materialfluss.')) {
+      return (
+        roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN') || roles.has('LAGER_LESEN')
+        || roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
         || roles.has('manager') || roles.has('ADMIN')
       )
     }

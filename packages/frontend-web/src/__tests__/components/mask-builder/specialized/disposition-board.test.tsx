@@ -176,7 +176,7 @@ describe('disposition_board specialized component', () => {
 
   it('registriert disposition_board neben den Runtime46-Werkbaenken', () => {
     expect(registeredSpecializedTypes()).toEqual([
-      'disposition_board', 'intake', 'weighing', 'finance_workbench', 'admin_workbench', 'feed_workbench', 'agrar_workbench',
+      'disposition_board', 'intake', 'weighing', 'finance_workbench', 'admin_workbench', 'feed_workbench', 'agrar_workbench', 'lager_workbench',
     ])
     expect(validateScreenDefinition(dispositionBoardScreen)).toEqual([])
     expect(dispositionBoardScreen.specialized?.type).toBe('disposition_board')

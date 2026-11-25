@@ -764,6 +764,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "agrar/ernte-annahme-erfassung": {
+      "definition_hash": "8774dd451e075984a573cf9d6a71a29ba7f84217435692dbf8b05b5abe76392f",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "agrar/ernte-kampagne-erfassung": {
       "definition_hash": "d7034198e4c40d602deaaec247fd0c539c784b169147a53723f964dc4499c48b",
       "gates_passed": [
@@ -1919,6 +1930,17 @@
     },
     "analysis/what-if-simulator": {
       "definition_hash": "dc35b3a2140e44c9dcf1bfa40260a2cfca19424587f30900c51e490b77b6f7b5",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "annahme/abrechnung": {
+      "definition_hash": "ddace9d980604d05e05441903a877efe99115846ff6569e75818343c10118f92",
       "gates_passed": [
         "A",
         "B",
@@ -6365,6 +6387,17 @@
     },
     "lager/massebilanz": {
       "definition_hash": "68c52c9d780490558ef42979c496c00a900b45d33a0afdda352b9459725c475c",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "lager/materialfluss": {
+      "definition_hash": "f0902220deb12f0dd24700253cc1b7add7859beacf5092f326402eccd7627f37",
       "gates_passed": [
         "A",
         "B",
