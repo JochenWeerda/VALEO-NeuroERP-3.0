@@ -544,7 +544,7 @@ function SchlagkarteiFuerKunde({ kunde }: { kunde: PortalKundenkonto }) {
 
       {/* Tabs: Schläge / Maßnahmen */}
       <Tabs defaultValue="schlaege">
-        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+        <TabsList aria-label="Schlagkartei" className="h-auto min-h-11 w-full flex-wrap justify-start">
           <TabsTrigger value="schlaege" className="min-h-11">Schläge ({schlaege?.count ?? 0})</TabsTrigger>
           <TabsTrigger value="massnahmen" className="min-h-11">Maßnahmen ({massnahmen?.count ?? 0})</TabsTrigger>
         </TabsList>

@@ -41,7 +41,7 @@ export default function MischfutterStammPage(): JSX.Element {
       </div>
 
       <Tabs defaultValue="allgemein">
-        <TabsList>
+        <TabsList aria-label="Mischfuttermittel">
           <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
           <TabsTrigger value="rezeptur">Rezeptur</TabsTrigger>
           <TabsTrigger value="naehrwerte">Nährwerte</TabsTrigger>

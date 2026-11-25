@@ -97,6 +97,37 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedTablist: 'Fahrzeug-Vertiefung',
   },
+  {
+    label: 'agrar/kunden-schlagkartei',
+    path: '/agrar/kunden-schlagkartei',
+    screenId: 'agrar/kunden-schlagkartei',
+    testId: 'screen-agrar/kunden-schlagkartei',
+    title: 'Kundenschlagkartei',
+    specializedType: 'agrar_workbench',
+    specializedFields: [
+      { key: 'kunden_nr', label: 'Kunde' },
+      { key: 'schlag_count', label: 'Schläge' },
+      { key: 'massnahme_count', label: 'Maßnahmen' },
+      { key: 'gesamt_flaeche_ha', label: 'Fläche ha' },
+    ],
+    specializedTablist: 'Schlagkartei',
+  },
+  {
+    label: 'agrar/ernte-annahme-erfassung',
+    path: '/agrar/ernte-annahme-erfassung',
+    screenId: 'agrar/ernte-annahme-erfassung',
+    testId: 'screen-agrar/ernte-annahme-erfassung',
+    title: 'Ernte-Annahme-Erfassung',
+    specializedType: 'agrar_workbench',
+    specializedFields: [
+      { key: 'acceptance_number', label: 'Annahmenummer' },
+      { key: 'customer_id', label: 'Kunde' },
+      { key: 'release_status', label: 'Freigabe' },
+      { key: 'delivery_date', label: 'Lieferdatum' },
+    ],
+    // Ohne Annahme-ID erscheint oft die Listen-/Ansichts-Registerleiste zuerst.
+    specializedTablist: 'Annahme-Ansichten',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -246,6 +277,38 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ items: [], total: 0 }),
+      })
+    })
+  }
+  if (c.screenId === 'agrar/kunden-schlagkartei') {
+    // PortalKontoGate: ein Konto → Auto-Wahl → Tabs der Specialized-Surface.
+    await page.route(/\/api\/v1\/portal\/kundenkonten(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify([
+          {
+            customer_id: 'smoke-kunde-1',
+            customer_number: 'K-1',
+            name: 'Smoke-Hof',
+            rolle: 'betreiber',
+            rechte: ['*'],
+          },
+        ]),
+      })
+    })
+    await page.route(/\/(?:api\/v1\/)?innendienst\/kunden\/[^/]+\/schlaege(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ schlaege: [], count: 0 }),
+      })
+    })
+    await page.route(/\/(?:api\/v1\/)?innendienst\/kunden\/[^/]+\/massnahmen(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ massnahmen: [], count: 0 }),
       })
     })
   }

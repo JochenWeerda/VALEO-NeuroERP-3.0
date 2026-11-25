@@ -1595,7 +1595,7 @@ Suchen
           {/* ANLIEFERUNG / ABRECHNUNG Tabs */}
           <Card className="p-4">
             <Tabs value={deliveryTab} onValueChange={(v) => setDeliveryTab(v as typeof deliveryTab)}>
-              <TabsList className="grid w-full grid-cols-2 h-auto">
+              <TabsList aria-label="Annahme-Ansichten" className="grid w-full grid-cols-2 h-auto">
                 <TabsTrigger value="anlieferung" className="min-h-11 text-xs">ANLIEFERUNG</TabsTrigger>
                 <TabsTrigger value="abrechnung" className="min-h-11 text-xs">ABRECHNUNG</TabsTrigger>
               </TabsList>

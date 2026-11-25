@@ -250,7 +250,7 @@ export default function AnfrageDetailPage(): JSX.Element {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
+        <TabsList aria-label="Serviceauftrag">
           <TabsTrigger value="uebersicht">Uebersicht</TabsTrigger>
           <TabsTrigger value="aktivitaeten">Aktivitaeten</TabsTrigger>
           <TabsTrigger value="abschluss">Abschluss</TabsTrigger>

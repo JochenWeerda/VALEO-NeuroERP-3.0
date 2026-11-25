@@ -616,7 +616,7 @@ export default function RabattgruppenPage() {
         </p>
       </div>
       <Tabs defaultValue="gruppen">
-        <TabsList>
+        <TabsList aria-label="Rabattgruppen">
           <TabsTrigger value="gruppen">Rabattgruppen [RAG]</TabsTrigger>
           <TabsTrigger value="klassen">Rabattklassen [RAK]</TabsTrigger>
           <TabsTrigger value="saetze">Rabattsätze</TabsTrigger>

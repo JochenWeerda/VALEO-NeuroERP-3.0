@@ -477,7 +477,7 @@ export default function VertreterstammPage() {
         </p>
       </div>
       <Tabs defaultValue="gruppen">
-        <TabsList>
+        <TabsList aria-label="Vertreterstamm">
           <TabsTrigger value="gruppen">Vertretergruppen [VGRP]</TabsTrigger>
           <TabsTrigger value="vertreter">Vertreter [VERT]</TabsTrigger>
         </TabsList>

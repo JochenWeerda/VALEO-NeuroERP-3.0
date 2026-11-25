@@ -146,7 +146,7 @@ export default function PSMStammPage(): JSX.Element {
       )}
 
       <Tabs defaultValue="allgemein">
-        <TabsList>
+        <TabsList aria-label="PSM-Stamm">
           <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
           <TabsTrigger value="zulassung">Zulassung</TabsTrigger>
           <TabsTrigger value="anwendung">Anwendung</TabsTrigger>

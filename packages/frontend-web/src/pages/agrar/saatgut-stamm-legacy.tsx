@@ -293,7 +293,7 @@ const SaatgutStammPage: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <Tabs defaultValue="allgemein" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList aria-label="Saatgutstamm" className="grid w-full grid-cols-4">
               <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
               <TabsTrigger value="zulassungen">Zulassungen</TabsTrigger>
               <TabsTrigger value="agronomie">Agronomie</TabsTrigger>

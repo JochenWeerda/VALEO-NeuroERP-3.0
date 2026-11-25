@@ -588,7 +588,7 @@ export default function ZuAbschlaggruppenPage() {
       </div>
 
       <Tabs defaultValue="gruppen">
-        <TabsList>
+        <TabsList aria-label="Zu-/Abschlaggruppen">
           <TabsTrigger value="gruppen">Gruppen [ZAGR]</TabsTrigger>
           <TabsTrigger value="klassen">Klassen [ZAKL]</TabsTrigger>
           <TabsTrigger value="konditionen">Konditionen [ZAK]</TabsTrigger>

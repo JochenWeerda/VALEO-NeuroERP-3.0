@@ -198,7 +198,7 @@ export default function ChargenStammPage(): JSX.Element {
       </div>
 
       <Tabs defaultValue="allgemein">
-        <TabsList>
+        <TabsList aria-label="Charge">
           <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
           <TabsTrigger value="qs">QS-Readiness</TabsTrigger>
           <TabsTrigger value="json">QS-JSON</TabsTrigger>

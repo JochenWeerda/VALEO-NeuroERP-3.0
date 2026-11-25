@@ -432,7 +432,7 @@ export default function MengeneinheitenPage() {
         </p>
       </div>
       <Tabs defaultValue="stamm">
-        <TabsList>
+        <TabsList aria-label="Mengeneinheiten">
           <TabsTrigger value="stamm">Einheiten-Stamm</TabsTrigger>
           <TabsTrigger value="gruppen">Einheitengruppen</TabsTrigger>
         </TabsList>

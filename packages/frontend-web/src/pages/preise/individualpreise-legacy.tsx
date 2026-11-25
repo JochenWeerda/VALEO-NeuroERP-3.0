@@ -320,7 +320,7 @@ export default function IndividualpreisePage() {
         Ablösungsplan: ADR „Führendes Preismodell".
       </Callout>
       <Tabs defaultValue="vk">
-        <TabsList>
+        <TabsList aria-label="Individualpreise">
           <TabsTrigger value="vk">VK-Preise</TabsTrigger>
           <TabsTrigger value="ek">EK-Preise</TabsTrigger>
         </TabsList>

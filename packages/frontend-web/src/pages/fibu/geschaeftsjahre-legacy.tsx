@@ -345,7 +345,7 @@ export default function GeschaeftsjahreePage() {
       </div>
 
       <Tabs defaultValue="jahre">
-        <TabsList>
+        <TabsList aria-label="Geschäftsjahre">
           <TabsTrigger value="jahre">Geschäftsjahre [JAHR]</TabsTrigger>
           <TabsTrigger value="perioden">Perioden</TabsTrigger>
         </TabsList>

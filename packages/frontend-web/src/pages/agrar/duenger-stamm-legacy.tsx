@@ -367,7 +367,7 @@ const DuengerStammPage: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <Tabs defaultValue="allgemein" className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList aria-label="Düngerstamm" className="grid w-full grid-cols-4">
               <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
               <TabsTrigger value="zusammensetzung">Zusammensetzung</TabsTrigger>
               <TabsTrigger value="zulassungen">Zulassungen</TabsTrigger>

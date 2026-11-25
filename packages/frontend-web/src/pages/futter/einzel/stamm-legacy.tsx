@@ -63,7 +63,7 @@ export default function EinzelfutterStammPage(): JSX.Element {
       </div>
 
       <Tabs defaultValue="allgemein">
-        <TabsList>
+        <TabsList aria-label="Einzelfuttermittel">
           <TabsTrigger value="allgemein">Allgemein</TabsTrigger>
           <TabsTrigger value="naehrwerte">Nährwerte</TabsTrigger>
           <TabsTrigger value="qs">QS-Attribute</TabsTrigger>

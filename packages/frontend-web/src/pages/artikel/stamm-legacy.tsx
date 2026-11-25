@@ -601,7 +601,7 @@ export default function ArtikelStammPage(): JSX.Element {
 
       {/* Main Tabs */}
       <Tabs defaultValue="stammdaten" className="w-full">
-        <TabsList className="flex flex-wrap">
+        <TabsList aria-label="Artikelstamm" className="flex flex-wrap">
           <TabsTrigger value="stammdaten">Stammdaten</TabsTrigger>
           <TabsTrigger value="gefahrgut">Gefahrgut</TabsTrigger>
           <TabsTrigger value="kennzeichnung">Kennzeichnung</TabsTrigger>

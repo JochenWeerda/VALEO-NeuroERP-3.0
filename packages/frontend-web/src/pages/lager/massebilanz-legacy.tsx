@@ -402,7 +402,7 @@ export default function MassebilanzPage() {
       </div>
 
       <Tabs defaultValue="bilanzen">
-        <TabsList>
+        <TabsList aria-label="Massebilanz">
           <TabsTrigger value="bilanzen">Massebilanzen</TabsTrigger>
           <TabsTrigger value="bewegungen">Bewegungen</TabsTrigger>
         </TabsList>

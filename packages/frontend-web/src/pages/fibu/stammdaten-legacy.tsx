@@ -717,7 +717,7 @@ export default function FibuStammdatenPage() {
         </p>
       </div>
       <Tabs defaultValue="zahlungsformulare">
-        <TabsList>
+        <TabsList aria-label="FiBu-Stammdaten">
           <TabsTrigger value="zahlungsformulare">Zahlungsformulare [FIZAF]</TabsTrigger>
           <TabsTrigger value="zinsgruppen">Zinsgruppen</TabsTrigger>
           <TabsTrigger value="leergutarten">Leergutarten</TabsTrigger>
