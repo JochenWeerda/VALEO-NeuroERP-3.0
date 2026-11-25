@@ -20,6 +20,7 @@ class DocflowItemOut(BaseModel):
     quantity: float
     unit: Optional[str] = None
     unit_price: float
+    price_unit_quantity: float = 1  # Preis je Preisbezugsmenge (z. B. 100 Liter)
     discount_percent: float
     tax_code: Optional[str] = None
     expense_account: Optional[str] = None
@@ -118,6 +119,10 @@ class DocflowLineInput(BaseModel):
     quantity: float = Field(default=0, ge=0)
     unit: Optional[str] = Field(default=None, max_length=20)
     unit_price: float = Field(default=0, ge=0)
+    # Preis gilt je Preisbezugsmenge (z. B. 140,00 EUR je 100 Liter -> 100). Standard 1: Preis je Mengeneinheit.
+    # Die Menge bleibt in ihrer Einheit; sie wird nicht in die Preiseinheit umgerechnet.
+    # float wie quantity/unit_price (JSON-tauglich bei model_dump); gerechnet wird in Decimal ueber str().
+    price_unit_quantity: float = Field(default=1, gt=0, allow_inf_nan=False)
     discount_percent: float = Field(default=0, ge=0, le=100)
     # Steuerschluessel des Mandanten (tax_keys.code). Mit ihm kommt der Satz vom Server; ein abweichend
     # mitgeschickter Satz wird abgelehnt. Ohne ihn gilt der Satz der Anfrage — gebucht wird so nicht.

@@ -5,6 +5,7 @@ from typing import Any
 
 from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
 
+from app.core.stamm_list_parent import build_stamm_list_screen
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
@@ -68,9 +69,23 @@ def build_admin_ai_approvals() -> dict[str, Any]:
         edit_permission="admin.ai-approvals.update", bearbeiten_endpoint=None)
 
 def build_admin_api_keys() -> dict[str, Any]:
-    return _batch13_stamm("admin/api-keys", domain="admin", title="Api keys",
-        entity_endpoint="/api/v1/admin/benutzer/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.api-keys.update", bearbeiten_endpoint=None)
+    return build_stamm_list_screen(
+        screen_id="admin/api-keys", domain="admin", title="API-Schlüssel",
+        subtitle="Schlüsselstatus im aktiven Mandanten",
+        endpoint="/api/v1/admin/api-keys", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "key_prefix", "label": "Präfix", "priority": "secondary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "priority": "primary"},
+            {"key": "expires_at", "label": "Gültig bis", "renderKind": "datetime", "priority": "secondary"},
+            {"key": "last_used_at", "label": "Zuletzt verwendet", "renderKind": "datetime", "priority": "tertiary"},
+        ],
+        actions=[], row_actions=[],
+        purpose="Status und Gültigkeit von API-Schlüsseln prüfen.",
+        prompts=["Welche Schlüssel sind bald abgelaufen?"],
+        no_workflow="Die Liste zeigt die vom Verwaltungsdienst gelieferten Schlüsselmetadaten.",
+    )
+
 
 def build_admin_backup_restore() -> dict[str, Any]:
     return _batch13_stamm("admin/backup-restore", domain="admin", title="Backup restore",
@@ -83,9 +98,64 @@ def build_admin_berechtigungen_matrix() -> dict[str, Any]:
         edit_permission="admin.berechtigungen-matrix.update", bearbeiten_endpoint=None)
 
 def build_admin_branches() -> dict[str, Any]:
-    return _batch13_stamm("admin/branches", domain="admin", title="Branches",
-        entity_endpoint="/api/v1/admin/branches/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.branches.update", bearbeiten_endpoint=None)
+    return {
+        "schemaVersion": 1,
+        "id": "admin/branches",
+        "domain": "admin",
+        "mode": "list",
+        "title": "Niederlassungen",
+        "adapter": {"type": "native", "sourceId": "admin/branches", "temporary": False},
+        "dataSources": [{"key": "branches", "endpoint": "/api/v1/admin/branches", "staleTimeMs": 15_000}],
+        "tables": [{
+            "key": "branches",
+            "label": "Niederlassungen",
+            "dataSourceKey": "branches",
+            "serverPagination": False,
+            "pageSize": 50,
+            "virtualized": True,
+            "rowHeight": 44,
+            "columns": [
+                {"key": "branch_number", "label": "Nummer", "numeric": True, "sortable": True, "width": 100},
+                {"key": "name", "label": "Niederlassung", "sortable": True, "filterable": True, "width": 280},
+                {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "width": 100},
+            ],
+            "rowActions": [{"key": "open", "label": "Details öffnen", "dangerLevel": "safe",
+                            "navigationRoute": "/admin/branches/{entity_id}"}],
+        }],
+        "layout": {"floorplan": "worklist", "density": "compact", "contextRail": "none", "tableProfile": "standard"},
+        "noWorkflowReason": "Die Niederlassungsliste zeigt den aktuellen Stammdatenstand.",
+    }
+
+def build_admin_branch_detail() -> dict[str, Any]:
+    screen_id = "admin/branches/detail"
+    return {
+        "schemaVersion": 1,
+        "id": screen_id,
+        "domain": "admin",
+        "mode": "detail",
+        "title": "Niederlassung",
+        "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
+        "identityField": "name",
+        "dataSources": [stamm_entity_source("/api/v1/admin/branches/{entity_id}")],
+        "tabs": [stamm_kopf_tab([
+            {"key": "branch_number", "label": "Nummer", "type": "number", "readOnly": True},
+            {"key": "name", "label": "Name", "type": "text", "readOnly": True},
+            {"key": "is_active", "label": "Aktiv", "type": "boolean", "readOnly": True},
+            {"key": "created_at", "label": "Angelegt am", "type": "datetime", "readOnly": True},
+            {"key": "updated_at", "label": "Geändert am", "type": "datetime", "readOnly": True},
+        ])],
+        "layout": {"floorplan": "objectPage", "density": "compact", "contextRail": "audit", "tableProfile": "standard"},
+        "actions": [{
+            "key": "bearbeiten", "label": "Umbenennen", "kind": "primary", "dangerLevel": "moderate",
+            "permission": "admin:all", "command": "admin.branch.rename.v1",
+            "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten", "method": "POST",
+            "inputFields": [{"key": "name", "label": "Name", "type": "text", "required": True}],
+            "inputPrefill": "entity", "requiresExpectedVersion": True, "requiresIdempotencyKey": True,
+            "auditReasonRequired": True, "forbiddenForAgents": True,
+        }],
+        "noWorkflowReason": "Die Ansicht zeigt den aktuellen Stand der ausgewählten Niederlassung.",
+    }
+
 
 def build_admin_command_monitor() -> dict[str, Any]:
     return _batch13_stamm("admin/command-monitor", domain="admin", title="Command monitor",
@@ -103,14 +173,37 @@ def build_admin_tankstelle_evb() -> dict[str, Any]:
         edit_permission="admin.tankstelle-evb.update", bearbeiten_endpoint=None)
 
 def build_admin_tenants() -> dict[str, Any]:
-    return _batch13_stamm("admin/tenants", domain="admin", title="Tenants",
-        entity_endpoint="/api/v1/tenants/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.tenants.update", bearbeiten_endpoint=None)
+    definition = build_stamm_list_screen(
+        screen_id="admin/tenants", domain="admin", title="Mandanten",
+        subtitle="Mandanten im berechtigten Verwaltungsbereich",
+        endpoint="/api/v1/tenants/", row_route=None, bundle="admin",
+        columns=[
+            {"key": "name", "label": "Mandant", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "domain", "label": "Domain", "sortable": True, "filterable": True, "priority": "secondary"},
+            {"key": "is_active", "label": "Aktiv", "renderKind": "boolean", "priority": "secondary"},
+        ],
+        actions=[], row_actions=[],
+        purpose="Die vom Mandantendienst erlaubten Mandanten anzeigen.",
+        prompts=["Welche Mandanten darf ich administrieren?"],
+        no_workflow="Die Liste zeigt den aktuellen Verwaltungsbereich.",
+    )
+    definition["listExperience"] = {
+        "searchFields": ["name", "domain"],
+        "aggregates": [],
+        "export": {
+            "filenamePrefix": "Mandanten_",
+            "delimiter": ";",
+            "columns": [{"key": column["key"], "label": column["label"]} for column in definition["tables"][0]["columns"]],
+        },
+    }
+    return definition
+
 
 def build_admin_users() -> dict[str, Any]:
-    return _batch13_stamm("admin/users", domain="admin", title="Users",
-        entity_endpoint="/api/v1/admin/benutzer/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.users.update", bearbeiten_endpoint=None)
+    from app.core.screen_definitions_listen import build_admin_benutzer_liste
+
+    return build_admin_benutzer_liste(screen_id="admin/users")
+
 
 def build_admin_workflow_editor() -> dict[str, Any]:
     return _batch13_stamm("admin/workflow-editor", domain="admin", title="Workflow editor",
@@ -500,6 +593,7 @@ BATCH13_SCREEN_BUILDERS: dict[str, Any] = {
     "admin/backup-restore": build_admin_backup_restore,
     "admin/berechtigungen-matrix": build_admin_berechtigungen_matrix,
     "admin/branches": build_admin_branches,
+    "admin/branches/detail": build_admin_branch_detail,
     "admin/command-monitor": build_admin_command_monitor,
     "admin/system-einstellungen": build_admin_system_einstellungen,
     "admin/tankstelle-evb": build_admin_tankstelle_evb,
@@ -582,6 +676,7 @@ BATCH13_ROUTEN: dict[str, str] = {
     "admin/backup-restore": "/admin/backup-restore",
     "admin/berechtigungen-matrix": "/admin/berechtigungen-matrix",
     "admin/branches": "/admin/branches",
+    "admin/branches/detail": "/admin/branches/:id",
     "admin/command-monitor": "/admin/command-monitor",
     "admin/system-einstellungen": "/admin/system-einstellungen",
     "admin/tankstelle-evb": "/admin/tankstelle-evb",

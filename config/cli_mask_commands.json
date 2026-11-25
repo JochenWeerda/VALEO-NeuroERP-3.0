@@ -5,6 +5,7 @@
   "mask:abrechnung/eb-lieferschein-kontrolle:resolve",
   "mask:abrechnung/eb-lieferschein-kontrolle:start_work",
   "mask:abrechnung/eb-lieferschein-kontrolle:waive",
+  "mask:admin/branches/detail:bearbeiten",
   "mask:admin/control-center:escalate",
   "mask:admin/control-center:plan",
   "mask:admin/control-center:resolve",
@@ -293,6 +294,7 @@
   "mask:einkauf/zahlungsbedingungen:bearbeiten",
   "mask:einkauf/zahlungsbedingungen:deaktivieren",
   "mask:einkauf/zahlungsbedingungen:neu",
+  "mask:fibu/abschluss-checklist-detail:saldenvortrag",
   "mask:finance/ar-open-item:mahnen",
   "mask:finance/bank-abgleich:import",
   "mask:finance/bank-abgleich:validate",
@@ -382,6 +384,6 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 963
+  "kein_endpunkt": 960
  }
 }

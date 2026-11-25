@@ -859,10 +859,10 @@ def build_schaeden_liste() -> dict[str, Any]:
     )
 
 
-def build_admin_benutzer_liste() -> dict[str, Any]:
+def build_admin_benutzer_liste(*, screen_id: str = "admin/benutzer-liste") -> dict[str, Any]:
     """Benutzer des Mandanten; Detail- und Anlage-Route zeigten die Liste selbst, deshalb ohne Links."""
     return _liste(
-        screen_id="admin/benutzer-liste", domain="admin", title="Benutzer", subtitle="Benutzer mit Rolle und letzter Anmeldung",
+        screen_id=screen_id, domain="admin", title="Benutzer", subtitle="Benutzer mit Rolle und letzter Anmeldung",
         endpoint="/api/v1/admin/benutzer", row_route=None, bundle="admin",
         columns=[
             {"key": "name", "label": "Name", "sortable": True, "filterable": True, "priority": "primary"},

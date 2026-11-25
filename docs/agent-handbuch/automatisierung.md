@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-25
 version: 3.0.0
 description: MCP-Tools, Domain-Events und Automatisierungsregeln für Agenten.
 ---
@@ -206,6 +206,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | Event-ID | Kanal | Quelle |
 |---|---|---|
 | `...` | outbox | `scripts/extract_events.py` |
+| `admin.branch.renamed` | outbox | `app/api/v1/endpoints/branches.py` |
 | `admin.number_range.configured` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.number_range.deactivated` | outbox | `app/api/v1/endpoints/number_ranges_kommandos.py` |
 | `admin.postfach.saved` | outbox | `app/api/v1/endpoints/mailkonto.py` |
@@ -244,8 +245,7 @@ Namenskonvention: `tenant.{tenantId}.<domäne>.<aggregat>.<aktion>`
 | `finance.tax_key.saved` | outbox | `app/api/v1/endpoints/tax_keys.py` |
 | `finance.wechselkurs.aktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
 | `finance.zahlungsbedingung.deaktiviert` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| `finance.zahlungsbedingung.updated` | outbox | `app/api/v1/endpoints/finance_stammdaten_kommandos.py` |
-| … | | 34 weitere |
+| … | | 35 weitere |
 
 ### System
 

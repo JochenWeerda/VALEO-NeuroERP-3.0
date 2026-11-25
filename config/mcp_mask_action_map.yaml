@@ -1,12 +1,12 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-19'
+generated_on: '2026-11-25'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 796
-    screens_with_actions: 403
+    actions: 797
+    screens_with_actions: 407
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -93,14 +93,14 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 315
-  mask_mutations_considered: 256
+  mask_actions_considered: 317
+  mask_mutations_considered: 258
   by_coverage:
-    blocked_human_only: 82
-    blocked_unreleased: 2
+    blocked_human_only: 84
+    blocked_unreleased: 129
     local_ui: 59
     mapped: 38
-    mapped_generic: 128
+    mapped_generic: 1
     mapped_propose_only: 1
     mapped_read: 1
     open_high: 4
@@ -112,9 +112,9 @@ mappings:
   label: Zuweisen
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/assign_me
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:abrechnung/eb-lieferschein-kontrolle:resolve
   mask: abrechnung/eb-lieferschein-kontrolle
   domain: finance
@@ -122,9 +122,9 @@ mappings:
   label: Erledigt
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/resolve
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:abrechnung/eb-lieferschein-kontrolle:start_work
   mask: abrechnung/eb-lieferschein-kontrolle
   domain: finance
@@ -132,9 +132,9 @@ mappings:
   label: In Arbeit
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/start_work
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:abrechnung/eb-lieferschein-kontrolle:waive
   mask: abrechnung/eb-lieferschein-kontrolle
   domain: finance
@@ -145,6 +145,17 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/branches/detail:bearbeiten
+  mask: admin/branches/detail
+  domain: admin
+  action_key: bearbeiten
+  label: Umbenennen
+  command_endpoint: /api/v1/admin/branches/{entity_id}/actions/bearbeiten
+  command: admin.branch.rename.v1
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
 - mask_action_id: mask:admin/identity-budgets:allocate
   mask: admin/identity-budgets
@@ -175,9 +186,9 @@ mappings:
   label: Erledigen
   command_endpoint: /api/v1/admin/mobile/connector-events/{entity_id}/resolve
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/integrationen-quarantaene:retry
   mask: admin/integrationen-quarantaene
   domain: admin
@@ -185,9 +196,9 @@ mappings:
   label: Erneut versuchen
   command_endpoint: /api/v1/admin/mobile/connector-events/{entity_id}/retry
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/nummernkreise:aendern
   mask: admin/nummernkreise
   domain: platform
@@ -195,9 +206,9 @@ mappings:
   label: Ändern
   command_endpoint: /api/v1/admin/number-ranges/{entity_id}/actions/aendern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/nummernkreise:konfigurieren
   mask: admin/nummernkreise
   domain: platform
@@ -205,9 +216,9 @@ mappings:
   label: Nummernkreis konfigurieren
   command_endpoint: /api/v1/admin/number-ranges/actions/konfigurieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/nummernkreise:stilllegen
   mask: admin/nummernkreise
   domain: platform
@@ -215,9 +226,9 @@ mappings:
   label: Stilllegen
   command_endpoint: /api/v1/admin/number-ranges/{entity_id}/actions/stilllegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/postfaecher:entfernen
   mask: admin/postfaecher
   domain: platform
@@ -225,9 +236,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/admin/postfaecher/{entity_id}
   command: admin.postfachEntfernen
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/postfaecher:neu
   mask: admin/postfaecher
   domain: platform
@@ -258,9 +269,9 @@ mappings:
   label: Testmail senden
   command_endpoint: /api/v1/admin/postfaecher/{entity_id}/testen
   command: admin.postfachTesten
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/report-berechtigungen:aendern
   mask: admin/report-berechtigungen
   domain: platform
@@ -268,9 +279,9 @@ mappings:
   label: Ändern
   command_endpoint: /api/v1/admin/report-permissions/{entity_id}/actions/aendern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/report-berechtigungen:anlegen
   mask: admin/report-berechtigungen
   domain: platform
@@ -278,9 +289,9 @@ mappings:
   label: Berechtigung anlegen
   command_endpoint: /api/v1/admin/report-permissions/actions/anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/report-berechtigungen:entfernen
   mask: admin/report-berechtigungen
   domain: platform
@@ -288,9 +299,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/admin/report-permissions/{entity_id}/actions/entfernen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/rollen-verwaltung:aendern
   mask: admin/rollen-verwaltung
   domain: platform
@@ -298,9 +309,9 @@ mappings:
   label: Ändern
   command_endpoint: /api/v1/admin/rollen/{entity_id}/actions/aendern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/rollen-verwaltung:anlegen
   mask: admin/rollen-verwaltung
   domain: platform
@@ -308,9 +319,9 @@ mappings:
   label: Rolle anlegen
   command_endpoint: /api/v1/admin/rollen/actions/anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/rollen-verwaltung:entfernen
   mask: admin/rollen-verwaltung
   domain: platform
@@ -318,9 +329,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/admin/rollen/{entity_id}/actions/entfernen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/webhooks-liste:register
   mask: admin/webhooks-liste
   domain: admin
@@ -350,9 +361,9 @@ mappings:
   label: Als Auftrag anlegen
   command_endpoint: /api/v1/webshop/bestellungen/{entity_id}/actions/verarbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/webshop:anlegen
   mask: admin/webshop
   domain: sales
@@ -360,9 +371,9 @@ mappings:
   label: Shop anbinden
   command_endpoint: /api/v1/webshop/konfigurationen/actions/anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:admin/webshop:entfernen
   mask: admin/webshop
   domain: sales
@@ -370,9 +381,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/webshop/konfigurationen/{entity_id}/actions/entfernen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/duenger-liste:deaktivieren
   mask: agrar/duenger-liste
   domain: agrar
@@ -380,9 +391,9 @@ mappings:
   label: Deaktivieren
   command_endpoint: /api/v1/agrar/duenger/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/duenger-liste:neu
   mask: agrar/duenger-liste
   domain: agrar
@@ -548,9 +559,9 @@ mappings:
   label: Abrechnung drucken
   command_endpoint: /api/v1/agrar/settlements/{entity_id}/actions/drucken
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/kontrakte/formular:bearbeiten
   mask: agrar/kontrakte/formular
   domain: agrar
@@ -558,9 +569,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/kontrakte/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/kontrakte:bearbeiten
   mask: agrar/kontrakte
   domain: agrar
@@ -579,9 +590,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/psm-liste:neu
   mask: agrar/psm-liste
   domain: agrar
@@ -690,9 +701,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/kontrakte/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:annahme/qualitaets-check:save
   mask: annahme/qualitaets-check
   domain: agrar
@@ -710,9 +721,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/chargen-pflicht:bearbeiten
   mask: artikel/chargen-pflicht
   domain: lager
@@ -720,9 +731,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/ersatzteile:bearbeiten
   mask: artikel/ersatzteile
   domain: lager
@@ -730,9 +741,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/gebinde:bearbeiten
   mask: artikel/gebinde
   domain: lager
@@ -740,9 +751,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/gefahrgut:bearbeiten
   mask: artikel/gefahrgut
   domain: lager
@@ -750,9 +761,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/herkunft:bearbeiten
   mask: artikel/herkunft
   domain: lager
@@ -760,9 +771,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/kategorien:bearbeiten
   mask: artikel/kategorien
   domain: lager
@@ -770,9 +781,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/konditionen:bearbeiten
   mask: artikel/konditionen
   domain: lager
@@ -780,9 +791,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/lieferanten-artikel:bearbeiten
   mask: artikel/lieferanten-artikel
   domain: lager
@@ -790,9 +801,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/liste:neu
   mask: artikel/liste
   domain: lager
@@ -810,9 +821,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/qualitaetsmerkmale:bearbeiten
   mask: artikel/qualitaetsmerkmale
   domain: lager
@@ -820,9 +831,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/rabattgruppen:bearbeiten
   mask: artikel/rabattgruppen
   domain: lager
@@ -830,9 +841,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/stamm:bearbeiten
   mask: artikel/stamm
   domain: lager
@@ -840,9 +851,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:artikel/texte-medien:bearbeiten
   mask: artikel/texte-medien
   domain: lager
@@ -850,9 +861,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/articles/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/abfrage-center:import
   mask: auswertungen/abfrage-center
   domain: reporting
@@ -870,9 +881,9 @@ mappings:
   label: Zuweisen
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/assign_me
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/auftrags-kontrolle:resolve
   mask: auswertungen/auftrags-kontrolle
   domain: finance
@@ -880,9 +891,9 @@ mappings:
   label: Erledigt
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/resolve
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/auftrags-kontrolle:start_work
   mask: auswertungen/auftrags-kontrolle
   domain: finance
@@ -890,9 +901,9 @@ mappings:
   label: In Arbeit
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/start_work
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/auftrags-kontrolle:waive
   mask: auswertungen/auftrags-kontrolle
   domain: finance
@@ -911,9 +922,9 @@ mappings:
   label: Zuweisen
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/assign_me
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/beleg-kontrolle:resolve
   mask: auswertungen/beleg-kontrolle
   domain: finance
@@ -921,9 +932,9 @@ mappings:
   label: Erledigt
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/resolve
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/beleg-kontrolle:start_work
   mask: auswertungen/beleg-kontrolle
   domain: finance
@@ -931,9 +942,9 @@ mappings:
   label: In Arbeit
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/start_work
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/beleg-kontrolle:waive
   mask: auswertungen/beleg-kontrolle
   domain: finance
@@ -962,9 +973,9 @@ mappings:
   label: Zuweisen
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/assign_me
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/lieferschein-kontrolle:resolve
   mask: auswertungen/lieferschein-kontrolle
   domain: finance
@@ -972,9 +983,9 @@ mappings:
   label: Erledigt
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/resolve
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/lieferschein-kontrolle:start_work
   mask: auswertungen/lieferschein-kontrolle
   domain: finance
@@ -982,9 +993,9 @@ mappings:
   label: In Arbeit
   command_endpoint: /api/v1/document-control/exceptions/{entity_id}/actions/start_work
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:auswertungen/lieferschein-kontrolle:waive
   mask: auswertungen/lieferschein-kontrolle
   domain: finance
@@ -1115,9 +1126,9 @@ mappings:
   label: Als Vorschlag speichern
   command_endpoint: /api/v1/einkauf/bestellvorschlaege/berechnung/bedarf/actions/speichern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:bestellvorschlag/gespeichert:zu_bestellung
   mask: bestellvorschlag/gespeichert
   domain: einkauf
@@ -1125,9 +1136,9 @@ mappings:
   label: Zu Bestellung
   command_endpoint: /api/v1/einkauf/bestellvorschlaege/{entity_id}/actions/zu_bestellung
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:bestellvorschlag/lager:speichern
   mask: bestellvorschlag/lager
   domain: einkauf
@@ -1135,9 +1146,9 @@ mappings:
   label: Als Vorschlag speichern
   command_endpoint: /api/v1/einkauf/bestellvorschlaege/berechnung/lager/actions/speichern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:bestellvorschlag/rohware:speichern
   mask: bestellvorschlag/rohware
   domain: einkauf
@@ -1145,9 +1156,9 @@ mappings:
   label: Als Vorschlag speichern
   command_endpoint: /api/v1/einkauf/bestellvorschlaege/berechnung/rohware/actions/speichern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:bestellvorschlag/verkauf:speichern
   mask: bestellvorschlag/verkauf
   domain: einkauf
@@ -1155,9 +1166,9 @@ mappings:
   label: Als Vorschlag speichern
   command_endpoint: /api/v1/einkauf/bestellvorschlaege/berechnung/verkauf/actions/speichern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:charge/liste:neu
   mask: charge/liste
   domain: lager
@@ -1380,9 +1391,9 @@ mappings:
   label: Ändern
   command_endpoint: /api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/aendern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:anschrift_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1390,9 +1401,9 @@ mappings:
   label: Anschrift anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:ansprechpartner_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1400,9 +1411,9 @@ mappings:
   label: Ansprechpartner anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:anweisung_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1410,9 +1421,9 @@ mappings:
   label: Chef-Anweisung anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:bearbeiten
   mask: crm/customer-360
   domain: crm
@@ -1420,9 +1431,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:cpd_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1430,9 +1441,9 @@ mappings:
   label: CPD-Konto anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/cpd_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:create_activity
   mask: crm/customer-360
   domain: crm
@@ -1450,9 +1461,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/entfernen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:preis_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1460,9 +1471,9 @@ mappings:
   label: Preisvereinbarung anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/preis_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:rabatt_anlegen
   mask: crm/customer-360
   domain: crm
@@ -1470,9 +1481,9 @@ mappings:
   label: Rabatt anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/customer-360:stammdaten_pflegen
   mask: crm/customer-360
   domain: crm
@@ -1607,9 +1618,9 @@ mappings:
   label: Ändern
   command_endpoint: /api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/aendern
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:anschrift_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1617,9 +1628,9 @@ mappings:
   label: Anschrift anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anschrift_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:ansprechpartner_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1627,9 +1638,9 @@ mappings:
   label: Ansprechpartner anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/ansprechpartner_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:anweisung_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1637,9 +1648,9 @@ mappings:
   label: Chef-Anweisung anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/anweisung_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:bearbeiten
   mask: crm/kunden-cockpit
   domain: crm
@@ -1647,9 +1658,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:cpd_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1657,9 +1668,9 @@ mappings:
   label: CPD-Konto anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/cpd_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:create_activity
   mask: crm/kunden-cockpit
   domain: crm
@@ -1678,9 +1689,9 @@ mappings:
   label: Entfernen
   command_endpoint: /api/v1/crm/kunden-stamm/ansprechpartner/{entity_id}/actions/entfernen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:preis_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1688,9 +1699,9 @@ mappings:
   label: Preisvereinbarung anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/preis_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:rabatt_anlegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1698,9 +1709,9 @@ mappings:
   label: Rabatt anlegen
   command_endpoint: /api/v1/crm/customers/{entity_id}/actions/rabatt_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/kunden-cockpit:stammdaten_pflegen
   mask: crm/kunden-cockpit
   domain: crm
@@ -1729,9 +1740,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/crm/leads/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/lead:qualifizieren
   mask: crm/lead
   domain: crm
@@ -1801,9 +1812,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/crm/opportunities/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/opportunity:create_activity
   mask: crm/opportunity
   domain: crm
@@ -1919,9 +1930,9 @@ mappings:
   label: Provisionsgruppe anlegen
   command_endpoint: /api/v1/crm/vertreter/provisionen/gruppen/actions/anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/vertreterprovisionen:deaktivieren
   mask: crm/vertreterprovisionen
   domain: crm
@@ -1929,9 +1940,9 @@ mappings:
   label: Stilllegen
   command_endpoint: /api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/vertreterprovisionen:staffelzeile_anlegen
   mask: crm/vertreterprovisionen
   domain: crm
@@ -1939,9 +1950,9 @@ mappings:
   label: Staffelzeile anlegen
   command_endpoint: /api/v1/crm/vertreter/provisionen/gruppen/{entity_id}/actions/staffelzeile_anlegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:crm/wiedervorlagen:erledigen
   mask: crm/wiedervorlagen
   domain: crm
@@ -1949,9 +1960,9 @@ mappings:
   label: Erledigen
   command_endpoint: /api/v1/crm/kunden-kontakte/{entity_id}/erledigt
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:dms/inbox:create_beleg
   mask: dms/inbox
   domain: dms-compliance
@@ -1969,9 +1980,9 @@ mappings:
   label: Verwerfen
   command_endpoint: /api/v1/dms/inbox/{entity_id}
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anfrage:bearbeiten
   mask: einkauf/anfrage
   domain: einkauf
@@ -1979,9 +1990,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/einkauf/anfragen/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anfragen:in_bestellung
   mask: einkauf/anfragen
   domain: einkauf
@@ -1989,9 +2000,9 @@ mappings:
   label: In Bestellung
   command_endpoint: /api/v1/einkauf/anfragen/{entity_id}/actions/in_bestellung
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anfragen:loeschen
   mask: einkauf/anfragen
   domain: einkauf
@@ -2041,9 +2052,9 @@ mappings:
   label: Ablehnen
   command_endpoint: /api/v1/einkauf/angebote/{entity_id}/actions/ablehnen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/angebote:bestellen
   mask: einkauf/angebote
   domain: einkauf
@@ -2051,9 +2062,9 @@ mappings:
   label: In Bestellung
   command_endpoint: /api/v1/einkauf/angebote/{entity_id}/actions/bestellen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/angebote:genehmigen
   mask: einkauf/angebote
   domain: einkauf
@@ -2082,9 +2093,9 @@ mappings:
   label: Pruefen
   command_endpoint: /api/v1/einkauf/angebote/{entity_id}/actions/pruefen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anlieferavis-liste:bestaetigen
   mask: einkauf/anlieferavis-liste
   domain: einkauf
@@ -2092,9 +2103,9 @@ mappings:
   label: Bestaetigen
   command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/actions/bestaetigen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anlieferavis-liste:senden
   mask: einkauf/anlieferavis-liste
   domain: einkauf
@@ -2102,9 +2113,9 @@ mappings:
   label: Senden
   command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/actions/senden
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anlieferavis-liste:stornieren
   mask: einkauf/anlieferavis-liste
   domain: einkauf
@@ -2112,9 +2123,9 @@ mappings:
   label: Stornieren
   command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/actions/stornieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anlieferavis-liste:wareneingang
   mask: einkauf/anlieferavis-liste
   domain: einkauf
@@ -2122,9 +2133,9 @@ mappings:
   label: Wareneingang buchen
   command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/anlieferavis:wareneingang
   mask: einkauf/anlieferavis
   domain: einkauf
@@ -2142,9 +2153,9 @@ mappings:
   label: Bestaetigen
   command_endpoint: /api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/auftragsbestaetigung:pruefen
   mask: einkauf/auftragsbestaetigung
   domain: einkauf
@@ -2152,9 +2163,9 @@ mappings:
   label: Pruefen
   command_endpoint: /api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/auftragsbestaetigungen:bestaetigen
   mask: einkauf/auftragsbestaetigungen
   domain: einkauf
@@ -2162,9 +2173,9 @@ mappings:
   label: Bestaetigen
   command_endpoint: /api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/bestaetigen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/auftragsbestaetigungen:neu
   mask: einkauf/auftragsbestaetigungen
   domain: einkauf
@@ -2182,9 +2193,9 @@ mappings:
   label: Pruefen
   command_endpoint: /api/v1/einkauf/auftragsbestaetigungen/{entity_id}/actions/pruefen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/lieferanten:neu
   mask: einkauf/lieferanten
   domain: einkauf
@@ -2202,9 +2213,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/einkauf/lieferanten/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/supplier:entsperren
   mask: einkauf/supplier
   domain: einkauf
@@ -2245,9 +2256,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/stammdaten/warengruppen/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/warengruppen:deaktivieren
   mask: einkauf/warengruppen
   domain: einkauf
@@ -2255,9 +2266,9 @@ mappings:
   label: Deaktivieren
   command_endpoint: /api/v1/stammdaten/warengruppen/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/warengruppen:neu
   mask: einkauf/warengruppen
   domain: einkauf
@@ -2265,9 +2276,9 @@ mappings:
   label: Warengruppe anlegen
   command_endpoint: /api/v1/stammdaten/warengruppen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/zahlungsbedingungen:bearbeiten
   mask: einkauf/zahlungsbedingungen
   domain: finance
@@ -2275,9 +2286,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/zahlungsbedingungen:deaktivieren
   mask: einkauf/zahlungsbedingungen
   domain: finance
@@ -2285,9 +2296,9 @@ mappings:
   label: Deaktivieren
   command_endpoint: /api/v1/fibu/zahlungsbedingungen/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/zahlungsbedingungen:neu
   mask: einkauf/zahlungsbedingungen
   domain: finance
@@ -2295,9 +2306,20 @@ mappings:
   label: Zahlungsbedingung anlegen
   command_endpoint: /api/v1/fibu/zahlungsbedingungen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:fibu/abschluss-checklist-detail:saldenvortrag
+  mask: fibu/abschluss-checklist-detail
+  domain: fibu
+  action_key: saldenvortrag
+  label: Saldenvortrag buchen
+  command_endpoint: /api/v1/finance/closing/saldenvortrag
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:finance/ar-open-item:mahnen
   mask: finance/ar-open-item
   domain: finance
@@ -2336,9 +2358,9 @@ mappings:
   label: Anwenden
   command_endpoint: /api/v1/finance/booking-templates/{entity_id}/apply
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:finance/buchungsvorlagen:loeschen
   mask: finance/buchungsvorlagen
   domain: finance
@@ -2346,9 +2368,9 @@ mappings:
   label: Loeschen
   command_endpoint: /api/v1/finance/booking-templates/{entity_id}
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:finance/debitor:bearbeiten
   mask: finance/debitor
   domain: finance
@@ -2463,9 +2485,9 @@ mappings:
   label: Aktivieren
   command_endpoint: /api/v1/finance/exchange-rates/{entity_id}/actions/aktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:finance/wechselkurse:deaktivieren
   mask: finance/wechselkurse
   domain: finance
@@ -2473,9 +2495,9 @@ mappings:
   label: Deaktivieren
   command_endpoint: /api/v1/finance/exchange-rates/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:finance/wechselkurse:neu
   mask: finance/wechselkurse
   domain: finance
@@ -2483,9 +2505,9 @@ mappings:
   label: Kurs erfassen
   command_endpoint: /api/v1/finance/exchange-rates
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:foerderung/liste:neu
   mask: foerderung/liste
   domain: agrar
@@ -2503,9 +2525,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/fuhrpark/ausgehende-dokumente/{entity_id}
   command: fuhrpark.deleteDokument
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:fuhrpark/ausgehende-dokumente:neu
   mask: fuhrpark/ausgehende-dokumente
   domain: logistics
@@ -2568,9 +2590,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/fuhrpark/rechnungen/{entity_id}
   command: fuhrpark.deleteRechnung
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:fuhrpark/rechnungen:neu
   mask: fuhrpark/rechnungen
   domain: logistics
@@ -2600,9 +2622,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/fuhrpark/terminarten/{entity_id}
   command: fuhrpark.deleteTerminart
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:fuhrpark/terminarten:neu
   mask: fuhrpark/terminarten
   domain: logistics
@@ -2662,9 +2684,9 @@ mappings:
   label: Plausibilitaet pruefen
   command_endpoint: /api/v1/agrar/rations-optimization/feed-analyses/{entity_id}/actions/validate
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:futtermittel/analysen:import_analysis
   mask: futtermittel/analysen
   domain: futtermittel
@@ -2692,9 +2714,9 @@ mappings:
   label: Stilllegen
   command_endpoint: /api/v1/futter/einzelfuttermittel/{entity_id}/actions/stilllegen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:futtermittel/mischfuttermittel-liste:deaktivieren
   mask: futtermittel/mischfuttermittel-liste
   domain: futtermittel
@@ -2702,9 +2724,9 @@ mappings:
   label: Deaktivieren
   command_endpoint: /api/v1/futter/mischfuttermittel/{entity_id}/actions/deaktivieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:futtermittel/mischfuttermittel-liste:neu
   mask: futtermittel/mischfuttermittel-liste
   domain: futtermittel
@@ -2722,9 +2744,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/futter/mischfuttermittel/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:inbox:create_beleg
   mask: inbox
   domain: dms-compliance
@@ -2742,9 +2764,9 @@ mappings:
   label: Verwerfen
   command_endpoint: /api/v1/dms/inbox/{entity_id}
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt-liste/mahnung:mahnen
   mask: kontrakt-liste/mahnung
   domain: agrar
@@ -2752,9 +2774,9 @@ mappings:
   label: Mahnen
   command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/abrechnung:abrechnen
   mask: kontrakt/abrechnung
   domain: agrar
@@ -2762,9 +2784,9 @@ mappings:
   label: Abrechnen
   command_endpoint: /api/v1/kontrakt-vorgang/bewegungen/{entity_id}/actions/abrechnen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/abrechnung:abrechnung_uebergeben
   mask: kontrakt/abrechnung
   domain: agrar
@@ -2772,9 +2794,9 @@ mappings:
   label: An Abrechnung übergeben
   command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/abrechnung_uebergeben
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/abrechnung:stornieren
   mask: kontrakt/abrechnung
   domain: agrar
@@ -2793,9 +2815,9 @@ mappings:
   label: Mahnen
   command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/mahnen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/fixierung:fixieren
   mask: kontrakt/fixierung
   domain: agrar
@@ -2803,9 +2825,9 @@ mappings:
   label: Fixieren
   command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/fixieren
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/fixierung:notierung_erfassen
   mask: kontrakt/fixierung
   domain: agrar
@@ -2813,9 +2835,9 @@ mappings:
   label: Notierung erfassen
   command_endpoint: /api/v1/kontrakt-vorgang/{entity_id}/actions/notierung_erfassen
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:kontrakt/fixierung:stornieren
   mask: kontrakt/fixierung
   domain: agrar
@@ -2834,9 +2856,9 @@ mappings:
   label: Kontrolllauf
   command_endpoint: /api/v1/inventory/auxiliary/actions/create_control
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_count_sheet
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -2844,9 +2866,9 @@ mappings:
   label: Zaehlliste
   command_endpoint: /api/v1/inventory/auxiliary/actions/create_count_sheet
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_opening
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -2865,9 +2887,9 @@ mappings:
   label: Vorlaeufig bewerten
   command_endpoint: /api/v1/inventory/auxiliary/actions/create_valuation
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:lager/stock-movement:stornieren
   mask: lager/stock-movement
   domain: lager
@@ -2916,9 +2938,9 @@ mappings:
   label: Stornieren
   command_endpoint: /api/v1/logistik/tours/{entity_id}/cancel
   command: tour.cancel
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:logistik/verladung:neu
   mask: logistik/verladung
   domain: logistics
@@ -2957,9 +2979,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/personal/applications/{entity_id}
   command: personal.deleteBewerbung
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:personal/bewerbungen:neu
   mask: personal/bewerbungen
   domain: hr
@@ -3022,9 +3044,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/training/onboarding/runs/{entity_id}/actions/loeschen
   command: personal.deleteOnboarding
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:personal/onboarding:neu
   mask: personal/onboarding
   domain: hr
@@ -3055,9 +3077,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/training/qualifications/{entity_id}/actions/loeschen
   command: personal.deleteQualifikation
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:personal/qualifikationen:neu
   mask: personal/qualifikationen
   domain: hr
@@ -3087,9 +3109,9 @@ mappings:
   label: Löschen
   command_endpoint: /api/v1/training/assignments/{entity_id}/actions/loeschen
   command: personal.deleteSchulung
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:personal/schulungen:neu
   mask: personal/schulungen
   domain: hr
@@ -3170,9 +3192,9 @@ mappings:
   label: Zustaendigkeit/Frist
   command_endpoint: /api/v1/reklamationen/{entity_id}/actions/bearbeiten
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:qualitaet/reklamationen-liste:neu
   mask: qualitaet/reklamationen-liste
   domain: qualitaet
@@ -3220,9 +3242,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/stammdaten/hausbanken/{entity_id}
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:stammdaten/mengeneinheit:edit
   mask: stammdaten/mengeneinheit
   domain: lager
@@ -3230,9 +3252,9 @@ mappings:
   label: Bearbeiten
   command_endpoint: /api/v1/artikel/mengeneinheiten/stamm/{entity_id}
   command: null
-  mcp_tool_id: mask.action.execute
-  coverage: mapped_generic
-  notes: Generisches Werkzeug mask.action.execute ueber den Kommando-Endpunkt der Maske.
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:transporte/fahrer:neu
   mask: transporte/fahrer
   domain: logistics
@@ -3358,5 +3380,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 82; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 84; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

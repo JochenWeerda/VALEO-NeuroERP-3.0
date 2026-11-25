@@ -91,6 +91,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin/background-jobs",
+      "path": "admin/background-jobs",
+      "source": "alias"
+    },
+    {
       "module": "@/pages/admin/backup-restore",
       "path": "admin/backup-restore",
       "source": "alias"
@@ -128,6 +133,11 @@
     {
       "module": "@/pages/admin/branches",
       "path": "admin/branches",
+      "source": "alias"
+    },
+    {
+      "module": "@/pages/admin/branch-detail",
+      "path": "admin/branches/:id",
       "source": "alias"
     },
     {

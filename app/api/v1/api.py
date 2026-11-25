@@ -2424,10 +2424,6 @@ api_router.include_router(whatsapp_notify.router, prefix="/whatsapp", tags=["Wha
 from app.api.v1.endpoints import annahme  # noqa: E402
 api_router.include_router(annahme.router, tags=["annahme", "warteschlange"])
 
-# Reports Export (generischer Download-Endpunkt)
-from app.api.v1.endpoints import reports_export  # noqa: E402
-api_router.include_router(reports_export.router, tags=["reports", "export"])
-
 # CRM Kundensegmente
 
 from app.api.v1.endpoints import identity_management  # noqa: E402

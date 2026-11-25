@@ -3,9 +3,13 @@ import { beforeEach, expect, it, vi } from 'vitest'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 const { execute } = vi.hoisted(() => ({ execute: vi.fn() }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction: execute }),
+}))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({ plan: {}, entityData: { aktion_stornieren: true, version: 3 }, tableRows: {}, messages: [], refetch: vi.fn() }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction }: { onAction: (key: string, payload: object) => void }) =>
     <button onClick={() => onAction('stornieren', {})}>Stornieren</button>,
 }))

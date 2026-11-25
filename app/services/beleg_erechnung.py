@@ -23,10 +23,19 @@ _EINHEIT_CODE = {"dt": "DTN", "kg": "KGM", "t": "TNE", "g": "GRM", "l": "LTR", "
                  "stk": "C62", "st": "C62", "stueck": "C62", "h": "HUR", "ha": "HAR", "pal": "PF", "sack": "SA"}
 
 
-def einheit_code(einheit: Optional[str]) -> str:
+def einheit_code(einheit: Optional[str], db: Optional[Session] = None, tenant_id: Optional[str] = None) -> str:
+    """UN/ECE-Code der Einheit: zuerst die UN-Mengeneinheit des Mandantenstamms (a.eins-Feld, 24.11.2026), dann die
+    Tabelle der Grundeinheiten. Unbekanntes wird nicht geraten."""
     from app.core.agrar_units import normalisiere
 
     schluessel = normalisiere(einheit).lower() if einheit else ""
+    if db is not None and tenant_id and einheit:
+        stamm = db.execute(text(
+            "SELECT un_code FROM domain_shared.artikel_mengeneinheiten WHERE tenant_id = :t AND aktiv "
+            "AND LOWER(einheit_kuerzel) IN (:roh, :norm) AND COALESCE(un_code, '') <> '' LIMIT 1"),
+            {"t": tenant_id, "roh": str(einheit).strip().lower(), "norm": schluessel}).scalar()
+        if stamm:
+            return str(stamm)
     code = _EINHEIT_CODE.get(schluessel)
     if not code:
         raise ValidationFailedError(f"Einheit {einheit!r} hat keinen UN/ECE-Code fuer die E-Rechnung.")
@@ -66,7 +75,7 @@ def xrechnung_eingabe(db: Session, tenant_id: str, beleg: Beleg) -> dict[str, An
     zahlung = beleg.bausteine.get("zahlung") or {}
     zeilen = [{
         "line_id": str(p.pos_nr), "article": p.artikel_nr, "description": p.bezeichnung or p.artikel_nr,
-        "quantity": float(p.menge), "unit_code": einheit_code(p.einheit),
+        "quantity": float(p.menge), "unit_code": einheit_code(p.einheit, db, tenant_id),
         "unit_price_net": float(p.einzelpreis or 0), "line_net_amount": float(p.netto or 0),
         "vat_rate_percent": float(p.steuersatz or 0),
         "vat_category_code": _steuerart(db, tenant_id, p.steuerschluessel, Decimal(str(p.steuersatz or 0))),
