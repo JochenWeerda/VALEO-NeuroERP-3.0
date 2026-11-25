@@ -180,7 +180,6 @@
     "app/api/v1/endpoints/sustainability.py",
     "app/api/v1/schemas/agrar.py",
     "app/core/agrar_units.py",
-    "app/core/gobd_retention.py",
     "app/core/psm_protokoll.py",
     "app/documents/position_extraction.py",
     "app/infrastructure/models/__init__.py",
