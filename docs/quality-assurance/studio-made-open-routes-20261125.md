@@ -369,6 +369,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Alle 8 reparierten Prefixe werden konkret geladen
 - Gate-D Smoke + DMS Archiv-Suche + Betrieb Maschinen-Stamm → **16/16 passed**
 
+### Batch 43 — Fehlende Sales-Delivery-Editoren + Inventar-Load-Ratsche
+
+- `sales/delivery-editor` und `sales/delivery-editor-new` fehlten als Dateien (Route → `unknown module`)
+- Wiederhergestellt als `belegSeite('sales_delivery')` (wie `lieferung-neu` / `order-editor`)
+- Vitest `page-module-inventory-load.test.ts`: **jedes** Inventar-`@/pages/*`-Modul lädt (5/5 inkl. Loader-Tests)
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
