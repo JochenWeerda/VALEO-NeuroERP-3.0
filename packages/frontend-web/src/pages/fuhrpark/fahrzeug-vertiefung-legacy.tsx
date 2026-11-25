@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   changeFahrzeugStatus,
   createFahrzeugBussgeld,
@@ -259,25 +260,17 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b">
-        {TABS.map(tab => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
-              activeTab === tab
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as Tab)}>
+        <TabsList className="flex h-auto min-h-touch w-full flex-wrap justify-start" aria-label="Fahrzeug-Vertiefung">
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab} value={tab} className="min-h-touch whitespace-nowrap">
+              {tab}
+            </TabsTrigger>
+          ))}
+        </TabsList>
 
       {/* ── Statushistorie ─────────────────────────────────────────────────── */}
-      {activeTab === 'Statushistorie' && (
+      <TabsContent value="Statushistorie" className="space-y-4">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -350,10 +343,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
             </CardContent>
           </Card>
         </div>
-      )}
+      </TabsContent>
 
       {/* ── Schadensfälle ──────────────────────────────────────────────────── */}
-      {activeTab === 'Schadensfälle' && (
+      <TabsContent value="Schadensfälle" className="space-y-4">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -451,10 +444,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
             </CardContent>
           </Card>
         </div>
-      )}
+      </TabsContent>
 
       {/* ── Bußgelder ──────────────────────────────────────────────────────── */}
-      {activeTab === 'Bußgelder' && (
+      <TabsContent value="Bußgelder" className="space-y-4">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -544,10 +537,10 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
             </CardContent>
           </Card>
         </div>
-      )}
+      </TabsContent>
 
       {/* ── Wartungsvorhersage ─────────────────────────────────────────────── */}
-      {activeTab === 'Wartungsvorhersage' && (
+      <TabsContent value="Wartungsvorhersage" className="space-y-4">
         <div className="space-y-4">
           <Card>
             <CardHeader>
@@ -597,7 +590,7 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
                         </thead>
                         <tbody>
                           {wartungQ.data.vorhersagen_nach_km.map(v => (
-                            <tr key={v.terminart} className={`border-t ${v.dringend ? 'bg-amber-50 dark:bg-amber-950/20' : ''}`}>
+                            <tr key={v.terminart} className={`border-t ${v.dringend ? 'bg-status-warning/10' : ''}`}>
                               <td className="px-3 py-2 font-medium">{v.terminart}</td>
                               <td className="px-3 py-2 text-right tabular-nums">{v.intervall_km > 0 ? v.intervall_km.toLocaleString('de-DE') : '—'}</td>
                               <td className="px-3 py-2 text-right tabular-nums">{v.faellig_in_km != null ? v.faellig_in_km.toLocaleString('de-DE') : '—'}</td>
@@ -616,12 +609,12 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
             </CardContent>
           </Card>
         </div>
-      )}
+      </TabsContent>
 
       {/* ── Leasing-Rückgabe ───────────────────────────────────────────────── */}
-      {activeTab === 'Leasing-Rückgabe' && (
+      <TabsContent value="Leasing-Rückgabe" className="space-y-4">
         <div className="space-y-4">
-          <Card className="border-amber-200/80 bg-amber-50/40 dark:bg-amber-950/20">
+          <Card className="border-status-warning/40 bg-status-warning/10">
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
                 <Clock className="h-4 w-4 text-status-warning" /> Leasing-Rückgabe einleiten
@@ -670,7 +663,8 @@ export default function FahrzeugVertiefungPage(): JSX.Element {
             </CardContent>
           </Card>
         </div>
-      )}
+      </TabsContent>
+      </Tabs>
     </div>
   )
 }
