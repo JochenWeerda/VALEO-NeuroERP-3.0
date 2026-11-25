@@ -1,0 +1,323 @@
+# Abnahmeblatt Lager — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skill l3-lager-referenz: Bestand, Bestands-Korrektur, Lager zu Lager, Fremdware,
+# Inventur) plus Chargen/FEFO, Lagerbewegungen und Rueckverfolgbarkeit. Status: abgenommen | teilweise | fehlt.
+# "abgenommen" verlangt Nachweis, keine offene P0/P1-Luecke und keine Platzhaltermaske; die Bedienung im Browser ist
+# Teil der Maskenabnahme. Mock-Tests (MagicMock) und reine Schema-/422-Tests zaehlen nicht als Nachweis und stehen
+# nur im Befund. Masken ohne Eintrag in route-aliases.json (lager/fremdware, lager/inventur-nebenlaeufe, lager/charge,
+# lager/leitstand, lager/massebilanz, lager/foreign-goods-queue, charge/mischung, charge/teilung) tauchen im
+# Masken-Inventar nicht als Route auf und koennen deshalb in "routen" nicht genannt werden.
+id: lager
+titel: Lager (Bestand, Korrektur, Umlagerung, Fremdware, Inventur, Chargen)
+reifematrix: D05
+l3_referenz: l3-lager-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [lager, charge, inventory]
+screen_domains: [lager, charge, inventory]
+prozesse:
+  - id: LG-01
+    name: Bestand abfragen und bewerten
+    l3: LAGER > Bestand (F7) — Filter Niederlassung, Lagerhalle, Artikelgruppe, Artikel-Nr., Null-Bestaende verbergen; Spalten Min/Max, Buch-, verfuegbarer, phys. Bestand, Ø/letzter EK, Bewertungspreis, Bestandswert
+    routen: [lager/bestandsuebersicht, lager/article-stock/:id, reports/lagerbestand, lager/bestandsbewertung]
+    rolle: LAGER lesen (Mandant aus dem Token/Header)
+    nachweise:
+      - tests/test_api_gap_lager_pricing_scan.py::test_bestaende_happy_path_reflects_booked_movement
+      - tests/test_api_gap_lager_pricing_scan.py::test_bestaende_tenant_isolation
+      - tests/test_bestandsbuch_mandant_richtung.py::test_bestandsabfrage_unter_lager_nimmt_den_header
+      - tests/test_inventory_balance_reconciliation.py::test_summe_der_belegarten_ergibt_den_gesamtsaldo
+    status: teilweise
+    befund: >-
+      Die Bestandsabfrage (GET /lager/bestaende) ist gegen PostgreSQL geprueft: gebuchte Menge erscheint im Bestand,
+      ein fremder Mandant sieht nichts, der Header (nicht der Query-Parameter) bestimmt den Mandanten, und der
+      Abstimmbericht belegt, dass die Summe der Belegarten dem Gesamtsaldo entspricht. Die Listen Bestandsuebersicht
+      und Bestandsbewertung zeigen nur Artikel, Lager, Charge, Menge, Einheit (Bewertung zusaetzlich Bestandswert);
+      die L3-Spalten Min/Max, verfuegbar gegen physisch, Ø-EK und letzter EK fehlen, ebenso die Filter Artikelgruppe
+      und Niederlassung. Der Ø-EK-Mechanismus (test_lager_bwert_001) ist nur mit MagicMock getestet und zaehlt nicht;
+      der Bestandswert der Maske hat keinen Datenbanktest. Browser: nur Ladetest der Bestandsuebersicht
+      (playwright-tests/specs/inventory/lager-smoke.spec.ts).
+    luecken:
+      - text: L3-Bestandsspalten fehlen in der Maske (Min-/Max-Bestand, verfuegbarer gegen physischen Bestand, Ø-EK, letzter EK, Bewertungspreis) sowie die Filter Artikelgruppe und Niederlassung
+        prio: P2
+      - text: Bestandswert und Ø-EK-Fortschreibung nicht gegen PostgreSQL belegt (test_lager_bwert_001 nutzt MagicMock)
+        prio: P2
+      - text: Palettenbestand und Bestand-Detail je NVE (L3-Fussleiste) fehlen
+        prio: P3
+  - id: LG-02
+    name: Lagerbewegungen buchen und im Bewegungsbuch einsehen
+    l3: Artikel-Konto anzeigen; Bewegungen je Artikel und Lager mit Richtung, Charge, Beleg
+    routen: [lager/lagerbewegungen, statistik/bewegungen]
+    rolle: LAGER (Schreibwege mit Lagerrolle); lesen alle Lagerrollen
+    nachweise:
+      - tests/test_bestandsbuch_mandant_richtung.py::test_ein_abgang_mit_positiver_menge_senkt_beide_bestaende
+      - tests/test_bestandsbuch_mandant_richtung.py::test_kein_abgang_ueber_den_bestand
+      - tests/test_bestandsbuch_mandant_richtung.py::test_delete_loescht_keine_buchung
+      - tests/test_inventory_movement_register.py::test_alle_gebuchten_belegarten_sind_registriert
+      - tests/test_inventory_movement_direction.py::test_saldo_zaehlt_abgang_negativ_und_zaehlwerte_gar_nicht
+      - tests/test_api_gap_lager_pricing_scan.py::test_bewegungen_happy_path_wareneingang
+    status: teilweise
+    befund: >-
+      Der Schreibweg ist gegen PostgreSQL belegt: Abgang mit positiver Menge senkt Buch- und Artikelbestand,
+      kein Abgang ueber den Bestand, DELETE loescht keine gebuchte Bewegung (409, Storno statt Loeschen), jede
+      gebuchte Belegart steht im Register mit Richtung, der Saldo zaehlt Zaehlwerte nicht. Die Maske
+      lager/lagerbewegungen (und statistik/bewegungen) ist eine generische Platzhaltermaske: Spalten nur
+      id/name/status/datum, nur CSV-Export, keine Zeilenaktion — Artikel, Lager, Menge, Bewegungsart und Beleg sind
+      im Bewegungsbuch nicht zu sehen. Browser: nur Ladetest der Ueberschrift (lager-smoke.spec.ts).
+      test_inventory_operations (nur Schema und 422) zaehlt nicht.
+    luecken:
+      - text: Bewegungsbuch-Maske ist Platzhalter (nur id/name/status/datum, nur Export) — Artikel, Lager, Menge, Richtung, Charge, Beleg und der Sprung in die Bewegung fehlen
+        prio: P1
+      - text: Filter und Summen je Artikel/Lager/Zeitraum (L3 "Artikel-Konto anzeigen") nicht belegt
+        prio: P2
+  - id: LG-03
+    name: Lagerbewegung stornieren (Gegenbuchung)
+    l3: Bestands-Korrektur "Loeschen"; Korrektur als Gegenbuchung statt Loeschen
+    routen: [lager/stock-movement/:id]
+    rolle: LAGER (SCHREIBEN LAGER); Maskenaktion mit Recht lager.bewegung.stornieren, Grund Pflicht, Bestaetigung
+    nachweise:
+      - tests/test_lagerbewegung_storno.py::test_der_storno_hebt_die_bewegung_genau_auf
+      - tests/test_lagerbewegung_storno.py::test_kein_negativer_bestand_durch_storno
+      - tests/test_lagerbewegung_storno.py::test_stornieren_aus_der_maske_bucht_gegen
+      - tests/test_lagerbewegung_storno.py::test_ohne_begruendung_kein_storno
+      - tests/test_bestandsbuch_mandant_richtung.py::test_der_storno_korrigiert_auch_den_artikelbestand
+    status: teilweise
+    befund: >-
+      HTTP-Vertrag gegen PostgreSQL: die Gegenbuchung hebt die Bewegung je Bewegungsart genau auf, bestandsneutrale
+      Bewegungen und Stornos werden nicht storniert, doppeltes Stornieren bucht einmal (idempotent), kein negativer
+      Bestand, fremder Mandant 422, die Maskenaktion verlangt einen Grund und bucht gegen. Der Artikelbestand wird
+      mitkorrigiert. Nicht belegt: die Rollenpruefung der Aktion (kein Test mit fehlender Lagerrolle) und die
+      Erreichbarkeit aus der Oberflaeche — die Bewegungsliste (LG-02) ist Platzhalter ohne Zeilenverweis auf die
+      Detailmaske. Browserkette fehlt.
+    luecken:
+      - text: Stornieren ohne Lagerrolle (403) und Aufruf der Detailmaske aus der Bewegungsliste nicht belegt
+        prio: P2
+      - text: Browserkette Bewegung finden > Stornieren durch die Maske mit echtem Backend fehlt
+        prio: P2
+  - id: LG-04
+    name: Bestandskorrektur erfassen und buchen
+    l3: LAGER > Bestands-Buchungen > Korrektur — Kopf Beleg-Nr., Datum, Lagerhalle, Gegenkonto Aufwand/Ertrag, Bediener; Zeilen Soll-/Ist-/Differenzmenge und -wert, Lagerfach, Charge, NVE, Korrekturgrund, Nachh. Biomasse; Buchen
+    routen: [lager/bestandskorrektur, inventory/adjust]
+    rolle: LAGER (Buchen), Gegenkonto Buchhaltung
+    nachweise:
+      - tests/test_buchung_nicht_still.py::test_bestandskorrektur_bucht_keine_menge_als_betrag
+      - tests/test_kontosperre_meldung.py::test_bestandskorrektur_speichert_den_bestand_ohne_buchung
+      - tests/test_lagerbewegung_storno.py::test_der_storno_hebt_die_bewegung_genau_auf
+    status: teilweise
+    befund: >-
+      Der Schreibweg POST /lager/bestandskorrektur bucht die Mengenaenderung gegen PostgreSQL (genau eine Bewegung,
+      Meldung der fehlenden Bewertung); er schreibt aber bewusst keine Hauptbuchbuchung (journal_entry_id leer),
+      solange die Bestandsbewertung fehlt — bis 19.11.2026 ging die Menge als Eurobetrag ins Journal. Die Masken
+      lager/bestandskorrektur und inventory/adjust sind Platzhalter: sie lesen /lager/bestaende, zeigen aber nur
+      id/name/status/updated_at, haben nur CSV-Export und keine Erfassung. Die Korrekturgruende (7 Codes) und die
+      422-Faelle sind nur ohne Datenbank oder als Schema geprueft (test_inventory_operations) und zaehlen nicht.
+      Ein eigener Korrekturbeleg mit Soll/Ist/Differenz je Zeile (L3) existiert nur als Tabelle stock_corrections
+      unter /warehouses/transfers/corrections, ohne Buchen und ohne Maske.
+    luecken:
+      - text: Erfassungsmaske fuer die Bestandskorrektur fehlt (Platzhalter) — Beleg mit Lagerhalle, Artikel, Soll-/Ist-/Differenzmenge, Charge, Grund und Buchen ist ueber die Oberflaeche nicht moeglich
+        prio: P1
+      - text: Bewertete Korrektur fehlt — Differenzwert und Gegenkonto Aufwand/Ertrag (L3) werden nicht ins Hauptbuch gebucht, nur die Menge
+        prio: P1
+      - text: L3-Felder Lagerfach, NVE, Nachh. Biomasse und Bediener/Beleg-Nr. im Korrekturbeleg fehlen; Korrekturbeleg stock_corrections hat keinen Buchen-Weg
+        prio: P2
+      - text: Korrekturgruende und Rollenpruefung der Korrekturbuchung nicht gegen PostgreSQL belegt
+        prio: P2
+  - id: LG-05
+    name: Umlagerung Lager zu Lager
+    l3: LAGER > Bestands-Buchungen > Lager zu Lager — Beleg von Niederlassung an Niederlassung, Lkw-Nr., Positionen mit von/an Lager, Lagerfach, Charge, Summe Gefahrgutpunkte
+    routen: []
+    rolle: LAGER (SCHREIBEN LAGER)
+    nachweise:
+      - tests/test_bestandsbuch_mandant_richtung.py::test_eine_umlagerung_steht_in_der_richtungstabelle
+    status: teilweise
+    befund: >-
+      Backend: POST /warehouses/transfers mit Positionen und /post, das je Position einen Abgang im Quelllager und
+      einen Zugang im Ziellager bucht. Belegt ist nur, dass die Bewegungsart "transfer" in der Richtungstabelle
+      steht (Einzelbewegung ueber den Bewegungsweg). Die Transferendpunkte sind ausschliesslich mit MagicMock/
+      Recording-Sessions getestet (test_warehouse_transfers_api, test_security_warehouse_transfers) und zaehlen
+      nicht. Im Quelltext des Buchens fehlen: Statuspruefung (ein bereits gebuchter Transfer kann erneut gebucht
+      werden und verdoppelt die Bewegungen), Pruefung des verfuegbaren Bestands im Quelllager, Fortschreibung von
+      previous_stock/new_stock und Artikelbestand (ob ein Trigger das ausgleicht, ist nicht belegt), Einheit
+      ist fest "t". Eine Maske fehlt: lager/umlagerung rendert die Platzhalter-Bewegungsliste und steht nicht im
+      Masken-Inventar; die Maske des Transferbelegs gibt es nicht.
+    luecken:
+      - text: Umlagerungsmaske fehlt — Beleg mit von/an Lager, Positionen mit Charge/Lagerfach und Buchen ist nicht bedienbar (lager/umlagerung zeigt die Platzhalter-Bewegungsliste)
+        prio: P1
+      - text: Transfer-Buchen ist nicht idempotent und prueft weder Status noch verfuegbaren Quellbestand; Einheit fest "t" — als Integrationstest gegen PostgreSQL zu belegen und zu haerten
+        prio: P1
+      - text: L3-Felder Lkw-Nr., Bediener, Lagerfach, Summe Gefahrgutpunkte und Nachh. Biomasse im Transferbeleg fehlen
+        prio: P2
+  - id: LG-06
+    name: Fremdware einlagern, umlagern und abschliessen (Empfangsschein Fremdeinlagerung)
+    l3: LAGER > Module > Fremdware — Empfangsschein-Nr., Anlieferungsdatum, Niederlassung, Debitor, Kunden-Nr., Positionen mit Artikel, Menge, Lagerhalle; Druck
+    routen: []
+    rolle: LAGER (LAGER_BEARBEITEN); ohne Lagerrolle 403
+    nachweise:
+      - tests/test_lager_mask_commands.py::test_fremdware_umlagern_und_abschliessen
+      - tests/test_lager_mask_commands.py::test_fremdware_ohne_lagerrolle_und_fremder_mandant
+    status: teilweise
+    befund: >-
+      Maskenaktionen Umlagern (Ziellager Pflicht) und Abschliessen (Restmenge) sind gegen PostgreSQL geprueft:
+      Ziellager wird geschrieben, ein zweites Abschliessen scheitert, der Auditeintrag traegt den Token-Urheber,
+      ohne Lagerrolle 403, fremder Mandant aendert nichts. Die Fremdware-Worklist (lager/fremdware,
+      lager/foreign-goods-queue) steht nicht in route-aliases.json und daher nicht im Masken-Inventar; ihre Masken
+      haben Zeilenaktionen (Umlagern, Abschliessen, Quelle, Druck) und sind keine Platzhalter. Die Mock-Tests
+      test_foreign_goods_worklist zaehlen nicht. Das Anlegen des Empfangsscheins (POST /einkauf/fremdwaren-einlagerung)
+      hat keinen Test und keine Erfassungsaktion in der Maske; auch die Bestandsfuehrung des Fremdbestands
+      (gehoert dem Kunden, nicht dem Haus) ist nicht belegt.
+    luecken:
+      - text: Empfangsschein Fremdeinlagerung kann in der Maske nicht erfasst werden (kein Anlegen mit Kunde, Positionen, Lagerhalle; kein Empfangsscheindruck im L3-Layout)
+        prio: P1
+      - text: Anlegen und Aendern der Fremdeinlagerung (POST/PUT /einkauf/fremdwaren-einlagerung) nicht gegen PostgreSQL belegt
+        prio: P2
+      - text: Fremdbestand getrennt vom Eigenbestand (Eigentuemer, Bestandsabfrage, Lagergeld) nicht belegt
+        prio: P2
+      - text: Maske lager/fremdware ohne Eintrag in route-aliases.json — im Masken-Inventar nicht als Route gefuehrt
+        prio: P2
+  - id: LG-07
+    name: Inventur erfassen, pruefen und verbuchen
+    l3: LAGER > Module > Inventur — Beleg-Nr., Datum, Niederlassung, Lagerhalle; Zeilen mit Artikel, Menge, Charge/Serie, NVE, Einh.-Preis, Abschlag %, Bewertungspreis, Betrag; Pruefen, Drucken
+    routen: [lager/inventur, lager/permanente-inventur]
+    rolle: LAGER (SCHREIBEN LAGER)
+    nachweise:
+      - tests/test_buchung_nicht_still.py::test_inventur_wird_verbucht_ohne_menge_als_betrag
+      - tests/test_buchung_nicht_still.py::test_fremde_inventur_gibt_es_nicht
+      - tests/test_inventory_mobile_count_booking.py::test_abweichung_wird_als_differenz_gebucht
+      - tests/test_inventory_mobile_count_booking.py::test_zaehlung_ohne_abweichung_bucht_nicht
+    status: teilweise
+    befund: >-
+      Verbuchen einer Inventur ist gegen PostgreSQL belegt: Differenz wird als Bestandsbewegung gebucht, der Beleg
+      steht danach auf "posted", ohne Menge als Eurobetrag im Journal (journal_entry_id leer, bis zur
+      Bestandsbewertung). Mandantengrenze: eine fremde Inventur kann weder gelesen, geaendert, geloescht noch
+      verbucht werden. Die mobile Zaehlung bucht die Differenz zum Buchbestand und bei Gleichstand nichts; dieser
+      Test sucht sich eine vorhandene Bestandszeile als Vorlage (Skip bei leerer Datenbank) und raeumt per Marke
+      auf. Die Masken sind schwach: lager/inventur ist Platzhalter (liest /inventory/inventur, nur id/name/status/
+      datum, nur Export), lager/permanente-inventur ist eine Detailmaske mit Kopfzahlen (Lager, Status, Positionen,
+      Differenzen) und der einen Aktion "Bearbeiten" — keine Zaehlzeilen. test_inventory_counts prueft Schemata
+      und teils nur bedingt (Anlegen nur bei 201) und zaehlt nicht.
+    luecken:
+      - text: Zaehlbeleg-Erfassung in der Maske fehlt — Zeilen mit Artikel, Charge, Lagerfach, Zaehlmenge, Differenz und Verbuchen sind ueber die Oberflaeche nicht moeglich (lager/inventur Platzhalter, permanente-inventur nur Kopf)
+        prio: P1
+      - text: Bewertete Inventur fehlt — Einh.-Preis, Bewertungspreis, Abschlag % und Betrag (L3) sowie die Hauptbuchbuchung der Bestandsdifferenz werden nicht erzeugt
+        prio: P1
+      - text: Anlegen, Zeilen und Periodenabschluss (POST /inventory/counts, /period-close) ohne belastbaren Datenbanktest
+        prio: P2
+      - text: Funktionen Pruefen, Drucken und "Artikel-Konto anzeigen" der L3-Inventurmaske fehlen
+        prio: P3
+  - id: LG-08
+    name: Inventur-Nebenlaeufe (Zaehllisten, Kontrolllauf, Bewertung, Eroeffnung) mit Vier-Augen
+    l3: Inventur — Zaehllisten drucken, Kontrolle, Bewertung; Freigabe durch zweite Person
+    routen: []
+    rolle: LAGER (Pruefen), Lagerleitung LAGER_ADMIN (Freigeben, nicht als Ersteller)
+    nachweise:
+      - tests/test_lager_mask_commands.py::test_inventur_vier_augen_gegen_den_token
+      - tests/test_lager_mask_commands.py::test_inventur_erzeugen_prueft_die_inventur
+      - tests/test_inventory_count_sheet_postgres.py::test_real_rls_snapshot_and_replay
+      - tests/test_inventory_count_sheet_postgres.py::test_stale_line_or_article_value_is_rejected
+    status: teilweise
+    befund: >-
+      Gegen PostgreSQL: Vier-Augen-Prinzip gegen den Token (Freigeber gleich Ersteller wird abgewiesen, Freigabe nur
+      mit Lagerleitung), Erzeugen prueft die Inventur, die Zaehlliste ist mandantenfest (RLS), wiederholbar
+      (Idempotenzschluessel) und lehnt veraltete Zeilen- oder Artikelwerte mit 409 ab. Die Maske
+      lager/inventur-nebenlaeufe hat vier Erzeugeraktionen und Zeilenaktionen (Pruefen, Freigeben, Anwenden,
+      Quelle, Druck), steht aber nicht in route-aliases.json und damit nicht im Masken-Inventar. Die Mock-Tests
+      test_inventory_auxiliary zaehlen nicht. Nicht belegt: die Wirkung von "Anwenden" auf Bestand und Buchung.
+    luecken:
+      - text: Wirkung der Aktion "Anwenden" (Zaehlliste/Bewertung/Eroeffnung wird in den Bestand uebernommen) nicht gegen PostgreSQL belegt
+        prio: P2
+      - text: Maske lager/inventur-nebenlaeufe ohne Eintrag in route-aliases.json — im Masken-Inventar nicht als Route gefuehrt
+        prio: P2
+  - id: LG-09
+    name: Chargen verwalten und nach FEFO entnehmen
+    l3: Chargen-/Serien-Nr. auf allen Bewegungsarten; Lagerfach/Charge in Korrektur, Umlagerung, Inventur; MHD-gefuehrte Entnahme
+    routen: [charge/liste, charge/stamm, charge/stamm/:id, charge/sperrlager, charge/zusammenfuehrung, charge/wareneingang, lager/partiestamm]
+    rolle: LAGER (SCHREIBEN LAGER)
+    nachweise:
+      - tests/test_eudr_chargenkennzeichnung_vertrag.py::test_charge_wird_an_eine_eingereichte_erklaerung_gebunden
+      - tests/test_eudr_chargenkennzeichnung_vertrag.py::test_fremde_charge_ist_nicht_sichtbar_und_nicht_bindbar
+      - playwright-tests/specs/inventory/inv-lifecycle-smoke.spec.ts
+    status: teilweise
+    befund: >-
+      Chargen (domain_inventory.inventory_lots) sind in der Compliance-Kette gegen PostgreSQL belegt: Bindung an
+      Sorgfaltserklaerungen mit Menge, Mandantengrenze, offene Mengen. Der Playwright-Test inv-lifecycle-smoke
+      ruft gegen ein laufendes Backend Lot anlegen (201), auflisten und verbrauchen (Rest 500) auf — das ist eine
+      API-Kette, keine Bedienung der Masken, mit festen Test-Artikel-IDs, und prueft die FEFO-Reihenfolge nicht
+      (nur "Antwort ist ein Array"). Die FEFO-Entnahme (MHD zuerst, mehrere Chargen) ist nur mit MagicMock getestet
+      (test_spec_p1_08_lot_fefo_pick, test_warehouse_wms_fefo, test_dom_inv_004) und zaehlt nicht;
+      test_charges_api akzeptiert 200/201/422 und zaehlt nicht. Lager/partiestamm ist Platzhaltermaske (nur
+      id/name/status/datum, nur Export). Die Chargenliste liest /api/v1/chargen, die FEFO-Entnahme laeuft ueber
+      /lager/lots — ob beide dieselbe Tabelle meinen, ist nicht belegt. Die Masken charge/mischung und
+      charge/teilung haben keinen Routeneintrag im Inventar.
+    luecken:
+      - text: FEFO-Entnahme (fruehestes MHD zuerst, ueber mehrere Chargen, Ablehnung abgelaufener Chargen) nicht gegen PostgreSQL oder per HTTP-Vertrag belegt
+        prio: P2
+      - text: Chargenlisten-Weg (/chargen) und Lot-Weg (/lager/lots) auf eine gemeinsame Tabelle und einen Bestandsbezug pruefen und belegen
+        prio: P2
+      - text: Chargen im Lieferschein-Abgang und in Korrektur, Umlagerung, Inventur (Chargenfuehrung auf allen Bewegungsarten laut L3) nicht belegt
+        prio: P2
+      - text: Partiestamm-Maske ist Platzhalter (lager/partiestamm)
+        prio: P2
+      - text: Chargenzusammenfuehrung, -teilung und -mischung ohne Test und ohne Routeneintrag (charge/mischung, charge/teilung)
+        prio: P3
+  - id: LG-10
+    name: Rueckverfolgbarkeit Charge bis Lieferant und Kunde
+    l3: Chargen-/Serien-Nr.-Rueckverfolgbarkeit auf allen Bewegungsarten; NVE-Verfolgung
+    routen: [lager/rueckverfolgbarkeit, charge/chargen-verfolgung, charge/rueckverfolgung, charge/rueckruf, inventory/epcis]
+    rolle: LAGER und QS lesen
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Masken vorhanden, aber ohne belastbaren Nachweis. lager/rueckverfolgbarkeit ist laut Studio-Umbau nur noch
+      eine Liste der Wiegescheine (Wiegeschein, Menge, Vollstaendigkeitsflags); die zugehoerigen Playwright-Tests
+      (rueckverfolgbarkeit-smoke.spec.ts) sind als test.fixme abgeschaltet. charge/chargen-verfolgung zeigt nur
+      id/name/status/datum, ist aber wegen der Zeilenaktion "oeffnen" formal keine Platzhaltermaske.
+      inventory/epcis ist Platzhalter. Der Test test_wiegung_kanonisch_vertrag belegt nur die Wiegung als
+      Schein in der Tabelle, nicht die Kette Charge > Bewegungen > Kunde. Die Semantic-Chain-Spezifikation
+      wms-silo-semantic-chain akzeptiert 404/422/503 als gueltig und zaehlt nicht.
+    luecken:
+      - text: Kettenansicht Charge vorwaerts/rueckwaerts (Lieferant, Lager, Lieferschein, Kunde) fehlt in der Maske — nur Wiegescheinliste
+        prio: P1
+      - text: Rueckverfolgung und Rueckruf nicht gegen PostgreSQL oder per HTTP-Vertrag belegt
+        prio: P2
+      - text: NVE-Nummer der Versandeinheit (Palettenlabel) und Gefahrgutpunkte in der Rueckverfolgung fehlen
+        prio: P3
+  - id: LG-11
+    name: Einlagerung aus Wareneingang und Auslagerung
+    l3: Wareneingang/Einkauf-Lieferschein bucht Lagerzugang; Ausgang ueber Lieferschein
+    routen: [lager/einlagerung, lager/auslagerung, einkauf/wareneingang]
+    rolle: LAGER; Einkauf gibt Wareneingang frei
+    nachweise:
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_freigabe_bucht_nichts_einlagern_bucht_zugang_storno_bucht_zurueck
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_einlagern_ohne_buchbaren_zugang_bucht_nichts
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_maskenaktion_einlagern_nimmt_das_lager_aus_dem_kopf
+    status: teilweise
+    befund: >-
+      Die Einlagerung aus dem Wareneingang ist gegen PostgreSQL belegt: Freigabe bucht nichts, Einlagern bucht den
+      Zugang genau einmal, Storno bucht zurueck, ohne buchbaren Zugang (Lager, Artikel, Einheit) bucht nichts, die
+      Maskenaktion nimmt das Lager aus dem Belegkopf. Der Weg liegt in der Einkaufsmaske einkauf/wareneingang
+      (Belegliste). Die Lager-Masken lager/einlagerung und lager/auslagerung sind Platzhalter: sie lesen
+      /lager/bestaende, zeigen aber nur id/name/status/updated_at, haben nur Export und keine Aktion. Der
+      Auslagerungsweg ueber Lieferschein und Pickliste ist in Verkauf (VK-03) belegt, nicht hier.
+    luecken:
+      - text: Maske lager/einlagerung und lager/auslagerung sind Platzhalter ohne Aktion — Einlagern/Auslagern aus dem Lager heraus ist nicht bedienbar
+        prio: P2
+      - text: Browserkette Wareneingang > Einlagern durch die Belegmaske mit echtem Backend fehlt
+        prio: P2
+  - id: LG-12
+    name: Lagerorte pflegen (Lagerhalle, Lagerfach/Lagerplatz, Silo)
+    l3: Lagerhalle und Lagerfach als Dimension unter der Niederlassung; Silo-Uebersicht
+    routen: [lager/lagerplaetze, lager/silo-uebersicht, lager/silo-mobil, lager/terminal]
+    rolle: LAGER; Stammdatenpflege Lagerleitung
+    nachweise:
+      - tests/test_bestandsbuch_mandant_richtung.py::test_lager_lesen_und_aendern_nur_im_eigenen_mandanten
+      - tests/test_rls_domain_inventory.py::test_mandantengrenze_je_tabelle
+    status: teilweise
+    befund: >-
+      Lager (Lagerhalle) lesen und aendern ist gegen PostgreSQL mandantenfest belegt, ebenso die Mandantengrenze der
+      Lagertabellen (RLS). Die Masken lager/lagerplaetze, lager/silo-uebersicht, lager/silo-mobil und lager/terminal
+      sind Platzhalter: lagerplaetze liest /lager/bestaende statt der Lagerplaetze, die Silo-Listen lesen die
+      WMS-Silozellen, zeigen aber nur id/name/status/datum. Zonen, Gaenge und Plaetze (WMS) sind nur mit MagicMock
+      getestet (test_warehouse_wms_fefo) und zaehlen nicht.
+    luecken:
+      - text: Lagerplatz-/Lagerfach-Stamm (Zone, Gang, Platz, Sperre) ist als Maske Platzhalter und ohne Datenbanktest
+        prio: P2
+      - text: Silo-Uebersicht zeigt keine Kapazitaet, Belegung oder Charge (Platzhalter, nur id/name/status/datum)
+        prio: P2

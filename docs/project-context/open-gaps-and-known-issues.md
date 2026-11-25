@@ -11,6 +11,9 @@ description: Tracker aller bekannten offenen Luecken, Issues und technischen Sch
 
 # Open Gaps and Known Issues
 
+**Leistungsnachweise 23.11.2026:** Die native Liste verwendet den mandantengebundenen Leistungsnachweis-Endpunkt mit typisierter Antwort. Statusfilter und Tabellenfelder sind im Vertrag geprueft. Die bestehende Quelle liefert hoechstens 1.000 Datensaetze. Anlage, Bearbeitung und Freigabe in Studio sowie der Wareneingangsabgleich bleiben offen.
+
+
 **Studio-Testmigration 14.11.2026:** Die Runtime46-Restliste sinkt von 181 auf
 131 Faelle in 38 Dateien; neun Smoke-Ausnahmen bleiben bestehen. Klassen,
 Workflows, Bestellvorschlagsvarianten, Betriebslisten und Sortendetail haben

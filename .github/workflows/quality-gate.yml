@@ -594,7 +594,23 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build backend image
-        run: docker build -f Dockerfile.backend -t valeo-backend:ci .
+        run: |
+          mkdir -p docs/node_modules docs/artifacts
+          touch docs/.env-evidence-canary.md docs/node_modules/ci-evidence-exclusion-canary.md docs/artifacts/ci-evidence-exclusion-canary.md
+          trap 'rm -f docs/.env-evidence-canary.md docs/node_modules/ci-evidence-exclusion-canary.md docs/artifacts/ci-evidence-exclusion-canary.md' EXIT
+          docker build -f Dockerfile.backend -t valeo-backend:ci .
+
+      - name: Verify backend image documentation evidence
+        run: |
+          docker run --rm --entrypoint python valeo-backend:ci -c '
+          import json
+          from pathlib import Path
+          report = json.loads(Path("/app/artifacts/doc_drift_report.json").read_text())
+          assert report["generated_at"]
+          assert isinstance(report["issues"], list)
+          assert report["summary"]["total_drift_items"] == len(report["issues"])
+          assert report["summary"]["total_drift_items"] == 0, report["summary"]
+          '
 
       - name: Build frontend image
         run: docker build -f Dockerfile.frontend -t valeo-frontend:ci .

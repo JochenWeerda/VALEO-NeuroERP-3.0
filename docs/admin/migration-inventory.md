@@ -402,6 +402,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `ops_chargen_add_mhd_20260215` | add mhd to ops_chargen |
 | `ops_chargen_qs_fields_20260214` | add qs fields to ops_chargen |
 | `ops_domain_initial` | Operations Domain Models Migration |
+| `ops_fahrer_tenant_20261124` | ops_fahrer bekommt tenant_id (M4-LO-P0 Mandantenleck). |
 | `ops_wave106_operations_crud_20260519` | Wave 106: Operations CRUD — Versicherungen, Wartung/Anlagen, Tankstelle/Zapfungen, |
 | `ops_wave107_remaining_stubs_20260520` | ops_wave107_remaining_stubs — DB tables for critical in-memory stores |
 | `optimize_procurement_indexes_20260213` | Optimize indexes for documents/procurement frequent query paths. |

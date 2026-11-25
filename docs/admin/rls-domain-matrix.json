@@ -2,15 +2,15 @@
  "_note": "Generiert von scripts/rls_domain_matrix.py; nicht von Hand aendern.",
  "datenstand": "2026-10-28",
  "summary": {
-  "tabellen": 63,
+  "tabellen": 62,
   "nach_klasse": {
    "A": 35,
    "B": 19,
-   "C": 9
+   "C": 8
   },
   "nach_ursache": {
    "dienst": 16,
-   "position": 7,
+   "position": 6,
    "referenzdaten": 15,
    "mandant_nullbar": 12,
    "standardmandant": 7,
@@ -56,7 +56,6 @@
    },
    "ops": {
     "dienst": 1,
-    "position": 1,
     "referenzdaten": 1,
     "standardmandant": 1
    },
@@ -1054,6 +1053,7 @@
     "app/auth/portal_kunde.py",
     "app/core/customer_master_profile.py",
     "app/core/flow_spine_registry.py",
+    "app/core/public_kunden_mandant.py",
     "app/core/screen_definitions_domain_batch15.py",
     "app/core/screen_definitions_finance_capture.py",
     "app/crm/__init__.py",
@@ -2823,61 +2823,6 @@
    },
    "bereinigung": [],
    "policy": "keine, bis der Dienst tokengebundene Identitaet hat (rls-dienste-identitaet-vorschlag.md)"
-  },
-  {
-   "table": "domain_ops.ops_fahrer",
-   "domain": "ops",
-   "class": "C",
-   "tenant_type": null,
-   "eltern": [
-    "domain_ops.ops_fahrzeuge"
-   ],
-   "ursache": "position",
-   "gruende": [
-    "position"
-   ],
-   "modell": [
-    "app/domains/operations/models.py"
-   ],
-   "leser": [
-    "app/api/v1/endpoints/waage_mobile.py",
-    "app/core/database.py",
-    "app/core/screen_definitions_capture.py",
-    "app/core/screen_definitions_domain_batch15.py",
-    "app/core/supply_chain_tracking.py",
-    "app/domains/logistik/sendung.py",
-    "app/domains/operations/models.py",
-    "app/domains/verladung/models.py",
-    "app/services/whatsapp_notify_service.py"
-   ],
-   "schreiber": [
-    "app/api/v1/endpoints/beleg_vordrucke.py",
-    "app/api/v1/endpoints/personal.py",
-    "app/api/v1/endpoints/transporte.py",
-    "app/core/screen_definitions_listen.py",
-    "app/domains/operations/repository.py",
-    "app/domains/verladung/repository.py"
-   ],
-   "worker": [],
-   "identitaet": {
-    "nutzlast": 2,
-    "token": 3
-   },
-   "standardmandant_stellen": [],
-   "null_stellen": [],
-   "gemeinsam_stellen": [],
-   "daten": {
-    "zeilen": 1,
-    "eltern_fk": [
-     "aktuelles_fahrzeug_id -> domain_ops.ops_fahrzeuge.id"
-    ],
-    "verwaist": 0,
-    "ohne_eltern": 0
-   },
-   "bereinigung": [
-    "tenant_id aus dem Elternbeleg nachziehen, NOT NULL, Verbund-FK (eltern_id, tenant_id)"
-   ],
-   "policy": "getrennt: SELECT eigener Mandant; INSERT/UPDATE/DELETE nur eigener Mandant; tenant_id aus domain_ops.ops_fahrzeuge"
   },
   {
    "table": "domain_ops.ops_fahrzeuge",

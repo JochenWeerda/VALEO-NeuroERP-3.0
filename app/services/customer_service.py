@@ -861,22 +861,29 @@ class CustomerService:
                         "updated_at": None,
                     }
         if row is None:
+            from app.core.public_kunden_mandant import public_kunde_im_mandanten
+
             try:
-                alt = self.db.execute(
-                    text(
-                        """
-                        SELECT kunden_nr, name1, strasse, plz, ort, land, tel, fax, email,
-                               postfach, postfach_plz, postfach_ort, business_partner_id
-                        FROM public.kunden WHERE kunden_nr = :cid LIMIT 1
-                        """
-                    ),
-                    {"cid": customer_id},
-                ).mappings().first()
+                alt = public_kunde_im_mandanten(
+                    self.db, kunden_nr=customer_id, tenant_id=self.tenant_id
+                )
             except Exception:
                 self.db.rollback()
                 alt = None
             if alt is None:
                 return None
+            # Postfach-Felder liegen nicht in public_kunde_im_mandanten — nachladen.
+            try:
+                post = self.db.execute(
+                    text(
+                        "SELECT postfach, postfach_plz, postfach_ort "
+                        "FROM public.kunden WHERE kunden_nr = :cid LIMIT 1"
+                    ),
+                    {"cid": customer_id},
+                ).mappings().first()
+            except Exception:
+                self.db.rollback()
+                post = None
             name = str(alt.get("name1") or alt.get("kunden_nr") or customer_id)[:100]
             number = str(alt.get("kunden_nr") or customer_id)[:50]
             return {
@@ -905,9 +912,9 @@ class CustomerService:
                 "deleted_at": None,
                 "created_at": None,
                 "updated_at": None,
-                "postfach": alt.get("postfach"),
-                "postfach_plz": alt.get("postfach_plz"),
-                "postfach_ort": alt.get("postfach_ort"),
+                "postfach": (post or {}).get("postfach"),
+                "postfach_plz": (post or {}).get("postfach_plz"),
+                "postfach_ort": (post or {}).get("postfach_ort"),
                 "fax": alt.get("fax"),
             }
         city = getattr(row, "city", None)

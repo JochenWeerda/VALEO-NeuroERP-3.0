@@ -11,8 +11,8 @@ Regel: Neue Fehlerursache aus CI -> Pruefung hier ergaenzen, nicht in eine Liste
     python scripts/vor_push.py --ohne-tests     # nur Pruefstand und Register (schnell)
     python scripts/vor_push.py --base origin/main
 
-Pruefstand ist immer die gemeinsame Datenbank valeo_probe (keine weitere Test-DB anlegen). Steht sie hinter dem
-Alembic-Kopf und bringt der Branch keine eigene Migration mit, wird sie unter demselben Namen neu aufgebaut.
+Der gemeinsame Pruefstand wird nur lesend auf Bereitschaft geprueft. Wartung erfolgt separat und koordiniert
+gemaess docs/quality-assurance/test-database-resource-policy-20261001.md.
 """
 from __future__ import annotations
 
@@ -27,9 +27,10 @@ from pathlib import Path
 # VOR_PUSH_REPO: der zu pruefende Baum, wenn das Skript von aussen kommt (Hook auf Branches ohne dieses Skript).
 REPO = Path(os.environ.get("VOR_PUSH_REPO") or Path(__file__).resolve().parents[1]).resolve()
 HIER = Path(__file__).resolve().parent
-VORGABE_PRUEFSTAND = "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"
 BLOCK = 6  # Testdateien je pytest-Prozess (mehr legte Docker Desktop lahm)
-RUECKWEG: str | None = None  # Revision, auf die der Pruefstand nach voruebergehend eingespielten Branch-Migrationen zurueckgeht
+# Read-only-Pruefstand (M0-PROBE-SAFETY): wird nie gesetzt. Stelle_pruefstand_zurueck bleibt no-op,
+# damit Merges mit main (die die Funktion mitbringen) nicht NameError werfen.
+RUECKWEG: str | None = None
 #: Tabellen, die die Branch-Migrationen entfernen: Tests, die sie nennen, laufen mit (19.11.2026: S5 entfernte
 #: domain_einkauf.bestellungen; der RLS-Test nannte sie, aber keines der geaenderten Module - lokal gruen, CI rot).
 ENTFERNTE_TABELLEN: set[str] = set()
@@ -56,6 +57,7 @@ REGISTER: list[tuple[str, list[str], str]] = [
     ("Aktionskatalog der KI-Bedienung", ["python", "scripts/generate_screen_action_catalog.py", "--check"],
      "python scripts/generate_screen_action_catalog.py"),
     ("Masken-Studio-Ratsche", ["python", "scripts/mask_studio_inventory.py", "--check"], "python scripts/mask_studio_inventory.py"),
+    ("Domaenenabnahme (M4)", ["python", "scripts/domaenen_abnahme.py", "--check"], "python scripts/domaenen_abnahme.py"),
     ("Maskenfamilien-Versionen", ["python", "scripts/generate_mask_family_versions.py", "--check"],
      "python scripts/generate_mask_family_versions.py"),
     ("Belegmasken-Versionen", ["python", "scripts/generate_document_screen_versions.py", "--check"],
@@ -98,11 +100,19 @@ def _kopf(titel: str) -> None:
 # ── Pruefstand ────────────────────────────────────────────────────────────────
 
 def _pruefstand_umgebung() -> str:
-    """Beide Variablen auf denselben Pruefstand - ein leerer Wert liess DB-Tests still ueberspringen."""
-    url = os.environ.get("TEST_DATABASE_URL") or VORGABE_PRUEFSTAND
-    if not url.strip() or "valeo_neuro_erp" in url:
-        raise SystemExit(f"TEST_DATABASE_URL zeigt nicht auf den Pruefstand: {url!r}")
-    os.environ["TEST_DATABASE_URL"] = url
+    """Nur einen explizit konfigurierten Pruefstand verwenden, niemals Zugangsdaten ausgeben."""
+    from sqlalchemy.engine import make_url
+
+    url = os.environ.get("TEST_DATABASE_URL", "").strip()
+    try:
+        parsed = make_url(url)
+        name = (parsed.database or "").lower()
+        if (not parsed.drivername.startswith("postgresql") or not parsed.host
+                or not parsed.username or not name or "valeo_neuro_erp" in name
+                or not any(marker in name for marker in ("probe", "test", "pruefstand"))):
+            raise ValueError("ungueltiger Pruefstand")
+    except Exception:
+        raise SystemExit("TEST_DATABASE_URL fehlt oder bezeichnet keinen gueltigen PostgreSQL-Pruefstand.") from None
     os.environ["DATABASE_URL"] = url
     os.environ.setdefault("PGAPPNAME", "agent:vor_push")
     return url
@@ -118,95 +128,68 @@ def _alembic_koepfe() -> set[str]:
 def _db_revisionen(url: str) -> set[str] | None:
     import sqlalchemy as sa
 
+    engine = None
     try:
         engine = sa.create_engine(url, connect_args={"connect_timeout": 5})
-        with engine.connect() as verbindung:
+        with engine.connect().execution_options(postgresql_readonly=True) as verbindung:
             return {str(z[0]) for z in verbindung.execute(sa.text("SELECT version_num FROM alembic_version"))}
     except Exception as fehler:  # noqa: BLE001
-        print(f"  Pruefstand nicht lesbar: {type(fehler).__name__}: {fehler}".splitlines()[0])
+        print(f"  Pruefstand nicht lesbar ({type(fehler).__name__}).")
         return None
-
-
-def _laufe(befehl: list[str], titel: str) -> bool:
-    lauf = subprocess.run(befehl, cwd=REPO, capture_output=True, text=True, check=False, encoding="utf-8",
-                          errors="replace")
-    letzte = [z for z in (lauf.stdout + lauf.stderr).splitlines() if z.strip()][-1:] or [""]
-    print(f"  {'OK ' if lauf.returncode == 0 else 'ROT'}   {titel}: {letzte[0][:160]}", flush=True)
-    return lauf.returncode == 0
+    finally:
+        if engine is not None:
+            engine.dispose()
 
 
 def pruefe_pruefstand(url: str, base: str) -> bool:
-    """valeo_probe so herrichten wie die CI ihre Datenbank: Migrationen, Seed, getrennte Rollen.
-
-    Rollen mit --eigentum wie im Betrieb: sonst migriert Alembic als valeo_owner gegen Objekte von valeo_dev und
-    scheitert ("must be owner").
-    Nur Alembic (pruefstand_db.py) reichte nicht: Ohne Seed fehlten die Bestandszeilen, ohne provision_db_roles die
-    Rechte der App-Rolle - Tests waren lokal rot oder still uebersprungen, in CI gruen (19.11.2026: Inventur- und
-    POS-Retoure-Tests, galten lange als "Umgebung"). Bewusst OHNE create_all: RLS-Inventar und Schemavertraege gelten
-    dem rein migrierten Stand (die CI prueft sie vor create_all); ORM-Zusatztabellen verfaelschten sie.
-    """
-    _kopf("Pruefstand (wie CI)")
-    eigene = [p for p in _git("diff", "--name-only", "--diff-filter=A", f"{base}...HEAD", "--", "alembic/versions").split()
-              if p.endswith(".py")]
-    koepfe, stand = _alembic_koepfe(), _db_revisionen(url)
-    if stand is None:
+    """Lesender Bereitschaftscheck; Wartung niemals automatisch ausfuehren."""
+    _kopf("Pruefstand (lesende Bereitschaftspruefung)")
+    stand, koepfe = _db_revisionen(url), _alembic_koepfe()
+    if stand is None or stand != koepfe:
+        print("  Pruefstand nicht auf dem Branch-Schemakopf; Wartung koordiniert nach Runbook durchfuehren.")
         return False
-    py = sys.executable
-    if eigene:
-        # Die CI prueft den Branch MIT seiner Migration. Ohne sie meldeten DB-gestuetzte Register und Tests den alten
-        # Schemastand (19.11.2026, S5: entfernte Tabellen "gefunden"). Deshalb fuer die Dauer der Pruefung einspielen
-        # und danach auf den vorherigen Stand zurueck (main() -> stelle_pruefstand_zurueck). Scheitert der Rueckweg,
-        # baut der naechste Lauf aus main den Pruefstand neu (unbekannte Revision != Kopf).
-        global RUECKWEG
-        if len(stand) != 1:
-            print(f"  Pruefstand hat mehrere Revisionen {sorted(stand)}; ohne eindeutigen Rueckweg kein Einspielen.")
-            return False
-        print(f"  Branch bringt eigene Migrationen mit ({len(eigene)}): fuer die Pruefung auf {sorted(koepfe)}, "
-              f"danach zurueck auf {sorted(stand)}.")
-        rollen = [py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"]
-        if not _laufe(rollen, "Rollen und Eigentum (vor dem Einspielen)"):
-            return False
-        RUECKWEG = next(iter(stand))
-        vorher = _tabellen(url)
-        if not _laufe([py, "-m", "alembic", "upgrade", "head"], "Branch-Migrationen voruebergehend einspielen"):
-            return False
-        ENTFERNTE_TABELLEN.update(vorher - _tabellen(url))
-        if ENTFERNTE_TABELLEN:
-            print(f"  Entfernte Tabellen: {len(ENTFERNTE_TABELLEN)} - Tests, die sie nennen, laufen mit.")
-        return _laufe(rollen, "Rechte auf neue Objekte")
-    neu_aufgebaut = stand != koepfe
-    if neu_aufgebaut:
-        print(f"  Pruefstand {sorted(stand)} != Kopf {sorted(koepfe)}: wird unter demselben Namen neu aufgebaut.")
-        if not _laufe([py, "scripts/pruefstand_db.py"], "Neuaufbau aus den Migrationen"):
-            return False
-    else:
-        print(f"  Revision: {sorted(koepfe)}")
-    schritte = []
-    # Seed einmal nach dem Aufbau; Merkmal "schon wie CI": die App-Rolle hat Rechte.
-    if neu_aufgebaut or not _wie_ci(url):
-        schritte.append(([py, "-m", "app.seeds.inventory_seed"], "Bestands-Seed"))
-    schritte.append(([py, "scripts/provision_db_roles.py", "--url", url, "--anwenden", "--eigentum"], "Rollen und Rechte"))
-    return all([_laufe(befehl, titel) for befehl, titel in schritte])
-
-
-def _tabellen(url: str) -> set[str]:
-    import sqlalchemy as sa
-
-    with sa.create_engine(url).connect() as verbindung:
-        return {f"{s}.{n}" for s, n in verbindung.execute(sa.text(
-            "SELECT schemaname, tablename FROM pg_tables WHERE schemaname NOT IN ('pg_catalog', 'information_schema')"))}
+    if not _wie_ci(url):
+        print("  benoetigte App-Rolle oder Schema-Recht fehlt; Wartung koordiniert nach Runbook durchfuehren.")
+        return False
+    print("  Revision und geprueftes Schema-Recht bereit; Seed und weitere Rechte nicht vollstaendig geprueft.")
+    return True
 
 
 def _wie_ci(url: str) -> bool:
     import sqlalchemy as sa
 
+    engine = None
     try:
-        with sa.create_engine(url).connect() as verbindung:
+        engine = sa.create_engine(url, connect_args={"connect_timeout": 5})
+        with engine.connect().execution_options(postgresql_readonly=True) as verbindung:
             return bool(verbindung.execute(sa.text(
                 "SELECT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'valeo_app') "
                 "AND has_schema_privilege('valeo_app', 'domain_inventory', 'USAGE')")).scalar())
-    except Exception:  # noqa: BLE001 - fehlt die Rolle, ist der Pruefstand eben noch nicht wie CI
+    except Exception:
         return False
+    finally:
+        if engine is not None:
+            engine.dispose()
+
+
+def konfliktdateien(base: str) -> list[str]:
+    """Nur echte Marker am Zeilenanfang in geaenderten verfolgten Dateien melden."""
+    pfade = set()
+    for argumente in (("diff", "--name-only", f"{base}...HEAD"),
+                       ("diff", "--name-only", "HEAD"), ("diff", "--cached", "--name-only"),
+                       ("diff", "--name-only", "--diff-filter=U")):
+        pfade.update(_git(*argumente).splitlines())
+    marker = re.compile(r"^(?:<{7} .+|>{7} .+)\s*$", re.MULTILINE)
+    rot = set(_git("diff", "--name-only", "--diff-filter=U").splitlines())
+    for name in sorted(pfade):
+        datei = REPO / name
+        if datei.is_file():
+            try:
+                if marker.search(datei.read_text(encoding="utf-8")):
+                    rot.add(name)
+            except (UnicodeError, OSError):
+                continue
+    return sorted(rot)
 
 
 # ── Register ──────────────────────────────────────────────────────────────────
@@ -251,6 +234,44 @@ def _geaenderte_dateien(base: str) -> tuple[set[str], set[str]]:
     return vorhanden, entfernt
 
 
+def _migrationstabellen(pfade: set[str]) -> tuple[set[str], bool]:
+    """Statische DROP-TABLE-Namen; bei nicht eindeutigem DDL konservativ bleiben."""
+    namen: set[str] = set()
+    unklar = False
+    python_drop = re.compile(r"\b(?:op\.)?drop_table\s*\(\s*['\"]([A-Za-z_][\w]*)['\"]", re.I)
+    sql_drop = re.compile(r"\bDROP\s+TABLE\s+(?:IF\s+EXISTS\s+)?(?:[\w]+\.)?([A-Za-z_][\w]*)", re.I)
+    for pfad in pfade:
+        datei = REPO / pfad
+        if not datei.is_file():
+            unklar = True
+            continue
+        try:
+            quelle = datei.read_text(encoding="utf-8")
+        except (UnicodeError, OSError):
+            unklar = True
+            continue
+        py = python_drop.findall(quelle)
+        sql = sql_drop.findall(quelle)
+        namen.update(py + sql)
+        if len(re.findall(r"\bdrop_table\s*\(", quelle, re.I)) > len(py):
+            unklar = True
+        if len(re.findall(r"\bDROP\s+TABLE\b", quelle, re.I)) > len(sql):
+            unklar = True
+        if re.search(r"\b(?:execute|executemany)\s*\(\s*(?:f['\"]|[A-Za-z_]\w*\s*[,)])", quelle):
+            unklar = True
+    return namen, unklar
+
+
+def _base_gueltig(base: str) -> bool:
+    lauf = subprocess.run(["git", "rev-parse", "--verify", "--quiet", f"{base}^{{commit}}"],
+                          cwd=REPO, capture_output=True, text=True, check=False)
+    if lauf.returncode != 0:
+        return False
+    basis = subprocess.run(["git", "merge-base", base, "HEAD"], cwd=REPO,
+                           capture_output=True, text=True, check=False)
+    return basis.returncode == 0
+
+
 def betroffene_tests(base: str) -> list[str]:
     vorhanden, entfernt = _geaenderte_dateien(base)
     tests = {p for p in vorhanden if p.startswith("tests/") and Path(p).name.startswith("test_") and p.endswith(".py")}
@@ -273,9 +294,41 @@ def betroffene_tests(base: str) -> list[str]:
         for treffer in _git("grep", "-l", "-F", f".{name}", "--", "tests/*.py", "tests/**/*.py").split():
             if genau.search((REPO / treffer).read_text(encoding="utf-8", errors="ignore")):
                 tests.add(treffer)
+    migrationen = {p for p in vorhanden | entfernt if p.startswith("alembic/versions/")
+                   and p.endswith((".py", ".sql"))}
+    if migrationen:
+        namen, unklar = _migrationstabellen(migrationen)
+        # Schema-Vertraege laufen immer; dynamische DDL erweitert auf DB-nahe Tests.
+        schema = re.compile(r"(?:schema|migration|alembic|rls|database|postgres|db_)", re.I)
+        for datei in (REPO / "tests").rglob("test_*.py"):
+            rel = str(datei.relative_to(REPO)).replace("\\", "/")
+            if schema.search(rel):
+                tests.add(rel)
+            if namen:
+                try:
+                    quelle = datei.read_text(encoding="utf-8", errors="ignore")
+                except OSError:
+                    unklar = True
+                    continue
+                if any(re.search(r"\b" + re.escape(name) + r"\b", quelle) for name in namen):
+                    tests.add(rel)
+        if unklar:
+            # Nicht auf Vermutungen verlassen, wenn dynamisches DDL nicht aufloesbar ist.
+            raise RuntimeError("Migration enthaelt nicht statisch auswertbares DDL; nach koordinierter Pruefstandsvorbereitung mit --volle-tests erneut pruefen.")
     tests.update(p for p in IMMER if (REPO / p).exists())
     tests.update(str(p.relative_to(REPO)).replace("\\", "/") for p in (REPO / "tests").glob("*ratsche*.py"))
     return sorted(t for t in tests if (REPO / t).exists() and "/fixtures/" not in t)
+
+
+def alle_testdateien() -> list[str]:
+    """Alle verfolgten Python-Testdateien fuer den ausdruecklichen Volltest."""
+    lauf = subprocess.run(["git", "ls-files", "-z", "--", "tests"], cwd=REPO,
+                          capture_output=True, check=False)
+    if lauf.returncode != 0:
+        raise RuntimeError("Verfolgte Testdateien konnten nicht ermittelt werden.")
+    return sorted(p for p in lauf.stdout.decode("utf-8").split("\0")
+                  if p and Path(p).name.startswith("test_") and p.endswith(".py")
+                  and "/fixtures/" not in p and (REPO / p).is_file())
 
 
 def pruefe_tests(dateien: list[str]) -> list[str]:
@@ -365,26 +418,43 @@ class _Sperre:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--base", default="origin/main")
-    parser.add_argument("--ohne-tests", action="store_true")
+    testmodus = parser.add_mutually_exclusive_group()
+    testmodus.add_argument("--ohne-tests", action="store_true")
+    testmodus.add_argument("--volle-tests", action="store_true", help="alle verfolgten Python-Testdateien pruefen")
     args = parser.parse_args()
-    for strom in (sys.stdout, sys.stderr):  # Windows-Codepage: Umlaute und Ersatzzeichen nicht abstuerzen lassen
-        strom.reconfigure(errors="replace")
+    for strom in (sys.stdout, sys.stderr):
+        if hasattr(strom, "reconfigure"):
+            strom.reconfigure(errors="replace")
 
+    if not _base_gueltig(args.base):
+        print("Ungueltiger Vergleichsstand; Pruefung abgebrochen.")
+        return 1
+    konflikte = konfliktdateien(args.base)
+    if konflikte:
+        print("Konfliktmarker in geaenderten Dateien: " + ", ".join(konflikte))
+        return 1
     url = _pruefstand_umgebung()
     with _Sperre():
         try:
-            stand_ok = pruefe_pruefstand(url, args.base)
+            if not pruefe_pruefstand(url, args.base):
+                print("  ROT - Pruefstand nicht bereit; Register und Tests nicht gestartet.")
+                return 1
+            try:
+                testdateien = [] if args.ohne_tests else (
+                    alle_testdateien() if args.volle_tests else betroffene_tests(args.base)
+                )
+            except RuntimeError as fehler:
+                print(str(fehler))
+                return 1
             register_rot = pruefe_register(args.base)
-            tests_rot = [] if args.ohne_tests else pruefe_tests(betroffene_tests(args.base))
+            tests_rot = [] if args.ohne_tests else pruefe_tests(testdateien)
         finally:
             stelle_pruefstand_zurueck()
 
     _kopf("Ergebnis")
-    if stand_ok and not register_rot and not tests_rot:
+    if not register_rot and not tests_rot:
         print("  GRUEN - Push freigegeben.")
         return 0
-    if not stand_ok:
-        print("  Pruefstand nicht bereit.")
     for name in register_rot:
         print(f"  Register rot: {name}")
     if tests_rot:

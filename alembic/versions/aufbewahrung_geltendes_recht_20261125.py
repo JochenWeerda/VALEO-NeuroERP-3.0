@@ -1,7 +1,7 @@
 """Aufbewahrungsrichtlinien auf geltendes Recht (BEG IV, Fristbeginn Kalenderjahresende) - 25.11.2026.
 
 Revision ID: aufbewahrung_geltendes_recht_20261125
-Revises: folgeartikel_fremdschluessel_20261124
+Revises: ops_fahrer_tenant_20261124
 
 Nutzerauftrag 25.11.2026: "Aufbewahrungspflichten und Fristen nach geltendem Recht umsetzen". Die Standardzeilen
 (``tenant_id = 'default'``) aus ``add_gobd_compliance_20260220`` fuehrten Buchungsbelege und Rechnungen mit 10 Jahren
@@ -20,7 +20,7 @@ from alembic import op
 from sqlalchemy import text
 
 revision = "aufbewahrung_geltendes_recht_20261125"
-down_revision = "folgeartikel_fremdschluessel_20261124"
+down_revision = "ops_fahrer_tenant_20261124"
 branch_labels = None
 depends_on = None
 

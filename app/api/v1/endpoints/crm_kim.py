@@ -16,12 +16,13 @@ from __future__ import annotations
 import time
 from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.core.public_kunden_mandant import KUNDE_GEHOERT_MANDANT, public_kunde_im_mandanten
 from app.core.tenant import get_tenant_id
 from app.services.crm_kontakt_service import CrmKontaktService
 from app.services.crm_notification_service import CrmNotificationService
@@ -223,14 +224,22 @@ def _customer_from_row(r: dict) -> Customer:
     )
 
 
-_CUST_SELECT = """
+_CUST_SELECT = f"""
     SELECT k.kunden_nr, k.name1, k.strasse, k.plz, k.ort, k.tel, k.fax, k.email, k.homepage,
            c.kv_limit, c.sales_rep_vb, c.dispatcher_disp, c.abc_status, c.revenue_status,
            c.chef_anweisung, c.alert_messages, c.profile_summary, c.cust_group, c.co_affiliation
     FROM public.kunden k
     LEFT JOIN public.kunden_crm360 c ON c.kunden_nr = k.kunden_nr
     WHERE coalesce(k.geloescht, FALSE) = FALSE
+      AND {KUNDE_GEHOERT_MANDANT}
 """
+
+
+def _require_kunde_im_mandanten(db: Session, kunden_nr: str, tenant_id: str) -> dict[str, Any]:
+    row = public_kunde_im_mandanten(db, kunden_nr=kunden_nr, tenant_id=tenant_id)
+    if row is None or row.get("geloescht"):
+        raise HTTPException(status_code=404, detail="Kunde nicht gefunden")
+    return row
 
 
 # ── Kundenliste / Stammdaten ──────────────────────────────────────────────────
@@ -248,7 +257,7 @@ def list_customers(
     limit = max(1, min(limit, 1000))
     offset = max(0, offset)
     sql = _CUST_SELECT
-    params: dict[str, Any] = {"lim": limit, "off": offset}
+    params: dict[str, Any] = {"lim": limit, "off": offset, "tid": tenant_id}
     if q and q.strip():
         sql += " AND (k.name1 ILIKE :q OR k.kunden_nr ILIKE :q OR coalesce(k.ort,'') ILIKE :q)"
         params["q"] = f"%{q.strip()}%"
@@ -263,7 +272,12 @@ def get_customer(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> Optional[Customer]:
-    r = _safe(db, _CUST_SELECT + " AND k.kunden_nr = :k", {"k": kunden_nr}, many=False)
+    r = _safe(
+        db,
+        _CUST_SELECT + " AND k.kunden_nr = :k",
+        {"k": kunden_nr, "tid": tenant_id},
+        many=False,
+    )
     return _customer_from_row(dict(r)) if r else None
 
 
@@ -275,6 +289,8 @@ def update_customer(
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
     import json
+
+    _require_kunde_im_mandanten(db, kunden_nr, tenant_id)
 
     # Adressfelder am kunden-Stamm, Vertriebsfelder am Satellit kunden_crm360.
     if body.street is not None:
@@ -317,6 +333,7 @@ def list_contacts(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> list[ContactPerson]:
+    _require_kunde_im_mandanten(db, kunden_nr, tenant_id)
     # Nutzt die vorhandene L3-Tabelle (vorname/nachname/telefon1/anrede/…, kein tenant_id).
     rows = _safe(
         db,
@@ -326,6 +343,7 @@ def list_contacts(
         {"k": kunden_nr},
     )
     if not rows:
+        # Alt-Schema ohne email-Spalte: gleiche Liste ohne email.
         rows = _safe(
             db,
             "SELECT id, anrede, nachname, vorname, position, prioritaet, telefon1, telefon2, mobil, "
@@ -356,6 +374,7 @@ def create_contact(
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ) -> StatusOut:
+    _require_kunde_im_mandanten(db, kunden_nr, tenant_id)
     # Vorhandene L3-Tabelle: id ist serial (auto), kein tenant_id/wochenplan.
     db.execute(
         text(

@@ -12169,6 +12169,7 @@
             "app/api/v1/endpoints/crm_partner_klaerfaelle.py",
             "app/api/v1/endpoints/crm_segments.py",
             "app/api/v1/endpoints/finance_stammdaten.py",
+            "app/core/public_kunden_mandant.py",
             "app/crm/router.py",
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
@@ -13681,6 +13682,7 @@
             "app/api/v1/endpoints/stammdaten_bearbeiten.py",
             "app/api/v1/schemas/crm.py",
             "app/auth/portal_kunde.py",
+            "app/core/public_kunden_mandant.py",
             "app/core/screen_definitions_finance_capture.py",
             "app/domains/logistik/strecke.py",
             "app/infrastructure/models/__init__.py",
@@ -40112,6 +40114,11 @@
             {
               "name": "updated_by",
               "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
               "type": "character varying"
             }
           ],

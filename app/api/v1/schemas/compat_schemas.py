@@ -32,6 +32,27 @@ class EinkaufDocOut(BaseSchema):
     id: str = ""
 
 
+class ServiceEntrySheetOut(BaseSchema):
+    """Existing service-entry read projection; no approval or posting authority."""
+
+    id: str
+    number: str
+    supplierId: str | None
+    purchaseOrderId: str | None
+    serviceDate: str
+    description: str
+    quantity: float
+    unitPrice: float
+    amount: float
+    status: str
+    createdAt: str
+
+
+class ServiceEntrySheetListOut(BaseSchema):
+    items: list[ServiceEntrySheetOut]
+    total: int = Field(ge=0)
+
+
 class InventoryOut(BaseSchema):
     model_config = _ConfigDict(extra="allow")
 

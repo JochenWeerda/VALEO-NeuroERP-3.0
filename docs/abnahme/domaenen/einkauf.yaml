@@ -1,0 +1,257 @@
+# Abnahmeblatt Einkauf — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skill l3-einkauf-referenz: Bestellung, Einkauf-Lieferschein, Einkauf-Rechnung);
+# die Ernte-Abrechnung der Referenz hat ein eigenes Blatt. Dazu die Einkaufsprozesse, die VALEO ueber die L3-Kette
+# hinaus fuehrt (Anfrage/RFQ, Anlieferavis, Auftragsbestaetigung, 3-Wege-Abgleich, Bestellvorschlag).
+# Status: abgenommen | teilweise | fehlt. "abgenommen" verlangt Nachweis, keine offene P0/P1-Luecke und keine
+# Platzhaltermaske; die Belegkette im Browser ist Teil der Maskenabnahme.
+# Nicht als Nachweis gezaehlt (reine Mock-/Unit-Tests ohne Datenbank oder Browserketten mit offenen Statuslisten):
+# tests/test_einkauf_3way_match_ers_rfq.py, tests/test_einkauf_3wm_001.py, tests/test_dom_proc_004.py (MagicMock-DB),
+# playwright-tests/specs/procurement/proc-lifecycle-smoke.spec.ts und e2e-matrix/p2p-semantic-chain.spec.ts
+# (erwarten Statuslisten wie [200, 404, 422, 503]), einkauf/procurement-match-smoke.spec.ts (nur Ladetest).
+id: einkauf
+titel: Einkauf (Anfrage bis Eingangsrechnung)
+reifematrix: D02
+l3_referenz: l3-einkauf-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [einkauf]
+screen_domains: [einkauf]
+prozesse:
+  - id: EK-01
+    name: Anfrage (RFQ) und Lieferantenangebot bis zum Zuschlag
+    l3: Bestellung, Reiter ANFRAGE/ANGEBOT/AUFTRAG und Schaltflaeche "Lieferanten-Angebot"
+    routen: [einkauf/anfragen, einkauf/anfrage/:id, einkauf/anfrage-erstellen, einkauf/angebote, einkauf/angebot/:id, einkauf/angebote-vergleich, einkauf/rfq-bids]
+    rolle: EINKAUF (Schreiben); Mandant aus dem Token
+    nachweise:
+      - tests/test_rfq_integration.py
+      - tests/test_angebot_bestellung.py
+    status: teilweise
+    befund: >-
+      HTTP-Vertrag gegen PostgreSQL: RFQ anlegen, ohne Lieferanten nicht versenden (422), zwei Angebote
+      vergleichen (Preisrang), Zuschlag erzeugt einen DocFlow-Bestellentwurf mit der Menge der Anfrage; fehlende
+      oder Altidentitaet gibt 401, fremder Mandant wird abgewiesen. Lieferantenangebot wird mit seinen Positionen
+      genau einmal zur Bestellung (Mandantengrenze, Trockenlauf, Aktion aus der Maske), Anfrage per
+      convert-to-order zum Entwurf. Die Listen Anfragen-Erstellung und Angebotsvergleich sind duenn (zwei bis vier
+      Spalten, nur Export, keine Zeilenaktion) und im Browser nicht gegen das Backend bedient; der
+      Playwright-P2P-Test erwartet offene Statuslisten und zaehlt nicht.
+    luecken:
+      - text: Browserkette Anfrage > Angebote vergleichen > Zuschlag > Bestellentwurf durch die Masken mit echtem Backend fehlt
+        prio: P2
+      - text: Angebotsvergleich und Anfrage-Erstellung als Listen ohne Zeilenaktion (Zuschlag erteilen, Anfrage versenden) in der Maske
+        prio: P2
+      - text: Versand der Anfrage an mehrere Lieferanten (Mail/Portal) nur als Weigerung ohne Lieferant belegt, nicht der erfolgreiche Versand
+        prio: P3
+  - id: EK-02
+    name: Bestellung erfassen, freigeben und an den Lieferanten senden
+    l3: ERFASSUNG > Einkauf > Bestellung (Strg+F5) — Kreditor, Kommission, gepl. Lieferdatum, Positionen mit Kontrakt-Nr., Lager, Frachtauftrag
+    routen: [einkauf, einkauf/bestellungen, einkauf/bestellungen/neu, einkauf/bestellungen/:id, einkauf/bestellung/:id]
+    rolle: EINKAUF (beleg_write); Preise nur mit Preisrecht; Lager liest ohne Preise
+    nachweise:
+      - tests/test_beleg_liste.py::test_die_bestellung_geht_ueber_das_einkaufspostfach
+      - tests/test_beleg_liste.py::test_die_bestellung_geht_per_post_und_portal_nicht_der_lieferschein
+      - tests/test_beleg_reste_docflow.py::test_versandwege_der_bestellung
+      - tests/test_beleg_reste_docflow.py::test_offenes_bestellobligo
+      - tests/test_bestell_leser_docflow.py::test_compat_liste_und_suche_zeigen_die_docflow_bestellung
+      - tests/test_beleg_rechte.py::test_ohne_rolle_und_mit_rolle_des_anderen_bereichs_gibt_es_den_beleg_nicht
+    status: teilweise
+    befund: >-
+      Bestellung ist DocFlow-Beleg der Familie beleg (Variante purchase_order) und einziger Bestellspeicher; Liste
+      zeigt genau die DocFlow-Belege der Art und nur mit Preisrecht Betraege (test_beleg_liste), Versand ueber
+      Einkaufspostfach, Post und Portal (Fax ohne Faxdienst gilt nicht als versandt), offenes Bestellobligo,
+      Mandanten- und Rollengrenze gegen PostgreSQL. Die Leser (Compat-Liste, Artikelkontext, KPIs, Lieferantenreiter)
+      lesen DocFlow. Die Maskenaktionen Freigeben und Freigabe anfordern/erteilen sind fuer die Belegfamilie
+      geprueft, aber nicht an der Bestellung. Nicht belegt: Lieferanten-Artikelnummer an der Position (Feld fehlt im
+      Positionsvertrag), Lager/Lagerhalle/Fach je Position, Frachtauftrag aus der Bestellung (die Frachtmaske ist
+      eine Platzhaltermaske), "wie vorherige Bestellung" (F11). Die Maske einkauf/bestellung-freigabe ist ein
+      Cockpit mit nur Aktualisieren.
+    luecken:
+      - text: Lieferanten-Artikelnummer (Lief.-Artikel-Nr.) fehlt an der Bestellposition; DocflowLineInput kennt nur die eigene Artikelnummer
+        prio: P2
+      - text: Lager, Lagerhalle und Lagerfach je Bestellposition (L3-Positionsgrid) nicht im Positionsvertrag
+        prio: P2
+      - text: Frachtauftrag aus der Bestellung (L3-Schaltflaeche) fehlt; einkauf/frachtauftraege-eingang und einkauf/lieferschein-frachtauftrag zeigen nur die Platzhaltermaske einkauf/frachtauftraege-liste
+        prio: P2
+      - text: Browserkette Bestellung erfassen > freigeben > versenden durch die Belegmaske mit echtem Backend fehlt
+        prio: P2
+      - text: Funktion "wie vorherige Bestellung" (L3 F11) nicht vorhanden oder nicht belegt
+        prio: P3
+  - id: EK-03
+    name: Wareneingang (Einkaufs-Lieferschein) aus der Bestellung erfassen und einlagern
+    l3: ERFASSUNG > Einkauf > Lieferschein (Strg+F6) — "Bestellung(en) importieren", Chargen, Kontrakt, Zwischenhaendler-Reiter
+    routen: [einkauf/wareneingang, einkauf/lieferschein-erfassen, einkauf/lieferschein-erfassung]
+    rolle: LAGER (ohne Preise) und EINKAUF; Einlagern mit Lagerrecht
+    nachweise:
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_freigabe_bucht_nichts_einlagern_bucht_zugang_storno_bucht_zurueck
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_maskenaktion_einlagern_nimmt_das_lager_aus_dem_kopf
+      - tests/test_beleg_reste_docflow.py::test_ueberlieferung_wird_erfasst_und_gutgeschrieben
+      - tests/test_rls_domain_einkauf.py::test_fachkette_waren_und_rechnungseingaenge_nur_eigener_mandant
+      - tests/test_docflow_einkauf_gutschrift.py::test_bestellung_zwei_wareneingaenge_eingangsrechnung_bucht_ueber_finance
+    status: teilweise
+    befund: >-
+      Wareneingang entsteht als Folgebeleg der Bestellung mit Teilmengen (zwei Wareneingaenge je 6 und 4 t),
+      Einlagern bucht den Lagerzugang genau einmal, Storno bucht ihn zurueck, ungueltige Zugaenge (Einheit, Lager,
+      leere Positionen) buchen nichts; Ueberlieferung wird erfasst und gutgeschrieben statt negativ; Mandantengrenze
+      per RLS. Die Listenmaske einkauf/wareneingang ist die Belegliste goods-receipt (Spalten Nr., Datum, Partner,
+      Status, Referenz, Aktionen Neu/Export/Druck). Nicht belegt: mehrere Bestellungen in einen Wareneingang
+      importieren (die Umwandlung nimmt genau eine Quelle), die L3-Agrarspalten (Anerkennung, Serien-Nr., Strecke,
+      Bio/Nachhaltigkeit, Muster-Nr.) und der Zwischenhaendler-Reiter; Charge und Kontraktbezug je Position sind im
+      Vertrag vorhanden, aber nicht an einem Wareneingang geprueft.
+    luecken:
+      - text: Mehrere Bestellungen in einen Wareneingang importieren (L3 "Bestellung(en) importieren") fehlt; Umwandlung nur aus einer Quelle
+        prio: P2
+      - text: Agrarspalten der Wareneingangsposition (Anerkennung, Serien-Nr., Strecke, Bio/Nachhaltigkeit, Muster-Nr.) und Zwischenhaendler-Angaben gegen L3 nicht abgeglichen
+        prio: P2
+      - text: Charge und Kontraktabruf aus dem Wareneingang (contract_ref) nicht als Integrationstest belegt
+        prio: P2
+      - text: Browserkette Bestellung > Wareneingang > Einlagern durch die Belegmaske fehlt
+        prio: P2
+  - id: EK-04
+    name: Anlieferavis erfassen und Wareneingang daraus buchen
+    l3: kein eigenes Gegenstueck in der L3-Referenz (Vorankuendigung der Lieferung vor dem Lieferschein)
+    routen: [einkauf/anlieferavis, einkauf/anlieferavis/:id, einkauf/anlieferavis/neu, einkauf/anlieferavis-erfassen]
+    rolle: EINKAUF und LAGER
+    nachweise:
+      - tests/test_wareneingang_avis.py::test_ware_im_lager_und_bestellung_beliefert
+      - tests/test_wareneingang_avis.py::test_kein_zweiter_wareneingang
+      - tests/test_wareneingang_avis.py::test_ein_fremder_mandant_bucht_nichts
+      - tests/test_docflow_wareneingang_lagerzugang.py::test_wareneingang_aus_avis_wandelt_die_docflow_bestellung_und_lagert_ein
+    status: teilweise
+    befund: >-
+      Die Maskenaktion "Wareneingang buchen" wandelt die DocFlow-Bestellung mit der Restmenge um und lagert in
+      einem Commit ein; nur das Offene wird eingelagert, kein zweiter Wareneingang, ohne Lieferschein-Nummer oder
+      Lager, mit fremdem Lager, ohne Bestellbezug oder von fremdem Mandanten wird nichts gebucht; die Lagerauswahl
+      kennt nur eigene Lager. Gegen PostgreSQL. Browserkette fehlt; Avis ist kein L3-Prozess und wird nur gegen die
+      eigene Kette gemessen.
+    luecken:
+      - text: Browserkette Avis erfassen > Wareneingang buchen durch die Maske mit echtem Backend fehlt
+        prio: P2
+  - id: EK-05
+    name: Eingangsrechnung erfassen, pruefen, freigeben und buchen
+    l3: ERFASSUNG > Einkauf > Rechnung (Strg+F8) — "Lieferschein-Auswahl", zwei MwSt-Stufen, Beleg-/Rechnungsnummer, "Originalrechnung"
+    routen: [einkauf/rechnungseingaenge, einkauf/rechnungseingang, einkauf/rechnung-eingang-erfassung]
+    rolle: EINKAUF (Erfassen, Buchen nach Rechtekatalog); Zweitfreigabe maker-checker; Storno nur Buchhaltung/Bereichsleitung
+    nachweise:
+      - tests/test_docflow_einkauf_gutschrift.py::test_bestellung_zwei_wareneingaenge_eingangsrechnung_bucht_ueber_finance
+      - tests/test_docflow_einkauf_gutschrift.py::test_storno_der_eingangsrechnung_bucht_gegen_und_storniert_den_posten
+      - tests/test_eingangsrechnung_steuerschluessel.py
+      - tests/test_eingangsrechnung_mandant.py
+      - tests/test_freigabe.py::test_eine_moegliche_dublette_sperrt_bis_zur_unabhaengigen_freigabe
+      - tests/test_ap_workflow_security_contract.py
+    status: teilweise
+    befund: >-
+      Buchung gegen PostgreSQL ueber Finance: Aufwand und Vorsteuer im Soll, Kreditor brutto im Haben, auf den Cent
+      genau; Vorsteuer je Steuerschluessel und Aufwandskonto getrennt (mehrere Steuersaetze je Beleg, wie die zwei
+      MwSt-Stufen der L3-Rechnung); unklare Rechnungen werden nicht gebucht, Buchungsfehler lassen die Rechnung
+      freigegeben statt "verbucht" zu melden; Storno bucht gegen und storniert den offenen Posten. Mandantengrenze,
+      Rollen vor der Datenbank, eine Person erfuellt keine Zwei-Stufen-Freigabe; Dublette sperrt bis zur
+      unabhaengigen Freigabe; verifizierter Bearbeiter in der Freigabekette. Nicht belegt: die Rechnung aus mehreren
+      Wareneingaengen (L3 "Lieferschein-Auswahl" nimmt einen oder mehrere Lieferscheine; die Umwandlung hier genau
+      einen), Skonto/Zahlungsbedingung aus der Bestellung, Originalrechnung (Scan) am Beleg aus der Maske.
+    luecken:
+      - text: Eingangsrechnung aus mehreren Wareneingaengen zusammenfassen (L3 Lieferschein-Auswahl) fehlt; Umwandlung goods_receipt > purchase_invoice nur aus einer Quelle, sonst freie Erfassung ohne Bezug
+        prio: P1
+      - text: Zahlungsbedingung und Skonto aus Bestellung/Lieferant in der Eingangsrechnung nicht belegt
+        prio: P2
+      - text: Originalrechnung (Scan, E-Rechnung-Eingang) am Eingangsbeleg aus der Maske nicht als Kette belegt
+        prio: P2
+      - text: Browserkette Wareneingang > Eingangsrechnung > Buchen durch die Belegmaske mit echtem Backend fehlt
+        prio: P2
+  - id: EK-06
+    name: Einkaufsgutschrift und Lieferantenbelastung
+    l3: Rechnung/Lieferschein-Korrektur beim Kreditor; "Gutschrift kennzeichnen"
+    routen: [einkauf/gutschriften-belastungen, einkauf/gutschrift-belastung]
+    rolle: EINKAUF (Buchen, Verrechnen mit Recht des Einkaufs); Storno Buchhaltung; Gutschrift mit Bezug ist Routine, ohne Bezug ueber der Schwelle gesperrt
+    nachweise:
+      - tests/test_docflow_einkauf_gutschrift.py::test_einkaufsgutschrift_bucht_und_mindert_die_verbindlichkeit
+      - tests/test_docflow_einkauf_gutschrift.py::test_gutschrift_ohne_steuerschluessel_wird_nicht_gebucht
+      - tests/test_docflow_einkauf_gutschrift.py::test_eine_gebuchte_gutschrift_wird_nicht_ohne_gegenbuchung_storniert
+      - tests/test_freigabe_import_einkaufsmemo.py::test_gutschrift_und_belastung_bucht_der_einkauf_selbst
+      - tests/test_freigabe_import_einkaufsmemo.py::test_ohne_recht_des_einkaufs_wird_keine_gutschrift_angelegt
+      - tests/test_freigabe.py::test_gutschrift_mit_bezug_ist_routine_ohne_bezug_ueber_der_schwelle_gesperrt
+    status: teilweise
+    befund: >-
+      Gegen PostgreSQL: Einkaufsgutschrift bucht und mindert die Verbindlichkeit, ohne Steuerschluessel wird nicht
+      gebucht, eine gebuchte Gutschrift wird nicht ohne Gegenbuchung storniert; Lieferantengutschrift und
+      -belastung bucht der Einkauf selbst, ohne Recht wird nichts angelegt, Beleg eines anderen Mandanten wird nicht
+      gebucht, grosse Gutschrift wird gebucht und gemeldet. Die Gutschrift ist Folgebeleg der Eingangsrechnung
+      (purchase_invoice_to_credit_memo). Nicht belegt: die Browserkette und die Retoure an den Lieferanten
+      (einkauf/retouren, Liste mit Nummer/Lieferant/Status ohne Nachweis); Warenruecknahme mit Lagerabgang aus der
+      Gutschrift ist nicht geprueft.
+    luecken:
+      - text: Retoure an den Lieferanten (Warenruecksendung mit Lagerabgang und Gutschrift) ohne Nachweis und ohne Wirkung der Listenmaske einkauf/retouren
+        prio: P2
+      - text: Browserkette Eingangsrechnung > Gutschrift mit Bezugsrechnung durch die Belegmaske fehlt
+        prio: P2
+  - id: EK-07
+    name: 3-Wege-Abgleich Bestellung, Wareneingang, Eingangsrechnung
+    l3: kein eigenes Gegenstueck in der L3-Referenz (dort nur Rueckverfolgung ueber Lief.-LS-Nr. in der Rechnungsposition)
+    routen: [einkauf/rechnung-abgleich, einkauf/wareneingangsabgleich]
+    rolle: EINKAUF lesen; Abweichung sperrt bis zur unabhaengigen Freigabe
+    nachweise:
+      - tests/test_drei_wege_abgleich_docflow.py::test_teillieferung_rechnung_und_preisabweichung
+      - tests/test_drei_wege_abgleich_docflow.py::test_stornierter_wareneingang_und_fremder_mandant
+      - tests/test_freigabe.py::test_abweichung_von_der_bestellung_sperrt_die_frei_erfasste_rechnung_nicht
+      - tests/test_bestell_leser_docflow.py::test_ordrsp_und_rechnungspruefung_lesen_die_docflow_belege
+    status: teilweise
+    befund: >-
+      Der Abgleich rechnet gegen PostgreSQL aus den DocFlow-Belegen: Menge je Position aus der Umwandlung
+      (teilgeliefert 4 von 10), Rechnungswert gegen den gelieferten Wert, Abweichung (33 statt 30 EUR) als
+      Blocker mit ERS-Vorschau, Storno des Wareneingangs oeffnet die Position wieder, fremder Mandant findet nichts.
+      Die Pruefung laeuft aber auf Dienstebene (ProcurementMatchService), nicht ueber die HTTP-Route. Die Maske
+      einkauf/wareneingangsabgleich ist eine generische Platzhaltermaske (Spalten id/name/status/updated_at, nur
+      Export): der Anwender sieht den Abgleich nirgends; einkauf/rechnung-abgleich zeigt nur Rechnungsnummer,
+      Lieferant und Status. Die Altnachweise test_einkauf_3way_match_ers_rfq, test_einkauf_3wm_001 und
+      test_dom_proc_004 pruefen mit MagicMock-Datenbank und der Playwright-Test nur den Ladevorgang der Maske; beide
+      zaehlen nicht.
+    luecken:
+      - text: Maske Wareneingangs-Abgleich ist eine Platzhaltermaske; Abgleich (Bestellmenge, geliefert, fakturiert, Wertabweichung, Ausnahmen) ist in der Oberflaeche nicht sichtbar oder bedienbar
+        prio: P1
+      - text: HTTP-Vertragstest der Abgleichsendpunkte (procurement_match) gegen PostgreSQL fehlt; geprueft ist nur der Dienst
+        prio: P2
+      - text: ERS (Gutschriftsverfahren) und Toleranzen je Lieferant nur mit Mock-Tests, kein Integrationstest
+        prio: P2
+  - id: EK-08
+    name: Auftragsbestaetigung des Lieferanten (AB/ORDRSP) gegen die Bestellung abgleichen
+    l3: Bestellung, Reiter ANFRAGE/ANGEBOT/AUFTRAG (Auftragsbestaetigung des Lieferanten)
+    routen: [einkauf/auftragsbestaetigungen, einkauf/auftragsbestaetigung/:id, einkauf/auftragsbestaetigung-erfassen, einkauf/auftragsbestaetigung/neu]
+    rolle: EINKAUF (Pruefen, Bestaetigen)
+    nachweise:
+      - tests/test_bestell_leser_docflow.py::test_ordrsp_und_rechnungspruefung_lesen_die_docflow_belege
+    status: teilweise
+    befund: >-
+      Der Abgleich der Auftragsbestaetigung liest die DocFlow-Bestellung (gegen PostgreSQL belegt). Das Parsen und
+      der Abgleich der ORDRSP-Nachricht sind reine Funktionen und in tests/test_ordrsp_service.py ohne Datenbank
+      geprueft (jede Abweichung wird genannt); das ist ein Unit-Test der Funktion, kein Beleg der Kette. Nicht
+      belegt: Anlegen der Auftragsbestaetigung und EDI-Eingang ueber HTTP (POST /einkauf/auftragsbestaetigungen,
+      /edi-ordrsp), die Maskenaktionen Pruefen und Bestaetigen und die Wirkung einer Abweichung auf die Bestellung.
+    luecken:
+      - text: HTTP-Vertragstest gegen PostgreSQL fuer Auftragsbestaetigung anlegen und EDI-ORDRSP einlesen fehlt
+        prio: P2
+      - text: Wirkung der Maskenaktionen Pruefen und Bestaetigen auf die Bestellung (Termin, Preis, Menge) nicht belegt
+        prio: P2
+  - id: EK-09
+    name: Bestellvorschlag berechnen, speichern und in Bestellentwuerfe umsetzen
+    l3: kein eigenes Gegenstueck in der L3-Referenz (Disposition ausserhalb der Erfassungskette)
+    routen: [einkauf/bestellvorschlaege, einkauf/bestellvorschlaege/ansicht/:variante, einkauf/bestellvorschlag-kontrakt, einkauf/bestellvorschlag-lager, einkauf/bestellvorschlag-rohware, einkauf/bestellvorschlag-verbrauch, einkauf/bestellvorschlag-verkauf, disposition/bestell-vorschlag]
+    rolle: EINKAUF; Bearbeiter aus dem Token
+    nachweise:
+      - tests/test_bestellvorschlag_docflow.py::test_vorschlag_wird_docflow_bestellentwurf_in_dt
+      - tests/test_bestellvorschlag_docflow.py::test_berechnung_speichern_und_zu_bestellung_als_kommando
+      - tests/test_einkauf_bedarf_abverkauf.py::test_der_vorschlag_aus_dem_verkauf_findet_seine_auftraege
+      - tests/test_einkauf_bedarf_abverkauf.py::test_saisonal_schaut_ins_vorjahr_nicht_auf_den_letzten_monat
+    status: teilweise
+    befund: >-
+      Gegen PostgreSQL: je Lieferant entsteht ein DocFlow-Bestellentwurf, die Menge steht in der Einheit des Preises
+      (dt bei Preis je 100 kg), ohne Steuervorgabe und mit dem Bearbeiter aus dem Token; Berechnung, Speichern und
+      "zu Bestellung" laufen als Maskenkommando; der Bedarf wird aus dem Abverkauf nachrechenbar gerechnet
+      (2 t/Tag, 90 Tage, Horizont, Saison, Losgroesse nur mit Kostensaetzen). Die Ansichten Lager, Rohware,
+      Verbrauch, Verkauf und gespeicherte Vorschlaege teilen sich die Familie; die Wirkung je Ansicht (besonders
+      Kontrakt-/Rohwarenbezug) ist einzeln nicht belegt. test_bestellvorschlag_studio_fixture vergleicht nur
+      Fixture und Register und zaehlt nicht.
+    luecken:
+      - text: Ansicht Rohware (Kontraktbezug, offene Kontraktmengen) und Verbrauch nicht einzeln gegen PostgreSQL belegt
+        prio: P2
+      - text: Browserkette Vorschlag berechnen > speichern > Bestellentwurf durch die Maske mit echtem Backend fehlt
+        prio: P2
+      - text: Rueckschreiben eines uebernommenen Vorschlags (Status, Verknuepfung zur erzeugten Bestellung) in der Liste gespeicherter Vorschlaege nicht belegt
+        prio: P3
