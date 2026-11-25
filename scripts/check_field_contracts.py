@@ -129,6 +129,21 @@ def _eigenschaften(spec: dict, operation: dict | None) -> set[str] | None:
     return set(eigenschaften) or None
 
 
+def _projektionsfelder(spec: dict, operation: dict | None, projektion: dict[str, str]) -> set[str]:
+    response = (((operation or {}).get("responses") or {}).get("200") or {}).get("content") or {}
+    root = (response.get("application/json") or {}).get("schema") or {}
+    fields = set()
+    for key, path in projektion.items():
+        schema = root
+        for segment in path.split("."):
+            schema = (_komponente(spec, schema).get("properties") or {}).get(segment)
+            if not schema:
+                break
+        if schema:
+            fields.add(key)
+    return fields
+
+
 def _zeilenform(spec: dict, operation: dict | None) -> set[str] | None:
     """Die Feldnamen **einer Zeile** — oder None, wenn sie nicht deklariert ist.
 
@@ -191,7 +206,11 @@ def pruefe() -> dict:
             if not endpunkt or not endpunkt.startswith("/api/"):
                 continue
 
-            vorhanden = _eigenschaften(spec, _operation(spec, endpunkt))
+            operation = _operation(spec, endpunkt)
+            projektion = screen.get("entityProjection") if quelle == "entity" else None
+            vorhanden = _eigenschaften(spec, operation)
+            if projektion and vorhanden is not None:
+                vorhanden = _projektionsfelder(spec, operation, projektion)
             if vorhanden is None:
                 nicht_pruefbar.append(f"{screen_id}/{tab.get('key')} -> {endpunkt}")
                 continue

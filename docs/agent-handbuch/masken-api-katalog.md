@@ -11,7 +11,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 # Masken-API-Katalog
 
-> Generiert aus `app/core/screen_definitions.py` (779 Masken).
+> Generiert aus `app/core/screen_definitions.py` (780 Masken).
 
 ## Übersicht
 
@@ -20,14 +20,15 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `abrechnung/eb-lieferschein-kontrolle` | EB-Lieferschein-Kontrolle | finance | niedrig | — | `GET /api/v1/masks/abrechnung/eb-lieferschein-kontrolle/agent-contract` |
 | `admin/agenten-integration` | Agenten integration | admin | niedrig | — | `GET /api/v1/masks/admin/agenten-integration/agent-contract` |
 | `admin/ai-approvals` | AI-Freigaben | admin | niedrig | — | `GET /api/v1/masks/admin/ai-approvals/agent-contract` |
-| `admin/api-keys` | Api keys | admin | niedrig | — | `GET /api/v1/masks/admin/api-keys/agent-contract` |
+| `admin/api-keys` | API-Schlüssel | admin | niedrig | — | `GET /api/v1/masks/admin/api-keys/agent-contract` |
 | `admin/audit-log` | Audit log | admin | niedrig | — | `GET /api/v1/masks/admin/audit-log/agent-contract` |
 | `admin/audit-log-liste` | Audit-Log | admin | niedrig | — | `GET /api/v1/masks/admin/audit-log-liste/agent-contract` |
 | `admin/backup-restore` | Backup restore | admin | niedrig | — | `GET /api/v1/masks/admin/backup-restore/agent-contract` |
 | `admin/belegfolgekonfig` | Belegfolgekonfig | admin | niedrig | — | `GET /api/v1/masks/admin/belegfolgekonfig/agent-contract` |
 | `admin/benutzer-liste` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/benutzer-liste/agent-contract` |
 | `admin/berechtigungen-matrix` | Berechtigungen matrix | admin | niedrig | — | `GET /api/v1/masks/admin/berechtigungen-matrix/agent-contract` |
-| `admin/branches` | Branches | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
+| `admin/branches` | Niederlassungen | admin | niedrig | — | `GET /api/v1/masks/admin/branches/agent-contract` |
+| `admin/branches/detail` | Niederlassung | admin | mittel | — | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
 | `admin/command-monitor` | Command monitor | admin | niedrig | — | `GET /api/v1/masks/admin/command-monitor/agent-contract` |
 | `admin/compliance-dashboard` | Compliance-Dashboard | compliance | niedrig | — | `GET /api/v1/masks/admin/compliance-dashboard/agent-contract` |
 | `admin/control-center` | Admin Kontrollzentrum | admin | mittel | — | `GET /api/v1/masks/admin/control-center/agent-contract` |
@@ -54,10 +55,10 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `admin/rollen-verwaltung` | Rollen | platform | mittel | — | `GET /api/v1/masks/admin/rollen-verwaltung/agent-contract` |
 | `admin/system-einstellungen` | System einstellungen | admin | niedrig | — | `GET /api/v1/masks/admin/system-einstellungen/agent-contract` |
 | `admin/tankstelle-evb` | Tankstelle evb | admin | niedrig | — | `GET /api/v1/masks/admin/tankstelle-evb/agent-contract` |
-| `admin/tenants` | Tenants | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
+| `admin/tenants` | Mandanten | admin | niedrig | — | `GET /api/v1/masks/admin/tenants/agent-contract` |
 | `admin/terminologie` | Terminologie | platform | niedrig | — | `GET /api/v1/masks/admin/terminologie/agent-contract` |
 | `admin/token-consumption` | Technisches Verbrauchsnebenbuch | platform | niedrig | — | `GET /api/v1/masks/admin/token-consumption/agent-contract` |
-| `admin/users` | Users | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
+| `admin/users` | Benutzer | admin | niedrig | — | `GET /api/v1/masks/admin/users/agent-contract` |
 | `admin/webhooks-liste` | Webhook-Verwaltung | admin | mittel | — | `GET /api/v1/masks/admin/webhooks-liste/agent-contract` |
 | `admin/webshop` | Webshop-Anbindungen | sales | mittel | — | `GET /api/v1/masks/admin/webshop/agent-contract` |
 | `admin/webshop-bestellungen` | Webshop-Bestellungen | sales | niedrig | — | `GET /api/v1/masks/admin/webshop-bestellungen/agent-contract` |
@@ -668,7 +669,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `preise/rabattgruppen` | Neue Rabattgruppe [RAG] | preise | niedrig | — | `GET /api/v1/masks/preise/rabattgruppen/agent-contract` |
 | `preise/zu-abschlaggruppen` | Neue Zu-/Abschlaggruppe [ZAGR] | preise | niedrig | — | `GET /api/v1/masks/preise/zu-abschlaggruppen/agent-contract` |
 | `process/approval-density` | Freigabe-Dichte | platform | niedrig | — | `GET /api/v1/masks/process/approval-density/agent-contract` |
-| `process/background-jobs` | Hintergrund-Jobs | platform | niedrig | — | `GET /api/v1/masks/process/background-jobs/agent-contract` |
+| `process/background-jobs` | Hintergrundjobs | platform | niedrig | — | `GET /api/v1/masks/process/background-jobs/agent-contract` |
 | `produktion/chargen-bearbeiten` | Chargen-Nummern bearbeiten | inventory | niedrig | — | `GET /api/v1/masks/produktion/chargen-bearbeiten/agent-contract` |
 | `produktion/mischfutter-produktion` | Mischfutter-Produktion | futtermittel | niedrig | — | `GET /api/v1/masks/produktion/mischfutter-produktion/agent-contract` |
 | `produktion/produktions-dokumente-drucken` | Produktions dokumente drucken | produktion | niedrig | — | `GET /api/v1/masks/produktion/produktions-dokumente-drucken/agent-contract` |
@@ -851,9 +852,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/api-keys` — Api keys
+### `admin/api-keys` — API-Schlüssel
 
-**Zweck:** Stamm- und Fachmaske fuer Api keys (admin/api-keys).
+**Zweck:** Status und Gültigkeit von API-Schlüsseln prüfen.
 
 | | |
 |---|---|
@@ -865,17 +866,11 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/admin/benutzer/{entity_id}`
+- `list` → `/api/v1/admin/api-keys`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Api keys {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+- Welche Schlüssel sind bald abgelaufen?
 
 ---
 
@@ -1041,9 +1036,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/branches` — Branches
+### `admin/branches` — Niederlassungen
 
-**Zweck:** Stamm- und Fachmaske fuer Branches (admin/branches).
+**Zweck:** Niederlassungen — admin
 
 | | |
 |---|---|
@@ -1055,17 +1050,31 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
+- `branches` → `/api/v1/admin/branches`
+
+---
+
+### `admin/branches/detail` — Niederlassung
+
+**Zweck:** Niederlassung — admin
+
+| | |
+|---|---|
+| ScreenDefinition | `GET /api/v1/masks/admin/branches/detail/screen-definition` |
+| Agent-Contract | `GET /api/v1/masks/admin/branches/detail/agent-contract` |
+| Readiness | `GET /api/v1/masks/admin/branches/detail/readiness` |
+| Rollout-Route | `/mask-rollout/admin__branches__detail/:entityId` |
+| Adapter | `native` (temporary=nein) |
+
+**Data Sources:**
+
 - `entity` → `/api/v1/admin/branches/{entity_id}`
-
-**Beispiel-Prompts:**
-
-- Zeige Stammdaten fuer Branches {entity_id}.
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `bearbeiten` | Umbenennen | moderate | nein | `/api/v1/admin/branches/{entity_id}/actions/bearbeiten` |
 
 ---
 
@@ -1540,9 +1549,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `admin/tenants` — Tenants
+### `admin/tenants` — Mandanten
 
-**Zweck:** Stamm- und Fachmaske fuer Tenants (admin/tenants).
+**Zweck:** Die vom Mandantendienst erlaubten Mandanten anzeigen.
 
 | | |
 |---|---|
@@ -1554,23 +1563,17 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/tenants/{entity_id}`
+- `list` → `/api/v1/tenants/`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Tenants {entity_id}.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+- Welche Mandanten darf ich administrieren?
 
 ---
 
-### `admin/users` — Users
+### `admin/users` — Benutzer
 
-**Zweck:** Stamm- und Fachmaske fuer Users (admin/users).
+**Zweck:** Benutzer mit Rolle und letzter Anmeldung pruefen.
 
 | | |
 |---|---|
@@ -1582,17 +1585,18 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/admin/benutzer/{entity_id}`
+- `list` → `/api/v1/admin/benutzer`
 
 **Beispiel-Prompts:**
 
-- Zeige Stammdaten fuer Users {entity_id}.
+- Wer hat sich seit drei Monaten nicht angemeldet?
+- Welche Benutzer sind Administratoren?
 
 **Actions:**
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `bearbeiten` | Bearbeiten | safe | nein | `—` |
+| `export` | CSV-Export | safe | nein | `Exportiert die Liste mit ihren Spalten; keine Serverwirkung.` |
 
 ---
 
@@ -21025,7 +21029,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `dispo` | Dispo-Arbeitsraum | safe | nein | `Oeffnet den bestehenden Dispo-Arbeitsraum.` |
+| `dispo` | Dispo-Arbeitsraum | safe | nein | `—` |
 | `aufloesen` | Auflösen | safe | nein | `Liest den Lieferschein und setzt das Ziel.` |
 | `anlegen` | Tour anlegen | safe | nein | `/api/v1/logistik/tours/actions/anlegen` |
 
@@ -22700,9 +22704,9 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ---
 
-### `process/background-jobs` — Hintergrund-Jobs
+### `process/background-jobs` — Hintergrundjobs
 
-**Zweck:** Hintergrundverarbeitung ueberwachen und nachsteuern.
+**Zweck:** Hintergrundjobs im aktiven Mandanten überwachen.
 
 | | |
 |---|---|
@@ -22714,7 +22718,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `queue` → `/api/v1/process/background-jobs/queue`
+- `jobs` → `/api/v1/process/background-jobs`
 
 **MCP-Tools (Domäne):**
 
@@ -22722,7 +22726,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Beispiel-Prompts:**
 
-- Welche Jobs sind in der Queue fehlgeschlagen?
+- Welche Hintergrundjobs sind fehlgeschlagen?
 
 ---
 

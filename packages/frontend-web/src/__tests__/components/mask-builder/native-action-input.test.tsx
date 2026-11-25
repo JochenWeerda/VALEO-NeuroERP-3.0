@@ -33,14 +33,18 @@ vi.mock('@/lib/api-client', () => ({
   apiClient: { post: mocks.post.mockResolvedValue({}), get: vi.fn() },
   getAxiosErrorMessage: (e: unknown) => String(e),
 }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({
     plan: { actions: SD.actions }, entityData: { id: 'opp-1', name: 'Weizen 2027' }, entityError: null,
     tableRows: {}, tableQueryStates: {}, tableTotals: {}, messages: [], lookupBindings: {},
     setTableQuery: vi.fn(), updateUserOverlay: vi.fn(), resetUserOverlay: vi.fn(), refetch: vi.fn(),
     isEntityLoading: false, userOverlay: undefined,
   }),
+}))
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction: mocks.execute, loadingActionKey: null }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction }: { onAction: (k: string, p: Record<string, unknown>) => void }) => (
     <button onClick={() => onAction('create_activity', { id: 'opp-1' })}>Aktivität anlegen</button>
   ),

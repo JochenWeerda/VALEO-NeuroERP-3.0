@@ -918,8 +918,8 @@ Dateibesitz: bank_reconciliation.py, chart_of_accounts.py, financial_reports.py,
 ## M3-FIBU-ALTSPEICHER-20261123 — zur Abnahme, Claude Code (M3)
 
 Owner: Claude Code. Meilenstein: M3. PRs #165 (Schein-Fibu), #167 (Finanz-Altwege, gestapelt auf #165).
-PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
-PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
+- PR #165: app/routers/fibu_router.py und public.offene_posten/buchungen/konten/anlagen entfernt (Buchen am Journal vorbei, Mahnstufe ohne Mahnung, Zahlungslauf ohne Zahlung); Nebenbuch-Abstimmung je Nebenbuch gegen Sammelkonto (SKR03 1400/1600) ueber posted+reversed; public.nebenbuch_abstimmungen erstmals per Migration mit RLS.
+- PR #167: Wechselkurse, Buchungsschemata, Kostenstellen, Abschlusschecklisten, Intercompany in app/finance/router.py (Tabellen ohne Migration, DELETE Checkliste ohne Wirkung, zwei unerreichbare Wege) entfernt; fuehrend /exchange-rates, /booking-templates, /kostenrechnung, /closing-checklists. Ratsche tests/test_finance_modelle_frisch.py.
 Dateibesitz: app/finance/router.py, models.py, schemas.py, steuerschluessel.py (DEBITORENKONTO), app/core/container_config.py, … (gekuerzt; Volltext unter M3-FIBU-ALTSPEICHER-20261123 in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md))
 
 ## M2-FIBU-PLATZHALTERQUELLEN-20261123 — offen (M2)
@@ -974,9 +974,131 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
 
+## M2-HARVEST-INSPECT - reserviert, Codex Lead
+Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
+
+M2-HARVEST-INSPECT: vorhandene Regelwahl als lokale Aktion load_row deklariert. Sie verwendet bereits geladene Regelzeilen und denselben Handler wie die Zeilenauswahl. Zwei Fachvertraege gruen, Inventar 18 -> 17 nicht verfuegbare Aktionen, uebrige Ratschen unveraendert. Browserabnahme offen.
+
+## M2-TOUR-NAVIGATION - reserviert, Codex
+
+Ziel: Disposition und Beladung als bestehende lokale Navigation deklarieren. Dateibesitz: Tour-Definition und daraus erzeugte Inventare. Abnahme: beide Zielrouten und genaue Ratschen-Differenz. Browsernachweis offen.
+
+M2-TOUR-NAVIGATION umgesetzt: Dispo-Arbeitsraum und Beladung verwenden den vorhandenen Browser-Handler. Python-Definition, Frontend-Fallback und Versionenkatalog sind synchron. Mit der Regelinspektion sinken die nicht verfuegbaren Aktionen von 18 auf 15. Browserabnahme offen.
+
+## M2-FEED-NAVIGATION - reserviert, Codex
+
+Ziel: drei bestehende Navigationen der Fuetterungsberatung deklarieren. Dateibesitz: ScreenDefinitions der Fuetterungsberatung und erzeugter Versionskatalog. Abnahme: vorhandene Zielrouten, unveraenderte Rollen und Inventar.
+
+M2-FEED-NAVIGATION umgesetzt: Bestandsliste und mobile Fuetterungsdokumentation sind in drei Aktionen als Browser-Navigation deklariert. Zielrouten und vorhandene Handler abgeglichen. Geprueft: Studio-Inventar 292 -> 289 auf diesem Zweig, 15 nicht verfuegbare Aktionen. Browserabnahme offen.
+
+## M2-LOCAL-PRINT - reserviert, Codex
+
+Ziel: vorhandenen Browserdruck fuer Fuetterungsplan, Fremdware, Inventur und Abfrage-Center deklarieren. Dateibesitz: ScreenDefinitions und erzeugte Inventare. Abnahme: Handlerabgleich und Studio-Ratsche.
+
+M2-LOCAL-PRINT umgesetzt. Alle vier UI-Handler oeffnen den Browserdruck; es entsteht kein Server-Command. Studio-Ratsche 289 -> 285 undeklarierte Aktionen. Versionskatalog synchron, Katalog der Agentenwerkzeuge unveraendert. Die vorherige Fuetterungsnavigation ist mit sieben Definitionstests abgenommen.
+
+## M2-WORKSPACE-PRODUCTION-NAV - reserviert, Codex
+
+Ziel: bestehende Navigation zur Druckmaske und zum zuletzt geoeffneten Dokument deklarieren. Dateibesitz: zugehoerige ScreenDefinitions. Abnahme: Handler, Zielroute, Inventar.
+
+M2-WORKSPACE-PRODUCTION-NAV umgesetzt. Druckaktion fuehrt zur vorhandenen Druckmaske; Dokumentaktion nutzt den vorhandenen Link der eigenen Historie. Studio-Inventar 285 -> 283. Browserabnahme offen.
+
+## M2-PRUEFKORB-NAV - reserviert, Codex
+
+Ziel: vorhandenen Belegsprung deklarieren. Dateibesitz: Definition des Pruefkorbs und abgeleiteter Versionskatalog. Abnahme: serverseitige Belegroute, bestehender UI-Handler und Studio-Inventar.
+
+M2-PRUEFKORB-NAV umgesetzt: Zum Beleg nutzt die serverseitig abgeleitete Belegroute. Drei gezielte Maskenvertraege bestanden, Studio-Inventar 283 -> 282 auf diesem Zweig. Browserabnahme offen.
+
+## M2-ADMIN-BRANCHES-RUNTIME - reserviert, Codex
+
+Befund: /admin/branches hat keinen ID-Parameter und mountet ausschliesslich MadeByStudioDetailRuntimeWire. Deshalb endet der normale Einstieg vor dem Datenabruf bei der Datensatzauswahl. Die Detaildefinition erwartet bezeichnung/status, die vorhandene mandantengebundene Branch-API liefert branch_number/name/is_active. Folgeauftrag: Listenquelle am Einstieg anbinden, Auswahl und typgerechte Details belegen. Bearbeiten erst mit passendem Feldschema, bestehender Admin-Autorisierung und einem registrierten Kommando anbinden; ein Deklarationswechsel allein behebt den Laufzeitfehler nicht.
+
+Listeneinstieg umgesetzt: /admin/branches liest den vorhandenen mandantengebundenen Listenvertrag und zeigt Nummer, Name und Aktivstatus. Regressionstest und Studio-Inventar gruen. Die unwirksame Bearbeitungsdeklaration wurde entfernt; typisierte Detailansicht und Rollen-/Command-Anbindung der Bearbeitung sowie Browserabnahme bleiben offen.
+
+Detailansicht umgesetzt: Aus der Niederlassungsliste zur Studio-Objektseite. Die Ansicht liest den vorhandenen mandantengebundenen Detailvertrag und zeigt Nummer, Namen, Aktivstatus und Zeitstempel. Zwei Vertragspruefungen sowie Studio-Gates A/B/C/E gruen. Bearbeitung und Browserabnahme offen.
+
+Schreibvertrag vorbereitet: Adressen werden beim Anlegen und Aendern als echtes JSON gebunden, einschliesslich Apostroph, Boolean und null. SQLAlchemy-Bindung und bestehende Lesemaske mit vier gezielten Tests geprueft. Freigabe der Studio-Bearbeitung steht aus.
+
+PostgreSQL-Abnahme bestanden: Auf valeo_probe (mahnstufen_verlauf_entfernen_20261123) wurden Anlegen, Aendern und erneutes Lesen einer JSONB-Adresse geprueft. Der Test legt seinen eigenen Mandantendatensatz fuer den Fremdschluessel in derselben Transaktion an und rollt beide Datensaetze zurueck. Drei Tests bestanden.
+
+Niederlassungs-Update liefert die in derselben SQL-Anweisung geaenderte Zeile zurueck. Der Mandantenfilter bleibt Teil des Updates. Das vermeidet zwei Leseabfragen und eine konkurrierende Neulesung nach dem Commit. Drei gezielte Tests auf valeo_probe bestanden; Studio-Schreibbindung weiter offen.
+
+Versionsschutz fuer Niederlassungen: REST liefert eine aus updated_at abgeleitete ganzzahlige Version und akzeptiert expected_version. Abgleich im mandantengebundenen UPDATE, bei veraltetem Stand 409. Bestehende PUT-Aufrufe ohne Version bleiben kompatibel. OpenAPI nachgezogen, fuenf Tests inklusive Konfliktnachweis auf valeo_probe bestanden. Die verpflichtend versionsgebundene Studio-/CLI-/MCP-Aktion bleibt offen.
+
+Umbenennen in der Studio-Detailmaske umgesetzt. Der Admin-Endpunkt verwendet den bestehenden mandantengebundenen Versionsschutz sowie die gemeinsame Laufzeit fuer Trockenlauf, Idempotenz, Audit und Outbox. CLI-Register erzeugt; MCP klassifiziert die Aktion als gesperrt. Sechs Tests inklusive PostgreSQL-Trockenlauf, Ausfuehrung und Replay sowie Studio-Inventar gruen. Browser und MCP-Freigabe bleiben offen.
+
+CLI-Vertrag belegt: Die Kommandozeile verwendet die echte Studio-Definition und sendet Version, Auditgrund und Idempotenzschluessel an den Umbenennungs-Endpunkt. Der Test prueft den HTTP-Aufruf gegen das Backend-Schema mit simuliertem Transport. Ein Agent wird dabei vor dem Schreibaufruf abgewiesen. Browserabnahme offen.
+
+HTTP-Abnahme im ASGI-Test: Admin-Rolle, Pflichtversion, Idempotenz und Auditgrund geprueft. Fehlender Auditgrund wird vor der Ausfuehrung mit 422 abgewiesen; der Trockenlauf funktioniert ohne Schreibmetadaten. Sieben Tests gruen. Laufender Docker-Dienst: /api/v1/openapi.json antwortete nicht innerhalb von 30 Sekunden, Auslieferungsstand und Browserabnahme sind damit offen.
+
+Browserabnahme konkret eingegrenzt: Lokales Backend-Image accepted-a5f60738a und Frontend-Image portal-3b750ff68 melden healthy. Die serverseitige Umbenennung fehlt im laufenden Backend nachweislich. Fuer die Sichtpruefung ist ein gemeinsam aus demselben freigegebenen Stand gebautes Frontend und Backend erforderlich. PR #179 (21cf2416f) wartet auf CI und Pflichtreview.
+
+Frontend-Abnahme auf Komponentenebene: Umbenennen ueber echten Eingabedialog, Vorbelegung, Trockenlauf, Vorschau und Begründigung. Der Ausfuehrungsaufruf sendet nur Name, gelesene Version und Auditgrund. Ein neuer und 17 angrenzende Vitest-Faelle gruen. Reale Browserabnahme bleibt offen.
+
+## M2-READVIEW-IMPORT - reserviert, Codex
+
+Ziel: direkten Rueckimport des Lese-Dialogs in das Mask-Builder-Paket aufloesen. Dateibesitz: ReadViewDialog.tsx. Abnahme: bestehender Test des Lese-Dialogs.
+
+Lese-Dialog importiert Renderer und Laufzeit direkt. 13 Vitest-Faelle bestanden. Weitere Rueckimporte und Auswirkungen auf die Rollup-Warnungen sind offen.
+
+Folgeschritt M2-READVIEW-IMPORT: direkter Import in UniversalNativeDetailPage und UniversalNativeCockpitPage; betroffene Vitest-Mocks auf dieselben Module umstellen.
 ## M3-LAGERGELD-RECHNUNG-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3 (Lagergeld als Ausgangsrechnung). Der Lagergeld-Lauf stand auf "posted" ohne Rechnung, Erloes oder offenen Posten. Neu: POST /api/v1/inventory/storage-fees/runs/{run_id}/rechnungen legt je Einlagerer einen DocFlow-Rechnungsentwurf (sales_invoice, Quelle lagergeld) mit einer Position je Lagergeld-Zeile an; Verkaufs-Steuerschluessel ausdruecklich (keine Vorgabe), wiederholbar ohne Doppel. Freigabe und Buchung ueber die Belegmaske.
 Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/storage_fees.py, tests/test_lagergeld_rechnung.py.
+
+M2-READVIEW-IMPORT: Detail- und Cockpit-Maske verwenden direkte Modulimporte. Die 77 Mask-Builder-Testdateien sind mit 562 Tests gruen. main b881f45da integriert, beide Workboard-Eintraege erhalten, OpenAPI-Drift-Check gruen.
+
+## M0-I18NEXT-DEPENDENCY - reserviert, Codex
+
+Ziel: Auditbefund GHSA-6jcc-5g8w-32mx durch korrigierte i18next-Version schliessen. Dateibesitz: Frontend-Paket, pnpm-Lock und Migrationsnachweis. Abnahme: Installations- und i18n-Vertrag.
+
+GHSA-6jcc-5g8w-32mx behoben: i18next 26.3.4 im Frontend und Lockfile. Frozen-Lockfile-Installation, produktives Node-Audit (0 Befunde), TypeScript und zehn Frontend-Tests bestanden. GitHub-Nachlauf offen.
+
+Nachweis fuer den Major-Wechsel: Echter i18next-Laufzeittest mit Deutsch, Englisch und Spanisch inklusive Speicherung der Sprachauswahl. 19 Vitest-Faelle inklusive Bestellvorschlag und Prozessstudio bestanden.
+
+## M0-KI-ROUTER-DUPLIKAT - reserviert, Codex
+
+Ziel: zweiten Mount desselben KI-Usability-Routers unter /api/v1 entfernen. Dateibesitz: KI-Mount in main.py und generierte API-Doku. Abnahme: bestehende Pfade bleiben erhalten, doppelte OpenAPI-Operationen der KI entfallen.
+
+Doppelten KI-Usability-Mount entfernt. 4.052 HTTP-Operationen behalten unveraenderte Methoden, Pfade und IDs. OpenAPI zeigt nun die Bearer-Pflicht der beiden Aktionsabfragen. Drei KI-Duplikatwarnungen entfallen, acht POS-/Reporting-/CRM-Warnungen bleiben separat offen.
+
+## M0-POS-REPORTS-ROUTER-DUPLIKATE - reserviert, Codex
+
+Ziel: zwei verdeckte Platzhalter fuer Zahlarten und Berichtsexport entfernen. Dateibesitz: deren Routendeklarationen und OpenAPI. Abnahme: fuehrende Handler und Pfade bleiben erhalten.
+
+Verdeckten statischen Zahlarten-Handler und leeren Berichtsexport entfernt. OpenAPI beschreibt jetzt die bereits wirksamen Handler. Abgleich: 3.221 Pfade, unveraenderte Methoden und Operation-IDs; nur die beiden erwarteten GET-Vertraege geaendert. Sechs CRM-Duplikatwarnungen offen.
+
+## M0-CRM-ROUTER-DUPLIKATE - reserviert, Codex
+
+Ziel: sechs ueberschattete CRM-Registrierungen entfernen. Dateibesitz: betroffene Dekoratoren in app/crm/router.py, API-Artefakte. Abnahme: alle HTTP-Pfade und IDs bleiben erhalten, OpenAPI beschreibt die zuerst registrierten Handler.
+
+Sechs ueberschattete CRM-Registrierungen entfernt. OpenAPI ohne Duplikatwarnungen erzeugt. 3.221 Pfade, Methoden und IDs erhalten. Das Endpoint-Inventar zur Entfernung des Reporting-Stubs nachgezogen.
+## M0-I18NEXT-GHSA-6JCC-20261123 — in arbeit, Cursor (M0)
+Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+main 4859a973d integriert. Dessen i18next-Aufloesung 26.7.2 uebernommen; Frozen-Lockfile-Installation und echter Sprachwechseltest gruen.
+
+Review PR 179: Rollenzuordnung aus dem Endpunkt erzeugt (admin erforderlich), HTTP prueft jetzt menschliche Identitaet entsprechend CLI und Studio. 10 HTTP-Tests, 17 Frontend-Rollentests sowie 11 Registrierungs- und OpenAPI-Vertraege bestanden. GitHub-Pflichtreview braucht eine berechtigte Kennung ausserhalb der PR-Autorenschaft.
+
+## M2-ADMIN-USERS-LIST - reserviert, Codex
+
+Ziel: /admin/users mit der bestehenden Studio-Benutzerliste verdrahten; keine zweite fachliche Liste. Dateibesitz: beide Definitionen, Routeneinstieg und abgeleitete Artefakte. Abnahme: gleiche Spalten, Datenquelle und Listenlaufzeit.
+
+/admin/users verwendet denselben Studio-Listenbuilder und denselben geschuetzten Lese-Endpunkt wie /admin/benutzer. Unwirksame Bearbeitungsdeklaration entfiel. Zwei Regressionstests und Studio-Gates A/B/C/E gruen; 280 undeklarierte Aktionen auf diesem Zweig. Browserabnahme offen.
+
+## M2-ADMIN-TENANTS-LIST - reserviert, Codex
+
+Ziel: Mandanteneinstieg als Studio-Liste ueber den kanonischen, serverseitig autorisierten Leseweg. Dateibesitz: ScreenDefinition, Einstieg und erzeugte Kataloge. Abnahme: Felder und paginierter GET-Vertrag.
+
+Mandanteneinstieg als Studio-Liste umgesetzt. Der bestehende Lifecycle-Dienst bestimmt weiterhin den sichtbaren Verwaltungsbereich. Die Liste zeigt Name, Domain und Aktivstatus und verwendet die gemeinsame Projektion fuer Pagination. Drei Vertragspruefungen und Studio-Inventar gruen. Browserabnahme und Lifecycle-Aktionen in Studio offen.
+
+## M0-L3-ARCHITECTURE-CI - reserviert, Codex
+
+Ziel: Architekturindex nach aktuellen Routen abgleichen und den beschaedigten Vorspann der L3-Zuordnung entfernen. Abnahme: CI-Validatoren.
 
 ## M0-I18NEXT-GHSA-6JCC-20261123 — abgeschlossen, Cursor (M0)
 Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
@@ -1009,6 +1131,52 @@ Befund aus M0-E2E-FULL-UAT: finance/bank-abgleich (bank-surface.tsx) kann Kontoa
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
 
+main 5f5888862 integriert. Architekturindex frisch und vollstaendig (1.146 Routen, 349 Dienste, 474 Endpoint-Module). L3-YAML-Vorspann repariert; Validator meldet 8 Tabellen, 26 Zuordnungen, 0 Fehler, 0 Warnungen. CI behandelt einen Validatorfehler jetzt als Fehler. Kein L3-Datenimport durchgefuehrt.
+
+Mandantenliste: Laufzeitvertrag mit 51 synthetischen Zeilen geprueft. Der gemeinsame Datenleser ruft beide Seiten mit skip=0 und skip=50 ab und leitet das Bearer-Token ohne Mandantenheader weiter. Der Transport war simuliert.
+
+## M2-ADMIN-API-KEYS-LIST - reserviert, Codex
+
+Ziel: API-Schluessel-Einstieg an die bereits autorisierte Metadatenliste anbinden. Dateibesitz: ScreenDefinition, Routeneinstieg und generierte Artefakte. Abnahme: Schema, bestehender GET und Studio-Gates.
+
+API-Schluessel-Einstieg als Studio-Liste umgesetzt. Verwendet den geschuetzten GET fuer Schluesselmetadaten statt der Benutzer-Detailquelle. Keine Schreib- oder Exportaktion deklariert. Vertragstest und Studio-Inventar gruen; Browserabnahme offen.
+
+CLI-Register nach Entfernung der wirkungslosen Admin-Aktionen neu erzeugt. 380 ausfuehrbare CLI-Aktionen; zwei ueberholte Eintraege aus der Statistik entfernt. CLI-, MCP- und Listenrouten-Generatoren ohne Drift.
+
+## M0-COMMAND-MONITOR-TENANT - reserviert, Codex
+
+Ziel: Betriebszaehler des Command Monitors auf den geprueften aktiven Mandanten begrenzen. Dateibesitz: Overview-Handler, Idempotenz-Store und zugehoeriger Vertragstest. Abnahme: lokale und Gesamtstatistik des Stores.
+
+Command-Monitor-Overview zeigt Store-Zaehler und ausgefuehrte Kommandos des geprueften Mandanten. Der statische Capability-Katalog bleibt global. Drei Tests gruen, OpenAPI unveraendert und reproduzierbar. Weitere Monitoring-Wege sind nicht Teil dieses Nachweises.
+
+Einzelabrufe nach Ausfuehrungs-ID und Idempotenzschluessel sind an den aktiven Mandanten gebunden. Eigene Eintraege bleiben in beiden Abrufen verfuegbar; fremde und unbekannte Eintraege liefern HTTP 404.
+
+Der Ausfuehrungs-Endpunkt weist einen abweichenden Mandanten im Request vor dem Idempotenz-Lookup und vor der Kommandoausfuehrung mit HTTP 403 ab. Der HTTP-Vertrag prueft auch den abgewiesenen Replay nach einem Mandantenwechsel.
+
+Abnahme: gezielter Lauf fuer Wave 17/18/85 mit 27 bestandenen und einem uebersprungenen Test. Studio-Folgebefund: /admin/command-monitor verwendet eine generische Artikel-Detaildefinition mit unwirksamer Bearbeiten-Aktion, obwohl die vorhandene Ansicht den Idempotenz-Overview liest. Die separate Definition process/background-jobs beansprucht dieselbe Browserroute, zeigt jedoch die Job-Queue. Bei der Migration getrennte fachliche Routen und einen gleichwertigen Monitor-Nachweis vorsehen.
+
+Command-Monitor-Oberflaeche liest den JSON-Inhalt der Antwort und trennt den Abfragecache nach Mandant und Benutzer. Ein Frontend-Regressionstest prueft Datenprojektion, Mandantenwechsel und fehlende Identitaet. Die Studio-Routentrennung bleibt offen.
+
+PR 179: Der CI-Integritaetscheck meldete den Process-Kernel-Router mit 6115 gegen 6100 Zeilen. Die fachliche Overview-Berechnung liegt jetzt im bestehenden Idempotenzmodul, HTTP-Pfad und Antwort bleiben gleich. Der Router ist auf 6092 Zeilen gesunken und der Grenzwert wurde entsprechend abgesenkt.
+
+PostgreSQL-CI zu PR 179: Acht Fehler liefen ueber einen Test-Adapter, der execute_action direkt aufrief und die FastAPI-Mandanten-Dependency ausliess. Der gemeinsame AP-Kernel-Test mountet jetzt die echte Route und behaelt die signierten Test-Identitaeten und die transaktionale Test-DB bei.
+
+## M0-BACKGROUND-JOBS-TENANT - reserviert, Codex
+
+Ziel: Hintergrundjob-Daten und Statuswechsel ueber HTTP an den verifizierten Mandanten binden. Dateibesitz: Background-Job-Router, Registry und Wave-86-Vertrag. Abnahme: tenantgebundene Listen, Zaehler, Einzelabrufe und Statuswechsel; bestehende interne Aufrufer vor der Umstellung pruefen.
+
+HTTP-Liste und Queue-Statistik, Einreihen, Entnahme, Einzelabruf, Abschluss und Fehlerstatus verwenden den geprueften Mandanten. Fremde Selektoren liefern 403, fremde Job-IDs 404. Die Wave-86-Faelle wurden um zwei Mandanten erweitert. Syntax und Diff geprueft; Testabnahme und Push stehen aus.
+
+Studio-Folgebefund: process/background-jobs liest bisher den Metadatenknoten queue als Zeilenliste und erwartet job_type, created_at und attempts. Die mandantengebundene Listenroute liefert jobs mit job_id, typ, erstellt_am und retry_count. Die Arbeit an der eigenen Studio-Route muss diese tatsaechliche Zeilenform verwenden.
+
+## M2-BACKGROUND-JOBS-STUDIO - reserviert, Codex
+
+Ziel: eigene Studio-Listenroute fuer Hintergrundjobs. Dateibesitz: ScreenDefinition, Routeneinstieg und abgeleitete Kataloge. Abnahme: echte mandantengebundene Jobzeilen, keine Scheinaktionen und keine Doppelbelegung der Monitorroute.
+
+Die Hintergrundjob-Worklist hat den eigenen Einstieg /admin/background-jobs und verwendet paginierte Jobzeilen aus dem mandantengebundenen Listenvertrag. Die wirkungslose Zeilenaktion wurde entfernt. Der bisherige Command-Monitor-Einstieg bleibt fachlich getrennt. Die Browser- und PostgreSQL-Abnahmen stehen aus.
+
+Unbekannte Werte fuer Jobstatus oder Jobtyp liefern HTTP 422. Wave 86 deckt beide Filter ab. Vier Tests unter der gemeinsamen Pruefsperre bestanden.
+
 ## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
 ## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
@@ -1037,6 +1205,8 @@ Meilenstein: M4 (Coverage-Matrix Artikelmodell, Punkt Beziehungen referenziell).
 Meilenstein: M3 (Folge aus PR #195). domain_erp.journal_entries.status: Vorgabe draft, NOT NULL, Pruefbedingung auf die vier Status des Buchungsdienstes (draft/posted/cancelled/reversed). Gewachsener Bestand: 0 Eintraege ohne Status, Migration in zurueckgerollter Transaktion geprueft.
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
+
+PR 179, CI-Lauf 45472996604: Die Kontaktmaske liest die kanonische CRM-Route mit einer typisierten data-Huelle. Die gemeinsame Entity-Projektion uebernimmt die Kontakt-ID und die vier Kopffelder; position stammt aus job_title. Der Feldvertrag prueft die deklarierten Projektionspfade. Kontakt aus der Altlastenliste entfernt. Sechs Feldvertrags- und HTTP-Tests unter der gemeinsamen Pruefsperre bestanden.
 
 ## M4-BUCHUNGSDIENST-SCHLUESSEL-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung, Schritt 1). InventoryService.process_stock_movement nimmt buchungsschluessel (bestandsbuchung_schluessel, PR #194) und commit=False (Transaktion beim Aufrufer) - Voraussetzung, damit die 13 Direktschreiber auf den einen Dienst umgestellt werden koennen.

@@ -351,11 +351,13 @@ def build_crm_kontakt_stamm() -> dict[str, Any]:
         endpoint="/api/v1/crm/contacts/{entity_id}",
         identity="name",
         felder=[
+        _feld("id", "Kontakt-ID", readOnly=True),
         _feld("name", "Name"),
         _feld("email", "E-Mail", "email"),
         _feld("phone", "Telefon"),
         _feld("position", "Funktion"),
         ],
+        entity_projection={key: f"data.{key}" for key in ("id", "name", "email", "phone", "position")},
         edit_permission="crm.contact.update",
         test_id="crm-kontakt-stamm",
         purpose="Kontaktstammdaten.",

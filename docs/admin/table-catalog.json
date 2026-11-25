@@ -15677,7 +15677,7 @@
             "app/services/wareneingang_avis_service.py"
           ],
           "screens": [
-            "admin/branches"
+            "admin/branches/detail"
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
@@ -50566,7 +50566,7 @@
             "app/services/customer_reference.py"
           ],
           "screens": [
-            "admin/branches"
+            "admin/branches/detail"
           ],
           "written_by": [
             "app/api/v1/endpoints/branches.py"

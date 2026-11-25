@@ -5,6 +5,7 @@
   "mask:abrechnung/eb-lieferschein-kontrolle:resolve",
   "mask:abrechnung/eb-lieferschein-kontrolle:start_work",
   "mask:abrechnung/eb-lieferschein-kontrolle:waive",
+  "mask:admin/branches/detail:bearbeiten",
   "mask:admin/control-center:escalate",
   "mask:admin/control-center:plan",
   "mask:admin/control-center:resolve",
@@ -383,6 +384,6 @@
   "mask:waage/wiegungen:create"
  ],
  "nicht_unterstuetzt": {
-  "kein_endpunkt": 963
+  "kein_endpunkt": 960
  }
 }

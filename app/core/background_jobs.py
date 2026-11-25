@@ -166,18 +166,17 @@ class JobQueue:
         self._eintraege.append(eintrag)
         return job.job_id
 
-    def dequeue(self) -> BackgroundJob | None:
+    def dequeue(self, *, tenant_id: str | None = None) -> BackgroundJob | None:
         """
         Gibt den naechsten Job (hoechste Prioritaet, aeltester zuerst) zurueck
         und entfernt ihn aus der Queue. None wenn Queue leer.
         """
-        if not self._eintraege:
+        candidates = (entry for entry in self._eintraege
+                      if tenant_id is None or entry.job.tenant_id == tenant_id)
+        eintrag = min(candidates, key=lambda entry: (-entry.prioritaet_rang, entry.eingestellt_am), default=None)
+        if eintrag is None:
             return None
-        # Sortiere: hoechste Prio zuerst; bei Gleichstand frueheste Zeit
-        self._eintraege.sort(
-            key=lambda e: (-e.prioritaet_rang, e.eingestellt_am)
-        )
-        eintrag = self._eintraege.pop(0)
+        self._eintraege.remove(eintrag)
         eintrag.job.status = JobStatus.RUNNING
         eintrag.job.gestartet_am = datetime.now(timezone.utc)
         return eintrag.job
@@ -495,16 +494,22 @@ class BackgroundJobRegistry:
             self._queue.enqueue(job)
         return job, routing
 
-    def dequeue_next(self) -> BackgroundJob | None:
+    def dequeue_next(self, *, tenant_id: str | None = None) -> BackgroundJob | None:
         with self._lock:
-            job = self._queue.dequeue()
+            job = self._queue.dequeue(tenant_id=tenant_id)
             if job is not None:
                 self._jobs[job.job_id] = job
             return job
 
-    def get(self, job_id: str) -> BackgroundJob | None:
+    def get(self, job_id: str, *, tenant_id: str | None = None) -> BackgroundJob | None:
         with self._lock:
-            return self._jobs.get(job_id)
+            return self._get_owned_job(job_id, tenant_id)
+
+    def _get_owned_job(self, job_id: str, tenant_id: str | None) -> BackgroundJob | None:
+        job = self._jobs.get(job_id)
+        if job is None or (tenant_id is not None and job.tenant_id != tenant_id):
+            return None
+        return job
 
     def list(
         self,
@@ -527,9 +532,9 @@ class BackgroundJobRegistry:
             jobs = jobs[:limit]
         return jobs
 
-    def complete(self, job_id: str, ergebnis_summary: str = "") -> BackgroundJob | None:
+    def complete(self, job_id: str, ergebnis_summary: str = "", *, tenant_id: str | None = None) -> BackgroundJob | None:
         with self._lock:
-            job = self._jobs.get(job_id)
+            job = self._get_owned_job(job_id, tenant_id)
             if job is None:
                 return None
             self._queue.cancel(job_id)
@@ -541,9 +546,9 @@ class BackgroundJobRegistry:
             self._jobs[job_id] = job
             return job
 
-    def fail(self, job_id: str, fehler_meldung: str) -> BackgroundJob | None:
+    def fail(self, job_id: str, fehler_meldung: str, *, tenant_id: str | None = None) -> BackgroundJob | None:
         with self._lock:
-            job = self._jobs.get(job_id)
+            job = self._get_owned_job(job_id, tenant_id)
             if job is None:
                 return None
             self._queue.cancel(job_id)
@@ -555,8 +560,8 @@ class BackgroundJobRegistry:
             self._jobs[job_id] = job
             return job
 
-    def summary(self) -> dict[str, Any]:
-        jobs = self.list()
+    def summary(self, *, tenant_id: str | None = None) -> dict[str, Any]:
+        jobs = self.list(tenant_id=tenant_id)
         counts: dict[str, int] = {}
         by_typ: dict[str, int] = {}
         by_tenant: dict[str, int] = {}
@@ -568,7 +573,11 @@ class BackgroundJobRegistry:
         return {
             "schema_version": self.schema_version,
             "total_jobs": len(jobs),
-            "queue": self._queue.as_dict(),
+            "queue": {
+                "pending_count": counts.get(JobStatus.PENDING.value, 0),
+                "typen": sorted({job.typ.value for job in jobs if job.status == JobStatus.PENDING}),
+                "schema_version": self._queue.schema_version,
+            },
             "counts_by_status": counts,
             "counts_by_typ": by_typ,
             "counts_by_tenant": by_tenant,

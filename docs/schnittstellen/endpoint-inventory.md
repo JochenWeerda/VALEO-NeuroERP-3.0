@@ -405,7 +405,6 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `reklamation_api` | — |
 | `report_print` | Report and print endpoints for traceability, weighing PDFs and labels. |
 | `reporting_api` | — |
-| `reports_export` | Reports Export — generischer Berichts-Download-Endpunkt |
 | `rfq` | Einkauf — RFQ (Request for Quotation) — Anfrageprozess |
 | `rohware_sammelabrechnung` | Rohware-Sammelabrechnung — gebündelte Abrechnung mehrerer Belege (Agrar-Spezialsoftware Feature). |
 | `rohware_schema` | — |
