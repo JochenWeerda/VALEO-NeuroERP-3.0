@@ -515,6 +515,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Gate-D +7: Analytics, Einkauf-/Finance-/Inventory-/Feeding-Reports, NaWaRo, Process-Mining
 - Gate-D → **152/152 passed** (76 Masken × Hell/Dunkel)
 
+### Batch 68 — FlowSpine Theme-Vollangleichung
+
+- `FlowSpineWorkspaceRenderer` + `FlowSpineWorkspaceDialogs`: Indigo/Slate/`white/` → `primary`/`muted`/`card`/`border`/`foreground`
+- Keine Roh-Hex und keine Indigo-/Slate-Palette mehr in FlowSpine-UI
+- Gate-D Regression → **152/152 passed**
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

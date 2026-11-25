@@ -107,7 +107,7 @@ const LIFECYCLE_LABELS: Record<FlowSpineLifecycleStatus, string> = {
 }
 
 const LIFECYCLE_TONE_CLASSES: Record<FlowSpineLifecycleStatus, string> = {
-  draft: 'border-slate-500/40 bg-slate-500/10 text-slate-200',
+  draft: 'border-muted-foreground/40 bg-muted text-foreground',
   in_progress:
     'border-[hsl(var(--color-semantic-info-500-hsl)/0.4)] bg-[hsl(var(--color-semantic-info-500-hsl)/0.15)] text-[hsl(var(--color-semantic-info-50-hsl))]',
   on_hold:
@@ -128,9 +128,9 @@ function EmptyOperationalField({
   className?: string
 }): JSX.Element {
   return (
-    <div className={cn('rounded-xl border border-dashed border-white/12 px-3 py-2.5', className)}>
-      <div className="text-xs text-slate-500">
-        {label}: <span className="text-slate-400">nicht ermittelt</span>
+    <div className={cn('rounded-xl border border-dashed border-border px-3 py-2.5', className)}>
+      <div className="text-xs text-muted-foreground">
+        {label}: <span className="text-muted-foreground">nicht ermittelt</span>
       </div>
     </div>
   )
@@ -145,8 +145,8 @@ function CatalogContentNotice(): JSX.Element {
   return (
     <div className="mb-4 flex items-start gap-3 rounded-2xl border border-dashed border-status-warning/25 bg-status-warning/5 px-4 py-3">
       <Info className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-      <div className="text-sm text-slate-300">
-        <span className="font-medium text-slate-100">Beispielinhalt</span> — es ist kein
+      <div className="text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Beispielinhalt</span> — es ist kein
         Vorgang geladen. Kennzahlen, Zeitpunkte, Dokumente und Agentenhinweise stammen aus
         der Prozessbeschreibung und gehoeren zu keinem konkreten Fall. Waehle links einen
         Vorgang, um die tatsaechlichen Werte zu sehen.
@@ -216,43 +216,43 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
       >
         <PageSection className="overflow-hidden border-border bg-card/70 p-0">
           {/* Header skeleton */}
-          <div className="flex h-16 items-center justify-between border-b border-white/5 px-5 gap-4">
-            <div className="h-4 w-48 rounded-full bg-white/10 animate-pulse" />
-            <div className="h-8 flex-1 max-w-xl rounded-lg bg-white/5 animate-pulse" />
-            <div className="h-8 w-32 rounded-lg bg-white/10 animate-pulse" />
+          <div className="flex h-16 items-center justify-between border-b border-border px-5 gap-4">
+            <div className="h-4 w-48 rounded-full bg-muted animate-pulse" />
+            <div className="h-8 flex-1 max-w-xl rounded-lg bg-muted animate-pulse" />
+            <div className="h-8 w-32 rounded-lg bg-muted animate-pulse" />
           </div>
           {/* 3-column body skeleton */}
           <div className="grid min-h-[720px] grid-cols-[220px_minmax(0,1fr)_360px]">
             {/* Left nav skeleton */}
-            <div className="border-r border-white/5 bg-slate-950/45 p-4 space-y-3">
+            <div className="border-r border-border bg-muted/40 p-4 space-y-3">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-10 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: `${i * 60}ms` }} />
+                <div key={i} className="h-10 rounded-2xl bg-muted animate-pulse" style={{ animationDelay: `${i * 60}ms` }} />
               ))}
             </div>
             {/* Main content skeleton */}
             <div className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6 space-y-6">
-              <div className="h-8 w-72 rounded-full bg-white/10 animate-pulse" />
-              <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
+              <div className="h-8 w-72 rounded-full bg-muted animate-pulse" />
+              <div className="rounded-[28px] border border-border bg-muted/50 p-8">
                 {/* Node circles */}
                 <div className="flex justify-around mb-8">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="flex flex-col items-center gap-3">
-                      <div className="h-16 w-16 rounded-full bg-white/10 animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
-                      <div className="h-3 w-16 rounded-full bg-white/10 animate-pulse" />
+                      <div className="h-16 w-16 rounded-full bg-muted animate-pulse" style={{ animationDelay: `${i * 80}ms` }} />
+                      <div className="h-3 w-16 rounded-full bg-muted animate-pulse" />
                     </div>
                   ))}
                 </div>
                 {/* Detail cards */}
                 <div className="grid gap-5 xl:grid-cols-[1fr_300px]">
-                  <div className="h-48 rounded-2xl bg-white/5 animate-pulse" />
-                  <div className="h-48 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: '100ms' }} />
+                  <div className="h-48 rounded-2xl bg-muted animate-pulse" />
+                  <div className="h-48 rounded-2xl bg-muted animate-pulse" style={{ animationDelay: '100ms' }} />
                 </div>
               </div>
             </div>
             {/* Right panel skeleton */}
-            <div className="border-l border-white/5 bg-slate-950/45 p-5 space-y-3">
+            <div className="border-l border-border bg-muted/40 p-5 space-y-3">
               {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-12 rounded-2xl bg-white/5 animate-pulse" style={{ animationDelay: `${i * 70}ms` }} />
+                <div key={i} className="h-12 rounded-2xl bg-muted animate-pulse" style={{ animationDelay: `${i * 70}ms` }} />
               ))}
             </div>
           </div>
@@ -314,27 +314,27 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
       className="bg-[linear-gradient(180deg,hsl(var(--background)),hsl(var(--card)))]"
     >
       <PageSection className="overflow-hidden border-border bg-card/70 p-0 shadow-sm">
-        <header className="flex h-16 items-center justify-between border-b border-white/5 px-5">
+        <header className="flex h-16 items-center justify-between border-b border-border px-5">
           <div className="flex items-center gap-4">
-            <div className="text-sm font-semibold tracking-wide text-slate-100">{workspace.breadcrumb[0]}</div>
-            <div className="text-sm text-slate-400">
-              {workspace.breadcrumb[1]} <span className="px-2 text-slate-600">/</span> <span className="font-semibold text-slate-100">{workspace.instance_label}</span>
+            <div className="text-sm font-semibold tracking-wide text-foreground">{workspace.breadcrumb[0]}</div>
+            <div className="text-sm text-muted-foreground">
+              {workspace.breadcrumb[1]} <span className="px-2 text-muted-foreground">/</span> <span className="font-semibold text-foreground">{workspace.instance_label}</span>
             </div>
           </div>
           <div className="relative w-full max-w-xl">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500" />
+            <Input aria-label="Globale Suche" placeholder={workspace.search_placeholder} className="border-border bg-muted pl-9 text-foreground placeholder:text-muted-foreground" />
           </div>
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              className="min-h-touch border-indigo-400/30 bg-indigo-500/10 text-indigo-200 hover:bg-indigo-500/20"
+              className="min-h-touch border-primary/30 bg-primary/10 text-primary hover:bg-primary/20"
               onClick={() => setShowNewInstanceDialog(true)}
             >
               <Plus className="mr-1.5 h-3.5 w-3.5" />
               {startConfig.buttonLabel}
             </Button>
-            <div className="flex rounded-xl bg-white/5 p-1 text-xs" role="group" aria-label="Ansicht">
+            <div className="flex rounded-xl bg-muted p-1 text-xs" role="group" aria-label="Ansicht">
               {VIEW_MODES.map((mode) => (
                 <button
                   key={mode.id}
@@ -345,8 +345,8 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                   className={cn(
                     'rounded-lg px-3 py-1.5 transition',
                     viewMode === mode.id
-                      ? 'bg-indigo-500/30 text-indigo-100'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200',
+                      ? 'bg-primary/30 text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                   )}
                 >
                   {mode.label}
@@ -355,7 +355,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             </div>
             <Bell className="h-4 w-4 text-muted-foreground" />
             <Settings className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-slate-100">
+            <div className="flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1.5 text-sm text-foreground">
               <UserCircle2 className="h-5 w-5 text-muted-foreground" />
               <span>{workspace.user_role}</span>
             </div>
@@ -376,7 +376,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               : 'grid-cols-[220px_minmax(0,1fr)_48px]',
           )}
         >
-          <aside className="border-r border-white/5 bg-slate-950/45 p-4">
+          <aside className="border-r border-border bg-muted/40 p-4">
             {/*
               F4 aus der Begehung: 'fokus' hatte die ganze linke Spalte
               ausgeblendet — und damit auch den Vorgangswechsel. Fuer die Waage
@@ -387,7 +387,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             */}
             {viewMode !== 'fokus' ? (
             <div className="mb-6">
-              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
+              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Prozesse</p>
               <div className="space-y-2">
                 {processNavItems.length === 0 ? (
                   <p className="rounded-2xl border border-status-warning/20 bg-status-warning/10 px-3 py-2 text-xs text-status-warning">
@@ -400,7 +400,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     onClick={() => go(process.route_path)}
                     className={cn(
                       'flex w-full items-center justify-between rounded-2xl px-3 py-3 text-left text-sm transition',
-                      process.active ? 'bg-indigo-500/12 text-indigo-100 ring-1 ring-indigo-400/20' : 'text-slate-300 hover:bg-white/5 hover:text-white',
+                      process.active ? 'bg-primary/12 text-primary ring-1 ring-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                     )}
                   >
                     <span>{process.label}</span>
@@ -411,12 +411,12 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             </div>
             ) : null}
             <div className="mb-6">
-              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
+              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">Vorgaenge</p>
               <Input
                 placeholder="Suchen..."
                 value={instanceSearch}
                 onChange={(e) => setInstanceSearch(e.target.value)}
-                className="mb-2 h-8 border-white/10 bg-white/5 text-xs text-slate-100 placeholder:text-slate-500"
+                className="mb-2 h-8 border-border bg-muted text-xs text-foreground placeholder:text-muted-foreground"
               />
               <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
                 {instancesQuery.data?.map((inst) => (
@@ -430,8 +430,8 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     className={cn(
                       'w-full rounded-xl border px-3 py-2 text-left transition',
                       instanceId === inst.instance_id
-                        ? 'border-indigo-400/40 bg-indigo-500/15 text-indigo-100'
-                        : 'border-white/5 bg-white/3 text-slate-300 hover:bg-white/6',
+                        ? 'border-primary/40 bg-primary/15 text-primary'
+                        : 'border-border bg-muted/50 text-muted-foreground hover:bg-muted',
                     )}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -442,16 +442,16 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         </span>
                       ) : null}
                     </div>
-                    <div className="text-2xs text-slate-400 truncate">
+                    <div className="text-2xs text-muted-foreground truncate">
                       {inst.customer_name || inst.label || inst.subject || '\u2013'}
                     </div>
                   </button>
                 ))}
                 {instancesQuery.isLoading && (
-                  <div className="text-xs text-slate-500 py-2">Laden...</div>
+                  <div className="text-xs text-muted-foreground py-2">Laden...</div>
                 )}
                 {!instancesQuery.isLoading && instancesQuery.data?.length === 0 && (
-                  <div className="text-xs text-slate-500 py-2">Keine Vorgaenge gefunden</div>
+                  <div className="text-xs text-muted-foreground py-2">Keine Vorgaenge gefunden</div>
                 )}
               </div>
             </div>
@@ -460,8 +460,8 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
           <main className="bg-[linear-gradient(180deg,rgba(15,23,42,0.35),rgba(15,23,42,0.15))] p-6">
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight text-white">{workspace.title}</h1>
-                <p className="mt-1 max-w-3xl text-sm text-slate-400">{workspace.subtitle}</p>
+                <h1 className="text-3xl font-bold tracking-tight text-primary-foreground">{workspace.title}</h1>
+                <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{workspace.subtitle}</p>
               </div>
               <div className="flex items-center gap-2">
                 {workspace.badges.map((badge) => (
@@ -475,20 +475,20 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             {workspace.content_mode === 'catalog' ? <CatalogContentNotice /> : null}
 
             {workspace.customer_data && (
-              <div className="mb-4 flex items-center gap-4 rounded-2xl border border-indigo-400/20 bg-indigo-500/8 px-5 py-3">
+              <div className="mb-4 flex items-center gap-4 rounded-2xl border border-primary/20 bg-primary/10 px-5 py-3">
                 <Building2 className="h-5 w-5 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-slate-100">
+                  <div className="text-sm font-semibold text-foreground">
                     {workspace.customer_data.name_1}
                     {workspace.customer_data.name_2 && ` \u2013 ${workspace.customer_data.name_2}`}
                   </div>
-                  <div className="text-xs text-slate-400">
+                  <div className="text-xs text-muted-foreground">
                     {[workspace.customer_data.street, workspace.customer_data.house_number].filter(Boolean).join(' ')}
                     {workspace.customer_data.postal_code && `, ${workspace.customer_data.postal_code}`}
                     {workspace.customer_data.city && ` ${workspace.customer_data.city}`}
                   </div>
                 </div>
-                <div className="text-right text-xs text-slate-500 shrink-0">
+                <div className="text-right text-xs text-muted-foreground shrink-0">
                   <div>Nr. {workspace.customer_data.partner_number}</div>
                   {workspace.customer_data.debtor_account && <div>Deb. {workspace.customer_data.debtor_account}</div>}
                   {workspace.customer_data.creditor_account && <div>Kred. {workspace.customer_data.creditor_account}</div>}
@@ -497,7 +497,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             )}
 
             {instanceId ? (
-              <div className="mb-4 rounded-2xl border border-white/10 bg-slate-950/45 p-5">
+              <div className="mb-4 rounded-2xl border border-border bg-muted/40 p-5">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="space-y-3">
                     <div className="flex flex-wrap items-center gap-2">
@@ -505,28 +505,28 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         {lifecycleLabel}
                       </Badge>
                       {workspace.case_number ? (
-                        <Badge className="border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-200">
+                        <Badge className="border border-border bg-muted px-2.5 py-1 text-xs text-foreground">
                           {workspace.case_number}
                         </Badge>
                       ) : null}
                       {workspace.business_status ? (
-                        <Badge className="border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
+                        <Badge className="border border-border bg-muted px-2.5 py-1 text-xs text-muted-foreground">
                           {workspace.business_status}
                         </Badge>
                       ) : null}
                     </div>
-                    <div className="grid gap-2 text-xs text-slate-400 md:grid-cols-3">
+                    <div className="grid gap-2 text-xs text-muted-foreground md:grid-cols-3">
                       <div>
-                        <div className="uppercase tracking-[0.18em] text-slate-500">Owner</div>
-                        <div className="mt-1 text-slate-200">{workspace.assigned_owner || 'Nicht gesetzt'}</div>
+                        <div className="uppercase tracking-[0.18em] text-muted-foreground">Owner</div>
+                        <div className="mt-1 text-foreground">{workspace.assigned_owner || 'Nicht gesetzt'}</div>
                       </div>
                       <div>
-                        <div className="uppercase tracking-[0.18em] text-slate-500">Letzte Aktivitaet</div>
-                        <div className="mt-1 text-slate-200">{formatDateTime(workspace.last_activity_at || workspace.updated_at)}</div>
+                        <div className="uppercase tracking-[0.18em] text-muted-foreground">Letzte Aktivitaet</div>
+                        <div className="mt-1 text-foreground">{formatDateTime(workspace.last_activity_at || workspace.updated_at)}</div>
                       </div>
                       <div>
-                        <div className="uppercase tracking-[0.18em] text-slate-500">Zusammenfassung</div>
-                        <div className="mt-1 text-slate-200">{lifecycleSummary(workspace)}</div>
+                        <div className="uppercase tracking-[0.18em] text-muted-foreground">Zusammenfassung</div>
+                        <div className="mt-1 text-foreground">{lifecycleSummary(workspace)}</div>
                       </div>
                     </div>
                     {/*
@@ -535,17 +535,17 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       aber nicht mehr zwischen Status und Kundendaten.
                     */}
                     {workspace.resume_node_id || workspace.active_node_id || workspace.resume_route ? (
-                      <details className="rounded-xl border border-white/10 bg-white/3 px-3 py-2">
-                        <summary className="cursor-pointer text-xs text-slate-500 hover:text-slate-300">
+                      <details className="rounded-xl border border-border bg-muted/50 px-3 py-2">
+                        <summary className="cursor-pointer text-xs text-muted-foreground hover:text-muted-foreground">
                           Technische Details
                         </summary>
-                        <div className="mt-2 space-y-1 text-xs text-slate-400">
+                        <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                           <div>
-                            Knoten: <span className="text-slate-200">{workspace.resume_node_id || workspace.active_node_id || '—'}</span>
+                            Knoten: <span className="text-foreground">{workspace.resume_node_id || workspace.active_node_id || '—'}</span>
                           </div>
                           {workspace.resume_route ? (
                             <div>
-                              Letztes Resume-Ziel: <span className="text-slate-200">{workspace.resume_route}</span>
+                              Letztes Resume-Ziel: <span className="text-foreground">{workspace.resume_route}</span>
                             </div>
                           ) : null}
                         </div>
@@ -557,7 +557,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     <Button
                       onClick={() => void handleSaveLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch bg-white text-slate-950 hover:bg-white/90"
+                      className="min-h-touch bg-card text-foreground hover:bg-card"
                     >
                       <Save className="mr-1.5 h-4 w-4" />
                       Speichern
@@ -566,7 +566,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       variant="outline"
                       onClick={() => void handleResumeLifecycle()}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-border bg-muted text-foreground hover:bg-muted"
                     >
                       <PlayCircle className="mr-1.5 h-4 w-4" />
                       Wieder aufnehmen
@@ -575,7 +575,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       variant="outline"
                       onClick={() => openLifecycleDialog('hold')}
                       disabled={!instanceId || lifecycleBusy || hasTerminalLifecycle}
-                      className="min-h-touch border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+                      className="min-h-touch border-border bg-muted text-foreground hover:bg-muted"
                     >
                       <PauseCircle className="mr-1.5 h-4 w-4" />
                       Pause
@@ -612,9 +612,9 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               </div>
             ) : null}
 
-            <div className="rounded-[28px] border border-white/10 bg-white/3 p-8">
+            <div className="rounded-[28px] border border-border bg-muted/50 p-8">
               <div className="relative mb-8">
-                <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-white/10" />
+                <div className="absolute left-8 right-8 top-10 h-[2px] rounded-full bg-muted" />
                 <div className="absolute left-8 top-10 h-[2px] rounded-full bg-linear-to-r from-status-success via-status-info to-status-warning" style={{ width: progressWidth }} />
                 <div className={cn('relative grid gap-4', nodes.length === 4 ? 'grid-cols-4' : nodes.length === 5 ? 'grid-cols-5' : 'grid-cols-6')}>
                   {nodes.map((node) => {
@@ -625,12 +625,12 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         <div className={cn('mx-auto flex h-16 w-16 items-center justify-center rounded-full border', toneClasses(node.status), active && 'h-20 w-20')}>
                           <Icon className="h-6 w-6" />
                         </div>
-                        <div className="mt-3 text-sm font-semibold text-slate-100">{node.label}</div>
-                        {node.status === 'unknown' ? <div className="text-xs text-slate-500">Status nicht ermittelt</div> : null}
+                        <div className="mt-3 text-sm font-semibold text-foreground">{node.label}</div>
+                        {node.status === 'unknown' ? <div className="text-xs text-muted-foreground">Status nicht ermittelt</div> : null}
                         {/* FSX-003: metric/submetric sind operativ. Fehlen sie, bleibt die
                             Zeile leer statt einen Registry-Vorgabewert zu zeigen. */}
-                        {node.metric ? <div className="text-xs text-slate-500">{node.metric}</div> : null}
-                        {node.submetric ? <div className="text-2xs text-slate-400">{node.submetric}</div> : null}
+                        {node.metric ? <div className="text-xs text-muted-foreground">{node.metric}</div> : null}
+                        {node.submetric ? <div className="text-2xs text-muted-foreground">{node.submetric}</div> : null}
                       </button>
                     )
                   })}
@@ -652,11 +652,11 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     Kennzahl kehrt erst zurueck, wenn sie an eine benannte Quelle gebunden
                     ist (FSX-001). Mit ihr entfaellt auch die zweite Rasterspalte.
                   */}
-                  <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                  <Card className="border-border bg-card/80 text-foreground">
                     <CardHeader className="flex flex-row items-start justify-between gap-4">
                       <div>
                         <CardTitle className="text-xl">Status Details: {selectedNode.label}</CardTitle>
-                        <p className="mt-1 text-sm text-slate-400">{selectedNode.insight}</p>
+                        <p className="mt-1 text-sm text-muted-foreground">{selectedNode.insight}</p>
                       </div>
                       <Badge className={cn('border px-2.5 py-1 text-xs', toneClasses(selectedNode.status))}>{selectedNode.status.toUpperCase()}</Badge>
                     </CardHeader>
@@ -664,8 +664,8 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       {selectedNode.detail_rows.length > 0 ? (
                         selectedNode.detail_rows.map((row) => (
                           <div key={row.label} className="space-y-1">
-                            <div className="text-xs uppercase tracking-[0.18em] text-slate-500">{row.label}</div>
-                            <div className="text-sm font-medium text-slate-100">{row.value}</div>
+                            <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{row.label}</div>
+                            <div className="text-sm font-medium text-foreground">{row.value}</div>
                           </div>
                         ))
                       ) : (
@@ -682,21 +682,21 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                   <div className={cn('grid gap-4', showSideFlaechen ? 'lg:grid-cols-4' : 'lg:grid-cols-1')}>
                     {showSideFlaechen ? (
                     <>
-                    <Card className="border-white/10 bg-white/3 text-slate-100">
+                    <Card className="border-border bg-muted/50 text-foreground">
                       <CardHeader><CardTitle className="text-sm">KPIs</CardTitle></CardHeader>
                       <CardContent className="space-y-2 text-sm">
                         {selectedNode.kpis.length > 0 ? (
-                          selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-slate-400">{kpi.label}</span><span>{kpi.value}</span></div>)
+                          selectedNode.kpis.map((kpi) => <div key={kpi.label} className="flex justify-between gap-3"><span className="text-muted-foreground">{kpi.label}</span><span>{kpi.value}</span></div>)
                         ) : (
                           <EmptyOperationalField label="Kennzahlen" />
                         )}
                       </CardContent>
                     </Card>
-                    <Card className="border-white/10 bg-white/3 text-slate-100">
+                    <Card className="border-border bg-muted/50 text-foreground">
                       <CardHeader><CardTitle className="text-sm">Dokumente</CardTitle></CardHeader>
                       <CardContent className="space-y-2 text-sm">
                         {selectedNode.documents.length > 0 ? (
-                          selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-slate-300 hover:text-white"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)
+                          selectedNode.documents.map((doc) => <button key={doc.label} onClick={() => go(doc.href)} className="flex w-full items-center gap-2 text-left text-muted-foreground hover:text-foreground"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</button>)
                         ) : (
                           <EmptyOperationalField label="Belege zum Vorgang" />
                         )}
@@ -704,7 +704,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     </Card>
                     </>
                     ) : null}
-                    <Card className="border-white/10 bg-white/3 text-slate-100">
+                    <Card className="border-border bg-muted/50 text-foreground">
                       <CardHeader><CardTitle className="text-sm">Aktionen</CardTitle></CardHeader>
                       <CardContent className="space-y-3">
                         {selectedNode.actions.map((action) => (
@@ -713,7 +713,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                             onClick={() => void handleAction(action)}
                             disabled={executeAction.isPending}
                             variant={action.variant === 'primary' ? 'default' : 'outline'}
-                            className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                            className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border-border bg-muted text-foreground hover:bg-muted')}
                           >
                             {action.label}
                             <ChevronRight className="h-4 w-4" />
@@ -722,14 +722,14 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                       </CardContent>
                     </Card>
                     {showSideFlaechen ? (
-                    <Card className="border-indigo-400/20 bg-indigo-500/10 text-slate-100">
+                    <Card className="border-primary/20 bg-primary/10 text-foreground">
                       <CardHeader><CardTitle className="text-sm">Agent</CardTitle></CardHeader>
                       <CardContent className="space-y-3 text-sm">
                         {selectedNode.agent ? (
                           <>
-                            <div className="font-semibold text-white">{selectedNode.agent.headline}</div>
-                            <p className="text-slate-300">{selectedNode.agent.message}</p>
-                            <ul className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
+                            <div className="font-semibold text-primary-foreground">{selectedNode.agent.headline}</div>
+                            <p className="text-muted-foreground">{selectedNode.agent.message}</p>
+                            <ul className="space-y-1 text-xs text-muted-foreground">{selectedNode.agent.reasons.map((reason) => <li key={reason}>- {reason}</li>)}</ul>
                           </>
                         ) : (
                           <EmptyOperationalField label="Agentenbewertung" />
@@ -742,8 +742,8 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
 
                 {showSideFlaechen ? (
                 <div className="space-y-4">
-                  <Suspense fallback={null}><AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-white/10 bg-slate-950/50" /></Suspense>
-                  <Card className="border-white/10 bg-slate-950/50 text-slate-100">
+                  <Suspense fallback={null}><AgentProcessPanel domain={workspace.right_panel.domain} className="max-w-none border-border bg-card/80" /></Suspense>
+                  <Card className="border-border bg-card/80 text-foreground">
                     <CardHeader><CardTitle className="text-lg">Linked Modules</CardTitle></CardHeader>
                     <CardContent className="space-y-3">
                       {workspace.right_panel.linked_modules.map((module) => (
@@ -755,7 +755,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                             }
                             if (module.href) go(module.href)
                           }}
-                          className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-200 hover:bg-white/5"
+                          className="flex w-full items-center justify-between rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-foreground hover:bg-muted"
                         >
                           <span>{module.label}</span>
                           <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -779,20 +779,20 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                   (item) => flowSpineFooterItemHref(item) !== undefined,
                 )
                 return (
-                <Card key={card.title} className="border-white/10 bg-slate-950/45 text-slate-100">
+                <Card key={card.title} className="border-border bg-muted/40 text-foreground">
                   <CardHeader>
                     <CardTitle className="text-base">{card.title}</CardTitle>
                     {isNextSteps && !hasNavigableItems ? (
-                      <CardDescription className="text-slate-400">
+                      <CardDescription className="text-muted-foreground">
                         Orientierung — keine Navigation; die Punkte sind als Checkliste gemeint.
                       </CardDescription>
                     ) : null}
                   </CardHeader>
-                  <CardContent className="text-sm text-slate-300">
+                  <CardContent className="text-sm text-muted-foreground">
                     <ul
                       className={
                         isNextSteps && !hasNavigableItems
-                          ? 'list-disc space-y-1.5 pl-5 marker:text-slate-500'
+                          ? 'list-disc space-y-1.5 pl-5 marker:text-muted-foreground'
                           : 'space-y-2'
                       }
                     >
@@ -805,7 +805,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                               <button
                                 type="button"
                                 onClick={() => go(href)}
-                                className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                                className="flex w-full items-center justify-between rounded-2xl border border-border bg-muted/50 px-4 py-3 text-left text-sm text-foreground hover:bg-muted"
                               >
                                 <span>{label}</span>
                                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -819,7 +819,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                             className={
                               isNextSteps
                                 ? 'leading-snug'
-                                : 'rounded-2xl border border-white/10 px-4 py-3'
+                                : 'rounded-2xl border border-border px-4 py-3'
                             }
                           >
                             {label}
@@ -842,7 +842,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
           */}
           <aside
             className={cn(
-              'border-l border-white/5 bg-slate-950/45',
+              'border-l border-border bg-muted/40',
               copilotOpen ? 'p-5' : 'flex w-12 flex-col items-center gap-3 py-4',
             )}
           >
@@ -852,13 +852,13 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               aria-expanded={copilotOpen}
               aria-label={copilotOpen ? 'Copilot einklappen' : 'Copilot aufklappen'}
               className={cn(
-                'rounded-lg text-slate-400 transition hover:bg-white/5 hover:text-slate-100',
+                'rounded-lg text-muted-foreground transition hover:bg-muted hover:text-foreground',
                 copilotOpen ? 'mb-3 flex w-full items-center justify-between px-2 py-1.5' : 'p-2',
               )}
             >
               {copilotOpen ? (
                 <>
-                  <span className="text-sm font-semibold text-slate-100">AI Copilot</span>
+                  <span className="text-sm font-semibold text-foreground">AI Copilot</span>
                   <ArrowLeftRight className="h-4 w-4" />
                 </>
               ) : (
@@ -866,14 +866,14 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               )}
             </button>
             {!copilotOpen ? (
-              <span className="text-2xs uppercase tracking-wide text-slate-500 [writing-mode:vertical-rl]">
+              <span className="text-2xs uppercase tracking-wide text-muted-foreground [writing-mode:vertical-rl]">
                 Copilot
               </span>
             ) : null}
             {copilotOpen ? (
             <>
             <Tabs defaultValue="agent" className="flex h-full flex-col">
-              <TabsList aria-label="Prozessraum" className="grid w-full grid-cols-5 bg-white/5">
+              <TabsList aria-label="Prozessraum" className="grid w-full grid-cols-5 bg-muted">
                 <TabsTrigger value="agent">Agent</TabsTrigger>
                 <TabsTrigger value="actions">Aktionen</TabsTrigger>
                 <TabsTrigger value="timeline">Timeline</TabsTrigger>
@@ -884,11 +884,11 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                 {!selectedNode.agent ? (
                   <EmptyOperationalField label="Agentenbewertung" />
                 ) : (
-                <Card className="border-white/10 bg-white/3 text-slate-100">
+                <Card className="border-border bg-muted/50 text-foreground">
                   <CardHeader><CardTitle className="text-base">{selectedNode.agent.headline}</CardTitle></CardHeader>
                   <CardContent className="space-y-3 text-sm">
                     <p>{selectedNode.agent.message}</p>
-                    <div className="space-y-1 text-xs text-slate-300">{selectedNode.agent.reasons.map((reason) => <div key={reason}>- {reason}</div>)}</div>
+                    <div className="space-y-1 text-xs text-muted-foreground">{selectedNode.agent.reasons.map((reason) => <div key={reason}>- {reason}</div>)}</div>
                     <div className="grid grid-cols-3 gap-2">
                       {selectedNode.agent.actions.map((action) => (
                         <Button
@@ -898,7 +898,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                           variant={action === 'Uebernehmen' ? 'default' : 'outline'}
                           className={cn(
                             'min-h-touch',
-                            action === 'Uebernehmen' ? 'bg-white text-slate-900 hover:bg-white/90' : 'border-white/10 bg-white/5 text-white hover:bg-white/10',
+                            action === 'Uebernehmen' ? 'bg-card text-foreground hover:bg-card' : 'border-border bg-muted text-primary-foreground hover:bg-muted',
                           )}
                         >
                           {action}
@@ -915,7 +915,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                     key={action.label}
                     onClick={() => void handleAction(action)}
                     disabled={executeAction.isPending}
-                    className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-indigo-500 text-white hover:bg-indigo-400' : 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10')}
+                    className={cn('min-h-touch w-full justify-between', action.variant === 'primary' ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'border-border bg-muted text-foreground hover:bg-muted')}
                     variant={action.variant === 'primary' ? 'default' : 'outline'}
                   >
                     {action.label}
@@ -925,26 +925,26 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               </TabsContent>
               <TabsContent value="timeline" className="mt-4 space-y-3">
                 {!instanceId ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
                     Timeline verfuegbar, sobald eine konkrete Instanz geladen ist.
                   </div>
                 ) : timelineQuery.isLoading ? (
-                  <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
+                  <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
                     Timeline wird geladen...
                   </div>
                 ) : (
                   <div className="space-y-3">
                     {timelineQuery.data?.events.length ? (
                       timelineQuery.data.events.slice().reverse().map((event) => (
-                        <div key={event.event_id} className="rounded-2xl border border-white/10 bg-white/3 p-4">
+                        <div key={event.event_id} className="rounded-2xl border border-border bg-muted/50 p-4">
                           <div className="flex items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 text-sm font-medium text-slate-100">
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                               <History className="h-4 w-4 text-muted-foreground" />
                               {event.event_type}
                             </div>
-                            <div className="text-2xs text-slate-500">{formatDateTime(event.created_at)}</div>
+                            <div className="text-2xs text-muted-foreground">{formatDateTime(event.created_at)}</div>
                           </div>
-                          <div className="mt-2 space-y-1 text-xs text-slate-400">
+                          <div className="mt-2 space-y-1 text-xs text-muted-foreground">
                             <div>Status: {event.from_lifecycle_status || '—'} → {event.to_lifecycle_status || '—'}</div>
                             {event.node_id ? <div>Knoten: {event.node_id}</div> : null}
                             {event.reason_code ? <div>Grund: {event.reason_category || '—'} / {event.reason_code}</div> : null}
@@ -953,7 +953,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         </div>
                       ))
                     ) : (
-                      <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-400">
+                      <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
                         Noch keine Timeline-Eintraege vorhanden.
                       </div>
                     )}
@@ -968,7 +968,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                   <button
                     key={`${doc.label}-${doc.href}`}
                     onClick={() => go(doc.href)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-left text-sm text-slate-200 hover:bg-white/5"
+                    className="flex w-full items-center justify-between rounded-2xl border border-border bg-muted/50 px-4 py-3 text-left text-sm text-foreground hover:bg-muted"
                   >
                     <span className="flex items-center gap-2"><FileText className="h-4 w-4 text-muted-foreground" />{doc.label}</span>
                     <ChevronRight className="h-4 w-4 text-muted-foreground" />
@@ -977,9 +977,9 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
               </TabsContent>
               <TabsContent value="kpis" className="mt-4 space-y-3">
                 {selectedNode.kpis.map((kpi) => (
-                  <div key={kpi.label} className="rounded-2xl border border-white/10 bg-white/3 p-4">
-                    <div className="text-xs uppercase tracking-[0.2em] text-slate-500">{kpi.label}</div>
-                    <div className="mt-2 text-lg font-semibold text-white">{kpi.value}</div>
+                  <div key={kpi.label} className="rounded-2xl border border-border bg-muted/50 p-4">
+                    <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{kpi.label}</div>
+                    <div className="mt-2 text-lg font-semibold text-primary-foreground">{kpi.value}</div>
                   </div>
                 ))}
               </TabsContent>
