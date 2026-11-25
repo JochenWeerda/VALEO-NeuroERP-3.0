@@ -1038,6 +1038,8 @@ Meilenstein: M3 (Folge aus PR #195). domain_erp.journal_entries.status: Vorgabe 
 ## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
 Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
 
+## M4-BUCHUNGSDIENST-SCHLUESSEL-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung, Schritt 1). InventoryService.process_stock_movement nimmt buchungsschluessel (bestandsbuchung_schluessel, PR #194) und commit=False (Transaktion beim Aufrufer) - Voraussetzung, damit die 13 Direktschreiber auf den einen Dienst umgestellt werden koennen.
 ## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
 ## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
