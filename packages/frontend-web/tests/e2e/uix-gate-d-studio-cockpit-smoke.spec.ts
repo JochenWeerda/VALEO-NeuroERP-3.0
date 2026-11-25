@@ -155,6 +155,36 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Bankabgleich Arbeitsbereich',
   },
+  {
+    label: 'mahnwesen/mahnlauf',
+    path: '/mahnwesen/mahnlauf',
+    screenId: 'mahnwesen/mahnlauf',
+    testId: 'native-cockpit-mahnwesen-mahnlauf',
+    title: 'Mahnlauf',
+    specializedType: 'finance_workbench',
+    specializedFields: [
+      { key: 'op_id', label: 'Posten' },
+      { key: 'rechnungsnr', label: 'Rechnung' },
+      { key: 'partner', label: 'Partner' },
+      { key: 'tage_ueberfaellig', label: 'Überfällig' },
+      { key: 'offen', label: 'Offen' },
+      { key: 'aktuelle_stufe', label: 'Aktuelle Stufe' },
+      { key: 'naechste_stufe', label: 'Nächste Stufe' },
+      { key: 'dunning_fee', label: 'Gebühr' },
+      { key: 'interest', label: 'Zinsen' },
+      { key: 'total_amount', label: 'Gesamt' },
+      { key: 'id', label: 'Mahnung' },
+      { key: 'stufe', label: 'Stufe' },
+      { key: 'gesamt', label: 'Gesamtbetrag' },
+      { key: 'frist', label: 'Frist' },
+      { key: 'datum', label: 'Datum' },
+      { key: 'status', label: 'Status' },
+      { key: 'versand_art', label: 'Versandart' },
+      { key: 'empfaenger', label: 'Empfänger' },
+      { key: 'auswahl', label: 'Auswahl' },
+    ],
+    specializedLandmark: 'Mahnlauf Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -320,6 +350,20 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify([]),
+      })
+    })
+    await page.route(/\/api\/v1\/finance\/mahnlauf\/candidates(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [] }),
+      })
+    })
+    await page.route(/\/api\/v1\/finance\/mahnlauf\/notices(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [] }),
       })
     })
   }

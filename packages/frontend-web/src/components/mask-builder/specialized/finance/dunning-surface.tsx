@@ -127,7 +127,7 @@ export default function DunningSurface({ plan }: { plan: RenderPlan }) {
   })
 
   return (
-    <div className="space-y-4">
+    <section className="space-y-4" aria-label="Mahnlauf Arbeitsbereich">
       <div className="text-sm text-muted-foreground">{gewaehlt.length} von {cand.length} Posten für den Mahnlauf ausgewählt.</div>
 
       <Card>
@@ -253,6 +253,6 @@ export default function DunningSurface({ plan }: { plan: RenderPlan }) {
           )}
         </CardContent>
       </Card>
-    </div>
+    </section>
   )
 }
