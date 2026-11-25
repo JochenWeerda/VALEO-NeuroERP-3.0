@@ -414,6 +414,11 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Vitest-Ratsche gegen Micro-Label-Arbitraries (Allowlist nur Rationsoptimierung)
 - Milchvieh-Karte: Status-Token-Legende + Landmark; Gate-D → **26/26 passed**
 
+### Batch 50 — Workflow/UI Micro-Labels
+
+- `ux-standard`, CompactDecisionCard, PolicyBadge, Table/KPI/VirtualDataTable, CustomerCombobox, Idempotency-Panel → `text-2xs`
+- Micro-Label-Ratsche um `workflow`/`policy`/`ui` erweitert (Allowlist weiter nur Rationsoptimierung)
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

@@ -92,7 +92,7 @@ export function PolicyExplanationBadge({
         {icon}
         {label}
         {explanation.tenant_override_aktiv && (
-          <span className="ml-1 rounded bg-white/50 px-1 text-[10px]">Override</span>
+          <span className="ml-1 rounded bg-white/50 px-1 text-2xs">Override</span>
         )}
       </Badge>
 
@@ -117,7 +117,7 @@ export function PolicyExplanationBadge({
 
       {/* Geprüfte Regeln Zähler */}
       {showDetails && explanation.anzahl_gepruefter_regeln > 0 && (
-        <p className="text-right text-[10px] text-muted-foreground opacity-60">
+        <p className="text-right text-2xs text-muted-foreground opacity-60">
           {explanation.anzahl_gepruefter_regeln} Regel(n) geprüft
         </p>
       )}

@@ -119,7 +119,7 @@ export function IdempotencyMonitoringPanel({
           <p className="text-sm text-muted-foreground">{overview.recommended_action}</p>
           <div className="flex flex-wrap gap-2 pt-1">
             {overview.lookup_paths.map((path) => (
-              <Badge key={path} variant="outline" className="font-mono text-[11px]">
+              <Badge key={path} variant="outline" className="font-mono text-2xs">
                 {path}
               </Badge>
             ))}

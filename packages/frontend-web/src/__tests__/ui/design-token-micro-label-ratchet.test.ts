@@ -12,6 +12,9 @@ const ROOTS = [
   join(__dirname, '../../components/mask-builder'),
   join(__dirname, '../../components/patterns'),
   join(__dirname, '../../components/dms'),
+  join(__dirname, '../../components/workflow'),
+  join(__dirname, '../../components/policy'),
+  join(__dirname, '../../components/ui'),
 ]
 
 const ALLOWLIST = new Set([
