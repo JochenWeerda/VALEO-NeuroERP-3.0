@@ -54,3 +54,7 @@ Die oeffentliche Messung zeigt 140377 ausfuehrbare Zeilen mit 38078 ungedeckten
 sowie 20188 Bedingungen mit 8183 ungedeckten. Bei konstantem Nenner fehlen etwa
 14148 weitere abgedeckte Zeilen/Bedingungen. Dies ist eine breite echte
 Testluecke; keine Schwellen-, Baseline- oder Ausschlussaenderung vorgenommen.
+
+## Image-Nachlauf23.11
+
+Die fehlende Berichtspaketierung ist jetzt im produktiven Dockerfile.backend umgesetzt: vollstaendige Quellen in einer getrennten Buildstufe, nur generiertes JSON zur Laufzeit. Backend-spezifischer Buildkontext mit erneuten Geheimnis-/Artefaktausschluessen; echte Ausschluss- und Berichtpruefung im CI Docker Smoke. Vier enge Vertraege gruen; lokaler Vollquellenvergleich identisch. Image-/Bereitstellungsabnahme bleibt bis zum echten CI-Nachweis offen. Details: backend-image-drift-evidence-20261123.md.

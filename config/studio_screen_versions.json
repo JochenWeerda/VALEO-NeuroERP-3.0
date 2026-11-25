@@ -3446,7 +3446,7 @@
       "version": "1.0.0"
     },
     "crm/customer-360": {
-      "definition_hash": "97e76397cdf18042fc5d55ad85ddc45f784289326aa8f4cb085dc7ed804912d9",
+      "definition_hash": "091f069f71f3ef889bca30b46582a2d298ef1ad079589ab5a3ea302f94fa52fb",
       "gates_passed": [
         "A",
         "B",
@@ -3633,7 +3633,7 @@
       "version": "1.0.0"
     },
     "crm/kunden-cockpit": {
-      "definition_hash": "d31fd0407c61010f66fa39607d56b1faaab2ffa8953072e16173729fa969a9a7",
+      "definition_hash": "f94f1b6f7f3158f344cc8c41797bbedd4aca86a2e317bf28c2939066c0ff68e8",
       "gates_passed": [
         "A",
         "B",
@@ -4502,7 +4502,7 @@
       "version": "1.0.0"
     },
     "einkauf/service-entry-sheets": {
-      "definition_hash": "47053c717617dfc79443ba4c089211248516590730166646bf9c942f7f21aa86",
+      "definition_hash": "0f826bef1f9bde617abf87bf59fe15837f3392b4545b3594f684603e8edc1475",
       "gates_passed": [
         "A",
         "B",

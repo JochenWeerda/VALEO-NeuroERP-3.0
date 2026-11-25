@@ -212,42 +212,50 @@ class FahrzeugRepository:
 
 
 class FahrerRepository:
-    """Repository for Fahrer operations"""
-    
-    def __init__(self, db: Session):
+    """Repository for Fahrer operations — immer mandantengefiltert (M4-LO-P0)."""
+
+    def __init__(self, db: Session, tenant_id: str):
+        if not isinstance(tenant_id, str) or not tenant_id.strip():
+            raise ValueError("Verified tenant required")
         self.db = db
-    
+        self.tenant_id = tenant_id.strip()
+
+    def _q(self):
+        return self.db.query(Fahrer).filter(Fahrer.tenant_id == self.tenant_id)
+
     def get_all(self, skip: int = 0, limit: int = 100) -> List[Fahrer]:
-        return self.db.query(Fahrer).offset(skip).limit(limit).all()
-    
+        return self._q().order_by(Fahrer.name).offset(skip).limit(limit).all()
+
     def get_by_id(self, fahrer_id: str) -> Optional[Fahrer]:
-        return self.db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
-    
-    def get_by_status(self, status: str) -> List[Fahrer]:
-        return self.db.query(Fahrer).filter(Fahrer.status == status).all()
-    
+        return self._q().filter(Fahrer.id == fahrer_id).first()
+
+    def get_by_status(self, status: str, skip: int = 0, limit: int = 100) -> List[Fahrer]:
+        return self._q().filter(Fahrer.status == status).order_by(Fahrer.name).offset(skip).limit(limit).all()
+
     def get_by_personalnummer(self, personalnummer: str) -> Optional[Fahrer]:
-        return self.db.query(Fahrer).filter(Fahrer.personalnummer == personalnummer).first()
-    
+        return self._q().filter(Fahrer.personalnummer == personalnummer).first()
+
     def create(self, fahrer_data: dict) -> Fahrer:
+        daten = _ohne_mandant(fahrer_data)
         fahrer = Fahrer(
             id=f"DR-{str(__import__('uuid').uuid4())[:8].upper()}",
-            **fahrer_data
+            tenant_id=self.tenant_id,
+            **daten,
         )
         self.db.add(fahrer)
         self.db.commit()
         self.db.refresh(fahrer)
         return fahrer
-    
+
     def update(self, fahrer_id: str, fahrer_data: dict) -> Optional[Fahrer]:
         fahrer = self.get_by_id(fahrer_id)
         if fahrer:
-            for key, value in fahrer_data.items():
+            for key, value in _ohne_mandant(fahrer_data).items():
                 setattr(fahrer, key, value)
             self.db.commit()
             self.db.refresh(fahrer)
         return fahrer
-    
+
     def delete(self, fahrer_id: str) -> bool:
         fahrer = self.get_by_id(fahrer_id)
         if fahrer:

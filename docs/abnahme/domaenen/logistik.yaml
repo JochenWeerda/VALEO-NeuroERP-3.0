@@ -1,0 +1,443 @@
+# Abnahmeblatt Logistik und Fuhrpark — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skill l3-crm-organisation-referenz, Teil Fuhrpark) und den Frachtauftrag-/Spedition-
+# Abschnitten in l3-einkauf-referenz und l3-vertrieb-referenz; L3 hat keinen eigenen Logistik-Skill. Der Weg von der Tour
+# bis zur Frachtabrechnung ist dort nicht als Ganzes beschrieben; Prozesse ohne L3-Gegenstueck sind als solche vermerkt.
+# Status: abgenommen | teilweise | fehlt. "abgenommen" verlangt Nachweis, keine offene P0/P1-Luecke und keine
+# Platzhaltermaske; die Bedienung im Browser ist Teil der Maskenabnahme.
+#
+# Als Nachweis zaehlen nur HTTP-/Integrationstests gegen echte PostgreSQL (require_db / db-Fixture) und Playwright-Ketten
+# gegen ein echtes Backend; reine Unit-Tests reiner Funktionen gelten nur als Teilbeleg.
+# NICHT GEZAEHLT (stehen hoechstens im Befund):
+#   - MagicMock-/Mock-/patch-Tests: tests/test_logistics_tour_freight.py, tests/test_logistics_delivery_hint.py,
+#     tests/test_dom_log_004.py, tests/test_log_pod_dn_001.py, tests/test_versandprofil_commands.py,
+#     tests/test_mcp_mask_ce_sanctions_fracht.py (Frachttabellen-Teil), tests/test_mcp_mask_ce_batch2_tour_po.py (Tour-Teil),
+#     tests/test_mcp_mask_ce_fuhrpark_tenant.py, die Mock-Parametrisierungen in tests/test_fuhrpark_isolation_effects.py
+#     (test_every_registered_tool_rejects_tenant_override_before_sql, test_all_registered_tools_reject_foreign_header_without_sql,
+#     test_conflicting_token_tenant_aliases_are_rejected) und tests/test_loading_atomic_actor.py (SQLite im Speicher,
+#     laut Docstring ohne PostgreSQL-Anspruch; Router /tours).
+#   - Reine Definitions-/Registertests: tests/test_tourenplanung_definition.py (prueft Maskenkonfiguration, kein Verhalten).
+#   - Offene Statuslisten und Ladetests: packages/frontend-web/tests/e2e/fuhrpark-logistics.spec.ts (status_code in 200/401/404,
+#     nur "h1/main sichtbar"), main-routes-smoke.spec.ts, visual-tour.spec.ts, all-domains-e2e.spec.ts; die Disposition-Pruefung
+#     in playwright-tests/specs/logistik/log-lifecycle-smoke.spec.ts akzeptiert 200 oder 422 und gilt nur fuer Anlegen und Stopp-Status.
+#   - Browser-Specs mit abgefangenem Backend (page.route): fachliche-vertiefung-versandprofile.spec.ts und
+#     fachliche-vertiefung-frachttabellen.spec.ts beweisen nur die Maskenverdrahtung, nicht das Backend.
+# test_fuhrpark_vertiefung.py akzeptiert beim Anlegen (200, 201) und zaehlt deshalb nur fuer Statuswechsel, Schaeden, Bussgelder.
+# test_logistics_integration.py laeuft ueber require_db; ob die Datenbank der Pruefstand oder die Entwicklungsdatenbank ist,
+# bestimmt die Umgebung (Aufraeumen der eigenen Datensaetze ist vorhanden). Der Kettentest hangt an DEMO-LS-001 und wird sonst uebersprungen.
+#
+# Masken ohne Eintrag in route-aliases.json (logistik/frachttabellen, logistik/versandprofile, logistik/tour-fracht-arbeitsraum,
+# logistik/verladung, logistik/frachtbrief) tauchen im Masken-Inventar nicht als Route auf und koennen in "routen" nicht genannt
+# werden. Sie sind ueber die generierten Routengruppen erreichbar (route-inventory.gen.json). Die Routen transporte/fahrer/neu,
+# transporte/fahrer/:id und logistik/frachtbrief/neu rendern nach route-tree.gen.tsx nur die Listenseiten.
+# Drei konkurrierende Tourenmodelle: domain_logistics.tours (/logistik/tours, produktiv in der Maske), domain_log.log_touren (/tours)
+# und domain_ops.ops_fahrzeug_touren (FahrzeugTour, ORM-Kaskade am Fahrzeug).
+id: logistik
+titel: 'Logistik und Fuhrpark (Tour bis Frachtabrechnung)'
+reifematrix: D07
+l3_referenz: >-
+  l3-crm-organisation-referenz (Fuhrpark) — L3 hat keinen eigenen Logistik-Skill; Frachtauftrag und Spedition stehen auch in
+  l3-einkauf-referenz und l3-vertrieb-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [fuhrpark, transporte, logistik, versand, verladung, disposition]
+screen_domains: [logistics, logistik, transporte, verladung]
+prozesse:
+  - id: LO-01
+    name: Fahrzeugstamm pflegen (Fuhrpark)
+    l3: Stammdaten Fuhrpark (Fuhrpark-Stammdaten, Fahrzeugakte) — Kennzeichen, Typ, Betrieb, Fahrer, Fuehrerschein/Pruefdaten, Kilometer
+    routen: [fuhrpark/fuhrpark-stammdaten, fuhrpark/fahrzeug/neu, fuhrpark/fahrzeug/:id, fuhrpark/fahrzeuge, fuhrpark/uebersicht]
+    rolle: SCHREIBEN LOGISTIK (Fahrzeug-Routen) und GERAET; Mandant aus dem Token (FahrzeugRepository nimmt tenant_id)
+    nachweise:
+      - tests/test_fuhrpark_isolation_effects.py::test_repository_crud_foreign_rows_are_invisible
+      - tests/test_fuhrpark_isolation_effects.py::test_http_header_cannot_choose_foreign_tenant
+      - tests/test_fuhrpark_isolation_effects.py::test_real_writes_and_audit_are_atomic
+      - tests/test_fuhrpark_vertiefung.py::test_status_wechsel_valide
+      - tests/test_fuhrpark_vertiefung.py::test_status_wechsel_ungueltig
+      - tests/test_fuhrpark_vertiefung.py::test_schaden_anlegen_und_abrufen
+      - tests/test_rls_domain_ops.py::test_mandantengrenze_je_tabelle
+    status: teilweise
+    befund: >-
+      Das Fahrzeug ist mandantenfest: app/domains/operations/repository.py::FahrzeugRepository filtert je Aufruf nach
+      tenant_id, ops_fahrzeuge hat eine Eindeutigkeit je Mandant (tenant_id, kennzeichen) und Row-Level-Security; die
+      Datenbanktests belegen fremde Zeilen unsichtbar, kein Mandantenwechsel ueber Header oder Payload, atomare Schreibwege mit
+      Audit, Statuswechsel mit Historie, Schaeden und Bussgelder. Die Stammmaske fuhrpark/fahrzeug-stamm (Speichern, Loeschen) und
+      die Liste fuhrpark/fahrzeuge sind echte Masken mit Fachspalten. Die Routen fuhrpark/fahrzeuge und fuhrpark/uebersicht zeigen
+      dagegen die Platzhaltermaske fuhrpark/fahrzeuge-liste (Spalten nur id/name/status/datum, nur CSV-Export); ein Fahrzeug
+      hat keine Felder name und datum (app/domains/operations/models.py::Fahrzeug), die Spalten Bezeichnung und Datum bleiben
+      nach dem Modell leer (nicht im Browser geprueft). FahrzeugRepository.delete ruft db.delete auf; die ORM-Beziehung
+      Fahrzeug.tours hat cascade all, delete-orphan und loescht damit alle ops_fahrzeug_touren des Fahrzeugs ohne Verwendungspruefung
+      (das Gegenmuster zeigt WaageRepository.delete mit Loeschsperre bei Belegen). Die Endpunkte drucker-einrichten, drucken und
+      unfall-anzeige in app/api/v1/endpoints/fuhrpark.py melden ok=True, ohne etwas zu speichern oder zu drucken; die Maske
+      kennzeichnet Unfall-Anzeige als nicht verfuegbar. Browser: nur Ladetest (fuhrpark-logistics.spec.ts, nicht gezaehlt).
+    luecken:
+      - text: "Fahrzeug loeschen kaskadiert ueber Fahrzeug.tours (cascade delete-orphan) auf ops_fahrzeug_touren und prueft weder Touren noch Rechnungen noch Schaeden — Tourhistorie geht ohne Sperre verloren (FahrzeugRepository.delete)"
+        prio: P1
+      - text: "Routen fuhrpark/fahrzeuge und fuhrpark/uebersicht zeigen die Platzhalterliste fuhrpark/fahrzeuge-liste (id/name/status/datum, nur Export, keine Zeilenaktion) statt der Fachliste fuhrpark/fahrzeuge"
+        prio: P2
+      - text: "Endpunkte drucker-einrichten, drucken und unfall-anzeige geben Erfolg zurueck, ohne zu speichern oder zu drucken (fuhrpark.py setup_fahrzeug_printer, print_fahrzeugakte, create_unfall_anzeige)"
+        prio: P2
+      - text: "Browserkette Fahrzeug anlegen, aendern, loeschen gegen echtes Backend fehlt"
+        prio: P2
+      - text: "Fahrer am Fahrzeug ist Freitext (fahrer_name, fahrer_vorname), keine Verknuepfung zum Fahrerstamm"
+        prio: P3
+
+  - id: LO-02
+    name: Fahrerstamm pflegen (Transporte)
+    l3: Fuhrpark-/Personalstamm Fahrer (Fuehrerschein, ADR, Verfuegbarkeit) — in L3 ueber Fuhrpark und Personal; kein eigener Fahrer-Skill
+    routen: [transporte/fahrer, transporte/fahrer/neu]
+    rolle: Lesen ohne Mandantenbezug; Schreiben SCHREIBEN LOGISTIK (Endpunkte in transporte.py)
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Mandantenleck: app/api/v1/endpoints/transporte.py (list_fahrer, get_fahrer, create_fahrer, update_fahrer, delete_fahrer)
+      nimmt keinen Mandanten und fragt db.query(Fahrer) ohne Filter ab; das Modell Fahrer (ops_fahrer) hat kein tenant_id, die
+      personalnummer ist systemweit eindeutig, FahrerRepository (repository.py) kennt keinen Mandanten. Jeder angemeldete Mandant
+      liest, aendert und loescht damit alle Fahrer samt Geburtsdatum, Fuehrerschein und Kontaktdaten. Die Luecke ist in
+      alembic/versions/rls_domain_ops_teil2_20261028.py (Docstring) und docs/admin/rls-domain-matrix.md bekannt, aber nicht
+      geschlossen; ops_fahrzeug_touren.fahrer_id verweist auf diese Tabelle. Bedienung: die Liste transporte/fahrer ist eine echte
+      Maske, doch transporte/fahrer/neu und transporte/fahrer/:id rendern nach route-tree.gen.tsx nur pages/transporte/fahrer-liste;
+      die Aktion Neuer Fahrer ist ohne Serverwirkung (nur lokale Navigation), Verfuegbaren Fahrer oeffnen und Export sind als nicht
+      verfuegbar gekennzeichnet. Ein Fahrer ist im Browser weder anlegbar noch aenderbar. Kein Test fuer transporte/fahrer.
+    luecken:
+      - text: "Mandantenleck: ops_fahrer ohne tenant_id und transporte.py ohne Mandantenfilter — alle Mandanten sehen, aendern und loeschen alle Fahrer (personenbezogene Daten); Personalnummer systemweit eindeutig"
+        prio: P0
+      - text: "Fahrer ist im Browser nicht anlegbar oder aenderbar: transporte/fahrer/neu und transporte/fahrer/:id rendern nur die Liste, Aktion Neuer Fahrer ohne Serverwirkung"
+        prio: P1
+      - text: "Kein Datenbanktest fuer die Fahrer-Endpunkte (Vertrag, Fehlerpfade, Mandantengrenze)"
+        prio: P1
+      - text: "Platzhalterliste transporte/fahrer-liste (id/name/status/datum) ist in der Registry noch vorhanden, wird von keiner Route genutzt"
+        prio: P3
+
+  - id: LO-03
+    name: Tour planen — Stopps aus Lieferschein, Disposition, Storno
+    l3: Tourenplanung/Disposition (kein eigener L3-Skill); Selbstabholung und Spedition am Lieferschein (l3-vertrieb-referenz)
+    routen: [logistik/tourenplanung, disposition/touren-disposition]
+    rolle: SCHREIBEN LOGISTIK (Tour anlegen, Stopp aendern, stornieren); Mandant aus dem Token (get_tenant_id)
+    nachweise:
+      - tests/test_logistics_integration.py::test_create_tour_list_and_detail
+      - tests/test_logistics_integration.py::test_tour_cancel_fail_closed_and_stop_cancel
+      - tests/test_logistics_integration.py::test_chain_lifecycle_ls_tour_hints_freight_supply_read
+      - tests/test_rls_domain_logistics.py::test_touren_wege_nur_im_eigenen_mandanten
+      - tests/test_rls_domain_logistics.py::test_kein_verweis_auf_fremden_eltern
+      - tests/test_rls_domain_logistics.py::test_mandantengrenze_je_tabelle
+      - playwright-tests/specs/logistik/log-lifecycle-smoke.spec.ts
+    status: teilweise
+    befund: >-
+      Anlegen, Liste, Detail und Storno einer Tour (app/api/v1/endpoints/logistics_tours.py, command_handlers/logistics.py
+      insert_tour und action_tour_anlegen) sind gegen PostgreSQL belegt, die Mandantengrenze je Tabelle und je Elternverweis
+      ebenso (Row-Level-Security domain_logistics); Storno ist fail-closed und verweigert Touren mit gelieferten Stopps. Die
+      Tourenplanungsmaske legt eine Tour mit einem Stopp aus einem aufgeloesten Lieferschein an (Fahrzeug- und Fahrerauswahl,
+      Storno-Dialog); das Playwright-Kettenspec ruft die API gegen ein echtes Backend (Anlegen, Stopp-Status, Disposition-Pruefung,
+      die Disposition akzeptiert 200 oder 422). Die Dispositionspruefung (logistics_disposition_service.check_tour_disposition)
+      nimmt DEFAULT_VEHICLE_CAPACITY_KG = 20000, wenn keine Kapazitaet uebergeben wird, und kennt das Fahrzeuggewicht nicht.
+      Es gibt keinen Endpunkt zum Aendern einer Tour (kein PATCH auf die Tour); Fahrzeug, Fahrer, Datum und Reihenfolge lassen sich
+      nur durch Storno und Neuanlage aendern. insert_tour und der Anlegen-Weg pruefen vehicle_id und driver_id nicht gegen
+      den Mandanten oder den Fuhrpark (das Playwright-Spec legt eine Tour mit erfundenen Kennungen an und erhaelt 201), das
+      Statusfeld nimmt einen beliebigen Text. Die Aktionen Dispo-Arbeitsraum, Beladung, Hinweise und Aufloesen der Maske sind als
+      nicht verfuegbar gekennzeichnet. Tourenplanung zeigt je Tour Stoppzahl und Luftlinie (strecke.py touren_mit_stopps), keine
+      Fahrstrecke. Nicht gezaehlt: test_logistics_tour_freight.py, test_logistics_delivery_hint.py, test_tourenplanung_definition.py
+      (Mock bzw. Definitionstest), test_mcp_mask_ce_batch2_tour_po.py.
+    luecken:
+      - text: "Tour ist nach dem Anlegen nicht aenderbar (kein PATCH): Fahrzeug, Fahrer, Datum und Stopp-Reihenfolge nur durch Storno und Neuanlage; weitere Stopps lassen sich in der Maske nicht ergaenzen"
+        prio: P1
+      - text: "Zielort-Koordinate der Stopps kommt aus public.kunden_geo, gelesen nur ueber kunden_nr ohne Mandantenfilter (strecke.py _zielort_lesen, Tabelle ohne tenant_id); gleiche Kundennummern in zwei Mandanten koennen eine fremde Koordinate liefern"
+        prio: P1
+      - text: "vehicle_id und driver_id werden nicht gegen Fuhrpark und Mandant geprueft, status ist freier Text; das Kettenspec legt eine Tour mit erfundenen Kennungen an"
+        prio: P2
+      - text: "Dispositionspruefung rechnet mit pauschal 20 t Kapazitaet statt dem Fahrzeug (DEFAULT_VEHICLE_CAPACITY_KG); Tourenplanung ohne Ladungs- und Fahrzeugabgleich"
+        prio: P2
+      - text: "Mandantengrenze fuer Fahrzeug und Fahrer an der Tour nicht belegt (kein Fremdschluessel auf ops_fahrzeuge und ops_fahrer)"
+        prio: P2
+      - text: "Drei konkurrierende Tourenmodelle (domain_logistics.tours, domain_log.log_touren, ops_fahrzeug_touren); Maske und Kennzahlen nutzen nur das erste"
+        prio: P2
+      - text: "Browserkette Tour anlegen, Stopp, Storno ueber die Maske fehlt; Dispo-Arbeitsraum, Beladung und Hinweise sind nicht verfuegbar"
+        prio: P2
+
+  - id: LO-04
+    name: Tour durchfuehren — Stopp- und Tourstatus
+    l3: Tourverlauf bis Abschluss (kein L3-Skill; Entsprechung Lieferschein-Status im Verkauf)
+    routen: [logistik/tourenplanung]
+    rolle: SCHREIBEN LOGISTIK (patch_stop); Mandant aus dem Token
+    nachweise:
+      - tests/test_rls_domain_logistics.py::test_touren_wege_nur_im_eigenen_mandanten
+      - playwright-tests/specs/logistik/log-lifecycle-smoke.spec.ts
+    status: teilweise
+    befund: >-
+      Der Stopp-Status laesst sich ueber PATCH /logistik/tours/{tour}/stops/{stop} setzen (patch_stop), mandantengefiltert; der
+      Wert ist freier Text (TourStopPatch.status, keine Uebergangs- oder Wertepruefung). Fuer die Tour selbst gibt es nur
+      Anlegen und Storno (UPDATE status = STORNIERT in logistics_tours.py) — in app/ setzt nichts domain_logistics.tours auf
+      UNTERWEGS oder ABGESCHLOSSEN, auch nicht das Ende des letzten Stopps. Die Maske rechnet die Kennzahlen aus
+      lib/api/misc-modules.ts mapToursApiToTourenData aus genau diesen Werten (UNTERWEGS, ABGESCHLOSSEN, STORNIERT, sonst offen);
+      unterwegs und abgeschlossen bleiben damit ohne manuelle Eingabe beim Anlegen immer leer. Die Stoppstatus-Vokabulare
+      widersprechen sich: save_pod und mobile_sync_service setzen ABGELIEFERT, das Kettenspec setzt GELIEFERT, das Tour-Storno
+      sperrt nur Touren mit ABGELIEFERT (ein Stopp im Status GELIEFERT verhindert den Storno nicht). Tourlisten laden die Stopps
+      je Tour einzeln (mapToursApiToTourenData, useTouren). Die Tourstatistik (logistics_tours.py, Zaehlung nach ABGELIEFERT)
+      und die Dispositions-Auswertung beruhen auf diesem Wert.
+    luecken:
+      - text: "Kein Tourstatusfluss: nichts setzt eine Tour auf UNTERWEGS oder ABGESCHLOSSEN; die Kennzahlen unterwegs und abgeschlossen der Tourenplanung bleiben leer (logistics_tours.py, nur Anlegen und Storno)"
+        prio: P1
+      - text: "Stoppstatus ohne Wertebereich und Uebergangspruefung (TourStopPatch.status frei); ABGELIEFERT (POD, Mobil) und GELIEFERT (Kettenspec) nebeneinander, Tour-Storno sperrt nur ABGELIEFERT"
+        prio: P1
+      - text: "Kein Testnachweis fuer Tour- und Stopp-Statuswechsel mit Fehlerpfaden (nur Kettenspec Happy Path)"
+        prio: P2
+      - text: "Abschluss der Tour bucht nichts (kein Uebergang zu Lieferschein, Frachtkosten, Kilometer am Fahrzeug)"
+        prio: P2
+
+  - id: LO-05
+    name: Frachtauftrag an Spediteur aus Beleg (Einkauf-Lieferschein)
+    l3: Einkauf > Bestellung/Lieferschein — Schaltflaeche Frachtauftrag (l3-einkauf-referenz); Spediteur, Ladedatum, Liefertermin
+    routen: [einkauf/frachtauftraege-eingang, einkauf/lieferschein-frachtauftrag]
+    rolle: SCHREIBEN EINKAUF (Endpunkte /einkauf/frachtauftraege); Mandant aus dem Token
+    nachweise: []
+    status: teilweise
+    befund: >-
+      app/api/v1/endpoints/einkauf_lieferschein.py bietet Liste, Anlegen, Aendern und Loeschen von Frachtauftraegen
+      (Tabelle einkauf_frachtauftraege, mandantengefiltert, Row-Level-Security im rls_rollout_20261026). Der Frachtauftrag ist ein
+      eigenstaendiger Satz mit Spediteur-Nummer, Ladedatum, Kunde und einer losen Textspalte belegnummer; er entsteht nicht aus
+      Bestellung, Lieferschein oder Verkauf, kennt keine Position, kein Gewicht, keinen Preis und keine Verbindung zu Tour, Frachtbrief
+      oder Frachtkosten. Beide Routen zeigen die Platzhaltermaske einkauf/frachtauftraege-liste (id/name/status/datum, nur Export).
+      Die Liste faengt jeden Fehler ab und gibt eine leere Liste zurueck (list_frachtauftraege, Kommentar Fallback fuer nicht
+      migrierte Umgebungen) und verbirgt damit Fehler vor dem Nutzer. Es gibt keinen Test fuer Frachtauftraege (kein Treffer in
+      tests/). Der Beleg-Pfad Frachtauftrag aus der Bestellung ist auch im Blatt einkauf als Luecke gefuehrt.
+    luecken:
+      - text: "Frachtauftrag entsteht nicht aus Bestellung oder Lieferschein (L3-Schaltflaeche): keine Belegverknuepfung, keine Positionen, kein Gewicht, kein Preis, keine Verbindung zu Tour und Frachtbrief"
+        prio: P1
+      - text: "Beide Routen zeigen die Platzhaltermaske einkauf/frachtauftraege-liste; Anlegen und Aendern ist im Browser nicht moeglich"
+        prio: P1
+      - text: "Kein Test fuer die Frachtauftrag-Endpunkte (Vertrag, Mandantengrenze, Fehlerpfade)"
+        prio: P1
+      - text: "list_frachtauftraege gibt bei jedem Datenbankfehler still eine leere Liste zurueck (breiter except ohne Rueckmeldung)"
+        prio: P2
+      - text: "Frachtauftragsnummer ist nicht je Mandant eindeutig gesichert, Uebergabe an den Spediteur (Druck, E-Mail) fehlt"
+        prio: P2
+
+  - id: LO-06
+    name: Frachtbrief und Speditionsauftrag (aus Verladung)
+    l3: Verkauf > Lieferschein mit Spedition; Frachtbrief/Speditionsauftrag (l3-vertrieb-referenz)
+    routen: [logistik/frachtbriefe, versand, versand/frachtdokumente]
+    rolle: SCHREIBEN LOGISTIK (Frachtbrief-Endpunkte), SCHREIBEN LAGER (Verladung); Mandant aus dem Token
+    nachweise:
+      - tests/test_log_frachtbrief.py::test_create_frachtbrief_persists_and_is_listed
+      - tests/test_log_frachtbrief.py::test_duplicate_nummer_is_409_not_server_error
+      - tests/test_log_frachtbrief.py::test_status_transition_is_applied
+      - tests/test_log_frachtbrief.py::test_status_patch_rejects_invalid_enum
+      - tests/test_frachtbrief_service.py::test_vollstaendige_verladung_ist_bereit
+    status: teilweise
+    befund: >-
+      Der Frachtbrief-Vertrag ist gegen PostgreSQL geprueft: Anlegen und Liste, doppelte Nummer liefert 409, Statusuebergang
+      wirkt, ungueltiger Statuswert wird abgelehnt (app/api/v1/endpoints/logistik_frachtbriefe.py). Der Aufbau aus einer
+      Verladung (app/services/frachtbrief_service.py fehlende_angaben, generate_from_verladung,
+      finalize_menge_from_outbound_weighing) hat reine Unit-Tests als Teilbeleg (Gewicht kommt von der Waage). Die Maske
+      logistik/frachtbriefe ist eine Lese- und Suchliste mit Tourbezug (Spalten Frachtbrief, Datum, Fahrzeug, Absender, Empfaenger,
+      Tour) und nur CSV-Export; die Routen versand und versand/frachtdokumente zeigen dieselbe Maske, logistik/frachtbrief/neu
+      rendert ebenfalls nur die Liste. update_frachtbrief_status prueft nur den Wertebereich, keine Uebergaenge. Im Code gibt es
+      keinen Beleg-Renderer (PDF, Druck) fuer den Frachtbrief und keinen Versand an den Spediteur (kein Treffer ausserhalb von
+      Service, Endpunkt und Masken).
+    luecken:
+      - text: "Kein Druck, PDF oder Versand des Frachtbriefs (Speditionsauftrag) an den Spediteur im Code gefunden; Maske ist reine Liste mit Export"
+        prio: P1
+      - text: "Frachtbrief ist im Browser nicht anlegbar oder aenderbar (logistik/frachtbrief/neu rendert die Liste, Statuswechsel nur ueber die API)"
+        prio: P2
+      - text: "Statuswechsel ohne Uebergangspruefung (update_frachtbrief_status prueft nur den Wertebereich)"
+        prio: P2
+      - text: "Frachtbrief ist nicht mit den Tourstopps verknuepft; Zuordnung nur ueber ein Textfeld (Tourbezug nicht belegt)"
+        prio: P2
+      - text: "Browserkette Verladung zu Frachtbrief gegen echtes Backend fehlt"
+        prio: P2
+
+  - id: LO-07
+    name: Verladung und LKW-Beladung (Rampe, Waage)
+    l3: Verkauf/Lager — Verladung am Lieferschein, Wiegung ausgehend (l3-lager-referenz, l3-vertrieb-referenz)
+    routen: [logistik/verladungen, verladung, verladung/lkw-beladung]
+    rolle: SCHREIBEN LAGER (app/api/v1/endpoints/verladung.py); Mandant aus dem Token
+    nachweise:
+      - tests/test_frachtbrief_service.py::test_gewicht_gehoert_der_waage_handel_dem_lieferschein
+    status: teilweise
+    befund: >-
+      app/api/v1/endpoints/verladung.py ist mandantengefiltert mit Schreibrecht LAGER, erzeugt bei Anlegen und Aendern den
+      Frachtbrief (generate_from_verladung), loescht aber hart. Es gibt keinen HTTP-Test gegen PostgreSQL fuer die
+      Verladung-Endpunkte; test_loading_atomic_actor.py betrifft den Beladungsstatus am Router /tours (Modell domain_log) und
+      laeuft laut Docstring nur auf SQLite im Speicher, er belegt keine PostgreSQL-Abnahme und zaehlt nicht.
+      Die Routen logistik/verladungen und verladung zeigen die Platzhaltermaske verladung/liste (Spalten id/name/status/datum, nur
+      Export; die Daten von /api/v1/verladung haben andere Felder). verladung/lkw-beladung liest /api/v1/silo/kapazitaeten (Silo-
+      Kapazitaeten, keine Beladung). Die echte Maske logistik/verladung (Neue Beladung) ist ohne Route im Inventar; die Aktion
+      Neue Beladung ist ohne Serverwirkung.
+    luecken:
+      - text: "Verladung nur ueber die Platzhalterliste verladung/liste erreichbar (id/name/status/datum, nur Export); Anlegen, Rampe, Fahrzeug und Menge im Browser nicht bedienbar"
+        prio: P1
+      - text: "Kein Datenbanktest fuer die Verladung-Endpunkte (CRUD, Mandantengrenze, Frachtbrief-Erzeugung)"
+        prio: P1
+      - text: "verladung/lkw-beladung liest Silokapazitaeten statt Beladungen (falsche Datenquelle fuer die Maske)"
+        prio: P2
+      - text: "Verladung wird hart geloescht, obwohl daraus ein Frachtbrief entstanden sein kann (kein Storno, keine Sperre)"
+        prio: P2
+
+  - id: LO-08
+    name: Lieferavis und Versandprofile (Versand-Avis, Belegversand)
+    l3: Versand-Avis drucken/senden (Telefax, E-Mail), Lieferavis zum Lieferschein; Anlieferavis im Einkauf (l3-einkauf-referenz)
+    routen: [versand/versand-avis]
+    rolle: SCHREIBEN LOGISTIK (/logistik/versand/*); Mandant aus dem Token
+    nachweise: []
+    status: teilweise
+    befund: >-
+      app/api/v1/endpoints/versandprofile.py verwaltet Versandprofile (Anlegen, Deaktivieren ueber den versionierten Weg mit
+      Audit und Idempotenz, DELETE liefert 410) und Lieferavise (Liste, Anlegen, Statuswechsel offen, bestaetigt, abgeschlossen,
+      storniert; abgeschlossene Avise sind gesperrt). Alles ist mandantengefiltert. Die Maske versand/versand-avis ist eine Liste
+      der Avise mit Fachspalten (Avis-Nr., Kunde, Lieferant, Lieferschein, Datum, Artikel, Menge, Status) und beschreibt sich als
+      Druckliste ohne Workflow; Drucken oder Senden an den Empfaenger gibt es nicht. Die Zuordnung zum Lieferschein ist nur eine
+      Textspalte lieferschein_nr, keine Verknuepfung zu Beleg oder Tour. Anlegen und Statuswechsel eines Avis sind im Browser nicht
+      moeglich (Aktionen Profil speichern und Avis speichern der Maske logistik/versandprofile sind nicht verfuegbar). Der
+      Versandprofil-Versand selbst (E-Mail, Fax, EDI) ist im Code nicht an ein Senden angeschlossen. Es gibt keinen Datenbanktest
+      fuer Avise; test_versandprofil_commands.py ist Mock-gestuetzt (nicht gezaehlt), die Browser-Specs fachliche-vertiefung-*
+      fangen das Backend ab (nicht gezaehlt).
+    luecken:
+      - text: "Lieferavis ist nicht mit Lieferschein oder Tour verknuepft (nur Textspalte lieferschein_nr); kein Abgleich nach Wareneingang oder Zustellung"
+        prio: P1
+      - text: "Kein Datenbanktest fuer Avise und Versandprofile (Anlegen, Statuswechsel, Mandantengrenze)"
+        prio: P2
+      - text: "Versand-Avis kann nicht gedruckt oder versendet werden; Versandprofile (SMTP, Fax, EDI) werden nirgends zum Senden verwendet"
+        prio: P2
+      - text: "Avis und Versandprofil sind im Browser nicht anlegbar (Aktionen nicht verfuegbar); Statuswechsel nur ueber die API"
+        prio: P2
+      - text: "avis_status prueft keine Uebergaenge (bestaetigt zurueck auf offen moeglich), nur abgeschlossene Avise sind gesperrt"
+        prio: P3
+
+  - id: LO-09
+    name: Frachttabellen, Frachttarife und Frachtermittlung
+    l3: Stammdaten Preise/Frachten — Frachttabellen (Staffel), Zuordnung Frachtklasse mal Frachtgruppe mal Versandart (l3-stammdaten-referenz)
+    routen: [strecke/speditionen-fracht-preise]
+    rolle: SCHREIBEN LOGISTIK (frachttabellen, freight-tariffs, strecke/speditionen); Mandant aus dem Token
+    nachweise:
+      - tests/test_logistics_integration.py::test_freight_tariff_create_and_simulate
+      - tests/test_logistics_integration.py::test_freight_simulate_not_visible_for_other_tenant
+      - tests/test_logistics_integration.py::test_freight_tariff_cancel_soft_and_excludes_from_simulate
+      - tests/test_rls_domain_logistics.py::test_frachttarife_und_spediteur_rechnung
+      - tests/test_rls_domain_ops_teil2.py::test_frachttarife_und_rahmenvertraege_im_eigenen_mandanten
+    status: teilweise
+    befund: >-
+      Es gibt drei getrennte Frachtpreis-Speicher: domain_logistics.freight_tariffs (Spediteur, Gewichtsstaffel, Berechnung und
+      Simulation in logistics_freight.py, Datenbanktests belegen Anlegen, Simulation, Storno, Mandantengrenze), domain_shared.
+      logistik_frachttabellen mit Positionen und Zuordnung (logistik_frachttabellen.py, lookup nach Frachtklasse, Frachtgruppe,
+      Versandart, Menge) und strecke/speditionen/frachttarife (PLZ-Bereich, Preis je t, Blatt kontrakte-strecke). Kein Verbraucher
+      wendet eine Frachttabelle auf einen Beleg oder eine Tour an: weder lookup_frachttabelle noch calculate_freight wird von
+      Lieferschein, Tour oder Faktura aufgerufen (Suche in app/ ergibt nur die Endpunktdateien); die Tabellen werden nur gepflegt
+      und abgefragt. In der Frachttabellen-Maske ist Position anlegen als nicht verfuegbar gekennzeichnet, ohne Staffelzeilen ist eine
+      Tabelle ohne Wirkung; die Zuordnung ist nur ueber die API anlegbar. lookup_frachttabelle prueft nicht, ob die Tabelle aktiv ist
+      (delete_frachttabelle setzt nur aktiv = false, die Positionen bleiben im Lookup erreichbar). create_zuordnung prueft nicht, ob
+      tabelle_nr im Mandanten existiert. Frachttarife (freight_tariffs) sind im Browser nur listen, simulieren und stornieren
+      (lib/api/logistics-freight.ts), nicht anlegen. Der Frachttabellen-Anlegen-Weg (action_anlegen) hat dryRun, Idempotenz, Audit
+      und Outbox, ist aber nur mit Mock-Datenbank getestet (test_mcp_mask_ce_sanctions_fracht.py, nicht gezaehlt); die Maske hat
+      kein Datenbankspec (page.route-Spec nicht gezaehlt). Die Strecke-Frachttarif-Maske strecke/speditionen-fracht-preise ist
+      im Blatt kontrakte-strecke als Platzhalter gefuehrt.
+    luecken:
+      - text: "Frachtermittlung ist nirgends angebunden: lookup_frachttabelle und calculate_freight werden von Lieferschein, Tour und Faktura nicht aufgerufen — Frachtkosten entstehen nur durch manuelle Eingabe"
+        prio: P1
+      - text: "Frachttabelle ohne Staffelzeilen im Browser unbrauchbar: Aktion Position anlegen ist nicht verfuegbar, Zuordnung und Tarif-Anlage nur per API"
+        prio: P1
+      - text: "Drei konkurrierende Frachtpreis-Speicher (freight_tariffs, logistik_frachttabellen, strecke_speditionen) ohne Beziehung zueinander"
+        prio: P2
+      - text: "lookup_frachttabelle ignoriert aktiv = false einer geloeschten Frachttabelle; create_zuordnung prueft die Tabellennummer nicht"
+        prio: P2
+      - text: "Kein Datenbanktest fuer die Frachttabellen-Endpunkte (Anlegen, Positionen, Zuordnung, lookup, Mandantengrenze) und keine Browserkette"
+        prio: P2
+      - text: "Frachtsatz mal Menge ohne Mindestfracht-Rundung und Waehrungspruefung (Fliesskomma statt Dezimal im lookup)"
+        prio: P3
+
+  - id: LO-10
+    name: Frachtabrechnung — Spediteur-Rechnung und Gutschrift
+    l3: Einkauf-Rechnung des Spediteurs; Gutschrift Spediteur/Frachtabrechnung (kein L3-Skill, Selbstabrechnung nur Agrar)
+    routen: []
+    rolle: SCHREIBEN LOGISTIK (POST /logistik/freight-cost/carrier-invoice); Mandant aus dem Token
+    nachweise:
+      - tests/test_rls_domain_logistics.py::test_frachttarife_und_spediteur_rechnung
+    status: teilweise
+    befund: >-
+      logistics_freight.py create_carrier_invoice erfasst eine Spediteur-Eingangsrechnung zur Tour (404 fuer fremde Tour, 409 bei
+      doppelter Nummer, Buchungsentwurf im eigenen Savepoint; scheitert die Buchung, bleibt die Rechnung offen) und legt einen
+      FiBu-Entwurf Frachtkosten gegen Verbindlichkeiten mit Vorsteuerzeile an; der Mandant kommt aus dem Token, die Mandantengrenze
+      ist ueber test_frachttarife_und_spediteur_rechnung belegt. Konten sind Vorgaben im Request-Schema (debit_account 4820,
+      credit_account 1600, tax_account 1576) und gelten fuer jeden Mandanten, solange sie nicht ueberschrieben werden; der Steuertext
+      ist fest Vorsteuer 19%. Es gibt keinen Frontend-Aufruf (kein Treffer fuer carrier-invoice in packages/frontend-web), keine
+      Maske, keinen Soll-Ist-Vergleich der Rechnung mit der berechneten Fracht und keinen Prozess fuer eine Gutschrift an den Spediteur
+      oder Frachtabrechnung ueber mehrere Touren (Suche nach Frachtabrechnung und Frachtgutschrift in app/ ohne Treffer). Einen
+      HTTP-Happy-Path-Test fuer die Rechnung (Betraege, Buchung) gibt es nicht, nur den Mandantentest. Der Test mit
+      Mock-Datenbank (test_logistics_tour_freight.py) zaehlt nicht.
+    luecken:
+      - text: "Spediteur-Rechnung und Frachtabrechnung sind im Browser nicht bedienbar (kein Frontend-Aufruf, keine Maske); Gutschrift an den Spediteur und Sammelabrechnung ueber mehrere Touren fehlen"
+        prio: P1
+      - text: "Kein Soll-Ist-Vergleich der Spediteur-Rechnung mit der berechneten Fracht (calculate_freight/simulate_freight), keine Freigabe bei Abweichung"
+        prio: P2
+      - text: "Buchungskonten und Steuertext sind Vorgaben im Schema (4820, 1600, 1576, Vorsteuer 19%), nicht aus dem Kontenrahmen des Mandanten oder dem Steuerschluessel"
+        prio: P2
+      - text: "Kein Happy-Path-Datenbanktest fuer die Buchung der Spediteur-Rechnung (Betraege, Buchungsentwurf, Rechnungsstatus entwurf oder offen)"
+        prio: P2
+
+  - id: LO-11
+    name: Fahrer-App und Lieferquittung (ePOD, Zustellnachweis)
+    l3: Lieferschein-Zustellnachweis, Quittung durch den Fahrer (Beleg am Lieferschein, kein eigener Skill)
+    routen: [logistik/tourenplanung]
+    rolle: SCHREIBEN LOGISTIK (POD, ePOD-Abrechnung); Mandant aus dem Token; mobile Synchronisierung ueber den Mobil-Dienst
+    nachweise:
+      - tests/test_rls_domain_logistics.py::test_epod_abrechnung_nur_eigener_stopp
+    status: teilweise
+    befund: >-
+      Backend: save_pod (logistics_tours.py) speichert den Zustellnachweis als JSON am Stopp und setzt ihn auf ABGELIEFERT; der
+      Mobil-Sync (mobile_sync_service.py _handle_delivery_confirmation) setzt ebenfalls ABGELIEFERT; der Befehl
+      zustellnachweis_am_lieferschein (command_handlers/logistics.py) schreibt in domain_docflow.document_command_log. Die
+      ePOD-Abrechnung (logistics_epod_service.settle_epod) verlangt dagegen status oder epod_status gleich GELIEFERT oder SIGNED
+      (VALID_SETTLE_STATUSES); epod_status steht nach der Migration auf PENDING und wird nur von settle_epod selbst auf SETTLED
+      gesetzt. Ein per POD oder Mobil quittierter Stopp (ABGELIEFERT) kann daher nicht abgerechnet werden; nur ein Stopp, dessen Status
+      von Hand per PATCH auf GELIEFERT gesetzt wurde, laesst sich abrechnen. Die Mandantengrenze der Abrechnung ist gegen PostgreSQL
+      belegt. Es gibt keine Fahrer-Oberflaeche und keinen Frontend-Aufruf fuer POD oder ePOD (keine Treffer in packages/frontend-web
+      ausser dem Hilfeverweis epod). test_log_pod_dn_001.py und test_dom_log_004.py nutzen Mocks (nicht gezaehlt).
+    luecken:
+      - text: "ePOD-Abrechnung ist auf dem regulaeren Weg nicht erreichbar: save_pod und Mobil-Sync setzen ABGELIEFERT, settle_epod verlangt GELIEFERT oder SIGNED (logistics_epod_service.VALID_SETTLE_STATUSES); epod_status wird nie auf GELIEFERT/SIGNED gesetzt"
+        prio: P1
+      - text: "Keine Fahrer-Oberflaeche (Fahrer-App, Unterschrift, Foto) im Frontend; POD nur ueber API oder Mobil-Sync"
+        prio: P2
+      - text: "Zustellnachweis am Lieferschein nur als Eintrag im Befehlsprotokoll (document_command_log), nicht am Beleg sichtbar; kein Datenbanktest der Kette POD, Lieferschein, Abrechnung"
+        prio: P2
+
+  - id: LO-12
+    name: Telematik und Fahrzeugposition (Webfleet)
+    l3: Keine L3-Entsprechung im Referenzskill
+    routen: []
+    rolle: Konfiguration ueber Umgebungsvariablen WEBFLEET_ACCOUNT, WEBFLEET_USER, WEBFLEET_PASSWORD, WEBFLEET_APIKEY
+    nachweise: []
+    status: fehlt
+    befund: >-
+      app/services/webfleet_connect.py ruft den Fahrzeugbericht ab (showVehicleReportExtern, Basic Auth, hoechstens ein Abruf je
+      Minute, Mikrograd zu WGS84, nur Status A). tests/test_webfleet_connect.py prueft diese reine Logik ohne Netz (Teilbeleg, nicht
+      als Abnahme gezaehlt). Kein Modul und keine Maske ruft webfleet_connect auf (Suche ergibt nur Test und Architekturindex);
+      app/domains/logistik/strecke.py berechnet Luftlinie aus Stopp-Koordinaten und kennt die Fahrzeugposition nur als Parameter.
+      Konto und Schluessel kommen aus der globalen Umgebung, der Zwischenspeicher ist modulweit ohne Mandantentrennung — vor einer
+      Anbindung muss die Mandantenzuordnung geklaert sein. Zielorte der Stopps kommen aus public.kunden_geo.
+    luecken:
+      - text: "Webfleet-Dienst ist an keinen Endpunkt und keine Maske angebunden; keine Live-Position, kein Fahrzeug-Tour-Abgleich"
+        prio: P2
+      - text: "Konfiguration und Cache sind global (eine Umgebung, ein modulweiter Cache) statt je Mandant"
+        prio: P2
+
+  - id: LO-13
+    name: Fuhrpark-Kosten — Rechnungen, Termine, Schaeden und ausgehende Belege
+    l3: Fuhrpark Auswertungen, Rechnungen zum Fahrzeug, Terminarten (l3-crm-organisation-referenz)
+    routen: [fuhrpark/fuhrpark-rechnungen, fuhrpark/ausgehende-belege-dokumente, fuhrpark/fuhrpark-auswertung-kosten-pro-fahrzeug]
+    rolle: SCHREIBEN LOGISTIK/GERAET; Mandant aus dem Token
+    nachweise:
+      - tests/test_fuhrpark_isolation_effects.py::test_invoice_cannot_reference_foreign_vehicle
+      - tests/test_fuhrpark_vertiefung.py::test_bussgeld_anlegen
+      - tests/test_rls_domain_ops_teil2.py::test_fahrzeug_schaden_im_eigenen_mandanten_urheber_aus_token
+    status: teilweise
+    befund: >-
+      Fuhrpark-Rechnungen, Terminarten und ausgehende Dokumente haben Speichern- und Loeschen-Aktionen mit Mandantenpruefung; die
+      Datenbanktests belegen, dass eine Rechnung kein fremdes Fahrzeug referenzieren kann, sowie Bussgeld und Schaden im eigenen
+      Mandanten. Die Route fuhrpark/fuhrpark-rechnungen zeigt die Platzhaltermaske fuhrpark/rechnungen-liste (id/name/status/datum,
+      nur Export, ohne Zeilenroute) statt der Fachmaske fuhrpark/rechnungen. Die Kostenauswertung ist eine reine Aktualisieren-
+      Maske ohne eigenen Datenbanktest. Browser: nur Ladetest (fuhrpark-logistics.spec.ts, nicht gezaehlt).
+    luecken:
+      - text: "Route fuhrpark/fuhrpark-rechnungen zeigt die Platzhalterliste fuhrpark/rechnungen-liste (id/name/status/datum, nur Export) statt der Fachmaske"
+        prio: P2
+      - text: "Fuhrpark-Kostenauswertung hat keinen Datenbanktest fuer die Summen je Fahrzeug"
+        prio: P2
+      - text: "Browserkette Rechnung erfassen und Kosten je Fahrzeug einsehen gegen echtes Backend fehlt"
+        prio: P2

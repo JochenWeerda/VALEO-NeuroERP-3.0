@@ -199,3 +199,39 @@ Ratsche angehoben; diese Befunde bleiben offen. Keine konkurrierenden Arbeiten
 an screen_definitions_domain_batch15.py begonnen.
 
 PR153 nach main8575b4df9/ClaudePR146 integriert: nur sechs generierte Artefakte konfligierten, aus aktuellen Quellen regeneriert. Eigene Kundenprofile und Claudes Beleg-Rueckbau bleiben erhalten; keine Migration/DB-Aenderung im Integrationsschritt. 88 gezielte Vertraege erneutgruen; aktuelles API-/Godfile-Inventar geprueft. Gemeinsame CI nach Push noch offen.
+
+
+COMMUNITY-ISOLATION Folge-Slice separat auf cd2644b92: bestaetigte globale
+Mitgliederzugriffe im Partnerstamm durch eigenen Partner-Tenant-Join und genaue
+URL-Communitybindung geschlossen. Globale Katalogpflege jetzt vorhandene
+PLATTFORM/admin-Policy, Mitgliedsrollen sonst unveraendert CRM bzw. vorhandene
+interne Leser. API-Datei2716->2704, kein DDL/Modellwechsel. 9 Unit+1 echter
+PostgreSQL-Vertrag mit zwei Mandanten gruen; angrenzende49 Vertraege und drei
+Profilmetadaten-Vertraege gruen. Alle synthetischen Zeilen zurueckgerollt;
+Probe vorher frei, Revision unveraendert. Bank-/Steuer-/Kontakt-/Datenschutzfelder
+im expliziten Agentenvertrag als sensibel nachgetragen. QA community-member-
+isolation-20261117.md. PR153-CI laeuft unveraendert; Folge-CI noch offen.
+
+
+23.11 Koordination: Nutzer meldet, dass Claude main in PR160 und PR161
+integriert und der Kassen-Push-Hook laeuft. Root startet deshalb keine DB-
+Tests/Wartung. PR160-Korrekturen343463697 wurden lokal mit main6bb75adbc und
+der eigenen Mitgliedschafts-Isolation zusammengefuehrt; keine Behauptung,
+dass diese Korrekturen bereits auf main waren. Claudes Integration bleibt
+bei Claude. Lokaler Sicherheitszweig ergaenzt nur die eigene Absicherung.
+
+M0-PROBE-SAFETY: vor_push arbeitet jetzt standardmaessig lesend, ohne Default-
+Zugangsdaten und ohne implizite Wartung. 24 Mockvertraege gruen; Blockgroesse6
+und gezielte Auswahl erhalten, dynamische DDL fail-closed. Vergleichsstand/
+Konfliktmarker vor DB-Zugriff, Read-only-Transaktionen und Poolfreigabe.
+CLAUDE.md und Ressourcenrunbook angeglichen. Neue QA vom23.11; keine fremden
+Prozesse/Worktrees oder Datenbanken angefasst. Integration/CI noch offen.
+
+23.11 Nachlauf: neue Vor-Push-Fassung27 isolierte Tests; --volle-tests ist
+explizite Moeglichkeit fuer dynamische DDL, weiterhin keinerlei Wartung.
+Konfliktpruefung verwechselt legitime Markdown-Trennlinien nicht mit Markern.
+75+12 gezielte Vertraege und172 Referenz-Lesemodellfaelle gruen; Gesamt-CI
+fuer Kombination bleibt offen.143/141/99 Kopfkatalog/Sicht/Eingabe nach160;
+keine Vollparitaet oder Agentenschreibfreigabe fuer Bankpflege behauptet.
+Probe aktuell3 agent:vor_push-Sitzungen; Root fuehrt keine Fachtests/Wartung
+parallel zu Claudes gemeldetem Lauf durch.

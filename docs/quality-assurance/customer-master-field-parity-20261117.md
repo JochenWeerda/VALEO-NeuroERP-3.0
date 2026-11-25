@@ -308,3 +308,27 @@ nicht als globale Maskenfreigabe ausgegeben.
 Browser: Werkzeugstart scheitert aktuell mit „failed to write kernel assets“ /
 fehlendem Pfad, noch vor einer URL-Pruefung. Keine alternative Anmeldung,
 Sicherheitsumgehung oder neue Screenshotabnahme behauptet.
+
+
+### Konsolidierter Stand vom23.11.2026
+
+PR160 ergaenzt die bereits vorhandene Wiederherstellung um die CI-Vertraege,
+Pflichtform des ADR, CLI-/Studio-Register und korrekten CRM-Smoke-Mock. Der
+aktuelle sichere Katalog enthaelt143 skalare Attribute, davon141 sichtbare
+Partnerkopfpositionen und99 Eingaben. Drei technische Referenz-IDs ohne
+abgenommenen mandantenbezogenen Lookup bleiben ausgenommen; die Werte werden
+in der Datenbank erhalten. Das ist keine vollstaendige Feldparitaet.
+Die Bank-/Steuerpflege ist high, bestaetigungs-/begruendungspflichtig und
+fuer Agenten gesperrt; keine neue automatische MCP-Schreibfreigabe behauptet.
+
+75 gezielte Vertraege sowie zwoelf weitere zuvor rote Register-/CLI-/Studio-/
+Async-Vertraege bestanden im konsolidierten Quellstand. Ein anfangs fehlendes
+Async-Testmodul wurde fuer den betroffenen Lauf explizit geladen. Die172
+Referenz-zu-Lesemodell-Vertraege bestehen ebenfalls. API-Dokumentation und
+Antwortmodelle3686/3686, Docs Governance und Tabellenkatalog-Lineage gruen.
+Die volle neue GitHub-Abnahme und echte Browserabnahme sind weiterhin offen.
+
+Nach Nutzerinformation laufen Claudes Integrationen von160/161 parallel.
+Die eigene schreibfreie Ressourcenabfrage bestaetigte drei agent:vor_push-
+Sitzungen in valeo_probe. Deshalb keine neuen Fachtests oder Wartung dort;
+die frueheren SQL-Nachweise bleiben datierte Nachweise vom17.11.

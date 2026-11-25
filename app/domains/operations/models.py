@@ -246,12 +246,16 @@ class Fahrer(Base):
     Fahrer Model für Fuhrpark
     """
     __tablename__ = "ops_fahrer"
-    __table_args__ = {"schema": "domain_ops", "extend_existing": True}
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "personalnummer", name="uq_ops_fahrer_tenant_personalnummer"),
+        {"schema": "domain_ops", "extend_existing": True},
+    )
 
     id = Column(String, primary_key=True, default=default_prefixed_id("DR"))
-    
+    tenant_id = Column(String(120), nullable=False, index=True)
+
     # Stammdaten
-    personalnummer = Column(String(20), unique=True)
+    personalnummer = Column(String(20))
     name = Column(String(100), nullable=False)
     vorname = Column(String(100))
     geburtsdatum = Column(DateTime(timezone=True))

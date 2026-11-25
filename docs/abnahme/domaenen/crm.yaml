@@ -1,0 +1,401 @@
+# Abnahmeblatt CRM — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skills l3-crm-organisation-referenz: CRM-Dashboard/360-Kundenakte, Nachrichten,
+# Wiedervorlage, Kalender; l3-stammdaten-referenz: Kunden-/Lieferantenstamm) plus Leads/Verkaufschancen, Kampagnen,
+# Dubletten und DSGVO. Fuhrpark und Streckengeschaeft gehoeren nicht in dieses Blatt. Status: abgenommen | teilweise | fehlt.
+# "abgenommen" verlangt Nachweis, keine offene P0/P1-Luecke und keine Platzhaltermaske; die Bedienung im Browser ist
+# Teil der Maskenabnahme. Als Nachweis zaehlen nur HTTP-/Integrationstests gegen echte PostgreSQL (Pruefstand valeo_probe,
+# require_db bzw. eigene DB-Skip-Logik) und Playwright-Ketten gegen echtes Backend; reine Unit-Tests sind Teilbeleg.
+# NICHT GEZAEHLT (nur im Befund genannt): MagicMock-/Mock-DB-Tests test_crm_kim.py, test_crm_kim_contacts.py,
+# test_crm_kim_dashboard.py, test_crm_kim_kontaktlog.py, test_gdpr_api.py, test_faelle_crm_mandant.py,
+# test_crm_cases_verified_tenant.py, test_crm_customer_business_partner_link.py, test_business_partner_service_focused.py,
+# test_customer_master_profile_service.py, test_crm_campaign_template_slice.py; Kalender-Tests mit get_db-Override
+# bzw. Mock (test_uix063_planning_calendar.py, test_team_calendar.py, test_personal_calendar_api.py,
+# test_uix073_calendar_pipeline.py); Mock-Anteile in test_small_endpoints_wave61.py, test_welle6_response_models.py,
+# test_welle7_response_models.py, test_mask_entity_backends.py; Schema-/Fixture-Tests (test_crm_activity_contracts.py,
+# test_crm_connectors.py, test_frontend_native_batch11_12_fixtures.py); reine Logik ohne HTTP/DB (test_crm_duplicates.py,
+# test_kunden_merge.py) nur als Teilbeleg im Befund; Playwright-Ladetests und Mock-Ketten (page.route) —
+# playwright-tests/specs/crm/crm-stammdaten-smoke.spec.ts (Kunden-Zuordnung test.fixme), kontakte-smoke.spec.ts,
+# leads-smoke.spec.ts, kim-performance-smoke.spec.ts, crm360-model-based.spec.ts, crm360-revenue-handover.spec.ts,
+# packages/frontend-web/tests/e2e/crm-gdpr|crm-opportunities|crm-consent|crm-segments.spec.ts (bedingte "if visible"-
+# Assertions), crm-kim-redirect.spec.ts (nur Redirect-URL), crm-universal-customer-mask-pilot.spec.ts und
+# fachliche-vertiefung-kundenbanken.spec.ts (Route-Mocks), kundenstamm-bankverbindung.spec.ts (veraltete Route).
+# Die Browserkette der Kundenakte (crm360-kundenakte.spec.ts) liegt nur auf dem Branch cursor/m0-e2e-full-uat-20261123
+# und ist im Worktree nicht vorhanden; sie wird deshalb nicht als Nachweis gefuehrt.
+# Tests, die als Standard-DB die Entwicklungsdatenbank valeo_neuro_erp nutzen (test_crm360_kunde_wird_gefunden.py,
+# test_crm360_kontrakte_erscheinen.py, test_dsgvo_loeschung_loescht_wirklich.py), laufen gegen echte PostgreSQL, sind
+# aber nach Pruefstand-Regel nur Teilbeleg und stehen mit diesem Vorbehalt in den Nachweisen.
+# Bereiche: crm (Akte, Aktivitaeten, Leads, Kampagnen, DSGVO), termine (Kalender), benachrichtigungen, marketing,
+# prospecting. screen_domains nur crm — die Domaene platform (Kalender, Benachrichtigungen) waere fuer dieses Blatt
+# zu breit. Routen der Stamm-Masken verkauf/kunde*, einkauf/lieferant* stehen bei den Prozessen, zaehlen aber nicht
+# in die Bereichsstatistik (sie gehoeren zu den Blaettern Verkauf/Einkauf).
+id: crm
+titel: 'CRM (Kundenakte bis Wiedervorlage)'
+reifematrix: D04
+l3_referenz: l3-crm-organisation-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [crm, termine, benachrichtigungen, marketing, prospecting]
+screen_domains: [crm]
+prozesse:
+  - id: CR-01
+    name: Kunde anlegen und im Stamm pflegen
+    l3: Stammdaten > Kunden/Lieferanten — Kundenmaske mit Kopf, Anschrift, Zahlung, Konditionen; Anlage ueber Neu, Pflege je Register
+    routen: [crm/kunden, crm/kunden/:id, crm/customers, verkauf/kunden-liste, verkauf/kunde/neu, verkauf/kunde/:id]
+    rolle: SCHREIBEN CRM (Anlage, Pflegeaktionen); Mandant aus Token/Header, Body-Mandant fremd wird mit 403 abgewiesen
+    nachweise:
+      - tests/test_debitor_anlage_kundenstamm_postgres.py::test_created_debtor_is_listed_and_opens_in_detail
+      - tests/test_debitor_anlage_kundenstamm_postgres.py::test_legacy_route_uses_the_same_action_and_numbers_are_unique_per_tenant
+      - tests/test_debitor_anlage_kundenstamm_postgres.py::test_creation_needs_finance_write_role
+      - tests/test_partnerbruecke_postgres.py::test_landwirt_als_kunde_und_lieferant_ist_ein_partner
+      - tests/test_partnerbruecke_postgres.py::test_fremder_mandant_teilt_keinen_partner
+      - tests/test_partner_kontonummern_postgres.py::test_nummern_je_mandant_eigener_kreis_und_eindeutig
+      - tests/test_kunden_stamm_pflege.py::test_anschrift_anlegen_aendern_entfernen
+      - tests/test_kunden_stamm_pflege.py::test_fremder_mandant_sieht_die_zeile_nicht
+      - tests/test_customer_master_profile_postgres.py::test_postgres_roundtrip_version_replay_actor_and_tenant_isolation
+    status: teilweise
+    befund: >-
+      Anlage und Pflege sind gegen PostgreSQL belegt: Debitor-Anlage landet im fuehrenden Stamm und oeffnet in der
+      Detailansicht, Nummern sind je Mandant eindeutig, Kunde und Lieferant haengen an einem Partner und ein fremder
+      Mandant teilt keinen Partner, Anschrift anlegen/aendern/entfernen laeuft mit Grund und Trockenlauf, das
+      Stammprofil schreibt versioniert und idempotent. Der operative Bestand liegt aber noch in public.kunden, und
+      dort fehlt die Mandantengrenze. Die Maske crm/kunden-liste liest /crm/customers/lookup, das ueber
+      BusinessPartnerService.search_lookup die View public.kunden_lookup abfragt (public.kunden hat laut Migrationen
+      kunden_bp_bridge_20260601 und kunden_domain_tables_20260602 kein tenant_id) — jeder Mandant listet damit den
+      gesamten Kundenstamm. Ausserdem liefert KundenLookupItem weder id noch telefon, email, status: die
+      Zeilenverknuepfung /crm/kunden/{id} loest sich zu /crm/kunden/ auf (resolveRowRoute ersetzt fehlende Felder
+      durch leer), drei von sieben Spalten bleiben leer. Das KIM-Backend /crm/kim/customers (crm_kim.py) liest und
+      aendert public.kunden und public.kunden_crm360 per kunden_nr ohne Mandantenfilter (PUT /crm/kim/customers/{nr}
+      schreibt mandantenuebergreifend); belegt ist es nur durch Mock-/Reine-Logik-Tests (test_crm_kim*.py), die nicht
+      zaehlen. Die Anlage ueber verkauf/kunde/neu ist als Route vorhanden; eine Browserkette Anlegen > in der Liste
+      finden > Akte oeffnen gegen echtes Backend fehlt.
+    luecken:
+      - text: Kundenliste crm/kunden-liste zeigt den Kundenstamm aller Mandanten (/crm/customers/lookup > public.kunden_lookup ohne tenant_id) — Mandantenleck lesend
+        prio: P0
+      - text: KIM-Backend /crm/kim/customers liest und aendert public.kunden/kunden_crm360 per kunden_nr ohne Mandantenfilter (crm_kim.py update_customer, list_customers) — Mandantenleck lesend und schreibend, ohne Datenbanktest
+        prio: P0
+      - text: Zeile der Kundenliste oeffnet die Akte nicht — Lookup liefert kein Feld id, Zielroute /crm/kunden/{id} wird leer aufgeloest; Spalten Telefon, E-Mail und Status sind nicht im Lookup-Vertrag und bleiben leer
+        prio: P1
+      - text: Pflegeweg public.kunden hat keinen Mandantenbezug; der Test test_ein_reiner_bestandskunde_oeffnet_die_akte schreibt das Fehlverhalten (Bestandskunde unter fremdem Mandanten sichtbar) als Sollwert fest
+        prio: P1
+      - text: Browserkette Kunde anlegen > Liste > Akte oeffnen > Feld aendern gegen echtes Backend fehlt
+        prio: P2
+  - id: CR-02
+    name: Lieferant anlegen und im Stamm pflegen
+    l3: Stammdaten > Kunden/Lieferanten > Lieferanten — gleiche Stammmaske mit Lieferantenreitern (Zahlung, Skonto, Bank)
+    routen: [crm/lieferanten, crm/lieferanten/:id, crm/lieferanten/liste, einkauf/lieferanten, einkauf/lieferant/neu, einkauf/lieferant/:id]
+    rolle: SCHREIBEN Einkauf/Finanz je Weg; Mandant aus Token
+    nachweise:
+      - tests/test_partnerbruecke_postgres.py::test_landwirt_als_kunde_und_lieferant_ist_ein_partner
+      - tests/test_partnerbruecke_postgres.py::test_name_allein_ordnet_nie_zu
+      - tests/test_partner_kontonummern_postgres.py::test_landwirt_mit_beiden_rollen_hat_je_rolle_genau_ein_konto
+      - tests/test_partner_rollenfelder_postgres.py::test_ungueltige_iban_und_bank_beim_kreditor_aendern
+    status: teilweise
+    befund: >-
+      Die Lieferantenrolle haengt am selben Geschaeftspartner wie die Kundenrolle (Partnerbruecke), je Rolle genau ein
+      Konto, Zuordnung nie nur ueber den Namen, ungueltige IBAN beim Kreditor wird abgewiesen — alles gegen
+      PostgreSQL. Die CRM-Seite hat zwei Lieferantenmasken (crm/lieferant ueber /crm/business-partners/{id} und
+      einkauf/supplier ueber die Einkaufsmaske) mit eigenen Routen; die Liste crm/lieferanten-liste liest
+      /api/v1/crm/suppliers, dessen Mandantenbindung und Lesevertrag ich nicht gegen eine Datenbank belegt gefunden
+      habe. Browserkette fehlt.
+    luecken:
+      - text: Lieferantenliste crm/lieferanten-liste (/crm/suppliers) ohne Datenbanktest — Mandantenbindung und Spaltenvertrag nicht belegt
+        prio: P2
+      - text: Zwei parallele Lieferantenmasken (crm/lieferant, einkauf/supplier) mit getrennten Routen — fachlich eine Stammmaske noetig
+        prio: P2
+      - text: Browserkette Lieferant anlegen > finden > Bank pflegen fehlt
+        prio: P2
+  - id: CR-03
+    name: Ansprechpartner, Bankverbindung und Zahlungsbedingung am Partner pflegen
+    l3: Kundenmaske Reiter Ansprechpartner, Bank, Zahlungsbedingung/Skonto
+    routen: [crm/kunden/:id, crm/kontakte, crm/kontakt/:id]
+    rolle: SCHREIBEN CRM; Pflegeaktionen nur in der Kundenakte (test_pflegeaktionen_nur_in_der_kundenakte)
+    nachweise:
+      - tests/test_partner_rollenfelder_postgres.py::test_bank_und_skonto_landen_am_partner_und_in_der_detailmaske
+      - tests/test_partner_rollenfelder_postgres.py::test_ungueltige_iban_und_bank_beim_kreditor_aendern
+      - tests/test_kunden_stamm_pflege.py::test_rabatt_mit_ungueltigem_prozentsatz_abgelehnt
+      - tests/test_kunden_stamm_pflege.py::test_fremder_mandant_sieht_die_zeile_nicht
+      - tests/test_kunden_crm_core_mandant.py::test_fremder_kunde_ist_nicht_abrufbar_aenderbar_oder_loeschbar
+      - tests/test_customer_master_profile_postgres.py::test_postgres_roundtrip_version_replay_actor_and_tenant_isolation
+    status: teilweise
+    befund: >-
+      Bank und Skonto liegen am Partner und erscheinen in der Detailmaske, der Ansprechpartner wird ueber die
+      Aktion ansprechpartner_anlegen mit Mandantenpruefung angelegt, Rabatt mit ungueltigem Prozentsatz wird
+      abgewiesen, das Stammprofil (partner_iban) schreibt versioniert. Teilbeleg: test_kunden_crm_core_mandant.py
+      simuliert crm-core per AsyncMock. Das alte KIM-Backend legt Ansprechpartner in public.kunden_ansprechpartner
+      ohne Mandant an und liest sie so (crm_kim.py list_contacts/create_contact); Mock-Tests zaehlen nicht.
+      Der Ansprechpartner-Detail in der Akte (Funktion, Telefon, Mail je Person, wie in der L3-Kundenmaske) fehlt
+      laut Parity-Slice. Zahlungsbedingung wird als Feld des Stammprofils gefuehrt; eine Pruefung des Wirkens in
+      Auftrag/Rechnung ist nicht Teil dieses Blatts.
+    luecken:
+      - text: KIM-Ansprechpartner (crm_kim.py create_contact/list_contacts) schreibt und liest public.kunden_ansprechpartner ohne Mandantenfilter
+        prio: P0
+      - text: Ansprechpartner-Detail (Person mit Funktion, Telefon, Mail, Rolle) fehlt in der Kundenakte
+        prio: P1
+      - text: Zahlungsbedingung und Bankverbindung der Akte ohne Browserkette gegen echtes Backend
+        prio: P2
+  - id: CR-04
+    name: Kundenakte 360 oeffnen und lesen
+    l3: CRM Dashboard (360-Grad-Kundensicht) — Kopf, Umsatz, offene Posten, Kontakte, Belege, Kontrakte, Praesente; Drucken, Waehlen, Sprung in Debitoren
+    routen: [crm/customer-360/:id, crm/kunden/:id]
+    rolle: CRM lesen; Mandant aus Token/Header (get_tenant_id)
+    nachweise:
+      - tests/test_crm360_kunde_wird_gefunden.py::test_die_360_sicht_findet_den_kunden
+      - tests/test_crm360_kunde_wird_gefunden.py::test_jedes_register_findet_den_kunden
+      - tests/test_crm360_kunde_wird_gefunden.py::test_offene_posten_erscheinen_in_dokumenten_und_im_kopf
+      - tests/test_crm360_kunde_wird_gefunden.py::test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404
+      - tests/test_crm360_kontrakte_erscheinen.py::test_ein_fremder_mandant_sieht_den_kontrakt_nicht
+    status: teilweise
+    befund: >-
+      Die native Akte crm/customer-360 hat 28 Reiter (u. a. Stamm, Anschrift, Kontakte, Finanzen, Auftraege, Aktivitaeten,
+      Dokumente, Aufgaben, Kontrakte, Angebote, Historie, Praesente, Postfach, Steuer, Bank, Qualitaet,
+      Marketing, Genossenschaft, Ausgabe, Schnittstellen, Potenzial, Chefanweisungen, Anschriften, Kontoauszug, CPD,
+      Rabatte, Preise). Die Lesetests laufen ueber HTTP gegen echte PostgreSQL, aber gegen die Entwicklungsdatenbank
+      valeo_neuro_erp (Dev-Token) und mit eigener Skip-Logik: nur Teilbeleg. Mandantengrenze: der Suchweg
+      _kunde_finden (crm_360_sql.py) faellt als dritte Stufe auf public.kunden per kunden_nr ohne Mandantenfilter
+      zurueck und liefert den Satz auch ohne mandantengebundenen Partner; test_ein_reiner_bestandskunde_oeffnet_die_akte
+      legt dieses Verhalten fest. Die Register lesen ueber _query_many, das jede SQL-Ausnahme mit Rollback in eine leere
+      Liste verwandelt und auf 25 Zeilen kuerzt (fetchmany(25)) — ein Lesefehler sieht aus wie keine Daten. Die
+      Kennzahl Kunden-Nr. der Akte zeigt laut Beobachtung -; im Code bleibt die Summary-Kachel kunden_nr in der
+      Definition ohne Wert und wird erst in build_customer_screen_summary aus customer.get(kunden_nr) befuellt (Ursache
+      nicht per Lauf bestaetigt). Der Reiter dokumente zeigt Offene Posten statt der Unterlagenablage, finance und
+      dokumente teilen sich dieselbe Quelle. Es fehlen laut Slice M4-CRM-KUNDENAKTE-PARITAET-20261123 (im Worktree-
+      Workboard nicht auffindbar, vom Auftrag benannt): Drucken, Waehlen/TAPI, Ansprechpartner-Detail, KI-Zusammenfassung,
+      Angebot mit Kundenkontext, Beleg aus dem Register oeffnen, Sprung in OP-Debitoren, Leads/Karte, Unterlagenablage.
+      Die Browserkette crm360-kundenakte.spec.ts liegt nur auf dem Branch cursor/m0-e2e-full-uat-20261123.
+    luecken:
+      - text: Kundenakte findet Kunden ueber public.kunden ohne Mandantenfilter (crm_360_sql._kunde_finden Fallback 3) — Name und Nummer fremder Mandanten abrufbar
+        prio: P0
+      - text: Akte ohne Drucken, Waehlen/TAPI, KI-Zusammenfassung, Angebot mit Kundenkontext, Beleg aus dem Register oeffnen und Sprung in OP-Debitoren (Slice M4-CRM-KUNDENAKTE-PARITAET-20261123)
+        prio: P1
+      - text: Kennzahl Kunden-Nr. der Akte zeigt - (Summary-Kachel kunden_nr)
+        prio: P1
+      - text: Register lesen mit stillem Leerfall und 25-Zeilen-Deckel (_query_many/_query_one schlucken SQL-Fehler) — Fehler und Abschneiden sind fuer Bediener unsichtbar
+        prio: P2
+      - text: Lesetests der Akte laufen auf valeo_neuro_erp statt dem Pruefstand valeo_probe; Browserkette der Akte nicht im Worktree
+        prio: P2
+  - id: CR-05
+    name: Aktivitaet und Kontaktprotokoll erfassen
+    l3: CRM Dashboard > Kontakte/Aktivitaeten — Anruf, Besuch, Mail mit Betreff, Datum, Notiz; Protokoll in der Kundenakte
+    routen: [crm/aktivitaeten, crm/activities, crm/activities/neu, crm/aktivitaet/:id, crm/kontakte, crm/kontakt/:id]
+    rolle: SCHREIBEN CRM (Aktivitaeten-Aktion mit Recht CRM, Urheber aus Token); fremder Mandant 404, ungenuegende Rolle 403
+    nachweise:
+      - tests/test_crm_activity_canonical_sql.py::test_real_creation_replay_and_changed_repeat_are_atomic
+      - tests/test_crm_activity_canonical_sql.py::test_foreign_records_and_insufficient_roles_cannot_write
+      - tests/test_crm_activity_canonical_sql.py::test_delete_checks_version_and_replays_without_duplicate_effect
+      - tests/test_crm_activity_canonical_sql.py::test_audit_failure_rolls_back_activity_receipt_and_outbox
+      - tests/test_crm_activity_canonical_sql.py::test_list_and_detail_are_the_same_dto_and_pagination_contract
+      - tests/test_crm_activity_canonical_sql.py::test_foreign_customer_is_blocked_by_command_and_database_fk
+      - tests/test_crm_activity_canonical_sql.py::test_customer_mask_action_lands_in_history_not_in_tasks
+      - tests/test_crm_activity_canonical_sql.py::test_preview_has_no_business_audit_receipt_or_outbox_effect
+    status: teilweise
+    befund: >-
+      Das kanonische Aktivitaetenmodell domain_crm.activities ist gegen PostgreSQL belegt: Anlage mit Replay und 409 bei
+      geaenderter Wiederholung, Versionsschutz, Audit/Outbox atomar, fremder Mandant 404, Rollen 403, Fremdschluessel
+      auf den Kunden, Trockenlauf ohne Wirkung. Die Maskenaktion create_activity der Kundenakte landet im Test in der
+      Historie (200) — aber nur mit gesetztem _idempotencyKey. Der Endpunkt create_activity_action (crm_360.py) lehnt
+      jeden Body mit anderen Schluesseln als betreff/typ/datum/verantwortlich/notiz (+ _mode, _auditReason,
+      _idempotencyKey) mit 422 Invalid activity action envelope ab, und ActivityCreateCommand verlangt einen
+      Idempotenzschluessel (min_length=1); fehlt er im Ausfuehrungsmodus, ergibt sich ein Validierungsfehler 422. Die
+      beobachtete 422 der Maskenaktion (Slice CRM-ACTIVITY-CANONICAL-20261029, Codex) ist damit plausibel erklaert,
+      aber nicht per Lauf bestaetigt. Das Kontaktprotokoll des KIM-Wegs (CrmKontaktService, public.kunden_kontakte)
+      ist mandantengebunden, uebernimmt den Bediener aber bei POST /crm/kunden-kontakte aus dem Body statt aus dem
+      Token. Zwei Datenhaltungen (domain_crm.activities und public.kunden_kontakte) laufen nebeneinander. Browserkette
+      gegen echtes Backend fehlt.
+    luecken:
+      - text: Maskenaktion create_activity der Kundenakte liefert 422 (Envelope ohne _idempotencyKey bzw. mit zusaetzlichen Schluesseln) — Aktivitaet aus der Akte nicht erfassbar
+        prio: P1
+      - text: Zwei Datenhaltungen fuer Kontakte/Aktivitaeten (domain_crm.activities und public.kunden_kontakte) ohne fuehrende Quelle in der Akte
+        prio: P2
+      - text: POST /crm/kunden-kontakte uebernimmt den Bediener aus dem Body statt aus dem verifizierten Token
+        prio: P2
+      - text: Browserkette Aktivitaet in der Akte erfassen > erscheint in der Historie fehlt
+        prio: P2
+  - id: CR-06
+    name: Wiedervorlage und Aufgabe anlegen, abarbeiten und erledigen
+    l3: Wiedervorlage-System — faellige Rueckrufe und Aufgaben ueber alle Kunden, erledigen mit Ergebnis
+    routen: [crm/wiedervorlagen, docflow/wiedervorlagen]
+    rolle: Recht crm.kontakt.erledigen fuer die Zeilenaktion; Mandant aus Token/Header
+    nachweise:
+      - tests/test_studio_listen_kommandos.py::test_wiedervorlagen_mandantengenau_mit_namen_und_erledigen
+    status: teilweise
+    befund: >-
+      Die Liste crm/wiedervorlagen ist keine Platzhaltermaske: sie liest /crm/kunden-kontakte/wiedervorlagen, zeigt
+      faellig, ueberfaellig, Kunde, Kunden-Nr., Art, Kurzinfo, Bediener und hat die Zeilenaktion erledigen mit
+      optionalem Ergebnis; der Zeilenverweis geht ueber kunden_nr in die Akte. Der Datenbanktest belegt Mandantentrennung
+      der Liste, Kundenname, Ueberfaellig-Kennzeichen, 404 beim Erledigen einer fremden Wiedervorlage und das Anhaengen
+      des Ergebnisses an die Notiz. Nicht belegt: die Anlage einer Wiedervorlage mit Datum ueber die Oberflaeche
+      (sie entsteht nur als Feld des Kontaktprotokolls), die Rollenpruefung der Erledigen-Aktion (kein Test ohne
+      Recht) und eine Browserkette. test_small_endpoints_wave61.py prueft die Route nur mit ersetztem Service und
+      zaehlt nicht. Daneben steht eine zweite Wiedervorlage-Maske docflow/wiedervorlagen (Belegfolge-Follow-ups,
+      /docflow/evidence/followups) mit eigener Datenhaltung.
+    luecken:
+      - text: Wiedervorlage kann nicht eigenstaendig angelegt werden (kein Neu in der Liste, nur Kontaktprotokoll) und Aufgaben ohne Kundenbezug fehlen
+        prio: P2
+      - text: Erledigen ohne Recht crm.kontakt.erledigen (403) nicht belegt; Browserkette Wiedervorlage abarbeiten fehlt
+        prio: P2
+      - text: Zwei getrennte Wiedervorlage-Systeme (Kundenkontakte und DocFlow-Follow-ups) ohne gemeinsame Sicht
+        prio: P3
+  - id: CR-07
+    name: Kalender und Termine
+    l3: Kalender — Termine und Fristen des Mitarbeiters und des Teams, Termin anlegen
+    routen: [termine/kalender, planung/kalender]
+    rolle: Mandant aus Token (get_tenant_id); Aktion reproject
+    nachweise:
+      - tests/test_crm_activity_canonical_sql.py::test_calendar_and_repository_read_the_same_tenant_bound_activity
+    status: teilweise
+    befund: >-
+      termine/kalender und planung/kalender zeigen dieselbe Maske planung/kalender (Domaene platform) mit einziger Aktion
+      reproject und Endpunkt /planung/kalender (Layer-Projektionen, bestaetigen/verwerfen, ICS-Feed). Gegen
+      PostgreSQL belegt ist nur, dass die Kalenderprojektion die mandantengebundene CRM-Aktivitaet liest. Die
+      Kalendertests (test_uix063_planning_calendar.py, test_team_calendar.py, test_personal_calendar_api.py,
+      test_uix073_calendar_pipeline.py) laufen mit get_db-Override bzw. Mock und zaehlen nicht. Im gelesenen Router
+      gibt es keinen Weg, einen eigenen Termin anzulegen oder zu verschieben; die Termine entstehen aus Projektionen.
+    luecken:
+      - text: Kein Anlegen und Verschieben eigener Termine im Kalender (nur Projektion, bestaetigen, verwerfen) — L3-Terminanlage fehlt
+        prio: P2
+      - text: Kalender-API und ICS-Token ohne Datenbanktest (nur Mock/get_db-Override); Browserkette fehlt
+        prio: P2
+  - id: CR-08
+    name: Interne Nachrichten senden und lesen
+    l3: Nachrichten — internes Tagesprotokoll, Nachricht an Kollegen mit Lesestand
+    routen: [benachrichtigungen]
+    rolle: SCHREIBEN CRM (POST /messages), Absender aus verifiziertem Token, Mandant aus get_tenant_id
+    nachweise: []
+    status: fehlt
+    befund: >-
+      Das Backend /api/v1/messages (messages.py) ist mandantengebunden und nimmt den Absender aus dem geprueften
+      Token; es gibt aber keine Maske dafuer. Die Route benachrichtigungen zeigt benachrichtigungen/liste (Domaene
+      platform): System- und Prozesshinweise, nur Export und eine rein lokale Aktion Als gelesen markieren (nur bis zum
+      Verlassen der Ansicht) — keine Nachricht an Kollegen, kein Postfach. Im Frontend ist kein Aufruf von /messages
+      zu finden. Datenbanktests fuer /messages gibt es nicht; test_l3c_smoke.py ruft die Route nur auf Erreichbarkeit.
+    luecken:
+      - text: Keine Maske fuer interne Nachrichten (Backend /messages ohne Oberflaeche, ohne Datenbanktest)
+        prio: P2
+      - text: Benachrichtigungen sind nur lokal als gelesen markierbar, Lesestatus geht beim Verlassen verloren
+        prio: P3
+  - id: CR-09
+    name: Lead und Verkaufschance fuehren und qualifizieren
+    l3: Interessenten, Vertriebschancen — Lead erfassen, qualifizieren, in Verkaufschance und Kunde ueberfuehren
+    routen: [crm/leads, crm/lead/:id, prospecting/leads, crm/opportunities, crm/opportunity/:id, crm/opportunity/new, crm/opportunities-kanban]
+    rolle: Leads require_roles; Opportunities SCHREIBEN CRM; Mandant aus Token, Kunde muss zum Mandanten gehoeren
+    nachweise:
+      - tests/test_user_decisions_lead_pdf.py::test_local_crud_pagination_and_tenant_authority
+      - tests/test_user_decisions_lead_pdf.py::test_qualification_real_opportunity_and_no_duplicate
+      - tests/test_user_decisions_lead_pdf.py::test_foreign_customer_lead_and_read_only_role_rejected
+      - tests/test_user_decisions_lead_pdf.py::test_qualification_failure_rolls_back_opportunity_audit_and_event
+      - tests/test_opportunity_mandant.py::TestLesen::test_nur_der_eigene_mandant_sieht_die_opportunity
+      - tests/test_opportunity_mandant.py::TestSchreiben::test_fremder_mandant_aendert_und_loescht_nicht
+      - tests/test_interessent_ist_lead_vertrag.py::TestRegister::test_interessent_landet_in_crm_leads
+      - tests/test_crm_activity_canonical_sql.py::test_opportunity_rest_mask_and_mcp_replay_one_canonical_command
+    status: teilweise
+    befund: >-
+      Lead und Verkaufschance sind gegen PostgreSQL belegt: Lead-CRUD mit Mandantenhoheit und Paginierung, Qualifizierung
+      zur Opportunity ohne Duplikat und mit Rollback bei Fehler, Fremdkunde und Nur-Lese-Rolle werden abgewiesen,
+      fremder Mandant aendert und loescht keine Opportunity, Interessenten landen in crm_leads. Teile von
+      test_user_decisions_lead_pdf.py nutzen monkeypatch fuer Fehlerinjektion. Die Lead-Liste crm/leads-liste ist
+      faktisch eine Platzhaltermaske: Spalten id, name, status, datum, keine Zeilenaktion, und ihre Ziele sind tote
+      Routen — die Zeile verweist auf /crm/leads/{id} und Neu auf /crm/leads/neu, der Routenbaum kennt aber nur
+      crm/lead/$id, crm/leads und crm/leads/new (aus dem Quelltext, nicht im Browser gelaufen). Die Lead-Detailmaske
+      crm/lead hat Daten, Aktivitaeten, Aufgaben und die Aktion Als Opportunity qualifizieren.
+    luecken:
+      - text: Lead-Liste verweist auf nicht vorhandene Routen (/crm/leads/{id}, /crm/leads/neu) — Lead aus der Liste weder oeffnen noch anlegen; Spalten nur id/name/status/datum
+        prio: P1
+      - text: Browserkette Lead erfassen > qualifizieren > Opportunity gegen echtes Backend fehlt (leads-smoke.spec.ts ist nur ein Ladetest)
+        prio: P2
+      - text: Zwei Interessenten-Zugaenge (crm/leads und prospecting/leads) mit getrennten Listen
+        prio: P3
+  - id: CR-10
+    name: Kampagne, Segment und Praesent steuern
+    l3: Marketing und Praesente — Kampagne, Zielgruppe, Weihnachtsgeschenke je Kunde
+    routen: [crm/campaigns, crm/campaign/:id, crm/campaign/new, marketing/kampagnen, crm/segments, crm/segment/:id, crm/geschenke-liste]
+    rolle: SCHREIBEN CRM; Mandant aus Token
+    nachweise:
+      - tests/test_crm_native_privacy_postgres.py::test_segment_signed_tenant_replay
+      - tests/test_crm_native_privacy_postgres.py::test_segment_rules_closed_and_empty_dynamic_rejected
+      - tests/test_rls_domain_crm.py::test_mandantengrenze_je_tabelle
+      - tests/test_crm360_kunde_wird_gefunden.py::test_praesent_erscheint_im_register
+    status: teilweise
+    befund: >-
+      Segmente sind gegen PostgreSQL belegt (Replay mit signierter Identitaet, 409 bei geaenderter Wiederholung, offene
+      dynamische Regel wird abgewiesen), die Mandantengrenze der CRM-Tabellen prueft test_rls_domain_crm.py je Tabelle;
+      ein Praesent erscheint im Register der Akte (Entwicklungsdatenbank, Teilbeleg). Kampagnen fuehren seit 04.11.2026
+      domain_crm.crm_campaigns (der Marketingweg ist entfernt, test_scheinwege_mandant_batch8.py), aber es gibt keinen
+      HTTP-Test fuer Anlegen, Planen oder Auswerten einer Kampagne; test_crm_campaign_template_slice.py arbeitet mit
+      Mocks und zaehlt nicht. Praesente (crm_gifts, Maske crm/geschenke-liste): Mandantenbindung und Schreibweg sind
+      in diesem Lauf nicht gegen eine Datenbank belegt gefunden.
+    luecken:
+      - text: Kampagne anlegen, ausfuehren und auswerten ohne HTTP-/Datenbanktest (crm_campaigns.py nur Mock)
+        prio: P2
+      - text: Praesente (crm_gifts, crm/geschenke-liste) ohne Datenbanktest fuer Mandant und Schreibweg
+        prio: P2
+      - text: Browserkette Kampagne > Segment > Versand fehlt
+        prio: P2
+  - id: CR-11
+    name: Dubletten pruefen und Kunden zusammenfuehren
+    l3: Kundenstamm bereinigen — Dublettenpruefung, Zusammenfuehren zweier Kunden mit Umhaengen der Belege
+    routen: [crm/dubletten, crm/dubletten-pruefung, crm/kunden-zuordnung, crm/klaerfall-inbox, crm/partner-klaerfaelle]
+    rolle: SCHREIBEN CRM; Bediener des Zusammenfuehrens aus dem Body (body.bediener oder KIM)
+    nachweise:
+      - tests/test_partner_rollenfelder_postgres.py::test_klaerfall_zuordnen_nur_mit_grund_und_eigenem_partner
+      - tests/test_partner_rollenfelder_postgres.py::test_klaerfall_neuer_partner_und_rolle
+    status: teilweise
+    befund: >-
+      Nur der Klaerfall-Weg (Zuordnen mit Grund zum eigenen Partner, neuer Partner mit Rolle) ist gegen PostgreSQL
+      belegt. Die Dublettenpruefung und das Zusammenfuehren (crm_duplicates.py, crm_merge_service.py) sind nur durch
+      reine Logik-Tests abgedeckt (test_crm_duplicates.py: Normalisierung, UnionFind; test_kunden_merge.py) — Teilbeleg ohne
+      HTTP und ohne Datenbank. Im Code verschiebt das Zusammenfuehren Datensaetze per UPDATE public.{tabelle} SET
+      kunden_nr = :m WHERE kunden_nr = :d und markiert den Verlierer in public.kunden (geloescht, merged_into), alles ohne
+      tenant_id; ein Kunde eines anderen Mandanten laesst sich damit zusammenfuehren, und die Belege wandern
+      mandantenuebergreifend. Das Merge-Protokoll schreibt tenant_id, der Bediener kommt aus dem Body. _count
+      schluckt SQL-Fehler.
+    luecken:
+      - text: Zusammenfuehren (crm_merge_service) verschiebt und loescht public.* ueber kunden_nr ohne tenant_id — Datenverlust und Mandantenleck, ohne Datenbanktest
+        prio: P0
+      - text: Dublettenpruefung und Merge nur durch reine Logik-Tests belegt, kein HTTP-Vertrag gegen PostgreSQL
+        prio: P2
+      - text: Bediener des Zusammenfuehrens aus dem Body statt aus dem verifizierten Token
+        prio: P2
+  - id: CR-12
+    name: Einwilligung, DSGVO-Auskunft und Loeschung
+    l3: Datenschutz am Kunden — Einwilligungen, Auskunft, Loeschung nach Art. 17 DSGVO
+    routen: [crm/consents, crm/consent/:id, crm/gdpr-requests, crm/gdpr-request/:id]
+    rolle: Selbstauskunft des Betroffenen, Anonymisierung nur Admin, Mandant aus signierter Identitaet
+    nachweise:
+      - tests/test_crm_native_privacy_postgres.py::test_scoped_export_replay_and_foreign_isolation
+      - tests/test_crm_native_privacy_postgres.py::test_failed_erasure_rolls_back_all_changes
+      - tests/test_gdpr_subject_boundary.py::test_self_export_uses_provider_mapping_and_only_own_tenant_audit
+      - tests/test_gdpr_subject_boundary.py::test_other_local_subject_is_denied_and_admin_is_still_tenant_bound
+      - tests/test_gdpr_subject_boundary.py::test_anonymization_requires_admin_and_never_rewrites_retained_audit
+      - tests/test_gdpr_subject_boundary.py::test_forged_tenant_or_user_headers_and_missing_identity_cannot_authorize
+      - tests/test_rls_domain_crm.py::test_dsgvo_kurzweg_meldet_keinen_schein_erfolg
+      - tests/test_dsgvo_loeschung_loescht_wirklich.py::test_der_kunde_ist_danach_anonym
+    status: teilweise
+    befund: >-
+      Auskunft und Loeschung sind gegen PostgreSQL belegt: begrenzter Export mit Replay und fremdem Mandanten 404, ein
+      fehlgeschlagener Loeschlauf rollt vollstaendig zurueck, fremde Betroffene werden abgewiesen, gefaelschte
+      Tenant-/User-Header autorisieren nicht, Anonymisierung nur durch Admin und ohne Umschreiben der aufbewahrten
+      Audit-Zeilen, der Kurzweg meldet keinen Scheinerfolg. Der Test test_dsgvo_loeschung_loescht_wirklich.py laeuft
+      auf der Entwicklungsdatenbank und ist Teilbeleg (er pruefte, dass die Loeschung nach Art. 17 wirklich
+      anonymisiert; vorher meldete sie 503). test_gdpr_api.py nutzt MagicMock und zaehlt nicht. Die Einwilligung
+      (crm/consents) hat im Pruefstand nur den RLS-Mandantentest je Tabelle; ein HTTP-Vertrag fuer Erteilen und
+      Widerrufen der CRM-Einwilligung ist nicht belegt gefunden. Browserketten sind bedingte Ladetests.
+    luecken:
+      - text: Einwilligung Erteilen und Widerrufen (crm/consents) ohne HTTP-Vertrag gegen PostgreSQL, nur Mandantengrenze der Tabelle
+        prio: P2
+      - text: Loeschtest laeuft auf valeo_neuro_erp statt Pruefstand; Browserkette Auskunft > Loeschung fehlt (crm-gdpr.spec.ts nur bedingte Assertions)
+        prio: P2
+  - id: CR-13
+    name: Unterlagen zur Kundenakte ablegen und oeffnen
+    l3: Kundenmaske Dokumente — Schriftverkehr, Vertraege, Scans je Kunde (Unterlagenablage)
+    routen: []
+    rolle: SCHREIBEN CRM; Mandant aus Token
+    nachweise: []
+    status: fehlt
+    befund: >-
+      Die Kundenakte hat keinen Reiter fuer die Unterlagenablage: der Reiter dokumente zeigt die Offenen Posten
+      (und teilt seine Quelle mit finance), die Unterlagenablage steht als fehlend im Parity-Slice
+      M4-CRM-KUNDENAKTE-PARITAET-20261123. Ein Ablage- oder Oeffnen-Weg fuer Kundenunterlagen in der Akte ist weder
+      im Code noch durch einen Test belegt gefunden.
+    luecken:
+      - text: Unterlagenablage (Dokument je Kunde ablegen, anzeigen, oeffnen) fehlt in der Kundenakte
+        prio: P2

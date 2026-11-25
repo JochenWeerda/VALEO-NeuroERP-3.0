@@ -1,0 +1,441 @@
+# Abnahmeblatt Kontrakte und Streckengeschaeft — Quelle fuer scripts/domaenen_abnahme.py (Fahrplan M4).
+# Prozessliste nach der L3-Referenz (Skill l3-stammdaten-referenz: Kontrakt Einkauf/Zukauf/Verkauf, Matif, NaWaRo;
+# Skill l3-crm-organisation-referenz: Strecke/Streckengeschaeft mit Deckungsbeitrag). Status: abgenommen | teilweise |
+# fehlt. "abgenommen" verlangt Nachweis, keine offene P0/P1-Luecke und keine Platzhaltermaske.
+#
+# Abgrenzung: Das Warenkontraktmodell ist domain_ops.kon_contract (docs/architecture/domains/kontrakte/fuehrendes-modell.md).
+# Das Vertragsregister (domain_contracts, Miete/Pacht) ist ein anderer Fachbegriff und nicht Teil dieses Blatts.
+# Die Tests gegen Mock-Sessions (test_kontrakte_api, test_strecke_api, test_kontrakt_hedging_preis_erechnung,
+# test_verkauf_kontrakte_central, test_agrar_kon_001) und die reinen Logiktests (test_contract_fixing,
+# test_contract_fulfillment, test_contract_engagement, test_contract_settlement, test_kontrakte_services,
+# test_strecke_zielort) zaehlen hier nicht als Nachweis.
+# screen_domains: agrar wird bewusst nicht aufgenommen (sonst zaehlen Feldbuch/Saatzucht mit); die Kontraktlisten
+# (kontrakt-liste/*, domain agrar) stehen deshalb in den Prozessen, nicht in der Domaenenzaehlung der Aktionen.
+id: kontrakte-strecke
+titel: Kontrakte und Streckengeschaeft
+reifematrix: D11
+l3_referenz: l3-stammdaten-referenz
+erhoben: 2026-11-23
+pruefer: Cursor
+bereiche: [kontrakte, contracts, strecke, nawaro, vertrag]
+screen_domains: [kontrakte, contracts, strecke, nawaro, vertrag, logistics]
+prozesse:
+  - id: KS-01
+    name: Kontrakt anlegen (Einkauf, Zukauf, Verkauf)
+    l3: ERFASSUNG > Kontrakt > Einkauf/Zukauf/Verkauf > Kontrakte Lieferanten/Kunden - Standard (Kopf, Reiter LIEFERANT/BEDINGUNGEN, Positionen mit Matif-Zuschlag)
+    routen: [einkauf/kontrakt-anlage, kontrakte/neu]
+    rolle: KONTRAKT_BEARBEITEN; manuelle Kontraktnummer nur KONTRAKT_ADMIN
+    nachweise:
+      - tests/test_kontrakt_ordnung_vertrag.py::test_der_warenkontrakt_traegt_seine_preisbildung
+    status: teilweise
+    befund: >-
+      Der Endpunkt POST /api/v1/kontrakte besteht (Nummernkreis je Typ, Dublette 409, Rollenpruefung, Auditspur), und das
+      Schema traegt Preismodell, Praemie und Fixierungsfenster. Geprueft ist nur das Schema gegen PostgreSQL; der
+      Anlageweg selbst hat nur Mock-Tests (test_kontrakte_api) und zaehlt nicht. In der Oberflaeche gibt es keine
+      Anlagemaske: kontrakte/neu rendert die Listenmaske vertrag/neu (Preisabsicherungen aus /price-hedge/hedges),
+      einkauf/kontrakt-anlage ist ein schreibgeschuetztes Cockpit mit der Aktion Aktualisieren, und createKontrakt in
+      lib/api/kontrakte.ts wird von keiner Seite aufgerufen.
+    luecken:
+      - text: Kontrakt-Anlagemaske fehlt (Kopf, Partner, Positionen, Preisbildung); kontrakte/neu und einkauf/kontrakt-anlage legen nichts an, obwohl der Endpunkt besteht
+        prio: P1
+      - text: Anlageweg POST /kontrakte (Nummernkreis, 409 bei Dublette, Rolle, Mandant) als Integrationstest gegen PostgreSQL fehlt
+        prio: P2
+  - id: KS-02
+    name: Kontraktposition (Long/Short) und Kontraktvergleich Einkauf/Verkauf
+    l3: ERFASSUNG > Kontrakt > Kontraktvergleich EK/VK, Kontrakt-Ertrag
+    routen: [kontrakte/positionen, kontrakte/kontrakt-positionsmonitor, disposition/position-matrix, disposition/regeln]
+    rolle: KONTRAKT_LESEN; Ueberschreitung der Positionsregel nur mit Freigabe
+    nachweise:
+      - tests/test_position_service.py::test_net_calculation_per_period
+      - tests/test_position_service.py::test_view_mode_physisch_disponiert_only_open
+      - tests/test_position_service.py::test_check_impact_allowed_above_tolerance
+    status: teilweise
+    befund: >-
+      Die Positionsmatrix (Netto je Artikel und Periode, nur offene Kontrakte, Schwellen und Override-Antrag) ist gegen
+      PostgreSQL geprueft. Der Positionsmonitor ist dagegen eine generische Platzhaltermaske
+      (kontrakte/positionen, in den Routen kontrakte/positionen, kontrakte/kontrakt-positionsmonitor und
+      disposition/position-matrix): sie zeigt nur Kennung, Name, Status und Datum, nicht Long/Short, Rest oder
+      Durchschnittspreis. Der Spread EK/VK aus kontrakt_position_service ist nirgends sichtbar und ungetestet.
+    luecken:
+      - text: Kontraktvergleich EK/VK und Kontrakt-Ertrag (Long/Short je Artikel, gewichteter Preis je Seite, Spread) in der Oberflaeche nicht vorhanden; Positionsmonitor ist Platzhaltermaske
+        prio: P1
+      - text: Spread-Berechnung (kontrakt_position_service) ohne Integrationstest gegen PostgreSQL
+        prio: P2
+  - id: KS-03
+    name: Kontraktuebersicht, Erfuellungsstand und Alarme
+    l3: ERFASSUNG > Kontrakt > Kontrakt-Uebersicht (Rest-Menge, Kontroll-Datum, erledigt)
+    routen: [kontrakte, kontrakte/kontrakt-uebersicht, kontrakte/alarme, kontrakte/listen/:variante, agrar/kontrakt-erfuellung, agrar/kontrakt-engagement]
+    rolle: KONTRAKT_LESEN (ohne Leserecht 403); Mandantengrenze
+    nachweise:
+      - tests/test_kontrakt_vorgang.py::test_kopf_traegt_erfuellung_fixierung_und_abrechnung
+      - tests/test_kontrakt_vorgang.py::test_kontraktnummer_fuehrt_zum_selben_kopf
+      - tests/test_kontrakt_vorgang.py::test_fremder_mandant_sieht_den_kontrakt_nicht
+      - tests/test_kontrakt_vorgang.py::test_alarme_kommen_vom_server
+      - tests/test_kontrakt_vorgang.py::test_ohne_leserecht_kein_zugriff
+      - tests/test_rls_domain_ops.py::test_mandantengrenze_je_tabelle
+    status: abgenommen
+    befund: >-
+      Die Listenmasken kontrakt-liste/* lesen /api/v1/kontrakt-vorgang/uebersicht (Rest, Alarmzahl). Der Lesevertrag ist
+      gegen PostgreSQL geprueft: Kopf mit Erfuellung, Fixierung und Abrechnung, Zugriff ueber Nummer, fremder Mandant
+      404, stornierte Kontrakte ohne Alarm, Alarme vom Server, 403 ohne Leserecht; Mandantengrenze der kon_contract-Tabellen
+      per RLS. Im Browser nur Ladetests (all-domains-e2e.spec.ts, nur Ueberschrift sichtbar), keine Kette mit Daten.
+    luecken:
+      - text: Browserkette Kontraktliste mit echtem Backend und Testkontrakt (Filter, Ansichtswechsel, Oeffnen) fehlt
+        prio: P2
+      - text: Engagement je Artikel und je Partner (kontrakt-liste/engagement-*) nur als reine Aggregationslogik, nicht ueber HTTP gegen PostgreSQL belegt
+        prio: P2
+  - id: KS-04
+    name: Kontrakt-Detail (Kopf, Positionen, Umsaetze, Protokoll)
+    l3: Kontrakt-Maske (Kopf, Positionen-Tabelle, Fusszeile Umsaetze/Preisstaffel) und Kontrakt-Protokoll
+    routen: [kontrakte/:id, agrar/kontrakte/:id]
+    rolle: KONTRAKT_LESEN; Aendern KONTRAKT_BEARBEITEN
+    nachweise:
+      - tests/test_kontrakt_vorgang.py::test_positionen_und_bewegungen_haben_eine_zeilenkennung
+    status: teilweise
+    befund: >-
+      Backend: Positionen und Bewegungen je Kontrakt mit Zeilenkennung sind gegen PostgreSQL geprueft. Die Detailroute
+      kontrakte/:id waehlt aber die native Kontraktmaske (agrar/kontrakte) nur, wenn VITE_ENABLE_UNIVERSAL_MASK_AGRAR_KONTRAKT=true
+      gesetzt ist; ohne die Variable (kein Standard in der Konfiguration) zeigt auch ein bestehender Kontrakt die
+      Listenmaske vertrag/neu mit Preisabsicherungen. Die Protokollmaske (FrmKontraktProtokoll) hat keine Route, der
+      Auditweg GET /kontrakte/{id}/audit keinen Test.
+    luecken:
+      - text: Detailmaske eines bestehenden Kontrakts erscheint nur hinter einem Build-Schalter, im Standard zeigt kontrakte/:id die Absicherungsliste statt des Kontrakts
+        prio: P1
+      - text: Kontrakt-Protokoll (Aenderungshistorie) ohne Route in der Oberflaeche und ohne Test des Auditwegs
+        prio: P2
+  - id: KS-05
+    name: Kontraktabruf gegen Lieferungen und Kontraktpreis im Beleg
+    l3: Lieferschein-Position mit Kontrakt-Nr. bucht Abruf; Preis und Rabatt aus der Kontraktzeile
+    routen: [sales/lieferungen, verkauf/lieferschein-erfassung, disposition/kontrakt-abruf]
+    rolle: VERKAUF (beleg_write); Freigabe Lieferschein bucht den Abruf
+    nachweise:
+      - tests/test_docflow_position_kontrakt.py::test_freigabe_bucht_den_abruf_in_der_kontrakteinheit_und_storno_kennzeichnet_ihn
+      - tests/test_docflow_position_kontrakt.py::test_abruf_ueber_die_restmenge_haelt_die_freigabe_an
+      - tests/test_docflow_position_kontrakt.py::test_unbekannter_oder_fremder_kontrakt_wird_abgelehnt
+      - tests/test_docflow_position_kontrakt.py::test_umwandeln_nimmt_kontrakt_charge_und_batch_mit
+      - tests/test_preisfindung_kaskade_vertrag.py::test_kontraktzeile_bestimmt_preis_und_rabatt
+    status: teilweise
+    befund: >-
+      Verkaufsseite gegen PostgreSQL geprueft: Freigabe des Lieferscheins bucht den Abruf in der Kontrakteinheit (3 dt =
+      300 kg), Storno kennzeichnet ihn, Abruf ueber die Restmenge haelt die Freigabe an, fremder oder unbekannter Kontrakt
+      wird abgelehnt, Kontrakt/Charge/Batch gehen beim Umwandeln mit; die Preisfindung nimmt Preis und Rabatt der
+      Kontraktzeile vor der Mengenstaffel. Nicht belegt: der Einkaufsweg (Einkauf-Lieferschein, Ernteannahme gegen
+      Einkaufskontrakt); test_agrar_kon_001 prueft die Fortschreibung nur mit Mock-Session. Die Route
+      disposition/kontrakt-abruf ist ein Read-Model-Cockpit auf /api/v1/kontrakte mit der Aktion Aktualisieren, kein Abrufdialog.
+    luecken:
+      - text: Abruf gegen Einkaufskontrakt bei Wareneingang/Ernteannahme ohne Integrationstest (nur Mock in test_agrar_kon_001)
+        prio: P2
+      - text: Browserkette Lieferschein mit Kontraktbezug durch die Belegmaske mit echtem Backend fehlt
+        prio: P2
+  - id: KS-06
+    name: Kontraktdisposition (Abrufe planen, freigeben, als geliefert melden)
+    l3: Kontrakt-Abruf je Position mit Wiegeschein; Kontrollen und Mehrlieferung
+    routen: [disposition/kontrakt-abruf, disposition/strecken-disposition]
+    rolle: KONTRAKT_BEARBEITEN; Freigabe getrennt von Anlage
+    nachweise:
+      - tests/test_kontrakt_disposition_vertrag.py::test_tabelle_kommt_aus_der_migration
+      - tests/test_kontrakt_disposition_vertrag.py::test_summe_ueber_der_kontraktmenge_wird_abgewiesen
+      - tests/test_kontrakt_disposition_vertrag.py::test_lieferung_nur_aus_der_freigabe
+      - tests/test_kontrakt_disposition_vertrag.py::test_lieferung_bindet_den_kanonischen_wiegeschein
+      - tests/test_kontrakt_disposition_vertrag.py::test_fremde_abrufe_sind_nicht_lesbar
+    status: teilweise
+    befund: >-
+      Der Dispositionsweg ist gegen PostgreSQL und die Migration geprueft: Abruf nur innerhalb der Kontraktmenge, storniert
+      bindet keine Menge, Freigabe abgeleitet, Lieferung nur aus der Freigabe, gelieferter Abruf endgueltig, Bindung an
+      den kanonischen Wiegeschein, Mandantentrennung, 503 statt leerer Liste. Die Routen disposition/kontrakt-abruf und
+      disposition/strecken-disposition sind aber generische Cockpits mit Anzahl/Offen und der Aktion Aktualisieren;
+      Abruf anlegen, freigeben und liefern melden stehen dort nicht. Die Disposition-Karte im Arbeitsbereich ist nur mit
+      gemocktem API-Client getestet (disposition-board.test.tsx).
+    luecken:
+      - text: Fachmaske zum Anlegen, Freigeben und Als-geliefert-Melden von Kontraktabrufen unter den Dispositionsrouten fehlt (nur API und Arbeitsbereich-Karte)
+        prio: P2
+      - text: Browserkette Abruf anlegen > freigeben > liefern mit echtem Backend fehlt
+        prio: P2
+  - id: KS-07
+    name: Restmengen und Ueberlieferung
+    l3: Kontrakt-Positionen Rest-Menge, Kontroll-Datum, Mengen-Art; Mehrlieferung erlaubt/nicht
+    routen: [kontrakte/listen/:variante, kontrakte/vorgang/:variante/:id]
+    rolle: KONTRAKT_LESEN; Mehrlieferung nur bei erlaubter Ueberlieferung
+    nachweise:
+      - tests/test_kontrakt_disposition_vertrag.py::test_ueberlieferung_wenn_der_kontrakt_sie_erlaubt
+      - tests/test_kontrakt_disposition_vertrag.py::test_abrufstand_nennt_die_offene_menge
+      - tests/test_kontrakt_vorgang.py::test_kopf_traegt_erfuellung_fixierung_und_abrechnung
+      - tests/test_docflow_position_kontrakt.py::test_abruf_ueber_die_restmenge_haelt_die_freigabe_an
+    status: teilweise
+    befund: >-
+      Restmenge und offene Menge (Kopf: 100 kontrahiert, 50 abgerufen, 50 offen), Abrufstand, Ueberlieferungsregel
+      (allow_overdelivery) und Sperre ueber der Restmenge sind gegen PostgreSQL geprueft, auf Verkaufs- und
+      Dispositionsseite. Die Restmengenfuehrung der Erzeugerkontrakte (domain_inventory.agrar_contracts) bei der
+      Ernteannahme ist nur mit Mock belegt; Kontrakt-Einheiten-Umrechnung zwischen Positionen ist nicht getestet.
+    luecken:
+      - text: Restmengenfortschreibung des Erzeugerkontrakts bei Ernteannahme gegen PostgreSQL nicht belegt
+        prio: P2
+      - text: Mengenart Einzelmengen/Mengenzeitraeume (Gesamtmenge je Zeitraum) ohne Integrationstest
+        prio: P2
+  - id: KS-08
+    name: Preisfixierung (Matif, Praemie, Notierung)
+    l3: Kontraktposition Matif?, Matif-Preis, Matif-Zuschlag; Fixierung Teilmengen
+    routen: [kontrakte/vorgang/:variante/:id, agrar/kontrakt-fixierung]
+    rolle: KONTRAKT_BEARBEITEN; Bearbeiter aus dem Token
+    nachweise:
+      - tests/test_kontrakt_vorgang.py::test_trockenlauf_fixiert_nichts
+      - tests/test_kontrakt_vorgang.py::test_fixieren_schreibt_den_bearbeiter_aus_dem_token
+      - tests/test_kontrakt_vorgang.py::test_ueberfixieren_wird_abgelehnt
+      - tests/test_kontrakt_vorgang.py::test_storno_verlangt_einen_grund
+      - tests/test_kontrakt_vorgang.py::test_fremder_kontrakt_ist_fuer_kommandos_unbekannt
+    status: abgenommen
+    befund: >-
+      Die Maske kontrakt/fixierung ruft dieselben Kommandowege wie der Test (fixieren, Storno einer Fixierung). Gegen
+      PostgreSQL geprueft: Trockenlauf schreibt nichts, Fixierung rechnet effektiven Preis (Matif 210 + Praemie 12 = 222),
+      Bearbeiter aus dem Token statt Festwert, Ueberfixieren abgelehnt, Storno nur mit Grund, fremder Kontrakt unbekannt.
+      Die Bewertungsformeln (effektiver Preis, Marktwert) haben zusaetzlich reine Unit-Tests.
+    luecken:
+      - text: Notierung erfassen (notierung_erfassen, Matif-Kurs) ohne Test des Kommandowegs
+        prio: P2
+      - text: Browserkette Fixieren durch die Maske mit echtem Backend fehlt
+        prio: P2
+  - id: KS-09
+    name: Kontraktabrechnung und Kontraktmahnung
+    l3: Kontrakt-Abrechnung der Bewegungen; Mahnung ueberfaelliger Kontrakte
+    routen: [kontrakte/vorgang/:variante/:id, agrar/kontrakt-settlement]
+    rolle: KONTRAKT_BEARBEITEN; Storno einer Bewegung mit Grund
+    nachweise:
+      - tests/test_kontrakt_vorgang.py::test_uebergabe_rechnet_die_offenen_bewegungen_ab
+      - tests/test_kontrakt_vorgang.py::test_mahnen_nur_wenn_faellig
+      - tests/test_kontrakt_vorgang.py::test_stornierter_kontrakt_ist_kein_mahnkandidat
+    status: teilweise
+    befund: >-
+      Gegen PostgreSQL geprueft: Uebergabe rechnet nur offene Bewegungen ab und ist wiederholungssicher (zweiter Aufruf
+      meldet keine offenen), stornierte Bewegungen bleiben storniert, Mahnen nur bei Faelligkeit mit Bearbeiter aus dem
+      Token, stornierte Kontrakte sind keine Mahnkandidaten. Nicht belegt: ob aus der Uebergabe ein Beleg (Kaufabrechnung,
+      Gutschrift, Rechnung) mit Buchung entsteht, und die Einzelabrechnung einer Bewegung (abrechnen).
+    luecken:
+      - text: Folgebeleg und Buchung aus der Kontraktabrechnung (Kaufabrechnung/Rechnung) nicht belegt; Uebergabe setzt im Test nur den Bewegungsstatus
+        prio: P2
+      - text: Einzelabrechnung einer Bewegung (abrechnen) und Mahnlauf ueber mehrere Kontrakte ohne Test
+        prio: P2
+  - id: KS-10
+    name: Kontrakt aendern, stornieren und loeschen
+    l3: Kontrakt-Menue Kontrakte loeschen / Kontrakte modifizieren (Loesch-Nr.)
+    routen: [kontrakte/:id, agrar/kontrakte/:id]
+    rolle: KONTRAKT_BEARBEITEN; Loeschen und manuelle Nummer KONTRAKT_ADMIN
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Endpunkte bestehen (PATCH, PUT, DELETE, POST /cancel, Nachtraege/Amendments, Auditspur). Es gibt keinen
+      Integrationstest gegen PostgreSQL; vorhanden sind nur Mock-Tests (test_kontrakte_api) und 404-Pruefungen
+      ohne Fachvertrag (test_gap_fixes_batch2). Die Detailmaske kann den Kontrakt im Standard nicht anzeigen (KS-04); die
+      Aktion Bearbeiten (agrar/kontrakte) ist als serverwirksam deklariert, fuer Agenten gesperrt.
+    luecken:
+      - text: Aenderung, Storno und Loeschen eines Kontrakts mit Pruefung offener Abrufe/Fixierungen und Rolle als Integrationstest gegen PostgreSQL fehlen
+        prio: P2
+      - text: Loeschnummer/Loeschprotokoll wie im L3-Menue nicht vorhanden oder nicht belegt
+        prio: P3
+  - id: KS-11
+    name: Kontraktklassen, Mengenart und Mengenzeitraeume
+    l3: Kontrakt-Maske Mengen-Art (Dropdown, z.B. Einzelmengen), Gesamt-Menge, Einheit
+    routen: [kontrakte/kontraktklassen, kontrakte/mengenzeitraeume]
+    rolle: KONTRAKT_BEARBEITEN
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Kontraktklassen (Variante, Incoterm-Ort) werden aus /api/v1/kontrakt-klassen gelesen; die Maske
+      kontrakte/mengenzeitraeume ist eine Detailmaske auf dem Kontrakt mit der nicht deklarierten Aktion edit. Es gibt
+      nur Mock-Tests (Klassenvarianten in test_kontrakt_hedging_preis_erechnung) und reine Validierung; kein Test gegen PostgreSQL.
+    luecken:
+      - text: Kontraktklassen und Mengenzeitraeume ohne Integrationstest; Aktion edit der Mengenzeitraum-Maske ohne deklarierte Serverwirkung
+        prio: P2
+  - id: KS-12
+    name: Preisabsicherung (Hedge) zum Kontrakt
+    l3: Matif-Bezug der Kontraktposition und Absicherung (Warenterminboerse)
+    routen: [vertrag/neu, vertrag/:id]
+    rolle: KONTRAKT_BEARBEITEN
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Die Maske vertrag/neu listet /api/v1/price-hedge/hedges, zeigt aber laut Definition nur die Spalten
+      alternate_articles und status und hat nur den CSV-Export, also keine Absicherung anlegen oder einem Kontrakt zuordnen.
+      Mark-to-Market und Stornierung der Hedges sind nur mit Mock-Session getestet (test_kontrakt_hedging_preis_erechnung).
+    luecken:
+      - text: Absicherungen (Hedges) lassen sich in der Oberflaeche weder anlegen noch einem Kontrakt zuordnen; Spalten der Liste unbrauchbar
+        prio: P2
+      - text: Hedge-Bewertung ohne Integrationstest gegen PostgreSQL
+        prio: P2
+  - id: KS-13
+    name: Rahmenvertraege (Mengenrahmen)
+    l3: Rahmenkontrakte mit Abrufen; Rahmenvertragsnummer je Mandant
+    routen: [vertrag/rahmenvertraege]
+    rolle: VERKAUF/EINKAUF lesen; Anlage mit Schreibrecht
+    nachweise:
+      - tests/test_rls_domain_ops_teil2.py::test_rahmenvertragsnummer_je_mandant
+      - tests/test_rls_domain_ops_teil2.py::test_frachttarife_und_rahmenvertraege_im_eigenen_mandanten
+    status: teilweise
+    befund: >-
+      Nummer je Mandant und Mandantengrenze sind gegen PostgreSQL geprueft. Die Maske vertrag/rahmenvertraege ist eine
+      generische Platzhaltermaske (nur Kennung, Name, Status, Datum, nur Export): Mengenrahmen, Abrufstand und Laufzeit
+      sind nicht sichtbar. Der Rahmenauftrag der Verkaufsseite (test_verkauf_kontrakte_central) ist nur mit Mock belegt.
+    luecken:
+      - text: Rahmenvertragsliste als echte Maske mit Mengenrahmen, Abruf und Restmenge statt Platzhalter; Abruf gegen Rahmen mit Integrationstest
+        prio: P2
+  - id: KS-14
+    name: Streckengeschaeft erfassen (Einkaufs- und Verkaufsseite)
+    l3: ERFASSUNG > Strecke (Strg+E, Kontrakte Lieferanten/Kunden - Strecke); Reiter STRECKE, LIEFERANTEN/KUNDEN, KONTRAKTE, BE-/ENTLADESTELLE, PARTIE/NLS
+    routen: [strecke/streckengeschaeft, strecke/menu]
+    rolle: LOGISTIK (Schreibrecht); Nummer STR-JJJJ-NNNN je Mandant
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Endpunkt und Tabelle bestehen (Nummernvergabe je Mandant und Jahr mit Advisory-Lock, anlegen, aendern, loeschen),
+      aber das Modell fuehrt nur die Lieferantenseite: Lieferant, eine Kontraktnummer, Artikel, Netto/MwSt/Brutto.
+      Es gibt weder Kunde noch Verkaufskontrakt, weder Einkaufs- und Verkaufsmenge noch Be-/Entladestelle oder Spedition.
+      Die Maske strecke/streckengeschaeft ist eine reine Liste ohne Aktion (kein Neu, kein Bearbeiten); strecke/menu ist
+      ein leeres Cockpit. Tests: test_strecke_api arbeitet mit Mock-Session und zaehlt nicht; test_gap_fixes_batch1
+      und test_parallel_installation_endpoints pruefen nur Liste 200, 404 und 422 ohne Fachvertrag.
+    luecken:
+      - text: Kundenseite des Streckengeschaefts fehlt (Kunde, Verkaufskontrakt, VK-Menge und -Preis, Be-/Entladestelle, Spedition); das Modell kennt nur den Lieferanten
+        prio: P1
+      - text: Streckengeschaeft laesst sich in der Maske nicht erfassen oder bearbeiten (strecke/streckengeschaeft ist eine Liste ohne Aktionen)
+        prio: P1
+      - text: Anlage mit Nummernvergabe und Mandantentrennung als Integrationstest gegen PostgreSQL fehlt
+        prio: P2
+  - id: KS-15
+    name: Streckenliste und Selektion
+    l3: Liste Streckengeschaefte (von/bis Strecke-Nr., Artikel, Ernte-Jahr, Datum; unerledigt/erledigt; Vorgaenge getrennt)
+    routen: [strecke/streckengeschaeft, disposition/strecken-disposition]
+    rolle: LOGISTIK lesen
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Die Liste zeigt Strecke-Nr., Datum, Niederlassung, Lieferant, Artikel, Brutto und Erledigt. Es fehlen die
+      L3-Selektionen nach Ernte-Jahr, Artikelbereich und Datumsbereich sowie die Spalten fuer EK/VK-Kontrakt, Menge, Rest und Fracht.
+      disposition/strecken-disposition ist ein Cockpit mit Anzahl und Offen auf derselben Quelle. Der Listenweg hat nur Mock-Tests
+      und einen Statuscode-Test ohne Fachinhalt.
+    luecken:
+      - text: Selektion nach Ernte-Jahr, Artikelbereich, Datum und erledigt/unerledigt sowie getrennte Vorgaenge/Positionen wie in L3 nicht vorhanden
+        prio: P2
+      - text: Liste und Filter als Integrationstest gegen PostgreSQL (Mandant, erledigt) fehlen
+        prio: P2
+  - id: KS-16
+    name: Streckengeschaeft abschliessen (Lieferantenrechnung, offener Posten)
+    l3: Strecke erledigen mit Rechnung; Lieferung/Rechnung je Strecke
+    routen: [strecke/streckengeschaeft]
+    rolle: LOGISTIK (Schreibrecht)
+    nachweise: []
+    status: teilweise
+    befund: >-
+      POST /strecke/streckengeschaefte/{id}/close setzt erledigt und die Rechnungsnummer und legt einen Kreditoren-OP an.
+      Fehlschlag der OP-Anlage wird still verschluckt (except ... pass), der Abschluss meldet trotzdem Erfolg. Die Maske
+      hat keine Abschlussaktion. Belegt sind nur 404 bei unbekannter Strecke und 422 ohne Rechnungsnummer
+      (test_gap_fixes_batch1), nicht der Erfolgsweg und nicht der OP.
+    luecken:
+      - text: Abschluss laesst sich in der Oberflaeche nicht ausloesen; Erfolgsweg inklusive Kreditoren-OP nicht gegen PostgreSQL getestet
+        prio: P2
+      - text: Fehlschlag der OP-Anlage beim Abschluss wird still verschluckt und dem Nutzer nicht gemeldet (Verstoss gegen die Fehlerinvariante)
+        prio: P2
+  - id: KS-17
+    name: Margenueberwachung der Strecke (Deckungsbeitrag, Rest, Fracht Soll/Ist)
+    l3: Liste Streckengeschaefte, Summenzeile EK-Betrag, VK-Betrag, Fracht Soll/Ist, DB (Deckungsbeitrag), kalk. VK, Rest-Menge, Rest-Wert, geplante Menge EK/VK
+    routen: []
+    rolle: LOGISTIK/CONTROLLING lesen
+    nachweise: []
+    status: fehlt
+    befund: >-
+      Keine Route, kein Endpunkt, keine Spalte: Streckengeschaeft kennt keine Verkaufsseite, daher gibt es keinen
+      Deckungsbeitrag, keine Rest-Menge und keinen Rest-Wert, keine kalkulatorische Gegenueberstellung und keine Fracht Soll/Ist. L3
+      rechnet Einkaufs- und Verkaufsseite parallel und zeigt die Marge live. Der Spread EK/VK der Kontraktposition (KS-02) ersetzt das nicht.
+    luecken:
+      - text: Margenueberwachung je Strecke (EK gegen VK, Deckungsbeitrag, Rest-Menge/-Wert, Fracht Soll/Ist, Warnung bei negativer Marge) fehlt vollstaendig
+        prio: P1
+  - id: KS-18
+    name: Streckendisposition und vorlaeufige Streckengeschaefte
+    l3: Disposition der Strecken (Lkw, Verladedatum, Be-/Entladestelle)
+    routen: [strecke/disposition, strecke/vorlaeufige-streckengeschaefte, disposition/strecken-disposition]
+    rolle: LOGISTIK
+    nachweise: []
+    status: teilweise
+    befund: >-
+      strecke/disposition und strecke/vorlaeufige-streckengeschaefte lesen /api/v1/tours, also Touren, nicht
+      Streckengeschaefte; strecke/disposition hat die Aktionen neu und loeschen ohne deklarierte Serverwirkung. Die Zielort-/Fahrtpositionslogik
+      (test_strecke_zielort) ist reine Logik und zaehlt nicht. Ein vorlaeufiges Streckengeschaeft als Stand der Strecke gibt es im Modell nicht.
+    luecken:
+      - text: Dispositionsmasken der Strecke zeigen Touren statt Streckengeschaefte; Zuordnung Strecke zu Lkw/Verladetermin fehlt
+        prio: P2
+      - text: Aktionen neu und loeschen in strecke/disposition ohne deklarierte Serverwirkung
+        prio: P2
+  - id: KS-19
+    name: Fracht der Strecke (Speditionen, Frachttarife)
+    l3: Strecken-Spalten Sped.-Nr., Fracht-Art, Sped.-Preis, Fracht Soll/Ist
+    routen: [strecke/speditionen-fracht-preise]
+    rolle: LOGISTIK; Mandantengrenze der Tarife
+    nachweise:
+      - tests/test_rls_domain_ops_teil2.py::test_frachttarife_und_rahmenvertraege_im_eigenen_mandanten
+    status: teilweise
+    befund: >-
+      Frachttarife (PLZ von/bis, Spediteur, Preis EUR/t) sind je Mandant getrennt (RLS, Fremdmandant 404). Die Maske
+      strecke/speditionen-fracht-preise ist eine generische Platzhaltermaske (nur Kennung, Name, Status, Datum und CSV-Export):
+      PLZ-Bereich, Spediteur und Preis sind nicht sichtbar. Eine Frachtberechnung gegen eine Strecke (Soll) und die Istfracht fehlen.
+    luecken:
+      - text: Frachttarif-Maske als Platzhalter (keine PLZ, kein Spediteur, kein Preis); Fracht Soll aus dem Tarif und Fracht Ist je Strecke fehlen
+        prio: P2
+  - id: KS-20
+    name: Streckendokumente drucken (Lieferung, Rechnung, Frachtauftrag der Strecke)
+    l3: Strecke Reiter LIEFERUNG/RECHNUNG und Druck der Streckenbelege
+    routen: [strecke/dokumente-drucken, strecke/menu]
+    rolle: LOGISTIK
+    nachweise: []
+    status: fehlt
+    befund: >-
+      strecke/dokumente-drucken und strecke/menu sind leere Cockpits ohne Datenquelle und ohne Aktion. Ein Druck der
+      Streckenbelege (Lieferschein/Rechnung/Frachtauftrag aus der Strecke) ist weder in den Masken noch am Endpunkt vorhanden.
+    luecken:
+      - text: Druck und Erzeugung der Streckenbelege (Lieferung, Rechnung, Frachtauftrag) aus dem Streckengeschaeft fehlt; Masken sind leere Huellen
+        prio: P1
+  - id: KS-21
+    name: NaWaRo-Vertragsblatt und Flaechenblatt
+    l3: Stammdaten > Weitere > NaWaRo (nachwachsende Rohstoffe), Felder Nachhaltige Biomasse
+    routen: [nawaro/vertraege, nawaro/anbauflaechen, agrar/nawaro-kaskade, strecke/nawaro-vertraege-pruefen]
+    rolle: AGRAR (Schreibrecht); Mandantengrenze
+    nachweise: []
+    status: teilweise
+    befund: >-
+      Endpunkte fuer Vertragsblaetter (/agrar/nawaro/contract-sheets) und Flaechenblaetter (area-sheets) bestehen mit
+      Schreibrecht AGRAR; die Listenmasken lesen sie. Es gibt keinen Test dieser Wege gegen PostgreSQL (die RLS-Tests
+      decken nawaro_print_notifications und nawaro_raps_profiles ab, nicht die Blaetter). strecke/nawaro-vertraege-pruefen
+      hat die nicht deklarierte Aktion open_source. Die Listen zeigen nur Kennung, Name, Status, Datum; Anlegen und
+      Bearbeiten ist in den Masken nicht moeglich.
+    luecken:
+      - text: Vertrags- und Flaechenblaetter lassen sich in der Oberflaeche nicht anlegen oder pruefen; Wege ohne Integrationstest
+        prio: P2
+  - id: KS-22
+    name: NaWaRo-Erntemitteilung, Ernteerklaerung und Uebersicht drucken
+    l3: NaWaRo-Untermenue (Mitteilungen, Uebersicht, Ernteerklaerung)
+    routen: [agrar/nawaro-erntemeldung, nawaro/mitteilung-drucken, strecke/nawaro-ernterklaerung-drucken, strecke/nawaro-uebersicht, strecke/nawaro-uebersicht-drucken, strecke/nawaro-lieferungen]
+    rolle: AGRAR (Schreibrecht)
+    nachweise:
+      - tests/test_rls_domain_inventory.py::test_mandantengrenze_je_tabelle
+    status: teilweise
+    befund: >-
+      Nur die Mandantengrenze von nawaro_print_notifications ist gegen PostgreSQL geprueft. Von den Masken liest allein
+      agrar/nawaro-erntemeldung die Druckmitteilungen. strecke/nawaro-ernterklaerung-drucken und strecke/nawaro-uebersicht
+      sind leere Cockpits; strecke/nawaro-uebersicht-drucken liest die Frachttarife und strecke/nawaro-lieferungen die
+      Touren, also fachfremde Daten; nawaro/mitteilung-drucken hat keine eigene Maskendefinition.
+    luecken:
+      - text: NaWaRo-Uebersicht, Ernteerklaerung und Lieferungen zeigen leere Huellen oder fachfremde Daten (Frachttarife, Touren); Druckweg der Mitteilung nicht lauffaehig belegt
+        prio: P1
+      - text: Druckmitteilung (print-notifications) Anlage, Aenderung und Druck ohne Integrationstest ueber die Mandantengrenze hinaus
+        prio: P2
+  - id: KS-23
+    name: Raps-Profil (Nachhaltige Biomasse, THG)
+    l3: Artikel LH Block Nachhaltige Biomasse und NaWaRo Enderzeugnis
+    routen: [nawaro/raps-profil]
+    rolle: AGRAR (Schreibrecht)
+    nachweise:
+      - tests/test_rls_domain_inventory.py::test_kein_verweis_auf_fremden_eltern
+    status: teilweise
+    befund: >-
+      Die Maske liest /agrar/nawaro/raps-profiles (Ertrag, Verwendungsanteile, THG gCO2eq/MJ) mit CSV-Export;
+      nawaro_raps_profiles ist in den RLS-Verweistests des Artikelbereichs enthalten (kein Verweis auf fremde Artikel). Anlage,
+      Ableitung aus dem Betrieb (derive-from-ops) und die Berechnung der Anteile sind nicht belegt.
+    luecken:
+      - text: Raps-Profil anlegen und aus Betriebsdaten ableiten (derive-from-ops) mit Pruefung der Anteilssumme ohne Integrationstest; Maske nur Liste mit Export
+        prio: P2

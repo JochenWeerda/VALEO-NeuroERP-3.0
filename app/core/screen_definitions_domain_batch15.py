@@ -27,6 +27,8 @@ from app.core.stamm_object_page_parent import (
 
 
 
+_FILTER_LIST_PROMPT = "Filtere die Liste."
+
 def build_einkauf_reports_screen_definition() -> dict[str, Any]:
     cols = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
     return build_cockpit_overview_screen(
@@ -45,21 +47,30 @@ def build_einkauf_reports_screen_definition() -> dict[str, Any]:
 
 
 def build_einkauf_service_entry_sheets_screen_definition() -> dict[str, Any]:
-    columns = [{"key": "id", "label": "Id", "sortable": True, "filterable": True, "width": 160}, {"key": "name", "label": "Name", "sortable": True, "filterable": True, "width": 160}, {"key": "status", "label": "Status", "sortable": True, "filterable": True, "width": 160}, {"key": "updated_at", "label": "Updated At", "sortable": True, "filterable": True, "width": 160}]
+    columns = [
+        {"key": key, "label": label, "sortable": True, "filterable": True, "width": width}
+        for key, label, width in (
+            ("number", "Nachweisnummer", 160), ("supplierId", "Lieferant", 160),
+            ("purchaseOrderId", "Bestellung", 160), ("serviceDate", "Leistungsdatum", 140),
+            ("description", "Leistung", 220), ("quantity", "Menge", 100),
+            ("unitPrice", "Einzelpreis", 120), ("amount", "Betrag", 120),
+            ("status", "Status", 130),
+        )
+    ]
     return build_stamm_list_screen(
         screen_id="einkauf/service-entry-sheets",
         domain="einkauf",
-        title="Service entry sheets",
-        subtitle="einkauf",
-        endpoint="/api/v1/einkauf/anfragen",
+        title="Leistungsnachweise",
+        subtitle="Einkauf",
+        endpoint="/api/v1/einkauf/service-entry-sheets",
         row_route=None,
         columns=columns,
         actions=[stamm_list_export_action()],
         row_actions=[],
-        purpose="Service entry sheets im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Service entry sheets.", "Filtere die Liste."],
+        purpose="Leistungsnachweise im Einkauf finden und auswerten.",
+        prompts=["Zeige Leistungsnachweise.", "Filtere Leistungsnachweise nach Status."],
         bundle="einkauf",
-        no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        no_workflow="Diese Liste zeigt Leistungsnachweise; Anlage, Bearbeitung und Freigabe sind hier nicht verfügbar.",
     )
 
 
@@ -76,7 +87,7 @@ def build_einkauf_wareneingangsabgleich_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Wareneingangsabgleich im einkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Wareneingangsabgleich.", "Filtere die Liste."],
+        prompts=["Zeige Wareneingangsabgleich.", _FILTER_LIST_PROMPT],
         bundle="einkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -95,7 +106,7 @@ def build_export_ustva_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Umsatzsteuervoranmeldung im export-Bereich finden und auswerten.",
-        prompts=["Zeige Umsatzsteuervoranmeldung.", "Filtere die Liste."],
+        prompts=["Zeige Umsatzsteuervoranmeldung.", _FILTER_LIST_PROMPT],
         bundle="export",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -150,7 +161,7 @@ def build_fibu_anlagen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Anlagen Gesamt im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Anlagen Gesamt.", "Filtere die Liste."],
+        prompts=["Zeige Anlagen Gesamt.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -169,7 +180,7 @@ def build_fibu_atlas_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Atlas im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Atlas.", "Filtere die Liste."],
+        prompts=["Zeige Atlas.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -188,7 +199,7 @@ def build_fibu_bilanz_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Bilanz im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Bilanz.", "Filtere die Liste."],
+        prompts=["Zeige Bilanz.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -224,7 +235,7 @@ def build_fibu_guv_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Guv im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Guv.", "Filtere die Liste."],
+        prompts=["Zeige Guv.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -243,7 +254,7 @@ def build_fibu_monatswerte_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Monatswerte im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Monatswerte.", "Filtere die Liste."],
+        prompts=["Zeige Monatswerte.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -305,7 +316,7 @@ def build_fibu_sachkonto_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Sachkonto im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Sachkonto.", "Filtere die Liste."],
+        prompts=["Zeige Sachkonto.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -324,7 +335,7 @@ def build_fibu_sicherheiten_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Sicherheiten im fibu-Bereich finden und auswerten.",
-        prompts=["Zeige Sicherheiten.", "Filtere die Liste."],
+        prompts=["Zeige Sicherheiten.", _FILTER_LIST_PROMPT],
         bundle="fibu",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -377,7 +388,7 @@ def build_finance_abschluss_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Monats-/Jahresabschluss im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Monats-/Jahresabschluss.", "Filtere die Liste."],
+        prompts=["Zeige Monats-/Jahresabschluss.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -417,7 +428,7 @@ def build_finance_buchungserfassung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Vorgang im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Vorgang.", "Filtere die Liste."],
+        prompts=["Zeige Vorgang.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -436,7 +447,7 @@ def build_finance_buchungsimport_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Buchungsimport im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Buchungsimport.", "Filtere die Liste."],
+        prompts=["Zeige Buchungsimport.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -464,7 +475,7 @@ def build_finance_dunning_editor_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Mahnvorgang im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Mahnvorgang.", "Filtere die Liste."],
+        prompts=["Zeige Mahnvorgang.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -485,7 +496,7 @@ def build_finance_kasse_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Kasse im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Kasse.", "Filtere die Liste."],
+        prompts=["Zeige Kasse.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -504,7 +515,7 @@ def build_finance_lastschriften_debitoren_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Debitorenlauf im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Debitorenlauf.", "Filtere die Liste."],
+        prompts=["Zeige Debitorenlauf.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -523,7 +534,7 @@ def build_finance_op_debitoren_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="OP-Lage im finance-Bereich finden und auswerten.",
-        prompts=["Zeige OP-Lage.", "Filtere die Liste."],
+        prompts=["Zeige OP-Lage.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -559,7 +570,7 @@ def build_finance_ustva_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Meldekontext im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Meldekontext.", "Filtere die Liste."],
+        prompts=["Zeige Meldekontext.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -578,7 +589,7 @@ def build_finance_zahlungslauf_kreditoren_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Zahlungslage im finance-Bereich finden und auswerten.",
-        prompts=["Zeige Zahlungslage.", "Filtere die Liste."],
+        prompts=["Zeige Zahlungslage.", _FILTER_LIST_PROMPT],
         bundle="finance",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -597,7 +608,7 @@ def build_finanzplanung_liquiditaet_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Liquiditaet im finanzplanung-Bereich finden und auswerten.",
-        prompts=["Zeige Liquiditaet.", "Filtere die Liste."],
+        prompts=["Zeige Liquiditaet.", _FILTER_LIST_PROMPT],
         bundle="finanzplanung",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -616,7 +627,7 @@ def build_foerderung_antrag_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Antrag im foerderung-Bereich finden und auswerten.",
-        prompts=["Zeige Antrag.", "Filtere die Liste."],
+        prompts=["Zeige Antrag.", _FILTER_LIST_PROMPT],
         bundle="foerderung",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -635,7 +646,7 @@ def build_futtermittel_beratung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Beratung im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Beratung.", "Filtere die Liste."],
+        prompts=["Zeige Beratung.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -654,7 +665,7 @@ def build_futtermittel_chargen_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Charge-Verfolgung im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Charge-Verfolgung.", "Filtere die Liste."],
+        prompts=["Zeige Charge-Verfolgung.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -681,7 +692,7 @@ def build_futtermittel_futtermittel_bestellung_screen_definition() -> dict[str, 
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Futtermittel bestellung im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Futtermittel bestellung.", "Filtere die Liste."],
+        prompts=["Zeige Futtermittel bestellung.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -700,7 +711,7 @@ def build_futtermittel_futtermittel_statistik_screen_definition() -> dict[str, A
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Futtermittel statistik im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Futtermittel statistik.", "Filtere die Liste."],
+        prompts=["Zeige Futtermittel statistik.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -719,7 +730,7 @@ def build_futtermittel_integrationsmonitor_screen_definition() -> dict[str, Any]
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Integrationsmonitor im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Integrationsmonitor.", "Filtere die Liste."],
+        prompts=["Zeige Integrationsmonitor.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -742,7 +753,7 @@ def build_futtermittel_rations_schnittstellen_import_screen_definition() -> dict
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rations schnittstellen import im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Rations schnittstellen import.", "Filtere die Liste."],
+        prompts=["Zeige Rations schnittstellen import.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -761,7 +772,7 @@ def build_futtermittel_rations_zugang_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rations zugang im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Rations zugang.", "Filtere die Liste."],
+        prompts=["Zeige Rations zugang.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -788,7 +799,7 @@ def build_futtermittel_rationsvergleich_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rationsvergleich im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Rationsvergleich.", "Filtere die Liste."],
+        prompts=["Zeige Rationsvergleich.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -807,7 +818,7 @@ def build_futtermittel_wareneingang_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Futtermittel wareneingang im futtermittel-Bereich finden und auswerten.",
-        prompts=["Zeige Futtermittel wareneingang.", "Filtere die Liste."],
+        prompts=["Zeige Futtermittel wareneingang.", _FILTER_LIST_PROMPT],
         bundle="futtermittel",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -843,7 +854,7 @@ def build_inventory_epcis_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Index im inventory-Bereich finden und auswerten.",
-        prompts=["Zeige Index.", "Filtere die Liste."],
+        prompts=["Zeige Index.", _FILTER_LIST_PROMPT],
         bundle="inventory",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -862,7 +873,7 @@ def build_kasse_tagesabschluss_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Tagesabschluss im kasse-Bereich finden und auswerten.",
-        prompts=["Zeige Tagesabschluss.", "Filtere die Liste."],
+        prompts=["Zeige Tagesabschluss.", _FILTER_LIST_PROMPT],
         bundle="kasse",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -922,7 +933,7 @@ def build_kontrakte_positionen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="KontraktPositionsmonitor im kontrakte-Bereich finden und auswerten.",
-        prompts=["Zeige KontraktPositionsmonitor.", "Filtere die Liste."],
+        prompts=["Zeige KontraktPositionsmonitor.", _FILTER_LIST_PROMPT],
         bundle="kontrakte",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -941,7 +952,7 @@ def build_lager_auslagerung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Auslagerung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Auslagerung.", "Filtere die Liste."],
+        prompts=["Zeige Auslagerung.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -960,7 +971,7 @@ def build_lager_bestandskorrektur_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Bestandskorrektur im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Bestandskorrektur.", "Filtere die Liste."],
+        prompts=["Zeige Bestandskorrektur.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -979,7 +990,7 @@ def build_lager_einlagerung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Einlagerung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Einlagerung.", "Filtere die Liste."],
+        prompts=["Zeige Einlagerung.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -998,7 +1009,7 @@ def build_lager_gs1_scanner_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Gs1 scanner im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Gs1 scanner.", "Filtere die Liste."],
+        prompts=["Zeige Gs1 scanner.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1017,7 +1028,7 @@ def build_lager_lagerplaetze_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Lagerplaetze im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Lagerplaetze.", "Filtere die Liste."],
+        prompts=["Zeige Lagerplaetze.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1053,7 +1064,7 @@ def build_lager_materialfluss_visualisierung_screen_definition() -> dict[str, An
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Materialfluss visualisierung im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Materialfluss visualisierung.", "Filtere die Liste."],
+        prompts=["Zeige Materialfluss visualisierung.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1089,7 +1100,7 @@ def build_lager_terminal_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Terminal im lager-Bereich finden und auswerten.",
-        prompts=["Zeige Terminal.", "Filtere die Liste."],
+        prompts=["Zeige Terminal.", _FILTER_LIST_PROMPT],
         bundle="lager",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1112,7 +1123,7 @@ def build_mobile_scanner_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Scanner im mobile-Bereich finden und auswerten.",
-        prompts=["Zeige Scanner.", "Filtere die Liste."],
+        prompts=["Zeige Scanner.", _FILTER_LIST_PROMPT],
         bundle="mobile",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1131,7 +1142,7 @@ def build_nachhaltigkeit_eudr_compliance_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Eudr compliance im nachhaltigkeit-Bereich finden und auswerten.",
-        prompts=["Zeige Eudr compliance.", "Filtere die Liste."],
+        prompts=["Zeige Eudr compliance.", _FILTER_LIST_PROMPT],
         bundle="nachhaltigkeit",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1150,7 +1161,7 @@ def build_personal_hrm_operations_gates_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Hrm operations gates im personal-Bereich finden und auswerten.",
-        prompts=["Zeige Hrm operations gates.", "Filtere die Liste."],
+        prompts=["Zeige Hrm operations gates.", _FILTER_LIST_PROMPT],
         bundle="personal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1186,7 +1197,7 @@ def build_personal_organigramm_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Organigramm im personal-Bereich finden und auswerten.",
-        prompts=["Zeige Organigramm.", "Filtere die Liste."],
+        prompts=["Zeige Organigramm.", _FILTER_LIST_PROMPT],
         bundle="personal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1232,7 +1243,7 @@ def build_portal_lohndienste_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Lohndienste im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Lohndienste.", "Filtere die Liste."],
+        prompts=["Zeige Lohndienste.", _FILTER_LIST_PROMPT],
         bundle="portal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1253,7 +1264,7 @@ def build_portal_onboarding_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Onboarding im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Onboarding.", "Filtere die Liste."],
+        prompts=["Zeige Onboarding.", _FILTER_LIST_PROMPT],
         bundle="portal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1272,7 +1283,7 @@ def build_portal_preisspiegel_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Preisspiegel im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Preisspiegel.", "Filtere die Liste."],
+        prompts=["Zeige Preisspiegel.", _FILTER_LIST_PROMPT],
         bundle="portal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1301,7 +1312,7 @@ def build_portal_whatsapp_simulator_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Whatsapp simulator im portal-Bereich finden und auswerten.",
-        prompts=["Zeige Whatsapp simulator.", "Filtere die Liste."],
+        prompts=["Zeige Whatsapp simulator.", _FILTER_LIST_PROMPT],
         bundle="portal",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1345,7 +1356,7 @@ def build_pos_customer_display_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Customer display im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Customer display.", "Filtere die Liste."],
+        prompts=["Zeige Customer display.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1364,7 +1375,7 @@ def build_pos_gift_cards_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Gift cards im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Gift cards.", "Filtere die Liste."],
+        prompts=["Zeige Gift cards.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1383,7 +1394,7 @@ def build_pos_promotionen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Promotionen im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Promotionen.", "Filtere die Liste."],
+        prompts=["Zeige Promotionen.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1402,7 +1413,7 @@ def build_pos_rabatte_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rabatte im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Rabatte.", "Filtere die Liste."],
+        prompts=["Zeige Rabatte.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1421,7 +1432,7 @@ def build_pos_retoure_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Retoure im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Retoure.", "Filtere die Liste."],
+        prompts=["Zeige Retoure.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1440,7 +1451,7 @@ def build_pos_suspended_sales_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Suspended sales im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Suspended sales.", "Filtere die Liste."],
+        prompts=["Zeige Suspended sales.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1459,7 +1470,7 @@ def build_pos_tagesabschluss_enhanced_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Tagesabschluss enhanced im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Tagesabschluss enhanced.", "Filtere die Liste."],
+        prompts=["Zeige Tagesabschluss enhanced.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1478,7 +1489,7 @@ def build_pos_terminal_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Terminal im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Terminal.", "Filtere die Liste."],
+        prompts=["Zeige Terminal.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1497,7 +1508,7 @@ def build_pos_tse_journal_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Tse journal im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Tse journal.", "Filtere die Liste."],
+        prompts=["Zeige Tse journal.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
         table_profile="financial",
@@ -1517,7 +1528,7 @@ def build_pos_uebernahme_kasse_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Uebernahme kasse im pos-Bereich finden und auswerten.",
-        prompts=["Zeige Uebernahme kasse.", "Filtere die Liste."],
+        prompts=["Zeige Uebernahme kasse.", _FILTER_LIST_PROMPT],
         bundle="pos",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1536,7 +1547,7 @@ def build_preise_historie_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Historie im preise-Bereich finden und auswerten.",
-        prompts=["Zeige Historie.", "Filtere die Liste."],
+        prompts=["Zeige Historie.", _FILTER_LIST_PROMPT],
         bundle="preise",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1572,7 +1583,7 @@ def build_preise_konditionen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Konditionen im preise-Bereich finden und auswerten.",
-        prompts=["Zeige Konditionen.", "Filtere die Liste."],
+        prompts=["Zeige Konditionen.", _FILTER_LIST_PROMPT],
         bundle="preise",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1625,7 +1636,7 @@ def build_produktion_produktions_dokumente_drucken_screen_definition() -> dict[s
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Produktions dokumente drucken im produktion-Bereich finden und auswerten.",
-        prompts=["Zeige Produktions dokumente drucken.", "Filtere die Liste."],
+        prompts=["Zeige Produktions dokumente drucken.", _FILTER_LIST_PROMPT],
         bundle="produktion",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1661,7 +1672,7 @@ def build_prospecting_leads_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="LeadExplorer im prospecting-Bereich finden und auswerten.",
-        prompts=["Zeige LeadExplorer.", "Filtere die Liste."],
+        prompts=["Zeige LeadExplorer.", _FILTER_LIST_PROMPT],
         bundle="prospecting",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1760,7 +1771,7 @@ def build_reports_deckungsbeitrag_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Deckungsbeitrag im reports-Bereich finden und auswerten.",
-        prompts=["Zeige Deckungsbeitrag.", "Filtere die Liste."],
+        prompts=["Zeige Deckungsbeitrag.", _FILTER_LIST_PROMPT],
         bundle="reports",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1779,7 +1790,7 @@ def build_rezepte_editor_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Grunddaten im rezepte-Bereich finden und auswerten.",
-        prompts=["Zeige Grunddaten.", "Filtere die Liste."],
+        prompts=["Zeige Grunddaten.", _FILTER_LIST_PROMPT],
         bundle="rezepte",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1799,7 +1810,7 @@ def build_sales_auftrag_lieferschein_abgleich_screen_definition() -> dict[str, A
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Auftrag lieferschein abgleich im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Auftrag lieferschein abgleich.", "Filtere die Liste."],
+        prompts=["Zeige Auftrag lieferschein abgleich.", _FILTER_LIST_PROMPT],
         bundle="sales",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1818,7 +1829,7 @@ def build_sales_auftragskette_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Auftragskette im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Auftragskette.", "Filtere die Liste."],
+        prompts=["Zeige Auftragskette.", _FILTER_LIST_PROMPT],
         bundle="sales",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1839,7 +1850,7 @@ def build_sales_kalkulationen_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Kalkulation im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Kalkulation.", "Filtere die Liste."],
+        prompts=["Zeige Kalkulation.", _FILTER_LIST_PROMPT],
         bundle="sales",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1858,7 +1869,7 @@ def build_sales_lieferung_storno_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Lieferung storno im sales-Bereich finden und auswerten.",
-        prompts=["Zeige Lieferung storno.", "Filtere die Liste."],
+        prompts=["Zeige Lieferung storno.", _FILTER_LIST_PROMPT],
         bundle="sales",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1877,7 +1888,7 @@ def build_service_abschluss_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Abschluss im service-Bereich finden und auswerten.",
-        prompts=["Zeige Abschluss.", "Filtere die Liste."],
+        prompts=["Zeige Abschluss.", _FILTER_LIST_PROMPT],
         bundle="service",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1930,7 +1941,7 @@ def build_service_rueckmeldung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rueckmeldung im service-Bereich finden und auswerten.",
-        prompts=["Zeige Rueckmeldung.", "Filtere die Liste."],
+        prompts=["Zeige Rueckmeldung.", _FILTER_LIST_PROMPT],
         bundle="service",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -1949,7 +1960,7 @@ def build_setup_firma_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Firma im setup-Bereich finden und auswerten.",
-        prompts=["Zeige Firma.", "Filtere die Liste."],
+        prompts=["Zeige Firma.", _FILTER_LIST_PROMPT],
         bundle="setup",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2121,7 +2132,7 @@ def build_strecke_speditionen_fracht_preise_screen_definition() -> dict[str, Any
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Speditionen fracht preise im strecke-Bereich finden und auswerten.",
-        prompts=["Zeige Speditionen fracht preise.", "Filtere die Liste."],
+        prompts=["Zeige Speditionen fracht preise.", _FILTER_LIST_PROMPT],
         bundle="strecke",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2140,7 +2151,7 @@ def build_system_live_monitor_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Live monitor im system-Bereich finden und auswerten.",
-        prompts=["Zeige Live monitor.", "Filtere die Liste."],
+        prompts=["Zeige Live monitor.", _FILTER_LIST_PROMPT],
         bundle="system",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2159,7 +2170,7 @@ def build_tankstelle_zapfungen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Zapfungen im tankstelle-Bereich finden und auswerten.",
-        prompts=["Zeige Zapfungen.", "Filtere die Liste."],
+        prompts=["Zeige Zapfungen.", _FILTER_LIST_PROMPT],
         bundle="tankstelle",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2178,7 +2189,7 @@ def build_transporte_fahrer_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Fahrer liste im transporte-Bereich finden und auswerten.",
-        prompts=["Zeige Fahrer liste.", "Filtere die Liste."],
+        prompts=["Zeige Fahrer liste.", _FILTER_LIST_PROMPT],
         bundle="transporte",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2214,7 +2225,7 @@ def build_verkauf_betriebs_auftraege_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Betriebs auftraege im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Betriebs auftraege.", "Filtere die Liste."],
+        prompts=["Zeige Betriebs auftraege.", _FILTER_LIST_PROMPT],
         bundle="verkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2250,7 +2261,7 @@ def build_verkauf_kommissions_auftraege_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Kommissions auftraege im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Kommissions auftraege.", "Filtere die Liste."],
+        prompts=["Zeige Kommissions auftraege.", _FILTER_LIST_PROMPT],
         bundle="verkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2322,7 +2333,7 @@ def build_verkauf_unerledigte_auftrags_positionen_screen_definition() -> dict[st
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Unerledigte auftrags positionen im verkauf-Bereich finden und auswerten.",
-        prompts=["Zeige Unerledigte auftrags positionen.", "Filtere die Liste."],
+        prompts=["Zeige Unerledigte auftrags positionen.", _FILTER_LIST_PROMPT],
         bundle="verkauf",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2341,7 +2352,7 @@ def build_verladung_lkw_beladung_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Lkw beladung im verladung-Bereich finden und auswerten.",
-        prompts=["Zeige Lkw beladung.", "Filtere die Liste."],
+        prompts=["Zeige Lkw beladung.", _FILTER_LIST_PROMPT],
         bundle="verladung",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2363,7 +2374,7 @@ def build_vertrag_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Gespeichert im vertrag-Bereich finden und auswerten.",
-        prompts=["Zeige Gespeichert.", "Filtere die Liste."],
+        prompts=["Zeige Gespeichert.", _FILTER_LIST_PROMPT],
         bundle="vertrag",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2382,7 +2393,7 @@ def build_vertrag_rahmenvertraege_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Rahmenvertraege im vertrag-Bereich finden und auswerten.",
-        prompts=["Zeige Rahmenvertraege.", "Filtere die Liste."],
+        prompts=["Zeige Rahmenvertraege.", _FILTER_LIST_PROMPT],
         bundle="vertrag",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2401,7 +2412,7 @@ def build_vertrieb_kundenumsatz_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Kundenumsatz im vertrieb-Bereich finden und auswerten.",
-        prompts=["Zeige Kundenumsatz.", "Filtere die Liste."],
+        prompts=["Zeige Kundenumsatz.", _FILTER_LIST_PROMPT],
         bundle="vertrieb",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2424,7 +2435,7 @@ def build_waage_vorlagen_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Vorlagen im waage-Bereich finden und auswerten.",
-        prompts=["Zeige Vorlagen.", "Filtere die Liste."],
+        prompts=["Zeige Vorlagen.", _FILTER_LIST_PROMPT],
         bundle="waage",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2443,7 +2454,7 @@ def build_waage_wiegeschein_detail_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Wiegeschein detail im waage-Bereich finden und auswerten.",
-        prompts=["Zeige Wiegeschein detail.", "Filtere die Liste."],
+        prompts=["Zeige Wiegeschein detail.", _FILTER_LIST_PROMPT],
         bundle="waage",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2553,7 +2564,7 @@ def build_workflow_workflow_regeln_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Workflow regeln im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Workflow regeln.", "Filtere die Liste."],
+        prompts=["Zeige Workflow regeln.", _FILTER_LIST_PROMPT],
         bundle="workflow",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2572,7 +2583,7 @@ def build_workflow_workflow_sandbox_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Workflow sandbox im workflow-Bereich finden und auswerten.",
-        prompts=["Zeige Workflow sandbox.", "Filtere die Liste."],
+        prompts=["Zeige Workflow sandbox.", _FILTER_LIST_PROMPT],
         bundle="workflow",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2591,7 +2602,7 @@ def build_workflows_history_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Workflow monitoring im workflows-Bereich finden und auswerten.",
-        prompts=["Zeige Workflow monitoring.", "Filtere die Liste."],
+        prompts=["Zeige Workflow monitoring.", _FILTER_LIST_PROMPT],
         bundle="workflows",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )
@@ -2610,7 +2621,7 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
         actions=[stamm_list_export_action()],
         row_actions=[],
         purpose="Liste im zertifikate-Bereich finden und auswerten.",
-        prompts=["Zeige Liste.", "Filtere die Liste."],
+        prompts=["Zeige Liste.", _FILTER_LIST_PROMPT],
         bundle="zertifikate",
         no_workflow="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
     )

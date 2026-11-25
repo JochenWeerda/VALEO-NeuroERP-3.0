@@ -29,8 +29,14 @@ def _registry() -> dict:
 
 
 def development_release() -> bool:
-    """Sind waehrend der Entwicklung alle Agenten-Schreibwege freigegeben?"""
-    return _registry().get("agent_write_phase") == DEVELOPMENT_PHASE
+    """Sind alle deklarierten Agenten-Schreibwege offen?
+
+    Seit 25.11.2026 nach Umgebung (``app/core/umgebung.py``): nur in LOCAL und CI, ausdruecklich gesetzt. Der fruehere
+    Registry-Schalter ``agent_write_phase: entwicklung`` wirkt weiter, ist aber entfernt (M5, 24.11.2026).
+    """
+    from app.core.umgebung import agenten_autonom
+
+    return agenten_autonom() or _registry().get("agent_write_phase") == DEVELOPMENT_PHASE
 
 
 def _entries() -> list[dict]:

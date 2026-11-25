@@ -4,8 +4,8 @@ type: reference
 audience: [produkt, management, agent, entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-10-07
-version: 1.0.0
+last_reviewed: 2026-11-23
+version: 1.1.0
 description: Kanonischer Einstieg fuer Capability-/Usability-Gaps — ersetzt die 2025er Archiv-Analysen als Source of Truth.
 ---
 
@@ -19,8 +19,10 @@ Die Analysen unter [`docs/_internal/archive/gap/`](../_internal/archive/gap/) (u
 
 | Dokument | Inhalt |
 |---|---|
-| [executive-summary-20261007.md](executive-summary-20261007.md) | Management-Übersicht Domänenreife + Top-Gaps |
-| [domain-maturity-matrix-20261007.csv](domain-maturity-matrix-20261007.csv) | Domänen × Reife × Evidenz |
+| [domain-maturity-matrix-20261123.csv](domain-maturity-matrix-20261123.csv) | Domänenreife aus M4-Abnahmeblättern (ehrlich: P0 → niedrig, P1 → mittel) |
+| [docs/abnahme/domaenen/README.md](../abnahme/domaenen/README.md) | Abnahmeblätter je Domäne (Verkauf … CRM) |
+| [executive-summary-20261007.md](executive-summary-20261007.md) | Management-Übersicht Domänenreife + Top-Gaps (Stand 07.10., teilweise überholt) |
+| [domain-maturity-matrix-20261007.csv](domain-maturity-matrix-20261007.csv) | Historische Erhebung 07.10.2026 — durch 20261123 ersetzt, wo ein Abnahmeblatt existiert |
 | [usability-systemaudit-matrix-20261007.csv](usability-systemaudit-matrix-20261007.csv) | Usability-Cluster-Scores |
 | [usability-systemaudit-findings-20261007.csv](usability-systemaudit-findings-20261007.csv) | Usability-/Future-Befunde |
 | [usability-peer-matrix-20261007.csv](usability-peer-matrix-20261007.csv) | Light-Peers ERPClaw/OpenLedger/TaxHacker/OpenAccountants vs VALEO |
