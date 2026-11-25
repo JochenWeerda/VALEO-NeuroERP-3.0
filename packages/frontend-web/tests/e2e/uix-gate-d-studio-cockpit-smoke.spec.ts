@@ -42,6 +42,28 @@ const COCKPIT_CASES: CockpitCase[] = [
     testId: 'screen-agrar/milchvieh-crosssell',
     title: 'Milchvieh Cross-Sell',
   },
+  // Specialized workbenches (Batches 28–38): native-cockpit shell + specialized surface
+  {
+    label: 'lager/materialfluss',
+    path: '/lager/materialfluss',
+    screenId: 'lager/materialfluss',
+    testId: 'screen-lager/materialfluss',
+    title: 'Materialfluss',
+  },
+  {
+    label: 'konditionen/konditionssystem',
+    path: '/konditionen/konditionssystem',
+    screenId: 'konditionen/konditionssystem',
+    testId: 'screen-konditionen/konditionssystem',
+    title: 'Konditionssystem',
+  },
+  {
+    label: 'fuhrpark/fahrzeug-vertiefung',
+    path: '/fuhrpark/fahrzeug-vertiefung',
+    screenId: 'fuhrpark/fahrzeug-vertiefung',
+    testId: 'screen-fuhrpark/fahrzeug-vertiefung',
+    title: 'Fahrzeug-Vertiefung',
+  },
 ]
 
 function maskPath(screenId: string): string {

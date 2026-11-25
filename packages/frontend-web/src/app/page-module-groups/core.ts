@@ -11,10 +11,13 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/admin/**/*.tsx',
   '../../pages/admin-suite/**/*.tsx',
   '../../pages/analytics/**/*.tsx',
+  '../../pages/analysis/**/*.tsx',
   '../../pages/workflow/**/*.tsx',
   '../../pages/workflows/**/*.tsx',
   '../../pages/personal/**/*.tsx',
   '../../pages/planung/**/*.tsx',
   '../../pages/benachrichtigungen/**/*.tsx',
   '../../pages/stammdaten/**/*.tsx',
+  '../../pages/schnittstelle/**/*.tsx',
+  '../../pages/studio/**/*.tsx',
 ]) as PageModuleGlob

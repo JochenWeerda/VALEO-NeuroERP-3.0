@@ -15,3 +15,15 @@ it('loads the published document pilot page through the existing page groups', a
   const page = await getPageModuleLoader('@/pages/belege/beleg')()
   expect(typeof page.default).toBe('function')
 }, 20000)
+
+it('loads previously missing page-group prefixes (pricing/ops/studio)', async () => {
+  const modules = [
+    '@/pages/konditionen/konditionssystem',
+    '@/pages/dms/archiv-suche',
+    '@/pages/studio/workspace-composition-preview',
+  ]
+  for (const modulePath of modules) {
+    const page = await getPageModuleLoader(modulePath)()
+    expect(typeof page.default, modulePath).toBe('function')
+  }
+}, 30000)
