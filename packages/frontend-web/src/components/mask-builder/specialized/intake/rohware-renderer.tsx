@@ -324,7 +324,11 @@ export function RohwareRenderer({ state }: { state: RohwareState }): JSX.Element
   ]
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Rohware-Annahme Arbeitsbereich"
+    >
       <div className="p-3 md:p-6">
         <ModuleToolbar
           backTarget="/annahme/warteschlange"

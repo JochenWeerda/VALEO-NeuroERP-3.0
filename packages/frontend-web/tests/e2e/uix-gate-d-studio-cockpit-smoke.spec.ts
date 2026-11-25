@@ -276,6 +276,89 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Annahme-Warteschlange Arbeitsbereich',
   },
+  {
+    label: 'annahme/lkw-registrierung',
+    path: '/annahme/lkw-registrierung',
+    screenId: 'annahme/lkw-registrierung',
+    testId: 'native-cockpit-annahme-lkw-registrierung',
+    title: 'LKW-Registrierung',
+    specializedType: 'intake',
+    specializedFields: [
+      { key: 'kennzeichen', label: 'Kennzeichen' },
+      { key: 'lieferant', label: 'Lieferant' },
+      { key: 'lieferscheinNr', label: 'Lieferschein' },
+      { key: 'articleId', label: 'Artikel-ID' },
+      { key: 'artikel', label: 'Artikel' },
+      { key: 'ankunftszeit', label: 'Ankunft' },
+      { key: 'prioritaet', label: 'Priorität' },
+      { key: 'attachmentIds', label: 'Anhänge' },
+    ],
+    specializedLandmark: 'LKW-Registrierung Arbeitsbereich',
+  },
+  {
+    label: 'annahme/qualitaets-check',
+    path: '/annahme/qualitaets-check',
+    screenId: 'annahme/qualitaets-check',
+    testId: 'native-cockpit-annahme-qualitaets-check',
+    title: 'Qualitätsprüfung',
+    specializedType: 'intake',
+    specializedFields: [
+      { key: 'lieferscheinNr', label: 'Lieferschein' },
+      { key: 'artikel', label: 'Artikel' },
+      { key: 'feuchtigkeit', label: 'Feuchtigkeit' },
+      { key: 'protein', label: 'Protein' },
+      { key: 'verunreinigung', label: 'Verunreinigung' },
+      { key: 'fremdgeruch', label: 'Fremdgeruch' },
+      { key: 'schaedlinge', label: 'Schädlinge' },
+      { key: 'farbe', label: 'Farbe' },
+      { key: 'bemerkungen', label: 'Bemerkungen' },
+      { key: 'ergebnis', label: 'Ergebnis' },
+    ],
+    specializedLandmark: 'Qualitätsprüfung Arbeitsbereich',
+  },
+  {
+    label: 'annahme/rohware',
+    path: '/annahme/rohware',
+    screenId: 'annahme/rohware',
+    testId: 'native-cockpit-annahme-rohware',
+    title: 'Rohware-Annahme',
+    specializedType: 'intake',
+    specializedFields: [
+      { key: 'lieferant', label: 'Lieferant' },
+      { key: 'kennzeichen', label: 'Kennzeichen' },
+      { key: 'lieferscheinNr', label: 'Lieferschein' },
+      { key: 'datum', label: 'Datum' },
+      { key: 'artikel', label: 'Artikel' },
+      { key: 'bruttoKg', label: 'Brutto' },
+      { key: 'taraKg', label: 'Tara' },
+      { key: 'lagerZiel', label: 'Lagerziel' },
+      { key: 'feuchtePct', label: 'Feuchte' },
+      { key: 'besatzPct', label: 'Besatz' },
+      { key: 'fallzahl', label: 'Fallzahl' },
+      { key: 'customer_id', label: 'Kunde' },
+    ],
+    specializedLandmark: 'Rohware-Annahme Arbeitsbereich',
+  },
+  {
+    label: 'waage/wiegungen',
+    path: '/waage/wiegungen',
+    screenId: 'waage/wiegungen',
+    testId: 'native-cockpit-waage-wiegungen',
+    title: 'Wiegungen',
+    specializedType: 'weighing',
+    specializedFields: [
+      { key: 'ticketNumber', label: 'Wiegeschein' },
+      { key: 'scaleId', label: 'Waage' },
+      { key: 'vehiclePlate', label: 'Kennzeichen' },
+      { key: 'grossWeight', label: 'Brutto' },
+      { key: 'tareWeight', label: 'Tara' },
+      { key: 'moisturePct', label: 'Feuchte' },
+      { key: 'impuritiesPct', label: 'Besatz' },
+      { key: 'selectedTicketId', label: 'Ticket' },
+      { key: 'selectedContractId', label: 'Kontrakt' },
+    ],
+    specializedLandmark: 'Wiegungen Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -523,6 +606,12 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
     await page.route(/\/api\/v1\/waage\/waagen(?:\?.*)?$/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
     })
+    await page.route(/\/api\/v1\/weighing-tickets(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+    await page.route(/\/api\/v1\/contracts(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
   }
   if (c.specializedType === 'intake') {
     await page.route(/\/api\/v1\/annahme\/warteschlange(?:\?.*)?$/, async (route) => {
@@ -530,6 +619,13 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ items: [], total: 0 }),
+      })
+    })
+    await page.route(/\/api\/v1\/articles(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ items: [] }),
       })
     })
   }
