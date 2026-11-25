@@ -31,7 +31,11 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (scopes.has(permission)) return true
     if (permission === 'logistics:read' && scopes.has('logistics:write')) return true
     // Match the canonical lead API's existing role contract, not schema-granted rights.
-    if (permission.startsWith('crm.lead.') || permission.startsWith('crm.contact.')) {
+    if (
+      permission.startsWith('crm.lead.')
+      || permission.startsWith('crm.contact.')
+      || permission.startsWith('crm.betriebsprofil.')
+    ) {
       return roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN') || roles.has('manager')
     }
     // Agrar Saatgut/Duenger Create mirrors SCHREIBEN["AGRAR"] until action-permission projection covers POST /.
@@ -88,6 +92,18 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         'FUTTERMITTEL', 'FINANCE', 'PERSONAL',
       ]
       return fachlich.some(b => roles.has(`${b}_BEARBEITEN`) || roles.has(`${b}_ADMIN`)) || roles.has('manager')
+    }
+    if (permission.startsWith('personal.mitarbeiter.')) {
+      return roles.has('PERSONAL_BEARBEITEN') || roles.has('PERSONAL_ADMIN') || roles.has('manager')
+    }
+    // Betriebsstaetten Create mirrors SCHREIBEN["STAMMDATEN"] (Einkauf/Sales/Lager).
+    if (permission.startsWith('stammdaten.betriebsstaette.')) {
+      return (
+        roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN')
+        || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')
+        || roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN')
+        || roles.has('manager')
+      )
     }
     return false
   })

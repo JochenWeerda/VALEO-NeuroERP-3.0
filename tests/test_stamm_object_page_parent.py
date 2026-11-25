@@ -270,6 +270,25 @@ def test_service_anfrage_has_native_creation() -> None:
         assert {"kunde", "betreff"} <= keys
 
 
+def test_betriebsprofil_mitarbeiter_betriebsstaette_have_native_creation() -> None:
+    """Batch 4: Betriebsprofil, Mitarbeiter, Betriebsstaette."""
+    cases = (
+        ("crm/betriebsprofil", "/api/v1/crm/betriebsprofile", {"name"}, None),
+        ("personal/mitarbeiter/neu", "/api/v1/personal/mitarbeiter", {"name", "email"}, None),
+        ("stammdaten/betriebsstaetten", "/api/v1/stammdaten/betriebsstaetten",
+         {"filial_nr", "bezeichnung"}, "filial_nr"),
+    )
+    for screen_id, endpoint, required, response_id_key in cases:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        keys = {field["key"] for field in creation["fields"]}
+        assert required <= keys
+        if response_id_key:
+            assert creation["responseIdKey"] == response_id_key
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")
