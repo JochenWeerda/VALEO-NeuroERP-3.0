@@ -8,7 +8,8 @@ _VISIBLE_RUNTIME = re.compile(
     r'<(?:UniversalMaskRenderer|UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|NativeAuditListPage|'
     r'CaptureScreenHost|MadeByStudio(?:List|Detail|Cockpit)RuntimeWire|'
     r'DocumentControlScopePage|SanktionsScopePage|PartyNativePage|UniversalMaskRolloutPilotPage)\b'
-    r'|\b(?:useUniversalMaskRuntime|createStammNative(?:Detail|Create|List)Page)\s*\('
+    # belegSeite → UniversalNativeDetailPage (BELEG-052 DocFlow); createStamm* → Native Create/Detail.
+    r'|\b(?:useUniversalMaskRuntime|createStammNative(?:Detail|Create|List)Page|belegSeite)\s*\('
 )
 
 

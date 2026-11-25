@@ -40,6 +40,7 @@ Bezug Entity-Profil: [studio-entity-release-20261021](../../quality-assurance/st
 
 - [ ] Nutzerroute → `UniversalNative*Page` / ListPage → freigegebene Screen-ID (Inventar: `runtime_wired`).
 - [ ] Commands/Datenwege Human = CLI = MCP (gleiche Rechte/Mandant); keine Stub-Wirkung.
+- [ ] Gegenueber dem abgeloesten Vorgaenger: keine Funktionsverluste und keine fehlenden Datenfelder (Create/Edit/Aktionen); Paritaet ist Abnahmekriterium, nicht optional.
 - [ ] Tabellenkatalog / Runtime-Catalog im Image/Dev-Deploy vorhanden (Compiler-Pflicht).
 
 ### D — Browser / Image (sichtbarer Nachweis)

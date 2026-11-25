@@ -1989,7 +1989,54 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
 
 
 def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
-    """Native SD fuer einkauf/angebot (Lieferantenangebot)."""
+    """Native SD fuer einkauf/angebot — Feld-/Aktionsparitaet zur Legacy-ObjectPage.
+
+    Human, CI und MCP nutzen dieselben Endpunkte (MCP-WRITE-015 / Made-by-Studio Gate C).
+    """
+    _status_opts = [
+        {"value": "ERFASST", "label": "Erfasst"},
+        {"value": "GEPRUEFT", "label": "Geprueft"},
+        {"value": "GENEHMIGT", "label": "Genehmigt"},
+        {"value": "IN_BESTELLUNG", "label": "In Bestellung"},
+        {"value": "ABGELEHNT", "label": "Abgelehnt"},
+    ]
+    _einheit_opts = [
+        {"value": "kg", "label": "kg"}, {"value": "t", "label": "t"},
+        {"value": "l", "label": "l"}, {"value": "Stk", "label": "Stk"},
+    ]
+    _waehrung_opts = [
+        {"value": "EUR", "label": "EUR"}, {"value": "USD", "label": "USD"}, {"value": "GBP", "label": "GBP"},
+    ]
+    _incoterms = [
+        {"value": "EXW", "label": "EXW - Ab Werk"}, {"value": "FCA", "label": "FCA - Frei Frachtfuehrer"},
+        {"value": "CPT", "label": "CPT - Frachtfrei bezahlt bis"}, {"value": "CIP", "label": "CIP - Frachtfrei versichert bis"},
+        {"value": "DAT", "label": "DAT - Geliefert Terminal"}, {"value": "DAP", "label": "DAP - Geliefert benannter Ort"},
+        {"value": "DDP", "label": "DDP - Geliefert verzollt"},
+    ]
+    _kopf_fields = [
+        {"key": "angebotNummer", "label": "Angebot-Nr.", "type": "text", "readOnly": True},
+        {"key": "anfrageId", "label": "Anfrage", "type": "lookup", "dataSourceKey": "anfragen"},
+        {"key": "lieferantId", "label": "Lieferant", "type": "lookup", "dataSourceKey": "lieferanten", "required": True},
+        {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+    ]
+    _angebot_fields = [
+        {"key": "artikel", "label": "Artikel", "type": "lookup", "dataSourceKey": "artikel", "required": True},
+        {"key": "menge", "label": "Menge", "type": "number", "required": True},
+        {"key": "einheit", "label": "Einheit", "type": "select", "required": True, "options": _einheit_opts},
+        {"key": "preis", "label": "Preis", "type": "currency", "required": True},
+        {"key": "waehrung", "label": "Waehrung", "type": "select", "options": _waehrung_opts},
+        {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "type": "number", "required": True},
+        {"key": "gueltigBis", "label": "Gueltig bis", "type": "date", "required": True},
+    ]
+    _kondition_fields = [
+        {"key": "mindestabnahme", "label": "Mindestabnahme", "type": "number"},
+        {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+        {"key": "incoterms", "label": "Incoterms", "type": "select", "options": _incoterms},
+        {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+    ]
+    _edit_fields = [
+        {**f, "readOnly": False} for f in (_kopf_fields[1:] + _angebot_fields + _kondition_fields)
+    ]
     return {
         "schemaVersion": 1, "id": "einkauf/angebot", "domain": "einkauf", "mode": "detail",
         "title": "Lieferantenangebot", "subtitle": "Einkauf / Angebot",
@@ -1997,17 +2044,17 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/angebote/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "anfragen", "endpoint": "/api/v1/einkauf/anfragen?status=FREIGEGEBEN"},
+            {"key": "lieferanten", "endpoint": "/api/v1/crm/business-partners?type=supplier"},
+            {"key": "artikel", "endpoint": "/api/v1/articles"},
         ],
         "tabs": [
-            {"key": "kopf", "label": "Angebot-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 {"key": "angebotNummer", "label": "Angebot-Nr.", "type": "text", "readOnly": True},
-                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
-                 {"key": "artikel", "label": "Artikel", "type": "text"},
-                 {"key": "gueltigBis", "label": "Gueltig bis", "type": "date"},
-                 {"key": "preis", "label": "Gesamtbetrag", "type": "currency"},
-                 {"key": "status", "label": "Status", "type": "text"},
-             ]},
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kopf_fields},
+            {"key": "angebot", "label": "Angebotsdetails", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _angebot_fields},
+            {"key": "konditionen", "label": "Konditionen", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kondition_fields},
             {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
              "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
                          "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
@@ -2019,34 +2066,109 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                              {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST", "requiresConfirmation": True}],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}",
+             "method": "PUT", "inputPrefill": "entity", "inputFields": _edit_fields},
+            {"key": "pruefen", "label": "Pruefen", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update",
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/review", "method": "POST"},
+            {"key": "genehmigen", "label": "Genehmigen", "kind": "primary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update",
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/approve", "method": "POST"},
+            {"key": "ablehnen", "label": "Ablehnen", "kind": "secondary", "dangerLevel": "destructive",
+             "permission": "einkauf.angebot.update", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/reject", "method": "POST"},
+            {"key": "inBestellung", "label": "In Bestellung", "kind": "secondary", "dangerLevel": "moderate",
+             "permission": "einkauf.angebot.order", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/convert-to-order", "method": "POST",
+             "resultNavigationRoute": "/einkauf/bestellung/{purchaseOrderId}"},
+        ],
         "creation": {
             "endpoint": "/api/v1/einkauf/angebote",
             "permission": "einkauf.angebot.create",
             "detailRoute": "/einkauf/angebot/{entity_id}",
-            "defaults": {"status": "ENTWURF", "waehrung": "EUR"},
+            "defaults": {"status": "ERFASST", "waehrung": "EUR", "einheit": "Stk"},
+            "dataSources": [
+                {"key": "anfragen", "endpoint": "/api/v1/einkauf/anfragen?status=FREIGEGEBEN"},
+                {"key": "lieferanten", "endpoint": "/api/v1/crm/business-partners?type=supplier"},
+                {"key": "artikel", "endpoint": "/api/v1/articles"},
+            ],
             "fields": [
-                {"key": "lieferant", "label": "Lieferant", "type": "text", "required": True},
-                {"key": "artikel", "label": "Artikel", "type": "text"},
-                {"key": "preis", "label": "Gesamtbetrag", "type": "currency"},
-                {"key": "gueltigBis", "label": "Gueltig bis", "type": "date"},
-                {"key": "angebotNummer", "label": "Angebot-Nr. (optional)", "type": "text"},
+                {"key": "anfrageId", "label": "Anfrage", "type": "lookup", "dataSourceKey": "anfragen"},
+                {"key": "lieferantId", "label": "Lieferant", "type": "lookup", "dataSourceKey": "lieferanten", "required": True},
+                {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+                {"key": "artikel", "label": "Artikel", "type": "lookup", "dataSourceKey": "artikel", "required": True},
+                {"key": "menge", "label": "Menge", "type": "number", "required": True},
+                {"key": "einheit", "label": "Einheit", "type": "select", "required": True, "options": _einheit_opts},
+                {"key": "preis", "label": "Preis", "type": "currency", "required": True},
+                {"key": "waehrung", "label": "Waehrung", "type": "select", "options": _waehrung_opts},
+                {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "type": "number", "required": True},
+                {"key": "gueltigBis", "label": "Gueltig bis", "type": "date", "required": True},
+                {"key": "mindestabnahme", "label": "Mindestabnahme", "type": "number"},
+                {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                {"key": "incoterms", "label": "Incoterms", "type": "select", "options": _incoterms},
+                {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
             ],
         },
-        "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
+        "noWorkflowReason": "Angebots-Stand kommt aus Status + Aktionen pruefen/genehmigen/ablehnen/inBestellung — kein separater Workflow-YAML.",
         "agentContract": {
-            "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
-            "examplePrompts": ["Wie lange ist Angebot {entity_id} gueltig?", "Zeige alle Positionen und Preise von Angebot {entity_id}."],
-            "sensitiveFields": ["gesamtbetrag", "einzelpreis"],
-            "testSelectors": {"screenRoot": "[data-testid='einkauf-angebot']", "primaryAction": "[data-testid='action-bestellen']", "summaryArea": "[data-testid='mask-summary']"},
+            "businessPurpose": "Lieferantenangebot: Stammdaten, Angebotsdetails, Konditionen und Bestellueberfuehrung — gleiche Wege fuer Human, CI und MCP.",
+            "examplePrompts": [
+                "Wie lange ist Angebot {entity_id} gueltig?",
+                "Zeige alle Positionen und Preise von Angebot {entity_id}.",
+                "Genehmige Angebot {entity_id} und erzeuge eine Bestellung.",
+            ],
+            "sensitiveFields": ["preis", "mindestabnahme", "zahlungsbedingungen"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='einkauf-angebot']",
+                "primaryAction": "[data-testid='action-genehmigen']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "workflow", "tableProfile": "standard",
+        },
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
 
 
 def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
-    """Native SD fuer einkauf/anlieferavis."""
+    """Native SD fuer einkauf/anlieferavis — Feld-/Aktionsparitaet zur Legacy-ObjectPage.
+
+    Human, CI und MCP nutzen dieselben Endpunkte (MCP-WRITE-015 / Made-by-Studio Gate C).
+    """
+    _status_opts = [
+        {"value": "GESENDET", "label": "Gesendet"},
+        {"value": "BESTAETIGT", "label": "Bestaetigt"},
+        {"value": "STORNIERT", "label": "Storniert"},
+        {"value": "ERHALTEN", "label": "Erhalten"},
+    ]
+    _kopf_fields = [
+        {"key": "bestellungId", "label": "Bestellung", "type": "lookup", "dataSourceKey": "bestellungen", "required": True},
+        {"key": "avisNummer", "label": "Avis-Nummer", "type": "text", "required": True},
+        {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+        {"key": "geplantesAnlieferDatum", "label": "Geplantes Anlieferdatum", "type": "datetime", "required": True},
+    ]
+    _fahrzeug_fields = [
+        {"key": "kennzeichen", "label": "Kennzeichen", "type": "text", "required": True},
+        {"key": "fahrer", "label": "Fahrer", "type": "text", "required": True},
+        {"key": "telefon", "label": "Telefon", "type": "text"},
+    ]
+    _belege_fields = [
+        {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+    ]
+    _position_row = [
+        {"key": "positionId", "label": "Bestellposition", "type": "text", "required": True},
+        {"key": "menge", "label": "Menge", "type": "number", "required": True},
+        {"key": "chargenNummer", "label": "Charge-Nr.", "type": "text"},
+        {"key": "verpackung", "label": "Verpackung", "type": "text"},
+    ]
+    _edit_fields = _kopf_fields + _fahrzeug_fields + _belege_fields + [
+        {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+         "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
+    ]
     return {
         "schemaVersion": 1, "id": "einkauf/anlieferavis", "domain": "einkauf", "mode": "detail",
         "title": "Anlieferavis", "subtitle": "Einkauf / Wareneingangsankuendigung",
@@ -2054,55 +2176,84 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/anlieferavis/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "bestellungen", "endpoint": "/api/v1/belege/purchase_order?status=open"},
         ],
         "tabs": [
-            {"key": "kopf", "label": "Avis-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kopf_fields},
+            {"key": "fahrzeug", "label": "Fahrzeug & Fahrer", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _fahrzeug_fields},
+            {"key": "positionen", "label": "Positionen", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
              "fields": [
-                 {"key": "avisNummer", "label": "Avis-Nr.", "type": "text", "readOnly": True},
-                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
-                 {"key": "geplantesAnlieferDatum", "label": "Lieferdatum", "type": "date"},
-                 {"key": "bestellung", "label": "Bestellung", "type": "text"},
-                 {"key": "kennzeichen", "label": "Kennzeichen", "type": "text"},
-                 {"key": "status", "label": "Status", "type": "text"},
+                 {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+                  "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
              ]},
-            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
-                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
-                             {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                             {"key": "einheit", "label": "Einheit", "width": 70},
-                             {"key": "charge", "label": "Charge", "width": 120},
-                         ]}]},
+            {"key": "belege", "label": "Belege", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _belege_fields},
         ],
-        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang", "method": "POST",
-            "inputFields": [
-                {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
-                {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
-                 "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
-            ]}],
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}", "method": "PUT",
+             "inputPrefill": "entity", "inputFields": _edit_fields},
+            {"key": "senden", "label": "Avis senden", "kind": "primary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/send", "method": "POST"},
+            {"key": "bestaetigen", "label": "Bestaetigen", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/confirm", "method": "POST"},
+            {"key": "stornieren", "label": "Stornieren", "kind": "secondary", "dangerLevel": "destructive",
+             "permission": "einkauf.anlieferavis.update", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/cancel", "method": "POST"},
+            {"key": "wareneingang", "label": "Wareneingang buchen", "kind": "secondary", "dangerLevel": "moderate",
+             "permission": "lager.wareneingang.create", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang", "method": "POST",
+             "inputFields": [
+                 {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
+                 {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
+                  "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
+             ]},
+        ],
         "creation": {
             "endpoint": "/api/v1/einkauf/anlieferavis",
             "permission": "einkauf.anlieferavis.create",
             "detailRoute": "/einkauf/anlieferavis/{entity_id}",
-            "defaults": {"status": "ENTWURF"},
+            "defaults": {"status": "GESENDET"},
+            "dataSources": [
+                {"key": "bestellungen", "endpoint": "/api/v1/belege/purchase_order?status=open"},
+            ],
             "fields": [
-                {"key": "lieferant", "label": "Lieferant", "type": "text", "required": True},
-                {"key": "bestellung", "label": "Bestellung", "type": "text"},
-                {"key": "geplantesAnlieferDatum", "label": "Lieferdatum", "type": "date"},
-                {"key": "kennzeichen", "label": "Kennzeichen", "type": "text"},
-                {"key": "avisNummer", "label": "Avis-Nr. (optional)", "type": "text"},
+                {"key": "bestellungId", "label": "Bestellung", "type": "lookup", "dataSourceKey": "bestellungen", "required": True},
+                {"key": "avisNummer", "label": "Avis-Nummer", "type": "text", "required": True},
+                {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+                {"key": "geplantesAnlieferDatum", "label": "Geplantes Anlieferdatum", "type": "datetime", "required": True},
+                {"key": "kennzeichen", "label": "Kennzeichen", "type": "text", "required": True},
+                {"key": "fahrer", "label": "Fahrer", "type": "text", "required": True},
+                {"key": "telefon", "label": "Telefon", "type": "text"},
+                {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+                 "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
+                {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
             ],
         },
-        "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
+        "noWorkflowReason": "Avis-Stand kommt aus Status + Aktionen senden/bestaetigen/stornieren/wareneingang — kein separater Workflow-YAML.",
         "agentContract": {
-            "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",
-            "examplePrompts": ["Wann ist Avis {entity_id} angekuendigt?", "Zeige alle Positionen von Avis {entity_id}."],
+            "businessPurpose": "Anlieferavis: Bestellung, Fahrzeug, Positionen und Wareneingang — gleiche Wege fuer Human, CI und MCP.",
+            "examplePrompts": [
+                "Wann ist Avis {entity_id} angekuendigt?",
+                "Zeige alle Positionen von Avis {entity_id}.",
+                "Bestaetige Avis {entity_id} und buche den Wareneingang.",
+            ],
             "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='einkauf-anlieferavis']", "primaryAction": "[data-testid='action-wareneingang']", "summaryArea": "[data-testid='mask-summary']"},
+            "testSelectors": {
+                "screenRoot": "[data-testid='einkauf-anlieferavis']",
+                "primaryAction": "[data-testid='action-senden']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "workflow", "tableProfile": "standard",
+        },
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
 

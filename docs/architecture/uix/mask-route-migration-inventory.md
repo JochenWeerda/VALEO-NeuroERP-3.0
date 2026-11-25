@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1035 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1082 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 106 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 59 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 874 |
+| runtime_wired | 894 |
 | legacy_mask_pattern | 16 |
-| hand_built | 167 |
+| hand_built | 147 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 106 |
+| handgebaute Routen | 442 | 59 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1035 |
+| Runtime-verdrahtet | — | 1082 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -555,9 +555,14 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `einkauf/auftragsbestaetigungen` ← `src/pages/einkauf/auftragsbestaetigungen-liste.tsx`
 - `einkauf/auftragsbestaetigungen-liste` ← `src/pages/einkauf/auftragsbestaetigungen-liste.tsx`
 - `einkauf/auftragsbestaetigungen/:id` ← `src/pages/einkauf/auftragsbestaetigung.tsx`
+- `einkauf/bestellung-anlegen` ← `src/pages/einkauf/bestellung-anlegen.tsx`
 - `einkauf/bestellung-freigabe` ← `src/pages/einkauf/bestellung-freigabe.tsx`
+- `einkauf/bestellung-stamm` ← `src/pages/einkauf/bestellung-stamm.tsx`
+- `einkauf/bestellung/:id` ← `src/pages/einkauf/bestellung-native.tsx`
 - `einkauf/bestellungen` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/bestellungen-liste` ← `src/pages/einkauf/bestellungen-liste.tsx`
+- `einkauf/bestellungen/:id` ← `src/pages/einkauf/bestellung-stamm.tsx`
+- `einkauf/bestellungen/neu` ← `src/pages/einkauf/bestellung-anlegen.tsx`
 - `einkauf/bestellvorschlaege` ← `src/pages/einkauf/bestellvorschlaege.tsx`
 - `einkauf/bestellvorschlaege/ansicht/:variante` ← `src/pages/einkauf/bestellvorschlag-ansicht.tsx`
 - `einkauf/bestellvorschlag-kontrakt` ← `src/pages/einkauf/bestellvorschlag-kontrakt.tsx`
@@ -570,6 +575,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `einkauf/einkauf-vorgang-liste` ← `src/pages/einkauf/EinkaufVorgangPage.tsx`
 - `einkauf/frachtauftraege-eingang` ← `src/pages/einkauf/frachtauftraege-eingang.tsx`
 - `einkauf/frachtauftrag/:id` ← `src/pages/einkauf/frachtauftraege-eingang.tsx`
+- `einkauf/gutschrift-belastung` ← `src/pages/einkauf/gutschrift-belastung.tsx`
 - `einkauf/gutschriften-belastungen` ← `src/pages/einkauf/gutschriften-belastungen.tsx`
 - `einkauf/gutschriften-belastungen/:type` ← `src/pages/einkauf/gutschriften-belastungen.tsx`
 - `einkauf/kontrakt-anlage` ← `src/pages/einkauf/kontrakt-anlage.tsx`
@@ -585,12 +591,19 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `einkauf/lieferanten-stamm` ← `src/pages/einkauf/lieferanten-stamm.tsx`
 - `einkauf/lieferanten/:id` ← `src/pages/einkauf/supplier-native.tsx`
 - `einkauf/lieferantenbewertung` ← `src/pages/einkauf/lieferantenbewertung.tsx`
+- `einkauf/lieferschein-erfassen` ← `src/pages/einkauf/lieferschein-erfassen.tsx`
+- `einkauf/lieferschein-erfassung` ← `src/pages/einkauf/lieferschein-erfassung.tsx`
 - `einkauf/lieferschein-frachtauftrag` ← `src/pages/einkauf/lieferschein-frachtauftrag.tsx`
 - `einkauf/mahnwesen-lieferanten` ← `src/pages/einkauf/mahnwesen-lieferanten.tsx`
 - `einkauf/rechnung-abgleich` ← `src/pages/einkauf/rechnung-abgleich.tsx`
 - `einkauf/rechnung-abgleich/:invoiceId` ← `src/pages/einkauf/rechnung-abgleich.tsx`
+- `einkauf/rechnung-eingang-erfassung` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
+- `einkauf/rechnungen/:id` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
 - `einkauf/rechnungseingaenge` ← `src/pages/einkauf/rechnungseingaenge-liste.tsx`
 - `einkauf/rechnungseingaenge-liste` ← `src/pages/einkauf/rechnungseingaenge-liste.tsx`
+- `einkauf/rechnungseingaenge/:id` ← `src/pages/einkauf/rechnungseingang.tsx`
+- `einkauf/rechnungseingang` ← `src/pages/einkauf/rechnungseingang.tsx`
+- `einkauf/rechnungseingang/neu` ← `src/pages/einkauf/rechnungseingang.tsx`
 - `einkauf/reports` ← `src/pages/einkauf/reports.tsx`
 - `einkauf/retouren` ← `src/pages/einkauf/retouren.tsx`
 - `einkauf/retouren/:grId` ← `src/pages/einkauf/retouren.tsx`
@@ -665,8 +678,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `fibu/zahlungsvorschlaege` ← `src/pages/fibu/zahlungsvorschlaege.tsx`
 - `finance/abschluss` ← `src/pages/finance/abschluss.tsx`
 - `finance/accounts/:id` ← `src/pages/finance/chart-of-accounts.tsx`
+- `finance/ap-invoice-form` ← `src/pages/finance/ap-invoice-form.tsx`
+- `finance/ap-invoice/:id` ← `src/pages/finance/ap-invoice-native.tsx`
 - `finance/ap-invoices-list` ← `src/pages/finance/ap-invoices-list.tsx`
 - `finance/ap/invoices` ← `src/pages/finance/ap-invoices-list.tsx`
+- `finance/ap/invoices/:id` ← `src/pages/finance/ap-invoice-form.tsx`
+- `finance/ap/invoices/new` ← `src/pages/finance/ap-invoice-form.tsx`
 - `finance/ar-open-item/:id` ← `src/pages/finance/ar-open-item-native.tsx`
 - `finance/audit-trail` ← `src/pages/finance/audit-trail.tsx`
 - `finance/bank` ← `src/pages/finance/bankkonten-stamm.tsx`
@@ -691,8 +708,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `finance/debitoren/new` ← `src/pages/finance/debitoren-stamm.tsx`
 - `finance/dunning` ← `src/pages/finance/mahnlauf.tsx`
 - `finance/dunning-editor` ← `src/pages/finance/dunning-editor.tsx`
+- `finance/invoice-form` ← `src/pages/finance/invoice-form.tsx`
 - `finance/invoices` ← `src/pages/finance/invoices-list.tsx`
 - `finance/invoices-list` ← `src/pages/finance/invoices-list.tsx`
+- `finance/invoices/neu` ← `src/pages/finance/invoice-form.tsx`
+- `finance/invoices/new` ← `src/pages/finance/invoice-form.tsx`
 - `finance/kasse` ← `src/pages/finance/kasse.tsx`
 - `finance/kontenplan` ← `src/pages/finance/chart-of-accounts.tsx`
 - `finance/kreditor/:id` ← `src/pages/finance/kreditor-native.tsx`
@@ -958,20 +978,40 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `reports/umsatz` ← `src/pages/reports/umsatz.tsx`
 - `rezepte/editor` ← `src/pages/rezepte/editor.tsx`
 - `sales` ← `src/pages/sales/auftraege-liste.tsx`
+- `sales/angebot-erstellen` ← `src/pages/sales/angebot-erstellen.tsx`
+- `sales/angebot/:id` ← `src/pages/sales/angebot-erstellen.tsx`
+- `sales/angebot/neu` ← `src/pages/sales/angebot-erstellen.tsx`
 - `sales/angebote` ← `src/pages/sales/angebote-liste.tsx`
 - `sales/angebote-liste` ← `src/pages/sales/angebote-liste.tsx`
+- `sales/angebote/neu` ← `src/pages/sales/angebot-erstellen.tsx`
 - `sales/auftraege` ← `src/pages/sales/auftraege-liste.tsx`
 - `sales/auftraege-liste` ← `src/pages/sales/auftraege-liste.tsx`
+- `sales/auftraege/neu` ← `src/pages/sales/order-editor.tsx`
 - `sales/auftrag-lieferschein-abgleich` ← `src/pages/sales/auftrag-lieferschein-abgleich.tsx`
 - `sales/auftragskette` ← `src/pages/sales/auftragskette.tsx`
+- `sales/credit-note-editor` ← `src/pages/sales/credit-note-editor.tsx`
+- `sales/credit-notes` ← `src/pages/sales/credit-note-editor.tsx`
+- `sales/deliveries/new` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
+- `sales/delivery` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
+- `sales/delivery-note/:id` ← `src/pages/verkauf/lieferschein-native.tsx`
+- `sales/invoice` ← `src/pages/sales/invoice-editor.tsx`
+- `sales/invoice-editor` ← `src/pages/sales/invoice-editor.tsx`
+- `sales/invoice/:id` ← `src/pages/sales/invoice-editor.tsx`
+- `sales/invoices/new` ← `src/pages/sales/invoice-editor.tsx`
 - `sales/kalkulationen/neu` ← `src/pages/preise/kalkulation.tsx`
 - `sales/kreditlimit-pruefung` ← `src/pages/sales/kreditlimit-pruefung.tsx`
 - `sales/lieferung-storno` ← `src/pages/sales/lieferung-storno.tsx`
 - `sales/lieferungen` ← `src/pages/sales/lieferungen-liste.tsx`
 - `sales/lieferungen-liste` ← `src/pages/sales/lieferungen-liste.tsx`
+- `sales/lieferungen/neu` ← `src/pages/sales/lieferung-neu.tsx`
+- `sales/order` ← `src/pages/sales/order-editor.tsx`
+- `sales/order-editor` ← `src/pages/sales/order-editor.tsx`
+- `sales/order-editor/:id` ← `src/pages/sales/order-editor.tsx`
 - `sales/orders-modern` ← `src/pages/sales/orders-modern.tsx`
+- `sales/orders/new` ← `src/pages/sales/order-editor.tsx`
 - `sales/rechnungen` ← `src/pages/verkauf/rechnungen-worklist.tsx`
 - `sales/rechnungen-liste` ← `src/pages/sales/rechnungen-liste.tsx`
+- `sales/sales-order/:id` ← `src/pages/sales/sales-order-native.tsx`
 - `schaeden` ← `src/pages/schaeden/liste.tsx`
 - `schaeden/:id` ← `src/pages/schaeden/meldung.tsx`
 - `schaeden/liste` ← `src/pages/schaeden/liste.tsx`
@@ -1024,7 +1064,9 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `transporte/fahrer/neu` ← `src/pages/transporte/fahrer-liste.tsx`
 - `verify/:domain/:number` ← `src/pages/public/verify.tsx`
 - `verify/:domain/:number/:hash` ← `src/pages/public/verify.tsx`
+- `verkauf` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
 - `verkauf/auftraege` ← `src/pages/sales/auftraege-liste.tsx`
+- `verkauf/auftraege/neu` ← `src/pages/sales/order-editor.tsx`
 - `verkauf/betriebs-auftraege` ← `src/pages/verkauf/betriebs-auftraege.tsx`
 - `verkauf/dauerauftraege` ← `src/pages/verkauf/dauerauftraege.tsx`
 - `verkauf/gutschrift-buchungsvorschlaege` ← `src/pages/verkauf/gutschrift-buchungsvorschlaege.tsx`
@@ -1033,7 +1075,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `verkauf/kunden-liste` ← `src/pages/verkauf/kunden-liste.tsx`
 - `verkauf/kunden-stamm-enhanced` ← `src/pages/verkauf/kunden-stamm-enhanced.tsx`
 - `verkauf/kunden-stamm-enhanced/:id` ← `src/pages/verkauf/kunden-stamm-enhanced.tsx`
+- `verkauf/lieferschein-erfassung` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
+- `verkauf/lieferschein-erfassung/:id` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
+- `verkauf/rechnung/:id` ← `src/pages/verkauf/rechnung.tsx`
 - `verkauf/rechnungen` ← `src/pages/verkauf/rechnungen-worklist.tsx`
+- `verkauf/rechnungen/:id` ← `src/pages/sales/invoice-editor.tsx`
+- `verkauf/rechnungen/neu` ← `src/pages/sales/invoice-editor.tsx`
 - `verkauf/unerledigte-auftrags-positionen` ← `src/pages/verkauf/unerledigte-auftrags-positionen.tsx`
 - `verladung` ← `src/pages/verladung/liste.tsx`
 - `verladung/liste` ← `src/pages/verladung/liste.tsx`
@@ -1146,14 +1193,14 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/kunden-cockpit` ← `src/pages/crm/kunden-cockpit.tsx`
 - `crm/kunden-stamm-modern` ← `src/pages/crm/kunden-stamm-modern.tsx`
 - `document` ← `src/pages/document.tsx`
-- `einkauf/bestellung-anlegen` ← `src/pages/einkauf/bestellung-anlegen.tsx`
-- `einkauf/bestellung-stamm` ← `src/pages/einkauf/bestellung-stamm.tsx`
-- `einkauf/bestellung/:id` ← `src/pages/einkauf/bestellung-native.tsx`
-- `einkauf/bestellungen/:id` ← `src/pages/einkauf/bestellung-stamm.tsx`
-- `einkauf/bestellungen/neu` ← `src/pages/einkauf/bestellung-anlegen.tsx`
-- `einkauf/gutschrift-belastung` ← `src/pages/einkauf/gutschrift-belastung.tsx`
-- `einkauf/lieferschein-erfassen` ← `src/pages/einkauf/lieferschein-erfassen.tsx`
-- `einkauf/lieferschein-erfassung` ← `src/pages/einkauf/lieferschein-erfassung.tsx`
-- `einkauf/rechnung-eingang-erfassung` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
-- `einkauf/rechnungen/:id` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
-- `einkauf/rechnungseingaenge/:id` ← `src/pages/einkauf/rechnungseingang.tsx`
+- `errors/NotFound` ← `src/pages/errors/NotFound.tsx`
+- `finance` ← `src/pages/finance/index.tsx`
+- `hilfe` ← `src/pages/hilfe.tsx`
+- `kontrakte/:id` ← `src/pages/kontrakte/KontraktDetailRoute.tsx`
+- `kontrakte/mengenzeitraeume` ← `src/pages/kontrakte/mengenzeitraeume.tsx`
+- `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
+- `login` ← `src/pages/auth/Login.tsx`
+- `pricing` ← `src/pages/pricing.tsx`
+- `stock-management` ← `src/pages/stock-management.tsx`
+- `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`
+- `verkauf/kunde/:id` ← `src/pages/verkauf/kunden-stamm.tsx`

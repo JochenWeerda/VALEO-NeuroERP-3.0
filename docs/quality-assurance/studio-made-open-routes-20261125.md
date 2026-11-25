@@ -150,9 +150,22 @@ Inventar: `legacy_wrapper` **0** (vorher 35).
 
 Live `createStammNativeDetailPage` + `legacyImport`: **0**.
 
+## Paritaets-Nachzug (Batch 17b) — verbindliche Invariante
+
+Studio-made Masken duerfen gegenueber dem Vorgaenger **keine Funktionseinschränkung
+und keine fehlenden Datenfelder** haben. Human, CI und MCP bedienen dieselben
+`commandEndpoint`s (MCP-WRITE-015 / Made-by-Studio Gate C).
+
+| Maske | Nachweis |
+|-------|----------|
+| `einkauf/angebot` | Legacy-Felder (Stammdaten/Angebot/Konditionen) + Aktionen pruefen/genehmigen/ablehnen/inBestellung + PUT; Test `tests/test_einkauf_studio_field_parity.py` |
+| `einkauf/anlieferavis` | Legacy-Felder (Bestellung/Fahrzeug/Positionen/Bemerkungen) + senden/bestaetigen/stornieren (+ wareneingang additiv) + PUT; gleicher Test |
+
+Inventar: `belegSeite(...)` zaehlt als `runtime_wired` (`mask_runtime_evidence`).
+
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben
+- `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests
