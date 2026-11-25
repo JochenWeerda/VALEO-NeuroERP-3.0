@@ -59,7 +59,6 @@
   "domain_mfg.production_event": "mandant_nullbar",
   "domain_mfg.production_order": "mandant_nullbar",
   "domain_ops.ops_chargen": "dienst",
-  "domain_ops.ops_fahrer": "position",
   "domain_ops.ops_fahrzeuge": "referenzdaten",
   "domain_ops.reklamationen": "standardmandant",
   "domain_portal.customer_order_items": "position",
