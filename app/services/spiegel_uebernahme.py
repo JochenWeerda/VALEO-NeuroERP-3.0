@@ -116,8 +116,10 @@ def _artikel_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
 # --- Objektart kunde (L3 KUNDEN mit Anschrift aus ADRESSEN, im Abzug verbunden) ------------------------------------
 #
 # Ziel ist der Kundenstamm domain_crm.customers (fuehrt die Debitoren im Uebergang, Entscheidung 01.11.2026). Die
-# L3-Debitorennummer ist nicht die Kundennummer; ihr Ziel (business_partners.debtor_account, ADR Stufe 3b) gibt es noch
-# nicht. Sie bleibt im Quellinhalt (Pruefsumme) und wird im Differenzbericht als nicht zugeordnet ausgewiesen.
+# L3-Debitorennummer ist nicht die Kundennummer. Ihr Ziel ist business_partners.debtor_account (ADR Stufe 3b, seit
+# 02.11.2026). Offen ist die fachliche Entscheidung, ob die L3-Nummern als Konten uebernommen werden oder der
+# Nummernkreis neu vergibt. Bis dahin bleibt sie im Quellinhalt (Pruefsumme) und wird im Differenzbericht als
+# nicht zugeordnet ausgewiesen.
 
 KUNDE_FELDER = ("customer_number", "company_name", "address", "postal_code", "city", "country", "tax_id", "phone",
                 "email", "is_active")
@@ -268,7 +270,8 @@ def _bestand_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
 
 #: Quellfelder ohne VALEO-Ziel je Objektart - im Differenzbericht ausgewiesen, nicht verworfen.
 NICHT_ZUGEORDNET: dict[str, dict[str, str]] = {
-    "kunde": {"debitorkonto": "business_partners.debtor_account (ADR Debitoren/Kreditoren Stufe 3b) fehlt noch"},
+    "kunde": {"debitorkonto": "Ziel business_partners.debtor_account vorhanden; Entscheidung offen: L3-Nummer "
+                              "uebernehmen oder aus dem Nummernkreis neu vergeben"},
 }
 
 
