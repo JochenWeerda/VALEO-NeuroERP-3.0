@@ -230,9 +230,6 @@
     "app/services/external_mock_harness_service.py": {
       "date.today": 3
     },
-    "app/services/feed_inventory_link_service.py": {
-      "date.today": 1
-    },
     "app/services/feeding_actual_measure_service.py": {
       "date.today": 1
     },
