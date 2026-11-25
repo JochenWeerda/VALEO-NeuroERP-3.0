@@ -3,9 +3,13 @@ import { describe, expect, it, vi } from 'vitest'
 import { UniversalNativeDetailPage } from '@/components/mask-builder/UniversalNativeDetailPage'
 
 const { executeAction, state } = vi.hoisted(() => ({ executeAction: vi.fn(), state: { binding: false, audit: false, data: { aktion_buchen: true, aktionshinweis: '' } as Record<string, unknown> } }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction }),
+}))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({ plan: {}, entityData: state.data, tableRows: {}, messages: [], refetch: vi.fn() }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction, messages }: { onAction: (key: string, payload: object) => void; messages: { message: string }[] }) => (
     <div><button onClick={() => onAction('buchen', state.data)}>Buchen</button>{messages.map((m, i) => <p key={i}>{m.message}</p>)}</div>
   ),

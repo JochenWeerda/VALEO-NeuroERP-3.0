@@ -823,11 +823,10 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
             {
                 "key": "dispo",
                 "label": "Dispo-Arbeitsraum",
-                "command": "tour.openWorkspace",
                 "kind": "secondary",
                 "dangerLevel": "safe",
                 "zone": "header",
-                "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum.",
+                "localEffect": "navigation",
             },
             {
                 "key": "aufloesen",
@@ -868,8 +867,8 @@ def build_logistik_tourenplanung_screen_definition() -> dict[str, Any]:
                 "rowHeight": 44,
                 "rowDetail": False,
                 "rowActions": [
-                    {"key": "beladung", "label": "Beladung", "command": "tour.openLoading", "dangerLevel": "safe", "permission": "logistics.tour.loading",
-                     "stubReason": "Oeffnet die Beladungsansicht der Tour in der Maske."},
+                    {"key": "beladung", "label": "Beladung", "dangerLevel": "safe", "permission": "logistics.tour.loading",
+                     "localEffect": "navigation"},
                     {"key": "hinweise", "label": "Hinweise", "command": "tour.showHints", "dangerLevel": "safe", "permission": "logistics.tour.read",
                      "stubReason": "Zeigt die Hinweise zur Tour in der Maske."},
                     {

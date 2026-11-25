@@ -129,10 +129,8 @@ def _computed_field_errors(fields: list[dict[str, Any]]) -> list[str]:
 
 REFERENCE_COMMANDS: dict[str, frozenset[str]] = {
     "logistik/tourenplanung": frozenset({
-        "tour.openWorkspace",
         "tour.resolveDeliveryNote",
         "tour.create",
-        "tour.openLoading",
         "tour.showHints",
         "tour.cancel",
     }),

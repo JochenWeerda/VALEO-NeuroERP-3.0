@@ -371,3 +371,30 @@ def test_zeilenkennung_im_pfad_kommt_aus_der_objektkennung():
         == "pfadparameter:{approval_id}"
     zwei = {"key": "x", "commandEndpoint": "/api/v1/a/{id}/b/{statement_id}"}
     assert support.support(zwei).reason == "pfadparameter:{id},{statement_id}"
+
+
+def test_branch_rename_passes_version_and_audit_to_the_studio_command(monkeypatch):
+    from app.api.v1.endpoints.branches import BranchRenameCommand
+    from app.core.screen_definitions_stamm_batch13 import build_admin_branch_detail
+
+    calls = []
+
+    def server(request):
+        if request.url.path.endswith("/screen-definition"):
+            return httpx.Response(200, json=build_admin_branch_detail())
+        assert request.method == "POST"
+        assert request.url.path == "/api/v1/admin/branches/branch-1/actions/bearbeiten"
+        calls.append(BranchRenameCommand.model_validate_json(request.content))
+        return httpx.Response(200, json={"success": True})
+
+    args = ["ausfuehren", "admin/branches/detail", "bearbeiten", "--id", "branch-1",
+            "--feld", "name=Nordwest", "--version", "123456", "--grund", "Namenskorrektur",
+            "--idempotenz", "branch-rename-1", "--ja"]
+    code, output = run(args, server, monkeypatch=monkeypatch)
+    assert code == 0, output
+    submitted, = calls
+    assert submitted.name == "Nordwest" and submitted.expected_version == 123456
+    assert submitted.reason == "Namenskorrektur" and submitted.idempotency_key == "branch-rename-1"
+
+    code, _ = run(args, server, token=AGENT, monkeypatch=monkeypatch)
+    assert code != 0 and len(calls) == 1

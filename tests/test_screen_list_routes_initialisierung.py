@@ -23,3 +23,51 @@ def test_kalter_warmer_und_wiederholter_lauf_liefern_dieselben_routen(monkeypatc
     assert not set(cold["routen"]) & curated
     for screen_id in ("artikel/stamm", "annahme/waage-1", "admin/users"):
         assert cold["routen"][screen_id] == STAMM_ROUTEN[screen_id]
+
+
+def test_admin_users_reuses_the_canonical_user_list():
+    from app.api.v1.schemas.admin_core_schemas import AdminUserOut
+
+    alias = screens.get_screen_definition("admin/users")
+    canonical = screens.get_screen_definition("admin/benutzer-liste")
+    assert alias["id"] == "admin/users"
+    assert alias["mode"] == canonical["mode"] == "list"
+    assert alias["tables"] == canonical["tables"]
+    assert alias["actions"] == canonical["actions"]
+    assert alias["dataSources"] == canonical["dataSources"]
+    assert {column["key"] for column in alias["tables"][0]["columns"]} <= AdminUserOut.model_fields.keys()
+
+
+def test_admin_tenant_list_binds_the_paginated_contract():
+    from app.api.v1.endpoints.tenants import list_tenants
+    from app.api.v1.schemas.shared import Tenant
+
+    definition = screens.get_screen_definition("admin/tenants")
+    assert definition["mode"] == "list"
+    source, = definition["dataSources"]
+    assert source["endpoint"] == "/api/v1/tenants/"
+    table, = definition["tables"]
+    assert table["dataSourceKey"] == source["key"]
+    assert table["serverPagination"] is False
+    fields = {column["key"] for column in table["columns"]}
+    assert fields == {"name", "domain", "is_active"}
+    assert fields <= Tenant.model_fields.keys()
+    assert list_tenants.__annotations__["return"].model_fields["items"].annotation == list[Tenant]
+    assert set(definition["listExperience"]["searchFields"]) <= fields
+    assert definition["actions"] == table["rowActions"] == []
+
+
+def test_admin_api_keys_list_uses_the_metadata_endpoint():
+    from app.api.v1.endpoints.admin_core import list_admin_api_keys, router
+    from app.api.v1.schemas.admin_core_schemas import AdminApiKeyOut
+
+    definition = screens.get_screen_definition("admin/api-keys")
+    route = next(route for route in router.routes if route.endpoint is list_admin_api_keys)
+    assert route.response_model == list[AdminApiKeyOut]
+    assert definition["mode"] == "list"
+    assert definition["dataSources"][0]["endpoint"] == f"/api/v1/admin{route.path}"
+    table, = definition["tables"]
+    fields = {column["key"] for column in table["columns"]}
+    assert fields == {"name", "key_prefix", "status", "expires_at", "last_used_at"}
+    assert fields <= AdminApiKeyOut.model_fields.keys()
+    assert definition["actions"] == table["rowActions"] == []

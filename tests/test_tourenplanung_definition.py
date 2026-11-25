@@ -74,6 +74,12 @@ def test_tour_builder_und_fallback_stimmen_ueberein() -> None:
     assert endpoints == TOUR_ENDPOINTS
     for endpoint in TOUR_ENDPOINTS:
         assert endpoint in block
+    dispo = next(action for action in definition["actions"] if action["key"] == "dispo")
+    beladung = next(action for action in definition["tables"][0]["rowActions"] if action["key"] == "beladung")
+    assert all(action.get("localEffect") == "navigation" for action in (dispo, beladung))
+    assert "tour.openWorkspace" not in block
+    assert "tour.openLoading" not in block
+    assert block.count("localEffect: 'navigation'") == 2
     assert "DEMO-LS-001" not in block
     assert get_screen_definition("logistik/tourenplanung")["id"] == "logistik/tourenplanung"
 
