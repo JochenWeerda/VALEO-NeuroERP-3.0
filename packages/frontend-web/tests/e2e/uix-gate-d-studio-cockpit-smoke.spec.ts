@@ -6,6 +6,7 @@
  * native-cockpit Runtime-Shell und sichtbaren Titel (publizierte Route).
  */
 import { expect, test, type Page } from '@playwright/test'
+import { setzeUiTestsitzung } from './helpers/ui-testsitzung'
 
 type CockpitCase = {
   label: string
@@ -145,15 +146,20 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
 }
 
 test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => {
+  test.beforeEach(async ({ page }) => {
+    // UI-Testsitzung: unsigniertes Token nur fuer Render/Routing (kein Live-SSO / keine API-Rechte).
+    await setzeUiTestsitzung(page)
+  })
+
   for (const c of COCKPIT_CASES) {
     test(`${c.label} — native-cockpit Runtime, Titel sichtbar`, async ({ page }) => {
       await installCockpitMocks(page, c)
       const response = await page.goto(c.path, { waitUntil: 'domcontentloaded' })
       expect(response?.status() ?? 200).toBeLessThan(400)
 
-      const root = page.getByTestId(c.testId)
+      // Cockpit-Shell und Renderer teilen oft denselben testId — Runtime-Attribut ist eindeutig.
+      const root = page.locator(`[data-testid="${c.testId}"][data-runtime="native-cockpit"]`)
       await expect(root).toBeVisible({ timeout: 30_000 })
-      await expect(root).toHaveAttribute('data-runtime', 'native-cockpit')
       await expect(page.getByRole('heading', { name: c.title }).first()).toBeVisible({
         timeout: 30_000,
       })
