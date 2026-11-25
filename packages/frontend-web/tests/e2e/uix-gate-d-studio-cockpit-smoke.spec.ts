@@ -71,6 +71,7 @@ const COCKPIT_CASES: CockpitCase[] = [
       { key: 'node_count', label: 'Knoten' },
       { key: 'edge_count', label: 'Kanten' },
     ],
+    specializedLandmark: 'Materialfluss Arbeitsbereich',
   },
   {
     label: 'konditionen/konditionssystem',
@@ -1079,8 +1080,6 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
           await expect(page.getByRole('region', { name: c.specializedLandmark })).toBeVisible({
             timeout: 30_000,
           })
-        } else if (c.specializedType === 'lager_workbench') {
-          await expect(page.getByText('Hinweis Prototyp')).toBeVisible({ timeout: 30_000 })
         }
 
         await page.screenshot({

@@ -478,6 +478,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Landmark + Portal-`kundenkonten`-Mock (Auto-Wahl eines Betriebs)
 - Gate-D → **70/70 passed**
 
+### Batch 62 — Materialfluss Landmark
+
+- `materialfluss-legacy`: Region `Materialfluss Arbeitsbereich`
+- Gate-D: Spezialfall „Hinweis Prototyp“ entfernt → einheitliche Landmark-Prüfung
+- Gate-D → **70/70 passed**
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

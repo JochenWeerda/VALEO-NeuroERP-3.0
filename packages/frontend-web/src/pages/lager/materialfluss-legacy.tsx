@@ -1379,7 +1379,7 @@ export default function MaterialflussPage(): JSX.Element {
   const nodeTypes = useMemo(() => demoNodeTypes, [])
 
   return (
-    <>
+    <div role="region" aria-label="Materialfluss Arbeitsbereich">
       <PageToolbar
         title="Materialfluss (Agrar)"
         subtitle="Siloanlagen, Förderwege, QS — digitales Modell (WM-AGRI-SILO-001)"
@@ -2400,6 +2400,6 @@ export default function MaterialflussPage(): JSX.Element {
         </div>
       ) : null}
     </div>
-    </>
+    </div>
   )
 }
