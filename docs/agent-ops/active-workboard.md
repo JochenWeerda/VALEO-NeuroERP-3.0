@@ -1321,5 +1321,7 @@ Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandene
 ## M7-M8-VORARBEITEN-20261125 — zur Abnahme, Claude Code (M7/M8)
 Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. Ohne M6 startbar: Loeschkonzept, Installationsprobe, Demo-Mandant, Lizenzpruefung, Helm. Pruefpunkte Aufbewahrungsfristen (gobd_retention: Buchungsbelege 8 statt 10 Jahre seit BEG IV, PSM 3, DueV 7, Fristbeginn Kalenderjahresende) - Bestaetigung durch Steuerberater/Fachbereich offen, kein Code geaendert.
 
+## M6-SPIEGEL-KUNDEN-20261125 — zur Abnahme, Claude Code (M6)
+Objektart kunde in der Spiegeluebernahme (domain_crm.customers): Kundennummer, Name, Anschrift, USt-ID, Sperre; wiederholbar, Aenderungen mit Felddifferenz, Fremdbestand als Fehlerzeile. L3-Debitorennummer ohne Ziel bis ADR Stufe 3b - im Differenzbericht 'nicht_zugeordnet'. Dateibesitz: app/services/spiegel_uebernahme.py, tests/test_spiegel_uebernahme.py.
 ## AUFBEWAHRUNG-GELTENDES-RECHT-20261125 — zur Abnahme, Claude Code (M7/M5)
 Nutzerauftrag 25.11.2026: Aufbewahrungspflichten nach geltendem Recht. gobd_retention.py einzige Quelle (BEG IV: Belege/Rechnungen 8 J., Buecher 10, Briefe/Vertraege 6, Lieferschein bis Rechnung, PSM 3, DueV 7, Fristbeginn Kalenderjahresende, Ablaufhemmung). Finance-Router, Standardrichtlinien (Migration aufbewahrung_geltendes_recht_20261125), Governance, Personalakte angeglichen; Ratsche tests/test_aufbewahrungsfristen_recht.py.

@@ -12,7 +12,7 @@ Freigabe) - keine zweite Importstrecke. Grundsaetze:
   ein Zielobjekt, das schon ohne Quellreferenz existiert, werden Fehlerzeilen im Protokoll statt Annahmen.
 - **Eine Zeile scheitert allein.** Jede Zeile laeuft in einem eigenen Sicherungspunkt.
 
-Objektarten: zunaechst ``artikel``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im Adapterprofil
+Objektarten: ``artikel``, ``kunde``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im Adapterprofil
 (``field_mapping``); siehe ``docs/migration/m6-spiegelbetrieb-l3.md``.
 """
 from __future__ import annotations
@@ -113,6 +113,73 @@ def _artikel_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
         {"id": ziel_id, "t": tenant_id, **werte})
 
 
+# --- Objektart kunde (L3 KUNDEN mit Anschrift aus ADRESSEN, im Abzug verbunden) ------------------------------------
+#
+# Ziel ist der Kundenstamm domain_crm.customers (fuehrt die Debitoren im Uebergang, Entscheidung 01.11.2026). Die
+# L3-Debitorennummer ist nicht die Kundennummer; ihr Ziel (business_partners.debtor_account, ADR Stufe 3b) gibt es noch
+# nicht. Sie bleibt im Quellinhalt (Pruefsumme) und wird im Differenzbericht als nicht zugeordnet ausgewiesen.
+
+KUNDE_FELDER = ("customer_number", "company_name", "address", "postal_code", "city", "country", "tax_id", "phone",
+                "email", "is_active")
+
+
+def _kunde_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    strasse = _text(p, "strasse")
+    return {
+        "customer_number": _text(p, "kundennummer", pflicht=True),
+        "company_name": _text(p, "name", pflicht=True),
+        "address": json.dumps({"street": strasse}, ensure_ascii=False) if strasse else None,
+        "postal_code": _text(p, "plz"),
+        "city": _text(p, "ort"),
+        "country": _text(p, "land"),
+        "tax_id": _text(p, "ust_id"),
+        "phone": _text(p, "telefon"),
+        "email": _text(p, "email"),
+        "is_active": not _ja(p, "gesperrt"),
+    }
+
+
+def _kunde_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
+    zeile = db.execute(text(
+        "SELECT customer_number, company_name, address, postal_code, city, country, tax_id, phone, email, is_active, "
+        "deleted_at FROM domain_crm.customers WHERE tenant_id = :t AND id = :id"),
+        {"t": tenant_id, "id": ziel_id}).mappings().first()
+    if not zeile:
+        return None
+    werte = dict(zeile)
+    if werte["address"] is not None:  # jsonb kommt als dict; Vergleich mit dem serialisierten Zielwert
+        werte["address"] = json.dumps(werte["address"], ensure_ascii=False)
+    return werte
+
+
+def _kunde_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    if db.execute(text("SELECT 1 FROM domain_crm.customers WHERE tenant_id = :t AND customer_number = :n"),
+                  {"t": tenant_id, "n": werte["customer_number"]}).first():
+        raise ZeilenFehler(f"Kunde {werte['customer_number']} existiert bereits ohne L3-Quellreferenz - "
+                           "Zuordnung fachlich klaeren")
+    ziel_id = str(uuid7())
+    db.execute(text(
+        "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, address, postal_code, city, "
+        "country, tax_id, phone, email, is_active) VALUES (:id, :t, :customer_number, :company_name, "
+        "CAST(:address AS JSONB), :postal_code, :city, :country, :tax_id, :phone, :email, :is_active)"),
+        {"id": ziel_id, "t": tenant_id, **werte})
+    return ziel_id
+
+
+def _kunde_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    db.execute(text(
+        "UPDATE domain_crm.customers SET customer_number = :customer_number, company_name = :company_name, "
+        "address = CAST(:address AS JSONB), postal_code = :postal_code, city = :city, country = :country, "
+        "tax_id = :tax_id, phone = :phone, email = :email, is_active = :is_active, deleted_at = NULL, "
+        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+
+
+#: Quellfelder ohne VALEO-Ziel je Objektart - im Differenzbericht ausgewiesen, nicht verworfen.
+NICHT_ZUGEORDNET: dict[str, dict[str, str]] = {
+    "kunde": {"debitorkonto": "business_partners.debtor_account (ADR Debitoren/Kreditoren Stufe 3b) fehlt noch"},
+}
+
+
 @dataclass(frozen=True)
 class Zielart:
     tabelle: str
@@ -125,6 +192,7 @@ class Zielart:
 ZIELARTEN: dict[str, Zielart] = {
     "artikel": Zielart("domain_inventory.articles", _artikel_zielwerte, _artikel_lesen, _artikel_anlegen,
                        _artikel_aendern),
+    "kunde": Zielart("domain_crm.customers", _kunde_zielwerte, _kunde_lesen, _kunde_anlegen, _kunde_aendern),
 }
 
 
@@ -246,4 +314,6 @@ def differenzbericht(db: Session, tenant_id: str, batch_id: str) -> dict[str, An
                    for z in zeilen if z["ergebnis"] == "fehler"],
         "geaendert": [{"zeile": z["line_no"], "quellschluessel": z["quellschluessel"], "felder": z["differenzen"]}
                       for z in zeilen if z["ergebnis"] == "geaendert"],
+        "nicht_zugeordnet": {art: NICHT_ZUGEORDNET[art] for art in sorted({z["objektart"] for z in zeilen})
+                             if art in NICHT_ZUGEORDNET},
     }

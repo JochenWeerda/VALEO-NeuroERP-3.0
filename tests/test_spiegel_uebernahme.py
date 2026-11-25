@@ -18,7 +18,10 @@ pytestmark = pytest.mark.integration
 MAPPING = {"TYP": "record_type", "ARTIKELNR": "source_ref", "ARTNR": "artikelnummer", "BEZEICHN1": "bezeichnung",
            "BEZEICHN2": "bezeichnung2", "ARTIKELGRP": "artikelgruppe", "ME1": "mengeneinheit_nr",
            "GESPERRT": "gesperrt"}
-VERTRAG = {"encoding": "utf-8", "record_types": ["artikel"], "sample_hash": "synthetisch", "export_stand": "Test"}
+MAPPING.update({"QUELLE": "source_ref", "KUNDENNR": "kundennummer", "KUNDNAME": "name", "STRASSE": "strasse",
+                "PLZ": "plz", "ORT": "ort", "STAAT": "land", "USTID": "ust_id", "DEBITORKTO": "debitorkonto",
+                "SPERRE": "gesperrt"})
+VERTRAG = {"encoding": "utf-8", "record_types": ["artikel", "kunde"], "sample_hash": "synthetisch", "export_stand": "Test"}
 
 
 def _artikel(nr: str, bezeichnung: str, **mehr) -> dict:
@@ -46,6 +49,7 @@ def mandant():
             for sql in ("DELETE FROM domain_integration.spiegel_protokoll WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
+                        "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_staging WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_audit WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_batches WHERE tenant_id = :t",
@@ -128,7 +132,7 @@ def test_unbekannte_bezuege_und_fremdbestand_werden_fehlerzeilen_ohne_abbruch(ma
         _artikel("999001", "Gruppe fehlt", ARTIKELGRP="999"),
         _artikel("151706", "Einheit fehlt", ME1="77"),
         _artikel("151799", "schon da"),
-        {"TYP": "kunde", "ARTIKELNR": "K1"},
+        {"TYP": "rechnung", "ARTIKELNR": "K1"},
     ])
 
     with SessionLocal() as db:
@@ -194,3 +198,44 @@ def test_protokoll_ist_unveraenderlich(mandant):
     with SessionLocal() as db, pytest.raises(Exception, match="unveraenderlich"):
         db.execute(text("UPDATE domain_integration.spiegel_protokoll SET ergebnis = 'neu' WHERE tenant_id = :t"),
                    {"t": mandant})
+
+
+def _kunde(nr: str, name: str, **mehr) -> dict:
+    return {"TYP": "kunde", "QUELLE": nr, "KUNDENNR": nr, "KUNDNAME": name, "STRASSE": "Hauptstr. 1", "PLZ": "26721",
+            "ORT": "Emden", "STAAT": "D", "DEBITORKTO": "10001", **mehr}
+
+
+def _kundenzeilen(t: str) -> list[tuple]:
+    with SessionLocal() as db:
+        return [tuple(r) for r in db.execute(text(
+            "SELECT customer_number, company_name, address->>'street', postal_code, city, is_active "
+            "FROM domain_crm.customers WHERE tenant_id = :t ORDER BY customer_number"), {"t": t})]
+
+
+def test_kunden_werden_angelegt_wiederholt_unveraendert_und_debitor_nicht_zugeordnet(mandant):
+    records = [_kunde("10001", "Hof Janssen"), _kunde("10002", "Hof Meyer", SPERRE="1")]
+
+    erster = _lauf(mandant, "kd-1", records)
+    zweiter = _lauf(mandant, "kd-2", records)
+    with SessionLocal() as db:
+        bericht = differenzbericht(db, mandant, db.execute(text(
+            "SELECT id FROM domain_integration.legacy_adapter_batches WHERE tenant_id = :t AND external_id = 'kd-1'"),
+            {"t": mandant}).scalar_one())
+
+    assert (erster["neu"], zweiter["unveraendert"]) == (2, 2)
+    assert _kundenzeilen(mandant) == [("10001", "Hof Janssen", "Hauptstr. 1", "26721", "Emden", True),
+                                      ("10002", "Hof Meyer", "Hauptstr. 1", "26721", "Emden", False)]
+    assert "debitorkonto" in bericht["nicht_zugeordnet"]["kunde"]
+
+
+def test_kundenaenderung_und_fremdbestand(mandant):
+    with SessionLocal() as db:
+        db.execute(text("INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name) "
+                        "VALUES (:id, :t, '10099', 'von Hand')"), {"id": str(uuid.uuid4()), "t": mandant})
+        db.commit()
+    _lauf(mandant, "kd-1", [_kunde("10001", "Hof Janssen")])
+    zweiter = _lauf(mandant, "kd-2", [_kunde("10001", "Hof Janssen GbR"), _kunde("10099", "schon da")])
+
+    assert (zweiter["geaendert"], zweiter["fehler"]) == (1, 1)
+    assert [z[:2] for z in _kundenzeilen(mandant)] == [("10001", "Hof Janssen GbR"), ("10099", "von Hand")]
+

@@ -1146,6 +1146,7 @@
     "app/services/harvest_acceptance_service.py",
     "app/services/lieferschein_pdf.py",
     "app/services/sales_offer_import.py",
+    "app/services/spiegel_uebernahme.py",
     "app/services/studio_process_simulation.py",
     "modules/agrar/services/harvest_rule_store.py",
     "services/crm-core/app/api/v1/endpoints/activities.py",

@@ -13711,6 +13711,7 @@
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
+            "app/services/spiegel_uebernahme.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
           ],
@@ -13722,7 +13723,8 @@
             "app/api/v1/endpoints/compliance_dsgvo.py",
             "app/api/v1/endpoints/finance_stammdaten_kommandos.py",
             "app/services/business_partner_service.py",
-            "app/services/customer_service.py"
+            "app/services/customer_service.py",
+            "app/services/spiegel_uebernahme.py"
           ]
         },
         "farm_profiles": {
