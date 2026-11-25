@@ -293,10 +293,7 @@ async def post_inventory_count(
 
         adjustments += 1
         ref = f"INV-{count_id[:8].upper()}-{adjustments}"
-        lager = line.warehouse_id or getattr(count, "warehouse_id", None)
-        if not lager:
-            db.rollback()
-            raise HTTPException(422, f"Inventurzeile {line.id}: kein Lager - Differenz nicht buchbar.")
+        lager = line.warehouse_id or count.warehouse_id  # inventory_counts.warehouse_id ist NOT NULL
 
         # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Vorher-/Nachherbestand statt 0, Artikelbestand
         # mandantengebunden (bis dahin WHERE id ohne Mandant), Unterdeckung, Buchungsschluessel je Inventurzeile.

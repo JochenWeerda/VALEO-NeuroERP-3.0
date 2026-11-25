@@ -68,3 +68,23 @@ def test_inventurdifferenz_bucht_echten_bestandsverlauf(inventur):
     assert ergebnis.total_adjustments == 1
     assert [(r[0], D(str(r[1])), D(str(r[2])), D(str(r[3]))) for r in zeilen] == \
         [("adjustment", D("-3"), D("20"), D("17"))]
+
+
+def _zeile_setzen(inventur, **werte) -> None:
+    with SessionLocal() as db:
+        db.execute(text("UPDATE domain_inventory.inventory_count_lines SET "
+                        + ", ".join(f"{k} = :{k}" for k in werte) + " WHERE tenant_id = :t"),  # nosec B608 - Testspalten
+                   {"t": inventur["t"], **werte})
+        db.commit()
+
+
+def test_inventurdifferenz_ueber_den_bestand_wird_abgewiesen(inventur):
+    from fastapi import HTTPException
+
+    from app.api.v1.endpoints.inventory_counts import post_inventory_count
+
+    _zeile_setzen(inventur, expected_qty=50, counted_qty=0)  # -50 bei 20 t Buchbestand
+    with SessionLocal() as db, pytest.raises(HTTPException) as fehler:
+        asyncio.run(post_inventory_count(inventur["zaehlung"], tenant_id=inventur["t"], db=db))
+
+    assert fehler.value.status_code == 422 and "Insufficient stock" in fehler.value.detail
