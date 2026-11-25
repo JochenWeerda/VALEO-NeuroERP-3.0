@@ -1,2 +1,6 @@
-/** Admin-Suite Ops-Oberflaeche — kein Stamm-Create. */
-export { default } from './compliance-legacy'
+import { NativeListPage } from '@/components/mask-builder'
+
+/** Native Liste: ScreenDefinition admin-suite/compliance */
+export default function AdminSuiteCompliancePage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/compliance" testId="screen-admin-suite/compliance" />
+}

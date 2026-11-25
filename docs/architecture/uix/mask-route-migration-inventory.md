@@ -11,21 +11,21 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1091 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1101 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 35 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 25 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 904 |
+| Gesamt TSX-Seiten | 1061 |
+| runtime_wired | 914 |
 | legacy_mask_pattern | 13 |
-| hand_built | 126 |
+| hand_built | 117 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 35 |
+| handgebaute Routen | 442 | 25 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1091 |
+| Runtime-verdrahtet | — | 1101 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -61,6 +61,14 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 - `/` ← `src/pages/start-dashboard.tsx`
 - `abrechnung/eb-lieferschein-kontrolle` ← `src/pages/abrechnung/eb-lieferschein-kontrolle.tsx`
+- `admin-suite` ← `src/pages/admin-suite/index.tsx`
+- `admin-suite/compliance` ← `src/pages/admin-suite/compliance.tsx`
+- `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
+- `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
+- `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
+- `admin-suite/operations` ← `src/pages/admin-suite/operations.tsx`
+- `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
+- `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
 - `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
 - `admin/api-keys` ← `src/pages/admin/api-keys.tsx`
 - `admin/audit-log` ← `src/pages/admin/audit-log.tsx`
@@ -74,6 +82,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/berechtigungen-matrix` ← `src/pages/admin/berechtigungen-matrix.tsx`
 - `admin/branches` ← `src/pages/admin/branches.tsx`
 - `admin/branches/:id` ← `src/pages/admin/branch-detail.tsx`
+- `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/compliance` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/compliance-dashboard` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/control-center` ← `src/pages/admin/control-center/index.tsx`
@@ -248,6 +257,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `annahme/qr` ← `src/pages/annahme/annahme-qr.tsx`
 - `annahme/qr-scanner` ← `src/pages/annahme/qr-scanner.tsx`
 - `annahme/qualitaets-check` ← `src/pages/annahme/qualitaets-check.tsx`
+- `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
 - `annahme/rohwaren-annahme` ← `src/pages/annahme/rohwaren-annahme.tsx`
 - `annahme/silo-zuweisung` ← `src/pages/annahme/silo-zuweisung.tsx`
 - `annahme/waage-1` ← `src/pages/annahme/waage-1.tsx`
@@ -1153,21 +1163,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 ## Handgebaut — Migrationskandidaten (erste 60, alphabetisch)
 
-- `admin-suite` ← `src/pages/admin-suite/index.tsx`
-- `admin-suite/compliance` ← `src/pages/admin-suite/compliance.tsx`
-- `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
-- `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
-- `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
 - `admin-suite/ki-anbieter` ← `src/pages/admin-suite/ki-anbieter.tsx`
 - `admin-suite/migration` ← `src/pages/admin-suite/migration.tsx`
-- `admin-suite/operations` ← `src/pages/admin-suite/operations.tsx`
 - `admin-suite/pos-fiscalization` ← `src/pages/admin-suite/pos-fiscalization.tsx`
 - `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
-- `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
-- `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
 - `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
-- `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
 - `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
 - `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
@@ -1185,6 +1186,5 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
 - `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
-- `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
 - `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
 - `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`

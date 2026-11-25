@@ -217,17 +217,27 @@ Inventar: `hand_built` ~36.
 
 Inventar: Command-Monitor und Rohware runtime_wired über Studio-Hosts.
 
+## Vierundzwanzigste Hebung (Batch 24)
+
+| Maske | Nachher |
+|-------|---------|
+| `admin-suite` | `UniversalNativeCockpitPage`: Readiness-KPIs + Evidenzliste + Nav-Kacheln; GET `/readiness/evidence` |
+| `admin-suite/connectors\|devices\|operations\|compliance\|system-status\|diagnostics` | `NativeListPage` (gleiche Katalog-Endpunkte, `id=key`) |
+| `admin-suite/setup` | `NativeListPage` + PATCH `/setup/steps/{entity_id}` (In Arbeit / Abschliessen) |
+
+Inventar nach Batch 24: `runtime_wired` ~1101, `hand_built` ~25.
+
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte, Admin-Suite) — **nur mit Feld-/Aktionsparitaet**
+- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte, Rest Admin-Suite migration/security/ki) — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests
 
 ```bash
 python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_batch23.py \
-  tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
-  -q --noconftest -o addopts=
+  tests/test_studio_parity_batch24.py tests/test_zinsabrechnung_studio_parity.py \
+  tests/test_einkauf_studio_field_parity.py -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \
   src/__tests__/pages/mask-objectpage-stamm-native-route.test.ts \
   src/__tests__/bank-account-form-contract.test.tsx \

@@ -94,6 +94,10 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('admin.command_monitor.')) {
       return roles.has('ADMIN') || roles.has('manager')
     }
+    // Admin Suite: Readiness und Setup.
+    if (permission.startsWith('admin.admin_suite.')) {
+      return roles.has('ADMIN') || roles.has('manager')
+    }
     // Opportunity Create mirrors SCHREIBEN["CRM"] (CRM + SALES write roles).
     if (permission.startsWith('crm.opportunity.')) {
       return (

@@ -182,6 +182,7 @@ class SecurityCockpitOut(BaseModel):
 
 
 class ConnectorOut(BaseModel):
+    id: str
     key: str
     label: str
     config_status: Literal["configured", "partial", "disabled", "unchecked"]
@@ -192,6 +193,7 @@ class ConnectorOut(BaseModel):
 
 
 class DeviceCapabilityOut(BaseModel):
+    id: str
     key: str
     label: str
     registry_source: str
@@ -202,6 +204,7 @@ class DeviceCapabilityOut(BaseModel):
 
 
 class OperationsEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     implementation_status: Literal["available", "partial", "planned"]
@@ -211,6 +214,7 @@ class OperationsEvidenceOut(BaseModel):
 
 
 class ComplianceEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     implementation_status: Literal["available", "partial", "planned"]
@@ -222,6 +226,7 @@ class ComplianceEvidenceOut(BaseModel):
 
 
 class SystemStatusEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     probe_status: Literal["available", "partial", "planned"]
@@ -232,6 +237,7 @@ class SystemStatusEvidenceOut(BaseModel):
 
 
 class DiagnosticManifestItemOut(BaseModel):
+    id: str
     key: str
     label: str
     source: str
@@ -521,7 +527,7 @@ def _connector_catalog() -> list[ConnectorOut]:
         status = item.get("status")
         missing = item.get("missing") or []
         items.append(
-            ConnectorOut(
+            ConnectorOut(id=key, 
                 key=key,
                 label=label,
                 config_status="configured" if status == "ready" else ("disabled" if status == "disabled" else "partial"),
@@ -533,12 +539,12 @@ def _connector_catalog() -> list[ConnectorOut]:
         )
     items.extend(
         [
-            ConnectorOut(key="dms", label="Paperless / Mayan DMS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/admin/dms/status", notes="Separater Status- und Testvertrag vorhanden."),
-            ConnectorOut(key="fints", label="FinTS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/banken/fints/konten", notes="TAN-Flow vorhanden; produktiver Bankzugang extern."),
-            ConnectorOut(key="elster", label="ELSTER / ERiC", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/ebilanz/eric-readiness", notes="ERiC-Readiness vorhanden; externes Zertifikat erforderlich."),
-            ConnectorOut(key="fiskaly", label="Fiskaly / TSE", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="app.services.tse_fiskaly_service", notes="TSE-Service vorhanden; produktive Abnahme extern."),
-            ConnectorOut(key="datev", label="DATEV", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="config/fibu_cutover_mapping.template.yaml", notes="Cutover-Mapping benoetigt fachliche Freigabe."),
-            ConnectorOut(key="webhooks", label="Webhooks", config_status="unchecked", live_status="unchecked", credential_status="not_required", source="/admin/webhooks", notes="Registrierung vorhanden; Laufzeitstatus nicht aggregiert."),
+            ConnectorOut(id="dms", key="dms", label="Paperless / Mayan DMS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/admin/dms/status", notes="Separater Status- und Testvertrag vorhanden."),
+            ConnectorOut(id="fints", key="fints", label="FinTS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/banken/fints/konten", notes="TAN-Flow vorhanden; produktiver Bankzugang extern."),
+            ConnectorOut(id="elster", key="elster", label="ELSTER / ERiC", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/ebilanz/eric-readiness", notes="ERiC-Readiness vorhanden; externes Zertifikat erforderlich."),
+            ConnectorOut(id="fiskaly", key="fiskaly", label="Fiskaly / TSE", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="app.services.tse_fiskaly_service", notes="TSE-Service vorhanden; produktive Abnahme extern."),
+            ConnectorOut(id="datev", key="datev", label="DATEV", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="config/fibu_cutover_mapping.template.yaml", notes="Cutover-Mapping benoetigt fachliche Freigabe."),
+            ConnectorOut(id="webhooks", key="webhooks", label="Webhooks", config_status="unchecked", live_status="unchecked", credential_status="not_required", source="/admin/webhooks", notes="Registrierung vorhanden; Laufzeitstatus nicht aggregiert."),
         ]
     )
     return items
@@ -546,59 +552,59 @@ def _connector_catalog() -> list[ConnectorOut]:
 
 def _device_catalog() -> list[DeviceCapabilityOut]:
     return [
-        DeviceCapabilityOut(key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
-        DeviceCapabilityOut(key="scanner", label="Scanner", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_scan"], notes="Registry und Fachflows vorhanden; Heartbeat fehlt."),
-        DeviceCapabilityOut(key="scale", label="Waage", registry_source="/api/v1/waage/scales", registration_status="available", live_status="unchecked", test_actions=["test_weighing", "calibration_check"], notes="Waagen-CRUD und Kalibrierung vorhanden; Eich-UAT extern."),
-        DeviceCapabilityOut(key="pos_tse", label="POS / TSE", registry_source="/api/v1/admin/pos", registration_status="partial", live_status="unchecked", test_actions=["tse_smoke"], notes="Fiskaly-Service vorhanden; produktive TSE-Abnahme extern."),
-        DeviceCapabilityOut(key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
+        DeviceCapabilityOut(id="printer", key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
+        DeviceCapabilityOut(id="scanner", key="scanner", label="Scanner", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_scan"], notes="Registry und Fachflows vorhanden; Heartbeat fehlt."),
+        DeviceCapabilityOut(id="scale", key="scale", label="Waage", registry_source="/api/v1/waage/scales", registration_status="available", live_status="unchecked", test_actions=["test_weighing", "calibration_check"], notes="Waagen-CRUD und Kalibrierung vorhanden; Eich-UAT extern."),
+        DeviceCapabilityOut(id="pos_tse", key="pos_tse", label="POS / TSE", registry_source="/api/v1/admin/pos", registration_status="partial", live_status="unchecked", test_actions=["tse_smoke"], notes="Fiskaly-Service vorhanden; produktive TSE-Abnahme extern."),
+        DeviceCapabilityOut(id="mobile", key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
     ]
 
 
 def _operations_catalog() -> list[OperationsEvidenceOut]:
     return [
-        OperationsEvidenceOut(key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
-        OperationsEvidenceOut(key="restore_drill", label="Restore-Drill", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml", notes="Restore-Test-Job deploybar; letzter realer Drill nicht als Evidenz importiert."),
-        OperationsEvidenceOut(key="release", label="Release-Stand", implementation_status="partial", runtime_status="unchecked", source="docs/architecture/process-kernel/STATUS.md", notes="Repo-Status vorhanden; deployte Version fehlt."),
-        OperationsEvidenceOut(key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
-        OperationsEvidenceOut(key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
+        OperationsEvidenceOut(id="database_backup", key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
+        OperationsEvidenceOut(id="restore_drill", key="restore_drill", label="Restore-Drill", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml", notes="Restore-Test-Job deploybar; letzter realer Drill nicht als Evidenz importiert."),
+        OperationsEvidenceOut(id="release", key="release", label="Release-Stand", implementation_status="partial", runtime_status="unchecked", source="docs/architecture/process-kernel/STATUS.md", notes="Repo-Status vorhanden; deployte Version fehlt."),
+        OperationsEvidenceOut(id="alembic", key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
+        OperationsEvidenceOut(id="diagnostics", key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
     ]
 
 
 def _compliance_catalog() -> list[ComplianceEvidenceOut]:
     return [
-        ComplianceEvidenceOut(key="gobd", label="GoBD und Buchungsnachweis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="docs/GOBD-COMPLIANCE.md", target_path="/admin/audit-log", notes="Audit-, Archiv- und Stornovertraege sind vorhanden; produktiver Verfahrensnachweis und Testat bleiben externe Evidenz."),
-        ComplianceEvidenceOut(key="gdpr_art30", label="DSGVO Art. 30 Verarbeitungsverzeichnis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art30/activities", target_path="/compliance/verarbeitungsverzeichnis", notes="CRUD und Export sind vorhanden; produktive Pflege und Datenschutzfreigabe muessen betrieblich nachgewiesen werden."),
-        ComplianceEvidenceOut(key="gdpr_art33", label="DSGVO Art. 33 Datenpannen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art33/breaches", target_path="/compliance/datenpannen", notes="72h-Fristueberwachung ist vorhanden; Behoerdenkommunikation und reale Prozessprobe bleiben externe Nachweise."),
-        ComplianceEvidenceOut(key="pos_tse", label="POS / TSE und DSFinV-K", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/admin/pos/tse/status", target_path="/admin/pos", notes="TSE- und DSFinV-K-Vertraege sind vorhanden; produktiver Fiskaly-Zugang und Pruefwerkzeug-Abnahme bleiben extern."),
-        ComplianceEvidenceOut(key="elster", label="eBilanz / ELSTER", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/ebilanz/eric-readiness", target_path="/fibu/ebilanz", notes="ERiC-Readiness ist repo-seitig vorbereitet; Zertifikat und Steuerberaterfreigabe fehlen als Betriebsnachweis."),
-        ComplianceEvidenceOut(key="atlas", label="ATLAS Zollausfuhr", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/fibu/atlas", target_path="/fibu/atlas", notes="Zollausfuhrpfad ist implementiert; produktives ATLAS-Zertifikat bleibt externe Voraussetzung."),
-        ComplianceEvidenceOut(key="reporting", label="Meldewesen und Fachquittungen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/compliance/meldewesen-konsole", target_path="/compliance/meldewesen-konsole", notes="Meldewesen-Konsole und Exportpfade sind vorhanden; echte Einreichungsquittungen werden noch nicht aggregiert."),
-        ComplianceEvidenceOut(key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
+        ComplianceEvidenceOut(id="gobd", key="gobd", label="GoBD und Buchungsnachweis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="docs/GOBD-COMPLIANCE.md", target_path="/admin/audit-log", notes="Audit-, Archiv- und Stornovertraege sind vorhanden; produktiver Verfahrensnachweis und Testat bleiben externe Evidenz."),
+        ComplianceEvidenceOut(id="gdpr_art30", key="gdpr_art30", label="DSGVO Art. 30 Verarbeitungsverzeichnis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art30/activities", target_path="/compliance/verarbeitungsverzeichnis", notes="CRUD und Export sind vorhanden; produktive Pflege und Datenschutzfreigabe muessen betrieblich nachgewiesen werden."),
+        ComplianceEvidenceOut(id="gdpr_art33", key="gdpr_art33", label="DSGVO Art. 33 Datenpannen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art33/breaches", target_path="/compliance/datenpannen", notes="72h-Fristueberwachung ist vorhanden; Behoerdenkommunikation und reale Prozessprobe bleiben externe Nachweise."),
+        ComplianceEvidenceOut(id="pos_tse", key="pos_tse", label="POS / TSE und DSFinV-K", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/admin/pos/tse/status", target_path="/admin/pos", notes="TSE- und DSFinV-K-Vertraege sind vorhanden; produktiver Fiskaly-Zugang und Pruefwerkzeug-Abnahme bleiben extern."),
+        ComplianceEvidenceOut(id="elster", key="elster", label="eBilanz / ELSTER", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/ebilanz/eric-readiness", target_path="/fibu/ebilanz", notes="ERiC-Readiness ist repo-seitig vorbereitet; Zertifikat und Steuerberaterfreigabe fehlen als Betriebsnachweis."),
+        ComplianceEvidenceOut(id="atlas", key="atlas", label="ATLAS Zollausfuhr", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/fibu/atlas", target_path="/fibu/atlas", notes="Zollausfuhrpfad ist implementiert; produktives ATLAS-Zertifikat bleibt externe Voraussetzung."),
+        ComplianceEvidenceOut(id="reporting", key="reporting", label="Meldewesen und Fachquittungen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/compliance/meldewesen-konsole", target_path="/compliance/meldewesen-konsole", notes="Meldewesen-Konsole und Exportpfade sind vorhanden; echte Einreichungsquittungen werden noch nicht aggregiert."),
+        ComplianceEvidenceOut(id="sanctions", key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
     ]
 
 
 def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
     return [
-        SystemStatusEvidenceOut(key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
-        SystemStatusEvidenceOut(key="api_readiness", label="API Readiness", probe_status="available", runtime_status="unchecked", source="/ready", target_path="/admin/control-center", notes="Readiness-Probe ist vorhanden; beobachteter Laufzeitstatus benoetigt einen expliziten Probe-Adapter."),
-        SystemStatusEvidenceOut(key="startup", label="Startup Guards", probe_status="available", runtime_status="unchecked", source="/health/startup", target_path="/admin/control-center", notes="Startup-Probe und Guards sind vorhanden; letzter produktiver Status wird nicht importiert."),
-        SystemStatusEvidenceOut(key="release", label="Release und Deployment", probe_status="partial", runtime_status="unchecked", source="k8s/helm/valeo-erp", target_path="/admin-suite/operations", notes="Deployment-Manifeste sind vorhanden; deployte Version und Rollout-Status fehlen als Runtime-Evidenz."),
-        SystemStatusEvidenceOut(key="alembic", label="Alembic Head", probe_status="available", runtime_status="unchecked", source="scripts/check_alembic_single_head.py", target_path="/admin-suite/operations", notes="Repo-seitiger Single-Head-Check ist vorhanden; Zielsystem-Head wird nicht live abgefragt."),
-        SystemStatusEvidenceOut(key="event_bus", label="NATS Event Bus", probe_status="available", runtime_status="unchecked", source="monitoring/grafana/dashboards/event-bus-dashboard.json", target_path="/admin-suite/connectors", notes="Monitoring-Artefakte sind vorhanden; aktuelle Broker-Metriken benoetigen Monitoring-Import."),
-        SystemStatusEvidenceOut(key="workers", label="Worker und Jobs", probe_status="partial", runtime_status="unchecked", source="app/workers", target_path="/admin-suite/operations", notes="Worker und CronJobs sind implementiert; letzter Lauf und Queue-Lage werden noch nicht aggregiert."),
-        SystemStatusEvidenceOut(key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
+        SystemStatusEvidenceOut(id="api_liveness", key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
+        SystemStatusEvidenceOut(id="api_readiness", key="api_readiness", label="API Readiness", probe_status="available", runtime_status="unchecked", source="/ready", target_path="/admin/control-center", notes="Readiness-Probe ist vorhanden; beobachteter Laufzeitstatus benoetigt einen expliziten Probe-Adapter."),
+        SystemStatusEvidenceOut(id="startup", key="startup", label="Startup Guards", probe_status="available", runtime_status="unchecked", source="/health/startup", target_path="/admin/control-center", notes="Startup-Probe und Guards sind vorhanden; letzter produktiver Status wird nicht importiert."),
+        SystemStatusEvidenceOut(id="release", key="release", label="Release und Deployment", probe_status="partial", runtime_status="unchecked", source="k8s/helm/valeo-erp", target_path="/admin-suite/operations", notes="Deployment-Manifeste sind vorhanden; deployte Version und Rollout-Status fehlen als Runtime-Evidenz."),
+        SystemStatusEvidenceOut(id="alembic", key="alembic", label="Alembic Head", probe_status="available", runtime_status="unchecked", source="scripts/check_alembic_single_head.py", target_path="/admin-suite/operations", notes="Repo-seitiger Single-Head-Check ist vorhanden; Zielsystem-Head wird nicht live abgefragt."),
+        SystemStatusEvidenceOut(id="event_bus", key="event_bus", label="NATS Event Bus", probe_status="available", runtime_status="unchecked", source="monitoring/grafana/dashboards/event-bus-dashboard.json", target_path="/admin-suite/connectors", notes="Monitoring-Artefakte sind vorhanden; aktuelle Broker-Metriken benoetigen Monitoring-Import."),
+        SystemStatusEvidenceOut(id="workers", key="workers", label="Worker und Jobs", probe_status="partial", runtime_status="unchecked", source="app/workers", target_path="/admin-suite/operations", notes="Worker und CronJobs sind implementiert; letzter Lauf und Queue-Lage werden noch nicht aggregiert."),
+        SystemStatusEvidenceOut(id="voice", key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
     ]
 
 
 def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     return [
-        DiagnosticManifestItemOut(key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
-        DiagnosticManifestItemOut(key="health_summary", label="Health-Zusammenfassung", source="/api/v1/admin-suite/system-status", collection_status="not_collected", redaction="metadata_only", notes="Nur normalisierte Probe-Ergebnisse; keine Rohantworten oder Umgebungsvariablen."),
-        DiagnosticManifestItemOut(key="migration_summary", label="Migrationsstand", source="scripts/check_alembic_single_head.py", collection_status="not_collected", redaction="metadata_only", notes="Nur Revisionskennungen und Ergebnisstatus; keine Connection Strings."),
-        DiagnosticManifestItemOut(key="connector_summary", label="Connector-Konfiguration", source="/api/v1/admin-suite/connectors", collection_status="not_collected", redaction="required", notes="Nur redigierte Metadaten; keine Tokens, Secrets, URLs mit Credentials oder Payloads."),
-        DiagnosticManifestItemOut(key="event_bus_summary", label="Event-Bus-Metriken", source="monitoring/grafana/dashboards/event-bus-dashboard.json", collection_status="not_collected", redaction="required", notes="Nur aggregierte Zaehler und Statuswerte; keine Event-Payloads."),
-        DiagnosticManifestItemOut(key="worker_summary", label="Worker- und Jobstatus", source="app/workers", collection_status="not_collected", redaction="required", notes="Nur Jobname, Zustand und Zeitstempel; keine fachlichen Payloads oder personenbezogenen Daten."),
-        DiagnosticManifestItemOut(key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
+        DiagnosticManifestItemOut(id="release_metadata", key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
+        DiagnosticManifestItemOut(id="health_summary", key="health_summary", label="Health-Zusammenfassung", source="/api/v1/admin-suite/system-status", collection_status="not_collected", redaction="metadata_only", notes="Nur normalisierte Probe-Ergebnisse; keine Rohantworten oder Umgebungsvariablen."),
+        DiagnosticManifestItemOut(id="migration_summary", key="migration_summary", label="Migrationsstand", source="scripts/check_alembic_single_head.py", collection_status="not_collected", redaction="metadata_only", notes="Nur Revisionskennungen und Ergebnisstatus; keine Connection Strings."),
+        DiagnosticManifestItemOut(id="connector_summary", key="connector_summary", label="Connector-Konfiguration", source="/api/v1/admin-suite/connectors", collection_status="not_collected", redaction="required", notes="Nur redigierte Metadaten; keine Tokens, Secrets, URLs mit Credentials oder Payloads."),
+        DiagnosticManifestItemOut(id="event_bus_summary", key="event_bus_summary", label="Event-Bus-Metriken", source="monitoring/grafana/dashboards/event-bus-dashboard.json", collection_status="not_collected", redaction="required", notes="Nur aggregierte Zaehler und Statuswerte; keine Event-Payloads."),
+        DiagnosticManifestItemOut(id="worker_summary", key="worker_summary", label="Worker- und Jobstatus", source="app/workers", collection_status="not_collected", redaction="required", notes="Nur Jobname, Zustand und Zeitstempel; keine fachlichen Payloads oder personenbezogenen Daten."),
+        DiagnosticManifestItemOut(id="audit_summary", key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
     ]
 
 
@@ -606,6 +612,50 @@ def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
     return build_admin_suite_readiness()
+
+
+@router.get("/readiness/evidence", summary="Admin Suite readiness Evidenzliste")
+async def list_admin_suite_readiness_evidence() -> list[dict[str, Any]]:
+    """Flache Evidenzliste fuer Studio-Cockpit-Tabelle (wie Legacy-Karten)."""
+    readiness = build_admin_suite_readiness()
+    rows: list[dict[str, Any]] = []
+    for item in readiness.evidence:
+        rows.append(
+            {
+                "id": item.key,
+                "key": item.key,
+                "label": item.label,
+                "status": item.status,
+                "source": item.source,
+                "evidence": item.evidence,
+                "details": "; ".join(item.details) if item.details else "",
+                "checked_at": item.checked_at.isoformat(),
+            }
+        )
+    return rows
+
+
+@router.get("/setup/steps", summary="Admin Suite Setup-Schritte auflisten")
+async def list_setup_steps(
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+) -> list[dict[str, Any]]:
+    """Flache Setup-Schritte fuer NativeList (Human/CI/MCP)."""
+    settings = _load_tenant_settings(db, tenant_id)
+    session = _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
+    return [
+        {
+            "id": step.key,
+            "key": step.key,
+            "label": step.label,
+            "status": step.status,
+            "target_path": step.target_path,
+            "evidence": step.evidence,
+            "responsible": step.responsible,
+            "updated_at": step.updated_at.isoformat() if step.updated_at else None,
+        }
+        for step in session.steps
+    ]
 
 
 @router.get("/setup", response_model=SetupSessionOut, summary="Admin Suite setup session abrufen")

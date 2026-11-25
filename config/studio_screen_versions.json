@@ -8305,6 +8305,94 @@
       ],
       "studio_draft_clean": true,
       "version": "1.0.0"
+    },
+    "admin-suite": {
+      "definition_hash": "bd33f5c88c82e4a24b4c3bc911f0a1f8e189690f0922c538218259ece80f6c3c",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/connectors": {
+      "definition_hash": "ac98ed1ac6c9dd04c59aafb86f35254316b15ed8630fe98f7921dca511fdf1fc",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/devices": {
+      "definition_hash": "01927aa5fcc2233be64bff56f6ff5422bba25e719f1e3f3cefa34c2be23d728b",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/operations": {
+      "definition_hash": "ef48fccb441700a03126d37102f219a5df312411a92f358aa9d58a65b1723a0c",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/compliance": {
+      "definition_hash": "ae2627b1cd4dad949fbdcfa5fea8b4856464b33007581bd31d491a60d0b31f93",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/system-status": {
+      "definition_hash": "f9ca65e9a7a19e957afda328c0ef176de86db2213d4a4c0aa968ea271ac9532e",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/diagnostics": {
+      "definition_hash": "5fad65e212b13185ccb66da181f01f1ff7204308575357dfaf51ae96623eea05",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin-suite/setup": {
+      "definition_hash": "a7b00469491a6449d1af9d641ed10443f8e226599f8323eeb6756c277b49608f",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
     }
   }
 }

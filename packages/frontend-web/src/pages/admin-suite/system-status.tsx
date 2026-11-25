@@ -1,2 +1,6 @@
-/** Admin-Suite Ops-Oberflaeche — kein Stamm-Create. */
-export { default } from './system-status-legacy'
+import { NativeListPage } from '@/components/mask-builder'
+
+/** Native Liste: ScreenDefinition admin-suite/system-status */
+export default function AdminSuiteSystemStatusPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/system-status" testId="screen-admin-suite/system-status" />
+}

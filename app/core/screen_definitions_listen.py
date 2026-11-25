@@ -229,6 +229,257 @@ def build_agrar_qualitaet_nachtrag_liste() -> dict[str, Any]:
     )
 
 
+def build_admin_suite_home_cockpit() -> dict[str, Any]:
+    """Admin Suite Home — Go-Live-Readiness (Paritaet zur Legacy-Kartenmaske)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite",
+        domain="admin",
+        title="VALEO Admin Suite",
+        subtitle="Gefuehrte Produktionsvorbereitung mit nachvollziehbarer Evidenz",
+        business_purpose=(
+            "Go-Live-Readiness und Bereichsnachweise der Admin Suite beobachten "
+            "(dieselbe Datenquelle wie die Legacy-Readiness-Karten)."
+        ),
+        example_prompts=[
+            "Wie hoch ist der Go-Live-Readiness-Score?",
+            "Welche Evidenzbereiche sind blockiert?",
+        ],
+        test_id="admin-suite",
+        summary=[
+            {"key": "score", "label": "Readiness %", "tone": "info"},
+            {"key": "ready_count", "label": "Bereit", "tone": "success"},
+            {"key": "warning_count", "label": "Warnungen", "tone": "warning"},
+            {"key": "blocked_count", "label": "Blockiert", "tone": "warning"},
+            {"key": "unchecked_count", "label": "Nicht geprueft", "tone": "neutral"},
+            {"key": "evaluated_count", "label": "Bewertet", "tone": "neutral"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/readiness"),
+            cockpit_list_source("evidence", "/api/v1/admin-suite/readiness/evidence", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "evidence",
+                "label": "Evidenzbereiche",
+                "dataSourceKey": "evidence",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "Bereich", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "evidence", "label": "Nachweis", "priority": "secondary"},
+                    {"key": "source", "label": "Quelle", "filterable": True, "priority": "tertiary"},
+                    {"key": "details", "label": "Details", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        tiles=[
+            cockpit_nav_tile("setup", "Ersteinrichtung", target_route="/admin-suite/setup", tone="info"),
+            cockpit_nav_tile("migration", "Migration", target_route="/admin-suite/migration", tone="warning"),
+            cockpit_nav_tile("security", "Security", target_route="/admin-suite/security", tone="neutral"),
+            cockpit_nav_tile("connectors", "Connectors", target_route="/admin-suite/connectors", tone="neutral"),
+            cockpit_nav_tile("devices", "Hardware", target_route="/admin-suite/devices", tone="neutral"),
+            cockpit_nav_tile("compliance", "Compliance", target_route="/admin-suite/compliance", tone="neutral"),
+            cockpit_nav_tile("operations", "Operations", target_route="/admin-suite/operations", tone="neutral"),
+            cockpit_nav_tile("system_status", "System Status", target_route="/admin-suite/system-status", tone="neutral"),
+        ],
+        actions=[cockpit_refresh_action(permission="admin.admin_suite.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def _admin_suite_ops_liste(
+    *,
+    screen_id: str,
+    title: str,
+    subtitle: str,
+    endpoint: str,
+    columns: list[dict[str, Any]],
+    purpose: str,
+) -> dict[str, Any]:
+    return _liste(
+        screen_id=screen_id,
+        domain="admin",
+        title=title,
+        subtitle=subtitle,
+        endpoint=endpoint,
+        row_route=None,
+        bundle="admin",
+        columns=columns,
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose=purpose,
+        prompts=[f"Zeig die Eintraege von {title}."],
+        no_workflow="Ops-Evidenzliste ohne eigenen Objekt-Lebenszyklus.",
+        table_profile="audit",
+    )
+
+
+def build_admin_suite_connectors_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/connectors",
+        title="Connector Hub",
+        subtitle="Credential-Metadaten ohne Secret-Werte",
+        endpoint="/api/v1/admin-suite/connectors",
+        columns=[
+            {"key": "label", "label": "Connector", "filterable": True, "priority": "primary"},
+            {"key": "config_status", "label": "Config", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "live_status", "label": "Live", "filterable": True, "priority": "secondary"},
+            {"key": "credential_status", "label": "Credentials", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Redigierte Connector-Metadaten ohne Secrets oder Live-Probes.",
+    )
+
+
+def build_admin_suite_devices_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/devices",
+        title="Hardware Center",
+        subtitle="Geraete-Capabilities und Testaktionen",
+        endpoint="/api/v1/admin-suite/devices",
+        columns=[
+            {"key": "label", "label": "Geraet", "filterable": True, "priority": "primary"},
+            {"key": "registration_status", "label": "Registry", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "live_status", "label": "Live", "filterable": True, "priority": "secondary"},
+            {"key": "registry_source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Hardware-Capabilities und Registry-Status der Admin Suite.",
+    )
+
+
+def build_admin_suite_operations_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/operations",
+        title="Operations Center",
+        subtitle="Backup, Restore und Release-Evidenz",
+        endpoint="/api/v1/admin-suite/operations",
+        columns=[
+            {"key": "label", "label": "Bereich", "filterable": True, "priority": "primary"},
+            {"key": "implementation_status", "label": "Implementierung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Operations-Evidenz ohne Live-Probes.",
+    )
+
+
+def build_admin_suite_compliance_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/compliance",
+        title="Compliance Evidence",
+        subtitle="GoBD, DSGVO, TSE und Meldewesen",
+        endpoint="/api/v1/admin-suite/compliance",
+        columns=[
+            {"key": "label", "label": "Thema", "filterable": True, "priority": "primary"},
+            {"key": "implementation_status", "label": "Implementierung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "external_gate", "label": "Externes Gate", "filterable": True, "priority": "secondary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "target_path", "label": "Zielpfad", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Compliance-Evidenzmetadaten ohne externe Live-Erfolgsannahmen.",
+    )
+
+
+def build_admin_suite_system_status_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/system-status",
+        title="System Status",
+        subtitle="Probe-Metadaten ohne Live-Ausfuehrung",
+        endpoint="/api/v1/admin-suite/system-status",
+        columns=[
+            {"key": "label", "label": "Probe", "filterable": True, "priority": "primary"},
+            {"key": "probe_status", "label": "Probe", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "target_path", "label": "Zielpfad", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Runtime-Probe-Metadaten der Admin Suite.",
+    )
+
+
+def build_admin_suite_diagnostics_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/diagnostics",
+        title="Diagnosepaket",
+        subtitle="Erlaubte Diagnosekategorien ohne Datensammlung",
+        endpoint="/api/v1/admin-suite/diagnostics",
+        columns=[
+            {"key": "label", "label": "Kategorie", "filterable": True, "priority": "primary"},
+            {"key": "collection_status", "label": "Sammlung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "redaction", "label": "Redaktion", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Diagnose-Manifest ohne automatische Datensammlung.",
+    )
+
+
+def build_admin_suite_setup_liste() -> dict[str, Any]:
+    """Ersteinrichtungs-Assistent — Schritte + Statuswechsel wie Legacy."""
+    return _liste(
+        screen_id="admin-suite/setup",
+        domain="admin",
+        title="Ersteinrichtungs-Assistent",
+        subtitle="Tenant-Setup-Schritte pruefen und abschliessen",
+        endpoint="/api/v1/admin-suite/setup/steps",
+        row_route=None,
+        bundle="admin",
+        columns=[
+            {"key": "label", "label": "Schritt", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "evidence", "label": "Evidenz", "priority": "secondary"},
+            {"key": "responsible", "label": "Verantwortlich", "priority": "tertiary"},
+            {"key": "target_path", "label": "Fachmaske", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {
+                "key": "in_arbeit",
+                "label": "In Arbeit",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.setup",
+                "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+                "method": "PATCH",
+                "inputFields": [
+                    {"key": "status", "label": "Status", "type": "text", "required": True, "defaultValue": "in_progress"},
+                ],
+            },
+            {
+                "key": "abschliessen",
+                "label": "Abschliessen",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.setup",
+                "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+                "method": "PATCH",
+                "requiresConfirmation": True,
+                "inputFields": [
+                    {"key": "status", "label": "Status", "type": "text", "required": True, "defaultValue": "completed"},
+                ],
+            },
+        ],
+        purpose="Setup-Schritte explizit pruefen und dokumentiert abschliessen.",
+        prompts=["Welche Setup-Schritte sind noch offen?", "Schließe Setup-Schritt {entity_id} ab."],
+        no_workflow="Setup-Fortschritt wird am Tenant gespeichert; die Liste fuehrt keinen eigenen Workflow.",
+        table_profile="audit",
+    )
+
+
 def build_agrar_milchvieh_crosssell_cockpit() -> dict[str, Any]:
     """Milchvieh Cross-Sell — KPI-Summary + Kundenliste + Produktgruppen (Legacy-Paritaet)."""
     from app.core.cockpit_overview_parent import (
@@ -3488,6 +3739,14 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
     "agrar/erntefenster-konfig": build_agrar_erntefenster_konfig_liste,
     "agrar/milchvieh-crosssell": build_agrar_milchvieh_crosssell_cockpit,
+    "admin-suite": build_admin_suite_home_cockpit,
+    "admin-suite/connectors": build_admin_suite_connectors_liste,
+    "admin-suite/devices": build_admin_suite_devices_liste,
+    "admin-suite/operations": build_admin_suite_operations_liste,
+    "admin-suite/compliance": build_admin_suite_compliance_liste,
+    "admin-suite/system-status": build_admin_suite_system_status_liste,
+    "admin-suite/diagnostics": build_admin_suite_diagnostics_liste,
+    "admin-suite/setup": build_admin_suite_setup_liste,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
@@ -3598,6 +3857,14 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
                 "agrar/erntefenster-konfig": "/agrar/erntefenster-konfig",
                 "agrar/milchvieh-crosssell": "/agrar/milchvieh-crosssell",
+                "admin-suite": "/admin-suite",
+                "admin-suite/connectors": "/admin-suite/connectors",
+                "admin-suite/devices": "/admin-suite/devices",
+                "admin-suite/operations": "/admin-suite/operations",
+                "admin-suite/compliance": "/admin-suite/compliance",
+                "admin-suite/system-status": "/admin-suite/system-status",
+                "admin-suite/diagnostics": "/admin-suite/diagnostics",
+                "admin-suite/setup": "/admin-suite/setup",
                 "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
