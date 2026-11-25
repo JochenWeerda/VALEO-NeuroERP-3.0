@@ -12,7 +12,7 @@ Freigabe) - keine zweite Importstrecke. Grundsaetze:
   ein Zielobjekt, das schon ohne Quellreferenz existiert, werden Fehlerzeilen im Protokoll statt Annahmen.
 - **Eine Zeile scheitert allein.** Jede Zeile laeuft in einem eigenen Sicherungspunkt.
 
-Objektarten: ``artikel``, ``kunde``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im Adapterprofil
+Objektarten: ``artikel``, ``kunde``, ``bestand``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im Adapterprofil
 (``field_mapping``); siehe ``docs/migration/m6-spiegelbetrieb-l3.md``.
 """
 from __future__ import annotations
@@ -116,11 +116,14 @@ def _artikel_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
 # --- Objektart kunde (L3 KUNDEN mit Anschrift aus ADRESSEN, im Abzug verbunden) ------------------------------------
 #
 # Ziel ist der Kundenstamm domain_crm.customers (fuehrt die Debitoren im Uebergang, Entscheidung 01.11.2026). Die
-# L3-Debitorennummer ist nicht die Kundennummer; ihr Ziel (business_partners.debtor_account, ADR Stufe 3b) gibt es noch
-# nicht. Sie bleibt im Quellinhalt (Pruefsumme) und wird im Differenzbericht als nicht zugeordnet ausgewiesen.
+# L3-Debitorennummer ist nicht die Kundennummer: Sie wird das Konto des Geschaeftspartners
+# (business_partners.debtor_account, ADR Stufe 3b) - Nutzerentscheid 25.11.2026: L3-Nummern uebernehmen, damit offene
+# Posten und Journal Konto fuer Konto gegen L3 abgleichbar sind. Der Partner entsteht ueber die Partnerbruecke
+# (BusinessPartnerService.partner_fuer_rolle); ein schon vergebenes, abweichendes Konto oder eine im Mandanten
+# vergebene Nummer wird Fehlerzeile.
 
 KUNDE_FELDER = ("customer_number", "company_name", "address", "postal_code", "city", "country", "tax_id", "phone",
-                "email", "is_active")
+                "email", "is_active", "debitorkonto")
 
 
 def _kunde_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
@@ -136,13 +139,16 @@ def _kunde_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str
         "phone": _text(p, "telefon"),
         "email": _text(p, "email"),
         "is_active": not _ja(p, "gesperrt"),
+        "debitorkonto": _text(p, "debitorkonto"),
     }
 
 
 def _kunde_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
     zeile = db.execute(text(
-        "SELECT customer_number, company_name, address, postal_code, city, country, tax_id, phone, email, is_active, "
-        "deleted_at FROM domain_crm.customers WHERE tenant_id = :t AND id = :id"),
+        "SELECT c.customer_number, c.company_name, c.address, c.postal_code, c.city, c.country, c.tax_id, c.phone, "
+        "c.email, c.is_active, c.deleted_at, bp.debtor_account AS debitorkonto FROM domain_crm.customers c "
+        "LEFT JOIN domain_crm.business_partners bp ON bp.partner_id::text = c.business_partner_id::text "
+        "AND bp.tenant_id = c.tenant_id WHERE c.tenant_id = :t AND c.id = :id"),
         {"t": tenant_id, "id": ziel_id}).mappings().first()
     if not zeile:
         return None
@@ -150,6 +156,24 @@ def _kunde_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | 
     if werte["address"] is not None:  # jsonb kommt als dict; Vergleich mit dem serialisierten Zielwert
         werte["address"] = json.dumps(werte["address"], ensure_ascii=False)
     return werte
+
+
+def _kunde_partner(db: Session, tenant_id: str, werte: dict[str, Any], partner_id: str | None) -> str:
+    from app.core.exceptions import ConflictError
+    from app.services.business_partner_service import BusinessPartnerService
+
+    strasse = json.loads(werte["address"]).get("street") if werte["address"] else None
+    try:
+        return BusinessPartnerService(db, tenant_id).partner_fuer_rolle(
+            "kunde", name=werte["company_name"], vat_id=werte["tax_id"], street=strasse,
+            postal_code=werte["postal_code"], city=werte["city"], country=werte["country"], email=werte["email"],
+            phone=werte["phone"], partner_id=partner_id, konto=werte["debitorkonto"])
+    except ConflictError as fehler:
+        raise ZeilenFehler(f"Debitorenkonto: {fehler}") from fehler
+
+
+def _kunde_spalten(werte: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in werte.items() if k != "debitorkonto"}
 
 
 def _kunde_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
@@ -162,21 +186,120 @@ def _kunde_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
         "INSERT INTO domain_crm.customers (id, tenant_id, customer_number, company_name, address, postal_code, city, "
         "country, tax_id, phone, email, is_active) VALUES (:id, :t, :customer_number, :company_name, "
         "CAST(:address AS JSONB), :postal_code, :city, :country, :tax_id, :phone, :email, :is_active)"),
-        {"id": ziel_id, "t": tenant_id, **werte})
+        {"id": ziel_id, "t": tenant_id, **_kunde_spalten(werte)})
+    partner = _kunde_partner(db, tenant_id, werte, None)
+    db.execute(text("UPDATE domain_crm.customers SET business_partner_id = :p WHERE tenant_id = :t AND id = :id"),
+               {"p": partner, "t": tenant_id, "id": ziel_id})
     return ziel_id
 
 
 def _kunde_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    partner = db.execute(text("SELECT business_partner_id FROM domain_crm.customers WHERE tenant_id = :t AND id = :id"),
+                         {"t": tenant_id, "id": ziel_id}).scalar()
+    partner = _kunde_partner(db, tenant_id, werte, str(partner) if partner else None)
+    db.execute(text("UPDATE domain_crm.customers SET business_partner_id = :p WHERE tenant_id = :t AND id = :id"),
+               {"p": partner, "t": tenant_id, "id": ziel_id})
     db.execute(text(
         "UPDATE domain_crm.customers SET customer_number = :customer_number, company_name = :company_name, "
         "address = CAST(:address AS JSONB), postal_code = :postal_code, city = :city, country = :country, "
         "tax_id = :tax_id, phone = :phone, email = :email, is_active = :is_active, deleted_at = NULL, "
-        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **_kunde_spalten(werte)})
+
+
+# --- Objektart bestand (L3 WWS_ARTBESTAND/WWS_LAGERBESTAND je Artikel und Lager) ---------------------------------
+#
+# Erster Abzug: Anfangsbestand als Bestandsvortrag ueber den kanonischen Buchungsdienst (Schluessel
+# ``spiegel:bestand:<Quellschluessel>`` -> nie doppelt). Jeder weitere Abzug bucht NICHT: Im Spiegelbetrieb vollzieht
+# VALEO die Bewegungen ueber eigene Belege nach; eine stille Korrektur verdeckte genau die Abweichungen, die der
+# Spiegelbetrieb finden soll. Weicht der VALEO-Lagerbestand (Saldo aus dem Bestandsjournal) vom L3-Bestand ab, steht
+# das als "geaendert" mit Felddifferenz ``menge`` im Protokoll - die Uebernahme laesst den Bestand unveraendert.
+
+
+def _menge_text(menge) -> str:
+    """Kanonische Mengendarstellung ohne Exponent und ohne Nachkommanullen: 10.000 -> "10", 12.50 -> "12.5"."""
+    from decimal import Decimal
+
+    text_ = format(Decimal(menge).normalize(), "f")
+    return "0" if Decimal(text_) == 0 else text_
+
+
+def _bestand_bezug(db: Session, tenant_id: str, p: dict[str, Any]) -> tuple[str, str]:
+    nummer = _text(p, "artikelnummer", pflicht=True)
+    lager = _text(p, "lager", pflicht=True)
+    artikel = db.execute(text("SELECT id FROM domain_inventory.articles WHERE tenant_id = :t AND article_number = :n "
+                              "AND deleted_at IS NULL"), {"t": tenant_id, "n": nummer}).scalar()
+    if artikel is None:
+        raise ZeilenFehler(f"Artikel {nummer} ist in VALEO nicht vorhanden - zuerst Artikel uebernehmen")
+    lager_id = db.execute(text("SELECT id FROM domain_inventory.warehouses WHERE tenant_id = :t "
+                               "AND warehouse_code = :c"), {"t": tenant_id, "c": lager}).scalar()
+    if lager_id is None:
+        raise ZeilenFehler(f"Lager {lager} ist in VALEO nicht angelegt")
+    return str(artikel), str(lager_id)
+
+
+def _bestand_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    from decimal import Decimal, InvalidOperation
+
+    artikel, lager = _bestand_bezug(db, tenant_id, p)
+    roh = _text(p, "menge", pflicht=True)
+    try:
+        menge = Decimal(roh.replace(",", ".")) if "," in roh and "." not in roh else Decimal(roh)
+    except InvalidOperation as fehler:
+        raise ZeilenFehler(f"Menge {roh!r} ist keine Zahl") from fehler
+    return {"article_id": artikel, "warehouse_id": lager, "menge": _menge_text(menge),
+            "einheit": _text(p, "einheit")}
+
+
+def _lagersaldo(db: Session, tenant_id: str, artikel: str, lager: str) -> str:
+    from decimal import Decimal
+
+    from app.services.inventory_movement_direction import direction_sql
+
+    richtung = direction_sql("sm.movement_type", "sm.quantity")
+    saldo = db.execute(text(
+        f"SELECT COALESCE(SUM({richtung}), 0) FROM domain_inventory.inventory_stock_movements sm "  # nosec B608 - Fragment aus Modulkonstante
+        "WHERE sm.tenant_id = :t AND sm.article_id = :a AND sm.warehouse_id = :w"),
+        {"t": tenant_id, "a": artikel, "w": lager}).scalar()
+    return _menge_text(Decimal(str(saldo or 0)))
+
+
+def _bestand_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
+    bewegung = db.execute(text("SELECT article_id, warehouse_id, unit FROM domain_inventory.inventory_stock_movements "
+                               "WHERE tenant_id = :t AND id = :id"), {"t": tenant_id, "id": ziel_id}).mappings().first()
+    if not bewegung:
+        return None
+    return {"article_id": str(bewegung["article_id"]), "warehouse_id": str(bewegung["warehouse_id"]),
+            "menge": _lagersaldo(db, tenant_id, str(bewegung["article_id"]), str(bewegung["warehouse_id"])),
+            "einheit": bewegung["unit"]}
+
+
+def _bestand_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    from decimal import Decimal
+
+    from app.domains.inventory.application.services.inventory_service import InventoryService
+
+    vorhanden = _lagersaldo(db, tenant_id, werte["article_id"], werte["warehouse_id"])
+    if Decimal(vorhanden) != 0:
+        raise ZeilenFehler(f"Lager hat in VALEO bereits Bestand {vorhanden} ohne L3-Quellreferenz - "
+                           "Anfangsbestand fachlich klaeren")
+    try:
+        bewegung = InventoryService(db).process_stock_movement(
+            werte["article_id"], werte["warehouse_id"], "opening_balance", Decimal(werte["menge"]),
+            unit=werte["einheit"], reference_number="L3-Spiegel Anfangsbestand", booking_user="l3_spiegel",
+            auto_created=True, notes="Anfangsbestand aus L3-Spiegelabzug", tenant_id=tenant_id,
+            buchungsschluessel=f"spiegel:bestand:{werte['article_id']}:{werte['warehouse_id']}", commit=False,
+            source_document_type="l3_spiegel", unterdeckung_pruefen=False)
+    except ValueError as fehler:
+        raise ZeilenFehler(f"Anfangsbestand nicht buchbar: {fehler}") from fehler
+    return str(bewegung.id)
+
+
+def _bestand_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    """Keine Buchung: Abweichungen bleiben sichtbar (siehe oben)."""
 
 
 #: Quellfelder ohne VALEO-Ziel je Objektart - im Differenzbericht ausgewiesen, nicht verworfen.
 NICHT_ZUGEORDNET: dict[str, dict[str, str]] = {
-    "kunde": {"debitorkonto": "business_partners.debtor_account (ADR Debitoren/Kreditoren Stufe 3b) fehlt noch"},
 }
 
 
@@ -187,12 +310,16 @@ class Zielart:
     lesen: Callable[[Session, str, str], dict[str, Any] | None]
     anlegen: Callable[[Session, str, dict[str, Any]], str]
     aendern: Callable[[Session, str, str, dict[str, Any]], None]
+    #: Auch bei unveraendertem L3-Inhalt gegen VALEO vergleichen (Bestand: VALEO-Seite kann abweichen).
+    immer_vergleichen: bool = False
 
 
 ZIELARTEN: dict[str, Zielart] = {
     "artikel": Zielart("domain_inventory.articles", _artikel_zielwerte, _artikel_lesen, _artikel_anlegen,
                        _artikel_aendern),
     "kunde": Zielart("domain_crm.customers", _kunde_zielwerte, _kunde_lesen, _kunde_anlegen, _kunde_aendern),
+    "bestand": Zielart("domain_inventory.inventory_stock_movements", _bestand_zielwerte, _bestand_lesen,
+                       _bestand_anlegen, _bestand_aendern, immer_vergleichen=True),
 }
 
 
@@ -215,6 +342,9 @@ def _zeile(db: Session, tenant_id: str, batch_id: str, objektart: str, quellschl
         alt = art.lesen(db, tenant_id, referenz["ziel_id"])
         if alt is None:
             raise ZeilenFehler("Zielobjekt der Quellreferenz fehlt in VALEO - geloescht? fachlich klaeren")
+        if art.immer_vergleichen:
+            differenzen = _differenzen(alt, art.zielwerte(db, tenant_id, payload))
+            return ("geaendert" if differenzen else "unveraendert"), differenzen
         if not alt.get("deleted_at"):
             return "unveraendert", {}
         # Soft-Delete in VALEO, gleicher L3-Inhalt: wiederbeleben (L3 fuehrend).

@@ -20,8 +20,8 @@ MAPPING = {"TYP": "record_type", "ARTIKELNR": "source_ref", "ARTNR": "artikelnum
            "GESPERRT": "gesperrt"}
 MAPPING.update({"QUELLE": "source_ref", "KUNDENNR": "kundennummer", "KUNDNAME": "name", "STRASSE": "strasse",
                 "PLZ": "plz", "ORT": "ort", "STAAT": "land", "USTID": "ust_id", "DEBITORKTO": "debitorkonto",
-                "SPERRE": "gesperrt"})
-VERTRAG = {"encoding": "utf-8", "record_types": ["artikel", "kunde"], "sample_hash": "synthetisch", "export_stand": "Test"}
+                "SPERRE": "gesperrt", "LAGER": "lager", "BESTAND": "menge", "EINHEIT": "einheit"})
+VERTRAG = {"encoding": "utf-8", "record_types": ["artikel", "kunde", "bestand"], "sample_hash": "synthetisch", "export_stand": "Test"}
 
 
 def _artikel(nr: str, bezeichnung: str, **mehr) -> dict:
@@ -47,9 +47,13 @@ def mandant():
     finally:
         with SessionLocal() as db:
             for sql in ("DELETE FROM domain_integration.spiegel_protokoll WHERE tenant_id = :t",
+                        "DELETE FROM domain_inventory.bestandsbuchung_schluessel WHERE tenant_id = :t",
+                        "DELETE FROM domain_inventory.inventory_stock_movements WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
                         "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                        "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
+                        "DELETE FROM domain_inventory.warehouses WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_staging WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_audit WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_batches WHERE tenant_id = :t",
@@ -202,7 +206,7 @@ def test_protokoll_ist_unveraenderlich(mandant):
 
 def _kunde(nr: str, name: str, **mehr) -> dict:
     return {"TYP": "kunde", "QUELLE": nr, "KUNDENNR": nr, "KUNDNAME": name, "STRASSE": "Hauptstr. 1", "PLZ": "26721",
-            "ORT": "Emden", "STAAT": "D", "DEBITORKTO": "10001", **mehr}
+            "ORT": "Emden", "STAAT": "D", "DEBITORKTO": nr, **mehr}
 
 
 def _kundenzeilen(t: str) -> list[tuple]:
@@ -212,7 +216,7 @@ def _kundenzeilen(t: str) -> list[tuple]:
             "FROM domain_crm.customers WHERE tenant_id = :t ORDER BY customer_number"), {"t": t})]
 
 
-def test_kunden_werden_angelegt_wiederholt_unveraendert_und_debitor_nicht_zugeordnet(mandant):
+def test_kunden_werden_angelegt_wiederholt_unveraendert_mit_l3_debitorenkonto(mandant):
     records = [_kunde("10001", "Hof Janssen"), _kunde("10002", "Hof Meyer", SPERRE="1")]
 
     erster = _lauf(mandant, "kd-1", records)
@@ -225,7 +229,19 @@ def test_kunden_werden_angelegt_wiederholt_unveraendert_und_debitor_nicht_zugeor
     assert (erster["neu"], zweiter["unveraendert"]) == (2, 2)
     assert _kundenzeilen(mandant) == [("10001", "Hof Janssen", "Hauptstr. 1", "26721", "Emden", True),
                                       ("10002", "Hof Meyer", "Hauptstr. 1", "26721", "Emden", False)]
-    assert "debitorkonto" in bericht["nicht_zugeordnet"]["kunde"]
+    assert bericht["nicht_zugeordnet"] == {}
+    with SessionLocal() as db:  # Nutzerentscheid 25.11.2026: L3-Debitorennummer = Konto am Geschaeftspartner
+        konten = [tuple(r) for r in db.execute(text(
+            "SELECT c.customer_number, bp.debtor_account FROM domain_crm.customers c JOIN domain_crm.business_partners "
+            "bp ON bp.partner_id::text = c.business_partner_id::text WHERE c.tenant_id = :t ORDER BY 1"), {"t": mandant})]
+    assert konten == [("10001", "10001"), ("10002", "10002")]
+
+
+def test_vergebenes_debitorenkonto_wird_fehlerzeile(mandant):
+    ergebnis = _lauf(mandant, "kd-1", [_kunde("10001", "Hof Janssen"), _kunde("10003", "Hof Ohne", DEBITORKTO="10001")])
+
+    assert (ergebnis["neu"], ergebnis["fehler"]) == (1, 1)
+    assert [z[0] for z in _kundenzeilen(mandant)] == ["10001"]
 
 
 def test_kundenaenderung_und_fremdbestand(mandant):
@@ -238,4 +254,77 @@ def test_kundenaenderung_und_fremdbestand(mandant):
 
     assert (zweiter["geaendert"], zweiter["fehler"]) == (1, 1)
     assert [z[:2] for z in _kundenzeilen(mandant)] == [("10001", "Hof Janssen GbR"), ("10099", "von Hand")]
+
+
+def _lager(t: str, code: str = "L1") -> None:
+    with SessionLocal() as db:
+        db.execute(text("INSERT INTO domain_inventory.warehouses (id, tenant_id, warehouse_code, name) "
+                        "VALUES (:id, :t, :c, 'Hauptlager')"), {"id": str(uuid.uuid4()), "t": t, "c": code})
+        db.commit()
+
+
+def _bestand(nr: str, menge: str, lager: str = "L1") -> dict:
+    return {"TYP": "bestand", "QUELLE": f"{nr}@{lager}", "ARTNR": nr, "LAGER": lager, "BESTAND": menge, "EINHEIT": "St"}
+
+
+def _saldo(t: str, nr: str) -> tuple:
+    with SessionLocal() as db:
+        return tuple(db.execute(text(
+            "SELECT COUNT(*), COALESCE(SUM(m.quantity), 0) FROM domain_inventory.inventory_stock_movements m "
+            "JOIN domain_inventory.articles a ON a.id = m.article_id WHERE m.tenant_id = :t AND a.article_number = :n"),
+            {"t": t, "n": nr}).one())
+
+
+def test_anfangsbestand_einmal_gebucht_und_wiederholung_bucht_nicht(mandant):
+    _lager(mandant)
+    _lauf(mandant, "ab-1", [_artikel("151704", "x"), _bestand("151704", "12")])
+    zweiter = _lauf(mandant, "ab-2", [_artikel("151704", "x"), _bestand("151704", "12")])
+
+    assert zweiter["unveraendert"] == 2
+    anzahl, menge = _saldo(mandant, "151704")
+    assert (anzahl, float(menge)) == (1, 12.0)
+
+
+def test_abweichung_in_valeo_wird_gemeldet_nicht_gebucht(mandant):
+    from decimal import Decimal
+
+    from app.domains.inventory.application.services.inventory_service import InventoryService
+
+    _lager(mandant)
+    _lauf(mandant, "ab-1", [_artikel("151704", "x"), _bestand("151704", "12")])
+    with SessionLocal() as db:  # Abgang in VALEO, den L3 (noch) nicht kennt
+        artikel, lager = db.execute(text(
+            "SELECT a.id, w.id FROM domain_inventory.articles a, domain_inventory.warehouses w "
+            "WHERE a.tenant_id = :t AND w.tenant_id = :t"), {"t": mandant}).one()
+        InventoryService(db).process_stock_movement(str(artikel), str(lager), "out", Decimal("2"), unit="St",
+                                                    tenant_id=mandant, buchungsschluessel="test:abgang")
+    zweiter = _lauf(mandant, "ab-2", [_artikel("151704", "x"), _bestand("151704", "12")])
+
+    with SessionLocal() as db:
+        bericht = differenzbericht(db, mandant, db.execute(text(
+            "SELECT id FROM domain_integration.legacy_adapter_batches WHERE tenant_id = :t AND external_id = 'ab-2'"),
+            {"t": mandant}).scalar_one())
+    assert zweiter["geaendert"] == 1
+    assert bericht["geaendert"][0]["felder"] == {"menge": {"valeo": "10", "l3": "12"}}
+    assert _saldo(mandant, "151704")[0] == 2  # keine Korrekturbuchung
+
+
+def test_bestand_ohne_artikel_lager_oder_mit_fremdbestand_wird_fehlerzeile(mandant):
+    from decimal import Decimal
+
+    from app.domains.inventory.application.services.inventory_service import InventoryService
+
+    _lager(mandant)
+    _lauf(mandant, "ab-0", [_artikel("151704", "x"), _artikel("151705", "y")])
+    with SessionLocal() as db:
+        artikel, lager = db.execute(text(
+            "SELECT a.id, w.id FROM domain_inventory.articles a, domain_inventory.warehouses w "
+            "WHERE a.tenant_id = :t AND w.tenant_id = :t AND a.article_number = '151705'"), {"t": mandant}).one()
+        InventoryService(db).process_stock_movement(str(artikel), str(lager), "in", Decimal("5"), unit="St",
+                                                    tenant_id=mandant, buchungsschluessel="test:zugang")
+
+    ergebnis = _lauf(mandant, "ab-1", [_bestand("999999", "1"), _bestand("151704", "1", lager="L9"),
+                                        _bestand("151705", "7")])
+
+    assert (ergebnis["neu"], ergebnis["fehler"]) == (0, 3)
 
