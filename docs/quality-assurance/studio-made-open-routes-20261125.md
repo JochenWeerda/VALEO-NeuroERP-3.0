@@ -71,11 +71,21 @@ Permission-Projektion (UI): `finance.bankkonto.*` / `finance.kreditor.*` → FIN
 
 Permission-Projektion (UI): `stammdaten.stoffstrom|bestandteil|verpackung|indiv_artikel.*` → STAMMDATEN-Rollen; `verkauf.kunde.*` → CRM/SALES.
 
+## Siebte Hebung (Batch 7)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `preise/individualpreise` | Legacy-ObjectPage | POST `/api/v1/preise/individualpreise` |
+| `preise/rabattgruppen` | Legacy-ObjectPage | POST `/api/v1/preise/rabatte/gruppen` |
+| `preise/zu-abschlaggruppen` | Legacy-ObjectPage | POST `/api/v1/kontrakte/zuabschlagsgruppen` |
+| `verkauf/dauerauftraege` | Legacy-ObjectPage | POST `/api/v1/dauerauftraege` (`responseIdKey=da_nr`, Positionen-Tabelle) |
+| `produktion/rezepturgruppen` | Legacy-ObjectPage | POST `/api/v1/produktion/mischfutter/rezepturgruppen` (`responseIdKey=gruppe_nr`) |
+
 ## Noch offen (Folge)
 
 - 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
-- Weitere Stamm-Factories mit Legacy (Admin, Preise, FiBu, Lager, …)
+- Weitere Stamm-Factories mit Legacy (Admin, FiBu, Lager, Schulung, bank-stamm, …)
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

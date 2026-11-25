@@ -122,6 +122,31 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Preise Individual/Rabatt + Dauerauftrag Create mirrors SCHREIBEN["VERKAUF"] (SALES).
+    if (
+      permission.startsWith('preise.individualpreis.')
+      || permission.startsWith('preise.rabattgruppe.')
+      || permission.startsWith('verkauf.dauerauftrag.')
+    ) {
+      return roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN') || roles.has('manager')
+    }
+    // Zu-/Abschlaggruppe Create mirrors SCHREIBEN["KONTRAKT"].
+    if (permission.startsWith('preise.zuabschlaggruppe.')) {
+      return (
+        roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('manager')
+      )
+    }
+    // Rezepturgruppe Create mirrors SCHREIBEN["PRODUKTION"].
+    if (permission.startsWith('produktion.rezepturgruppe.')) {
+      return (
+        roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN')
+        || roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }

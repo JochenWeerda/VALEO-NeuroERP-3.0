@@ -92,6 +92,18 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(kunde, user([], ['SALES_BEARBEITEN']))).toEqual(['verkauf.kunde.create'])
     expect(getScreenPermissions(kunde, user([], ['CRM_ADMIN']))).toEqual(['verkauf.kunde.create'])
   })
+  it('matches SALES write roles for Individualpreis creation', () => {
+    const preis: ScreenDefinition = { ...screen, id: 'preise/individualpreise', domain: 'preise', actions: [],
+      creation: { endpoint: '/api/v1/preise/individualpreise', permission: 'preise.individualpreis.create', detailRoute: '/preise/individualpreise/{entity_id}' } }
+    expect(getScreenPermissions(preis, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(preis, user([], ['SALES_BEARBEITEN']))).toEqual(['preise.individualpreis.create'])
+  })
+  it('matches KONTRAKT write roles for Zu-/Abschlaggruppe creation', () => {
+    const zagr: ScreenDefinition = { ...screen, id: 'preise/zu-abschlaggruppen', domain: 'preise', actions: [],
+      creation: { endpoint: '/api/v1/kontrakte/zuabschlagsgruppen', permission: 'preise.zuabschlaggruppe.create', detailRoute: '/preise/zu-abschlaggruppen/{entity_id}' } }
+    expect(getScreenPermissions(zagr, user([], ['SALES_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(zagr, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['preise.zuabschlaggruppe.create'])
+  })
 })
 
 
