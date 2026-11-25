@@ -56,6 +56,7 @@ REGISTER: list[tuple[str, list[str], str]] = [
     ("Aktionskatalog der KI-Bedienung", ["python", "scripts/generate_screen_action_catalog.py", "--check"],
      "python scripts/generate_screen_action_catalog.py"),
     ("Masken-Studio-Ratsche", ["python", "scripts/mask_studio_inventory.py", "--check"], "python scripts/mask_studio_inventory.py"),
+    ("Domaenenabnahme (M4)", ["python", "scripts/domaenen_abnahme.py", "--check"], "python scripts/domaenen_abnahme.py"),
     ("Maskenfamilien-Versionen", ["python", "scripts/generate_mask_family_versions.py", "--check"],
      "python scripts/generate_mask_family_versions.py"),
     ("Belegmasken-Versionen", ["python", "scripts/generate_document_screen_versions.py", "--check"],
