@@ -30307,7 +30307,6 @@
             "app/seeds/inventory_seed.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_compat_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/warehouse_service.py"
@@ -32691,7 +32690,6 @@
             "app/services/bestandsbewertung.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_balance_reconciliation.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
@@ -32713,7 +32711,6 @@
             "app/services/agri_silo_material_flow_service.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
             "app/services/mobile_sync_service.py",
