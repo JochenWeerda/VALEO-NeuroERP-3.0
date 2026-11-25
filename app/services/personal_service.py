@@ -1749,17 +1749,17 @@ class PersonalService:
     _DOCUMENT_CLASSES: dict[str, dict[str, Any]] = {
         "employment_contract": {
             "title": "Arbeitsvertrag",
-            "legal_basis": ["BDSG §26", "Nachweisgesetz", "DSGVO Art. 6(1)(b)"],
+            "legal_basis": ["BDSG §26", "Nachweisgesetz", "DSGVO Art. 6(1)(b)", "§ 147 Abs. 1 Nr. 5 AO"],
             "default_visibility": "hr",
-            "retention_years": 10,
+            "retention_years": 6,  # sonstige steuerlich bedeutsame Unterlage
             "requires_dms_ref": True,
             "deletion_rule": "Nach Austritt und Ablauf arbeits-/steuerrechtlicher Fristen pruefen.",
         },
         "payroll_document": {
             "title": "Gehalts- und Payroll-Dokument",
-            "legal_basis": ["BDSG §26", "GoBD", "Steuerrecht"],
+            "legal_basis": ["BDSG §26", "§ 147 Abs. 1 Nr. 4, Abs. 3 AO (BEG IV)", "§ 41 EStG"],
             "default_visibility": "payroll",
-            "retention_years": 10,
+            "retention_years": 8,  # Lohnabrechnungen als Buchungsbelege (gobd_retention: lohnabrechnung)
             "requires_dms_ref": True,
             "deletion_rule": "Nicht loeschen, solange Payroll-/Steuerfristen laufen.",
         },
