@@ -35,6 +35,7 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
       permission.startsWith('crm.lead.')
       || permission.startsWith('crm.contact.')
       || permission.startsWith('crm.betriebsprofil.')
+      || permission.startsWith('crm.vertreter.')
     ) {
       return roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN') || roles.has('manager')
     }
@@ -96,8 +97,12 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('personal.mitarbeiter.')) {
       return roles.has('PERSONAL_BEARBEITEN') || roles.has('PERSONAL_ADMIN') || roles.has('manager')
     }
-    // Betriebsstaetten Create mirrors SCHREIBEN["STAMMDATEN"] (Einkauf/Sales/Lager).
-    if (permission.startsWith('stammdaten.betriebsstaette.')) {
+    // Betriebsstaetten/Hausbank/Mengeneinheit Create mirrors SCHREIBEN["STAMMDATEN"].
+    if (
+      permission.startsWith('stammdaten.betriebsstaette.')
+      || permission.startsWith('stammdaten.hausbank.')
+      || permission.startsWith('stammdaten.mengeneinheit.')
+    ) {
       return (
         roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN')
         || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')

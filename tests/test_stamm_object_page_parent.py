@@ -289,6 +289,26 @@ def test_betriebsprofil_mitarbeiter_betriebsstaette_have_native_creation() -> No
             assert creation["responseIdKey"] == response_id_key
 
 
+def test_hausbank_mengeneinheit_vertreter_have_native_creation() -> None:
+    """Batch 5: Hausbank, Mengeneinheit, Vertreter."""
+    cases = (
+        ("stammdaten/hausbanken", "/api/v1/stammdaten/hausbanken",
+         {"bank_nr", "bezeichnung", "iban"}, "bank_nr"),
+        ("stammdaten/mengeneinheiten", "/api/v1/artikel/mengeneinheiten/stamm",
+         {"einheit_kuerzel", "bezeichnung"}, None),
+        ("crm/vertreter", "/api/v1/crm/vertreter", {"vertreter_nr", "name"}, "vertreter_nr"),
+    )
+    for screen_id, endpoint, required, response_id_key in cases:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        keys = {field["key"] for field in creation["fields"]}
+        assert required <= keys
+        if response_id_key:
+            assert creation["responseIdKey"] == response_id_key
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")
