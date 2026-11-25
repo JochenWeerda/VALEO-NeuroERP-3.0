@@ -30,3 +30,12 @@ def test_profile_command_uses_existing_role_permission_and_concurrency_contract(
     assert action['enabledWhen'] == {'path': 'business_partner_id', 'exists': True}
     source = next(s for s in screen['dataSources'] if s['key'] == 'entity')
     assert source['endpoint'].endswith('/{entity_id}/master-profile')
+
+
+def test_explicit_generate_agent_contract_preserves_sensitive_partner_fields():
+    from app.api.v1.endpoints.mask_screen_definition import _generate_agent_contract
+    screen = build_crm_customer_360_screen_definition()
+    contract = _generate_agent_contract(screen)
+    assert {'iban', 'bic', 'partner_iban', 'partner_bic', 'partner_account_holder',
+            'partner_tax_number', 'partner_email', 'partner_privacy_policy_accepted_at'} <= set(contract['sensitiveFields'])
+    assert len(contract['sensitiveFields']) == len(set(contract['sensitiveFields']))

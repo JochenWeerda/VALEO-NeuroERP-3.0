@@ -48,6 +48,14 @@ def master_input_fields() -> list[dict[str, Any]]:
 
 def apply_customer_master_profile(definition: dict[str, Any]) -> None:
     """Enrich the existing Studio customer page; never introduce another customer form."""
+    agent = definition.setdefault("agentContract", {})
+    sensitive_groups = {"banking", "finance", "contactData", "gdpr", "marketingConsent"}
+    sensitive = [PREFIX + field["key"] for group in master_catalog()["groups"]
+                 if group["key"] in sensitive_groups for field in group["fields"]]
+    agent["sensitiveFields"] = list(dict.fromkeys([
+        *agent.get("sensitiveFields", []), "iban", "bic", "bankname", "kontoinhaber",
+        "partner_account_holder", "email", "telefon", *sensitive,
+    ]))
     for source in definition.get("dataSources", []):
         if source["key"] == "entity":
             source["endpoint"] = "/api/v1/crm/customers/{entity_id}/master-profile"

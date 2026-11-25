@@ -11,7 +11,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError, OperationalError, ProgrammingError
 from sqlalchemy.orm import Session
 
-from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError, PermissionDeniedError
 from app.core.uuid7 import uuid7
 from app.infrastructure.models import (
     BusinessPartner,
@@ -1633,12 +1633,39 @@ class BusinessPartnerService:
         self.db.delete(row)
         self.db.commit()
 
+    def _community_member_scope(self, community_id: str) -> None:
+        if not isinstance(self.tenant_id, str) or not self.tenant_id.strip():
+            raise PermissionDeniedError("Verified tenant context required")
+        if self.db.query(BusinessPartnerCommunity.id).filter(
+            BusinessPartnerCommunity.id == community_id
+        ).with_for_update(read=True).first() is None:
+            raise EntityNotFoundError("BusinessPartnerCommunity", community_id)
+
+    def _community_partner(self, partner_id: str) -> None:
+        if not isinstance(partner_id, str) or not partner_id.strip():
+            raise ValidationFailedError("partner_id is required")
+        if self.db.query(BusinessPartner.partner_id).filter(
+            BusinessPartner.partner_id == partner_id,
+            BusinessPartner.tenant_id == self.tenant_id,
+        ).with_for_update(read=True).first() is None:
+            raise EntityNotFoundError("BusinessPartner", str(partner_id))
+
+    def _community_member_query(self, community_id: str):
+        return self.db.query(BusinessPartnerCommunityMember).join(
+            BusinessPartner, BusinessPartner.partner_id == BusinessPartnerCommunityMember.partner_id
+        ).filter(BusinessPartnerCommunityMember.community_id == community_id,
+                 BusinessPartner.tenant_id == self.tenant_id)
+
     def list_community_members(self, community_id: str) -> list:
-        return self.db.query(BusinessPartnerCommunityMember).filter(
-            BusinessPartnerCommunityMember.community_id == community_id
-        ).order_by(BusinessPartnerCommunityMember.partner_id).all()
+        self._community_member_scope(community_id)
+        return self._community_member_query(community_id).order_by(
+            BusinessPartnerCommunityMember.partner_id).all()
 
     def create_community_member(self, community_id: str, data: dict) -> BusinessPartnerCommunityMember:
+        self._community_member_scope(community_id)
+        if set(data) - {"partner_id", "share_percent"}:
+            raise ValidationFailedError("Invalid community member fields")
+        self._community_partner(data.get("partner_id"))
         row = BusinessPartnerCommunityMember(id=uuid7(), community_id=community_id, **data)
         self.db.add(row)
         try:
@@ -1649,22 +1676,32 @@ class BusinessPartnerService:
         self.db.refresh(row)
         return row
 
-    def patch_community_member(self, member_id: str, data: dict) -> BusinessPartnerCommunityMember:
-        row = self.db.query(BusinessPartnerCommunityMember).filter(
+    def patch_community_member(self, community_id: str, member_id: str, data: dict) -> BusinessPartnerCommunityMember:
+        self._community_member_scope(community_id)
+        if set(data) - {"partner_id", "share_percent"}:
+            raise ValidationFailedError("Invalid community member fields")
+        row = self._community_member_query(community_id).filter(
             BusinessPartnerCommunityMember.id == member_id
-        ).first()
+        ).with_for_update(of=(BusinessPartnerCommunityMember, BusinessPartner)).first()
         if row is None:
             raise EntityNotFoundError("BusinessPartnerCommunityMember", member_id)
+        if "partner_id" in data:
+            self._community_partner(data["partner_id"])
         for k, v in data.items():
             setattr(row, k, v)
-        self.db.commit()
+        try:
+            self.db.commit()
+        except IntegrityError as exc:
+            self.db.rollback()
+            raise ConflictError("Member already in community") from exc
         self.db.refresh(row)
         return row
 
-    def delete_community_member(self, member_id: str) -> None:
-        row = self.db.query(BusinessPartnerCommunityMember).filter(
+    def delete_community_member(self, community_id: str, member_id: str) -> None:
+        self._community_member_scope(community_id)
+        row = self._community_member_query(community_id).filter(
             BusinessPartnerCommunityMember.id == member_id
-        ).first()
+        ).with_for_update(of=(BusinessPartnerCommunityMember, BusinessPartner)).first()
         if row is None:
             raise EntityNotFoundError("BusinessPartnerCommunityMember", member_id)
         self.db.delete(row)

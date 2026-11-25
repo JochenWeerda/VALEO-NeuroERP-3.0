@@ -179,8 +179,10 @@ Runbook: `docs/quality-assurance/pruefstand-datenbank.md`.
 
 ### Vor jedem Push: `python scripts/vor_push.py` (verbindlich)
 
-Ein Lauf richtet `valeo_probe` wie die CI her (Migrationen, Seed, getrennte Rollen; nie eine weitere Test-DB),
-prueft alle Register und Verzeichnisse (OpenAPI, Doc-Generatoren, Tabellenkatalog-Lineage, RLS-Inventar und -Matrix,
+Ein Lauf prueft den ausdruecklich mit `TEST_DATABASE_URL` konfigurierten gemeinsamen Pruefstand lesend.
+Fehlende Bereitschaft stoppt vor Registern und Tests. Migrationen, Reset, Seed und Rechte-/Eigentumswechsel
+erfolgen ausschliesslich separat im abgestimmten Wartungsfenster; keine automatische Einrichtung beim Push.
+Danach prueft der Lauf alle Register und Verzeichnisse (OpenAPI, Doc-Generatoren, Tabellenkatalog-Lineage, RLS-Inventar und -Matrix,
 Pflichtstruktur, Masken-/Familien-/Studio-Versionen, Baseline, Improvement-Pipelines, Docs-Governance) und faehrt die
 betroffenen Tests gestaffelt; ein Skip mangels Datenbank zaehlt als Fehler. Neue Rotursache aus CI -> Pruefung in
 `scripts/vor_push.py` ergaenzen, nicht in eine Liste schreiben.

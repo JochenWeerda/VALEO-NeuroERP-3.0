@@ -137,4 +137,3 @@ export function useKasseTagesabschlussAktuell(datum?: string) {
     staleTime: 30 * 1000,
   })
 }
-

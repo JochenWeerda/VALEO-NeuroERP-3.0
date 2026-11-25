@@ -54,7 +54,7 @@ from app.services.inventory_compat_service import InventoryCompatService, Futter
 from app.services.annahme_service import AnnahmeService
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.compat_schemas import CsvImportResponse, PurchaseOrderListOut
+from app.api.v1.schemas.compat_schemas import CsvImportResponse, PurchaseOrderListOut, ServiceEntrySheetListOut
 from pydantic import ConfigDict as _ConfigDict
 from app.api.v1.schemas.base import CompatBridgeOut
 from app.api.v1.schemas.mask_entity_contracts import (
@@ -1881,7 +1881,7 @@ async def einkauf_retoure_patch(
     return result
 
 
-@router.get("/einkauf/service-entry-sheets", response_model=EinkaufDocOut, summary="Service entry sheets auflisten")
+@router.get("/einkauf/service-entry-sheets", response_model=ServiceEntrySheetListOut, summary="Leistungsnachweise auflisten")
 async def list_service_entry_sheets(
     status: Optional[str] = Query(None),
     tenant_id: str = Depends(get_tenant_id),
