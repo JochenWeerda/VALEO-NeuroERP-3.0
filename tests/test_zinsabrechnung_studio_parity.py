@@ -1,7 +1,9 @@
-"""Paritaet Legacy-Zinsabrechnung → Studio NativeListPage."""
+"""Paritaet Legacy-Zinsabrechnung → Studio NativeListPage.
+
+Legacy-ObjectPage entfernt (Entwicklungsaltlast); Formfelder als Baseline eingefroren.
+"""
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
@@ -9,8 +11,21 @@ import pytest
 from app.core.screen_definitions_listen import build_agrar_zinsabrechnung_liste
 
 ROOT = Path(__file__).resolve().parents[1]
-LEGACY = ROOT / "packages/frontend-web/src/pages/agrar/zinsabrechnung-legacy.tsx"
 PAGE = ROOT / "packages/frontend-web/src/pages/agrar/zinsabrechnung.tsx"
+
+# Eingefrorene Legacy-Formfelder (vormals register(...) in zinsabrechnung-legacy.tsx).
+LEGACY_FORM_FIELDS = {
+    "basisbetrag_eur",
+    "bemerkung",
+    "bis_datum",
+    "buchungs_periode",
+    "kontrakt_nr",
+    "lieferant_name",
+    "lieferant_nr",
+    "mwst_satz",
+    "von_datum",
+    "zinssatz_prozent",
+}
 
 
 @pytest.mark.unit
@@ -23,9 +38,8 @@ def test_zinsabrechnung_page_is_native_list():
 
 @pytest.mark.unit
 def test_zinsabrechnung_studio_covers_legacy_form_and_actions():
-    legacy = LEGACY.read_text(encoding="utf-8")
-    form_fields = set(re.findall(r"register\('([^']+)'", legacy))
-    assert form_fields, "Legacy-Formfelder nicht gefunden"
+    form_fields = LEGACY_FORM_FIELDS
+    assert form_fields, "Legacy-Formfelder-Baseline fehlt"
 
     sd = build_agrar_zinsabrechnung_liste()
     anlegen = next(a for a in sd["actions"] if a["key"] == "anlegen")
@@ -35,17 +49,11 @@ def test_zinsabrechnung_studio_covers_legacy_form_and_actions():
     assert anlegen["commandEndpoint"] == "/api/v1/zinsabrechnung"
 
     row_keys = {a["key"] for a in sd["tables"][0]["rowActions"]} if sd.get("tables") else set()
-    # stamm_list stores row_actions on the table inside the builder output
     if not row_keys:
-        # inspect builder structure
         for tab in sd.get("tabs") or []:
             for table in tab.get("tables") or []:
                 row_keys |= {a["key"] for a in table.get("rowActions") or []}
     if not row_keys:
-        # some parents put rowActions at top level under actions only for header
-        # Fall back: rebuild expects row_actions in definition via stamm parent
-        from app.core.stamm_list_parent import build_stamm_list_screen
-        # parse from sd recursively
         def walk(obj):
             found = set()
             if isinstance(obj, dict):

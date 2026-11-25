@@ -24,7 +24,6 @@ def test_admin_suite_connectoren_route_and_cockpit():
     src = (PAGES / "admin-suite/connectoren.tsx").read_text(encoding="utf-8")
     assert "UniversalNativeCockpitPage" in src
     assert 'screenId="admin-suite/connectoren"' in src
-    assert (PAGES / "admin-suite/connectoren-legacy.tsx").exists()
     auto = ADMIN_SUITE_AUTO.read_text(encoding="utf-8")
     assert "connectoren" in auto
     assert "@/pages/admin-suite/connectoren" in auto

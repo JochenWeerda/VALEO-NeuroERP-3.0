@@ -6,6 +6,8 @@ interface PageSurfaceProps {
   className?: string
   contentClassName?: string
   'data-page-surface'?: string
+  role?: 'region' | 'main' | 'complementary'
+  'aria-label'?: string
 }
 
 interface PageSectionProps {
@@ -20,6 +22,8 @@ export function PageSurface({
   className,
   contentClassName,
   'data-page-surface': dataPageSurface = 'default',
+  role,
+  'aria-label': ariaLabel,
 }: PageSurfaceProps): JSX.Element {
   return (
     <div
@@ -28,6 +32,8 @@ export function PageSurface({
         className,
       )}
       data-page-surface={dataPageSurface}
+      role={role}
+      aria-label={ariaLabel}
     >
       <div className={cn('flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:px-8', contentClassName)}>{children}</div>
     </div>

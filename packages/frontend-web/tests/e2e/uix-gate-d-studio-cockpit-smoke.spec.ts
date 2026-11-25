@@ -25,6 +25,7 @@ type CockpitCase = {
     | 'finance_workbench'
     | 'feed_workbench'
     | 'admin_workbench'
+    | 'weighing'
   specializedFields?: Array<{ key: string; label: string }>
   /** ARIA tablist name inside the specialized surface (Studio Tabs-Invariante). */
   specializedTablist?: string
@@ -227,6 +228,34 @@ const COCKPIT_CASES: CockpitCase[] = [
       { key: 'status', label: 'Status' },
     ],
     specializedLandmark: 'Rationseditor Arbeitsbereich',
+  },
+  {
+    label: 'waage/liste',
+    path: '/waage/liste',
+    screenId: 'waage/liste',
+    testId: 'native-cockpit-waage-liste',
+    title: 'Waagen',
+    specializedType: 'weighing',
+    specializedFields: [
+      { key: 'id', label: 'Waage' },
+      { key: 'standort', label: 'Standort' },
+      { key: 'typ', label: 'Typ' },
+      { key: 'maxKapazitaet', label: 'Max. Kapazität' },
+      { key: 'letzteEichung', label: 'Letzte Eichung' },
+      { key: 'naechsteEichung', label: 'Nächste Eichung' },
+      { key: 'status', label: 'Status' },
+      { key: 'letztes_eichdatum', label: 'Eichdatum' },
+      { key: 'naechste_eichfaelligkeit', label: 'Eichfälligkeit' },
+      { key: 'eichamt', label: 'Eichamt' },
+      { key: 'zertifikat_nr', label: 'Zertifikat' },
+      { key: 'importScaleId', label: 'Import-Waage' },
+      { key: 'importFile', label: 'Import-Datei' },
+      { key: 'fehlerToleranz', label: 'Fehlertoleranz' },
+      { key: 'importRaw', label: 'Import roh' },
+      { key: 'importError', label: 'Importfehler' },
+      { key: 'importRetryCount', label: 'Import-Retries' },
+    ],
+    specializedLandmark: 'Waagenliste Arbeitsbereich',
   },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
@@ -470,6 +499,11 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
       },
     )
+  }
+  if (c.specializedType === 'weighing') {
+    await page.route(/\/api\/v1\/waage\/waagen(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
   }
 }
 

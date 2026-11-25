@@ -23,7 +23,6 @@ def test_externe_gates_cockpit_parity():
     src = (PAGES / "admin/externe-gates.tsx").read_text(encoding="utf-8")
     assert "UniversalNativeCockpitPage" in src
     assert 'screenId="admin/externe-gates"' in src
-    assert (PAGES / "admin/externe-gates-legacy.tsx").exists()
     api = EXTERNAL.read_text(encoding="utf-8")
     assert '"/overview"' in api
     assert '"/items"' in api

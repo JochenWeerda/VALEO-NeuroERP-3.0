@@ -97,7 +97,12 @@ export function ScalesRenderer({ state }: { state: ScalesState }): JSX.Element {
   ]
 
   return (
-    <PageSurface data-page-surface="waage-liste" contentClassName="space-y-6">
+    <PageSurface
+      data-page-surface="waage-liste"
+      contentClassName="space-y-6"
+      role="region"
+      aria-label="Waagenliste Arbeitsbereich"
+    >
 
       <ScaleImportPanel plan={plan} scales={waagen} onImported={() => { void refetch() }} />
       <ScaleCalibrationPanel plan={plan} scales={waagen} onSaved={() => { void refetch() }} />
