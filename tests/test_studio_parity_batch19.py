@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from app.core.screen_definitions_listen import (
+    build_agrar_erntefenster_konfig_liste,
     build_agrar_qualitaet_nachtrag_liste,
     build_agrar_sammelabrechnung_liste,
     build_kontrakte_mengenzeitraeume_liste,
@@ -139,3 +140,24 @@ def test_mengenzeitraeume_replaces_stub_with_full_actions():
         "variante",
         "bemerkung",
     }.issubset(create_keys)
+
+
+@pytest.mark.unit
+def test_erntefenster_konfig_parity():
+    src = (PAGES / "agrar/erntefenster-konfig.tsx").read_text(encoding="utf-8")
+    assert "NativeListPage" in src
+    assert "agrar/erntefenster-konfig" in src
+    assert "-legacy" not in src
+
+    sd = build_agrar_erntefenster_konfig_liste()
+    assert {
+        "template_id",
+        "name",
+        "year",
+        "start_mmdd",
+        "end_mmdd",
+    }.issubset(_create_field_keys(sd, "anlegen"))
+    keys = _action_keys(sd)
+    assert {"anlegen", "alt_daten_zuordnen", "settlement_pruefen", "sandbox"}.issubset(keys)
+    anlegen = next(a for a in sd["actions"] if a["key"] == "anlegen")
+    assert anlegen["commandEndpoint"] == "/api/v1/admin/erntefenster-from-template"

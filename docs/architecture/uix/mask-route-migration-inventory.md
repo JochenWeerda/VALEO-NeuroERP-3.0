@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1088 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1089 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 38 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 37 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 901 |
+| runtime_wired | 902 |
 | legacy_mask_pattern | 13 |
-| hand_built | 129 |
+| hand_built | 128 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 38 |
+| handgebaute Routen | 442 | 37 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1088 |
+| Runtime-verdrahtet | — | 1089 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -140,6 +140,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/ernte-qualitaetsfreigabe` ← `src/pages/agrar/ernte-qualitaetsfreigabe.tsx`
 - `agrar/ernte/kampagnenabschluss` ← `src/pages/agrar/ernte/kampagnenabschluss.tsx`
 - `agrar/ernte/liste` ← `src/pages/agrar/ernte/liste.tsx`
+- `agrar/erntefenster-konfig` ← `src/pages/agrar/erntefenster-konfig.tsx`
 - `agrar/feldbuch/ackerschlagkartei` ← `src/pages/agrar/feldbuch/ackerschlagkartei.tsx`
 - `agrar/feldbuch/flurstueck-kataster` ← `src/pages/agrar/feldbuch/flurstueck-kataster.tsx`
 - `agrar/feldbuch/massnahme/:id` ← `src/pages/agrar/feldbuch/massnahmen.tsx`
@@ -1179,31 +1180,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
 - `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/ernte/neu` ← `src/pages/agrar/ernte/neu.tsx`
-- `agrar/erntefenster-konfig` ← `src/pages/agrar/erntefenster-konfig.tsx`
-- `agrar/feldbuch/schlag/neu` ← `src/pages/agrar/feldbuch/schlag/neu.tsx`
 - `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
 - `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
 - `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
 - `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
-- `auth/callback` ← `src/pages/auth/Callback.tsx`
-- `auth/login` ← `src/pages/auth/Login.tsx`
-- `crm` ← `src/pages/crm/kim/index.tsx`
-- `crm/customers/:id/articles` ← `src/pages/crm/kunden-cockpit.tsx`
-- `crm/kim` ← `src/pages/crm/kim/index.tsx`
-- `crm/kunden-cockpit` ← `src/pages/crm/kunden-cockpit.tsx`
-- `document` ← `src/pages/document.tsx`
-- `errors/NotFound` ← `src/pages/errors/NotFound.tsx`
-- `finance` ← `src/pages/finance/index.tsx`
-- `hilfe` ← `src/pages/hilfe.tsx`
 - `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
-- `login` ← `src/pages/auth/Login.tsx`
-- `pricing` ← `src/pages/pricing.tsx`
-- `stock-management` ← `src/pages/stock-management.tsx`
 - `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`
-- `verkauf/kunde/:id` ← `src/pages/verkauf/kunden-stamm.tsx`
-- `verkauf/kunde/neu` ← `src/pages/verkauf/kunden-stamm.tsx`
-- `verkauf/kunden-stamm` ← `src/pages/verkauf/kunden-stamm.tsx`
-- `verkauf/kunden-stamm/:id` ← `src/pages/verkauf/kunden-stamm.tsx`

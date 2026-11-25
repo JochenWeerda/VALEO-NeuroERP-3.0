@@ -128,8 +128,9 @@ def main() -> None:
             runtime_paths.append(entry)
         elif klass == "legacy_mask_pattern":
             legacy_paths.append(entry)
-        else:
+        elif klass == "hand_built" or klass == "legacy_wrapper":
             hand_paths.append(entry)
+        # technical_page / sonstiges: zaehlen in by_class, aber keine Migrationskandidaten
 
     # page-file inventory (unique files)
     page_files = [

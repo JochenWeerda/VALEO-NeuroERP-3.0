@@ -185,6 +185,15 @@ Inventar nach Batch 18: `hand_built`-Routen ~50 (Domain), `legacy_wrapper` 0.
 
 Inventar nach Batch 19: `runtime_wired` ~1088, `hand_built` ~38, `legacy_wrapper` 0.
 
+## Zwanzigste Hebung (Batch 20)
+
+| Maske / Fix | Nachher |
+|-------------|---------|
+| `agrar/erntefenster-konfig` | NativeListPage: Create aus Vorlage (alle Felder), Settlement-Nav, Sandbox-Nav, Backfill-Pfad-Alias |
+| Inventar | `technical_page` nicht mehr in Handgebaut-Liste; Redirects sauber getrennt |
+
+Inventar nach Batch 20: `hand_built` ~37.
+
 ## Noch offen (Folge)
 
 - `hand_built` Prozessmasken (u. a. `annahme/rohware`, `lager/materialfluss`, Agrar-Ops-Legacy) — **nur mit Feld-/Aktionsparitaet**

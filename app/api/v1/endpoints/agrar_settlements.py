@@ -346,6 +346,26 @@ async def backfill_settlement_campaign_reference(
     return SettlementCampaignBackfillResponse(**plan_data)
 
 
+@router.post(
+    "/campaign-reference/backfill/{campaign_id}",
+    response_model=SettlementCampaignBackfillResponse,
+    summary="Settlement campaign reference backfill (Pfad)",
+    dependencies=SCHREIBEN["AGRAR"],
+)
+async def backfill_settlement_campaign_reference_by_id(
+    campaign_id: str,
+    dry_run: bool = False,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Alias fuer NativeListPage/MCP: Kampagne steht im Pfad statt im Body."""
+    return await backfill_settlement_campaign_reference(
+        SettlementCampaignBackfillRequest(campaign_id=campaign_id, dry_run=dry_run),
+        tenant_id=tenant_id,
+        db=db,
+    )
+
+
 @router.get("/{settlement_id}", response_model=SettlementOut, summary="Settlement abrufen")
 async def get_settlement(
     settlement_id: str,

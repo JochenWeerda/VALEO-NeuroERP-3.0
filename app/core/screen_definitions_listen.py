@@ -229,6 +229,61 @@ def build_agrar_qualitaet_nachtrag_liste() -> dict[str, Any]:
     )
 
 
+def build_agrar_erntefenster_konfig_liste() -> dict[str, Any]:
+    """Erntefenster-Kampagnen — Paritaet zur Legacy-Konfig-Maske."""
+    _create_fields = [
+        {
+            "key": "template_id",
+            "label": "Vorlage",
+            "type": "select",
+            "required": True,
+            "optionsEndpoint": "/api/v1/admin/erntefenster-templates",
+            "optionValueKey": "id",
+            "optionLabelKey": "name",
+        },
+        {"key": "name", "label": "Kampagnenname", "type": "text", "required": True},
+        {"key": "year", "label": "Jahr", "type": "number", "required": True},
+        {"key": "start_mmdd", "label": "Start (MM-DD)", "type": "text"},
+        {"key": "end_mmdd", "label": "Ende (MM-DD)", "type": "text"},
+    ]
+    return _liste(
+        screen_id="agrar/erntefenster-konfig", domain="agrar",
+        title="Erntefenster-Konfiguration",
+        subtitle="Saisonale Kampagnen aus Vorlagen anlegen und Alt-Daten zuordnen",
+        endpoint="/api/v1/admin/erntefenster-campaigns", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "start_date", "label": "Start", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "end_date", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "process_key", "label": "Prozess", "filterable": True, "priority": "secondary"},
+            {"key": "template_id", "label": "Vorlage", "filterable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Kampagne aus Vorlage", "kind": "primary", "dangerLevel": "safe",
+             "zone": "header", "permission": "agrar.erntefenster.create",
+             "commandEndpoint": "/api/v1/admin/erntefenster-from-template", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "settlement_pruefen", "label": "Settlement-Abschluss pruefen", "dangerLevel": "safe",
+             "permission": "agrar.erntefenster.read",
+             "navigationRoute": "/annahme/abrechnung?campaignId={id}&campaignName={name}&campaignStart={start_date}&campaignEnd={end_date}"},
+            {"key": "sandbox", "label": "In Sandbox pruefen", "dangerLevel": "safe",
+             "permission": "agrar.erntefenster.read",
+             "navigationRoute": "/workflow/workflow-sandbox?process={process_key}&date={start_date}&campaign={id}"},
+            {"key": "alt_daten_zuordnen", "label": "Alt-Daten zuordnen", "dangerLevel": "moderate",
+             "permission": "agrar.erntefenster.backfill",
+             "commandEndpoint": "/api/v1/agrar/settlements/campaign-reference/backfill/{entity_id}",
+             "method": "POST", "requiresConfirmation": True},
+        ],
+        purpose="Erntefenster-Kampagnen aus Vorlagen anlegen, Settlements pruefen und Alt-Daten zuordnen.",
+        prompts=["Lege eine Erntefenster-Kampagne an.", "Ordne Alt-Settlements der Kampagne {entity_id} zu."],
+        no_workflow="Kampagnen sind Konfiguration; der Ernteprozess laeuft in den Fachmasken.",
+    )
+
+
 def build_kontrakte_mengenzeitraeume_liste() -> dict[str, Any]:
     """Kontrakt-Mengenzeiträume + Zu-/Abschläge — volle Legacy-Aktionsparitaet.
 
@@ -3335,6 +3390,7 @@ LISTEN_SCREEN_BUILDERS = {
     "agrar/zinsabrechnung": build_agrar_zinsabrechnung_liste,
     "agrar/sammelabrechnung": build_agrar_sammelabrechnung_liste,
     "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
+    "agrar/erntefenster-konfig": build_agrar_erntefenster_konfig_liste,
     "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
@@ -3443,6 +3499,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "agrar/zinsabrechnung": "/agrar/zinsabrechnung",
                 "agrar/sammelabrechnung": "/agrar/sammelabrechnung",
                 "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
+                "agrar/erntefenster-konfig": "/agrar/erntefenster-konfig",
                 "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
@@ -3495,6 +3552,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
 LISTEN_SYNONYME = {"agrar/zinsabrechnung": ["zinsabrechnung", "zib", "kontraktzinsen"],
                    "agrar/sammelabrechnung": ["sammelabrechnung", "rohware sammelabrechnung", "ernte sammeln"],
                    "agrar/annahmen-qualitaet-nachtrag": ["qualitaets nachtrag", "laborbuch nachtrag", "fehlende qualitaet"],
+                   "agrar/erntefenster-konfig": ["erntefenster", "erntekampagne", "saisonale kampagne"],
                    "kontrakte/mengenzeitraeume": ["mengenzeitraum", "zu abschlag", "abnahme staffel"],
                    "einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
