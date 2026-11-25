@@ -604,6 +604,8 @@ export interface ScreenDefinition {
     defaults?: Record<string, unknown>
     /** Key of the created entity id in the POST response (default `id`). */
     responseIdKey?: string
+    /** Wrap the flat form payload as `{ [payloadEnvelope]: payload }` (e.g. Training `data`). */
+    payloadEnvelope?: string
   }
   creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1

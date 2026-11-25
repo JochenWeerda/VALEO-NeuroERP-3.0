@@ -84,7 +84,11 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
         if (intentRef.current?.signature !== signature) intentRef.current = {signature, key: crypto.randomUUID()}
         payload = {...payload, idempotency_key: intentRef.current.key}
       }
-      const response = await apiClient.post<Record<string, unknown>>(original.creation.endpoint, payload)
+      const envelope = original.creation.payloadEnvelope
+      const requestBody: Record<string, unknown> = envelope
+        ? { [envelope]: payload }
+        : payload
+      const response = await apiClient.post<Record<string, unknown>>(original.creation.endpoint, requestBody)
       const idKey = original.creation.responseIdKey ?? 'id'
       const body = response.data ?? {}
       const nested = body.data && typeof body.data === 'object' ? body.data as Record<string, unknown> : undefined

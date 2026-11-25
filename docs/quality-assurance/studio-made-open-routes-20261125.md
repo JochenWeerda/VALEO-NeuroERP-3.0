@@ -104,14 +104,20 @@ Permission-Projektion (UI): `stammdaten.stoffstrom|bestandteil|verpackung|indiv_
 | `finance/bank-stamm` | Legacy-Factory | Alias auf `finance/bankkonto` Create |
 | `agribusiness/field-service-task-neu` | Legacy + fehlende SD | neue SD + POST `/api/v1/agribusiness/field-service-tasks` |
 
+## Elfte Hebung (Batch 11)
+
+| Maske / Runtime | Vorher | Nachher |
+|-----------------|--------|---------|
+| `UniversalNativeCreatePage` | nur flaches POST | optional `payloadEnvelope` (z. B. `data`) |
+| `personal/schulung-neu` | Legacy (Training `{data}`) | Native Create mit `payloadEnvelope=data` |
+
 ## Noch offen (Folge)
 
 - 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
-- `personal/schulung-neu`: Training-API erwartet Payload-Hülle `{data:…}` — Legacy bis Adapter
 - `kontrakte/mengenzeitraeume`: POST nur unter `/{kontrakt_nr}/…` (kein flaches Create)
 - `fibu/abschluss-checklist-detail`: Prozessmaske (Saldenvortrag), kein Stamm-Create
-- Admin-Factories (ai-approvals, command-monitor, agenten-integration)
+- Admin-Factories (ai-approvals, command-monitor, agenten-integration) — Ops-Dashboards ohne Stamm-Create
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

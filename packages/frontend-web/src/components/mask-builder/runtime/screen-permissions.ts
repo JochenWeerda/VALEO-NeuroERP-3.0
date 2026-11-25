@@ -94,7 +94,7 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
       ]
       return fachlich.some(b => roles.has(`${b}_BEARBEITEN`) || roles.has(`${b}_ADMIN`)) || roles.has('manager')
     }
-    if (permission.startsWith('personal.mitarbeiter.')) {
+    if (permission.startsWith('personal.mitarbeiter.') || permission.startsWith('personal.schulung.')) {
       return roles.has('PERSONAL_BEARBEITEN') || roles.has('PERSONAL_ADMIN') || roles.has('manager')
     }
     // Betriebsstaetten/Hausbank/Mengeneinheit/Artikel-Stamm Create mirrors SCHREIBEN["STAMMDATEN"].

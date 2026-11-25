@@ -104,6 +104,12 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(zagr, user([], ['SALES_BEARBEITEN']))).toEqual([])
     expect(getScreenPermissions(zagr, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['preise.zuabschlaggruppe.create'])
   })
+  it('matches PERSONAL write roles for Schulung creation', () => {
+    const schulung: ScreenDefinition = { ...screen, id: 'personal/schulung-neu', domain: 'personal', actions: [],
+      creation: { endpoint: '/api/v1/training/courses', permission: 'personal.schulung.create', detailRoute: '/personal/schulungen/{entity_id}', payloadEnvelope: 'data' } }
+    expect(getScreenPermissions(schulung, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(schulung, user([], ['PERSONAL_BEARBEITEN']))).toEqual(['personal.schulung.create'])
+  })
 })
 
 
