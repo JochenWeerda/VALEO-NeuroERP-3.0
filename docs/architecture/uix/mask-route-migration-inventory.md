@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1090 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1091 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 36 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 35 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 903 |
+| runtime_wired | 904 |
 | legacy_mask_pattern | 13 |
-| hand_built | 127 |
+| hand_built | 126 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 36 |
+| handgebaute Routen | 442 | 35 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1090 |
+| Runtime-verdrahtet | — | 1091 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -61,6 +61,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 - `/` ← `src/pages/start-dashboard.tsx`
 - `abrechnung/eb-lieferschein-kontrolle` ← `src/pages/abrechnung/eb-lieferschein-kontrolle.tsx`
+- `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
 - `admin/api-keys` ← `src/pages/admin/api-keys.tsx`
 - `admin/audit-log` ← `src/pages/admin/audit-log.tsx`
 - `admin/background-jobs` ← `src/pages/admin/background-jobs.tsx`
@@ -1166,7 +1167,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
 - `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
-- `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
 - `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
 - `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`

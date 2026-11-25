@@ -83,6 +83,13 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     ) {
       return roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN') || roles.has('manager')
     }
+    // AI-Freigaben: Admin-Ops + Finance (AP-Approval).
+    if (permission.startsWith('admin.ai_approvals.')) {
+      return (
+        roles.has('ADMIN') || roles.has('manager')
+        || roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN')
+      )
+    }
     // Opportunity Create mirrors SCHREIBEN["CRM"] (CRM + SALES write roles).
     if (permission.startsWith('crm.opportunity.')) {
       return (

@@ -5,7 +5,7 @@ from typing import Any
 
 from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
 
-from app.core.stamm_list_parent import build_stamm_list_screen
+from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
@@ -64,9 +64,44 @@ def build_admin_agenten_integration() -> dict[str, Any]:
         edit_permission="admin.agenten-integration.update", bearbeiten_endpoint=None)
 
 def build_admin_ai_approvals() -> dict[str, Any]:
-    return _batch13_stamm("admin/ai-approvals", domain="admin", title="Ai approvals",
-        entity_endpoint="/api/v1/finance/ap/approval-workflow/status/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.ai-approvals.update", bearbeiten_endpoint=None)
+    """AI-Freigaben: offene Eingangsrechnungen — Paritaet zur Legacy-Worklist."""
+    return build_stamm_list_screen(
+        screen_id="admin/ai-approvals",
+        domain="admin",
+        title="AI-Aktionen zur Freigabe",
+        subtitle="Human-in-the-loop: Eingangsrechnungen zur manuellen Freigabe",
+        endpoint="/api/v1/belege/purchase_invoice?status=open&limit=50",
+        row_route=None,
+        bundle="admin",
+        columns=[
+            {"key": "beleg_nr", "label": "Beleg-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "partner_name", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "partner_nummer", "label": "Partner-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "waehrung", "label": "Währung", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[stamm_list_export_action()],
+        row_actions=[
+            {
+                "key": "freigeben",
+                "label": "Freigeben",
+                "dangerLevel": "moderate",
+                "permission": "admin.ai_approvals.approve",
+                "commandEndpoint": "/api/v1/finance/ap/approval-workflow/approve",
+                "method": "POST",
+                "requiresConfirmation": True,
+                "inputFields": [
+                    {"key": "invoice_id", "label": "Rechnungs-ID", "type": "text", "required": True},
+                    {"key": "comment", "label": "Kommentar", "type": "textarea"},
+                ],
+            },
+        ],
+        purpose="Eingangsrechnungen im Freigabe-Workflow finden und manuell freigeben.",
+        prompts=["Welche Eingangsrechnungen warten auf Freigabe?", "Gib Rechnung {entity_id} frei."],
+        no_workflow="Worklist; Freigabe erfolgt ueber den Approval-Workflow-Endpunkt.",
+    )
 
 def build_admin_api_keys() -> dict[str, Any]:
     return build_stamm_list_screen(
