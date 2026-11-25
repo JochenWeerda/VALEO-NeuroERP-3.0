@@ -28,7 +28,6 @@
   "mask:admin/backup-restore:bearbeiten",
   "mask:admin/belegfolgekonfig:open",
   "mask:admin/berechtigungen-matrix:bearbeiten",
-  "mask:admin/command-monitor:bearbeiten",
   "mask:admin/control-center/ai-approvals:open",
   "mask:admin/control-center/incident-response:open",
   "mask:admin/control-center/operations:open",

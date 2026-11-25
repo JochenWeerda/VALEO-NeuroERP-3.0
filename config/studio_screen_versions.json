@@ -135,7 +135,7 @@
       "version": "1.0.0"
     },
     "admin/command-monitor": {
-      "definition_hash": "3784ba80e32804083d96d296a9e8efb8a93d4cf16e6491afd2e7e68dc29c745d",
+      "definition_hash": "842b3b04a47d7a467a4d542c8dee08cbc3dd6a22243fa98cce5ad41a454cf3c5",
       "gates_passed": [
         "A",
         "B",

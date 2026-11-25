@@ -3,7 +3,6 @@
   "abweichungen_masken": [
     "admin/backup-restore",
     "admin/berechtigungen-matrix",
-    "admin/command-monitor",
     "admin/system-einstellungen",
     "admin/zeitachsen-editor",
     "agrar/ernte-annahme-abrechnung",

@@ -90,6 +90,10 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN')
       )
     }
+    // Command Monitor: Admin-Ops Read-Model.
+    if (permission.startsWith('admin.command_monitor.')) {
+      return roles.has('ADMIN') || roles.has('manager')
+    }
     // Opportunity Create mirrors SCHREIBEN["CRM"] (CRM + SALES write roles).
     if (permission.startsWith('crm.opportunity.')) {
       return (

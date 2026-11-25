@@ -193,9 +193,83 @@ def build_admin_branch_detail() -> dict[str, Any]:
 
 
 def build_admin_command_monitor() -> dict[str, Any]:
-    return _batch13_stamm("admin/command-monitor", domain="admin", title="Command monitor",
-        entity_endpoint="/api/v1/articles/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.command-monitor.update", bearbeiten_endpoint=None)
+    """Command Monitor — Idempotenz-Cockpit (Paritaet zur Legacy-Panel-Maske)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin/command-monitor",
+        domain="admin",
+        title="Command Monitor",
+        subtitle="Idempotenz-Nachweis, Replay-Schutz und Command-Abdeckung",
+        business_purpose=(
+            "Idempotente Process-Kernel-Commands und Replay-Schutz beobachten "
+            "(dieselbe Datenquelle wie das Legacy-IdempotencyMonitoringPanel)."
+        ),
+        example_prompts=[
+            "Wie hoch ist die Idempotenz-Abdeckung?",
+            "Welche Commands und Aggregate werden beobachtet?",
+        ],
+        test_id="admin-command-monitor",
+        summary=[
+            {"key": "confidence_score", "label": "Confidence %", "tone": "info"},
+            {"key": "total_commands", "label": "Commands gesamt", "tone": "neutral"},
+            {"key": "idempotent_commands", "label": "Idempotent", "tone": "success"},
+            {"key": "idempotent_coverage_pct", "label": "Abdeckung %", "tone": "success"},
+            {"key": "human_confirmation_commands", "label": "Human Confirm", "tone": "warning"},
+            {"key": "agent_ready_commands", "label": "Agent-ready", "tone": "info"},
+            {"key": "total_records", "label": "Store Records", "tone": "neutral"},
+            {"key": "execution_count", "label": "Execution-IDs", "tone": "neutral"},
+            {"key": "tenant_count", "label": "Mandanten", "tone": "neutral"},
+            {"key": "aggregate_count", "label": "Aggregate", "tone": "neutral"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/process/actions/idempotency/overview"),
+            cockpit_list_source("commands", "/api/v1/process/actions/idempotency/commands", page_size=200),
+            cockpit_list_source("aggregates", "/api/v1/process/actions/idempotency/aggregates", page_size=200),
+            cockpit_list_source("lookup_paths", "/api/v1/process/actions/idempotency/lookup-paths", page_size=20),
+        ],
+        tables=[
+            {
+                "key": "commands",
+                "label": "Commands",
+                "dataSourceKey": "commands",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "name", "label": "Command", "filterable": True, "priority": "primary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "aggregates",
+                "label": "Aggregate",
+                "dataSourceKey": "aggregates",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "name", "label": "Aggregate", "filterable": True, "priority": "primary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "lookup_paths",
+                "label": "Lookup-Pfade",
+                "dataSourceKey": "lookup_paths",
+                "pageSize": 20,
+                "columns": [
+                    {"key": "path", "label": "Pfad", "filterable": True, "priority": "primary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="admin.command_monitor.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Monitoring ohne eigenen Objekt-Lebenszyklus.",
+    )
 
 def build_admin_system_einstellungen() -> dict[str, Any]:
     return _batch13_stamm("admin/system-einstellungen", domain="admin", title="System einstellungen",
