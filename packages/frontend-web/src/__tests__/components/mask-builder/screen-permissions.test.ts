@@ -72,6 +72,12 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(rek, user([], ['LAGER_BEARBEITEN']))).toEqual(['qualitaet.reklamation.create'])
     expect(getScreenPermissions(rek, user([], ['AGRAR_ADMIN']))).toEqual(['qualitaet.reklamation.create'])
   })
+  it('matches AGRAR write roles for Labor creation', () => {
+    const labor: ScreenDefinition = { ...screen, id: 'qualitaet/labor-detail', domain: 'qualitaet', actions: [],
+      creation: { endpoint: '/api/v1/qualitaet/labor-auftraege', permission: 'qualitaet.labor.create', detailRoute: '/qualitaet/labor/{entity_id}' } }
+    expect(getScreenPermissions(labor, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(labor, user([], ['AGRAR_BEARBEITEN']))).toEqual(['qualitaet.labor.create'])
+  })
 })
 
 

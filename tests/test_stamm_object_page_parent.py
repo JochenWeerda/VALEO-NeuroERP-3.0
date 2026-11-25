@@ -247,6 +247,17 @@ def test_crm_kontakt_has_native_creation() -> None:
     assert {"customer_id", "first_name", "last_name", "email"} <= keys
 
 
+def test_qualitaet_labor_has_native_creation() -> None:
+    """Batch 3: Laborauftrag Create an Detail-SD (nicht Listen-ID)."""
+    screen = get_screen_definition("qualitaet/labor-detail")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/qualitaet/labor-auftraege"
+    assert creation["detailRoute"] == "/qualitaet/labor/{entity_id}"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"chargenId", "labor"} <= keys
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

@@ -644,6 +644,8 @@ def build_finance_bank_account_stamm() -> dict[str, Any]:
 
 
 def build_qualitaet_labor_stamm() -> dict[str, Any]:
+    # Listen-SD gleicher ID (domain_batch15) gewinnt fuer get_screen_definition —
+    # Create liegt an qualitaet/labor-detail.
     return _stamm(
         screen_id="qualitaet/labor-auftrag",
         domain="qualitaet",

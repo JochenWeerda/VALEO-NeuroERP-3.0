@@ -71,6 +71,16 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Labor Create mirrors SCHREIBEN["AGRAR"] on POST /qualitaet/labor-auftraege.
+    if (permission.startsWith('qualitaet.labor.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
+        || roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }
