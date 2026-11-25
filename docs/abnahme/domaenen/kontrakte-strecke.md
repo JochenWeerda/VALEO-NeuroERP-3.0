@@ -115,7 +115,7 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 3:
 - `strecke/speditionen-fracht-preise` — Speditionen fracht preise
 - `vertrag/rahmenvertraege` — Rahmenvertraege
 
-Aktionen der Domaenenmasken: 58, davon serverwirksam 13; ohne CLI 0; nicht verfuegbar 13; nicht deklariert 5.
+Aktionen der Domaenenmasken: 58, davon serverwirksam 13; ohne CLI 0; nicht verfuegbar 11; nicht deklariert 5.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 

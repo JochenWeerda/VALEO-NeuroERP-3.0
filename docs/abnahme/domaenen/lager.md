@@ -98,7 +98,7 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 12:
 - `lager/silo-uebersicht-liste` — Silo-Uebersicht
 - `lager/terminal` — Terminal
 
-Aktionen der Domaenenmasken: 80, davon serverwirksam 20; ohne CLI 0; nicht verfuegbar 1; nicht deklariert 27.
+Aktionen der Domaenenmasken: 80, davon serverwirksam 20; ohne CLI 0; nicht verfuegbar 1; nicht deklariert 22.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 

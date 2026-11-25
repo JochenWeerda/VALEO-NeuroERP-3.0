@@ -99,7 +99,7 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 8:
 - `waage/vorlagen` — Vorlagen
 - `waage/wiegeschein-detail` — Wiegeschein detail
 
-Aktionen der Domaenenmasken: 277, davon serverwirksam 59; ohne CLI 0; nicht verfuegbar 1; nicht deklariert 82.
+Aktionen der Domaenenmasken: 277, davon serverwirksam 59; ohne CLI 0; nicht verfuegbar 0; nicht deklariert 75.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 
