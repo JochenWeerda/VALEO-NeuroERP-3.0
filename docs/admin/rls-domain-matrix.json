@@ -1055,6 +1055,7 @@
     "app/auth/portal_kunde.py",
     "app/core/customer_master_profile.py",
     "app/core/flow_spine_registry.py",
+    "app/core/public_kunden_mandant.py",
     "app/core/screen_definitions_domain_batch15.py",
     "app/core/screen_definitions_finance_capture.py",
     "app/crm/__init__.py",
