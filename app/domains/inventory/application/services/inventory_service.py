@@ -86,7 +86,9 @@ class InventoryService:
         storage_fee_start_date: Optional[date] = None,
         storage_fee_monthly_rate: Optional[Decimal] = None,
         storage_fee_last_charged_until: Optional[date] = None,
-        tenant_id: str = None
+        tenant_id: str = None,
+        buchungsschluessel: Optional[str] = None,
+        commit: bool = True,
     ):
         """Eine Lagerbewegung buchen: Bestandsbuch und Artikelbestand in einem Commit.
 
@@ -108,6 +110,10 @@ class InventoryService:
         Artikel und Lager muessen dem Mandanten gehoeren. Vorher-/Nachher-Bestand
         stammen aus dem Bestandsbuch je Lager; der Artikelbestand laeuft um dieselbe
         Menge mit. Kein Abgang macht den Lagerbestand negativ.
+
+        ``buchungsschluessel`` (24.11.2026, docs/design/bestandsbuchung-wege-konsolidierung.md): ist der fachliche
+        Vorgang schon gebucht, kommt die vorhandene Bewegung zurueck - kein zweiter Journaleintrag, kein zweiter
+        Bestandszugang (Wiederholung, paralleler Zweitversuch). ``commit=False`` laesst die Transaktion beim Aufrufer.
         """
         from app.services.inventory_movement_direction import signed_quantity
         from app.services.inventory_stock_balance import current_stock
@@ -122,7 +128,7 @@ class InventoryService:
             menge = abs(menge)
         elif typ == "transfer":
             typ = "umbuchung"
-        elif typ != "adjustment":
+        elif typ not in ("adjustment", "opening_balance"):  # beide vorzeichenbehaftet (Richtungstabelle)
             raise ValueError(f"Invalid movement type: {movement_type}")
         movement_type = typ
         quantity = menge
@@ -142,6 +148,13 @@ class InventoryService:
         )
         if not warehouse:
             raise ValueError(f"Warehouse {warehouse_id} not found")
+
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import beanspruche
+
+            vorhanden = beanspruche(self.db, tenant_id, buchungsschluessel)
+            if vorhanden is not None:
+                return self.db.get(StockMovementModel, vorhanden)
 
         delta = Decimal(str(signed_quantity(movement_type, float(quantity))))
         previous_stock = Decimal(str(current_stock(
@@ -198,6 +211,13 @@ class InventoryService:
 
         # Save changes
         self.db.add(movement)
+        self.db.flush()
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import verknuepfe
+
+            verknuepfe(self.db, tenant_id, buchungsschluessel, str(movement.id))
+        if not commit:
+            return movement
         self.db.commit()
         self.db.refresh(movement)
 

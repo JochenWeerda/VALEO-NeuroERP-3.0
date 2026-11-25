@@ -271,6 +271,22 @@ async def post_inventory_count(
     total_positive = Decimal("0")
     total_negative = Decimal("0")
 
+    # Buchungsentwurf zum gleitenden Durchschnitt, vor den Bewegungen (Schnitt = Stand vor der Inventur).
+    from app.services.bestandsbewertung import BuchungNichtMoeglich, entwerfe_bestandsbuchung
+
+    from .inventory_operations import melde_fehlende_bewertung
+
+    differenzen = [(str(z.article_id), Decimal(str((z.counted_qty or 0) - (z.expected_qty or 0))), "t")
+                   for z in lines if abs((z.counted_qty or 0) - (z.expected_qty or 0)) >= 0.001]
+    journal_entry_id = None
+    if differenzen:
+        try:
+            journal_entry_id = entwerfe_bestandsbuchung(
+                db, tid, f"INVENTUR-{count_id[:8].upper()}", f"Inventurdifferenzen {count_id[:8]}", posting_date,
+                differenzen)
+        except BuchungNichtMoeglich as grund:
+            melde_fehlende_bewertung("inventory_counts_gl", f"INVENTUR-{count_id[:8].upper()} ({grund})")
+
     for line in lines:
         diff = (line.counted_qty or 0) - (line.expected_qty or 0)
         if abs(diff) < 0.001:
@@ -321,13 +337,6 @@ async def post_inventory_count(
             total_positive += Decimal(str(diff))
         else:
             total_negative += Decimal(str(abs(diff)))
-
-    # Keine Buchung ohne Bewertung: frueher ging die Netto-Differenz in Tonnen als Eurobetrag ins Journal.
-    journal_entry_id = None
-    if total_positive != total_negative:
-        from .inventory_operations import melde_fehlende_bewertung
-
-        melde_fehlende_bewertung("inventory_counts_gl", f"INVENTUR-{count_id[:8].upper()}")
 
     # Update count status
     count.status = "posted"

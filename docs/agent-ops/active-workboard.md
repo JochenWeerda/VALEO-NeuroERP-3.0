@@ -988,6 +988,13 @@ Dateibesitz: app/services/lagergeld_rechnung.py, app/domains/inventory/api/stora
 
 ## M0-I18NEXT-GHSA-6JCC-20261123 — abgeschlossen, Cursor (M0)
 Meilenstein: M0 (main ohne rote Laeufe). Owner: Cursor.
+Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrt den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
+Ziel: Herstellerfix statt Backport (ADR-080): i18next auf ^26.3.4 im Frontend, Lockfile; react-i18next 16 erlaubt i18next >= 25.10.9. Code nutzt keine in 26.0.0 entfernte Option (initImmediate, interpolation.format, simplifyPluralSuffix).
+Dateibesitz: packages/frontend-web/package.json (nur i18next), pnpm-lock.yaml, QA docs/quality-assurance/i18next-ghsa-6jcc-20261123.md.
+Abnahme: Dependency Scan, Python and Node Dependency Audit, Frontend-Tests und -Build gruen.
+
+## M3-BESTANDSBEWERTUNG-BUCHUNG-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 2, gestapelt auf PR #184). Bestandskorrektur, Schwund, MHD-Abschreibung und Inventurdifferenzen erzeugen einen Buchungsentwurf (draft) zum gleitenden Durchschnitt: Zugang Soll Bestand an Gegenkonto Zugang, Abgang Soll Gegenkonto Abgang an Bestand, Konten nur aus domain_einkauf.lager_kontenzuordnung (keine Ersatzkonten). Gebucht wird ueber den Freigabeweg des Hauptbuchs (APPROVAL-001). Fehlt Bewertung oder Zuordnung: Bestand operativ gebucht, Luecke gemeldet (melde_fehlende_bewertung). Fix: positive adjustment zaehlte im Durchschnitt als Abgang.
 Befund: Advisory GHSA-6jcc-5g8w-32mx (i18next deepExtend, DoS, moderate, veroeffentlicht 23.11.2026 20:53 UTC) sperrte den Node-Dependency-Gate aller PRs (i18next 25.5.3, behoben ab 26.3.4).
 Ergebnis: Herstellerfix (ADR-080) — i18next ^26.3.4, Lock 26.7.2; gemergt als #183 (4859a973d).
 
@@ -1009,3 +1016,53 @@ Befund aus M0-E2E-FULL-UAT: finance/bank-abgleich (bank-surface.tsx) kann Kontoa
 
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
+
+## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
+## STAMM-MENGENEINHEITEN-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Nutzerauftrag 24.11.2026: Mengeneinheiten nach a.eins, PR #186). Felder der Grundmengeneinheit (Nummer, Langtext, ISO-Name, DataNorm, Statistikkennzeichen, Rundung 0-4 nur nach oben bei aktiven Einheiten, Preisbezug, UN-Mengeneinheit Rec. 20), mitgelieferte Grundeinheiten, eRechnung liest den UN-Code aus dem Stamm, Maske stammdaten/mengeneinheit erweitert. Fachgrundlage docs/design/mengeneinheiten-aeins-uebernahme.md.
+## STAMM-GEBINDERECHNUNG-AEINS-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Artikelstamm, Mengeneinheiten nach a.eins, Schnitt 2a, PR #187). Reiner Rechenkern app/core/gebinde_rechnung.py: Gebindetypen 0-9 (6/7 deaktiv wie in a.eins), Ergebnismenge mit Rundung, Anzahl aus effektiver Menge mit Anbruch, Faktorherkunft (speziell vor allgemein). Fehlender Faktor -> GebindeNichtRechenbar, nie geraten. Offen 2b: Gebindefelder am Stamm und Anbindung an Belegpositionen.
+
+## STAMM-GEBINDE-STAMM-BELEG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (Mengeneinheiten nach a.eins, Schnitt 2b-1, gestapelt auf PR #186 und #187). Gebindefelder und LVS-Relevanz 0/1/2 am Mengeneinheiten-Stamm, Stufenfaktoren (domain_shared.artikel_gebindefaktoren, RLS je Befehl) mit serverseitiger Pflegepruefung, unveraenderliches Berechnungsabbild je Belegposition (document_items.gebinde_berechnung, Trigger), app/services/gebinde_aufloesung.py als einziger Rechenweg mit Stammdaten. Offen 2b-2: LVS-Buchungsverantwortung mit persistenter Idempotenz, Masken, Belegfluesse (Verwiegung, Teillieferung, Retoure, Storno).
+## M3-BESTANDSBEWERTUNG-GLEITEND-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Bestandsbewertung Schnitt 1, PR #184; Nutzerentscheid gleitender Durchschnitt). Einstandspreis beim Lagerzugang aus DocFlow (unit_cost/total_cost, Storno zum Zugangspreis), app/services/bestandsbewertung.py: gleitender_durchschnitt und bewerte je Lagereinheit; nicht umrechenbare Einheit -> BewertungNichtBestimmbar. Schnitt 2 (Buchungsentwurf) gestapelt auf diesem Zweig.
+
+## M3-PREISBEZUG-POSITION-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3/M4 (kaufmaennischer Rechenkern, Nutzerauftrag 24.11.2026). app/core/kaufmaennisch.py als eine Quelle der Positionsrechnung (DocFlow _line_amounts delegiert): Decimal durchgaengig, kaufmaennisch je Position gerundet, Belegsumme aus gerundeten Positionen. document_items.price_unit_quantity (Preis je Preisbezugsmenge, Bestand 1 = bisherige Bedeutung); Menge bleibt in ihrer Einheit, Umwandlung uebernimmt den Preisbezug. Golden Master tests/golden_master/diesel_220050.json (9 Positionen, 660,10 statt 660,11). Offen: beleg_anlage.position_in_preiseinheit rechnet Menge in die Preiseinheit um und nutzt float - auf Preisbezug umstellen.
+## M0-TEST-CONVERT-WARTEN-20261124 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0. native-docflow-convert.test.tsx griff synchron auf die Positionszeile des Uebernahme-Dialogs zu, die erst nach dem Dialog rendert; unter CI-Last rot (#186, Lauf 45371355464 Versuch 1). Test wartet jetzt auf die Zeile (findByLabelText); 5 Laeufe hintereinander gruen.
+
+## M3-BERICHTE-NUR-GEBUCHT-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. Bilanz, GuV und BWA (financial_reports.py) zaehlten Journalbuchungen ohne Status mit (je.status IS NULL); domain_erp.journal_entries.status ist auf frischer Installation nullbar ohne Vorgabe. Jetzt nur posted/reversed wie alle Journalleser (#164); Ratsche in tests/test_journal_storno_gebucht.py. Offen: status NOT NULL mit Vorgabe draft per Migration (Bestand pruefen).
+## M4-BESTANDSBUCHUNG-IDEMPOTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Schnitt 2b-2, Nutzerauftrag 24.11.2026). domain_inventory.bestandsbuchung_schluessel (PK tenant+schluessel, RLS je Befehl, FK auf die Bewegung): Belegfluss (docflow_lagerzugang, Schluessel je Position/Storno) und Lagerplatz (WarehouseService.book_stock_movement, WMS idempotency_key, Pickbestaetigung) beanspruchen den Schluessel vor allen Wirkungen. Wiederholung, parallele Zweitbuchung und Abbruch getestet. Offen: LVS-Buchungsverantwortung (lvs_relevanz aus PR #191) - welcher Weg bestandsfuehrend ist.
+
+## M4-FOLGEARTIKEL-FK-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Coverage-Matrix Artikelmodell, Punkt Beziehungen referenziell). domain_shared.artikel_folgeartikel: zusammengesetzte Fremdschluessel (tenant_id, artikel_nr|folge_artikel_nr) auf articles (tenant_id, article_number), ON UPDATE/DELETE CASCADE, Pruefbedingung verschieden; Anlageweg antwortet 404 statt 500. Bestand frisch und gewachsen: 0 Zeilen.
+## M3-JOURNAL-STATUS-PFLICHT-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3 (Folge aus PR #195). domain_erp.journal_entries.status: Vorgabe draft, NOT NULL, Pruefbedingung auf die vier Status des Buchungsdienstes (draft/posted/cancelled/reversed). Gewachsener Bestand: 0 Eintraege ohne Status, Migration in zurueckgerollter Transaktion geprueft.
+## M3-SALDENVORTRAG-AKTION-20261124 — zur Abnahme, Claude Code (M3)
+Meilenstein: M3. Maskenaktion Saldenvortrag buchen in fibu/abschluss-checklist-detail (Studio): POST /api/v1/finance/closing/saldenvortrag mit Eingabe Jahr, Recht finance.closing.saldenvortrag (Projektion aus finance_admin), dangerLevel high, forbiddenForAgents (ADR-086). Fachweg seit PR #174.
+
+## M4-BUCHUNGSDIENST-SCHLUESSEL-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung, Schritt 1). InventoryService.process_stock_movement nimmt buchungsschluessel (bestandsbuchung_schluessel, PR #194) und commit=False (Transaktion beim Aufrufer) - Voraussetzung, damit die 13 Direktschreiber auf den einen Dienst umgestellt werden koennen.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
+
+## M4-KONSOLIDIERUNG-KORREKTUR-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung Schritt 2, gestapelt auf PR #200 und #201). Bestandskorrektur/Schwund/MHD (inventory_operations.create_bestandskorrektur) bucht ueber InventoryService.process_stock_movement mit Buchungsschluessel korrektur:<id>: echter Vorher-/Nachherbestand statt 0, Unterdeckung 422. Ratsche-Baseline inventory_operations 2->1.
+
+## M4-STORNO-BEWERTUNG-KONSISTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4/M3 (Bestandsbuchung und Bewertung, gestapelt auf PR #202). inventory_correction_service.storno_korrektur markierte auch das Original mit storno_ref; die Bestandsbewertung las das als Storno - ein stornierter Zugang ergab Bestand -10 statt 10. Rueckverweis entfernt (storno_ref nur vorwaerts). Umstellung des Storno-Dienstes auf InventoryService folgt (Mock-Tests in test_dom_inv_004 vorher auf echte DB umstellen).
+## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
+Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
+## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
+Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 Stellen schreiben am Buchungsdienst InventoryService.process_stock_movement vorbei ins Bestandsjournal, neun davon ohne Artikelbestand. Zielbild und Reihenfolge docs/design/bestandsbuchung-wege-konsolidierung.md; Ratsche tests/test_bestandsjournal_schreiber_ratsche.py (Baseline nur senken). Naechste Schritte: Dienst um Buchungsschluessel erweitern, Wege umstellen, LVS 2 buchend.
+
+## M0-JOURNALTEST-OHNE-DDL-20261125 — zur Abnahme, Claude Code (M0)
+Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.py (aus PR #196) spielte die Migration auf der echten domain_erp.journal_entries zurueck und vor; ALTER TABLE wartete in der vollen CI-Suite hinter offenen Transaktionen frueherer Tests ohne Ende (#201, Backend 90 min, abgebrochen). Jetzt Einordnungslogik an einer temporaeren Kopie, lock_timeout 5 s; mit gleichzeitig offener Lesetransaktion auf der Journaltabelle gruen.
+
+## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.

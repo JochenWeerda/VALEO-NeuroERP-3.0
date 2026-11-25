@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-23
+last_reviewed: 2026-11-25
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -451,7 +451,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `export/umsatzsteuer-voranmeldung-liste` | USt-Voranmeldung | finance | niedrig | — | `GET /api/v1/masks/export/umsatzsteuer-voranmeldung-liste/agent-contract` |
 | `export/ustva` | Umsatzsteuervoranmeldung | export | niedrig | — | `GET /api/v1/masks/export/ustva/agent-contract` |
 | `fibu/abschluss-checklist` | Abschluss-Checkliste | finance | niedrig | — | `GET /api/v1/masks/fibu/abschluss-checklist/agent-contract` |
-| `fibu/abschluss-checklist-detail` | Abschluss checklist detail | fibu | niedrig | — | `GET /api/v1/masks/fibu/abschluss-checklist-detail/agent-contract` |
+| `fibu/abschluss-checklist-detail` | Abschluss checklist detail | fibu | hoch | — | `GET /api/v1/masks/fibu/abschluss-checklist-detail/agent-contract` |
 | `fibu/abschluss-cockpit` | Abschluss-Cockpit | finance | niedrig | — | `GET /api/v1/masks/fibu/abschluss-cockpit/agent-contract` |
 | `fibu/anlage` | Anlage | finance | niedrig | — | `GET /api/v1/masks/fibu/anlage/agent-contract` |
 | `fibu/anlagen` | Anlagen Gesamt | fibu | niedrig | — | `GET /api/v1/masks/fibu/anlagen/agent-contract` |
@@ -13738,6 +13738,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
 | `edit` | Bearbeiten | safe | nein | `—` |
+| `saldenvortrag` | Saldenvortrag buchen | high | ja | `/api/v1/finance/closing/saldenvortrag` |
 
 ---
 
