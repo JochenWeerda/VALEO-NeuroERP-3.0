@@ -1,7 +1,2 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
-
-export default createStammNativeDetailPage(
-  'admin/ai-approvals',
-  'admin-ai-approvals',
-  () => import('./ai-approvals-legacy'),
-)
+/** Ops-Dashboard (keine Stamm-Create-Paritaet) — spezialisierte Freigabe-Oberflaeche. */
+export { default } from './ai-approvals-legacy'

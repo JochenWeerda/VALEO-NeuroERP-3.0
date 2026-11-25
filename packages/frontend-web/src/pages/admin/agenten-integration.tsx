@@ -1,9 +1,3 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
-
-export { AgentenIntegrationWorkspace } from './agenten-integration-legacy'
-
-export default createStammNativeDetailPage(
-  'admin/agenten-integration',
-  'admin-agenten-integration',
-  () => import('./agenten-integration-legacy'),
-)
+/** Admin-Workspace — spezialisierte Integrationsoberflaeche, kein Stamm-Create. */
+export { AgentenIntegrationWorkspace } from '@/components/mask-builder/specialized/admin/integration-workspace'
+export { default } from '@/components/mask-builder/specialized/admin/integration-workspace'

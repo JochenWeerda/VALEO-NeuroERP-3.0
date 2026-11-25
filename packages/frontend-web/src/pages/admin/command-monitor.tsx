@@ -1,7 +1,2 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
-
-export default createStammNativeDetailPage(
-  'admin/command-monitor',
-  'admin-command-monitor',
-  () => import('./command-monitor-legacy'),
-)
+/** Ops-Dashboard (keine Stamm-Create-Paritaet) — Idempotenz-/Replay-Monitor. */
+export { default } from './command-monitor-legacy'

@@ -111,13 +111,17 @@ Permission-Projektion (UI): `stammdaten.stoffstrom|bestandteil|verpackung|indiv_
 | `UniversalNativeCreatePage` | nur flaches POST | optional `payloadEnvelope` (z. B. `data`) |
 | `personal/schulung-neu` | Legacy (Training `{data}`) | Native Create mit `payloadEnvelope=data` |
 
+## Zwoelfte Hebung (Batch 12)
+
+Ops-/Workspace-Masken vom falschen `createStammNativeDetailPage`-Factory geloest:
+`admin/ai-approvals`, `admin/command-monitor`, `admin/agenten-integration` (spezialisiert),
+`kontrakte/mengenzeitraeume` (pfadgebundenes Workspace).
+
 ## Noch offen (Folge)
 
-- 35 `legacy_wrapper`-Routen (Admin-Suite, Agrar-Prozessmasken ohne SD-Create)
-- `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST-Create im Backend (nur Transitionen) — Legacy bleibt bis API
-- `kontrakte/mengenzeitraeume`: POST nur unter `/{kontrakt_nr}/…` (kein flaches Create)
-- `fibu/abschluss-checklist-detail`: Prozessmaske (Saldenvortrag), kein Stamm-Create
-- Admin-Factories (ai-approvals, command-monitor, agenten-integration) — Ops-Dashboards ohne Stamm-Create
+- 35 `legacy_wrapper`-Routen (`createLegacyMaskPage`, Admin-Suite/Agrar-Prozess)
+- `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST — Factory+Legacy bis API
+- `fibu/abschluss-checklist-detail`: Prozessmaske, Create weiter Legacy
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

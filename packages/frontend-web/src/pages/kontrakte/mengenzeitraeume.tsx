@@ -1,7 +1,5 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
-
-export default createStammNativeDetailPage(
-  'kontrakte/mengenzeitraeume',
-  'kontrakte-mengenzeitraeume',
-  () => import('./mengenzeitraeume-legacy'),
-)
+/**
+ * Mengenzeiträume / Zu-Abschläge: Workspace mit pfadgebundenen POSTs
+ * (`/kontrakte/{kontrakt_nr}/mengenzeitraeume`) — kein flaches Stamm-Create.
+ */
+export { default } from './mengenzeitraeume-legacy'
