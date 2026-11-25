@@ -281,7 +281,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg vorhanden** | `packages/frontend-web/tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts` — Spec committed; Lauf braucht Dev-Server + Playwright-Browser (hier kein Frontend auf :3001) |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — 3/3 passed mit `setzeUiTestsitzung` (unsigniertes UI-Token, Mock-SD); kein Live-SSO |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **blockiert** | Kein SSO-/OIDC-Live-Mandant in diesem Agent-Environment; Qualitaetsversprechen verlangt reale SSO + Theme-Screenshots der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
