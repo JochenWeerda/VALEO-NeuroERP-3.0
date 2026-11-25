@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-23",
+  "generatedAt": "2026-11-25",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -900,7 +900,7 @@
     },
     {
       "mask_id": "admin/api-keys",
-      "title": "Api keys",
+      "title": "API-Schlüssel",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__api-keys/:entityId",
@@ -908,19 +908,7 @@
       "screen_definition_url": "/api/v1/masks/admin/api-keys/screen-definition",
       "readiness_url": "/api/v1/masks/admin/api-keys/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "admin.api-keys.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
@@ -1058,7 +1046,7 @@
     },
     {
       "mask_id": "admin/branches",
-      "title": "Branches",
+      "title": "Niederlassungen",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__branches/:entityId",
@@ -1066,16 +1054,30 @@
       "screen_definition_url": "/api/v1/masks/admin/branches/screen-definition",
       "readiness_url": "/api/v1/masks/admin/branches/readiness",
       "risk_summary": "low",
+      "actions": [],
+      "sensitive_fields": [],
+      "mcp_tool_ids": []
+    },
+    {
+      "mask_id": "admin/branches/detail",
+      "title": "Niederlassung",
+      "domain": "admin",
+      "process_keys": [],
+      "rollout_route": "/mask-rollout/admin__branches__detail/:entityId",
+      "agent_contract_url": "/api/v1/masks/admin/branches/detail/agent-contract",
+      "screen_definition_url": "/api/v1/masks/admin/branches/detail/screen-definition",
+      "readiness_url": "/api/v1/masks/admin/branches/detail/readiness",
+      "risk_summary": "medium",
       "actions": [
         {
           "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
+          "label": "Umbenennen",
+          "dangerLevel": "moderate",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "admin.branches.update",
-          "commandEndpoint": null,
-          "method": null,
+          "permission": "admin:all",
+          "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -1431,7 +1433,7 @@
     },
     {
       "mask_id": "admin/tenants",
-      "title": "Tenants",
+      "title": "Mandanten",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__tenants/:entityId",
@@ -1439,25 +1441,13 @@
       "screen_definition_url": "/api/v1/masks/admin/tenants/screen-definition",
       "readiness_url": "/api/v1/masks/admin/tenants/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "admin.tenants.update",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
     {
       "mask_id": "admin/users",
-      "title": "Users",
+      "title": "Benutzer",
       "domain": "admin",
       "process_keys": [],
       "rollout_route": "/mask-rollout/admin__users/:entityId",
@@ -1467,15 +1457,15 @@
       "risk_summary": "low",
       "actions": [
         {
-          "key": "bearbeiten",
-          "label": "Bearbeiten",
+          "key": "export",
+          "label": "CSV-Export",
           "dangerLevel": "safe",
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
-          "permission": "admin.users.update",
+          "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": null
+          "stubReason": "Exportiert die Liste mit ihren Spalten; keine Serverwirkung."
         }
       ],
       "sensitive_fields": [],
@@ -13897,7 +13887,7 @@
       "agent_contract_url": "/api/v1/masks/fibu/abschluss-checklist-detail/agent-contract",
       "screen_definition_url": "/api/v1/masks/fibu/abschluss-checklist-detail/screen-definition",
       "readiness_url": "/api/v1/masks/fibu/abschluss-checklist-detail/readiness",
-      "risk_summary": "low",
+      "risk_summary": "high",
       "actions": [
         {
           "key": "edit",
@@ -13908,6 +13898,17 @@
           "permission": "fibu.write",
           "commandEndpoint": null,
           "method": null,
+          "stubReason": null
+        },
+        {
+          "key": "saldenvortrag",
+          "label": "Saldenvortrag buchen",
+          "dangerLevel": "high",
+          "humanApprovalRequired": true,
+          "requiresConfirmation": true,
+          "permission": "finance.closing.saldenvortrag",
+          "commandEndpoint": "/api/v1/finance/closing/saldenvortrag",
+          "method": "POST",
           "stubReason": null
         }
       ],
@@ -20772,7 +20773,7 @@
           "permission": null,
           "commandEndpoint": null,
           "method": null,
-          "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum."
+          "stubReason": null
         },
         {
           "key": "aufloesen",
@@ -22402,7 +22403,7 @@
     },
     {
       "mask_id": "process/background-jobs",
-      "title": "Hintergrund-Jobs",
+      "title": "Hintergrundjobs",
       "domain": "platform",
       "process_keys": [],
       "rollout_route": "/mask-rollout/process__background-jobs/:entityId",
@@ -27250,5 +27251,5 @@
       "endpoint": "POST /api/v1/mcp/tools/call"
     }
   ],
-  "event_count": 142
+  "event_count": 143
 }

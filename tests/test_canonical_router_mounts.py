@@ -90,3 +90,46 @@ def test_unique_purchasing_delete_routes_remain_mounted(kind):
                and r.path == path and "DELETE" in r.methods]
     assert len(matches) == 1
     assert matches[0].endpoint is getattr(import_module("app.einkauf.router"), f"delete_{singular}")
+
+@pytest.mark.parametrize("method,path,module", [
+    ("GET", "/actions", "ki_usability"),
+    ("GET", "/actions/{action_id}", "ki_usability"),
+    ("POST", "/voice/resolve", "ki_usability"),
+    ("GET", "/pos/payment-methods", "pos_payments"),
+    ("GET", "/reports/export/{report_type}", "app.reports.router"),
+    ("GET", "/crm/contacts/{contact_id}", "contacts"),
+    ("PUT", "/crm/contacts/{contact_id}", "contacts"),
+    ("DELETE", "/crm/contacts/{contact_id}", "contacts"),
+    ("GET", "/crm/consents", "crm_consents"),
+    ("POST", "/crm/consents", "crm_consents"),
+    ("POST", "/crm/consents/{consent_id}/revoke", "crm_consents"),
+])
+def test_previously_shadowed_routes_match_the_published_contract(method, path, module):
+    from fastapi.openapi.utils import get_openapi
+
+    path = settings.API_V1_STR + path
+    matches = [route for route in app.routes if isinstance(route, APIRoute)
+               and route.path == path and method in route.methods]
+    assert len(matches) == 1, (method, path, [route.endpoint.__module__ for route in matches])
+    route, = matches
+    target = module if module.startswith("app.") else f"app.api.v1.endpoints.{module}"
+    assert route.endpoint.__module__ == target
+    isolated = get_openapi(title="canonical", version="1", routes=[route])
+    published = app.openapi()
+    documented = published["paths"][path][method.lower()]
+    expected = isolated["paths"][path][method.lower()]
+    assert {k: v for k, v in documented.items() if k != "requestBody"} == {
+        k: v for k, v in expected.items() if k != "requestBody"
+    }
+    if "requestBody" in expected:
+        # FastAPI qualifies component names when the full app has name collisions.
+        def request_schema(spec, operation):
+            body = operation["requestBody"]
+            schema = body["content"]["application/json"]["schema"]
+            if "$ref" in schema:
+                schema = spec["components"]["schemas"][schema["$ref"].rsplit("/", 1)[1]]
+            return body.get("required", False), schema
+
+        assert request_schema(published, documented) == request_schema(isolated, expected)
+    else:
+        assert "requestBody" not in documented

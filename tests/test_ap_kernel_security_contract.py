@@ -1,7 +1,10 @@
 """Actual kernel writes under signed HTTP identity, shared rollback probe."""
 import pytest
+from app.api.v1.endpoints import process_kernel_api
 from app.core.action_execution import ActionExecutionService, ActionExecutionRequest
 from app.core.action_idempotency import get_action_idempotency_store
+from main import BearerAuthMiddleware
+from app.core.tenant_binding import install_tenant_bindings
 from app.services.command_handlers_finance import register_finance_command_mutations
 from test_ap_workflow_security_contract import case, headers, request, count
 from test_gdpr_subject_boundary import subject_data, keys, probe
@@ -11,16 +14,15 @@ from test_gdpr_subject_boundary import subject_data, keys, probe
 def kernel(case):
     get_action_idempotency_store().clear()
     register_finance_command_mutations()
-    @case[0].app.post("/api/v1/ap-kernel-security-test")
-    def execute(body: ActionExecutionRequest):
-        from app.api.v1.endpoints.process_kernel_api import execute_action
-        return execute_action(body, db=case[1])
+    app = case[0].app
+    app.include_router(process_kernel_api.router, prefix="/api/v1")
+    install_tenant_bindings(app, public_paths=BearerAuthMiddleware.PUBLIC_PATHS)
     def run(ref, *, subject="human-b", role="FINANCE_ADMIN", command="ApproveAPInvoice", key="kernel-ap", **changes):
         body = dict(command_name=command, aggregate_type="ap_invoice", aggregate_id=case[5],
             payload={"status": "ZUR_FREIGABE", "approval_request_id": ref}, tenant_id=case[3],
             issuer_role="admin", issuer_type="human", human_confirmation=True, idempotency_key=key)
         body.update(changes)
-        return case[0].post("/api/v1/ap-kernel-security-test", headers=headers(case, subject, role), json=body)
+        return case[0].post("/api/v1/process/actions/execute", headers=headers(case, subject, role), json=body)
     yield run
     get_action_idempotency_store().clear()
 

@@ -137,14 +137,9 @@ def storno_korrektur(
         ),
         {"delta": -wirkung, "id": article_id, "tid": tenant_id},
     )
-    # mark original as storniert
-    db.execute(
-        text(
-            "UPDATE domain_inventory.inventory_stock_movements "
-            "SET storno_ref = :storno_id WHERE id = :orig_id"
-        ),
-        {"storno_id": storno_id, "orig_id": korrektur_id},
-    )
+    # Kein Rueckverweis am Original (24.11.2026): storno_ref gilt nur vorwaerts (Storno -> Original). Die
+    # Bestandsbewertung liest storno_ref als "ist ein Storno"; der markierte Zugang zaehlte dort als Abgang und sein
+    # Storno noch einmal (Bestand -10 statt 10). Doppelstorno verhindert die Suche oben ueber den Vorwaertsverweis.
     db.commit()
     logger.info("storno_korrektur: Storno %s für Korrektur %s angelegt", storno_id, korrektur_id)
     return {

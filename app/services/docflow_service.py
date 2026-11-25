@@ -82,11 +82,14 @@ def _qty(v: Decimal) -> Decimal:
 
 
 def _line_amounts(
-    quantity: Decimal, unit_price: Decimal, discount_percent: Decimal, tax_rate: Decimal
+    quantity: Decimal, unit_price: Decimal, discount_percent: Decimal, tax_rate: Decimal,
+    price_unit_quantity: Decimal = Decimal("1"),
 ) -> tuple[Decimal, Decimal, Decimal]:
-    net = _money(quantity * unit_price * (Decimal("100") - discount_percent) / Decimal("100"))
-    tax = _money(net * tax_rate / Decimal("100"))
-    return net, tax, _money(net + tax)
+    """Positionsbetraege aus dem kaufmaennischen Rechenkern (app/core/kaufmaennisch.py)."""
+    from app.core.kaufmaennisch import positionsbetraege
+
+    b = positionsbetraege(quantity, unit_price, discount_percent, tax_rate, price_unit_quantity)
+    return b.netto, b.steuer, b.brutto
 
 
 class DocflowService:
@@ -578,21 +581,22 @@ class DocflowService:
             qty = _qty(Decimal(str(line.quantity)))
             price = Decimal(str(line.unit_price))
             discount = Decimal(str(line.discount_percent))
+            price_unit_quantity = Decimal(str(getattr(line, "price_unit_quantity", None) or 1))
             tax_code, tax_rate = self._steuer_der_position(idx, line, saetze, richtung)
-            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
+            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate, price_unit_quantity)
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
             self.db.execute(
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity, unit,
-                     unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, expense_account, contract_ref, created_at, updated_at)
+                     unit_price, price_unit_quantity, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, batch_id, charge, expense_account, contract_ref, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, NULL, :article_number, :description, :quantity, :unit,
-                     :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, :expense_account, :contract_ref, NOW(), NOW())
+                     :unit_price, :price_unit_quantity, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :batch_id, :charge, :expense_account, :contract_ref, NOW(), NOW())
                 """),
                 {
                     "id": str(uuid4()), "tenant_id": self.tenant_id, "header_id": header_id,
                     "line_number": idx, "article_number": line.article_number, "description": line.description,
-                    "quantity": qty, "unit": line.unit, "unit_price": price, "discount_percent": discount,
+                    "quantity": qty, "unit": line.unit, "unit_price": price, "price_unit_quantity": price_unit_quantity, "discount_percent": discount,
                     "tax_code": tax_code, "tax_rate": tax_rate, "line_total_net": line_net, "line_total_tax": line_tax,
                     "line_total_gross": line_gross, "batch_id": getattr(line, "batch_id", None),
                     "charge": getattr(line, "charge", None),
@@ -976,6 +980,7 @@ class DocflowService:
             line_net, line_tax, line_gross = _line_amounts(
                 qty, Decimal(str(src.get("unit_price") or 0)),
                 Decimal(str(src.get("discount_percent") or 0)), Decimal(str(src.get("tax_rate") or 0)),
+                Decimal(str(src.get("price_unit_quantity") or 1)),
             )
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
         if payload.dry_run:
@@ -1020,21 +1025,22 @@ class DocflowService:
             price = Decimal(str(src.get("unit_price") or 0))
             discount = Decimal(str(src.get("discount_percent") or 0))
             tax_rate = Decimal(str(src.get("tax_rate") or 0))
-            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate)
+            price_unit_quantity = Decimal(str(src.get("price_unit_quantity") or 1))
+            line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate, price_unit_quantity)
             target_item_id = str(uuid4())
             self.db.execute(
                 text("""
                     INSERT INTO domain_docflow.document_items
                     (id, tenant_id, header_id, line_number, source_line_id, article_number, description, quantity,
-                     unit, unit_price, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, expense_account, batch_id, charge, contract_ref, metadata, created_at, updated_at)
+                     unit, unit_price, price_unit_quantity, discount_percent, tax_code, tax_rate, line_total_net, line_total_tax, line_total_gross, expense_account, batch_id, charge, contract_ref, metadata, created_at, updated_at)
                     VALUES (:id, :tenant_id, :header_id, :line_number, :source_line_id, :article_number, :description, :quantity,
-                     :unit, :unit_price, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :expense_account, :batch_id, :charge, :contract_ref, CAST(:metadata AS jsonb), NOW(), NOW())
+                     :unit, :unit_price, :price_unit_quantity, :discount_percent, :tax_code, :tax_rate, :line_total_net, :line_total_tax, :line_total_gross, :expense_account, :batch_id, :charge, :contract_ref, CAST(:metadata AS jsonb), NOW(), NOW())
                 """),
                 {
                     "id": target_item_id, "tenant_id": self.tenant_id, "header_id": target_id,
                     "line_number": line_no, "source_line_id": str(src["id"]),
                     "article_number": src.get("article_number") or "", "description": src.get("description"),
-                    "quantity": qty, "unit": src.get("unit"), "unit_price": price, "discount_percent": discount,
+                    "quantity": qty, "unit": src.get("unit"), "unit_price": price, "price_unit_quantity": price_unit_quantity, "discount_percent": discount,
                     "tax_code": src.get("tax_code"), "expense_account": src.get("expense_account"),
                     # Rueckverfolgbarkeit: Charge, Batch und Kontrakt gehen in den Folgebeleg mit.
                     "batch_id": src.get("batch_id"), "charge": src.get("charge"), "contract_ref": src.get("contract_ref"),

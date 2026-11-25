@@ -7,8 +7,10 @@ import fixture from '../../fixtures/complaint-studio.json'
 
 const state = vi.hoisted(() => ({ setTableQuery: vi.fn(), schema: {} as ScreenDefinition }))
 vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: state.schema }) }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: () => <div>Central mask</div>,
+}))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({ plan: { ...state.schema, tablesByKey: {list:state.schema.tables?.[0]} },
     filteredTableRows:{list:[]}, tableQueryStates:{list:{page:3,pageSize:50,presetFilters:{owner:'mine'}}},
     setTableQuery: state.setTableQuery }),

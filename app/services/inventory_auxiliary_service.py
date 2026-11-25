@@ -157,30 +157,28 @@ class InventoryAuxiliaryService:
                 """), {"qty": item["counted_qty"], "line_id": item["line_id"],
                          "count_id": row["inventory_count_id"], "tid": self.tenant_id})
         elif row["batch_type"] == "opening_balance":
+            # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026). Bis dahin setzte der Vortrag current_stock
+            # absolut auf die Zeilenmenge - bei mehreren Lagern ueberschrieb die letzte Zeile die anderen, und das
+            # Journal (opening_balance = +Menge) lief vom Artikelbestand weg. Jetzt Delta wie im Journal, je Zeile
+            # einmal (Buchungsschluessel statt Referenzsuche).
+            from decimal import Decimal
+
+            from app.domains.inventory.application.services.inventory_service import InventoryService
+
+            dienst = InventoryService(self.db)
             for item in payload:
-                reference = f"OPEN-{row['id'][:12]}-{item['line_id'][:8]}"
-                exists = self.db.execute(text("""
-                    SELECT 1 FROM domain_inventory.inventory_stock_movements
-                     WHERE tenant_id=:tid AND reference_number=:ref
-                """), {"tid": self.tenant_id, "ref": reference}).first()
-                if exists:
+                menge = Decimal(str(item.get("counted_qty", 0) or 0))
+                if menge == 0:
                     continue
-                qty = float(item.get("counted_qty", 0) or 0)
-                self.db.execute(text("""
-                    INSERT INTO domain_inventory.inventory_stock_movements
-                      (id,article_id,warehouse_id,movement_type,quantity,unit,charge,reference_number,
-                       movement_date,movement_time,notes,booking_user,auto_created,ownership_type,tenant_id,
-                       previous_stock,new_stock,created_at)
-                    VALUES (:id,:article_id,:warehouse_id,'opening_balance',:qty,'t',:charge,:ref,
-                            CURRENT_DATE,NOW()::time,'Freigegebener Bestandsvortrag',:actor,true,'owned',:tid,0,:qty,NOW())
-                """), {"id": str(uuid7()), "article_id": item["article_id"], "warehouse_id": item["warehouse_id"],
-                         "qty": qty, "charge": item.get("batch_number"), "ref": reference,
-                         "actor": actor, "tid": self.tenant_id})
-                self.db.execute(text("""
-                    UPDATE domain_inventory.articles
-                       SET current_stock=:qty,available_stock=:qty,updated_at=NOW()
-                     WHERE id=:article_id AND tenant_id=:tid
-                """), {"qty": qty, "article_id": item["article_id"], "tid": self.tenant_id})
+                reference = f"OPEN-{row['id'][:12]}-{item['line_id'][:8]}"
+                try:
+                    dienst.process_stock_movement(
+                        str(item["article_id"]), str(item["warehouse_id"]), "opening_balance", menge, unit="t",
+                        reference_number=reference, charge=item.get("batch_number"), booking_user=actor,
+                        auto_created=True, notes="Freigegebener Bestandsvortrag", tenant_id=self.tenant_id,
+                        buchungsschluessel=f"bestandsvortrag:{row['id']}:{item['line_id']}", commit=False)
+                except ValueError as fehler:
+                    raise InventoryAuxiliaryError(f"Bestandsvortrag Zeile {item['line_id']}: {fehler}") from fehler
 
     def _audit(self, batch_id: str, action: str, old: str | None, new: str | None, actor: str, reason: str) -> None:
         self.db.execute(text("""

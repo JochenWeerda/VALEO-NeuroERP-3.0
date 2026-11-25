@@ -15,6 +15,13 @@
         ]
       ]
     },
+    "admin/branches/detail": {
+      "admin:all": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/identity-budgets": {
       "identity:quota:allocate": [
         [
@@ -1239,6 +1246,14 @@
         ]
       ],
       "finance.zahlungsbedingung.deaktivieren": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "fibu/abschluss-checklist-detail": {
+      "finance.closing.saldenvortrag": [
         [
           "FINANCE_ADMIN",
           "admin"

@@ -2037,6 +2037,10 @@
       "path": "admin/command-monitor"
     },
     {
+      "module": "@/pages/admin/background-jobs",
+      "path": "admin/background-jobs"
+    },
+    {
       "module": "@/pages/wissen/wissensbasis",
       "path": "wissen/wissensbasis"
     },
@@ -2727,6 +2731,10 @@
     {
       "module": "@/pages/admin/branches",
       "path": "admin/branches"
+    },
+    {
+      "module": "@/pages/admin/branch-detail",
+      "path": "admin/branches/:id"
     },
     {
       "module": "@/pages/admin/control-center/incident-response",

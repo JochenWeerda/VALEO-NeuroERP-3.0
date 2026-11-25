@@ -73,21 +73,6 @@ def _promotion_discount(line: PosCartLine, rule: PromotionRule) -> float:
     return round(min(rule.value, base), 2)
 
 
-@router.get("/payment-methods", summary="Payment methods auflisten",
-    response_model=PosPaymentsPromotionsOut
-)
-async def list_payment_methods() -> dict:
-    return {
-        "methods": [
-            {"id": "BAR", "label": "Bar", "splitAllowed": True},
-            {"id": "KARTE", "label": "Karte", "splitAllowed": True},
-            {"id": "SEPA", "label": "SEPA", "splitAllowed": True},
-            {"id": "GUTSCHEIN", "label": "Gutschein", "splitAllowed": True},
-            {"id": "KUNDENKONTO", "label": "Kundenkonto", "splitAllowed": True},
-        ]
-    }
-
-
 @router.post("/promotions/simulate", summary="Promotions simulate",
     response_model=PosPaymentsPromotionsOut, dependencies=SCHREIBEN["VERKAUF"])
 async def simulate_promotions(payload: PosCheckoutPreviewIn) -> dict:

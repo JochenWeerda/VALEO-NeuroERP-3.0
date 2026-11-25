@@ -6,7 +6,8 @@ import { readWorkflowEntryContext } from '@/components/workflow/WorkflowEntryBan
 import { WorkflowProcessBand } from '@/components/workflow/WorkflowProcessBand'
 import type { RenderPlan } from './render-plan/types'
 import { evaluateListExperience, formatListAggregate, selectListRoleFocus, focusListInsights } from './runtime/list-experience'
-import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { UniversalMaskRenderer } from './UniversalMaskRenderer'
+import { useUniversalMaskRuntime } from './runtime/useUniversalMaskRuntime'
 import { useScreenDefinition } from '@/lib/api/masks'
 import { useScreenPermissions } from './runtime/screen-permissions'
 
