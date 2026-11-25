@@ -147,6 +147,23 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
         || roles.has('manager')
       )
     }
+    // Geschäftsjahr Create mirrors finance_admin (FINANCE_ADMIN / admin).
+    if (permission.startsWith('fibu.geschaeftsjahr.')) {
+      return roles.has('FINANCE_ADMIN') || roles.has('admin') || roles.has('manager')
+    }
+    // Massebilanz Create mirrors SCHREIBEN["AGRAR"]; PIV mirrors SCHREIBEN["LAGER"].
+    if (permission.startsWith('lager.massebilanz.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
+        || roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
+    if (permission.startsWith('lager.piv.')) {
+      return roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN') || roles.has('manager')
+    }
     return false
   })
 }

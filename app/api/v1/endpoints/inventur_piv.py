@@ -107,6 +107,21 @@ def list_piv_abschluesse(
     return [PIVAbschlussOut(**dict(r._mapping)) for r in rows]
 
 
+@router.get("/{abschluss_id}", response_model=PIVAbschlussOut, summary="Piv abschluss abrufen")
+def get_piv_abschluss(
+    abschluss_id: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.inventur_piv_abschluesse
+        WHERE id = :id AND tenant_id = :tid
+    """), {"id": abschluss_id, "tid": tenant_id}).fetchone()
+    if not row:
+        raise HTTPException(404, "PIV-Abschluss nicht gefunden.")
+    return PIVAbschlussOut(**dict(row._mapping))
+
+
 @router.post("", response_model=PIVAbschlussOut, status_code=201, summary="Piv abschluss anlegen", dependencies=SCHREIBEN["LAGER"])
 def create_piv_abschluss(
     payload: PIVAbschlussCreate,
