@@ -451,6 +451,57 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'DMS-Integration Arbeitsbereich',
   },
+  {
+    label: 'admin/control-center',
+    path: '/admin/control-center',
+    screenId: 'admin/control-center',
+    testId: 'native-cockpit-admin-control-center',
+    title: 'Admin Kontroll- und Ueberwachungszentrum',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'tenant_id', label: 'Mandant' },
+      { key: 'incident_id', label: 'Vorfall' },
+      { key: 'source', label: 'Quelle' },
+      { key: 'severity', label: 'Priorität' },
+      { key: 'status', label: 'Status' },
+      { key: 'title', label: 'Titel' },
+      { key: 'owner', label: 'Verantwortlich' },
+      { key: 'recommended_action', label: 'Empfehlung' },
+      { key: 'scheduled_for', label: 'Geplant' },
+      { key: 'plan_id', label: 'Plan' },
+      { key: 'kind', label: 'Art' },
+      { key: 'calendar_window', label: 'Kalender' },
+      { key: 'open_quarantine_count', label: 'Quarantäne' },
+      { key: 'journal_error_count', label: 'Journalfehler' },
+    ],
+    specializedLandmark: 'Admin Kontroll- und Ueberwachungszentrum Arbeitsbereich',
+  },
+  {
+    label: 'admin/setup',
+    path: '/admin/setup',
+    screenId: 'admin/setup',
+    testId: 'native-cockpit-admin-setup',
+    title: 'Ersteinrichtung',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'step', label: 'Schritt' },
+      { key: 'status', label: 'Status' },
+    ],
+    specializedLandmark: 'Ersteinrichtung Arbeitsbereich',
+  },
+  {
+    label: 'studio/workspace-composition-preview',
+    path: '/studio/workspace-composition-preview',
+    screenId: 'studio/workspace-composition-preview',
+    testId: 'native-cockpit-studio-workspace-composition-preview',
+    title: 'WorkspaceComposition Studio',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'draft_id', label: 'Entwurf' },
+      { key: 'status', label: 'Status' },
+    ],
+    specializedLandmark: 'WorkspaceComposition Studio Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -783,7 +834,17 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
       })
     })
   }
-  if (c.screenId === 'admin/agenten-integration') {
+  if (c.screenId === 'admin/setup/dms-integration' || c.screenId === 'admin/setup') {
+    await page.route(/\/api\/v1\/admin\/dms\/status(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, configured: false, message: 'offline' }),
+      })
+    })
+  }
+  if (c.screenId === 'admin/control-center' || c.screenId === 'admin/agenten-integration') {
+    const tenantId = '00000000-0000-0000-0000-000000000001'
     await page.route(/\/api\/v1\/admin\/agent-manifest(?:\?.*)?$/, async (route) => {
       await route.fulfill({
         status: 200,
@@ -802,15 +863,42 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
     await page.route(/\/api\/v1\/commands\/catalog(?:\?.*)?$/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
     })
-  }
-  if (c.screenId === 'admin/setup/dms-integration') {
-    await page.route(/\/api\/v1\/admin\/dms\/status(?:\?.*)?$/, async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ ok: false, configured: false, message: 'offline' }),
+    if (c.screenId === 'admin/control-center') {
+      await page.route(/\/api\/v1\/agents\/neuroassist\/ops\/planning(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            tenant_id: tenantId,
+            storage_path: 'runtime/planning.json',
+            calendar_window: 'week',
+            suggested_items: [],
+            planned_items: [],
+            summary: {
+              heartbeat_count: 0,
+              planned_item_count: 0,
+              blocked_connector_count: 0,
+            },
+          }),
+        })
       })
-    })
+      await page.route(/\/api\/v1\/agents\/neuroassist\/ops\/incidents(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({
+            tenant_id: tenantId,
+            incident_count: 0,
+            open_quarantine_count: 0,
+            blocked_connector_count: 0,
+            stale_ticket_count: 0,
+            review_ticket_count: 0,
+            journal_error_count: 0,
+            incidents: [],
+          }),
+        })
+      })
+    }
   }
 }
 

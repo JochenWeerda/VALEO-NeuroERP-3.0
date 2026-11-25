@@ -46,7 +46,11 @@ export default function AdminSetupPage(): JSX.Element {
   const terminology = TERMINOLOGY_TEXTS[lang] ?? TERMINOLOGY_TEXTS.de
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
+    <div
+      className="container mx-auto py-8 space-y-6"
+      role="region"
+      aria-label={`${texts.title} Arbeitsbereich`}
+    >
       <div className="space-y-2">
         <h1 className="text-3xl font-bold">{texts.title}</h1>
         <p className="text-muted-foreground">{texts.subtitle}</p>

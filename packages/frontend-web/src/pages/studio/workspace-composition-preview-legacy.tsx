@@ -93,6 +93,8 @@ export default function WorkspaceCompositionPreviewPage(): JSX.Element {
       data-testid="workspace-composition-preview"
       data-preview-route={WORKSPACE_COMPOSITION_PREVIEW_ROUTE}
       data-storage-key={storageKey}
+      role="region"
+      aria-label="WorkspaceComposition Studio Arbeitsbereich"
     >
       <header className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex flex-col gap-1">
