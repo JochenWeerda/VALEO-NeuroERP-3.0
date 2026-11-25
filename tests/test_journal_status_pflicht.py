@@ -79,37 +79,49 @@ def _migration():
     return modul
 
 
-def _migriere(conn, schritt: str) -> None:
+#: Temporaere Kopie statt der echten Journaltabelle (25.11.2026): ALTER TABLE auf domain_erp.journal_entries brauchte
+#: eine exklusive Sperre und hing in der vollen CI-Suite hinter offenen Transaktionen frueherer Tests (#201).
+KOPIE = "pg_temp.journal_entries_migrationsprobe"
+
+
+def _kopie(conn, mandant: str, zeilen: list[dict]) -> None:
+    conn.execute(sa.text("SET LOCAL lock_timeout = '5s'"))
+    conn.execute(sa.text(f"CREATE TEMP TABLE {KOPIE.split('.')[1]} (LIKE domain_erp.journal_entries INCLUDING DEFAULTS)"))
+    conn.execute(sa.text(f"ALTER TABLE {KOPIE} ALTER COLUMN status DROP NOT NULL, ALTER COLUMN status DROP DEFAULT"))
+    for z in zeilen:
+        conn.execute(sa.text(
+            f"INSERT INTO {KOPIE} (id, tenant_id, entry_number, entry_date, posting_date, period, status, posted_at, "  # nosec B608
+            "reversed_entry_id) VALUES (:id, :t, :id, '2026-11-24', '2026-11-24', '2026-11', :status, :posted_at, :rev)"),
+            {"t": mandant, "status": None, "posted_at": None, "rev": None, **z})
+
+
+def _migriere_kopie(conn) -> None:
     from alembic.migration import MigrationContext
     from alembic.operations import Operations
 
+    modul = _migration()
+    modul.TABELLE = KOPIE
     with Operations.context(MigrationContext.configure(conn)):
-        getattr(_migration(), schritt)()
+        modul.upgrade()
 
 
 def test_altbestand_ohne_status_wird_nur_bei_belegtem_buchungsstand_eingeordnet(verbindung):
     """Nutzervorgabe 24.11.2026: nicht pauschal einordnen; eindeutige Faelle migrieren, ungeklaerte ausweisen."""
     conn, mandant = verbindung
-    _migriere(conn, "downgrade")
-    gebucht, storniert, gegen = (_eintrag(conn, mandant, "") for _ in range(3))
-    conn.execute(sa.text("UPDATE domain_erp.journal_entries SET status = NULL WHERE tenant_id = :t"), {"t": mandant})
-    conn.execute(sa.text("UPDATE domain_erp.journal_entries SET posted_at = now() WHERE id IN (:a, :b)"),
-                 {"a": gebucht, "b": storniert})
-    conn.execute(sa.text("UPDATE domain_erp.journal_entries SET reversed_entry_id = :o, status = 'posted' "
-                         "WHERE id = :g"), {"o": storniert, "g": gegen})
+    gebucht, storniert, gegen = (str(uuid.uuid4()) for _ in range(3))
+    _kopie(conn, mandant, [{"id": gebucht, "posted_at": "2026-11-24"}, {"id": storniert, "posted_at": "2026-11-24"},
+                           {"id": gegen, "status": "posted", "rev": storniert}])
 
-    _migriere(conn, "upgrade")
-    stand = dict(conn.execute(sa.text("SELECT id, status FROM domain_erp.journal_entries WHERE tenant_id = :t"),
-                              {"t": mandant}).fetchall())
+    _migriere_kopie(conn)
+    stand = dict(conn.execute(sa.text(f"SELECT id, status FROM {KOPIE}")).fetchall())  # nosec B608
 
     assert (stand[gebucht], stand[storniert], stand[gegen]) == ("posted", "reversed", "posted")
 
 
 def test_ungeklaerter_altbestand_bricht_die_migration_ab(verbindung):
     conn, mandant = verbindung
-    _migriere(conn, "downgrade")
-    offen = _eintrag(conn, mandant, "")
-    conn.execute(sa.text("UPDATE domain_erp.journal_entries SET status = NULL WHERE id = :id"), {"id": offen})
+    offen = str(uuid.uuid4())
+    _kopie(conn, mandant, [{"id": offen}])
 
     with pytest.raises(RuntimeError, match=offen):
-        _migriere(conn, "upgrade")
+        _migriere_kopie(conn)
