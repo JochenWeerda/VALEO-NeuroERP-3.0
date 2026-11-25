@@ -32712,7 +32712,6 @@
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/docflow_lagerzugang.py",
-            "app/services/feed_inventory_link_service.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",

@@ -1055,3 +1055,6 @@ Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 S
 
 ## M0-JOURNALTEST-OHNE-DDL-20261125 — zur Abnahme, Claude Code (M0)
 Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.py (aus PR #196) spielte die Migration auf der echten domain_erp.journal_entries zurueck und vor; ALTER TABLE wartete in der vollen CI-Suite hinter offenen Transaktionen frueherer Tests ohne Ende (#201, Backend 90 min, abgebrochen). Jetzt Einordnungslogik an einer temporaeren Kopie, lock_timeout 5 s; mit gleichzeitig offener Lesetransaktion auf der Journaltabelle gruen.
+
+## M4-KONSOLIDIERUNG-FUTTER-20261125 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Futterproduktion (feed_inventory_link_service.book_snapshot_movements) ueber InventoryService.process_stock_movement: echter Bestandsverlauf statt 0/0, Unterdeckung abgewiesen (Freigabe 409 statt negativem Lagerbestand), Buchungsschluessel futter:<auftrag>:<ef>:<art>; Dienst nimmt source_document_type/id. Ratsche: feed_inventory_link_service 1->0.

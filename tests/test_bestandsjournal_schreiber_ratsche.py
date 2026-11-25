@@ -24,7 +24,6 @@ BASELINE = {
     "app/services/agri_lot_link_booking_service.py": 1,
     "app/services/agri_silo_material_flow_service.py": 2,
     "app/services/docflow_lagerzugang.py": 1,
-    "app/services/feed_inventory_link_service.py": 1,
     "app/services/inventory_auxiliary_service.py": 1,
     "app/services/inventory_correction_service.py": 1,
     "app/services/inventory_count_close_service.py": 1,

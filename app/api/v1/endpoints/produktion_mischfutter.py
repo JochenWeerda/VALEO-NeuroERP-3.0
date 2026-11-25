@@ -288,12 +288,17 @@ async def update_auftrag_status(
                 )
             chain.apply_verbrauch(snapshot, richtung=-1)
             inv_link = FeedInventoryLinkService(db, tenant_id)
-            inv_link.book_snapshot_movements(
-                snapshot=snapshot,
-                direction=-1,
-                production_order_id=auftrag.id,
-                booked_by=payload.freigegeben_von or "system",
-            )
+            try:
+                inv_link.book_snapshot_movements(
+                    snapshot=snapshot,
+                    direction=-1,
+                    production_order_id=auftrag.id,
+                    booked_by=payload.freigegeben_von or "system",
+                )
+            except FeedInventoryLinkError as fehler:
+                # Lagerbestand reicht nicht (Buchungsdienst, 25.11.2026) - Freigabe ohne Teilbuchung zurueckweisen.
+                db.rollback()
+                raise HTTPException(status_code=409, detail=f"Lagerbestand reicht nicht: {fehler}") from fehler
             auftrag.verbrauch = snapshot
             auftrag.bestands_abzug_erfolgt = True
         auftrag.freigegeben_von = payload.freigegeben_von

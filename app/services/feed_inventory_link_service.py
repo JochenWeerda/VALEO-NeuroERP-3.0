@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from datetime import date
 from decimal import Decimal
 from typing import Any
 
@@ -257,48 +256,22 @@ class FeedInventoryLinkService:
                 booked.append({"idempotent": True, "movement_id": str(existing[0])})
                 continue
 
-            movement_id = str(uuid7())
             signed_qty = float(qty) if direction > 0 else float(-qty)
-            self.db.execute(
-                text("""
-                    INSERT INTO domain_inventory.inventory_stock_movements
-                        (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
-                         reference_number, movement_date, movement_time,
-                         notes, booking_user, auto_created, ownership_type, tenant_id,
-                         source_document_type, source_document_id,
-                         previous_stock, new_stock, storage_fee_relevant, created_at)
-                    VALUES
-                        (:id, :article_id, :warehouse_id, :movement_type, :quantity, 't', NULL,
-                         :ref, :dt, NOW()::time,
-                         :notes, :user, true, 'owned', :tid,
-                         'feed_production', :doc,
-                         0, 0, false, NOW())
-                """),
-                {
-                    "id": movement_id,
-                    "article_id": article_id,
-                    "warehouse_id": wh,
-                    "movement_type": movement_type,
-                    "quantity": float(qty),
-                    "ref": ref,
-                    "dt": date.today(),
-                    "notes": f"Produktion {production_order_id}: {row.get('name')} {signed_qty:+.3f}t",
-                    "user": booked_by,
-                    "tid": self.tenant_id,
-                    "doc": f"{production_order_id}:{ef_id}",
-                },
-            )
-            delta = signed_qty
-            self.db.execute(
-                text("""
-                    UPDATE domain_inventory.articles
-                    SET current_stock = COALESCE(current_stock, 0) + :delta,
-                        available_stock = COALESCE(available_stock, 0) + :delta,
-                        updated_at = NOW()
-                    WHERE id = :aid AND tenant_id = :tid
-                """),
-                {"delta": delta, "aid": article_id, "tid": self.tenant_id},
-            )
+            # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Bestandsverlauf statt 0/0, Unterdeckung
+            # abgewiesen statt negativem Bestand, Buchungsschluessel je Produktionsposition. Die Referenzsuche oben
+            # bleibt fuer Bewegungen, die vor dem Schluessel gebucht wurden.
+            from app.domains.inventory.application.services.inventory_service import InventoryService
+
+            try:
+                bewegung = InventoryService(self.db).process_stock_movement(
+                    str(article_id), str(wh), movement_type, qty, unit="t", reference_number=ref,
+                    notes=f"Produktion {production_order_id}: {row.get('name')} {signed_qty:+.3f}t",
+                    booking_user=booked_by, auto_created=True, tenant_id=self.tenant_id,
+                    source_document_type="feed_production", source_document_id=f"{production_order_id}:{ef_id}",
+                    buchungsschluessel=f"futter:{production_order_id}:{ef_id}:{movement_type}", commit=False)
+            except ValueError as fehler:
+                raise FeedInventoryLinkError(f"{row.get('name')}: {fehler}") from fehler
+            movement_id = str(bewegung.id)
             booked.append({"movement_id": movement_id, "article_id": article_id, "quantity_t": float(qty)})
 
         return {"ok": True, "warehouse_id": wh, "movements": booked, "skipped": skipped}
