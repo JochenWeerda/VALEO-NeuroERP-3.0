@@ -101,7 +101,12 @@ export function ScreenStudioPage(): JSX.Element {
   }
 
   return (
-    <div className="grid gap-4 p-4 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)_minmax(16rem,20rem)]" data-testid="screen-studio">
+    <div
+      className="grid gap-4 p-4 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)_minmax(16rem,20rem)]"
+      data-testid="screen-studio"
+      role="region"
+      aria-label="Masken-Studio Arbeitsbereich"
+    >
       {controlsInitiallyOpen && <details className="col-span-full min-w-0 rounded border p-3" open
         onToggle={event => { if (event.currentTarget.open) setControlsSeen(true) }}>
         <summary className="cursor-pointer font-medium">Ernte-Abrechnung: Vertragsregeln, Messnachweise und Freigaben</summary>

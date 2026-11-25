@@ -384,6 +384,47 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Voice-Kanal Arbeitsbereich',
   },
+  {
+    label: 'admin/vordruck-editor',
+    path: '/admin/vordruck-editor',
+    screenId: 'admin/vordruck-editor',
+    testId: 'native-cockpit-admin-vordruck-editor',
+    title: 'Belegformular-Vordruck-Editor',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'id', label: 'ID' },
+      { key: 'name', label: 'Name' },
+      { key: 'kategorie', label: 'Kategorie' },
+    ],
+    specializedLandmark: 'Vordruck-Editor Arbeitsbereich',
+  },
+  {
+    label: 'admin/screen-studio',
+    path: '/admin/screen-studio',
+    screenId: 'admin/screen-studio',
+    testId: 'native-cockpit-admin-screen-studio',
+    title: 'Masken-Studio',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'screen_id', label: 'Maske' },
+      { key: 'status', label: 'Status' },
+    ],
+    specializedLandmark: 'Masken-Studio Arbeitsbereich',
+  },
+  {
+    label: 'admin/GapPipelineConsole',
+    path: '/admin/GapPipelineConsole',
+    screenId: 'admin/GapPipelineConsole',
+    testId: 'native-cockpit-admin-GapPipelineConsole',
+    title: 'GAP-Pipeline Konsole',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'year', label: 'Jahr' },
+      { key: 'pipeline_complete', label: 'Pipeline fertig' },
+      { key: 'gap_payments_count', label: 'GAP-Zahlungen' },
+    ],
+    specializedLandmark: 'GAP-Pipeline Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -666,6 +707,53 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ enabled: false, ready: false, last_utterance: null }),
+      })
+    })
+  }
+  if (c.screenId === 'admin/vordruck-editor') {
+    await page.route(/\/api\/v1\/admin\/vordrucke(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+  }
+  if (c.screenId === 'admin/screen-studio') {
+    await page.route(/\/api\/v1\/studio\/catalog(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ semantic: null, domains: [] }),
+      })
+    })
+    await page.route(/\/api\/v1\/studio\/drafts(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ drafts: [] }),
+      })
+    })
+    await page.route(/\/api\/v1\/studio\/validate$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          definitionReady: true,
+          violations: [],
+          readiness: { generatorReady: true, errors: [], warnings: [] },
+        }),
+      })
+    })
+  }
+  if (c.screenId === 'admin/GapPipelineConsole') {
+    await page.route(/\/api\/v1\/gap\/pipeline\/status(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          year: new Date().getFullYear() - 1,
+          gap_payments_count: 0,
+          snapshot_count: 0,
+          customers_with_analytics_count: 0,
+          pipeline_complete: false,
+        }),
       })
     })
   }

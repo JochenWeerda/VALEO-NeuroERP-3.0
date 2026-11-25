@@ -280,7 +280,11 @@ export default function VordruckEditorPage(): JSX.Element {
   const aktivesElement = entwurf && selectedElement !== null ? entwurf.layout[selectedElement] : null
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Vordruck-Editor Arbeitsbereich"
+    >
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
