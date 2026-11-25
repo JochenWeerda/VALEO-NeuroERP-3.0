@@ -26,13 +26,12 @@ PROTOKOLL = "domain_integration.spiegel_protokoll"
 OWN = "(tenant_id)::text = public.rls_current_tenant()"
 
 
-def _rls(tabelle: str, *, aendern: bool) -> None:
+def _rls(tabelle: str) -> None:
     op.execute(f"ALTER TABLE {tabelle} ENABLE ROW LEVEL SECURITY")
     op.execute(f"CREATE POLICY tenant_isolation_select ON {tabelle} FOR SELECT USING ({OWN})")
     op.execute(f"CREATE POLICY tenant_isolation_insert ON {tabelle} FOR INSERT WITH CHECK ({OWN})")
-    if aendern:
-        op.execute(f"CREATE POLICY tenant_isolation_update ON {tabelle} FOR UPDATE USING ({OWN}) WITH CHECK ({OWN})")
-        op.execute(f"CREATE POLICY tenant_isolation_delete ON {tabelle} FOR DELETE USING ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_update ON {tabelle} FOR UPDATE USING ({OWN}) WITH CHECK ({OWN})")
+    op.execute(f"CREATE POLICY tenant_isolation_delete ON {tabelle} FOR DELETE USING ({OWN})")
 
 
 def upgrade() -> None:
@@ -53,7 +52,7 @@ def upgrade() -> None:
             CONSTRAINT uq_spiegel_quellreferenz_ziel UNIQUE (tenant_id, ziel_tabelle, ziel_id)
         )
     """)
-    _rls(REFERENZ, aendern=True)
+    _rls(REFERENZ)
     op.execute(f"""
         CREATE TABLE {PROTOKOLL} (
             id text PRIMARY KEY,
@@ -69,9 +68,21 @@ def upgrade() -> None:
         )
     """)
     op.execute(f"CREATE INDEX ix_spiegel_protokoll_lauf ON {PROTOKOLL} (tenant_id, batch_id, ergebnis)")
-    _rls(PROTOKOLL, aendern=False)
+    _rls(PROTOKOLL)
+    # Protokollzeilen sind unveraenderlich (Korrektur = neuer Lauf). Loeschen bleibt fuer die Mandantenaufloesung moeglich.
+    op.execute("""
+        CREATE OR REPLACE FUNCTION domain_integration.spiegel_protokoll_unveraenderlich() RETURNS trigger
+        LANGUAGE plpgsql AS $$
+        BEGIN
+            RAISE EXCEPTION 'Spiegelprotokoll ist unveraenderlich (Zeile %)', OLD.id USING ERRCODE = 'check_violation';
+        END;
+        $$
+    """)
+    op.execute(f"CREATE TRIGGER trg_spiegel_protokoll_unveraenderlich BEFORE UPDATE ON {PROTOKOLL} "
+               "FOR EACH ROW EXECUTE FUNCTION domain_integration.spiegel_protokoll_unveraenderlich()")
 
 
 def downgrade() -> None:
     op.execute(f"DROP TABLE IF EXISTS {PROTOKOLL}")
+    op.execute("DROP FUNCTION IF EXISTS domain_integration.spiegel_protokoll_unveraenderlich()")
     op.execute(f"DROP TABLE IF EXISTS {REFERENZ}")

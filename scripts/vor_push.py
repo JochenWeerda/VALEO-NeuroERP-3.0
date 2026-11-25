@@ -318,7 +318,8 @@ SPERRE_FRIST_S = 45 * 60
 def _lebt(pid: int) -> bool:
     if os.name == "nt":
         ausgabe = subprocess.run(["tasklist", "/FI", f"PID eq {pid}", "/NH"], capture_output=True, text=True,
-                                 check=False).stdout
+                                 errors="replace",
+                                 check=False).stdout or ""
         return str(pid) in ausgabe
     try:
         os.kill(pid, 0)

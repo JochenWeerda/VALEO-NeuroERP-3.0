@@ -149,3 +149,10 @@ def test_nur_freigegebene_batches_werden_uebernommen(mandant):
         dienst.stage(batch, actor="test", reason="M6")
     with SessionLocal() as db, pytest.raises(LegacyAdapterError, match="freigegebene"):
         uebernehme(db, mandant, batch, actor="test", reason="M6")
+
+
+def test_protokoll_ist_unveraenderlich(mandant):
+    _lauf(mandant, "abzug-1", [_artikel("151704", "x")])
+    with SessionLocal() as db, pytest.raises(Exception, match="unveraenderlich"):
+        db.execute(text("UPDATE domain_integration.spiegel_protokoll SET ergebnis = 'neu' WHERE tenant_id = :t"),
+                   {"t": mandant})

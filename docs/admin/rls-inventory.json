@@ -2731,7 +2731,7 @@
    "tenant_type": "text",
    "rls": true,
    "force_rls": false,
-   "policies": 2
+   "policies": 4
   },
   {
    "table": "domain_integration.spiegel_quellreferenzen",
