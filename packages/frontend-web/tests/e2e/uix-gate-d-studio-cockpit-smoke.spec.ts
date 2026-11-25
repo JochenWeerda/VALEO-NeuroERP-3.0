@@ -425,6 +425,32 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'GAP-Pipeline Arbeitsbereich',
   },
+  {
+    label: 'admin/agenten-integration',
+    path: '/admin/agenten-integration',
+    screenId: 'admin/agenten-integration',
+    testId: 'native-cockpit-admin-agenten-integration',
+    title: 'Agenten-Integration',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'tenant_id', label: 'Mandant' },
+      { key: 'section', label: 'Abschnitt' },
+    ],
+    specializedLandmark: 'Agenten-Integration Arbeitsbereich',
+  },
+  {
+    label: 'admin/setup/dms-integration',
+    path: '/admin/setup/dms-integration',
+    screenId: 'admin/setup/dms-integration',
+    testId: 'native-cockpit-admin-setup-dms-integration',
+    title: 'DMS-Integration',
+    specializedType: 'admin_workbench',
+    specializedFields: [
+      { key: 'status', label: 'Status' },
+      { key: 'connected', label: 'Verbunden' },
+    ],
+    specializedLandmark: 'DMS-Integration Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -754,6 +780,35 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
           customers_with_analytics_count: 0,
           pipeline_complete: false,
         }),
+      })
+    })
+  }
+  if (c.screenId === 'admin/agenten-integration') {
+    await page.route(/\/api\/v1\/admin\/agent-manifest(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          version: '1',
+          generated_at: new Date().toISOString(),
+          auth: {},
+          headers: [],
+          links: [],
+          examples: [],
+          notes: [],
+        }),
+      })
+    })
+    await page.route(/\/api\/v1\/commands\/catalog(?:\?.*)?$/, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
+    })
+  }
+  if (c.screenId === 'admin/setup/dms-integration') {
+    await page.route(/\/api\/v1\/admin\/dms\/status(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ ok: false, configured: false, message: 'offline' }),
       })
     })
   }

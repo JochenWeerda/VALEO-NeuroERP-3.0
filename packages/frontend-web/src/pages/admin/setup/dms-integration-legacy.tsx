@@ -203,11 +203,13 @@ export default function DmsIntegrationCard(): JSX.Element {
   }, [baseUrl, hasCredentials, loadStatus, toast, token])
 
   return (
+    <div role="region" aria-label="DMS-Integration Arbeitsbereich">
     <Card className="border border-dashed">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle>Mayan DMS</CardTitle>
+            <h1 className="text-lg font-semibold tracking-tight">DMS-Integration</h1>
+            <CardTitle className="sr-only">Mayan DMS</CardTitle>
             <CardDescription>DMS-Integration fuellt Inbox, Dokument-Metadaten und Workflow.</CardDescription>
           </div>
           {isConfigured && (
@@ -404,5 +406,6 @@ export default function DmsIntegrationCard(): JSX.Element {
         )}
       </CardContent>
     </Card>
+    </div>
   )
 }
