@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-15
+last_reviewed: 2026-11-25
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 698 Tabellen, 9141 Spalten.**
+**31 Schemas, 698 Tabellen, 9142 Spalten.**
 
 ## Schemas
 
@@ -45,7 +45,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_meldewesen` | `finance` | 2 | 21 |
 | `domain_mfg` | `inventory` | 3 | 15 |
 | `domain_nachweisraum` | `dms-compliance` | 3 | 31 |
-| `domain_ops` | `inventory` | 75 | 1081 |
+| `domain_ops` | `inventory` | 75 | 1082 |
 | `domain_portal` | `crm` | 9 | 150 |
 | `domain_pos` | `finance` | 4 | 41 |
 | `domain_pricing` | `finance` | 5 | 49 |
@@ -1301,7 +1301,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `ops_dokument_versionen` | `inventory` | prefix | `id` | id, dokument_id, version, name, groesse, speicherpfad, aenderungsbemerkung, erstellt_am, erstellt_von, tenant_id |
 | `ops_dokumente` | `inventory` | prefix | `id` | id, name, typ, kategorie, groesse, speicherpfad, mime_type, beschreibung, schlagwoerter, version, referenz_typ, referenz_id, status, hochgeladen_am, hochgeladen_von, geloescht_am, geloescht_von, created_at, updated_at, created_by, updated_by, tenant_id |
 | `ops_enni_meldungen` | `inventory` | prefix | `id` | id, typ, betrieb, vvvo, datum, status, naehrstoff_n, naehrstoff_p, naehrstoff_k, created_at, updated_at, tenant_id |
-| `ops_fahrer` | `inventory` | prefix | `id` | id, personalnummer, name, vorname, geburtsdatum, telefon, email, fuehrerschein, fuehrerschein_gueltig_bis, adr_bescheinigung, adr_gueltig_bis, status, aktuelles_fahrzeug_id, touren_heute, touren_woche, kilometer_heute, verfuegbar_ab, created_at, updated_at, created_by, updated_by |
+| `ops_fahrer` | `inventory` | prefix | `id` | id, personalnummer, name, vorname, geburtsdatum, telefon, email, fuehrerschein, fuehrerschein_gueltig_bis, adr_bescheinigung, adr_gueltig_bis, status, aktuelles_fahrzeug_id, touren_heute, touren_woche, kilometer_heute, verfuegbar_ab, created_at, updated_at, created_by, updated_by, tenant_id |
 | `ops_fahrzeug_bussgeld` | `inventory` | prefix | `id` | id, fahrzeug_id, fahrer_id, datum, ort, tatbestand, betrag_eur, faellig_am, bezahlt_am, aktenzeichen, status, notiz, created_at, updated_at, tenant_id |
 | `ops_fahrzeug_schaeden` | `inventory` | prefix | `id` | id, fahrzeug_id, datum, ort, beschreibung, schadenhoehe_eur, versicherung_gemeldet, versicherungs_nr, gegner_kennzeichen, polizei_aktenzeichen, status, abgeschlossen_am, erstellt_von, created_at, updated_at, tenant_id |
 | `ops_fahrzeug_status_historie` | `inventory` | prefix | `id` | id, fahrzeug_id, von_status, zu_status, grund, benutzer, km_stand, timestamp, tenant_id |
