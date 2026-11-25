@@ -1,0 +1,14 @@
+domain_id,domain_name,blatt,prozesse,abgenommen,teilweise,fehlt,p0,p1,p2,p3,maturity_20261123,maturity_202610,landhandel_sor,evidence,top_open_items,supersedes
+D01,Verkauf (Angebot bis Rechnung),verkauf,10,0,9,1,0,1,9,1,mittel,hoch,stark,docs/abnahme/domaenen/verkauf.md,P0=0 P1=1; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D02,Einkauf (Anfrage bis Eingangsrechnung),einkauf,9,0,9,0,0,2,22,3,mittel,hoch_mittel,stark,docs/abnahme/domaenen/einkauf.md,P0=0 P1=2; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D03,Finance_FiBu,,,,,,,,,,nicht_erhoben,mittel,mittel,noch kein Abnahmeblatt (Fahrplan M4 Nachzug POS/Portal/Personal/Compliance/KI),Close; Journal-Atomizitaet; Agentic Finance; Bank-Proof,
+D04,CRM (Kundenakte bis Wiedervorlage),crm,13,0,11,2,5,7,24,3,niedrig,hoch,stark,docs/abnahme/domaenen/crm.md,P0=5 P1=7; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D05,Lager (Bestand; Korrektur; Umlagerung; Fremdware; Inventur; Chargen),lager,12,0,12,0,0,9,23,4,mittel,hoch,stark,docs/abnahme/domaenen/lager.md,P0=0 P1=9; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D06,Annahme; Waage und Ernte (Wiegung bis Gutschrift),ernte-waage,13,0,13,0,0,3,34,2,mittel,hoch,sehr_stark,docs/abnahme/domaenen/ernte-waage.md,P0=0 P1=3; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D07,Logistik und Fuhrpark (Tour bis Frachtabrechnung),logistik,13,0,12,1,1,18,34,4,niedrig,hoch,stark,docs/abnahme/domaenen/logistik.md,P0=1 P1=18; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D08,Personal_HR,,,,,,,,,,nicht_erhoben,hoch_mittel,mittel,noch kein Abnahmeblatt (Fahrplan M4 Nachzug POS/Portal/Personal/Compliance/KI),UI-Rollen; Bewerber-Selbstzugang,
+D09,Compliance_Meldewesen,,,,,,,,,,nicht_erhoben,mittel,mittel_hoch_DE,noch kein Abnahmeblatt (Fahrplan M4 Nachzug POS/Portal/Personal/Compliance/KI),Tax-Skill-MCP; globale Guides,
+D10,POS_Portal,,,,,,,,,,nicht_erhoben,mittel,mittel,noch kein Abnahmeblatt (Fahrplan M4 Nachzug POS/Portal/Personal/Compliance/KI),Channel-UX; TSE extern,
+D11,Kontrakte und Streckengeschaeft,kontrakte-strecke,23,2,19,2,0,8,31,1,mittel,hoch,sehr_stark,docs/abnahme/domaenen/kontrakte-strecke.md,P0=0 P1=8; Workboard M4-*-LUECKEN,domain-maturity-matrix-20261007.csv
+D12,KI_Agent_MCP,,,,,,,,,,nicht_erhoben,mittel_duenn,mittel,noch kein Abnahmeblatt (Fahrplan M4 Nachzug POS/Portal/Personal/Compliance/KI),Action-Dichte; Policy-Agents; Local OCR,
+D13,Produktion und Muehle (Rezeptur bis Chargenfreigabe),produktion-muehle,15,0,13,2,3,12,27,13,niedrig,,stark,docs/abnahme/domaenen/produktion-muehle.md,P0=3 P1=12; Workboard M4-*-LUECKEN,

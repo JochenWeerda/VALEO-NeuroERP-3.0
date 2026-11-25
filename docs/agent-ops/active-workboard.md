@@ -974,6 +974,65 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
 
+## CUSTOMER-COMMUNITY-ISOLATION-20261117 — in Arbeit, Codex Lead
+Ziel: bestaetigte mandantenuebergreifende Leser/Schreiber bei Partner-Gemeinschaftsmitgliedern schliessen: Community bleibt gemeinsamer Katalog, Mitglied muss eigenem Partner und URL-Community entsprechen; globale Katalogpflege mit vorhandener Adminrolle absichern. Besitzer profile_backend: app/services/business_partner_service.py nur Community-Mitglieder, app/api/v1/endpoints/business_partners.py nur Community-Katalog-/Mitgliedswege und entfallender globaler Partnerpruefer; neue kleine Hilfsmodule/Tests falls erforderlich, Quell-Godfile darf nicht wachsen. Lead besitzt QA/Handshakes/Inventare. Kein neues Tabellenmodell/DDL/DB/Container, gemeinsamer Probe nur abgestimmt und rollbackisoliert. PR153-CI laeuft unveraendert auf cd2644b92; neuer Sicherheits-Slice separat, kein Abbruch laufender gruener Nachweise.
+
+CUSTOMER-COMMUNITY Zwischenabnahme: 9 Unit+1 PostgreSQL-Vertrag als valeo_agent
+mit zwei Mandanten gruen; fremde Mitgliederdaten und falsche URL-Community
+abgewiesen, erlaubte Wirkung nachgewiesen, alleszurueckgerollt. Angrenzende49
+Partner-/Profil-/HTTP-Vertraege plus3 Metadatenvertraege gruen. Endpoint2704LOC,
+Baseline nurgesenkt. Expliziter Kunden-Agentenvertrag kennzeichnet neue Bank-/
+Steuer-/Kontakt-/Datenschutzfelder sensibel; keine Rechte durch Tool-Sichtbarkeit.
+Quell- und Rechtekorrektur lokal fertig, generierte Artefakte/Integration folgen.
+
+## M0-PROBE-SAFETY-20261123 — in Arbeit, Codex Lead
+Ziel: vor_push standardmaessig lesend, explizit konfigurierte Testverbindung, Abbruch bei nicht bereitem Pruefstand vor Folgepruefungen. Keine impliziten Resets/Migrationen/Seeds/Rechtewechsel oder Klartext-Zugangsdefaults. Besitzer ci_failures_review: scripts/vor_push.py, tests/test_vor_push.py; Lead QA/Runbook/Handshakes. Effiziente Testauswahl/Blockgroesse und entfernte-Tabellen-Erkennung erhalten; Konfliktmarkierungen vor Push abweisen. Keine reale DB-Aktion bei Umsetzung/Unit-Tests; Wartung separat koordiniert.
+
+M0-PROBE-SAFETY Dateibesitzpraezisierung23.11: Lead gleicht CLAUDE.md (Abschnitt vor jedem Push), Pruefstand-Runbook und eigene QA mit dem lesenden Vor-Push-Vertrag ab. Keine Aenderung an Claudes laufenden Worktrees oder Datenbanken.
+
+23.11 konsolidiert: 75 gezielte Vertraege,12 ehemalige CI-/Register-/CLI-/
+Studio-/Async-Vertraege und172 Referenz-Lesemodellfaelle gruen. Kein pauschaler
+Gesamt-CI-Erfolg behauptet.143 Katalogattribute/141 sichtbare/99 editierbare
+Profilfelder nach PR160; technische Lookups bleiben offen, Bankpflege high
+und agentengesperrt. Vor-Push-Ressourcenschutz27 isolierte Tests gruen,
+expliziter Volltestmodus ohne Wartung. Probe hat3 fremde agent:vor_push-
+Sitzungen; keine Fachtests/DDL/Resets durch Root. Claudes PR160/161-Integration
+bleibt bei Claude; eigener Zweig ergaenzt Mitgliedschafts- und Ressourcenschutz.
+
+## M0-EFFECT-REDOS-20261123 — lokal abgenommen, Codex Lead
+Befund GitHubDependabot710/GHSA-7589-6fvf-x4pw: effect3.21.3 im pnpm-Lock ueber @prisma/config6.19.0, behoben ab3.22.1. Besitzer Lead: package.json nur effect-Override, pnpm-lock.yaml nur gezielte Aufloesung, eigener enger Sicherheitsnachweis/QA/Handshake. Erst Pfad/Version/Integritaet pruefen; keine fremden node_modules, DB/Container oder generellen Paketupdates; keine Ausnahme/Schwellenlockerung.
+
+23.11 Effect: exakt3.22.1, eingefrorener Lock-Check36 Workspaces und isolierter Integritaets-/ReDoS-Verhaltenstest bestanden. Keine DB-/Docker-/fremde Installationsaenderung. QA und Handshake effect-redos-20261123; main-Integration/Sicherheitsnachlauf offen.
+
+## M0-CONSOLIDATED-CI-20261123 — in Arbeit, Codex Lead
+Ziel: aktualisierten Kundenstamm-PR160 mit eigenem Mandanten-/Vor-Push-/Effect-Schutz konsolidieren, engen Integrationsdiff pruefen, einen PR-CI-Nachlauf starten. Dateibesitz: eigene Integrationscommits, QA/Handshake/Workboard; Claudes PR161 unveraendert. Keine DB-Wartung, keine doppelten Volltests. Abnahme: finaler Head im PR nachvollziehbar, CI-Ergebnis ehrlich je Gate, keine roten Checks umgehen.
+
+M0 konsolidiert23.11: PR160-Head9b27b57d9 integriert,36 gezielte Tests gruen, keine fachliche Aenderung im Integrationsdiff. Effect ist Ursache der neuen Dependency-Rotlaeufe; Backend-Evidence bleibt absichtlich an erfolgreiches Gesamtgate gebunden. QA m0-consolidated-ci-20261123; neuer PR-Nachlauf folgt, keine Gesamtfreigabe.
+
+## M0-ZAP-WORKSPACE-20261123 — in Arbeit, Codex Lead
+Ziel: belegten ZAP-Arbeitsverzeichnisfehler in CI beheben (PR160 Job137506796501 Permission denied /zap/wrk/zap.yaml), ohne Gate-Absenkung. Besitzer Codex: .github/workflows/ci.yml nur ZAP-Schritte, enger Workflowvertrag, QA/Handshake. Dediziertes beschreibbares Scannerverzeichnis statt Repository-Schreibfreigabe, fehlender/ungueltiger Bericht und Scannerfehler bleiben blockierend. Keine DB/Docker-Lokalbauten; gezielte Tests ohne Dienste.
+
+ZAP23.11: dedizierter Mount statt Checkout-Schreibfreigabe, strenger Status-/Berichtsvertrag, Bericht bei Fehler hochgeladen;12 Mock-Verhaltenstests bestanden6,95s. Keine DB/Docker-Lokaltests. QA/Handshake nachgezogen; echte neue CI-Abnahme offen.
+
+## M5-IMAGE-DRIFT-EVIDENCE-20261123 — in Arbeit, Codex Lead
+Ziel: offenen RUNTIME-FIVE-503-Imagebericht aus vollstaendigen Buildquellen erzeugen und nur JSON in produktives Backendimage uebernehmen. Besitzer Lead: Dockerfile.backend (neue leichte Berichtsstufe), Dockerfile.backend.dockerignore (Root-Regeln plus benoetigte Markdown-Doku), enger Buildquellenvertrag und Docker-Smoke-Validierung in quality-gate.yml, QA/Runbook. Keine unvollstaendige Doku, keine lokalen Artefakte/Geheimnisse kopieren, keine Gate-Absenkung. Buildkontext-Erweiterung nur backend-spezifisch; keine konkurrierenden lokalen Builds/DB-Sitzungen.
+
+M5 Image23.11: vollstaendiger Buildquellenvergleich identisch; permanente kleine Quellketten-/Ignore-/Schema-Paketvertraege4/4 in1,77s. Docker Smoke erweitert um echte Ausschlussmarker und Bericht im Laufzeitimage. Keine lokale DB/Buildlast. QA backend-image-drift-evidence-20261123; CI-/Bereitstellungsabnahme noch offen.
+
+## M2-SERVICE-ENTRY-SOURCE-20261123 — in Arbeit, Codex Lead
+Ziel: bestaetigten Anfrage-Platzhalter der nativen Leistungsnachweisliste durch bestehenden tenantgebundenen SES-Listenvertrag samt echten Fachspalten ersetzen. Besitzer Lead: nur build_einkauf_service_entry_sheets_screen_definition in screen_definitions_domain_batch15.py, enger Definition-/Listen-/Tenantvertrag, abgeleitete Artefakte/QA. Keine Freigabe oder sichere Schreibparitaet behaupten; bestehende SES-Create/Patch-Vertragsluecken getrennt fortfuehren. Kein neues Fachmodell, keine DB/Container/Handmade-Seite; keine Aenderung an Claudes Finance/Kundenclaims.
+
+M2-SERVICE-ENTRY Dateibesitzpraezisierung vor Edit: Lead besitzt zusaetzlich typisierten SES-Lesevertrag in compat_schemas.py und GET-Bindung in compat.py; Subagent ausschliesslich nativen Builder+neuen Verhaltenstest. Kein konkurrierender Edit an Schreibwegen. OpenAPI soll die tatsaechlichen Fachspalten statt extra=allow ohne Feldvertrag beschreiben.
+
+Leistungsnachweis-Leseweg umgesetzt. Gezielter Vertrag prueft Statusfilter, Mandantentrennung am Repository-Aufruf, Felder und typisierte Antwort. Quelle auf 1.000 Datensaetze begrenzt. Browserabnahme und Studio-Schreibwege offen.
+
+## M0-PR163-SONAR - reserviert, Codex Lead
+Sonar auf dfabfb63c: 75,6 Prozent neue Coverage und Wartbarkeit B. Besitz: Community-Routen/Tests, gezielte weitere Befunde und OpenAPI. Kanalzweig bleibt getrennt; keine Gate-Absenkung.
+
+PR163-Sonar: 14 nicht abgedeckte neue Zeilen in Community-Routen ermittelt. Sechs HTTP-Fehlerfaelle und vertrauenswuerdige Mandantweitergabe neu getestet. 16 gezielte Tests bestanden. Fehlercodes dokumentiert, doppelte Meldung zentralisiert, Testassertionen getrennt, OpenAPI und Studio-Artefakte erzeugt. Gatebewertung auf neuem Head offen.
+
+PR163 auf main 602394bd9 nachgezogen. Abdeckung war im Nachlauf gruen; einziger offener Sonar-Befund S1192 zum Filterhinweis im Maskenbatch zentralisiert. 43 gezielte Tests und Godfile-Pruefung gruen; OpenAPI und Studio-/Handbuch-Artefakte synchron. Neue Gesamt-CI und Review offen.
+
 ## M2-NAVIGATION-CONTRACTS - reserviert, Codex Lead
 Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen Maskendefinitionen und deren erzeugte Register. Nur bereits verdrahtete UI-Aktionen deklarieren; Funktionsumfang und Ratschenabnahme pruefen.
 
@@ -1136,6 +1195,14 @@ Stand 23.11.2026 abends: workflow_dispatch-Lauf 45285135642 auf d8963888a gruen 
 ## M3-BANK-ZUORDNUNG-UI-20261123 — offen, P1 (M3, Bahn Fibu)
 Befund aus M0-E2E-FULL-UAT: finance/bank-abgleich (bank-surface.tsx) kann Kontoauszuege importieren und Salden vergleichen, bietet aber weder manuelle Zuordnung einer Bankzeile zu einem offenen Posten noch Zuordnungsvorschlaege noch Abgleichkennzahlen. Das Backend hat /api/v1/finance/auto-matching/match und /match/{line_id}/apply. Abnahme: die drei test.fixme in playwright-tests/specs/finance/payment-matching.spec.ts sind scharf und gruen.
 
+## M4-CR-P0-MANDANTENLECK-20261123 — zur Abnahme, Cursor (M4, P0)
+Meilenstein: M4. Owner: Cursor. Stand: zur Abnahme; nach Merge #178 auf main `90d553658` nachgezogen (PR #188).
+Quelle: docs/abnahme/domaenen/crm.md (D04) / Reifematrix 20261123 (PR #181).
+P0-Luecken geschlossen: CR-01 lookup ohne tenant_id; CR-01 KIM customers ohne Mandantenfilter; CR-03 KIM-Ansprechpartner ohne Filter; CR-04 _kunde_finden Fallback public.kunden ohne Mandant; CR-11 CrmMergeService ohne tenant_id; zusaetzlich CustomerService.get_from_db_any_key Altbestand-Fallback.
+Dateibesitz: app/core/public_kunden_mandant.py, app/services/business_partner_service.py (search_lookup), app/api/v1/endpoints/crm_kim.py, app/api/v1/endpoints/crm_360_sql.py, app/services/crm_merge_service.py, app/services/customer_service.py (Altbestand-Fallback), tests/test_m4_cr_p0_mandantenleck.py, QA docs/quality-assurance/m4-cr-p0-mandantenleck-20261124.md, Workboard.
+Abnahme: Integrationstest gegen PostgreSQL mit Fremdmandant 404/leere Liste; eigener Mandant bleibt lesbar; CI/Review offen.
+Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte, PR #190) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion.
+
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
 
@@ -1243,5 +1310,10 @@ Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory
 
 ## M6-SPIEGEL-UEBERNAHME-20261125 — zur Abnahme, Claude Code (M6)
 Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandenen Adapterstrecke (legacy_adapter_*): Profil l3_spiegel, Uebernahme freigegebener Batches in die Fachtabellen mit Quellreferenz (spiegel_quellreferenzen, Pruefsumme -> idempotent) und fortgeschriebenem Protokoll (spiegel_protokoll) samt Differenzbericht; erste Objektart Artikel. Unbekannte Bezuege und Fremdbestand = Fehlerzeilen, kein Raten. Plan, L3-Tabellen je Objektart (WWS_*), Abnahmekriterien, Blocker: docs/migration/m6-spiegelbetrieb-l3.md. Dateibesitz: app/services/spiegel_uebernahme.py, alembic spiegel_quellreferenz_20261125, tests/test_spiegel_uebernahme.py.
+## M5-UMGEBUNG-AGENTENMATRIX-20261125 — zur Abnahme, Claude Code (M5)
+Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBUNG local|ci|staging|production, nicht gesetzt = production (geschlossen). Agenten schreiben autonom nur in LOCAL/CI ueber alle deklarierten Kommandowege; STAGING/PRODUCTION Freigabe je Aktion; Fachregeln der Maske gelten ueberall. docker-compose.yml setzt local. Fiskaly-Werte aus .env.example entfernt (Werte nicht ausgegeben). Bestand der Umgebungen: docs/security/umgebungen-und-agentenrechte.md (nur LOCAL und CI in Betrieb).
+
+## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
+Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
 ## M7-M8-VORARBEITEN-20261125 — zur Abnahme, Claude Code (M7/M8)
 Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. Ohne M6 startbar: Loeschkonzept, Installationsprobe, Demo-Mandant, Lizenzpruefung, Helm. Pruefpunkte Aufbewahrungsfristen (gobd_retention: Buchungsbelege 8 statt 10 Jahre seit BEG IV, PSM 3, DueV 7, Fristbeginn Kalenderjahresende) - Bestaetigung durch Steuerberater/Fachbereich offen, kein Code geaendert.

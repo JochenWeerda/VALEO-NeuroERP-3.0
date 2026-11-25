@@ -93,3 +93,13 @@ seine erwartete Version. Interne Fachrollen erforderlich; kein Portal-Leseweg.
 MaskActionRuntime, serverseitigen Urheber, Versionsvergleich, Idempotenz und
 atomaren Audit-/Outbox-Commit. Keine neue Tabelle, kein Servicecontainer.
 [Grenzen und SQL-Nachweise](../../../quality-assurance/customer-master-field-parity-20261117.md).
+
+
+## Gemeinschaftsmitglieder: Eigentumsgrenzen (17.11.2026)
+
+`/catalog/communities/{community_id}/members` liest und schreibt ausschliesslich
+Mitglieder eigener Partner im aktiven Token-Mandanten. PATCH/DELETE binden
+zusaetzlich member_id an community_id aus der URL, Neuzuordnung verlangt einen
+eigenen Zielpartner. Bestehende interne Leser-/CRM-Schreibrollen gelten weiter;
+die globale Katalogpflege ist PLATTFORM/admin vorbehalten.
+[SQL- und Rollennachweise](../../../quality-assurance/community-member-isolation-20261117.md).

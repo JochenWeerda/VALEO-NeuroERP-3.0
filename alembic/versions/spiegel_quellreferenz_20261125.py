@@ -1,7 +1,7 @@
 """Spiegelbetrieb L3: Quellreferenz je uebernommenem Datensatz und Uebernahmeprotokoll (M6, 25.11.2026).
 
 Revision ID: spiegel_quellreferenz_20261125
-Revises: folgeartikel_fremdschluessel_20261124
+Revises: ops_fahrer_tenant_20261124
 
 Die vorhandene Adapterstrecke (``domain_integration.legacy_adapter_*``: Annahme, Staging, Mengenabgleich, Freigabe)
 endete vor den Fachtabellen. Die Uebernahme braucht:
@@ -17,7 +17,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "spiegel_quellreferenz_20261125"
-down_revision = "folgeartikel_fremdschluessel_20261124"
+down_revision = "ops_fahrer_tenant_20261124"
 branch_labels = None
 depends_on = None
 

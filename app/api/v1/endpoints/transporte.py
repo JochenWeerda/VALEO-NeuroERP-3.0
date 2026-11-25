@@ -1,4 +1,4 @@
-"""Transporte — Fahrerverwaltung, vollständiges CRUD."""
+"""Transporte — Fahrerverwaltung, vollständiges CRUD (mandantengefiltert, M4-LO-P0)."""
 
 from datetime import datetime
 from decimal import Decimal
@@ -9,9 +9,10 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.domains.operations.models import Fahrer, FahrerStatus
+from app.core.tenant import get_tenant_id
+from app.domains.operations.models import FahrerStatus
+from app.domains.operations.repository import FahrerRepository
 
-from app.api.v1.schemas.base import BaseSchema
 from app.api.v1.schemas.transporte_schemas import TransporteOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
@@ -68,11 +69,14 @@ def list_fahrer(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, le=500),
     db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
 ):
-    q = db.query(Fahrer)
-    if status:
-        q = q.filter(Fahrer.status == status)
-    rows = q.order_by(Fahrer.name).offset(skip).limit(limit).all()
+    repo = FahrerRepository(db, tenant_id)
+    rows = (
+        repo.get_by_status(status, skip=skip, limit=limit)
+        if status
+        else repo.get_all(skip=skip, limit=limit)
+    )
     result = []
     for f in rows:
         d = _to_dict(f)
@@ -84,8 +88,12 @@ def list_fahrer(
 @router.get("/fahrer/{fahrer_id}", summary="Fahrer abrufen",
     response_model=TransporteOut
 )
-def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
+def get_fahrer(
+    fahrer_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    obj = FahrerRepository(db, tenant_id).get_by_id(fahrer_id)
     if not obj:
         raise HTTPException(404, "Fahrer nicht gefunden")
     data = _to_dict(obj)
@@ -95,32 +103,43 @@ def get_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
 
 @router.post("/fahrer", status_code=201, summary="Fahrer anlegen",
     response_model=TransporteOut, dependencies=SCHREIBEN["LOGISTIK"])
-def create_fahrer(payload: FahrerPayload, db: Session = Depends(get_db)):
-    obj = Fahrer(**payload.model_dump())
-    db.add(obj)
-    db.commit()
-    db.refresh(obj)
+def create_fahrer(
+    payload: FahrerPayload,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    obj = FahrerRepository(db, tenant_id).create(payload.model_dump())
     return _to_dict(obj)
 
 
 @router.patch("/fahrer/{fahrer_id}", summary="Fahrer aktualisieren",
     response_model=TransporteOut, dependencies=SCHREIBEN["LOGISTIK"])
-def update_fahrer(fahrer_id: str, payload: FahrerPatch, db: Session = Depends(get_db)):
-    obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
+def update_fahrer(
+    fahrer_id: str,
+    payload: FahrerPatch,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    obj = FahrerRepository(db, tenant_id).update(
+        fahrer_id, payload.model_dump(exclude_unset=True)
+    )
     if not obj:
         raise HTTPException(404, "Fahrer nicht gefunden")
-    for field, value in payload.model_dump(exclude_unset=True).items():
-        setattr(obj, field, value)
-    obj.updated_at = datetime.utcnow()
-    db.commit()
-    db.refresh(obj)
     return _to_dict(obj)
 
 
-@router.delete("/fahrer/{fahrer_id}", status_code=204, response_class=Response, response_model=None, summary="Fahrer löschen", dependencies=SCHREIBEN["LOGISTIK"])
-def delete_fahrer(fahrer_id: str, db: Session = Depends(get_db)):
-    obj = db.query(Fahrer).filter(Fahrer.id == fahrer_id).first()
-    if not obj:
+@router.delete(
+    "/fahrer/{fahrer_id}",
+    status_code=204,
+    response_class=Response,
+    response_model=None,
+    summary="Fahrer löschen",
+    dependencies=SCHREIBEN["LOGISTIK"],
+)
+def delete_fahrer(
+    fahrer_id: str,
+    db: Session = Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    if not FahrerRepository(db, tenant_id).delete(fahrer_id):
         raise HTTPException(404, "Fahrer nicht gefunden")
-    db.delete(obj)
-    db.commit()
