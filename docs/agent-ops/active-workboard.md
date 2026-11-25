@@ -1136,6 +1136,14 @@ Stand 23.11.2026 abends: workflow_dispatch-Lauf 45285135642 auf d8963888a gruen 
 ## M3-BANK-ZUORDNUNG-UI-20261123 — offen, P1 (M3, Bahn Fibu)
 Befund aus M0-E2E-FULL-UAT: finance/bank-abgleich (bank-surface.tsx) kann Kontoauszuege importieren und Salden vergleichen, bietet aber weder manuelle Zuordnung einer Bankzeile zu einem offenen Posten noch Zuordnungsvorschlaege noch Abgleichkennzahlen. Das Backend hat /api/v1/finance/auto-matching/match und /match/{line_id}/apply. Abnahme: die drei test.fixme in playwright-tests/specs/finance/payment-matching.spec.ts sind scharf und gruen.
 
+## M4-CR-P0-MANDANTENLECK-20261123 — zur Abnahme, Cursor (M4, P0)
+Meilenstein: M4. Owner: Cursor. Stand: zur Abnahme; nach Merge #178 auf main `90d553658` nachgezogen (PR #188).
+Quelle: docs/abnahme/domaenen/crm.md (D04) / Reifematrix 20261123 (PR #181).
+P0-Luecken geschlossen: CR-01 lookup ohne tenant_id; CR-01 KIM customers ohne Mandantenfilter; CR-03 KIM-Ansprechpartner ohne Filter; CR-04 _kunde_finden Fallback public.kunden ohne Mandant; CR-11 CrmMergeService ohne tenant_id; zusaetzlich CustomerService.get_from_db_any_key Altbestand-Fallback.
+Dateibesitz: app/core/public_kunden_mandant.py, app/services/business_partner_service.py (search_lookup), app/api/v1/endpoints/crm_kim.py, app/api/v1/endpoints/crm_360_sql.py, app/services/crm_merge_service.py, app/services/customer_service.py (Altbestand-Fallback), tests/test_m4_cr_p0_mandantenleck.py, QA docs/quality-assurance/m4-cr-p0-mandantenleck-20261124.md, Workboard.
+Abnahme: Integrationstest gegen PostgreSQL mit Fremdmandant 404/leere Liste; eigener Mandant bleibt lesbar; CI/Review offen.
+Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte, PR #190) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion.
+
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
 
