@@ -1,22 +1,22 @@
 .shell {
-  --bg: #f5f8fc;
-  --ink: #0f172a;
-  --muted: #64748b;
-  --line: #dbe5f0;
-  --card: rgba(255, 255, 255, 0.78);
-  --accent: #005599;
-  --profit: #0ea870;
-  --loss: #d94a66;
+  --bg: hsl(var(--background));
+  --ink: hsl(var(--foreground));
+  --muted: hsl(var(--muted-foreground));
+  --line: hsl(var(--border));
+  --card: hsl(var(--card) / 0.78);
+  --accent: hsl(var(--primary));
+  --profit: hsl(var(--status-success-hsl));
+  --loss: hsl(var(--status-error-hsl));
   --radius: 16px;
   min-height: 100%;
   display: grid;
   grid-template-columns: 288px 1fr;
   background:
-    radial-gradient(circle at 20% 20%, #e7f0fb 0%, transparent 44%),
-    radial-gradient(circle at 90% 10%, #ebf5ff 0%, transparent 30%),
+    radial-gradient(circle at 20% 20%, hsl(var(--primary) / 0.08) 0%, transparent 44%),
+    radial-gradient(circle at 90% 10%, hsl(var(--primary) / 0.06) 0%, transparent 30%),
     var(--bg);
   color: var(--ink);
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: inherit;
 }
 
 .sidebar {
@@ -63,13 +63,13 @@
 
 .navItem:hover {
   border-color: var(--line);
-  background: #ffffffbf;
+  background: hsl(var(--card) / 0.75);
 }
 
 .navItemActive {
-  background: linear-gradient(180deg, #ffffffcc 0%, #f4f9ffcc 100%);
-  border-color: #c5d9ee;
-  box-shadow: 0 14px 24px -24px #00559999;
+  background: linear-gradient(180deg, hsl(var(--card) / 0.8) 0%, hsl(var(--muted) / 0.55) 100%);
+  border-color: var(--line);
+  box-shadow: 0 14px 24px -24px hsl(var(--primary) / 0.6);
 }
 
 .main {
@@ -126,7 +126,7 @@
   border-radius: 10px;
   border: 1px solid var(--line);
   padding: 0 10px;
-  background: #fff;
+  background: hsl(var(--card));
   color: var(--ink);
 }
 
@@ -138,9 +138,9 @@
 .journalButton {
   height: 40px;
   border-radius: 10px;
-  border: 1px solid #b4d3ec;
+  border: 1px solid var(--line);
   padding: 0 14px;
-  background: #fff;
+  background: hsl(var(--card));
   color: var(--accent);
   display: inline-flex;
   align-items: center;
@@ -150,7 +150,7 @@
 }
 
 .journalButton {
-  color: #fff;
+  color: hsl(var(--card));
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -162,8 +162,8 @@
   width: 160px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  background: #fff;
-  box-shadow: 0 14px 36px -26px #0f172acc;
+  background: hsl(var(--card));
+  box-shadow: 0 14px 36px -26px hsl(var(--foreground) / 0.8);
   z-index: 5;
   animation: fadeIn 0.18s ease;
 }
@@ -182,7 +182,7 @@
 }
 
 .exportMenu button:hover {
-  background: #f4f9ff;
+  background: hsl(var(--muted) / 0.45);
 }
 
 .searchResults {
@@ -198,7 +198,7 @@
   grid-template-columns: 140px 1fr;
   gap: 12px;
   padding: 8px 12px;
-  border-bottom: 1px solid #edf2f8;
+  border-bottom: 1px solid var(--line);
   font-size: 13px;
 }
 
@@ -331,7 +331,7 @@
 .table thead th {
   position: sticky;
   top: 0;
-  background: #f8fbff;
+  background: hsl(var(--muted) / 0.35);
   z-index: 1;
   text-align: left;
   border-bottom: 1px solid var(--line);
@@ -341,12 +341,12 @@
 
 .dataRow td,
 .sectionRow td {
-  border-bottom: 1px solid #edf2f8;
+  border-bottom: 1px solid var(--line);
   padding: 8px;
 }
 
 .sectionRow td {
-  background: #f8fbff;
+  background: hsl(var(--muted) / 0.35);
 }
 
 .sectionToggle {
@@ -381,7 +381,7 @@
   width: 100%;
   height: 8px;
   border-radius: 999px;
-  background: #edf2f8;
+  background: var(--line);
   overflow: hidden;
 }
 
@@ -402,7 +402,7 @@
 .modalBackdrop {
   position: fixed;
   inset: 0;
-  background: #0f172a73;
+  background: hsl(var(--foreground) / 0.45);
   backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
@@ -414,8 +414,8 @@
   width: min(820px, 100%);
   max-height: 80vh;
   border-radius: 18px;
-  border: 1px solid #cfdfef;
-  background: #ffffffea;
+  border: 1px solid var(--line);
+  background: hsl(var(--card) / 0.92);
   backdrop-filter: blur(20px);
   overflow: hidden;
 }
@@ -435,7 +435,7 @@
 
 .modalHeader button {
   border: 1px solid var(--line);
-  background: #fff;
+  background: hsl(var(--card));
   width: 30px;
   height: 30px;
   border-radius: 8px;
@@ -457,7 +457,7 @@
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px;
-  background: #fff;
+  background: hsl(var(--card));
 }
 
 .journalHead {
@@ -483,8 +483,8 @@
 
 .journalDetailsButton {
   margin-top: 8px;
-  border: 1px solid #c5d9ee;
-  background: #f4f9ff;
+  border: 1px solid var(--line);
+  background: hsl(var(--muted) / 0.45);
   color: var(--accent);
   border-radius: 8px;
   font-size: 12px;
@@ -495,9 +495,9 @@
 
 .journalLinesWrap {
   margin-top: 10px;
-  border: 1px solid #e0ebf5;
+  border: 1px solid var(--line);
   border-radius: 10px;
-  background: #ffffffd9;
+  background: hsl(var(--card) / 0.85);
   overflow: hidden;
 }
 
@@ -516,7 +516,7 @@
 .journalLinesTable th,
 .journalLinesTable td {
   padding: 7px 8px;
-  border-bottom: 1px solid #edf2f8;
+  border-bottom: 1px solid var(--line);
   text-align: left;
 }
 
@@ -527,8 +527,8 @@
 
 .journalLinesTotalRow td {
   font-weight: 700;
-  border-top: 2px solid #d7e6f4;
-  background: #f8fbff;
+  border-top: 2px solid var(--line);
+  background: hsl(var(--muted) / 0.35);
 }
 
 .journalCheckOk,
@@ -540,15 +540,15 @@
 }
 
 .journalCheckOk {
-  background: #eaf9f2;
-  border: 1px solid #bce9d4;
-  color: #0b7f55;
+  background: hsl(var(--status-success-hsl) / 0.12);
+  border: 1px solid hsl(var(--status-success-hsl) / 0.35);
+  color: var(--profit);
 }
 
 .journalCheckWarn {
-  background: #fff2f5;
-  border: 1px solid #f0bcc8;
-  color: #b1364f;
+  background: hsl(var(--status-error-hsl) / 0.12);
+  border: 1px solid hsl(var(--status-error-hsl) / 0.35);
+  color: var(--loss);
 }
 
 .skeletonGrid {
@@ -561,7 +561,7 @@
 .skeletonLarge,
 .modalSkeleton {
   border-radius: var(--radius);
-  background: linear-gradient(90deg, #eff4f9 25%, #f8fbff 37%, #eff4f9 63%);
+  background: linear-gradient(90deg, hsl(var(--muted) / 0.4) 25%, hsl(var(--muted) / 0.35) 37%, hsl(var(--muted) / 0.4) 63%);
   background-size: 400% 100%;
   animation: shimmer 1.2s ease infinite;
 }
