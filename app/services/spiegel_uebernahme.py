@@ -84,12 +84,14 @@ def _artikel_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[s
 
 def _artikel_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
     zeile = db.execute(text(
-        "SELECT article_number, name, description2, warengruppe, unit, is_active FROM domain_inventory.articles "
-        "WHERE tenant_id = :t AND id = :id"), {"t": tenant_id, "id": ziel_id}).mappings().first()
+        "SELECT article_number, name, description2, warengruppe, unit, is_active, deleted_at "
+        "FROM domain_inventory.articles WHERE tenant_id = :t AND id = :id"),
+        {"t": tenant_id, "id": ziel_id}).mappings().first()
     return dict(zeile) if zeile else None
 
 
 def _artikel_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    # Auch soft-geloeschte Zeilen: Unique (tenant_id, article_number) bleibt; kein stilles Wiederbeleben ohne Referenz.
     if db.execute(text("SELECT 1 FROM domain_inventory.articles WHERE tenant_id = :t AND article_number = :n"),
                   {"t": tenant_id, "n": werte["article_number"]}).first():
         raise ZeilenFehler(f"Artikel {werte['article_number']} existiert bereits ohne L3-Quellreferenz - "
@@ -103,10 +105,12 @@ def _artikel_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
 
 
 def _artikel_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    # L3 fuehrend: Soft-Delete in VALEO wird bei erneutem Abzug zurueckgenommen (deleted_at = NULL).
     db.execute(text(
         "UPDATE domain_inventory.articles SET article_number = :article_number, name = :name, "
         "description2 = :description2, warengruppe = :warengruppe, unit = :unit, is_active = :is_active, "
-        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+        "deleted_at = NULL, updated_at = now() WHERE tenant_id = :t AND id = :id"),
+        {"id": ziel_id, "t": tenant_id, **werte})
 
 
 @dataclass(frozen=True)
@@ -127,7 +131,7 @@ ZIELARTEN: dict[str, Zielart] = {
 # --- Lauf ------------------------------------------------------------------------------------------------------
 
 def _differenzen(alt: dict[str, Any] | None, neu: dict[str, Any]) -> dict[str, Any]:
-    alt = alt or {}
+    alt = {k: v for k, v in (alt or {}).items() if k != "deleted_at"}
     return {feld: {"valeo": alt.get(feld), "l3": wert} for feld, wert in neu.items() if alt.get(feld) != wert}
 
 
@@ -140,7 +144,21 @@ def _zeile(db: Session, tenant_id: str, batch_id: str, objektart: str, quellschl
         "AND quellsystem = :q AND objektart = :o AND quellschluessel = :k FOR UPDATE"),
         {"t": tenant_id, "q": QUELLSYSTEM, "o": objektart, "k": quellschluessel}).mappings().first()
     if referenz and referenz["payload_hash"] == summe:
-        return "unveraendert", {}
+        alt = art.lesen(db, tenant_id, referenz["ziel_id"])
+        if alt is None:
+            raise ZeilenFehler("Zielobjekt der Quellreferenz fehlt in VALEO - geloescht? fachlich klaeren")
+        if not alt.get("deleted_at"):
+            return "unveraendert", {}
+        # Soft-Delete in VALEO, gleicher L3-Inhalt: wiederbeleben (L3 fuehrend).
+        werte = art.zielwerte(db, tenant_id, payload)
+        differenzen = _differenzen(alt, werte)
+        differenzen["deleted_at"] = {"valeo": str(alt["deleted_at"]), "l3": None}
+        art.aendern(db, tenant_id, referenz["ziel_id"], werte)
+        db.execute(text(
+            "UPDATE domain_integration.spiegel_quellreferenzen SET batch_id = :b, zuletzt_am = now() "
+            "WHERE tenant_id = :t AND quellsystem = :q AND objektart = :o AND quellschluessel = :k"),
+            {"t": tenant_id, "q": QUELLSYSTEM, "o": objektart, "k": quellschluessel, "b": batch_id})
+        return "geaendert", differenzen
     werte = art.zielwerte(db, tenant_id, payload)
     if referenz is None:
         ziel_id = art.anlegen(db, tenant_id, werte)
@@ -154,6 +172,8 @@ def _zeile(db: Session, tenant_id: str, batch_id: str, objektart: str, quellschl
     if alt is None:
         raise ZeilenFehler("Zielobjekt der Quellreferenz fehlt in VALEO - geloescht? fachlich klaeren")
     differenzen = _differenzen(alt, werte)
+    if alt.get("deleted_at"):
+        differenzen["deleted_at"] = {"valeo": str(alt["deleted_at"]), "l3": None}
     art.aendern(db, tenant_id, referenz["ziel_id"], werte)
     db.execute(text(
         "UPDATE domain_integration.spiegel_quellreferenzen SET payload_hash = :h, batch_id = :b, "
@@ -170,6 +190,8 @@ def uebernehme(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason
         "WHERE id = :id AND tenant_id = :t FOR UPDATE"), {"id": batch_id, "t": tenant_id}).mappings().first()
     if not batch or batch["status"] != "approved":
         raise LegacyAdapterError("Nur freigegebene Batches sind uebernahmefaehig")
+    if batch["profile_key"] != "l3_spiegel":
+        raise LegacyAdapterError("Nur Batches mit Profil l3_spiegel sind uebernahmefaehig")
     zeilen = db.execute(text(
         "SELECT line_no, record_type, source_ref, canonical_payload FROM domain_integration.legacy_adapter_staging "
         "WHERE tenant_id = :t AND batch_id = :b AND validation_status = 'valid' ORDER BY line_no"),
