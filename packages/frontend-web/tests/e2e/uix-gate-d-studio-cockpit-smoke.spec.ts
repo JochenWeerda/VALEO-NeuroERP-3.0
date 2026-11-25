@@ -246,6 +246,21 @@ const COCKPIT_CASES: CockpitCase[] = [
     specializedLandmark: 'Rationsoptimierung Arbeitsbereich',
   },
   {
+    label: 'portal/rationsoptimierung',
+    path: '/portal/rationsoptimierung',
+    screenId: 'portal/rationsoptimierung',
+    testId: 'portal-feed-advice',
+    title: 'Willkommen bei der Rationsoptimierung',
+    specializedType: 'feed_workbench',
+    specializedFields: [
+      { key: 'view', label: 'Ansicht' },
+      { key: 'ration_id', label: 'Ration' },
+      { key: 'group_id', label: 'Gruppe' },
+      { key: 'plan_status', label: 'Planstatus' },
+    ],
+    specializedLandmark: 'Portal Rationsoptimierung Arbeitsbereich',
+  },
+  {
     label: 'waage/liste',
     path: '/waage/liste',
     screenId: 'waage/liste',
@@ -792,6 +807,24 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' })
       },
     )
+    if (c.screenId === 'portal/rationsoptimierung') {
+      // Portal-Layout: genau ein Kundenkonto → Auto-Wahl (PORTAL-CONTEXT-001).
+      await page.route(/\/api\/v1\/portal\/kundenkonten(?:\?.*)?$/, async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([
+            {
+              customer_id: 'smoke-betrieb-1',
+              customer_number: 'B-001',
+              name: 'Smoke-Testbetrieb',
+              rolle: 'betrieb',
+              rechte: ['*'],
+            },
+          ]),
+        })
+      })
+    }
   }
   if (c.specializedType === 'weighing') {
     await page.route(/\/api\/v1\/waage\/waagen(?:\?.*)?$/, async (route) => {

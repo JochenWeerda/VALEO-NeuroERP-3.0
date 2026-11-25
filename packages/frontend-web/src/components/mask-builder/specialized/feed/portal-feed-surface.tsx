@@ -65,7 +65,11 @@ export default function PortalFeedAdvicePage(): JSX.Element {
   }
 
   return (
-    <div data-testid="feed-advice-task-workspace">
+    <div
+      data-testid="feed-advice-task-workspace"
+      role="region"
+      aria-label="Portal Rationsoptimierung Arbeitsbereich"
+    >
       <a
         href="/portal/rationsoptimierung?mode=cockpit"
         className="mb-3 inline-flex min-h-touch items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
