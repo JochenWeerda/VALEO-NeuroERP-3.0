@@ -194,6 +194,14 @@ Inventar nach Batch 19: `runtime_wired` ~1088, `hand_built` ~38, `legacy_wrapper
 
 Inventar nach Batch 20: `hand_built` ~37.
 
+## Einundzwanzigste Hebung (Batch 21)
+
+| Maske | Nachher |
+|-------|---------|
+| `agrar/milchvieh-crosssell` | `UniversalNativeCockpitPage` mit KPI-Summary, Kundenliste (alle Legacy-Spalten), Produktgruppen-Tabelle; GET `/produktgruppen` |
+
+Inventar: `hand_built` ~36.
+
 ## Noch offen (Folge)
 
 - `hand_built` Prozessmasken (u. a. `annahme/rohware`, `lager/materialfluss`, Agrar-Ops-Legacy) — **nur mit Feld-/Aktionsparitaet**
