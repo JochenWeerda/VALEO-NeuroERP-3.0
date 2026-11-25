@@ -15661,6 +15661,7 @@
             "app/services/document_control_projection.py",
             "app/services/einkauf_compat_service.py",
             "app/services/finance_freigabe.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/gutschrift_docflow.py",
             "app/services/ist_aggregation_service.py",
             "app/services/kontrollkorb.py",
@@ -15678,7 +15679,7 @@
             "app/services/wareneingang_avis_service.py"
           ],
           "screens": [
-            "admin/branches"
+            "admin/branches/detail"
           ],
           "written_by": [
             "app/core/gobd_artifact.py",
@@ -15689,6 +15690,67 @@
             "app/services/mcp_execution_service.py",
             "app/services/settlement_document_archive_service.py",
             "app/services/wareneingang_avis_service.py"
+          ]
+        },
+        "document_item_gebinde_abbilder": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "position_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "version",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "abbild",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "erstellt_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "position_id",
+              "references": "domain_docflow.document_items.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_docflow.document_items.tenant_id"
+            }
+          ],
+          "owner_domain": "dms-compliance",
+          "ownership_reason": "Praefix 'document_' → domain_docflow.",
+          "placement": "prefix",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/gebinde_aufloesung.py"
+          ],
+          "written_by": [
+            "app/services/gebinde_aufloesung.py"
           ]
         },
         "document_items": {
@@ -15807,6 +15869,16 @@
               "name": "contract_ref",
               "nullable": true,
               "type": "character varying"
+            },
+            {
+              "name": "price_unit_quantity",
+              "nullable": false,
+              "type": "numeric"
+            },
+            {
+              "name": "gebinde_berechnung",
+              "nullable": true,
+              "type": "jsonb"
             }
           ],
           "foreign_keys": [
@@ -15837,6 +15909,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/ist_aggregation_service.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mcp_execution_service.py",
@@ -15847,7 +15920,8 @@
           ],
           "written_by": [
             "app/services/docflow_service.py",
-            "app/services/docflow_update_command.py"
+            "app/services/docflow_update_command.py",
+            "app/services/gebinde_aufloesung.py"
           ]
         },
         "document_links": {
@@ -18632,7 +18706,8 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/inventory_operations.py",
-            "app/infrastructure/models/einkauf_models.py"
+            "app/infrastructure/models/einkauf_models.py",
+            "app/services/bestandsbewertung.py"
           ]
         },
         "lieferanten": {
@@ -21631,7 +21706,7 @@
             },
             {
               "name": "status",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -30214,9 +30289,11 @@
             "app/infrastructure/models/l3c_models.py",
             "app/seeds/inventory_seed.py",
             "app/services/agri_flush_booking.py",
+            "app/services/bestandsbewertung.py",
             "app/services/customer_reference.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
+            "app/services/gebinde_aufloesung.py",
             "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_count_sheet_command.py",
             "app/services/ist_aggregation_service.py",
@@ -30228,15 +30305,59 @@
             "app/services/whatsapp_intake_service.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/inventory_counts.py",
-            "app/api/v1/endpoints/inventory_operations.py",
             "app/seeds/inventory_seed.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_compat_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/warehouse_service.py"
+          ]
+        },
+        "bestandsbuchung_schluessel": {
+          "columns": [
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "schluessel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "bewegung_id",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "erstellt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "bewegung_id",
+              "references": "domain_inventory.inventory_stock_movements.id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.inventory_stock_movements.tenant_id"
+            }
+          ],
+          "owner_domain": "inventory",
+          "ownership_reason": "Custodian domain_inventory / Domain inventory.",
+          "placement": "native",
+          "primary_key": [
+            "tenant_id",
+            "schluessel"
+          ],
+          "read_by": [
+            "app/services/bestandsbuchung_schluessel.py"
+          ],
+          "written_by": [
+            "app/services/bestandsbuchung_schluessel.py"
           ]
         },
         "bin_locations": {
@@ -32567,9 +32688,9 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/l3c_models.py",
             "app/services/agri_lot_link_booking_service.py",
+            "app/services/bestandsbewertung.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_balance_reconciliation.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
@@ -32581,7 +32702,6 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
-            "app/api/v1/endpoints/inventory_counts.py",
             "app/api/v1/endpoints/inventory_operations.py",
             "app/api/v1/endpoints/pos_retoure.py",
             "app/api/v1/endpoints/warehouse_transfers.py",
@@ -32590,8 +32710,6 @@
             "app/services/agri_lot_link_booking_service.py",
             "app/services/agri_silo_material_flow_service.py",
             "app/services/docflow_lagerzugang.py",
-            "app/services/feed_inventory_link_service.py",
-            "app/services/inventory_auxiliary_service.py",
             "app/services/inventory_correction_service.py",
             "app/services/inventory_count_close_service.py",
             "app/services/mobile_sync_service.py",
@@ -49299,7 +49417,24 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "artikel_nr",
+              "references": "domain_inventory.articles.article_number"
+            },
+            {
+              "column": "folge_artikel_nr",
+              "references": "domain_inventory.articles.article_number"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            }
+          ],
           "owner_domain": "platform",
           "ownership_reason": "Custodian domain_shared / Domain platform.",
           "placement": "native",
@@ -49311,6 +49446,101 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_stamm_ext.py"
+          ]
+        },
+        "artikel_gebindefaktoren": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "einheit_kuerzel",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "stufe",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "artikel_id",
+              "nullable": false,
+              "type": "character varying"
+            },
+            {
+              "name": "faktor1",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor2",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor3",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor4",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "geaendert_von",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "created_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "updated_at",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "artikel_id",
+              "references": "domain_inventory.articles.id"
+            },
+            {
+              "column": "einheit_kuerzel",
+              "references": "domain_shared.artikel_mengeneinheiten.einheit_kuerzel"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.artikel_mengeneinheiten.tenant_id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/gebinde_aufloesung.py"
+          ],
+          "written_by": [
+            "app/services/gebinde_aufloesung.py"
           ]
         },
         "artikel_inventurgruppen": {
@@ -49416,6 +49646,91 @@
               "name": "created_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "nummer",
+              "nullable": true,
+              "type": "integer"
+            },
+            {
+              "name": "langtext",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "iso_name",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "datanorm_kurz",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "statistikkennzeichen",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "preisbezug_einheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "preisbezug_menge",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "un_code",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "gebindetyp",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "ergebniseinheit",
+              "nullable": true,
+              "type": "character varying"
+            },
+            {
+              "name": "faktorherkunft",
+              "nullable": true,
+              "type": "smallint"
+            },
+            {
+              "name": "faktor1",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor2",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor3",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "faktor4",
+              "nullable": true,
+              "type": "numeric"
+            },
+            {
+              "name": "lvs_relevanz",
+              "nullable": false,
+              "type": "smallint"
+            },
+            {
+              "name": "lvs_default_lokalitaet",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [],
@@ -49426,10 +49741,14 @@
             "id"
           ],
           "read_by": [
-            "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/beleg_erechnung.py",
+            "app/services/gebinde_aufloesung.py",
+            "app/services/mengeneinheiten_grund.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/artikel_mengeneinheiten.py"
+            "app/api/v1/endpoints/artikel_mengeneinheiten.py",
+            "app/services/mengeneinheiten_grund.py"
           ]
         },
         "artikel_mengeneinheitengruppen": {
@@ -50248,7 +50567,7 @@
             "app/services/customer_reference.py"
           ],
           "screens": [
-            "admin/branches"
+            "admin/branches/detail"
           ],
           "written_by": [
             "app/api/v1/endpoints/branches.py"

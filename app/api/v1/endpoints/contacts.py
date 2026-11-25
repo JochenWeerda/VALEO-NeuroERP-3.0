@@ -16,7 +16,7 @@ from ....integrations import crm_core_client
 from ..schemas.crm import ContactCreate, ContactUpdate
 
 from app.api.v1.schemas.base import BaseSchema
-from app.api.v1.schemas.contacts_schemas import ContactsOut
+from app.api.v1.schemas.contacts_schemas import ContactDetailOut, ContactsOut
 from app.auth.bereich_roles import SCHREIBEN  # Schreibrecht je Bereich (WRITE-ROLES)
 
 
@@ -152,7 +152,7 @@ async def list_contacts(
 
 
 @router.get("/{contact_id}", summary="Contact abrufen",
-    response_model=ContactsOut
+    response_model=ContactDetailOut
 )
 async def get_contact(contact_id: str, db: Session = Depends(get_db), tenant_id: str = Depends(get_tenant_id)):
     try:
@@ -161,7 +161,7 @@ async def get_contact(contact_id: str, db: Session = Depends(get_db), tenant_id:
         raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve contact: {exc}") from exc
-    return {"data": _adapt_contact(contact)}
+    return {"data": {**_adapt_contact(contact), "position": contact.job_title}}
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, summary="Contact anlegen",

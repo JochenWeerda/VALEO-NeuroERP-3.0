@@ -3,7 +3,8 @@ import { useAuth } from '@/hooks/useAuth'
 import { auth } from '@/lib/auth'
 import { tenantFromToken } from '@/lib/tenant-from-token'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { UniversalMaskRenderer, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { UniversalMaskRenderer } from '../UniversalMaskRenderer'
+import { useUniversalMaskRuntime } from '../runtime/useUniversalMaskRuntime'
 import type { ScreenActionDefinition, ScreenDefinition } from '../schema'
 
 export function useReadViewIdentity(): string {

@@ -6,7 +6,6 @@ GET/POST/PATCH/DELETE for inventory count headers and lines.
 from typing import Optional
 from datetime import date
 from decimal import Decimal
-from uuid import uuid4
 
 from fastapi import Response, APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -271,63 +270,49 @@ async def post_inventory_count(
     total_positive = Decimal("0")
     total_negative = Decimal("0")
 
+    # Buchungsentwurf zum gleitenden Durchschnitt, vor den Bewegungen (Schnitt = Stand vor der Inventur).
+    from app.services.bestandsbewertung import BuchungNichtMoeglich, entwerfe_bestandsbuchung
+
+    from .inventory_operations import melde_fehlende_bewertung
+
+    differenzen = [(str(z.article_id), Decimal(str((z.counted_qty or 0) - (z.expected_qty or 0))), "t")
+                   for z in lines if abs((z.counted_qty or 0) - (z.expected_qty or 0)) >= 0.001]
+    journal_entry_id = None
+    if differenzen:
+        try:
+            journal_entry_id = entwerfe_bestandsbuchung(
+                db, tid, f"INVENTUR-{count_id[:8].upper()}", f"Inventurdifferenzen {count_id[:8]}", posting_date,
+                differenzen)
+        except BuchungNichtMoeglich as grund:
+            melde_fehlende_bewertung("inventory_counts_gl", f"INVENTUR-{count_id[:8].upper()} ({grund})")
+
     for line in lines:
         diff = (line.counted_qty or 0) - (line.expected_qty or 0)
         if abs(diff) < 0.001:
             continue
 
         adjustments += 1
-        movement_id = str(uuid4())
         ref = f"INV-{count_id[:8].upper()}-{adjustments}"
+        lager = line.warehouse_id or count.warehouse_id  # inventory_counts.warehouse_id ist NOT NULL
 
-        db.execute(
-            text("""
-                INSERT INTO domain_inventory.inventory_stock_movements
-                (id, article_id, warehouse_id, movement_type, quantity, unit, charge,
-                 reference_number, movement_date, movement_time,
-                 notes, booking_user, auto_created, ownership_type, tenant_id,
-                 previous_stock, new_stock, created_at)
-                VALUES (:id, :article_id, :warehouse_id, 'adjustment', :quantity, 't', :charge,
-                        :ref, :date, NOW()::time,
-                        :notes, 'inventur', true, 'owned', :tenant_id,
-                        0, 0, NOW())
-            """),
-            {
-                "id": movement_id,
-                "article_id": line.article_id,
-                "warehouse_id": line.warehouse_id or (count.warehouse_id if hasattr(count, 'warehouse_id') else 'INVENTUR'),
-                "quantity": diff,
-                "charge": line.batch_number,
-                "ref": ref,
-                "date": posting_date,
-                "notes": f"Inventur-Differenz: Soll={line.expected_qty}, Ist={line.counted_qty}",
-                "tenant_id": tid,
-            },
-        )
+        # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Vorher-/Nachherbestand statt 0, Artikelbestand
+        # mandantengebunden (bis dahin WHERE id ohne Mandant), Unterdeckung, Buchungsschluessel je Inventurzeile.
+        from app.domains.inventory.application.services.inventory_service import InventoryService
 
-        # Update article stock
-        db.execute(
-            text("""
-                UPDATE domain_inventory.articles
-                SET current_stock = COALESCE(current_stock, 0) + :delta,
-                    available_stock = COALESCE(available_stock, 0) + :delta,
-                    updated_at = NOW()
-                WHERE id = :article_id
-            """),
-            {"delta": diff, "article_id": line.article_id},
-        )
+        try:
+            InventoryService(db).process_stock_movement(
+                str(line.article_id), str(lager), "adjustment", Decimal(str(diff)), unit="t",
+                movement_date=posting_date, reference_number=ref, charge=line.batch_number, booking_user="inventur",
+                auto_created=True, notes=f"Inventur-Differenz: Soll={line.expected_qty}, Ist={line.counted_qty}",
+                tenant_id=tid, buchungsschluessel=f"inventur:{count_id}:{line.id}", commit=False)
+        except ValueError as fehler:
+            db.rollback()
+            raise HTTPException(422, f"Inventurzeile {line.id}: {fehler}") from fehler
 
         if diff > 0:
             total_positive += Decimal(str(diff))
         else:
             total_negative += Decimal(str(abs(diff)))
-
-    # Keine Buchung ohne Bewertung: frueher ging die Netto-Differenz in Tonnen als Eurobetrag ins Journal.
-    journal_entry_id = None
-    if total_positive != total_negative:
-        from .inventory_operations import melde_fehlende_bewertung
-
-        melde_fehlende_bewertung("inventory_counts_gl", f"INVENTUR-{count_id[:8].upper()}")
 
     # Update count status
     count.status = "posted"

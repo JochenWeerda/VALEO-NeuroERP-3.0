@@ -173,3 +173,25 @@ def test_forged_selectors_and_invalid_token_never_read_data(channels):
     assert case[0].get(base,headers={**headers,"X-Tenant-ID":case[4]}).status_code==403
     assert case[0].get(base,headers={"Authorization":"Bearer invalid"}).status_code==401
     assert case[0].get(base).status_code==401
+
+
+def test_tenant_launcher_collects_authorized_pages():
+    calls = []
+    rows = [{"id": str(i), "name": f"Mandant {i:02}", "domain": f"tenant-{i}.invalid", "is_active": True,
+             "settings": "{}"} for i in range(51)]
+
+    def read_page(request):
+        assert request.url.path == "/api/v1/tenants/"
+        assert request.headers["authorization"] == "Bearer signed"
+        assert "x-tenant-id" not in request.headers
+        skip = int(request.url.params["skip"])
+        limit = int(request.url.params["limit"])
+        calls.append(skip)
+        return httpx.Response(200, json={"items": rows[skip:skip + limit], "total": len(rows)})
+
+    query = MaskDataReadIn(screen_id="admin/tenants", source_key="list", table_key="list", complete=True)
+    result = service.read_sync(query, "own", "Bearer signed", transport=httpx.MockTransport(read_page))
+    assert calls == [0, 50]
+    assert result.data["total"] == 51
+    assert len(result.data["items"]) == 51
+    assert [row["id"] for row in result.data["items"]] == [str(i) for i in range(51)]

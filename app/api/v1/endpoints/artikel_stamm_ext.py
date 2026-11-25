@@ -157,20 +157,28 @@ def create_folgeartikel(
 ):
     if payload.artikel_nr == payload.folge_artikel_nr:
         raise HTTPException(422, "Artikel und Folgeartikel dürfen nicht identisch sein.")
+    from sqlalchemy.exc import IntegrityError
+
     new_id = uuid7()
-    db.execute(text("""
-        INSERT INTO domain_shared.artikel_folgeartikel
-            (id, tenant_id, artikel_nr, folge_artikel_nr,
-             gueltig_ab, gueltig_bis, grund, automatisch_ersetzen, aktiv)
-        VALUES (:id, :tid, :art_nr, :folge_nr,
-                :ab, :bis, :grund, :auto, true)
-    """), {
-        "id": new_id, "tid": tenant_id,
-        "art_nr": payload.artikel_nr, "folge_nr": payload.folge_artikel_nr,
-        "ab": payload.gueltig_ab, "bis": payload.gueltig_bis,
-        "grund": payload.grund, "auto": payload.automatisch_ersetzen,
-    })
-    db.commit()
+    try:
+        db.execute(text("""
+            INSERT INTO domain_shared.artikel_folgeartikel
+                (id, tenant_id, artikel_nr, folge_artikel_nr,
+                 gueltig_ab, gueltig_bis, grund, automatisch_ersetzen, aktiv)
+            VALUES (:id, :tid, :art_nr, :folge_nr,
+                    :ab, :bis, :grund, :auto, true)
+        """), {
+            "id": new_id, "tid": tenant_id,
+            "art_nr": payload.artikel_nr, "folge_nr": payload.folge_artikel_nr,
+            "ab": payload.gueltig_ab, "bis": payload.gueltig_bis,
+            "grund": payload.grund, "auto": payload.automatisch_ersetzen,
+        })
+        db.commit()
+    except IntegrityError as fehler:
+        # Fremdschluessel (24.11.2026): beide Artikel muessen in diesem Mandanten angelegt sein.
+        db.rollback()
+        raise HTTPException(404, f"Artikel {payload.artikel_nr} oder Folgeartikel {payload.folge_artikel_nr} "
+                                 "ist in diesem Mandanten nicht angelegt.") from fehler
     row = db.execute(text("""
         SELECT * FROM domain_shared.artikel_folgeartikel WHERE id = :id
     """), {"id": new_id}).fetchone()

@@ -26837,6 +26837,11 @@
             "format": "date-time",
             "title": "Updated At",
             "type": "string"
+          },
+          "version": {
+            "readOnly": true,
+            "title": "Version",
+            "type": "integer"
           }
         },
         "required": [
@@ -26845,7 +26850,8 @@
           "id",
           "tenant_id",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "version"
         ],
         "title": "Branch",
         "type": "object"
@@ -26889,6 +26895,67 @@
         "title": "BranchCreate",
         "type": "object"
       },
+      "BranchRenameCommand": {
+        "additionalProperties": false,
+        "properties": {
+          "_auditReason": {
+            "anyOf": [
+              {
+                "pattern": "\\S",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Auditreason"
+          },
+          "_idempotencyKey": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "pattern": "^\\S(?:.*\\S)?$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotencykey"
+          },
+          "_mode": {
+            "default": "execute",
+            "enum": [
+              "execute",
+              "dryRun",
+              "validate",
+              "propose"
+            ],
+            "title": "Mode",
+            "type": "string"
+          },
+          "expected_version": {
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "name": {
+            "maxLength": 255,
+            "minLength": 1,
+            "pattern": "\\S",
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "expected_version"
+        ],
+        "title": "BranchRenameCommand",
+        "type": "object"
+      },
       "BranchUpdate": {
         "properties": {
           "address": {
@@ -26902,6 +26969,19 @@
               }
             ],
             "title": "Address"
+          },
+          "expected_version": {
+            "anyOf": [
+              {
+                "maximum": 9007199254740991.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expected Version"
           },
           "is_active": {
             "anyOf": [
@@ -35952,17 +36032,6 @@
         "title": "ConnectorsUpdateIn",
         "type": "object"
       },
-      "ConsentChannel": {
-        "enum": [
-          "email",
-          "phone",
-          "sms",
-          "post",
-          "all"
-        ],
-        "title": "ConsentChannel",
-        "type": "string"
-      },
       "ConsentCheckRequest": {
         "properties": {
           "consent_type": {
@@ -35979,6 +36048,61 @@
           "consent_type"
         ],
         "title": "ConsentCheckRequest",
+        "type": "object"
+      },
+      "ConsentCreate": {
+        "additionalProperties": false,
+        "properties": {
+          "channel": {
+            "minLength": 1,
+            "title": "Channel",
+            "type": "string"
+          },
+          "consent_type": {
+            "minLength": 1,
+            "title": "Consent Type",
+            "type": "string"
+          },
+          "contact_id": {
+            "minLength": 1,
+            "title": "Contact Id",
+            "type": "string"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "source": {
+            "default": "manual",
+            "title": "Source",
+            "type": "string"
+          },
+          "tenant_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tenant Id"
+          }
+        },
+        "required": [
+          "contact_id",
+          "channel",
+          "consent_type"
+        ],
+        "title": "ConsentCreate",
         "type": "object"
       },
       "ConsentGrantRequest": {
@@ -36003,108 +36127,6 @@
           "consent_type"
         ],
         "title": "ConsentGrantRequest",
-        "type": "object"
-      },
-      "ConsentResponse": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ConsentChannel"
-          },
-          "created_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Created At"
-          },
-          "granted": {
-            "default": true,
-            "title": "Granted",
-            "type": "boolean"
-          },
-          "granted_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Granted At"
-          },
-          "id": {
-            "title": "Id",
-            "type": "string"
-          },
-          "ip_address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ip Address"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "partner_id": {
-            "title": "Partner Id",
-            "type": "string"
-          },
-          "purpose": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Purpose",
-            "type": "string"
-          },
-          "revoked_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Revoked At"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          },
-          "tenant_id": {
-            "title": "Tenant Id",
-            "type": "string"
-          }
-        },
-        "required": [
-          "partner_id",
-          "channel",
-          "purpose",
-          "id",
-          "tenant_id"
-        ],
-        "title": "ConsentResponse",
         "type": "object"
       },
       "ConsentRevokeRequest": {
@@ -36565,6 +36587,95 @@
           }
         },
         "title": "ContactData",
+        "type": "object"
+      },
+      "ContactDetail": {
+        "properties": {
+          "address": {
+            "title": "Address",
+            "type": "null"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "createdAt": {
+            "title": "Createdat",
+            "type": "string"
+          },
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "phone": {
+            "title": "Phone",
+            "type": "string"
+          },
+          "position": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Position"
+          },
+          "type": {
+            "title": "Type",
+            "type": "string"
+          },
+          "updatedAt": {
+            "title": "Updatedat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "company",
+          "email",
+          "phone",
+          "type",
+          "address",
+          "notes",
+          "position",
+          "createdAt",
+          "updatedAt"
+        ],
+        "title": "ContactDetail",
+        "type": "object"
+      },
+      "ContactDetailOut": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ContactDetail"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "ContactDetailOut",
         "type": "object"
       },
       "ContactDoc": {
@@ -53773,6 +53884,11 @@
             "title": "Line Total Tax",
             "type": "number"
           },
+          "price_unit_quantity": {
+            "default": 1,
+            "title": "Price Unit Quantity",
+            "type": "number"
+          },
           "quantity": {
             "title": "Quantity",
             "type": "number"
@@ -53907,6 +54023,12 @@
               }
             ],
             "title": "Expense Account"
+          },
+          "price_unit_quantity": {
+            "default": 1,
+            "exclusiveMinimum": 0.0,
+            "title": "Price Unit Quantity",
+            "type": "number"
           },
           "quantity": {
             "default": 0,
@@ -76547,6 +76669,122 @@
         "description": "Response schema for gdpr requests endpoints.",
         "properties": {},
         "title": "GdprRequestsOut",
+        "type": "object"
+      },
+      "GebindeEinstellung": {
+        "properties": {
+          "ergebniseinheit": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergebniseinheit"
+          },
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          },
+          "faktorherkunft": {
+            "anyOf": [
+              {
+                "maximum": 4.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Einstiegsstufe: 1 ME, 2 Artikelstamm, 3 Artikel, 4 Auspraegung",
+            "title": "Faktorherkunft"
+          },
+          "gebindetyp": {
+            "default": 0,
+            "description": "0 kein Gebinde, 1-5, 8, 9 (6/7 in a.eins deaktiv)",
+            "maximum": 9.0,
+            "minimum": 0.0,
+            "title": "Gebindetyp",
+            "type": "integer"
+          },
+          "lvs_default_lokalitaet": {
+            "anyOf": [
+              {
+                "maxLength": 40,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lvs Default Lokalitaet"
+          },
+          "lvs_relevanz": {
+            "default": 0,
+            "description": "0 nicht relevant, 1 relevant, 2 buchend",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Lvs Relevanz",
+            "type": "integer"
+          }
+        },
+        "title": "GebindeEinstellung",
         "type": "object"
       },
       "GelangensbestaetigungCreate": {
@@ -107921,6 +108159,7 @@
         "type": "object"
       },
       "MengeneinheitCreate": {
+        "description": "Grundmengeneinheit nach a.eins (Nutzerauftrag 24.11.2026).",
         "properties": {
           "basis_einheit": {
             "anyOf": [
@@ -107938,17 +108177,111 @@
             "title": "Bezeichnung",
             "type": "string"
           },
+          "datanorm_kurz": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Kurzbezeichnung im DataNorm-Verfahren",
+            "title": "Datanorm Kurz"
+          },
           "dezimalstellen": {
             "default": 3,
-            "maximum": 6.0,
+            "maximum": 4.0,
             "minimum": 0.0,
             "title": "Dezimalstellen",
             "type": "integer"
           },
           "einheit_kuerzel": {
+            "description": "Kurztext, wie er gedruckt wird (kg, Stück, Ltr.)",
             "maxLength": 10,
             "title": "Einheit Kuerzel",
             "type": "string"
+          },
+          "iso_name": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iso Name"
+          },
+          "langtext": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Langtext, der anstelle des Kurztexts gedruckt werden kann",
+            "title": "Langtext"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "maximum": 9999.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Nummer der Mengeneinheit (hoechstens 4 Stellen)",
+            "title": "Nummer"
+          },
+          "preisbezug_einheit": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Mengeneinheit des Preisbezugs",
+            "title": "Preisbezug Einheit"
+          },
+          "preisbezug_menge": {
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Preisbezug, z. B. 100 bei Preis je 100 kg",
+            "title": "Preisbezug Menge"
+          },
+          "statistikkennzeichen": {
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statistikkennzeichen"
           },
           "umrechnungsfaktor": {
             "anyOf": [
@@ -107964,6 +108297,19 @@
               }
             ],
             "title": "Umrechnungsfaktor"
+          },
+          "un_code": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Z0-9]{2,3}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "UN-Mengeneinheit (UN/ECE Rec. 20) fuer E-Rechnung und openTRANS",
+            "title": "Un Code"
           }
         },
         "required": [
@@ -107999,6 +108345,17 @@
             "title": "Created At",
             "type": "string"
           },
+          "datanorm_kurz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datanorm Kurz"
+          },
           "dezimalstellen": {
             "title": "Dezimalstellen",
             "type": "integer"
@@ -108007,9 +108364,162 @@
             "title": "Einheit Kuerzel",
             "type": "string"
           },
+          "ergebniseinheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ergebniseinheit"
+          },
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          },
+          "faktorherkunft": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktorherkunft"
+          },
+          "gebindetyp": {
+            "default": 0,
+            "title": "Gebindetyp",
+            "type": "integer"
+          },
           "id": {
             "title": "Id",
             "type": "string"
+          },
+          "iso_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Iso Name"
+          },
+          "langtext": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Langtext"
+          },
+          "lvs_default_lokalitaet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lvs Default Lokalitaet"
+          },
+          "lvs_relevanz": {
+            "default": 0,
+            "title": "Lvs Relevanz",
+            "type": "integer"
+          },
+          "nummer": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nummer"
+          },
+          "preisbezug_einheit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preisbezug Einheit"
+          },
+          "preisbezug_menge": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Preisbezug Menge"
+          },
+          "statistikkennzeichen": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Statistikkennzeichen"
           },
           "umrechnungsfaktor": {
             "anyOf": [
@@ -108021,6 +108531,17 @@
               }
             ],
             "title": "Umrechnungsfaktor"
+          },
+          "un_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Un Code"
           }
         },
         "required": [
@@ -155925,6 +156446,19 @@
             "title": "Bin Id",
             "type": "string"
           },
+          "idempotency_key": {
+            "anyOf": [
+              {
+                "maxLength": 160,
+                "minLength": 8,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Idempotency Key"
+          },
           "movement_type": {
             "title": "Movement Type",
             "type": "string"
@@ -158947,6 +159481,68 @@
           "stage"
         ],
         "title": "StufeIn",
+        "type": "object"
+      },
+      "Stufenfaktoren": {
+        "properties": {
+          "faktor1": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor1"
+          },
+          "faktor2": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor2"
+          },
+          "faktor3": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor3"
+          },
+          "faktor4": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faktor4"
+          }
+        },
+        "title": "Stufenfaktoren",
         "type": "object"
       },
       "StundenBuchung": {
@@ -181103,61 +181699,6 @@
         "title": "AssignIn",
         "type": "object"
       },
-      "app__api__v1__endpoints__crm_consents__ConsentCreate": {
-        "additionalProperties": false,
-        "properties": {
-          "channel": {
-            "minLength": 1,
-            "title": "Channel",
-            "type": "string"
-          },
-          "consent_type": {
-            "minLength": 1,
-            "title": "Consent Type",
-            "type": "string"
-          },
-          "contact_id": {
-            "minLength": 1,
-            "title": "Contact Id",
-            "type": "string"
-          },
-          "expires_at": {
-            "anyOf": [
-              {
-                "format": "date-time",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Expires At"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          },
-          "tenant_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tenant Id"
-          }
-        },
-        "required": [
-          "contact_id",
-          "channel",
-          "consent_type"
-        ],
-        "title": "ConsentCreate",
-        "type": "object"
-      },
       "app__api__v1__endpoints__crm_kim__Customer": {
         "properties": {
           "abcStatus": {
@@ -185999,62 +186540,6 @@
         "title": "AmendmentCreate",
         "type": "object"
       },
-      "app__crm__schemas__ConsentCreate": {
-        "properties": {
-          "channel": {
-            "$ref": "#/components/schemas/ConsentChannel"
-          },
-          "granted": {
-            "default": true,
-            "title": "Granted",
-            "type": "boolean"
-          },
-          "ip_address": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Ip Address"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "partner_id": {
-            "title": "Partner Id",
-            "type": "string"
-          },
-          "purpose": {
-            "maxLength": 200,
-            "minLength": 1,
-            "title": "Purpose",
-            "type": "string"
-          },
-          "source": {
-            "default": "manual",
-            "title": "Source",
-            "type": "string"
-          }
-        },
-        "required": [
-          "partner_id",
-          "channel",
-          "purpose"
-        ],
-        "title": "ConsentCreate",
-        "type": "object"
-      },
       "app__crm__schemas__Contact": {
         "properties": {
           "address_city": {
@@ -186254,122 +186739,6 @@
           "email"
         ],
         "title": "ContactCreate",
-        "type": "object"
-      },
-      "app__crm__schemas__ContactUpdate": {
-        "properties": {
-          "address_city": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address City"
-          },
-          "address_country": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Country"
-          },
-          "address_street": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Street"
-          },
-          "address_zip": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Address Zip"
-          },
-          "company": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Company"
-          },
-          "email": {
-            "anyOf": [
-              {
-                "format": "email",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Email"
-          },
-          "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Name"
-          },
-          "notes": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Notes"
-          },
-          "phone": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Phone"
-          },
-          "type": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ContactType"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "title": "ContactUpdate",
         "type": "object"
       },
       "app__crm__schemas__Lead": {
@@ -193035,9 +193404,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "List Actions",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }
@@ -193110,9 +193485,15 @@
             "description": "Validation Error"
           }
         },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "summary": "Get Action",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }
@@ -194713,7 +195094,7 @@
         ]
       },
       "put": {
-        "description": "Update a branch.",
+        "description": "Update a branch and return the exact row written by this request.",
         "operationId": "update_branch_api_v1_admin_branches__branch_id__put",
         "parameters": [
           {
@@ -194764,6 +195145,66 @@
           }
         ],
         "summary": "Branch aktualisieren",
+        "tags": [
+          "admin",
+          "branches",
+          "admin",
+          "branches"
+        ]
+      }
+    },
+    "/api/v1/admin/branches/{branch_id}/actions/bearbeiten": {
+      "post": {
+        "operationId": "rename_branch_api_v1_admin_branches__branch_id__actions_bearbeiten_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "branch_id",
+            "required": true,
+            "schema": {
+              "title": "Branch Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BranchRenameCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaskActionResult"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Niederlassung versionsgebunden umbenennen",
         "tags": [
           "admin",
           "branches",
@@ -236377,6 +236818,37 @@
         ]
       }
     },
+    "/api/v1/artikel/mengeneinheiten/stamm/grundeinheiten": {
+      "post": {
+        "description": "Legt die gaengigen Grundmengeneinheiten (Stueck, kg, dt, t, l ... mit UN/ECE-Code) an, soweit sie fehlen.",
+        "operationId": "grundeinheiten_einrichten_api_v1_artikel_mengeneinheiten_stamm_grundeinheiten_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response Grundeinheiten Einrichten Api V1 Artikel Mengeneinheiten Stamm Grundeinheiten Post",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Mitgelieferte Grundeinheiten einrichten",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
     "/api/v1/artikel/mengeneinheiten/stamm/umrechnen": {
       "get": {
         "description": "Mengenumrechnung zwischen zwei Einheiten über gemeinsame Basiseinheit.",
@@ -236589,6 +237061,339 @@
           }
         ],
         "summary": "Mengeneinheit aktualisieren",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebinde": {
+      "put": {
+        "operationId": "setze_gebinde_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebinde_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GebindeEinstellung"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gebinde der Mengeneinheit einstellen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebinde/berechnen": {
+      "get": {
+        "description": "Rechnet ohne zu speichern - dasselbe Abbild, das ein Beleg festschreibt.",
+        "operationId": "berechne_gebinde_weg_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebinde_berechnen_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Anzahl in der Gebinde-Mengeneinheit",
+            "in": "query",
+            "name": "anzahl",
+            "required": true,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "string"
+                }
+              ],
+              "description": "Anzahl in der Gebinde-Mengeneinheit",
+              "title": "Anzahl"
+            }
+          },
+          {
+            "in": "query",
+            "name": "artikel_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Artikel Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Gebinderechnung pruefen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebindefaktoren": {
+      "get": {
+        "operationId": "list_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren lesen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      }
+    },
+    "/api/v1/artikel/mengeneinheiten/stamm/{einheit_kuerzel}/gebindefaktoren/{stufe}/{bezug_id}": {
+      "delete": {
+        "operationId": "entferne_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren__stufe___bezug_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stufe",
+            "required": true,
+            "schema": {
+              "title": "Stufe",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bezug_id",
+            "required": true,
+            "schema": {
+              "title": "Bezug Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren entfernen",
+        "tags": [
+          "Artikelstamm - Mengeneinheiten & Gruppen"
+        ]
+      },
+      "put": {
+        "description": "Stufe 3 Artikel: ``bezug_id`` ist die Artikel-ID dieses Mandanten. Stufen 2 Artikelstamm und 4 Auspraegung\nhaben in VALEO noch kein Gegenstueck und werden abgewiesen (422).",
+        "operationId": "setze_gebindefaktoren_api_v1_artikel_mengeneinheiten_stamm__einheit_kuerzel__gebindefaktoren__stufe___bezug_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "einheit_kuerzel",
+            "required": true,
+            "schema": {
+              "title": "Einheit Kuerzel",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "stufe",
+            "required": true,
+            "schema": {
+              "title": "Stufe",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "bezug_id",
+            "required": true,
+            "schema": {
+              "title": "Bezug Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Stufenfaktoren"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stufenfaktoren pflegen",
         "tags": [
           "Artikelstamm - Mengeneinheiten & Gruppen"
         ]
@@ -256190,12 +256995,11 @@
     },
     "/api/v1/crm/consents": {
       "get": {
-        "description": "List consent entries.",
         "operationId": "list_consents_api_v1_crm_consents_get",
         "parameters": [
           {
             "in": "query",
-            "name": "partner_id",
+            "name": "contact_id",
             "required": false,
             "schema": {
               "anyOf": [
@@ -256206,7 +257010,7 @@
                   "type": "null"
                 }
               ],
-              "title": "Partner Id"
+              "title": "Contact Id"
             }
           },
           {
@@ -256224,6 +257028,45 @@
               ],
               "title": "Channel"
             }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Skip",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 100,
+              "maximum": 1000,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
           }
         ],
         "responses": {
@@ -256232,7 +257075,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/ConsentResponse"
+                    "$ref": "#/components/schemas/TypedObjectOut"
                   },
                   "title": "Response List Consents Api V1 Crm Consents Get",
                   "type": "array"
@@ -256257,20 +257100,19 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "List Consents",
+        "summary": "Einwilligungen auflisten",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       },
       "post": {
-        "description": "Record opt-in/opt-out consent for a partner (DSGVO Art. 6/7).",
         "operationId": "create_consent_api_v1_crm_consents_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ConsentCreate"
+                "$ref": "#/components/schemas/ConsentCreate"
               }
             }
           },
@@ -256281,7 +257123,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConsentResponse"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -256303,10 +257145,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Create Consent",
+        "summary": "Einwilligung anlegen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       }
     },
@@ -256429,7 +257271,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__api__v1__endpoints__crm_consents__ConsentCreate"
+                "$ref": "#/components/schemas/ConsentCreate"
               }
             }
           },
@@ -256870,7 +257712,6 @@
     },
     "/api/v1/crm/consents/{consent_id}/revoke": {
       "post": {
-        "description": "Revoke an existing consent (opt-out).",
         "operationId": "revoke_consent_api_v1_crm_consents__consent_id__revoke_post",
         "parameters": [
           {
@@ -256881,16 +257722,48 @@
               "title": "Consent Id",
               "type": "string"
             }
+          },
+          {
+            "in": "query",
+            "name": "reason",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reason"
+            }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "title": "Response Revoke Consent Api V1 Crm Consents  Consent Id  Revoke Post",
-                  "type": "object"
+                  "$ref": "#/components/schemas/TypedObjectOut"
                 }
               }
             },
@@ -256912,10 +257785,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Revoke Consent",
+        "summary": "Einwilligung widerrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "dsgvo"
         ]
       }
     },
@@ -257190,7 +258063,6 @@
     },
     "/api/v1/crm/contacts/{contact_id}": {
       "delete": {
-        "description": "Delete contact (soft delete or hard delete)",
         "operationId": "delete_contact_api_v1_crm_contacts__contact_id__delete",
         "parameters": [
           {
@@ -257223,14 +258095,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Delete Contact",
+        "summary": "Contact löschen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       },
       "get": {
-        "description": "Get contact by ID",
         "operationId": "get_contact_api_v1_crm_contacts__contact_id__get",
         "parameters": [
           {
@@ -257248,7 +258119,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Contact"
+                  "$ref": "#/components/schemas/ContactDetailOut"
                 }
               }
             },
@@ -257270,14 +258141,13 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Get Contact",
+        "summary": "Contact abrufen",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       },
       "put": {
-        "description": "Update contact",
         "operationId": "update_contact_api_v1_crm_contacts__contact_id__put",
         "parameters": [
           {
@@ -257294,7 +258164,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/app__crm__schemas__ContactUpdate"
+                "$ref": "#/components/schemas/app__api__v1__schemas__crm__ContactUpdate"
               }
             }
           },
@@ -257305,7 +258175,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/app__crm__schemas__Contact"
+                  "$ref": "#/components/schemas/ContactsOut"
                 }
               }
             },
@@ -257327,10 +258197,10 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Update Contact",
+        "summary": "Contact aktualisieren",
         "tags": [
-          "CRM",
-          "CRM"
+          "crm",
+          "contacts"
         ]
       }
     },
@@ -361652,7 +362522,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PosPaymentsPromotionsOut"
+                  "items": {
+                    "$ref": "#/components/schemas/PosPaymentOut"
+                  },
+                  "title": "Response List Payment Methods Api V1 Pos Payment Methods Get",
+                  "type": "array"
                 }
               }
             },
@@ -361666,9 +362540,6 @@
         ],
         "summary": "Payment methods auflisten",
         "tags": [
-          "pos",
-          "payments",
-          "promotions",
           "pos",
           "payments",
           "promotions"
@@ -367806,6 +368677,17 @@
               "maximum": 500,
               "minimum": 1,
               "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
               "type": "integer"
             }
           }
@@ -385118,33 +386000,32 @@
     },
     "/api/v1/reports/export/{report_type}": {
       "get": {
-        "description": "Stub: Export-Endpunkt für Berichte. Gibt leere Erfolgsmeldung zurück.",
+        "description": "Export report data in various formats",
         "operationId": "export_report_api_v1_reports_export__report_type__get",
         "parameters": [
           {
-            "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
             "in": "path",
             "name": "report_type",
             "required": true,
             "schema": {
-              "description": "Berichtstyp, z.B. umsatz, lagerbestand, deckungsbeitrag",
               "title": "Report Type",
               "type": "string"
             }
           },
           {
-            "description": "Ausgabeformat: xlsx, csv, pdf",
+            "description": "Export format: json, csv",
             "in": "query",
             "name": "format",
             "required": false,
             "schema": {
-              "default": "xlsx",
-              "description": "Ausgabeformat: xlsx, csv, pdf",
+              "default": "json",
+              "description": "Export format: json, csv",
               "title": "Format",
               "type": "string"
             }
           },
           {
+            "description": "Start date (YYYY-MM-DD)",
             "in": "query",
             "name": "start_date",
             "required": false,
@@ -385157,10 +386038,12 @@
                   "type": "null"
                 }
               ],
+              "description": "Start date (YYYY-MM-DD)",
               "title": "Start Date"
             }
           },
           {
+            "description": "End date (YYYY-MM-DD)",
             "in": "query",
             "name": "end_date",
             "required": false,
@@ -385173,6 +386056,7 @@
                   "type": "null"
                 }
               ],
+              "description": "End date (YYYY-MM-DD)",
               "title": "End Date"
             }
           }
@@ -385182,7 +386066,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TypedObjectOut"
+                  "additionalProperties": true,
+                  "title": "Response Export Report Api V1 Reports Export  Report Type  Get",
+                  "type": "object"
                 }
               }
             },
@@ -385204,12 +386090,12 @@
             "HTTPBearer": []
           }
         ],
-        "summary": "Bericht exportieren",
+        "summary": "Export Report",
         "tags": [
           "reports",
-          "export",
-          "reports",
-          "export"
+          "analytics",
+          "dashboard",
+          "reports"
         ]
       }
     },
@@ -404789,7 +405675,8 @@
         ],
         "summary": "Resolve Voice",
         "tags": [
-          "ki-usability",
+          "ki",
+          "usability",
           "ki-usability"
         ]
       }
