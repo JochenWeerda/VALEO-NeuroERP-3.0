@@ -91,6 +91,7 @@ class InventoryService:
         commit: bool = True,
         source_document_type: Optional[str] = None,
         source_document_id: Optional[str] = None,
+        unterdeckung_pruefen: bool = True,
     ):
         """Eine Lagerbewegung buchen: Bestandsbuch und Artikelbestand in einem Commit.
 
@@ -163,7 +164,9 @@ class InventoryService:
             self.db, tenant_id=tenant_id, article_id=str(article_id), warehouse_id=str(warehouse_id),
         )))
         new_stock = previous_stock + delta
-        if delta < 0 and new_stock < 0:
+        # unterdeckung_pruefen=False nur, wo ein anderer Bestand fuehrt und schon geprueft hat (Futterkette,
+        # verfuegbar_t) - doppelte Bestandsfuehrung, offen in docs/design/bestandsbuchung-wege-konsolidierung.md.
+        if unterdeckung_pruefen and delta < 0 and new_stock < 0:
             raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(delta)}")
         if ownership_type == "consigned" and not owner_partner_id:
             raise ValueError("owner_partner_id is required for consigned stock movements")

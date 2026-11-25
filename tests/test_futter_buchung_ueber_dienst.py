@@ -12,7 +12,7 @@ import pytest
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
-from app.services.feed_inventory_link_service import FeedInventoryLinkError, FeedInventoryLinkService
+from app.services.feed_inventory_link_service import FeedInventoryLinkService
 
 pytestmark = pytest.mark.integration
 
@@ -72,7 +72,8 @@ def test_verbrauch_bucht_echten_verlauf_und_einmal(haus):
                                 {"a": haus["artikel"]}).scalar_one())) == D("6")
 
 
-def test_verbrauch_ueber_den_bestand_wird_abgewiesen(haus):
-    with pytest.raises(FeedInventoryLinkError, match="Insufficient stock"):
-        _verbrauch(haus, "12", auftrag="PA-2")
-    assert _verlauf(haus) == []
+def test_verbrauch_ueber_den_lagerbestand_blockiert_die_futterkette_nicht(haus):
+    """Der Futterkomponenten-Bestand fuehrt (vor der Freigabe geprueft); das Journal spiegelt und zeigt die Luecke."""
+    _verbrauch(haus, "12", auftrag="PA-2")
+
+    assert _verlauf(haus) == [(D("10"), D("-2"))]

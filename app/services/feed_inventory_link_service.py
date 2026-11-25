@@ -257,8 +257,8 @@ class FeedInventoryLinkService:
                 continue
 
             signed_qty = float(qty) if direction > 0 else float(-qty)
-            # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Bestandsverlauf statt 0/0, Unterdeckung
-            # abgewiesen statt negativem Bestand, Buchungsschluessel je Produktionsposition. Die Referenzsuche oben
+            # Kanonischer Buchungsdienst (Konsolidierung, 25.11.2026): echter Bestandsverlauf statt 0/0,
+            # Buchungsschluessel je Produktionsposition. Die Referenzsuche oben
             # bleibt fuer Bewegungen, die vor dem Schluessel gebucht wurden.
             from app.domains.inventory.application.services.inventory_service import InventoryService
 
@@ -268,7 +268,10 @@ class FeedInventoryLinkService:
                     notes=f"Produktion {production_order_id}: {row.get('name')} {signed_qty:+.3f}t",
                     booking_user=booked_by, auto_created=True, tenant_id=self.tenant_id,
                     source_document_type="feed_production", source_document_id=f"{production_order_id}:{ef_id}",
-                    buchungsschluessel=f"futter:{production_order_id}:{ef_id}:{movement_type}", commit=False)
+                    buchungsschluessel=f"futter:{production_order_id}:{ef_id}:{movement_type}", commit=False,
+                    # Der Futterkomponenten-Bestand (verfuegbar_t) fuehrt und ist vor der Freigabe geprueft; das
+                    # Lagerjournal spiegelt ihn. Bis die doppelte Fuehrung konsolidiert ist, blockiert es nicht.
+                    unterdeckung_pruefen=False)
             except ValueError as fehler:
                 raise FeedInventoryLinkError(f"{row.get('name')}: {fehler}") from fehler
             movement_id = str(bewegung.id)
