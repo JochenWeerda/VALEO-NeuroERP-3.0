@@ -131,7 +131,7 @@ class InventoryService:
             menge = abs(menge)
         elif typ == "transfer":
             typ = "umbuchung"
-        elif typ != "adjustment":
+        elif typ not in ("adjustment", "opening_balance"):  # beide vorzeichenbehaftet (Richtungstabelle)
             raise ValueError(f"Invalid movement type: {movement_type}")
         movement_type = typ
         quantity = menge

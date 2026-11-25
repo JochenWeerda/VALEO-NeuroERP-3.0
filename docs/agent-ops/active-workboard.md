@@ -1058,3 +1058,5 @@ Meilenstein: M0 (main ohne haengende Laeufe). tests/test_journal_status_pflicht.
 
 ## M4-KONSOLIDIERUNG-FUTTER-20261125 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Futterproduktion (feed_inventory_link_service.book_snapshot_movements) ueber InventoryService.process_stock_movement: echter Bestandsverlauf statt 0/0, Unterdeckung abgewiesen (Freigabe 409 statt negativem Lagerbestand), Buchungsschluessel futter:<auftrag>:<ef>:<art>; Dienst nimmt source_document_type/id. Ratsche: feed_inventory_link_service 1->0.
+## M4-KONSOLIDIERUNG-BESTANDSVORTRAG-20261125 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4 (Konsolidierung der Bestandsbuchung). Bestandsvortrag (inventory_auxiliary_service._apply, opening_balance) ueber InventoryService.process_stock_movement: Artikelbestand als Delta wie das Journal statt absolut gesetzt (bei zwei Lagern zeigte der Artikel nur die letzte Zeile, 12 statt 42), Buchungsschluessel bestandsvortrag:<batch>:<zeile>. Dienst akzeptiert opening_balance als vorzeichenbehaftete Art. Ratsche: inventory_auxiliary_service 1->0.
