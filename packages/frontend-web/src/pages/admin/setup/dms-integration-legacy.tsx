@@ -86,6 +86,7 @@ export default function DmsIntegrationCard(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
   const [testState, setTestState] = useState<TestState>('idle')
   const [status, setStatus] = useState<DmsStatus | null>(null)
+  const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
   const [roleFocus, setRoleFocus] = useState<DmsSetupRole>('it')
   const isTouch = useTouchDevice()
 
@@ -111,11 +112,13 @@ export default function DmsIntegrationCard(): JSX.Element {
       const res = await apiClient.get<DmsStatus>('/api/v1/admin/dms/status')
       const data = res.data
       setStatus(data)
+      setStatusLoadError(null)
       if (data && isNonEmptyString(data.base)) {
         setBaseUrl(data.base)
       }
-    } catch (error) {
+    } catch {
       setStatus(null)
+      setStatusLoadError('Verbindungsstatus konnte nicht abgerufen werden. Bitte erneut versuchen.')
     }
   }, [])
 
@@ -217,6 +220,23 @@ export default function DmsIntegrationCard(): JSX.Element {
       </CardHeader>
 
       <CardContent className="p-0 space-y-4">
+        {statusLoadError ? (
+          <div
+            role="alert"
+            className="mx-6 mt-4 rounded-md border border-status-error/40 bg-status-error/10 px-3 py-2 text-sm text-status-error"
+          >
+            {statusLoadError}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="ml-3"
+              onClick={() => { void loadStatus() }}
+            >
+              Erneut laden
+            </Button>
+          </div>
+        ) : null}
         <div className="space-y-4 p-6 pb-0">
           {!isTouch ? (
           <>

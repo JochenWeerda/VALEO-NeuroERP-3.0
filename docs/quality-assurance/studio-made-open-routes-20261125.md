@@ -331,6 +331,24 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Rationsoptimierung: `text-[10px]` → `text-2xs` (64×)
 - Mask-Builder-Tree: 0 Treffer auf Rohpalette/`text-[10px]` (Scan)
 
+### Batch 37 — Tabs ARIA (Fleet/Pricing)
+
+- `fahrzeug-vertiefung-legacy`, `konditionssystem-legacy` → `Tabs`/`TabsList`/`TabsTrigger`/`TabsContent`
+- Head `d439080d1` — CI grün
+
+### Batch 38 — Tabs + Tokens (Rohwarengruppen / Legacy-Surfaces)
+
+- `rohwarengruppen-legacy` → ARIA Tabs
+- Status-Tokens: Materialfluss, Service/Qualität/Artikel-Legacy
+- Rohpalette-Scan `pages` + `mask-builder` = 0
+- Head `f525b07d0` — CI grün (mkdocs/docs-governance/role-contracts)
+
+### Batch 39 — Gate-D Theme-Smoke + DMS Error-Feedback
+
+- Gate-D Cockpit-Smoke: Hell+Dunkel (`localStorage.theme` + `html.dark|light`) inkl. Screenshots
+- DMS-Setup: Status-Load-Fehler sichtbar (`role="alert"`) statt stilles `setStatus(null)`
+- Hinweis: Theme-Smoke ersetzt **nicht** Live-SSO; Image-CI bleibt Codex
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -338,8 +356,8 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — 3/3 passed mit `setzeUiTestsitzung` (unsigniertes UI-Token, Mock-SD); kein Live-SSO |
-| Reale SSO-Bedienung + Hell/Dunkel Screenshots | **blockiert** | Kein SSO-/OIDC-Live-Mandant in diesem Agent-Environment; Qualitaetsversprechen verlangt reale SSO + Theme-Screenshots der *publizierten* Maske |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — 3 Cockpits × Hell/Dunkel = 6 Cases; Mock-SD + UI-Token; Screenshots unter `test-results/gate-d-*-{light,dark}.png` |
+| Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
 **Was dieser PR bewusst nicht anfasst:** `docs/admin/table-catalog.json` / `.md` (Codex-Besitz), kein Image-Rebuild, kein SSO-Mock als „Gate D gruen“.

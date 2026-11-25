@@ -145,6 +145,19 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
   })
 }
 
+async function applyTheme(page: Page, theme: 'light' | 'dark'): Promise<void> {
+  await page.addInitScript((mode) => {
+    try {
+      window.localStorage.setItem('theme', mode)
+    } catch {
+      /* storage may be blocked in locked-down browsers */
+    }
+    const root = document.documentElement
+    root.classList.toggle('dark', mode === 'dark')
+    root.classList.toggle('light', mode === 'light')
+  }, theme)
+}
+
 test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => {
   test.beforeEach(async ({ page }) => {
     // UI-Testsitzung: unsigniertes Token nur fuer Render/Routing (kein Live-SSO / keine API-Rechte).
@@ -152,17 +165,29 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
   })
 
   for (const c of COCKPIT_CASES) {
-    test(`${c.label} — native-cockpit Runtime, Titel sichtbar`, async ({ page }) => {
-      await installCockpitMocks(page, c)
-      const response = await page.goto(c.path, { waitUntil: 'domcontentloaded' })
-      expect(response?.status() ?? 200).toBeLessThan(400)
+    for (const theme of ['light', 'dark'] as const) {
+      test(`${c.label} — native-cockpit Runtime, Titel sichtbar (${theme})`, async ({ page }) => {
+        await applyTheme(page, theme)
+        await installCockpitMocks(page, c)
+        const response = await page.goto(c.path, { waitUntil: 'domcontentloaded' })
+        expect(response?.status() ?? 200).toBeLessThan(400)
 
-      // Cockpit-Shell und Renderer teilen oft denselben testId — Runtime-Attribut ist eindeutig.
-      const root = page.locator(`[data-testid="${c.testId}"][data-runtime="native-cockpit"]`)
-      await expect(root).toBeVisible({ timeout: 30_000 })
-      await expect(page.getByRole('heading', { name: c.title }).first()).toBeVisible({
-        timeout: 30_000,
+        await expect(page.locator('html')).toHaveClass(
+          theme === 'dark' ? /(?:^|\s)dark(?:\s|$)/ : /(?:^|\s)light(?:\s|$)/,
+        )
+
+        // Cockpit-Shell und Renderer teilen oft denselben testId — Runtime-Attribut ist eindeutig.
+        const root = page.locator(`[data-testid="${c.testId}"][data-runtime="native-cockpit"]`)
+        await expect(root).toBeVisible({ timeout: 30_000 })
+        await expect(page.getByRole('heading', { name: c.title }).first()).toBeVisible({
+          timeout: 30_000,
+        })
+
+        await page.screenshot({
+          path: `test-results/gate-d-${c.screenId.replace(/\//g, '_')}-${theme}.png`,
+          fullPage: true,
+        })
       })
-    })
+    }
   }
 })
