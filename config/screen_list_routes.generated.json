@@ -8,6 +8,7 @@
     "admin/belegfolgekonfig": "/admin/belegfolgekonfig",
     "admin/berechtigungen-matrix": "/admin/berechtigungen-matrix",
     "admin/branches": "/admin/branches",
+    "admin/branches/detail": "/admin/branches/:id",
     "admin/command-monitor": "/admin/command-monitor",
     "admin/compliance-dashboard": "/admin/compliance",
     "admin/control-center/incident-response": "/admin/control-center/incident-response",

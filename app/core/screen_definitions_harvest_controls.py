@@ -67,9 +67,7 @@ def build_harvest_controls():
             "rowActions": [{
                 "key": "inspect_rule",
                 "label": "Regelversion prüfen",
-                "command": "harvest.control.inspect_rule",
-                "permission": "agrar.harvest.control.inspect",
-                "stubReason": "Waehlt die Regelversion in der Maske zum Pruefen aus.",
+                "localEffect": "load_row",
             }],
             "columns": [{"key": key, "label": label, "width": width} for key, label, width in [
                 ("rule_id", "Regel", 170), ("rule_version", "Fassung", 80),

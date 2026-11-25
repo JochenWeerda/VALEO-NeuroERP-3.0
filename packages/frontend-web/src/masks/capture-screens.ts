@@ -1350,11 +1350,10 @@ export const tourenplanungScreen = {
     {
       "key": "dispo",
       "label": "Dispo-Arbeitsraum",
-      "command": "tour.openWorkspace",
       "kind": "secondary",
       "dangerLevel": "safe",
       "zone": "header",
-      "stubReason": "Oeffnet den bestehenden Dispo-Arbeitsraum."
+      "localEffect": "navigation"
     },
     {
       "key": "aufloesen",
@@ -1414,10 +1413,9 @@ export const tourenplanungScreen = {
         {
           "key": "beladung",
           "label": "Beladung",
-          "command": "tour.openLoading",
           "dangerLevel": "safe",
           "permission": "logistics.tour.loading",
-          "stubReason": "Oeffnet die Beladungsansicht der Tour in der Maske."
+          "localEffect": "navigation"
         },
         {
           "key": "hinweise",
