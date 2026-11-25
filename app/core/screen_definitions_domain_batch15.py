@@ -1919,7 +1919,7 @@ _SERVICE_ANFRAGE_CREATION = {
         {"key": "beschreibung", "label": "Beschreibung", "type": "textarea"},
         {"key": "prioritaet", "label": "Prioritaet", "type": "select",
          "options": [{"value": "niedrig", "label": "niedrig"}, {"value": "normal", "label": "normal"},
-                     {"value": "hoch", "label": "hoch"}, {"value": "dringend", "label": "dringend"}]},
+                     {"value": "hoch", "label": "hoch"}]},
         {"key": "kategorie", "label": "Kategorie", "type": "text"},
     ],
 }
