@@ -1045,6 +1045,9 @@ Meilenstein: M4 (LVS-Zielarchitektur, Nutzerentscheid 24.11.2026). Analyse: 13 S
 
 ## M4-KONSOLIDIERUNG-KORREKTUR-20261124 — zur Abnahme, Claude Code (M4)
 Meilenstein: M4 (Konsolidierung Schritt 2, gestapelt auf PR #200 und #201). Bestandskorrektur/Schwund/MHD (inventory_operations.create_bestandskorrektur) bucht ueber InventoryService.process_stock_movement mit Buchungsschluessel korrektur:<id>: echter Vorher-/Nachherbestand statt 0, Unterdeckung 422. Ratsche-Baseline inventory_operations 2->1.
+
+## M4-STORNO-BEWERTUNG-KONSISTENT-20261124 — zur Abnahme, Claude Code (M4)
+Meilenstein: M4/M3 (Bestandsbuchung und Bewertung, gestapelt auf PR #202). inventory_correction_service.storno_korrektur markierte auch das Original mit storno_ref; die Bestandsbewertung las das als Storno - ein stornierter Zugang ergab Bestand -10 statt 10. Rueckverweis entfernt (storno_ref nur vorwaerts). Umstellung des Storno-Dienstes auf InventoryService folgt (Mock-Tests in test_dom_inv_004 vorher auf echte DB umstellen).
 ## M5-AGENTEN-SCHREIBFREIGABE-GESCHLOSSEN-20261124 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Nutzerentscheid 24.11.2026). config/mcp_erp_tools.yaml: agent_write_phase entwicklung entfernt - Agenten schreiben nur ueber ausdruecklich je Aktion freigegebene write_capabilities (Default Deny); Ratsche test_entwicklungsfreigabe_ist_geschlossen. Geheimnis-Inventar und Rotationsplan ohne Werte: docs/security/geheimnis-inventar-rotationsplan.md. Offen beim Nutzer: Umgebungen ausser lokal, .env.example-Literale, Freigabe der produktiven Rotation.
 ## M4-BESTANDSBUCHUNG-KONSOLIDIERUNG-20261124 — in arbeit, Claude Code (M4)
