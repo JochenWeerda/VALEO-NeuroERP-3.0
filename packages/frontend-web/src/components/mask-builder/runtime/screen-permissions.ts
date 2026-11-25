@@ -163,11 +163,12 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('fibu.geschaeftsjahr.')) {
       return roles.has('FINANCE_ADMIN') || roles.has('admin') || roles.has('manager')
     }
-    // FiBu Zahlungsmeldung/Auszifferung/Zahlungsformular Create mirrors finance_write.
+    // FiBu Zahlungsmeldung/Auszifferung/Zahlungsformular/Abschluss-Checklist Create mirrors finance_write.
     if (
       permission.startsWith('fibu.zahlungsmeldung.')
       || permission.startsWith('fibu.op_auszifferung.')
       || permission.startsWith('fibu.zahlungsformular.')
+      || permission.startsWith('fibu.abschluss_checklist.')
     ) {
       return roles.has('FINANCE_BEARBEITEN') || roles.has('FINANCE_ADMIN') || roles.has('manager')
     }

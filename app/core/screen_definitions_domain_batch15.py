@@ -122,6 +122,22 @@ def build_fibu_abschluss_checklist_detail_screen_definition() -> dict[str, Any]:
         data_sources=[stamm_entity_source("/api/v1/finance/closing-checklists/{entity_id}")],
         tabs=[stamm_kopf_tab([{"key": "id", "label": "ID", "type": "text"}, {"key": "period", "label": "Periode", "type": "text"}, {"key": "closing_type", "label": "Abschlussart", "type": "text"}, {"key": "status", "label": "Status", "type": "text"}, {"key": "progress_percentage", "label": "Fortschritt %", "type": "number"}, {"key": "updated_at", "label": "Aktualisiert", "type": "datetime"}])],
         edit_permission="fibu.write",
+        creation={
+            "endpoint": "/api/v1/finance/closing-checklists",
+            "permission": "fibu.abschluss_checklist.create",
+            "detailRoute": "/fibu/abschluss-checklist-detail/{entity_id}",
+            "defaults": {"closing_type": "monthly"},
+            "fields": [
+                {"key": "period", "label": "Periode (YYYY-MM)", "type": "text", "required": True},
+                {"key": "closing_type", "label": "Abschlussart", "type": "select", "required": True,
+                 "options": [
+                     {"value": "monthly", "label": "Monatlich"},
+                     {"value": "quarterly", "label": "Quartalsweise"},
+                     {"value": "yearly", "label": "Jaehrlich"},
+                 ]},
+                {"key": "template_id", "label": "Vorlagen-ID", "type": "text"},
+            ],
+        },
         # Saldenvortrag ins neue Geschaeftsjahr (M3, 24.11.2026): Eroeffnungsbuchung ueber den kanonischen Buchungsdienst,
         # erst wenn alle Perioden des Jahres gesperrt sind; ein zweiter Vortrag fuer dasselbe Jahr wird abgewiesen (409).
         extra_actions=[
