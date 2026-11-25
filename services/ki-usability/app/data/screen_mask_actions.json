@@ -3,7 +3,7 @@
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
     "actions": 797,
-    "screens_with_actions": 404,
+    "screens_with_actions": 407,
     "domains": 50
   },
   "actions": [
@@ -144,6 +144,55 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/branches/detail:bearbeiten",
+      "label": "Umbenennen",
+      "description": "Umbenennen (admin/branches/detail)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/branches/detail",
+      "intent_phrases": [
+        "Umbenennen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/branches/detail",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/admin/branches/{entity_id}/actions/bearbeiten",
+        "navigationRoute": null,
+        "command": "admin.branch.rename.v1",
+        "method": "POST",
+        "permission": "admin:all",
+        "forbiddenForAgents": true,
+        "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/branches:open",
+      "label": "Details öffnen",
+      "description": "Details öffnen (admin/branches)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/branches",
+      "intent_phrases": [
+        "Details öffnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/branches",
+        "actionKey": "open",
+        "commandEndpoint": null,
+        "navigationRoute": "/admin/branches/{entity_id}",
+        "command": null,
         "method": null,
         "dangerLevel": "safe"
       }
@@ -845,6 +894,27 @@
         "command": "identity.budgets.open",
         "method": null,
         "permission": "identity:quota:read",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/users:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin/users)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/users",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/users",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
         "dangerLevel": "safe"
       }
     },
@@ -1684,29 +1754,6 @@
         "requiresConfirmation": false,
         "auditReasonRequired": false,
         "dangerLevel": "moderate"
-      }
-    },
-    {
-      "id": "mask:agrar/harvest-controls:inspect_rule",
-      "label": "Regelversion prüfen",
-      "description": "Regelversion prüfen (agrar/harvest-controls)",
-      "category": "mask-action",
-      "domain": "agrar",
-      "mask": "agrar/harvest-controls",
-      "intent_phrases": [
-        "Regelversion prüfen"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "agrar/harvest-controls",
-        "actionKey": "inspect_rule",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "harvest.control.inspect_rule",
-        "method": null,
-        "permission": "agrar.harvest.control.inspect"
       }
     },
     {
@@ -14596,51 +14643,6 @@
         "commandEndpoint": null,
         "navigationRoute": null,
         "command": "tour.resolveDeliveryNote",
-        "method": null,
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:logistik/tourenplanung:beladung",
-      "label": "Beladung",
-      "description": "Beladung (logistik/tourenplanung)",
-      "category": "mask-action",
-      "domain": "logistics",
-      "mask": "logistik/tourenplanung",
-      "intent_phrases": [
-        "Beladung"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "logistik/tourenplanung",
-        "actionKey": "beladung",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "tour.openLoading",
-        "method": null,
-        "permission": "logistics.tour.loading",
-        "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:logistik/tourenplanung:dispo",
-      "label": "Dispo-Arbeitsraum",
-      "description": "Dispo-Arbeitsraum (logistik/tourenplanung)",
-      "category": "mask-action",
-      "domain": "logistics",
-      "mask": "logistik/tourenplanung",
-      "intent_phrases": [
-        "Dispo-Arbeitsraum"
-      ],
-      "required_data": [],
-      "source": {
-        "screenId": "logistik/tourenplanung",
-        "actionKey": "dispo",
-        "commandEndpoint": null,
-        "navigationRoute": null,
-        "command": "tour.openWorkspace",
         "method": null,
         "dangerLevel": "safe"
       }

@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.core.action_execution import ActionExecutionResult
+from app.core.business_commands import build_core_command_catalog
 
 
 @dataclass(frozen=True)
@@ -132,8 +133,13 @@ class ActionIdempotencyStore:
         self._records_by_execution_id[result.execution_id] = record
         return record
 
-    def summary(self) -> dict[str, Any]:
-        records = list(self._records_by_key.values())
+    def summary(self, *, tenant_id: str | None = None) -> dict[str, Any]:
+        records = [record for record in self._records_by_key.values()
+                   if tenant_id is None or record.tenant_id == tenant_id]
+        execution_count = sum(
+            tenant_id is None or record.tenant_id == tenant_id
+            for record in self._records_by_execution_id.values()
+        )
         tenant_ids = {record.tenant_id for record in records}
         command_names = sorted({record.result.command_name for record in records})
         aggregate_types = sorted({record.result.aggregate_type for record in records})
@@ -153,7 +159,7 @@ class ActionIdempotencyStore:
         return {
             "total_records": len(records),
             "tenant_count": len(tenant_ids),
-            "execution_count": len(self._records_by_execution_id),
+            "execution_count": execution_count,
             "command_count": len(command_names),
             "aggregate_count": len(aggregate_types),
             "commands": command_names,
@@ -231,3 +237,31 @@ _STORE = ActionIdempotencyStore()
 
 def get_action_idempotency_store() -> ActionIdempotencyStore:
     return _STORE
+
+
+def build_idempotency_overview(tenant_id: str) -> dict[str, Any]:
+    """Combine the shared command catalog with tenant-scoped execution metrics."""
+    store_summary = get_action_idempotency_store().summary(tenant_id=tenant_id)
+    catalog = build_core_command_catalog()
+    idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
+    human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]
+    agent_ready_commands = [cmd.command_name for cmd in catalog if cmd.allowed_agent_types]
+    total_commands = len(catalog)
+    idempotent_coverage_pct = round((len(idempotent_commands) / total_commands) * 100) if total_commands else 0
+    confidence_score = min(100, max(0, round((idempotent_coverage_pct * 0.7) + (min(store_summary["total_records"], total_commands) * 3))))
+    return {
+        "schema_version": 1,
+        "catalog": {
+            "total_commands": total_commands,
+            "idempotent_commands": len(idempotent_commands),
+            "human_confirmation_commands": len(human_confirmation_commands),
+            "agent_ready_commands": len(agent_ready_commands),
+            "idempotent_coverage_pct": idempotent_coverage_pct,
+        },
+        "store": store_summary,
+        "confidence_score": confidence_score,
+        "recommended_action": (
+            "Idempotente Commands sind live und replay-sicher. "
+            "Nutze die Monitoring-Sicht, um Retries, Replays und Command-Abdeckung zu beobachten."
+        ),
+    }

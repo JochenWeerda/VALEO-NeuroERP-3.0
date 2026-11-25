@@ -118,3 +118,12 @@ describe('action permissions follow the command route roles', () => {
     expect(getScreenPermissions(contract, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['kontrakt.update'])
   })
 })
+
+it('requires the backend admin role for renaming a branch', () => {
+  const branch = {
+    id: 'admin/branches/detail',
+    actions: [{ key: 'bearbeiten', label: 'Umbenennen', permission: 'admin:all' }],
+  } as ScreenDefinition
+  expect(getScreenPermissions(branch, user(['admin:all']))).toEqual([])
+  expect(getScreenPermissions(branch, user([], ['admin']))).toEqual(['admin:all'])
+})
