@@ -89,10 +89,12 @@ describe('Batch 11 route inventory (source-level evidence only)', () => {
       return
     }
     if (file === 'crm/lead-detail.tsx') {
-      // Entity and create paths are distinct; the former uses the Party native detail runtime.
+      // Entity: Party native detail; Create: UniversalNativeCreatePage (crm/lead.creation).
       expect(src).toContain('<PartyNativePage kind="lead" entityId={entityId} />')
-      expect(src).toContain('LeadMaskDetailPage')
-      expect(src).toContain('LegacyLeadDetailPage')
+      expect(src).toContain('UniversalNativeCreatePage')
+      expect(src).toContain('screenId="crm/lead"')
+      expect(src).not.toContain('LeadMaskDetailPage')
+      expect(src).not.toContain('LegacyLeadDetailPage')
       return
     }
     if (file === 'fibu/debitoren.tsx') {

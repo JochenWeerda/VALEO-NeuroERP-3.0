@@ -1463,6 +1463,21 @@ def build_agrar_duenger_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="agrar.duenger.update",
+        creation={
+            "endpoint": "/api/v1/agrar/duenger/",
+            "permission": "agrar.duenger.create",
+            "detailRoute": "/agrar/duenger/{entity_id}",
+            "defaults": {"waehrung": "EUR"},
+            "fields": [
+                {"key": "artikelnummer", "label": "Artikel-Nr.", "type": "text", "required": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "typ", "label": "Typ", "type": "text", "required": True},
+                {"key": "hersteller", "label": "Hersteller", "type": "text"},
+                {"key": "n_gehalt", "label": "N %", "type": "number"},
+                {"key": "p_gehalt", "label": "P2O5 %", "type": "number"},
+                {"key": "k_gehalt", "label": "K2O %", "type": "number"},
+            ],
+        },
         no_workflow_reason="Duenger-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose=(
             "Duenger-Stammdaten: Naehrstoffgehalte, Verwendungshistorie und Preise fuer Duengungsplanung."
@@ -1526,6 +1541,21 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="agrar.saatgut.update",
+        creation={
+            "endpoint": "/api/v1/agrar/saatgut/",
+            "permission": "agrar.saatgut.create",
+            "detailRoute": "/agrar/saatgut/{entity_id}",
+            "defaults": {"waehrung": "EUR"},
+            "fields": [
+                {"key": "artikelnummer", "label": "Artikel-Nr.", "type": "text", "required": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "sorte", "label": "Sorte", "type": "text", "required": True},
+                {"key": "art", "label": "Kulturart", "type": "text", "required": True},
+                {"key": "zuechter", "label": "Zuechter", "type": "text"},
+                {"key": "zulassungsnummer", "label": "Zulassungs-Nr.", "type": "text"},
+                {"key": "tkm", "label": "TKG (g)", "type": "number"},
+            ],
+        },
         no_workflow_reason="Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose=(
             "Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung."

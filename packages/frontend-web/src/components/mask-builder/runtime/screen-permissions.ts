@@ -34,6 +34,16 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('crm.lead.')) {
       return roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN') || roles.has('manager')
     }
+    // Agrar Saatgut/Duenger Create mirrors SCHREIBEN["AGRAR"] until action-permission projection covers POST /.
+    if (permission.startsWith('agrar.saatgut.') || permission.startsWith('agrar.duenger.')) {
+      return (
+        roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('HARVEST_BEARBEITEN') || roles.has('HARVEST_ADMIN')
+        || roles.has('KONTRAKT_BEARBEITEN') || roles.has('KONTRAKT_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }

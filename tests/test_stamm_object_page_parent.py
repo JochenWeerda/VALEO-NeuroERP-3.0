@@ -163,6 +163,21 @@ def test_article_stock_and_crm_children_keep_domain_contracts() -> None:
     assert lead["creation"]["detailRoute"] == "/crm/lead/{entity_id}"
 
 
+def test_agrar_saatgut_and_duenger_have_native_creation() -> None:
+    """Create-Paritaet: keine Legacy-ObjectPage mehr fuer Neuanlage (STUDIO-MADE-OPEN-ROUTES)."""
+    for screen_id, endpoint, detail in (
+        ("agrar/saatgut", "/api/v1/agrar/saatgut/", "/agrar/saatgut/{entity_id}"),
+        ("agrar/duenger", "/api/v1/agrar/duenger/", "/agrar/duenger/{entity_id}"),
+    ):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        assert creation["detailRoute"] == detail
+        assert creation["permission"].endswith(".create")
+        assert any(field["required"] for field in creation["fields"])
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

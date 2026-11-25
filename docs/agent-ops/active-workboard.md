@@ -1313,6 +1313,9 @@ Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandene
 ## M5-UMGEBUNG-AGENTENMATRIX-20261125 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBUNG local|ci|staging|production, nicht gesetzt = production (geschlossen). Agenten schreiben autonom nur in LOCAL/CI ueber alle deklarierten Kommandowege; STAGING/PRODUCTION Freigabe je Aktion; Fachregeln der Maske gelten ueberall. docker-compose.yml setzt local. Fiskaly-Werte aus .env.example entfernt (Werte nicht ausgegeben). Bestand der Umgebungen: docs/security/umgebungen-und-agentenrechte.md (nur LOCAL und CI in Betrieb).
 
+## STUDIO-MADE-OPEN-ROUTES-20261125 — reserviert, Cursor Cloud (Nachzug)
+Nutzerziel 25.11.2026: alle noch offenen Routen kontrollieren und Altmasken auf Studio-made Qualitaet heben. Inventar main: 1147 Routen, 1037 runtime_wired, 35 legacy_wrapper, 69 hand_built, 16 ObjectPage-Legacy-Seiten. Erste Hebung: Create-Paritaet Saatgut/Duenger (SD creation + native Wrapper ohne Legacy), Lead-Anlage UniversalNativeCreatePage, Debitoren ohne totgeladene Legacy-Create. Dateibesitz: agrar/saatgut*-stamm, agrar/duenger*-stamm, crm/lead-detail, finance/debitoren-stamm, screen_definitions creation, Tests mask-objectpage-stamm-native-route / batch11-native-list, Inventar/QA. Kein Self-Merge.
+
 ## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
 Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
 

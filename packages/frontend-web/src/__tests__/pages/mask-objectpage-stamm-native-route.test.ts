@@ -19,17 +19,17 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     expect(isStammCreationEntityId('DEB-001')).toBe(false)
   })
 
-  const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' | 'native' }> = [
-    { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'factory' },
+  const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' | 'native' | 'create-capture' }> = [
+    { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'create-capture' },
     { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'factory' },
     { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'factory' },
     { file: 'futtermittel/einzelfuttermittel-stamm.tsx', screenId: 'futtermittel/einzelfuttermittel', kind: 'native-create' },
     { file: 'futtermittel/mischfuttermittel-stamm.tsx', screenId: 'futtermittel/mischfuttermittel', kind: 'native-create' },
     { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'factory' },
-    { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'factory' },
-    { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'factory' },
-    { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'factory' },
-    { file: 'agrar/saatgut-stamm.tsx', screenId: 'agrar/saatgut', kind: 'factory' },
+    { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
+    { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
+    { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
+    { file: 'agrar/saatgut-stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
     { file: 'einkauf/anfrage-stamm.tsx', screenId: 'einkauf/anfrage', kind: 'factory' },
     { file: 'einkauf/angebot-stamm.tsx', screenId: 'einkauf/angebot', kind: 'factory' },
     { file: 'einkauf/anlieferavis.tsx', screenId: 'einkauf/anlieferavis', kind: 'factory' },
@@ -54,6 +54,12 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(src).toContain('createStammNativeDetailPage')
       expect(src).toContain(`'${screenId}'`)
       expect(src).toContain('-legacy')
+    } else if (kind === 'create-capture') {
+      expect(src).toContain('createStammNativeDetailPage')
+      expect(src).toContain(`'${screenId}'`)
+      expect(src).toContain('<UniversalNativeCreatePage')
+      expect(src).toContain('finance/debitoren/new')
+      expect(src).not.toContain('-legacy')
     } else {
       expect(src).toContain('<UniversalNativeCreatePage')
       expect(src).toContain('<UniversalNativeDetailPage')
@@ -86,8 +92,8 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(routeTree).toContain(`path: "${route}"`)
       expect(routeTree).toContain(`"module":"@/pages/${page}","legacyPath":"/${route}"`)
     }
+    // Saatgut/Duenger: Create laeuft native; Legacy-Dateien bleiben nur als Rollback-Artefakt.
     for (const file of [
-      'agrar/saatgut-stamm-legacy.tsx', 'agrar/duenger-stamm-legacy.tsx',
       'crm/opportunity-detail-legacy.tsx',
       'einkauf/anfrage-stamm-legacy.tsx', 'einkauf/angebot-stamm-legacy.tsx',
       'einkauf/anlieferavis-legacy.tsx',
