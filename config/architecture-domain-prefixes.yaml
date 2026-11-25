@@ -660,6 +660,7 @@ exact_service_stems:
   foreign_goods_worklist_service: inventory
   l3_report_catalog_service: finance
   legacy_interface_adapter_service: platform
+  spiegel_uebernahme: platform
   mail_workspace_service: crm
   production_control_service: agrar
   recent_documents_service: platform

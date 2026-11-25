@@ -23,7 +23,7 @@ def result(*, first=None, one=None, all_rows=None, scalar=None):  # noqa: ANN001
 
 def test_catalog_exposes_only_fixed_inactive_profiles() -> None:
     catalog = LegacyInterfaceAdapterService(MagicMock(), "tenant-1").catalog()
-    assert {item["profile_key"] for item in catalog} == {"l3_standard", "unimet"}
+    assert {item["profile_key"] for item in catalog} == {"l3_standard", "l3_spiegel", "unimet"}
     assert all(
         item["status"] == "inactive" and item["execution_enabled"] is False
         for item in catalog
