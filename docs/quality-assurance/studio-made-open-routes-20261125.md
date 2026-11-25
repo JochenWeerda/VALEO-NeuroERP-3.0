@@ -282,6 +282,15 @@ Inventar nach 28b: Routen-`hand_built` **0** (Dlg*/Charts bleiben Nicht-Routen-M
 | Tote Nested-Altmasken | Entfernt: `kunden-stamm-modern/{Legacy,CustomerMaskEdit}`, `kunde-neu/KundeNeuMaskBuilderPage`, `lead-detail/{LeadMask,LegacyLead}` — Routen waren bereits native |
 | Switch-Test | `kunden-stamm-modern-switch` prueft Re-Export auf `customer-360-native` |
 
+### Batch 30 — fehlende Nav-Routen
+
+| Route / Artefakt | Aenderung |
+|------------------|-----------|
+| `admin-suite/connectoren` | In `auto-groups/generated/admin-suite.ts` verdrahtet (SD/Cockpit war schon da) |
+| `fuhrpark/fahrzeug-vertiefung` | Route + `fleet_workbench` + Legacy-Surface (Status/Schaeden/Bussgelder/Leasing); gleiche Fuhrpark-commandEndpoints |
+
+Nav-`preferredPath` ohne Route-Inventory: **0** (ausser `/` als leerer Pfad).
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -310,7 +319,7 @@ python -m pytest tests/test_studio_parity_batch19.py tests/test_studio_parity_ba
   tests/test_studio_parity_batch24.py tests/test_studio_parity_batch25.py \
   tests/test_studio_parity_batch26.py tests/test_studio_parity_batch27.py \
   tests/test_studio_parity_batch28.py tests/test_studio_parity_batch28b.py \
-  tests/test_studio_parity_batch29.py \
+  tests/test_studio_parity_batch29.py tests/test_studio_parity_batch30.py \
   tests/test_zinsabrechnung_studio_parity.py tests/test_einkauf_studio_field_parity.py \
   -q --noconftest -o addopts=
 cd packages/frontend-web && npx vitest run \

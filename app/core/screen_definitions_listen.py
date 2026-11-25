@@ -988,6 +988,12 @@ def build_konditionen_konditionssystem_workbench() -> dict[str, Any]:
     return build_konditionen_konditionssystem()
 
 
+def build_fuhrpark_fahrzeug_vertiefung_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_fleet_workbench import build_fuhrpark_fahrzeug_vertiefung
+
+    return build_fuhrpark_fahrzeug_vertiefung()
+
+
 def build_admin_externe_gates_cockpit() -> dict[str, Any]:
     """Externe Gates — DATEV/ELSTER/TSE/DMS/Bank Status (Paritaet Legacy-Karten)."""
     from app.core.cockpit_overview_parent import (
@@ -4475,6 +4481,7 @@ LISTEN_SCREEN_BUILDERS = {
     "annahme/abrechnung": build_annahme_abrechnung_workbench,
     "lager/materialfluss": build_lager_materialfluss_workbench,
     "konditionen/konditionssystem": build_konditionen_konditionssystem_workbench,
+    "fuhrpark/fahrzeug-vertiefung": build_fuhrpark_fahrzeug_vertiefung_workbench,
     "admin/externe-gates": build_admin_externe_gates_cockpit,
     "admin/control-center/agent-ops": build_admin_control_center_agent_ops_workbench,
     "admin/control-center/superglue": build_admin_control_center_superglue_workbench,
@@ -4612,6 +4619,7 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "annahme/abrechnung": "/annahme/abrechnung",
                 "lager/materialfluss": "/lager/materialfluss",
                 "konditionen/konditionssystem": "/konditionen/konditionssystem",
+                "fuhrpark/fahrzeug-vertiefung": "/fuhrpark/fahrzeug-vertiefung",
                 "admin/externe-gates": "/admin/externe-gates",
                 "admin/control-center/agent-ops": "/admin/control-center/agent-ops",
                 "admin/control-center/superglue": "/admin/control-center/superglue",

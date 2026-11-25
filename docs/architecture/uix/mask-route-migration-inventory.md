@@ -10,8 +10,8 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt Routen | 1148 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1127 |
+| Gesamt Routen | 1150 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1129 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
@@ -22,10 +22,10 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1059 |
+| Gesamt TSX-Seiten | 1060 |
 | runtime_wired | 936 |
 | legacy_mask_pattern | 9 |
-| hand_built | 97 |
+| hand_built | 98 |
 
 ## ScreenDefinitions / Studio
 
@@ -39,11 +39,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|---------|---------------------|
 | handgebaute Routen | 442 | 0 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1127 |
+| Runtime-verdrahtet | — | 1129 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
-aktuell sind **1148** generierte Routen inventarisiert. Die Absolute `hand_built`
+aktuell sind **1150** generierte Routen inventarisiert. Die Absolute `hand_built`
 ist deshalb nicht 1:1 vergleichbar, aber die Luecke zur Runtime bleibt gross.
 
 ## Dual-Pfad (Native Wrapper existiert, Primaernav oft Legacy)
@@ -63,6 +63,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `abrechnung/eb-lieferschein-kontrolle` ← `src/pages/abrechnung/eb-lieferschein-kontrolle.tsx`
 - `admin-suite` ← `src/pages/admin-suite/index.tsx`
 - `admin-suite/compliance` ← `src/pages/admin-suite/compliance.tsx`
+- `admin-suite/connectoren` ← `src/pages/admin-suite/connectoren.tsx`
 - `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
 - `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
 - `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
@@ -788,6 +789,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `foerderung/liste` ← `src/pages/foerderung/liste.tsx`
 - `fuhrpark/ausgehende-belege-dokumente` ← `src/pages/fuhrpark/ausgehende-belege-dokumente.tsx`
 - `fuhrpark/fahrzeug-stamm` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
+- `fuhrpark/fahrzeug-vertiefung` ← `src/pages/fuhrpark/fahrzeug-vertiefung.tsx`
 - `fuhrpark/fahrzeug/:id` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
 - `fuhrpark/fahrzeug/neu` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
 - `fuhrpark/fahrzeuge` ← `src/pages/fuhrpark/fahrzeuge.tsx`

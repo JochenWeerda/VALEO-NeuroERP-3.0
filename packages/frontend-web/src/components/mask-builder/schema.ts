@@ -36,7 +36,7 @@ export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 /** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
-export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench' | 'agrar_workbench' | 'lager_workbench' | 'pricing_workbench'
+export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench' | 'agrar_workbench' | 'lager_workbench' | 'pricing_workbench' | 'fleet_workbench'
 
 export interface ScreenSpecializedComponent {
   type: SpecializedComponentType
@@ -731,7 +731,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
 
   for (const action of screen.actions ?? []) {
     if (action.surfaceOnly !== undefined && (typeof action.surfaceOnly !== 'boolean'
-      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
+      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench', 'fleet_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
   }
   if (screen.flowSpineWorkspace !== undefined) {
     const key = screen.flowSpineWorkspace.processKey
@@ -862,7 +862,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     errors.push('twin.endpoint is required')
   }
   if (screen.specialized) {
-    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench'].includes(screen.specialized.type)) {
+    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench', 'fleet_workbench'].includes(screen.specialized.type)) {
       errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
     }
     const nativeBindings: Record<string, string[]> = {
@@ -888,6 +888,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
       agrar_workbench: ['agrar/kunden-schlagkartei', 'agrar/milchvieh-karte', 'agrar/ernte-annahme-erfassung', 'annahme/abrechnung'],
       lager_workbench: ['lager/materialfluss'],
       pricing_workbench: ['konditionen/konditionssystem'],
+      fleet_workbench: ['fuhrpark/fahrzeug-vertiefung'],
     }
     const allowed = nativeBindings[screen.specialized.type]
     if (allowed && (!surfaceScreenId || !allowed.includes(surfaceScreenId) || screen.specialized.id !== surfaceScreenId)) errors.push('specialized native binding is invalid')

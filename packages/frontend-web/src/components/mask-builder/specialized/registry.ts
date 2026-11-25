@@ -8,6 +8,7 @@ import { FeedWorkbench } from './feed/feed-workbench'
 import { AgrarWorkbench } from './agrar/agrar-workbench'
 import { LagerWorkbench } from './lager/lager-workbench'
 import { PricingWorkbench } from './pricing/pricing-workbench'
+import { FleetWorkbench } from './fleet/fleet-workbench'
 import type { SpecializedComponentModule } from './types'
 
 const REGISTRY: Record<SpecializedComponentType, SpecializedComponentModule> = {
@@ -20,6 +21,7 @@ const REGISTRY: Record<SpecializedComponentType, SpecializedComponentModule> = {
   agrar_workbench: AgrarWorkbench,
   lager_workbench: LagerWorkbench,
   pricing_workbench: PricingWorkbench,
+  fleet_workbench: FleetWorkbench,
 }
 
 export function resolveSpecializedComponent(

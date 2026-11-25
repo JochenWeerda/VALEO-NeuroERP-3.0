@@ -33,6 +33,7 @@ SPECIALIZED_SCREENS = {
     }),
     "lager_workbench": frozenset({"lager/materialfluss"}),
     "pricing_workbench": frozenset({"konditionen/konditionssystem"}),
+    "fleet_workbench": frozenset({"fuhrpark/fahrzeug-vertiefung"}),
 }
 
 

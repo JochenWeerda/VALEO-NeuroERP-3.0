@@ -21,6 +21,11 @@
       "source": "auto"
     },
     {
+      "module": "@/pages/admin-suite/connectoren",
+      "path": "admin-suite/connectoren",
+      "source": "auto"
+    },
+    {
       "module": "@/pages/admin-suite/connectors",
       "path": "admin-suite/connectors",
       "source": "auto"
@@ -3698,6 +3703,11 @@
     {
       "module": "@/pages/fuhrpark/fahrzeug-stamm",
       "path": "fuhrpark/fahrzeug-stamm",
+      "source": "auto"
+    },
+    {
+      "module": "@/pages/fuhrpark/fahrzeug-vertiefung",
+      "path": "fuhrpark/fahrzeug-vertiefung",
       "source": "auto"
     },
     {
