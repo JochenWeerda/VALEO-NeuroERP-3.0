@@ -186,7 +186,7 @@ class DataResidencyRule(BaseModel):
     allowed_export_targets: list[str] = Field(default_factory=list)  # Systeme/Endpunkte
     requires_approval_for_export: bool = False
     audit_on_export: bool = True
-    retention_years: int | None = None    # GoBD: 10 Jahre für Buchungsbelege
+    retention_years: int | None = None    # Mindestfrist aus app/core/gobd_retention.py; None = keine gesetzliche Frist
     schema_version: int = 1
 
 
@@ -211,6 +211,15 @@ class ExportGovernancePolicy(BaseModel):
 # Default governance setup for a standard agricultural cooperative tenant
 # ---------------------------------------------------------------------------
 
+def _jahre(dokumenttyp: str) -> int:
+    from app.core.gobd_retention import regel_fuer
+
+    regel = regel_fuer(dokumenttyp)
+    if regel is None:
+        raise KeyError(f"Keine Aufbewahrungsregel fuer {dokumenttyp}")
+    return regel.aufbewahrungsjahre
+
+
 def build_default_governance(tenant_id: str) -> ExportGovernancePolicy:
     """Liefert Standard-Datenresidenz-Regeln für einen Landhandel-Mandanten (GoBD-konform)."""
     return ExportGovernancePolicy(
@@ -218,13 +227,13 @@ def build_default_governance(tenant_id: str) -> ExportGovernancePolicy:
         rules=[
             DataResidencyRule(
                 rule_id="gobd.buchungsbeleg",
-                label="Buchungsbelege (GoBD §14b)",
+                label="Eingangsrechnungen (§ 14b UStG, § 147 AO)",
                 data_type="ap_invoice",
                 residency_zone=DataResidencyZone.DE,
                 export_classification=ExportClassification.CONFIDENTIAL,
                 requires_approval_for_export=True,
                 audit_on_export=True,
-                retention_years=10,
+                retention_years=_jahre("ap_invoice"),
             ),
             DataResidencyRule(
                 rule_id="gobd.ernte_annahme",
@@ -233,7 +242,7 @@ def build_default_governance(tenant_id: str) -> ExportGovernancePolicy:
                 residency_zone=DataResidencyZone.DE,
                 export_classification=ExportClassification.INTERNAL,
                 audit_on_export=True,
-                retention_years=10,
+                retention_years=_jahre("lieferschein_beleg"),  # Wiege-/Annahmebeleg als Buchungsbeleg
             ),
             DataResidencyRule(
                 rule_id="dsgvo.kundenstamm",
@@ -243,7 +252,7 @@ def build_default_governance(tenant_id: str) -> ExportGovernancePolicy:
                 export_classification=ExportClassification.RESTRICTED,
                 requires_approval_for_export=True,
                 audit_on_export=True,
-                retention_years=7,
+                retention_years=None,  # keine eigene Frist: loeschen, wenn kein Beleg mit laufender Frist mehr verweist
             ),
             DataResidencyRule(
                 rule_id="internal.qualitaetsprotokoll",
@@ -252,7 +261,7 @@ def build_default_governance(tenant_id: str) -> ExportGovernancePolicy:
                 residency_zone=DataResidencyZone.DE,
                 export_classification=ExportClassification.INTERNAL,
                 audit_on_export=True,
-                retention_years=5,
+                retention_years=5,  # betriebliche Festlegung, keine gesetzliche Mindestfrist
             ),
         ],
     )

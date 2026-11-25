@@ -207,7 +207,7 @@ def test_export_governance_policy_get_rule_returns_match():
     policy = build_default_governance("tenant1")
     rule = policy.get_rule("ap_invoice")
     assert rule is not None
-    assert rule.retention_years == 10
+    assert rule.retention_years == 8  # Rechnungen: § 14b UStG / § 147 AO nach BEG IV
     assert rule.requires_approval_for_export is True
 
 

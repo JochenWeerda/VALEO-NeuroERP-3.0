@@ -277,7 +277,7 @@ def test_retention_dokumenttyp_ap_invoice_vorhanden():
 
 
 def test_retention_aufzubewahren_bis_korrekt():
-    """aufzubewahren_bis = ereignisdatum + aufbewahrungsjahre Jahre."""
+    """aufzubewahren_bis = 31.12. des Jahres (Ereignisjahr + Frist), § 147 Abs. 4 AO."""
     pruefung = RetentionPruefung(
         pruefung_id=str(uuid.uuid4()),
         dokumenttyp="payment_run",
@@ -285,7 +285,7 @@ def test_retention_aufzubewahren_bis_korrekt():
         ereignisdatum=date(2015, 3, 15),
         aufbewahrungsjahre=10,
     )
-    assert pruefung.aufzubewahren_bis == date(2025, 3, 15)
+    assert pruefung.aufzubewahren_bis == date(2025, 12, 31)
 
 
 def test_retention_regel_schema_version():
