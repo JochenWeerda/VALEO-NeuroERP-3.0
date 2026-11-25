@@ -382,6 +382,14 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Query-sichere List/Overview-Mocks + gezielte Surface-API-Doubles (`price-lists` als Array)
 - Gate-D Smoke weiter **16/16 passed** — jetzt mit Specialized-Surface, nicht nur Shell/Titel
 
+### Batch 45 — ObjectPage-Legacy-Altlasten entfernt
+
+- 9 tote `*-legacy.tsx` ObjectPage/ListReport-Dateien geloescht (Saatgut/Duenger/Opportunity/Anfrage/Angebot/Anlieferavis/Bankkonten/Debitoren/Kreditoren)
+- Inventar: `pages_legacy` **9 → 0**; Routen `hand_built` weiter **0**
+- IBAN-Race-Schutz in `useIbanLookup` (Sequenz-Guard); Vitest deckt Hook statt ObjectPage ab
+- Angebot→Bestellung-Nav-Vertrag an ScreenDefinition `resultNavigationRoute` gebunden
+- Einkauf-Feldparitaet: eingefrorene Legacy-Feldvertraege statt Dateilesen
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

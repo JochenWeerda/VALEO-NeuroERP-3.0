@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { isStammCreationEntityId } from '@/components/mask-builder'
@@ -115,18 +115,22 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(routeTree).toContain(`path: "${route}"`)
       expect(routeTree).toContain(`"module":"@/pages/${page}","legacyPath":"/${route}"`)
     }
-    // Saatgut/Duenger: Create laeuft native; Legacy-Dateien bleiben nur als Rollback-Artefakt.
+    // ObjectPage-Legacy-Altlasten entfernt — kanonisch sind Native-Stammseiten.
     for (const file of [
       'crm/opportunity-detail-legacy.tsx',
-      'einkauf/anfrage-stamm-legacy.tsx', 'einkauf/angebot-stamm-legacy.tsx',
+      'einkauf/anfrage-stamm-legacy.tsx',
+      'einkauf/angebot-stamm-legacy.tsx',
       'einkauf/anlieferavis-legacy.tsx',
+      'finance/debitoren-stamm-legacy.tsx',
+      'finance/kreditoren-stamm-legacy.tsx',
+      'finance/bankkonten-stamm-legacy.tsx',
+      'agrar/duenger/stamm-legacy.tsx',
+      'agrar/saatgut/stamm-legacy.tsx',
     ]) {
-      expect(read(file)).toContain('isStammCreationEntityId')
+      expect(existsSync(resolve(pages, file))).toBe(false)
     }
-    for (const file of [
-      'finance/debitoren-stamm-legacy.tsx', 'finance/kreditoren-stamm-legacy.tsx',
-    ]) {
-      expect(read(file)).not.toMatch(/id:\s*['"]new['"]/)
-    }
+    expect(read('finance/debitoren-stamm.tsx')).toContain('UniversalNativeCreatePage')
+    expect(read('agrar/duenger/stamm.tsx')).toContain("createStammNativeDetailPage('agrar/duenger'")
+    expect(read('agrar/saatgut/stamm.tsx')).toContain("createStammNativeDetailPage('agrar/saatgut'")
   })
 })

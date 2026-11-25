@@ -11,20 +11,20 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1150 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1129 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1131 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
 | hand_built (weder Runtime noch ObjectPage/ListReport) | 0 |
-| non_page_module (Layout/Redirect/sonstiges) | 2 |
+| non_page_module (Layout/Redirect/sonstiges) | 0 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 936 |
-| legacy_mask_pattern | 9 |
+| Gesamt TSX-Seiten | 1053 |
+| runtime_wired | 938 |
+| legacy_mask_pattern | 0 |
 | hand_built | 98 |
 
 ## ScreenDefinitions / Studio
@@ -39,7 +39,7 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 |--------|---------|---------------------|
 | handgebaute Routen | 442 | 0 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1129 |
+| Runtime-verdrahtet | — | 1131 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -1039,6 +1039,8 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `sales/credit-notes` ← `src/pages/sales/credit-note-editor.tsx`
 - `sales/deliveries/new` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
 - `sales/delivery` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
+- `sales/delivery-editor` ← `src/pages/sales/delivery-editor.tsx`
+- `sales/delivery-editor-new` ← `src/pages/sales/delivery-editor-new.tsx`
 - `sales/delivery-note/:id` ← `src/pages/verkauf/lieferschein-native.tsx`
 - `sales/invoice` ← `src/pages/sales/invoice-editor.tsx`
 - `sales/invoice-editor` ← `src/pages/sales/invoice-editor.tsx`

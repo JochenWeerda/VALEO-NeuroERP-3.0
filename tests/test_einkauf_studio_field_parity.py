@@ -5,9 +5,6 @@ verlieren; Human, CI und MCP nutzen dieselben commandEndpoints (MCP-WRITE-015).
 """
 from __future__ import annotations
 
-import re
-from pathlib import Path
-
 import pytest
 
 from app.core.screen_definitions import (
@@ -15,25 +12,34 @@ from app.core.screen_definitions import (
     build_einkauf_anlieferavis_screen_definition,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
-FE_PAGES = ROOT / "packages" / "frontend-web" / "src" / "pages" / "einkauf"
-
-
-def _field_names_from_legacy(source: str) -> set[str]:
-    """Nur ``fields: [...]``-Bloecke der MaskConfig (nicht tabs/actions)."""
-    names: set[str] = set()
-    for block in re.finditer(r"fields:\s*\[(.*?)\](?=\s*(?:\}|,?\s*\{?\s*key:|\s*actions:))", source, re.S):
-        body = block.group(1)
-        names |= {m.group(1) for m in re.finditer(r"name:\s*'([^']+)'", body)}
-        names |= {m.group(1) for m in re.finditer(r"\{\s*key:\s*'([^']+)'\s*,\s*label:", body)}
-    return names
-
-
-def _action_keys_from_legacy(source: str) -> set[str]:
-    block = re.search(r"actions:\s*\[(.*?)\]\s*,\s*api:", source, re.S)
-    if not block:
-        return set()
-    return {m.group(1) for m in re.finditer(r"key:\s*'([^']+)'", block.group(1))}
+# Eingefrorene Legacy-Feldvertraege (ObjectPage-Altlasten entfernt 2026-11-25).
+# Studio darf gegenueber diesem Stand keine Felder verlieren.
+ANGEBOT_LEGACY_FIELDS = {
+    "anfrageId",
+    "angebotNummer",
+    "artikel",
+    "einheit",
+    "incoterms",
+    "lieferantId",
+    "menge",
+    "mindestabnahme",
+    "status",
+    "zahlungsbedingungen",
+}
+ANLIEFERAVIS_LEGACY_FIELDS = {
+    "avisNummer",
+    "bemerkungen",
+    "bestellungId",
+    "chargenNummer",
+    "fahrzeug.fahrer",
+    "fahrzeug.kennzeichen",
+    "fahrzeug.telefon",
+    "menge",
+    "positionId",
+    "positionen",
+    "status",
+    "verpackung",
+}
 
 
 def _collect_sd_field_keys(definition: dict) -> set[str]:
@@ -62,9 +68,8 @@ def _flatten_legacy_nested(names: set[str]) -> set[str]:
 
 @pytest.mark.unit
 def test_angebot_studio_covers_legacy_fields_and_actions():
-    legacy = (FE_PAGES / "angebot-stamm-legacy.tsx").read_text(encoding="utf-8")
     sd = build_einkauf_angebot_screen_definition()
-    legacy_fields = _flatten_legacy_nested(_field_names_from_legacy(legacy))
+    legacy_fields = _flatten_legacy_nested(ANGEBOT_LEGACY_FIELDS)
     # angebotNummer ist readOnly auf Detail; Create vergibt sie serverseitig.
     required = legacy_fields - {"angebotNummer"}
     missing = required - _collect_sd_field_keys(sd)
@@ -85,9 +90,8 @@ def test_angebot_studio_covers_legacy_fields_and_actions():
 
 @pytest.mark.unit
 def test_anlieferavis_studio_covers_legacy_fields_and_actions():
-    legacy = (FE_PAGES / "anlieferavis-legacy.tsx").read_text(encoding="utf-8")
     sd = build_einkauf_anlieferavis_screen_definition()
-    legacy_fields = _flatten_legacy_nested(_field_names_from_legacy(legacy))
+    legacy_fields = _flatten_legacy_nested(ANLIEFERAVIS_LEGACY_FIELDS)
     missing = legacy_fields - _collect_sd_field_keys(sd)
     assert not missing, f"Studio Anlieferavis fehlt Legacy-Felder: {sorted(missing)}"
 
