@@ -64,6 +64,21 @@ const COCKPIT_CASES: CockpitCase[] = [
     testId: 'screen-fuhrpark/fahrzeug-vertiefung',
     title: 'Fahrzeug-Vertiefung',
   },
+  // Prefixe, die vor Batch 41 an page-module-loader scheiterten
+  {
+    label: 'dms/archiv-suche',
+    path: '/dms/archiv-suche',
+    screenId: 'dms/archiv-suche',
+    testId: 'dms-archiv-suche',
+    title: 'Archiv-Suche',
+  },
+  {
+    label: 'betrieb/maschinen-stamm',
+    path: '/betrieb/maschinen-stamm',
+    screenId: 'betrieb/maschinen-stamm',
+    testId: 'betrieb-maschinen-stamm',
+    title: 'Maschinen-Stamm',
+  },
 ]
 
 function maskPath(screenId: string): string {
