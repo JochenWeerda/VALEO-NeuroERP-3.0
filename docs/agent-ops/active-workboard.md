@@ -974,6 +974,14 @@ Dateibesitz: app/api/v1/endpoints/compat.py (Tagesabschluss), app/finance/steuer
 Meilenstein: M5 (Produktions-Compose ohne Vorgabepasswoerter und ohne Dev-Token). docker-compose.production.yml: alle Geheimnisse (Postgres, OIDC-Client, Keycloak-DB/-Admin, Grafana-Admin) als ${VAR:?...} - ohne gesetztes Geheimnis bricht der Start ab statt mit leerem Kennwort zu laufen. Vertragstest tests/test_produktion_compose_geheimnisse.py (Pflicht, keine Vorgabewerte, kein API_DEV_TOKEN). check_production_readiness --contract-only: ready.
 Offen in M5: Geheimnisse rotieren (Passwoerter stehen in der Git-Historie, s. README-DOKU-20261110), Sicherung mit Restore-Probe, Mandanten-Anlage als ein Kommando, Agent-Schreibfreigabe schliessen (Nutzerentscheid vor Go-Live).
 
+## M2-NAVIGATION-CONTRACTS - reserviert, Codex Lead
+Besitz: reine vorhandene DMS- und Duengemittel-Navigationen in den kanonischen Maskendefinitionen und deren erzeugte Register. Nur bereits verdrahtete UI-Aktionen deklarieren; Funktionsumfang und Ratschenabnahme pruefen.
+
+M2-NAVIGATION-CONTRACTS: DMS-Vorschau und Artikelnavigation sowie Duengemittel-Quellbeleg als bestehende lokale Effekte deklariert. Inventar auf Basis 602394bd9 gruen: genau drei undeclarierte Eintraege entfallen, 292 -> 289. Andere Listen unveraendert. Studio-Katalog synchron; kein neuer Serverbefehl. Browserabnahme offen.
+M2-NAVIGATION-CONTRACTS: Besitz erweitert auf vorhandene Quellspruenge in Dokumentenruecklauf, Produktionsleitstand, Chargenbearbeitung, Inventurnebenlaeufen, Fremdware und Rechnungstapel.
+
+M2-NAVIGATION-CONTRACTS: sieben vorhandene Quellspruenge deklariert, Inventar gruen 289 -> 282. Uebrige Ratschen unveraendert. GitHub-/Browserabnahme offen. PR163 inzwischen konfliktbehaftet und Sonar weiterhin rot; separat an aktuellen main-Stand angleichen.
+
 ## M2-HARVEST-INSPECT - reserviert, Codex Lead
 Besitz: inspect_rule in der Ernte-Regeldefinition und generierte Register. Vorhandene Zeilenauswahl als lokale Aktion freistellen und Ratsche pruefen.
 
