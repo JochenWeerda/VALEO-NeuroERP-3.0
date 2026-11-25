@@ -1475,7 +1475,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
             { label: '2. Ration rechnen', text: 'Solver-Ergebnis, Grenzen und Warnungen pruefen.' },
             { label: '3. Fachlich freigeben', text: 'Review oeffnen, Nachweis exportieren und Umsetzung dokumentieren.' },
           ].map((step) => (
-            <div key={step.label} className="rounded-lg border bg-slate-50 p-3" style={{ borderColor: C.border }}>
+            <div key={step.label} className="rounded-lg border bg-muted p-3" style={{ borderColor: C.border }}>
               <p className="text-2xs font-bold uppercase tracking-wide" style={{ color: C.dark }}>{step.label}</p>
               <p className="mt-1 text-[12px] leading-relaxed" style={{ color: C.muted }}>{step.text}</p>
             </div>
@@ -1547,7 +1547,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               >
                 <div className="flex justify-between items-start mb-3">
                   <h3 className="font-bold group-hover:text-primary transition-colors" style={{ color: C.dark }}>{r.name}</h3>
-                  <span className="text-2xs font-bold uppercase bg-slate-50 px-1.5 py-0.5 rounded border" style={{ color: C.muted, borderColor: C.border }}>
+                  <span className="text-2xs font-bold uppercase bg-muted px-1.5 py-0.5 rounded border" style={{ color: C.muted, borderColor: C.border }}>
                     {r.status}
                   </span>
                 </div>
@@ -1566,7 +1566,7 @@ function Dashboard({ onStart, onDemo }: { onStart: () => void; onDemo: () => voi
               tabIndex={0}
               onKeyDown={tastenKlick}
               onClick={onStart}
-              className="bg-slate-50 p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-white"
+              className="bg-muted p-5 rounded-lg border-2 border-dashed flex flex-col items-center justify-center cursor-pointer min-h-[160px] transition-all hover:bg-white"
               style={{ borderColor: C.border }}
             >
               <Plus size={24} className="mb-2 opacity-40" />
@@ -1613,7 +1613,7 @@ function GfaPickerModal({
             <h3 className="font-bold text-base" style={{ color: C.dark }}>Betriebseigene Grundfutteranalyse hinzufügen</h3>
             <p className="text-xs mt-0.5" style={{ color: C.muted }}>LUFA-Analysen aus dem Grundfutteranalysen-Modul importieren</p>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-700 transition-colors">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <XIcon size={20} />
           </button>
         </div>
@@ -1650,7 +1650,7 @@ function GfaPickerModal({
             return (
               <div
                 key={a.id}
-                className="px-6 py-4 border-b flex items-center gap-4 hover:bg-slate-50 transition-colors"
+                className="px-6 py-4 border-b flex items-center gap-4 hover:bg-muted transition-colors"
                 style={{ borderColor: C.border }}
               >
                 <div className="flex-1 min-w-0">
@@ -1868,7 +1868,7 @@ function Wizard({
   })
 
   const inputCls = 'w-full border rounded-lg px-4 py-2 text-sm outline-hidden focus:ring-2 focus:ring-primary transition-all'
-  const labelCls = 'text-xs font-semibold text-slate-500 block mb-1'
+  const labelCls = 'text-xs font-semibold text-muted-foreground block mb-1'
 
   return (
     <div className="flex-1 p-6 flex flex-col max-w-6xl mx-auto w-full space-y-6" style={{ background: C.bg }}>
@@ -1894,9 +1894,9 @@ function Wizard({
         {/* Step 1: Group & Goal */}
         {step === 1 && (
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-2">
-            <div className="p-8 border-r border-slate-100 space-y-8">
+            <div className="p-8 border-r border-border space-y-8">
               <div className="space-y-4">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Tiergruppe</h3>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tiergruppe</h3>
                 <div className="space-y-1.5">
                   <label className={labelCls}>Gruppe</label>
                   <select
@@ -1917,7 +1917,7 @@ function Wizard({
                   ].map((row) => (
                     <div key={row.label} className="space-y-1.5">
                       <label className={labelCls}>{row.label}</label>
-                      <input type="number" value={row.val} readOnly className={cn(inputCls, 'bg-slate-50')} style={{ borderColor: C.border }} />
+                      <input type="number" value={row.val} readOnly className={cn(inputCls, 'bg-muted')} style={{ borderColor: C.border }} />
                     </div>
                   ))}
                 </div>
@@ -1934,8 +1934,8 @@ function Wizard({
               </div>
             </div>
 
-            <div className="p-8 bg-slate-50/50 space-y-6">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400">Leistungsziel</h3>
+            <div className="p-8 bg-muted/50 space-y-6">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Leistungsziel</h3>
               <div className="space-y-2">
                 <label className={labelCls}>Optimierungs-Modus</label>
                 <div className="flex flex-col gap-2">
@@ -2211,7 +2211,7 @@ function Wizard({
                 {showFanAdvanced && (
                   <div className="space-y-2 pt-2">
                     <div>
-                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                         Relaxation (weiche Grenzen)
                       </label>
                       <div className="flex gap-2">
@@ -2238,7 +2238,7 @@ function Wizard({
                       </div>
                     </div>
                     <div>
-                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                         Weide-/Saisonprofil
                       </label>
                       <select
@@ -2260,7 +2260,7 @@ function Wizard({
                     </div>
                     {/* DLG 01|2025 Tab. 13-15: Leistungs-/Physiologiestufe */}
                     <div>
-                      <label className="text-2xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">
+                      <label className="text-2xs font-semibold uppercase tracking-wider text-muted-foreground block mb-1">
                         Leistungsstufe (DLG 01|2025 Tab. 13-15)
                       </label>
                       <select
@@ -2362,7 +2362,7 @@ function Wizard({
               </div>
               <div className="flex gap-2">
                 <button
-                  className="text-xs px-3 py-1.5 border rounded-lg hover:bg-slate-50 flex items-center gap-1.5 font-semibold"
+                  className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted flex items-center gap-1.5 font-semibold"
                   style={{ borderColor: C.accent, color: C.accent }}
                   onClick={() => setShowGfaPicker(true)}
                 >
@@ -2370,7 +2370,7 @@ function Wizard({
                   Betriebsanalyse hinzufügen
                 </button>
                 <button
-                  className="text-xs px-3 py-1.5 border rounded-lg hover:bg-slate-50 flex items-center gap-1.5 font-semibold"
+                  className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted flex items-center gap-1.5 font-semibold"
                   style={{ borderColor: C.success, color: C.success }}
                   onClick={() => compoundUploadRef.current?.click()}
                   disabled={compoundUploadMut.isPending}
@@ -2378,8 +2378,8 @@ function Wizard({
                   {compoundUploadMut.isPending ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
                   Lieferschein / Rezeptur hochladen
                 </button>
-                <button className="text-xs px-3 py-1.5 border rounded-lg hover:bg-slate-50" style={{ borderColor: C.border }} onClick={() => setSelectedFeedIds(new Set(allDisplayFeeds.map((f) => f.id)))}>Alle</button>
-                <button className="text-xs px-3 py-1.5 border rounded-lg hover:bg-slate-50" style={{ borderColor: C.border }} onClick={() => setSelectedFeedIds(new Set())}>Keine</button>
+                <button className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted" style={{ borderColor: C.border }} onClick={() => setSelectedFeedIds(new Set(allDisplayFeeds.map((f) => f.id)))}>Alle</button>
+                <button className="text-xs px-3 py-1.5 border rounded-lg hover:bg-muted" style={{ borderColor: C.border }} onClick={() => setSelectedFeedIds(new Set())}>Keine</button>
               </div>
               <input
                 ref={compoundUploadRef}
@@ -2441,7 +2441,7 @@ function Wizard({
                             return next
                           })
                         }}
-                        className="text-slate-300 hover:text-status-error transition-colors"
+                        className="text-muted-foreground hover:text-status-error transition-colors"
                       >
                         <XIcon size={12} />
                       </button>
@@ -2550,7 +2550,7 @@ function Wizard({
                           else next.add(f.id)
                           setSelectedFeedIds(next)
                         }}
-                        className="cursor-pointer border-b transition-colors hover:bg-slate-50"
+                        className="cursor-pointer border-b transition-colors hover:bg-muted"
                         style={{ background: checked ? C.activeBg : undefined, borderColor: C.border }}
                       >
                         <td className="px-4 py-3">
@@ -2636,7 +2636,7 @@ function Wizard({
                                 setFeedMinFm((prev) => { const n = { ...prev }; delete n[f.id]; return n })
                                 setSelectedFeedIds((prev) => { const next = new Set(prev); next.delete(f.id); return next })
                               }}
-                              className="text-slate-300 hover:text-status-error transition-colors"
+                              className="text-muted-foreground hover:text-status-error transition-colors"
                             >
                               <XIcon size={12} />
                             </button>
@@ -2681,7 +2681,7 @@ function Wizard({
                 </p>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between gap-4">
-                    <span className="text-sm font-medium text-slate-700">TM-Aufnahme (kg/Tag)</span>
+                    <span className="text-sm font-medium text-foreground">TM-Aufnahme (kg/Tag)</span>
                     <div className="flex items-center gap-2">
                       <input
                         type="number"
@@ -2719,7 +2719,7 @@ function Wizard({
                     { label: 'aNDFom GF min (% d. TM)', field: 'andfomGfMinPctTm' as const },
                   ]).map((row) => (
                     <div key={row.field} className="flex items-center justify-between gap-4">
-                      <span className="text-sm font-medium text-slate-700">{row.label}</span>
+                      <span className="text-sm font-medium text-foreground">{row.label}</span>
                       <input
                         type="number"
                         step={0.1}
@@ -2746,7 +2746,7 @@ function Wizard({
                     { key: 'maximizeNEfficiencyRmd' as const, label: 'N-Effizienz maximieren (RMD)' },
                     { key: 'preferHomegrown' as const, label: 'Hofeigene Komponenten bevorzugen' },
                   ]).map((item) => (
-                    <label key={item.key} className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-100 rounded-xl cursor-pointer hover:bg-white transition-colors">
+                    <label key={item.key} className="flex items-center gap-3 p-3 bg-muted border border-border rounded-xl cursor-pointer hover:bg-white transition-colors">
                       <input
                         type="checkbox"
                         checked={wizardSoftGoals[item.key]}
@@ -2756,7 +2756,7 @@ function Wizard({
                         className="w-4 h-4 rounded"
                         style={{ accentColor: C.accent }}
                       />
-                      <span className="text-sm text-slate-700">{item.label}</span>
+                      <span className="text-sm text-foreground">{item.label}</span>
                     </label>
                   ))}
                 </div>
@@ -2768,7 +2768,7 @@ function Wizard({
                 <h3 className="text-xs font-bold uppercase tracking-widest" style={{ color: C.accent }}>Prioritäten</h3>
                 <p className="text-xs" style={{ color: C.muted }}>
                   Gewichtung per Schieberegler (0–100). Aus den Werten wird eine Solver-Stufe abgeleitet (
-                  <span className="font-semibold text-slate-600">{deriveObjectiveStrategy(mode, priorityWeights)}</span>
+                  <span className="font-semibold text-muted-foreground">{deriveObjectiveStrategy(mode, priorityWeights)}</span>
                   ); Details werden zusätzlich unter <code className="text-2xs">policy_overrides.wizard_priorities</code> mitgeschickt.
                 </p>
                 {PRIORITY_SLIDER_ROWS.map(({ key, label }) => {
@@ -2776,7 +2776,7 @@ function Wizard({
                   return (
                     <div key={key} className="space-y-2">
                       <div className="flex justify-between items-center text-sm gap-3">
-                        <span className="font-medium text-slate-700">{label}</span>
+                        <span className="font-medium text-foreground">{label}</span>
                         <span className="font-bold tabular-nums shrink-0 min-w-12 text-right" style={{ color: C.accent }}>{val}%</span>
                       </div>
                       <input
@@ -2810,7 +2810,7 @@ function Wizard({
                 <div className="flex items-center gap-2 font-bold text-sm uppercase tracking-widest" style={{ color: C.accent }}>
                   <Sparkles size={16} /> AI-Vorschau
                 </div>
-                <p className="text-sm text-slate-300">
+                <p className="text-sm text-muted-foreground">
                   Basierend auf {selectedFeedIds.size} ausgewählten Futtermitteln und aktuellen Preisen kann eine optimale Ration berechnet werden.
                 </p>
                 <div className="flex items-center gap-2 text-xs font-bold" style={{ color: C.accent }}>
@@ -2825,7 +2825,7 @@ function Wizard({
         <div className="h-20 border-t bg-white px-8 flex items-center justify-between sticky bottom-0" style={{ borderColor: C.border }}>
           <button
             onClick={step === 1 ? onCancel : () => setStep((s) => s - 1)}
-            className="px-6 py-2.5 border font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+            className="px-6 py-2.5 border font-bold rounded-xl hover:bg-muted transition-all flex items-center gap-2"
             style={{ borderColor: C.border, color: C.dark }}
           >
             <ArrowLeft size={18} /> {step === 1 ? 'Abbrechen' : 'Zurück'}
@@ -4112,7 +4112,7 @@ function Workbench({
         </div>
 
         <button
-          className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-slate-50"
+          className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-muted"
           style={{ borderColor: C.border, color: C.dark }}
           onClick={onGoDiagnose}
           disabled={!result}
@@ -4120,7 +4120,7 @@ function Workbench({
           → Diagnose
         </button>
         <button
-          className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-slate-50"
+          className="w-full py-2 text-sm font-semibold rounded-lg border transition-colors hover:bg-muted"
           style={{ borderColor: C.border, color: C.dark }}
           onClick={onGoReview}
           disabled={!result}
@@ -4139,7 +4139,7 @@ function Workbench({
           <button
             onClick={() => { setWorkbenchMode('Bewertung'); onOptimize() }}
             disabled={isOptimizing || !canEditRation}
-            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-muted disabled:opacity-40"
             style={{ borderColor: C.border, color: C.dark }}
             title="Aktuelle Ration nach GfE 2023 bewerten (ohne Umoptimierung)"
           >
@@ -4157,7 +4157,7 @@ function Workbench({
           <button
             onClick={onOptimize}
             disabled={isOptimizing}
-            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-muted disabled:opacity-40"
             style={{ borderColor: C.border, color: C.dark }}
             title="Beste unter allen harten Grenzen erreichbare Ration (Best-Attainable, Skill §4.2)"
           >
@@ -4166,23 +4166,23 @@ function Workbench({
           <button
             onClick={() => { if (result) setSavedVariants((prev) => [...prev, { name: `Variante ${String.fromCharCode(65 + prev.length)}`, result }]) }}
             disabled={!result || result.status !== 'optimal'}
-            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-muted disabled:opacity-40"
             style={{ borderColor: C.border, color: C.dark }}
             title="Aktuelles Ergebnis als Vergleichsvariante ablegen"
           >
             <Copy size={14} /> Variante speichern
           </button>
-          <button onClick={onDemo} disabled={isOptimizing} className="px-4 py-2 rounded text-sm font-semibold border transition-colors hover:bg-slate-50" style={{ borderColor: C.border }}>
+          <button onClick={onDemo} disabled={isOptimizing} className="px-4 py-2 rounded text-sm font-semibold border transition-colors hover:bg-muted" style={{ borderColor: C.border }}>
             Demo
           </button>
-          <button onClick={onReset} className="px-4 py-2 rounded text-sm font-semibold border transition-colors hover:bg-slate-50" style={{ borderColor: C.border }}>
+          <button onClick={onReset} className="px-4 py-2 rounded text-sm font-semibold border transition-colors hover:bg-muted" style={{ borderColor: C.border }}>
             <RotateCcw size={14} />
           </button>
           <div className="grow" />
           <button
             onClick={onGoDiagnose}
             disabled={!result}
-            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-slate-50 disabled:opacity-40"
+            className="px-4 py-2 rounded text-sm font-semibold border flex items-center gap-2 transition-colors hover:bg-muted disabled:opacity-40"
             style={{ borderColor: C.border, color: C.dark }}
           >
             Diagnose
@@ -4267,7 +4267,7 @@ function Workbench({
                   const isFixed = minFm != null && minFm === maxFm
                   const rothPct = item.cp_g != null && item.kgdm > 0 ? item.cp_g / item.kgdm / 10 : null
                   return (
-                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-slate-50" style={{ borderColor: C.border }}>
+                    <tr key={item.feed_id} className="border-b transition-colors hover:bg-muted" style={{ borderColor: C.border }}>
                       {/* RATION-WB-11: Aktiv-Checkbox (Abwählen entfernt die Zutat und rechnet neu) */}
                       <td className="p-2 text-center">
                         <input
@@ -4283,7 +4283,7 @@ function Workbench({
                       <td className="p-2 font-medium whitespace-nowrap" style={{ color: C.dark }} title={dupName ? item.feed_id : undefined}>
                         {item.name}
                         {dupName ? (
-                          <span className="text-slate-400 font-normal text-2xs ml-1">({item.feed_id})</span>
+                          <span className="text-muted-foreground font-normal text-2xs ml-1">({item.feed_id})</span>
                         ) : null}
                       </td>
                       <td className="p-2 text-right">
@@ -4295,7 +4295,7 @@ function Workbench({
                               disabled={!canEditRation}
                               aria-label={`Fixierung für ${item.name} lösen und neu optimieren`}
                               title="Menge ist fixiert — Klick löst die Fixierung und optimiert neu"
-                              className="rounded p-0.5 hover:bg-slate-100 disabled:opacity-40"
+                              className="rounded p-0.5 hover:bg-muted disabled:opacity-40"
                               style={{ color: C.accent }}
                             >
                               <Pin size={11} />
@@ -4485,7 +4485,7 @@ function Workbench({
                 type="button"
                 disabled={!canEditRation}
                 onClick={() => onApplySuggestionPatch({ fix_feed_fm: Object.fromEntries(rationItems.map((it) => [it.feed_id, Number(it.kgfm.toFixed(2))])) })}
-                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-muted disabled:opacity-40"
                 style={{ borderColor: C.border, color: C.dark }}
                 title="Alle aktuellen Mengen fixieren (Min=Max)"
               >
@@ -4495,7 +4495,7 @@ function Workbench({
                 type="button"
                 disabled={!canEditRation}
                 onClick={() => onApplySuggestionPatch({ unfix_feed_ids: rationItems.map((it) => it.feed_id) })}
-                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-slate-50 disabled:opacity-40"
+                className="rounded border px-2.5 py-1 text-2xs font-semibold transition-colors hover:bg-muted disabled:opacity-40"
                 style={{ borderColor: C.border, color: C.dark }}
                 title="Alle Fixierungen und Min/Max-Grenzen zurücksetzen"
               >
@@ -5065,7 +5065,7 @@ function Review({
           </thead>
           <tbody>
             {comparison.map((row, i) => (
-              <tr key={i} className="border-b hover:bg-slate-50 transition-colors" style={{ borderColor: C.border }}>
+              <tr key={i} className="border-b hover:bg-muted transition-colors" style={{ borderColor: C.border }}>
                 <td className="px-4 py-2.5 font-bold text-foreground">{row.label}</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs" style={{ color: C.muted }}>{row.ist}</td>
                 <td className="px-4 py-2.5 text-right font-mono text-xs font-bold" style={{ color: C.accent }}>{row.neu}</td>
@@ -5116,7 +5116,7 @@ function Review({
                 return (
                   <tr
                     key={row.label}
-                    className="border-b hover:bg-slate-50 transition-colors"
+                    className="border-b hover:bg-muted transition-colors"
                     style={{
                       borderColor: C.border,
                       background: isEpRow && (!epOkIst || !epOkNeu) ? C.deltaBg : undefined,
@@ -5164,7 +5164,7 @@ function Review({
             {changeLog.map((item, i) => (
               <li key={i} className="flex items-center gap-3 p-3 bg-white border rounded-xl" style={{ borderColor: C.border }}>
                 <TrendingUp size={16} style={{ color: C.accent }} />
-                <span className="text-sm font-medium text-slate-600">
+                <span className="text-sm font-medium text-muted-foreground">
                   {item.name}: {fmt(item.kgfm, 1)} kg FM / {fmt(item.kgdm, 2)} kg TM
                 </span>
               </li>
@@ -5190,9 +5190,9 @@ function Review({
                 { text: 'Biologische Plausibilität geprüft (Pansen/RMD)', defaultChecked: false },
               ] as const
             ).map((check, i) => (
-              <label key={i} className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer group hover:bg-white border border-transparent hover:border-slate-200 transition-all">
-                <input type="checkbox" defaultChecked={check.defaultChecked} className="w-5 h-5 rounded border-slate-300" style={{ accentColor: C.accent }} />
-                <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">{check.text}</span>
+              <label key={i} className="flex items-center gap-3 p-3 bg-muted rounded-xl cursor-pointer group hover:bg-white border border-transparent hover:border-border transition-all">
+                <input type="checkbox" defaultChecked={check.defaultChecked} className="w-5 h-5 rounded border-border" style={{ accentColor: C.accent }} />
+                <span className="text-sm font-medium text-muted-foreground group-hover:text-foreground transition-colors">{check.text}</span>
               </label>
             ))}
           </div>
@@ -5206,13 +5206,13 @@ function Review({
       <div className="flex items-center justify-between pt-8 border-t" style={{ borderColor: C.border }}>
         <button
           onClick={onBack}
-          className="px-6 py-3 border font-bold rounded-xl hover:bg-slate-50 transition-all flex items-center gap-2"
+          className="px-6 py-3 border font-bold rounded-xl hover:bg-muted transition-all flex items-center gap-2"
           style={{ borderColor: C.border, color: C.dark }}
         >
           <ArrowLeft size={18} /> Zurück editieren
         </button>
         <div className="flex gap-4">
-          <button className="px-6 py-3 bg-white border font-bold rounded-xl flex items-center gap-2 hover:bg-slate-50 transition-all" style={{ borderColor: C.border, color: C.dark }}>
+          <button className="px-6 py-3 bg-white border font-bold rounded-xl flex items-center gap-2 hover:bg-muted transition-all" style={{ borderColor: C.border, color: C.dark }}>
             <FileText size={18} /> PDF speichern
           </button>
           <button
