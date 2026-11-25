@@ -197,3 +197,8 @@ ostfriesland_*.json
 *.identity-private.json
 *.identity-secrets.local.*
 .env.identity*
+
+# L3-Testdatenabzug (M6, DSGVO): Abzuege bleiben lokal, nie im Repository
+**/l3-testdaten/**
+l3_abzug_*.csv
+l3_abzug_*.ods
