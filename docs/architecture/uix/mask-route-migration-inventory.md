@@ -11,11 +11,11 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt Routen | 1147 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 1037 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1033 |
 | legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
 | legacy_wrapper (laedt weiter die Altoberflaeche) | 35 |
 | technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 69 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 73 |
 | non_page_module (Layout/Redirect/sonstiges) | 2 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
@@ -23,9 +23,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 | Klasse | Anzahl |
 |--------|--------|
 | Gesamt TSX-Seiten | 1060 |
-| runtime_wired | 876 |
+| runtime_wired | 872 |
 | legacy_mask_pattern | 16 |
-| hand_built | 129 |
+| hand_built | 133 |
 
 ## ScreenDefinitions / Studio
 
@@ -37,9 +37,9 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 69 |
+| handgebaute Routen | 442 | 73 |
 | Routen mit alten Maskenmustern | 80 | 0 |
-| Runtime-verdrahtet | — | 1037 |
+| Runtime-verdrahtet | — | 1033 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
@@ -61,8 +61,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 - `/` ← `src/pages/start-dashboard.tsx`
 - `abrechnung/eb-lieferschein-kontrolle` ← `src/pages/abrechnung/eb-lieferschein-kontrolle.tsx`
-- `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
-- `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
 - `admin/api-keys` ← `src/pages/admin/api-keys.tsx`
 - `admin/audit-log` ← `src/pages/admin/audit-log.tsx`
 - `admin/background-jobs` ← `src/pages/admin/background-jobs.tsx`
@@ -75,7 +73,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin/berechtigungen-matrix` ← `src/pages/admin/berechtigungen-matrix.tsx`
 - `admin/branches` ← `src/pages/admin/branches.tsx`
 - `admin/branches/:id` ← `src/pages/admin/branch-detail.tsx`
-- `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/compliance` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/compliance-dashboard` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/control-center` ← `src/pages/admin/control-center/index.tsx`
@@ -807,7 +804,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `kontrakte/kontrakt-uebersicht` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
 - `kontrakte/kontraktklassen` ← `src/pages/kontrakte/kontraktklassen.tsx`
 - `kontrakte/listen/:variante` ← `src/pages/kontrakte/listen.tsx`
-- `kontrakte/mengenzeitraeume` ← `src/pages/kontrakte/mengenzeitraeume.tsx`
 - `kontrakte/neu` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`
 - `kontrakte/positionen` ← `src/pages/kontrakte/KontraktPositionsmonitor.tsx`
 - `kontrakte/vorgang/:variante/:id` ← `src/pages/kontrakte/vorgang.tsx`
@@ -1112,6 +1108,9 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
 - `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
 - `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
+- `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
+- `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
+- `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
 - `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
 - `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
@@ -1156,6 +1155,3 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `einkauf/lieferschein-erfassen` ← `src/pages/einkauf/lieferschein-erfassen.tsx`
 - `einkauf/lieferschein-erfassung` ← `src/pages/einkauf/lieferschein-erfassung.tsx`
 - `einkauf/rechnung-eingang-erfassung` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
-- `einkauf/rechnungen/:id` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
-- `einkauf/rechnungseingaenge/:id` ← `src/pages/einkauf/rechnungseingang.tsx`
-- `einkauf/rechnungseingang` ← `src/pages/einkauf/rechnungseingang.tsx`

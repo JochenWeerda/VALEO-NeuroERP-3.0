@@ -3019,6 +3019,46 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
     )
 
 
+def build_agrar_rohwarengruppen_screen_definition() -> dict[str, Any]:
+    return build_stamm_object_page(
+        screen_id="agrar/rohwarengruppen",
+        domain="agrar",
+        title="Rohwarengruppe anlegen",
+        subtitle="agrar",
+        identity_field="id",
+        data_sources=[stamm_entity_source("/api/v1/rohware/gruppen/{entity_id}")],
+        tabs=[stamm_kopf_tab([
+            {"key": "id", "label": "ID", "type": "text"},
+            {"key": "gruppe_nr", "label": "Gruppen-Nr.", "type": "text"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "type": "text"},
+            {"key": "artikel_nr", "label": "Artikel-Nr.", "type": "text"},
+            {"key": "waehrung", "label": "Waehrung", "type": "text"},
+            {"key": "mengeneinheit", "label": "ME", "type": "text"},
+        ])],
+        edit_permission="agrar.write",
+        creation={
+            "endpoint": "/api/v1/rohware/gruppen",
+            "permission": "agrar.rohwarengruppe.create",
+            "detailRoute": "/agrar/rohwarengruppen/{entity_id}",
+            "responseIdKey": "gruppe_nr",
+            "defaults": {"ek_aktiv": True, "vk_aktiv": False, "waehrung": "EUR"},
+            "fields": [
+                {"key": "gruppe_nr", "label": "Gruppen-Nr.", "type": "text", "required": True},
+                {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "artikel_nr", "label": "Artikel-Nr.", "type": "text"},
+                {"key": "ek_aktiv", "label": "EK aktiv", "type": "boolean"},
+                {"key": "vk_aktiv", "label": "VK aktiv", "type": "boolean"},
+                {"key": "waehrung", "label": "Waehrung", "type": "text"},
+                {"key": "mengeneinheit", "label": "Mengeneinheit", "type": "text"},
+            ],
+        },
+        no_workflow_reason="Die Maske ist ein Read-Model-/Listen-Workspace; Statuswechsel erfolgen in den verlinkten Fachmasken.",
+        business_purpose="Rohwarengruppe als Stammblatt pflegen.",
+        example_prompts=["Oeffne Rohwarengruppen.", "Lege eine Rohwarengruppe an."],
+        test_id="agrar-rohwarengruppen",
+    )
+
+
 def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, Any]:
     return build_stamm_object_page(
         screen_id="agribusiness/field-service-tasks/neu",
@@ -3068,6 +3108,7 @@ def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, 
 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {
     "agribusiness/field-service-tasks/neu": build_agribusiness_field_service_tasks_neu_screen_definition,
+    "agrar/rohwarengruppen": build_agrar_rohwarengruppen_screen_definition,
     "einkauf/reports": build_einkauf_reports_screen_definition,
     "einkauf/service-entry-sheets": build_einkauf_service_entry_sheets_screen_definition,
     "einkauf/wareneingangsabgleich": build_einkauf_wareneingangsabgleich_screen_definition,

@@ -117,9 +117,15 @@ Ops-/Workspace-Masken vom falschen `createStammNativeDetailPage`-Factory geloest
 `admin/ai-approvals`, `admin/command-monitor`, `admin/agenten-integration` (spezialisiert),
 `kontrakte/mengenzeitraeume` (pfadgebundenes Workspace).
 
+## Dreizehnte Hebung (Batch 13)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `agrar/rohwarengruppen` | `createLegacyMaskPage` | SD + POST `/api/v1/rohware/gruppen` (`responseIdKey=gruppe_nr`); GET `/{nr}` |
+
 ## Noch offen (Folge)
 
-- 35 `legacy_wrapper`-Routen (`createLegacyMaskPage`, Admin-Suite/Agrar-Prozess)
+- ~34 `legacy_wrapper`-Routen (`createLegacyMaskPage`, Admin-Suite/Agrar-Prozess)
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST — Factory+Legacy bis API
 - `fibu/abschluss-checklist-detail`: Prozessmaske, Create weiter Legacy
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
