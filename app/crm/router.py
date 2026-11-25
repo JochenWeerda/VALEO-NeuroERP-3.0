@@ -66,7 +66,6 @@ async def list_contacts(
     return query.all()
 
 
-@router.get("/contacts/{contact_id}", response_model=schemas.Contact)
 async def get_contact(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -84,7 +83,6 @@ async def get_contact(
     return contact
 
 
-@router.put("/contacts/{contact_id}", response_model=schemas.Contact, dependencies=SCHREIBEN["CRM"])
 async def update_contact(
     contact_id: str,
     contact_update: schemas.ContactUpdate,
@@ -109,7 +107,6 @@ async def update_contact(
     return db_contact
 
 
-@router.delete("/contacts/{contact_id}", status_code=204, dependencies=SCHREIBEN["CRM"])
 async def delete_contact(
     contact_id: str,
     db: Session = Depends(get_db),
@@ -513,7 +510,6 @@ async def get_pipeline_summary(
 # CONSENT MANAGEMENT (CRM-CNS-01)
 # ---------------------------------------------------------------------------
 
-@router.post("/consents", response_model=schemas.ConsentResponse, status_code=201, dependencies=SCHREIBEN["CRM"])
 async def create_consent(
     consent: schemas.ConsentCreate,
     db: Session = Depends(get_db),
@@ -553,7 +549,6 @@ async def create_consent(
     )
 
 
-@router.get("/consents", response_model=List[schemas.ConsentResponse])
 async def list_consents(
     partner_id: Optional[str] = None,
     channel: Optional[str] = None,
@@ -589,7 +584,6 @@ async def list_consents(
     ]
 
 
-@router.post("/consents/{consent_id}/revoke", response_model=dict, dependencies=SCHREIBEN["CRM"])
 async def revoke_consent(
     consent_id: str,
     db: Session = Depends(get_db),

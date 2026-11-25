@@ -34,11 +34,23 @@ router = APIRouter(prefix="/artikel/mengeneinheiten",
 # ── Schemas ───────────────────────────────────────────────────────────────────
 
 class MengeneinheitCreate(BaseModel):
-    einheit_kuerzel: str = Field(..., max_length=10)
+    """Grundmengeneinheit nach a.eins (Nutzerauftrag 24.11.2026)."""
+
+    einheit_kuerzel: str = Field(..., max_length=10, description="Kurztext, wie er gedruckt wird (kg, Stück, Ltr.)")
     bezeichnung: str
     basis_einheit: Optional[str] = Field(None, max_length=10)
     umrechnungsfaktor: Optional[Decimal] = Field(None, gt=0)
-    dezimalstellen: int = Field(default=3, ge=0, le=6)
+    # Rundung bei Umrechnung: 0 bis 4; bei aktiven Einheiten nur nach oben aenderbar.
+    dezimalstellen: int = Field(default=3, ge=0, le=4)
+    nummer: Optional[int] = Field(None, ge=1, le=9999, description="Nummer der Mengeneinheit (hoechstens 4 Stellen)")
+    langtext: Optional[str] = Field(None, max_length=80, description="Langtext, der anstelle des Kurztexts gedruckt werden kann")
+    iso_name: Optional[str] = Field(None, max_length=20)
+    datanorm_kurz: Optional[str] = Field(None, max_length=10, description="Kurzbezeichnung im DataNorm-Verfahren")
+    statistikkennzeichen: Optional[str] = Field(None, max_length=20)
+    preisbezug_einheit: Optional[str] = Field(None, max_length=10, description="Mengeneinheit des Preisbezugs")
+    preisbezug_menge: Optional[Decimal] = Field(None, gt=0, description="Preisbezug, z. B. 100 bei Preis je 100 kg")
+    un_code: Optional[str] = Field(None, pattern=r"^[A-Z0-9]{2,3}$",
+                                   description="UN-Mengeneinheit (UN/ECE Rec. 20) fuer E-Rechnung und openTRANS")
 
 
 class MengeneinheitOut(BaseModel):
@@ -48,8 +60,29 @@ class MengeneinheitOut(BaseModel):
     basis_einheit: Optional[str]
     umrechnungsfaktor: Optional[Decimal]
     dezimalstellen: int
+    nummer: Optional[int] = None
+    langtext: Optional[str] = None
+    iso_name: Optional[str] = None
+    datanorm_kurz: Optional[str] = None
+    statistikkennzeichen: Optional[str] = None
+    preisbezug_einheit: Optional[str] = None
+    preisbezug_menge: Optional[Decimal] = None
+    un_code: Optional[str] = None
+    gebindetyp: int = 0
+    ergebniseinheit: Optional[str] = None
+    faktorherkunft: Optional[int] = None
+    faktor1: Optional[Decimal] = None
+    faktor2: Optional[Decimal] = None
+    faktor3: Optional[Decimal] = None
+    faktor4: Optional[Decimal] = None
+    lvs_relevanz: int = 0
+    lvs_default_lokalitaet: Optional[str] = None
     aktiv: bool
     created_at: datetime
+
+
+ZUSATZFELDER = ("nummer", "langtext", "iso_name", "datanorm_kurz", "statistikkennzeichen", "preisbezug_einheit",
+                "preisbezug_menge", "un_code")
 
 
 class MengeneinheitengruppeCreate(BaseModel):
@@ -105,12 +138,15 @@ def create_mengeneinheit(
     db.execute(text("""
         INSERT INTO domain_shared.artikel_mengeneinheiten
             (id, tenant_id, einheit_kuerzel, bezeichnung, basis_einheit,
-             umrechnungsfaktor, dezimalstellen, aktiv)
-        VALUES (:id, :tid, :kz, :bez, :basis, :faktor, :dez, true)
+             umrechnungsfaktor, dezimalstellen, nummer, langtext, iso_name, datanorm_kurz,
+             statistikkennzeichen, preisbezug_einheit, preisbezug_menge, un_code, aktiv)
+        VALUES (:id, :tid, :kz, :bez, :basis, :faktor, :dez, :nummer, :langtext, :iso_name, :datanorm_kurz,
+                :statistikkennzeichen, :preisbezug_einheit, :preisbezug_menge, :un_code, true)
     """), {
         "id": new_id, "tid": tenant_id, "kz": payload.einheit_kuerzel,
         "bez": payload.bezeichnung, "basis": payload.basis_einheit,
         "faktor": payload.umrechnungsfaktor, "dez": payload.dezimalstellen,
+        **{feld: getattr(payload, feld) for feld in ZUSATZFELDER},
     })
     db.commit()
     row = db.execute(text(
@@ -127,21 +163,29 @@ def update_mengeneinheit(
     tenant_id: str = Depends(get_tenant_id),
 ):
     row = db.execute(text("""
-        SELECT id FROM domain_shared.artikel_mengeneinheiten
+        SELECT id, dezimalstellen, aktiv FROM domain_shared.artikel_mengeneinheiten
         WHERE tenant_id = :tid AND einheit_kuerzel = :kz
     """), {"tid": tenant_id, "kz": einheit_kuerzel}).fetchone()
     if not row:
         raise HTTPException(404, "Mengeneinheit nicht gefunden.")
+    if row.aktiv and payload.dezimalstellen < int(row.dezimalstellen or 0):
+        # a.eins: bei aktiven Einheiten nur nach oben, damit geschriebene Belege nicht nachtraeglich anders runden.
+        raise HTTPException(409, f"Rundung einer aktiven Mengeneinheit nur nach oben aenderbar "
+                                 f"(bisher {row.dezimalstellen}).")
 
     db.execute(text("""
         UPDATE domain_shared.artikel_mengeneinheiten
         SET bezeichnung = :bez, basis_einheit = :basis,
-            umrechnungsfaktor = :faktor, dezimalstellen = :dez
+            umrechnungsfaktor = :faktor, dezimalstellen = :dez,
+            nummer = :nummer, langtext = :langtext, iso_name = :iso_name, datanorm_kurz = :datanorm_kurz,
+            statistikkennzeichen = :statistikkennzeichen, preisbezug_einheit = :preisbezug_einheit,
+            preisbezug_menge = :preisbezug_menge, un_code = :un_code
         WHERE tenant_id = :tid AND einheit_kuerzel = :kz
     """), {
         "tid": tenant_id, "kz": einheit_kuerzel, "bez": payload.bezeichnung,
         "basis": payload.basis_einheit, "faktor": payload.umrechnungsfaktor,
         "dez": payload.dezimalstellen,
+        **{feld: getattr(payload, feld) for feld in ZUSATZFELDER},
     })
     db.commit()
     updated = db.execute(text("""
@@ -164,6 +208,20 @@ def delete_mengeneinheit(
     """), {"tid": tenant_id, "kz": einheit_kuerzel})
     db.commit()
     return Response(status_code=204)
+
+
+@router.post("/stamm/grundeinheiten", response_model=list[str], status_code=201,
+             summary="Mitgelieferte Grundeinheiten einrichten", dependencies=SCHREIBEN["STAMMDATEN"])
+def grundeinheiten_einrichten(
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Legt die gaengigen Grundmengeneinheiten (Stueck, kg, dt, t, l ... mit UN/ECE-Code) an, soweit sie fehlen."""
+    from app.services.mengeneinheiten_grund import richte_grundeinheiten_ein
+
+    angelegt = richte_grundeinheiten_ein(db, tenant_id)
+    db.commit()
+    return angelegt
 
 
 @router.get("/stamm/umrechnen", summary="Umrechnen",
@@ -325,3 +383,155 @@ def get_mengeneinheit(
     if row is None:
         raise HTTPException(404, "Mengeneinheit nicht gefunden.")
     return MengeneinheitOut(**dict(row._mapping))
+
+
+# ── Gebinde-Mengeneinheit nach a.eins (Schnitt 2b-1, 24.11.2026) ─────────────────────────────────────────────────
+# Rechnung nur ueber app/services/gebinde_aufloesung.py (eine Quelle fuer alle Fachmodule).
+
+class GebindeEinstellung(BaseModel):
+    gebindetyp: int = Field(0, ge=0, le=9, description="0 kein Gebinde, 1-5, 8, 9 (6/7 in a.eins deaktiv)")
+    ergebniseinheit: Optional[str] = Field(None, max_length=10)
+    faktorherkunft: Optional[int] = Field(None, ge=1, le=4,
+                                          description="Einstiegsstufe: 1 ME, 2 Artikelstamm, 3 Artikel, 4 Auspraegung")
+    faktor1: Optional[Decimal] = None
+    faktor2: Optional[Decimal] = None
+    faktor3: Optional[Decimal] = None
+    faktor4: Optional[Decimal] = None
+    lvs_relevanz: int = Field(0, ge=0, le=2, description="0 nicht relevant, 1 relevant, 2 buchend")
+    lvs_default_lokalitaet: Optional[str] = Field(None, max_length=40)
+
+
+class Stufenfaktoren(BaseModel):
+    faktor1: Optional[Decimal] = None
+    faktor2: Optional[Decimal] = None
+    faktor3: Optional[Decimal] = None
+    faktor4: Optional[Decimal] = None
+
+
+def _gebinde_fehler(fehler: Exception) -> HTTPException:
+    from app.core.gebinde_rechnung import FaktorpflegeNichtZulaessig
+    from app.services.gebinde_aufloesung import MengeneinheitUnbekannt
+
+    from app.services.gebinde_aufloesung import ArtikelUnbekannt
+
+    if isinstance(fehler, (MengeneinheitUnbekannt, ArtikelUnbekannt)):
+        return HTTPException(404, str(fehler))
+    if isinstance(fehler, FaktorpflegeNichtZulaessig):
+        return HTTPException(409, str(fehler))
+    return HTTPException(422, str(fehler))
+
+
+@router.put("/stamm/{einheit_kuerzel}/gebinde", response_model=None, summary="Gebinde der Mengeneinheit einstellen",
+            dependencies=SCHREIBEN["STAMMDATEN"])
+def setze_gebinde(
+    einheit_kuerzel: str,
+    payload: GebindeEinstellung,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    from app.core.gebinde_rechnung import GebindeNichtRechenbar
+    from app.services.gebinde_aufloesung import pruefe_einheit_vollstaendig, stufen_ausserhalb
+
+    faktoren = [payload.faktor1, payload.faktor2, payload.faktor3, payload.faktor4]
+    try:
+        pruefe_einheit_vollstaendig(payload.gebindetyp, payload.faktorherkunft, faktoren)
+    except GebindeNichtRechenbar as fehler:
+        raise _gebinde_fehler(fehler) from fehler
+    if not db.execute(text("SELECT 1 FROM domain_shared.artikel_mengeneinheiten WHERE tenant_id = :t "
+                           "AND einheit_kuerzel = :k"), {"t": tenant_id, "k": einheit_kuerzel}).first():
+        raise HTTPException(404, "Mengeneinheit nicht gefunden.")
+    ausserhalb = stufen_ausserhalb(db, tenant_id, einheit_kuerzel,
+                                   payload.faktorherkunft if payload.gebindetyp else None)
+    if ausserhalb:
+        raise HTTPException(409, f"Auf Stufe(n) {ausserhalb} sind Faktoren gepflegt, die diese Faktorherkunft nicht "
+                                 "zulaesst - erst dort entfernen.")
+    db.execute(text("""
+        UPDATE domain_shared.artikel_mengeneinheiten SET gebindetyp = :typ, ergebniseinheit = :erg,
+            faktorherkunft = :herkunft, faktor1 = :f1, faktor2 = :f2, faktor3 = :f3, faktor4 = :f4,
+            lvs_relevanz = :lvs, lvs_default_lokalitaet = :lok
+        WHERE tenant_id = :t AND einheit_kuerzel = :k
+    """), {"typ": payload.gebindetyp, "erg": payload.ergebniseinheit,
+           "herkunft": payload.faktorherkunft if payload.gebindetyp else None,
+           "f1": faktoren[0], "f2": faktoren[1], "f3": faktoren[2], "f4": faktoren[3],
+           "lvs": payload.lvs_relevanz, "lok": payload.lvs_default_lokalitaet, "t": tenant_id, "k": einheit_kuerzel})
+    db.commit()
+    return get_mengeneinheit(einheit_kuerzel, db=db, tenant_id=tenant_id)
+
+
+@router.get("/stamm/{einheit_kuerzel}/gebindefaktoren", response_model=None, summary="Stufenfaktoren lesen")
+def list_gebindefaktoren(
+    einheit_kuerzel: str,
+    limit: int = Query(200, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    zeilen = db.execute(text(
+        "SELECT stufe, artikel_id, faktor1, faktor2, faktor3, faktor4, geaendert_von, updated_at "
+        "FROM domain_shared.artikel_gebindefaktoren WHERE tenant_id = :t AND einheit_kuerzel = :k "
+        "ORDER BY stufe, artikel_id LIMIT :limit OFFSET :offset"),
+        {"t": tenant_id, "k": einheit_kuerzel, "limit": limit, "offset": offset}).mappings().fetchmany(limit)
+    return [dict(z) for z in zeilen]
+
+
+@router.put("/stamm/{einheit_kuerzel}/gebindefaktoren/{stufe}/{bezug_id}", response_model=None,
+            summary="Stufenfaktoren pflegen", dependencies=SCHREIBEN["STAMMDATEN"])
+def setze_gebindefaktoren(
+    einheit_kuerzel: str,
+    stufe: int,
+    bezug_id: str,
+    payload: Stufenfaktoren,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Stufe 3 Artikel: ``bezug_id`` ist die Artikel-ID dieses Mandanten. Stufen 2 Artikelstamm und 4 Auspraegung
+    haben in VALEO noch kein Gegenstueck und werden abgewiesen (422)."""
+    from app.core.gebinde_rechnung import GebindeNichtRechenbar
+    from app.services.gebinde_aufloesung import MengeneinheitUnbekannt, pruefe_stufe_zugeordnet, setze_artikelfaktoren
+
+    if stufe not in (2, 3, 4):
+        raise HTTPException(422, "Stufe 2 Artikelstamm, 3 Artikel oder 4 Artikel-Auspraegung.")
+    try:
+        pruefe_stufe_zugeordnet(stufe)
+        setze_artikelfaktoren(db, tenant_id, einheit_kuerzel, bezug_id,
+                              [payload.faktor1, payload.faktor2, payload.faktor3, payload.faktor4])
+    except (GebindeNichtRechenbar, MengeneinheitUnbekannt) as fehler:
+        db.rollback()
+        raise _gebinde_fehler(fehler) from fehler
+    db.commit()
+    return list_gebindefaktoren(einheit_kuerzel, limit=1000, offset=0, db=db, tenant_id=tenant_id)
+
+
+@router.delete("/stamm/{einheit_kuerzel}/gebindefaktoren/{stufe}/{bezug_id}", status_code=204,
+               response_model=None, summary="Stufenfaktoren entfernen", dependencies=SCHREIBEN["STAMMDATEN"])
+def entferne_gebindefaktoren(
+    einheit_kuerzel: str,
+    stufe: int,
+    bezug_id: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    from app.services.gebinde_aufloesung import entferne_artikelfaktoren
+
+    if stufe != 3 or not entferne_artikelfaktoren(db, tenant_id, einheit_kuerzel, bezug_id):
+        raise HTTPException(404, "Keine Faktoren fuer diese Stufe und diesen Bezug.")
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.get("/stamm/{einheit_kuerzel}/gebinde/berechnen", response_model=None, summary="Gebinderechnung pruefen")
+def berechne_gebinde_weg(
+    einheit_kuerzel: str,
+    anzahl: Decimal = Query(..., description="Anzahl in der Gebinde-Mengeneinheit"),
+    artikel_id: Optional[str] = Query(None),
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Rechnet ohne zu speichern - dasselbe Abbild, das ein Beleg festschreibt."""
+    from app.core.gebinde_rechnung import GebindeNichtRechenbar
+    from app.services.gebinde_aufloesung import MengeneinheitUnbekannt, berechne_position
+
+    try:
+        return berechne_position(db, tenant_id, einheit_kuerzel, anzahl, artikel_id=artikel_id).als_dict()
+    except (GebindeNichtRechenbar, MengeneinheitUnbekannt) as fehler:
+        raise _gebinde_fehler(fehler) from fehler

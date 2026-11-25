@@ -62,7 +62,7 @@ def build_pruefkorb_screen_definition() -> dict[str, Any]:
                 ],
                 row_actions=[
                     {"key": "pruefen", "label": "Bewerten", "visibleWhen": nur_offen},
-                    {"key": "open_source", "label": "Zum Beleg"},
+                    {"key": "open_source", "label": "Zum Beleg", "dangerLevel": "safe", "localEffect": "navigation"},
                 ],
             ),
         ],
@@ -464,22 +464,6 @@ def _batch8_builders() -> dict[str, Any]:
             "example_prompts": ["Wo staut sich die Freigabe?"],
         },
         {
-            "screen_id": "process/background-jobs",
-            "domain": "platform",
-            "title": "Hintergrund-Jobs",
-            "subtitle": "Asynchrone Job-Queue und Fehlversuche",
-            "queue_endpoint": "/api/v1/process/background-jobs/queue",
-            "queue_key": "queue",
-            "columns": _std_cols(
-                ("job_type", "Typ", 160),
-                ("status", "Status", 110),
-                ("created_at", "Eingestellt", 170),
-                ("attempts", "Versuche", 90),
-            ),
-            "business_purpose": "Hintergrundverarbeitung ueberwachen und nachsteuern.",
-            "example_prompts": ["Welche Jobs sind in der Queue fehlgeschlagen?"],
-        },
-        {
             "screen_id": "strecke/nawaro-vertraege-pruefen",
             "domain": "agrar",
             "title": "NaWaRo-Vertraege pruefen",
@@ -579,7 +563,41 @@ def _batch8_builders() -> dict[str, Any]:
     return builders
 
 
+def build_background_jobs_worklist() -> dict[str, Any]:
+    screen_id = "process/background-jobs"
+    title = "Hintergrundjobs"
+    return build_kontroll_worklist_screen(
+        screen_id=screen_id,
+        domain="platform",
+        title=title,
+        subtitle="Warteschlange und Verarbeitung im aktiven Mandanten",
+        data_sources=[{"key": "jobs", "endpoint": "/api/v1/process/background-jobs", "pageSize": 50}],
+        tables=[kontroll_queue_table(
+            table_key="jobs",
+            label=title,
+            columns=[
+                {"key": key, "label": label, "width": width}
+                for key, label, width in (
+                    ("job_id", "Job-ID", 220),
+                    ("typ", "Typ", 160),
+                    ("status", "Status", 110),
+                    ("erstellt_am", "Eingestellt", 170),
+                    ("retry_count", "Wiederholungen", 120),
+                )
+            ],
+            row_actions=[],
+            row_route_template=None,
+        )],
+        no_workflow_reason="Die Liste zeigt bereits eingereihte Hintergrundjobs und ihre Status.",
+        business_purpose="Hintergrundjobs im aktiven Mandanten überwachen.",
+        example_prompts=["Welche Hintergrundjobs sind fehlgeschlagen?"],
+        test_id="process-background-jobs",
+        table_profile="standard",
+    )
+
+
 BATCH8_KONTROLL_BUILDERS = _batch8_builders()
+BATCH8_KONTROLL_BUILDERS["process/background-jobs"] = build_background_jobs_worklist
 BATCH8_KONTROLL_SCREEN_IDS: tuple[str, ...] = tuple(sorted(BATCH8_KONTROLL_BUILDERS))
 
 
@@ -673,7 +691,7 @@ KONTROLLE_ROUTEN = {
     "sales/kreditlimit-pruefung": "/sales/kreditlimit-pruefung",
     "futtermittel/futtermittel-qualitaetskontrolle": "/futtermittel/futtermittel-qualitaetskontrolle",
     "process/approval-density": "/workflows/approval",
-    "process/background-jobs": "/admin/command-monitor",
+    "process/background-jobs": "/admin/background-jobs",
     "strecke/nawaro-vertraege-pruefen": "/strecke/nawaro-vertraege-pruefen",
     "compliance/export-pruefprotokoll": "/compliance/export-pruefprotokoll",
     "lager/foreign-goods-queue": "/lager/fremdware",

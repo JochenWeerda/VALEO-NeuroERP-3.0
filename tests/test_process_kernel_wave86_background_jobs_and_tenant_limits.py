@@ -1,16 +1,17 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
-from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import background_jobs, tenant_limits
 from app.core.background_jobs import get_background_job_registry
 
 
-def _client() -> TestClient:
+def _client(tenant_id: str = "tenant-a") -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_mandant(app, tenant_id)
     app.include_router(background_jobs.router)
     app.include_router(tenant_limits.router)
     return TestClient(app)
@@ -69,7 +70,7 @@ def test_background_job_listing_filters_by_tenant_and_status():
             "tenant_id": "tenant-a",
         },
     )
-    client.post(
+    foreign = _client("tenant-b").post(
         "/process/background-jobs/enqueue",
         json={
             "typ": "EDI_EXPORT",
@@ -82,6 +83,29 @@ def test_background_job_listing_filters_by_tenant_and_status():
     assert listing.status_code == 200
     assert listing.json()["job_count"] == 1
     assert listing.json()["jobs"][0]["tenant_id"] == "tenant-a"
+    assert listing.json()["items"] == listing.json()["jobs"]
+    next_page = client.get("/process/background-jobs", params={"limit": 1, "page": 2})
+    assert next_page.status_code == 200
+    assert next_page.json()["items"] == []
+    assert next_page.json()["total"] == 1
+    for field in ("status", "typ"):
+        response = client.get("/process/background-jobs", params={field: "unbekannt"})
+        assert response.status_code == 422
+    assert foreign.status_code == 201
+    assert client.get("/process/background-jobs", params={"tenant_id": "tenant-b"}).status_code == 403
+    rejected = client.post(
+        "/process/background-jobs/enqueue",
+        json={"typ": "REPORT_GENERATION", "angefordert_von": "user-1", "tenant_id": "tenant-b"},
+    )
+    assert rejected.status_code == 403
+    foreign_url = f'/process/background-jobs/{foreign.json()["job"]["job_id"]}'
+    assert client.get(foreign_url).status_code == 404
+    assert client.post(f"{foreign_url}/complete").status_code == 404
+    assert client.post(f"{foreign_url}/fail").status_code == 404
+    assert listing.json()["summary"]["queue"]["typen"] == ["REPORT_GENERATION"]
+    assert client.post("/process/background-jobs/dequeue").status_code == 200
+    assert client.post("/process/background-jobs/dequeue").status_code == 404
+    assert _client("tenant-b").get(foreign_url).json()["job"]["status"] == "PENDING"
 
 
 def test_tenant_limit_overview_surfaces_cache_namespace_and_policies():

@@ -35,7 +35,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { UniversalMaskRenderer, useHumanActionDispatch, useUniversalMaskRuntime } from '@/components/mask-builder'
+import { UniversalMaskRenderer } from './UniversalMaskRenderer'
+import { useHumanActionDispatch } from './runtime/useActionRuntime'
+import { useUniversalMaskRuntime } from './runtime/useUniversalMaskRuntime'
 import { UniversalNativeCreatePage } from './UniversalNativeCreatePage'
 import { useScreenPermissions } from './runtime/screen-permissions'
 import { actionIsEnabled } from './governance/screen-context'

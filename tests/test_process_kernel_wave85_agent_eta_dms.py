@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
-from testgrenze import ALLE_FACHROLLEN, ersetze_nutzer
+from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
 
 from app.api.v1.endpoints import process_kernel_api
@@ -12,6 +12,7 @@ from app.core.action_idempotency import get_action_idempotency_store
 def _client() -> TestClient:
     app = FastAPI()
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
+    ersetze_mandant(app, "tenant-1")
     app.include_router(process_kernel_api.router)
     return TestClient(app)
 
@@ -36,6 +37,13 @@ def test_idempotency_overview_surfaces_catalog_and_store_snapshot():
         ),
     )
 
+    first = store.get_by_key("tenant-1", "idem-1")
+    store.remember(
+        tenant_id="tenant-2", idempotency_key="idem-2", request_fingerprint="fp-2",
+        result=first.result.model_copy(update={"execution_id": "exec-2", "command_name": "OtherCommand"}),
+    )
+    assert store.summary()["total_records"] == 2
+
     response = client.get("/process/actions/idempotency/overview")
 
     assert response.status_code == 200
@@ -44,6 +52,7 @@ def test_idempotency_overview_surfaces_catalog_and_store_snapshot():
     assert body["catalog"]["total_commands"] >= 1
     assert body["catalog"]["idempotent_commands"] >= 1
     assert body["store"]["total_records"] == 1
+    assert body["store"]["execution_count"] == 1
     assert body["store"]["commands"] == ["FinalizeAgrarSettlement"]
     assert body["confidence_score"] >= 1
     store.clear()

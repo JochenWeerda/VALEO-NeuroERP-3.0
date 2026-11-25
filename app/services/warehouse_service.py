@@ -250,7 +250,8 @@ class WarehouseService:
     def book_stock_movement(self, bin_id: str, article_id: str, batch_number: str | None,
                              best_before_date: date | None, quantity_kg: Decimal,
                              unit_cost: Decimal | None, movement_type: str,
-                             reference: str | None = None, *, commit: bool = True) -> str:
+                             reference: str | None = None, *, commit: bool = True,
+                             buchungsschluessel: str | None = None) -> str:
         """Einlagerung (positiv) oder Auslagerung (negativ) auf Bin-Ebene buchen.
 
         Lagerplatz, Bestandsbuch und Artikelbestand laufen gemeinsam. Ins Bestandsbuch
@@ -264,6 +265,9 @@ class WarehouseService:
 
         ``commit=False`` laesst die Transaktion beim Aufrufer (mehrere Positionen in
         einem Commit).
+
+        ``buchungsschluessel`` (Schnitt 2b-2): ist er schon gebucht, kommt die vorhandene Bewegung zurueck und
+        weder Lagerplatz noch Artikelbestand aendern sich - Wiederholung und paralleler Zweitversuch buchen nichts.
         """
         from app.services.inventory_movement_direction import SIGNED_TYPES, direction_of
 
@@ -293,6 +297,15 @@ class WarehouseService:
             "SELECT 1 FROM domain_inventory.articles WHERE id = :aid AND tenant_id = :tid"
         ), {"aid": article_id, "tid": self.tenant_id}).scalar():
             raise ValueError(f"Artikel {article_id} nicht gefunden")
+
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import beanspruche
+
+            vorhanden = beanspruche(self.db, self.tenant_id, buchungsschluessel)
+            if vorhanden is not None:
+                if commit:
+                    self.db.commit()
+                return vorhanden
 
         # Upsert bin_stock
         existing = self.db.execute(text("""
@@ -364,6 +377,10 @@ class WarehouseService:
         """), {"id": mv_id, "aid": article_id, "bid": bin_id, "mtype": buchungsart,
                "buch_menge": buch_menge, "qty": quantity_kg, "cost": unit_cost, "ref": reference,
                "tid": self.tenant_id})
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import verknuepfe
+
+            verknuepfe(self.db, self.tenant_id, buchungsschluessel, mv_id)
         # Der Artikelbestand laeuft mit, wie im Buchungsdienst (InventoryService).
         self.db.execute(text("""
             UPDATE domain_inventory.articles
@@ -501,6 +518,7 @@ class WarehouseService:
                 movement_type="pick_out",
                 reference=pick_list_id,
                 commit=False,
+                buchungsschluessel=f"pick:{pl_line['line_id']}:{qty}",
             )
             new_status = "DONE" if qty >= Decimal(str(line.quantity_required)) else "PARTIAL"
             self.db.execute(text("""

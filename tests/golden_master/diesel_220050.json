@@ -1,0 +1,24 @@
+{
+  "quelle": "Anonymisierter realer Geschaeftsvorfall aus einem produktiven Warenwirtschaftssystem (Nutzer, 24.11.2026)",
+  "artikel": "220050",
+  "bezeichnung": "DIESELVERBRAUCH MMX-LOHN",
+  "quantity_unit": "LTR",
+  "price_unit_quantity": "100",
+  "price_unit": "LTR",
+  "currency": "EUR",
+  "positions": [
+    ["2026-01-06", "59.40", "140.00", "83.16"],
+    ["2026-01-30", "36.48", "140.00", "51.07"],
+    ["2026-02-18", "42.00", "140.00", "58.80"],
+    ["2026-03-16", "43.32", "170.00", "73.64"],
+    ["2026-04-07", "42.84", "180.00", "77.11"],
+    ["2026-05-04", "42.12", "195.00", "82.13"],
+    ["2026-05-18", "35.88", "195.00", "69.97"],
+    ["2026-06-11", "42.00", "195.00", "81.90"],
+    ["2026-07-09", "47.04", "175.00", "82.32"]
+  ],
+  "expected_total_quantity": "391.08",
+  "expected_total_net": "660.10",
+  "expected_unrounded_total_net": "660.108",
+  "expected_weighted_average_price": "168.79"
+}

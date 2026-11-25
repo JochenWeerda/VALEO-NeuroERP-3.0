@@ -23,11 +23,15 @@ vi.mock('@/lib/api/masks', () => ({ useScreenDefinition: () => ({ data: schema }
 vi.mock('@/components/mask-builder/runtime/screen-permissions', () => ({ useScreenPermissions: () => ['belege.bearbeiten', 'belege.preise'] }))
 vi.mock('@/lib/api-client', () => ({ apiClient: { get: mocks.get, post: vi.fn().mockResolvedValue({}) },
   getAxiosErrorMessage: (error: unknown) => error instanceof Error ? error.message : String(error) }))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime: () => ({ plan: {}, entityData: { belegart: 'sales_offer', version: 4, aktion_bearbeiten: true },
     tableRows: {}, tableQueryStates: {}, tableTotals: {}, messages: [], lookupBindings: {},
     setTableQuery: vi.fn(), updateUserOverlay: vi.fn(), resetUserOverlay: vi.fn(), refetch: mocks.refetch }),
+}))
+vi.mock('@/components/mask-builder/runtime/useActionRuntime', () => ({
   useHumanActionDispatch: () => ({ executeAction: mocks.execute }),
+}))
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({ onAction }: { onAction: (key: string, payload: object) => void }) =>
     <button onClick={() => onAction('bearbeiten', { items: [{ article_number: 'PAGED-INCOMPLETE' }] })}>Beleg bearbeiten</button>,
 }))

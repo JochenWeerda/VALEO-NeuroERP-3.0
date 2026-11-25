@@ -144,6 +144,30 @@ class TestFeedChain004:
         assert r2.status_code == 200
         assert r2.json().get("created") is False
 
+    def test_freigabe_mit_scheiternder_lagerbuchung_antwortet_409(self, feed004_seed, monkeypatch):
+        """Scheitert die Lagerbuchung (Buchungsdienst, 25.11.2026), weist die Freigabe mit 409 ab statt 500."""
+        from app.services.feed_inventory_link_service import FeedInventoryLinkError, FeedInventoryLinkService
+
+        def scheitert(self, **_):
+            raise FeedInventoryLinkError("Sojaschrot: Insufficient stock")
+
+        monkeypatch.setattr(FeedInventoryLinkService, "book_snapshot_movements", scheitert)
+        auftrag = self.client.post(
+            "/api/v1/produktion/mischfutter/auftrag",
+            json={"rezept_id": feed004_seed["rezept"], "menge_t": 10.0},
+            headers=HEADERS,
+        )
+        assert auftrag.status_code == 201, auftrag.text
+
+        freigegeben = self.client.patch(
+            f"/api/v1/produktion/mischfutter/auftrag/{auftrag.json()['id']}/status",
+            json={"status": "freigegeben", "freigegeben_von": "it-feed004"},
+            headers=HEADERS,
+        )
+
+        assert freigegeben.status_code == 409, freigegeben.text
+        assert "Lagerbestand reicht nicht" in freigegeben.text
+
     def test_freigabe_schreibt_inventory_stock_movements(self, feed004_seed):
         auftrag = self.client.post(
             "/api/v1/produktion/mischfutter/auftrag",

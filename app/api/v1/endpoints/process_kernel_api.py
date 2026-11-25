@@ -19,13 +19,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+from app.core.tenant import get_tenant_id
+
 from ....core.action_execution import (
     ActionExecutionRequest,
     ActionExecutionService,
     build_action_conflict_error,
 )
-from ....core.action_idempotency import get_action_idempotency_store
-from ....core.business_commands import build_core_command_catalog
+from ....core.action_idempotency import build_idempotency_overview, get_action_idempotency_store
 from ....core.process_commands import get_process_command_catalog
 from ....core.process_references import build_process_reference_context
 from ....core.policy_decisions import PolicyOverrideLayer, resolve_policy_override_layers
@@ -505,8 +506,14 @@ def build_explainability(body: dict) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 @router.post("/actions/execute", response_model=ProcessKernelOut, summary="Action ausfÃ¼hren", dependencies=SCHREIBEN["FACHLICH"])
-def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) -> dict[str, Any]:
+def execute_action(
+    body: ActionExecutionRequest,
+    db: Session = Depends(get_db),
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Fuehrt einen Process-Kernel-Command ueber den zentralen Action-Layer aus."""
+    if body.tenant_id != active_tenant_id:
+        raise HTTPException(status_code=403, detail="Mandant stimmt nicht mit der Anmeldung ueberein")
     body.normalized_reference_context()
     try:
         get_aggregate_definition(body.aggregate_type)
@@ -530,32 +537,10 @@ def execute_action(body: ActionExecutionRequest, db: Session = Depends(get_db)) 
 
 
 @router.get("/actions/idempotency/overview", response_model=ProcessKernelOut, summary="Idempotency overview abrufen")
-def get_idempotency_overview() -> dict[str, Any]:
+def get_idempotency_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     """Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer."""
-    store = get_action_idempotency_store()
-    store_summary = store.summary()
-    catalog = build_core_command_catalog()
-    idempotent_commands = [cmd.command_name for cmd in catalog if cmd.idempotent]
-    human_confirmation_commands = [cmd.command_name for cmd in catalog if cmd.requires_human_confirmation]
-    agent_ready_commands = [cmd.command_name for cmd in catalog if cmd.allowed_agent_types]
-    total_commands = len(catalog)
-    idempotent_coverage_pct = round((len(idempotent_commands) / total_commands) * 100) if total_commands else 0
-    confidence_score = min(100, max(0, round((idempotent_coverage_pct * 0.7) + (min(store_summary["total_records"], total_commands) * 3))))
     return {
-        "schema_version": 1,
-        "catalog": {
-            "total_commands": total_commands,
-            "idempotent_commands": len(idempotent_commands),
-            "human_confirmation_commands": len(human_confirmation_commands),
-            "agent_ready_commands": len(agent_ready_commands),
-            "idempotent_coverage_pct": idempotent_coverage_pct,
-        },
-        "store": store_summary,
-        "confidence_score": confidence_score,
-        "recommended_action": (
-            "Idempotente Commands sind live und replay-sicher. "
-            "Nutze die Monitoring-Sicht, um Retries, Replays und Command-Abdeckung zu beobachten."
-        ),
+        **build_idempotency_overview(tenant_id),
         "lookup_paths": [
             "/api/v1/process/actions/execute",
             "/api/v1/process/actions/idempotency/{tenant_id}/{idempotency_key}",
@@ -565,21 +550,28 @@ def get_idempotency_overview() -> dict[str, Any]:
 
 
 @router.get("/actions/idempotency/{tenant_id}/{idempotency_key}", response_model=ProcessKernelOut, summary="Action by idempotency abrufen")
-def get_action_by_idempotency(tenant_id: str, idempotency_key: str) -> dict[str, Any]:
+def get_action_by_idempotency(
+    tenant_id: str,
+    idempotency_key: str,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Liefert den kanonischen Action-Snapshot zu einem Idempotency-Key."""
     store = get_action_idempotency_store()
-    record = store.get_by_key(tenant_id, idempotency_key)
+    record = store.get_by_key(active_tenant_id, idempotency_key) if tenant_id == active_tenant_id else None
     if record is None:
         raise HTTPException(status_code=404, detail="Keine Action zu diesem Idempotency-Key gefunden")
     return record.result.model_dump(mode="json")
 
 
 @router.get("/actions/{execution_id}", response_model=ProcessKernelOut, summary="Action by execution id abrufen")
-def get_action_by_execution_id(execution_id: str) -> dict[str, Any]:
+def get_action_by_execution_id(
+    execution_id: str,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     """Liefert den kanonischen Action-Snapshot zu einer execution_id."""
     store = get_action_idempotency_store()
     record = store.get_by_execution_id(execution_id)
-    if record is None:
+    if record is None or record.tenant_id != active_tenant_id:
         raise HTTPException(status_code=404, detail="Keine Action zu dieser execution_id gefunden")
     return record.result.model_dump(mode="json")
 

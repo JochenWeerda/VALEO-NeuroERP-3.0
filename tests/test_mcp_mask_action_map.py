@@ -109,9 +109,14 @@ def test_row_commands_reflect_explicit_capability_release():
         assert action["command"] == command and action["commandEndpoint"] == endpoint
         assert action["domainCommand"].endswith(".v1")
         coverage = _generic_coverage({"mask": screen, "source": {"actionKey": "loeschen"}})
-        # Entwicklungsphase (agent_write_phase: entwicklung): jeder deklarierte Kommandoweg ist freigegeben.
-        assert agent_block(action, screen) is None
-        assert coverage["coverage"] == "mapped_generic" and coverage["mcp_tool_id"] == "mask.action.execute"
+        # Seit 24.11.2026 (M5) Default Deny: frei ist nur, was write_capabilities ausdruecklich freigibt
+        # (Versandprofil); die Personal-Aktionen stehen dort mit agent_write_enabled: false.
+        if screen == "logistik/versandprofile":
+            assert agent_block(action, screen) is None
+            assert coverage["coverage"] == "mapped_generic" and coverage["mcp_tool_id"] == "mask.action.execute"
+        else:
+            assert agent_block(action, screen) == "capability_nicht_freigegeben"
+            assert coverage["coverage"] == "blocked_unreleased" and coverage["mcp_tool_id"] is None
 
 
 def test_invalid_read_view_is_not_misclassified_as_human_policy(monkeypatch):

@@ -370,10 +370,8 @@ export default function TourenplanungPage(): JSX.Element {
       },
     },
     actions: {
-      'tour.openWorkspace': (payload) => handleAction('dispo', payload),
       'tour.resolveDeliveryNote': (payload) => handleAction('aufloesen', payload),
       'tour.create': (payload) => handleAction('anlegen', payload),
-      'tour.openLoading': (payload) => handleAction('beladung', payload),
       'tour.showHints': (payload) => handleAction('hinweise', payload),
       'tour.cancel': (payload) => handleAction('storno', payload),
     },

@@ -86,7 +86,12 @@ class InventoryService:
         storage_fee_start_date: Optional[date] = None,
         storage_fee_monthly_rate: Optional[Decimal] = None,
         storage_fee_last_charged_until: Optional[date] = None,
-        tenant_id: str = None
+        tenant_id: str = None,
+        buchungsschluessel: Optional[str] = None,
+        commit: bool = True,
+        source_document_type: Optional[str] = None,
+        source_document_id: Optional[str] = None,
+        unterdeckung_pruefen: bool = True,
     ):
         """Eine Lagerbewegung buchen: Bestandsbuch und Artikelbestand in einem Commit.
 
@@ -108,6 +113,10 @@ class InventoryService:
         Artikel und Lager muessen dem Mandanten gehoeren. Vorher-/Nachher-Bestand
         stammen aus dem Bestandsbuch je Lager; der Artikelbestand laeuft um dieselbe
         Menge mit. Kein Abgang macht den Lagerbestand negativ.
+
+        ``buchungsschluessel`` (24.11.2026, docs/design/bestandsbuchung-wege-konsolidierung.md): ist der fachliche
+        Vorgang schon gebucht, kommt die vorhandene Bewegung zurueck - kein zweiter Journaleintrag, kein zweiter
+        Bestandszugang (Wiederholung, paralleler Zweitversuch). ``commit=False`` laesst die Transaktion beim Aufrufer.
         """
         from app.services.inventory_movement_direction import signed_quantity
         from app.services.inventory_stock_balance import current_stock
@@ -122,7 +131,7 @@ class InventoryService:
             menge = abs(menge)
         elif typ == "transfer":
             typ = "umbuchung"
-        elif typ != "adjustment":
+        elif typ not in ("adjustment", "opening_balance"):  # beide vorzeichenbehaftet (Richtungstabelle)
             raise ValueError(f"Invalid movement type: {movement_type}")
         movement_type = typ
         quantity = menge
@@ -143,12 +152,21 @@ class InventoryService:
         if not warehouse:
             raise ValueError(f"Warehouse {warehouse_id} not found")
 
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import beanspruche
+
+            vorhanden = beanspruche(self.db, tenant_id, buchungsschluessel)
+            if vorhanden is not None:
+                return self.db.get(StockMovementModel, vorhanden)
+
         delta = Decimal(str(signed_quantity(movement_type, float(quantity))))
         previous_stock = Decimal(str(current_stock(
             self.db, tenant_id=tenant_id, article_id=str(article_id), warehouse_id=str(warehouse_id),
         )))
         new_stock = previous_stock + delta
-        if delta < 0 and new_stock < 0:
+        # unterdeckung_pruefen=False nur, wo ein anderer Bestand fuehrt und schon geprueft hat (Futterkette,
+        # verfuegbar_t) - doppelte Bestandsfuehrung, offen in docs/design/bestandsbuchung-wege-konsolidierung.md.
+        if unterdeckung_pruefen and delta < 0 and new_stock < 0:
             raise ValueError(f"Insufficient stock. Current: {previous_stock}, Requested: {abs(delta)}")
         if ownership_type == "consigned" and not owner_partner_id:
             raise ValueError("owner_partner_id is required for consigned stock movements")
@@ -185,6 +203,8 @@ class InventoryService:
             storage_fee_start_date=storage_fee_start_date,
             storage_fee_monthly_rate=storage_fee_monthly_rate,
             storage_fee_last_charged_until=storage_fee_last_charged_until,
+            source_document_type=source_document_type,
+            source_document_id=source_document_id,
             previous_stock=previous_stock,
             new_stock=new_stock,
             total_cost=total_cost,
@@ -198,6 +218,13 @@ class InventoryService:
 
         # Save changes
         self.db.add(movement)
+        self.db.flush()
+        if buchungsschluessel:
+            from app.services.bestandsbuchung_schluessel import verknuepfe
+
+            verknuepfe(self.db, tenant_id, buchungsschluessel, str(movement.id))
+        if not commit:
+            return movement
         self.db.commit()
         self.db.refresh(movement)
 
