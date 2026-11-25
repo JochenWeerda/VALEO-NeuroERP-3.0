@@ -96,7 +96,7 @@ export default function LaborDetailPage(): JSX.Element {
   if (isError || !auftrag) {
     return (
       <div className="p-6">
-        <Card className="border-red-500">
+        <Card className="border-status-error">
           <CardContent className="pt-6">
             <p className="text-status-error">Labor-Auftrag konnte nicht geladen werden.</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/qualitaet/labor')}>

@@ -1445,7 +1445,7 @@ export default function MaterialflussPage(): JSX.Element {
         , sonst Raster). Bird-View: WM-AGRI-MAP-001. Layout-Werkstatt für Referenz-Hofplan.
       </p>
 
-      <Card className="border-amber-200/80 bg-amber-50/50 dark:bg-amber-950/20">
+      <Card className="border-status-warning/40 bg-status-warning/10">
         <CardHeader className="flex flex-row items-start gap-2 py-3">
           <AlertTriangle className="h-5 w-5 text-status-warning shrink-0 mt-0.5" />
           <div>

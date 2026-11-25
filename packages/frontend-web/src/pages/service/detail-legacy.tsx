@@ -110,7 +110,7 @@ export default function AnfrageDetailPage(): JSX.Element {
   if (isError || !merged) {
     return (
       <div className="p-6">
-        <Card className="border-red-500">
+        <Card className="border-status-error">
           <CardContent className="pt-6">
             <p className="text-status-error">Anfrage konnte nicht geladen werden.</p>
             <Button variant="outline" className="mt-4" onClick={() => navigate('/service/anfragen')}>

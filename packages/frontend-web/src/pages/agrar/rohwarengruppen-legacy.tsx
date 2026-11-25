@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { PlusCircle, Wheat } from 'lucide-react'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
   useRohwarengruppen,
   useCreateRohwarengruppe,
@@ -222,11 +223,7 @@ function AbrechnungsschemataTab() {
   )
 }
 
-type TabId = 'gruppen' | 'schemata'
-
 export default function RohwarengruppenPage(): JSX.Element {
-  const [activeTab, setActiveTab] = useState<TabId>('gruppen')
-
   return (
     <div className="space-y-6 p-3 md:p-6">
       <div>
@@ -234,23 +231,22 @@ export default function RohwarengruppenPage(): JSX.Element {
         <p className="text-muted-foreground">Rohware-Stammdaten und Abrechnungsschemata</p>
       </div>
 
-      <div className="flex gap-1 rounded-lg border p-1 w-fit bg-muted">
-        {(['gruppen', 'schemata'] as TabId[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-              activeTab === tab
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tab === 'gruppen' ? 'Rohwarengruppen [RWG]' : 'Abrechnungsschemata'}
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'gruppen' ? <RohwarengruppenTab /> : <AbrechnungsschemataTab />}
+      <Tabs defaultValue="gruppen">
+        <TabsList className="flex h-auto min-h-touch w-fit flex-wrap justify-start" aria-label="Rohwarengruppen">
+          <TabsTrigger value="gruppen" className="min-h-touch whitespace-nowrap">
+            Rohwarengruppen [RWG]
+          </TabsTrigger>
+          <TabsTrigger value="schemata" className="min-h-touch whitespace-nowrap">
+            Abrechnungsschemata
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="gruppen">
+          <RohwarengruppenTab />
+        </TabsContent>
+        <TabsContent value="schemata">
+          <AbrechnungsschemataTab />
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }

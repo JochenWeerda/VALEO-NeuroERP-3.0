@@ -960,7 +960,7 @@ export default function ArtikelStammPage(): JSX.Element {
               </div>
               {artikel.gefahrgutklasse && (
                 <Callout variant="warning" className="rounded-lg border p-4">
-                  <div className="flex items-center gap-2 text-orange-700">
+                  <div className="flex items-center gap-2 text-status-warning">
                     <AlertTriangle className="h-5 w-5" />
                     <span className="font-medium">
                       Achtung: Dieser Artikel ist als Gefahrgut klassifiziert
@@ -1718,7 +1718,7 @@ export default function ArtikelStammPage(): JSX.Element {
                   </label>
                 </div>
               </div>
-              <div className="rounded-lg border border-red-200 p-4">
+              <div className="rounded-lg border border-status-error/40 p-4">
                 <h4 className="font-medium text-status-error mb-4">Gefahr</h4>
                 <div className="space-y-2">
                   <Button variant="destructive">Artikel loeschen</Button>
