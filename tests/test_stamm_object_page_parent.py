@@ -236,6 +236,17 @@ def test_qualitaet_reklamation_has_native_creation() -> None:
     assert {"lieferant_id", "typ", "zustaendiger", "frist_datum", "positionen"} <= keys
 
 
+def test_crm_kontakt_has_native_creation() -> None:
+    """Batch 3: Kontakt Create (nested data.id in der API-Antwort)."""
+    screen = get_screen_definition("crm/kontakt")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/crm/contacts/"
+    assert creation["detailRoute"] == "/crm/kontakt/{entity_id}"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"customer_id", "first_name", "last_name", "email"} <= keys
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

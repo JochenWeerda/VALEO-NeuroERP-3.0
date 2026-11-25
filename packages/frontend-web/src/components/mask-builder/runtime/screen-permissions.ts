@@ -31,7 +31,7 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (scopes.has(permission)) return true
     if (permission === 'logistics:read' && scopes.has('logistics:write')) return true
     // Match the canonical lead API's existing role contract, not schema-granted rights.
-    if (permission.startsWith('crm.lead.')) {
+    if (permission.startsWith('crm.lead.') || permission.startsWith('crm.contact.')) {
       return roles.has('CRM_BEARBEITEN') || roles.has('CRM_ADMIN') || roles.has('manager')
     }
     // Agrar Saatgut/Duenger Create mirrors SCHREIBEN["AGRAR"] until action-permission projection covers POST /.

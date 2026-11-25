@@ -359,6 +359,21 @@ def build_crm_kontakt_stamm() -> dict[str, Any]:
         ],
         entity_projection={key: f"data.{key}" for key in ("id", "name", "email", "phone", "position")},
         edit_permission="crm.contact.update",
+        creation={
+            # ContactCreate — Antwort ist {data:{id,…}}; NativeCreate liest nested data.id.
+            "endpoint": "/api/v1/crm/contacts/",
+            "permission": "crm.contact.create",
+            "detailRoute": "/crm/kontakt/{entity_id}",
+            "fields": [
+                {"key": "customer_id", "label": "Kunden-ID", "type": "text", "required": True},
+                {"key": "first_name", "label": "Vorname", "type": "text", "required": True},
+                {"key": "last_name", "label": "Nachname", "type": "text", "required": True},
+                {"key": "email", "label": "E-Mail", "type": "email", "required": True},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "position", "label": "Funktion", "type": "text"},
+                {"key": "department", "label": "Abteilung", "type": "text"},
+            ],
+        },
         test_id="crm-kontakt-stamm",
         purpose="Kontaktstammdaten.",
         prompts=['Welche E-Mail hat Kontakt {entity_id}?'],

@@ -33,6 +33,12 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(lead, user([], ['CRM_LESEN']))).toEqual([])
     expect(getScreenPermissions(lead, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.lead.create'])
   })
+  it('matches CRM write roles for Kontakt creation', () => {
+    const kontakt: ScreenDefinition = { ...screen, id: 'crm/kontakt', domain: 'crm', actions: [],
+      creation: { endpoint: '/api/v1/crm/contacts/', permission: 'crm.contact.create', detailRoute: '/crm/kontakt/{entity_id}' } }
+    expect(getScreenPermissions(kontakt, user([], ['FINANCE_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(kontakt, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.contact.create'])
+  })
   it('matches SCHREIBEN AGRAR roles for Saatgut/Duenger creation', () => {
     const saatgut: ScreenDefinition = { ...screen, id: 'agrar/saatgut', domain: 'agrar', actions: [],
       creation: { endpoint: '/api/v1/agrar/saatgut/', permission: 'agrar.saatgut.create', detailRoute: '/agrar/saatgut/{entity_id}' } }
