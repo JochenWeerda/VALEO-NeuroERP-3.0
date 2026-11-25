@@ -866,7 +866,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
       errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
     }
     const nativeBindings: Record<string, string[]> = {
-      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange'],
+      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange', 'annahme/rohware'],
       finance_workbench: ['finance/bank-abgleich', 'mahnwesen/mahnlauf'],
       admin_workbench: ['admin/webhooks-liste', 'admin/control-center'],
       feed_workbench: ['futtermittel/rationseditor', 'futtermittel/rationsoptimierung', 'portal/rationsoptimierung', 'futtermittel/fuetterungsdokumentation-mobil'],

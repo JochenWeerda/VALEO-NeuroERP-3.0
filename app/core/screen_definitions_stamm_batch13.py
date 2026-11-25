@@ -3,7 +3,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
+from app.core.screen_definitions_intake_weighing import (
+    build_intake_quality,
+    build_intake_registration,
+    build_intake_rohware,
+)
 
 from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 from app.core.stamm_object_page_parent import (
@@ -503,6 +507,10 @@ def build_annahme_qualitaets_check() -> dict[str, Any]:
     return build_intake_quality()
 
 
+def build_annahme_rohware() -> dict[str, Any]:
+    return build_intake_rohware()
+
+
 def build_annahme_rohwaren_annahme() -> dict[str, Any]:
     return _batch13_stamm("annahme/rohwaren-annahme", domain="agrar", title="Rohwaren annahme",
         entity_endpoint="/api/v1/annahme/warteschlange/{entity_id}", identity_field="bezeichnung",
@@ -743,6 +751,7 @@ BATCH13_SCREEN_BUILDERS: dict[str, Any] = {
     "annahme/lkw-registrierung": build_annahme_lkw_registrierung,
     "annahme/muster": build_annahme_muster,
     "annahme/qualitaets-check": build_annahme_qualitaets_check,
+    "annahme/rohware": build_annahme_rohware,
     "annahme/rohwaren-annahme": build_annahme_rohwaren_annahme,
     "annahme/silo-zuweisung": build_annahme_silo_zuweisung,
     "annahme/trocknung": build_annahme_trocknung,
@@ -826,6 +835,7 @@ BATCH13_ROUTEN: dict[str, str] = {
     "annahme/lkw-registrierung": "/annahme/lkw-registrierung",
     "annahme/muster": "/annahme/muster",
     "annahme/qualitaets-check": "/annahme/qualitaets-check",
+    "annahme/rohware": "/annahme/rohware",
     "annahme/rohwaren-annahme": "/annahme/rohwaren-annahme",
     "annahme/silo-zuweisung": "/annahme/silo-zuweisung",
     "annahme/trocknung": "/annahme/trocknung",

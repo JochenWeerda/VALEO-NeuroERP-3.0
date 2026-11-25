@@ -213,12 +213,13 @@ Inventar: `hand_built` ~36.
 | Maske | Nachher |
 |-------|---------|
 | `admin/command-monitor` | `UniversalNativeCockpitPage`: Idempotenz-KPIs (flach aus Overview), Tabellen Commands/Aggregate/Lookup-Pfade; GET `/idempotency/commands|aggregates|lookup-paths`; gefährlicher Batch13-Stamm-Stub entfernt |
+| `annahme/rohware` | `IntakeWeighingPage` + spezialisierter Wizard (alle Legacy-Felder) + POST `/api/v1/agrar/harvest-acceptance/rohware` (Compat→HarvestAcceptanceCreate); Human/CI/MCP gleicher Submit-Kanal |
 
-Inventar: Command-Monitor nicht mehr handgebaut/Altmuster.
+Inventar: Command-Monitor und Rohware runtime_wired über Studio-Hosts.
 
 ## Noch offen (Folge)
 
-- `hand_built` Prozessmasken (u. a. `annahme/rohware`, `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte, Admin-Suite) — **nur mit Feld-/Aktionsparitaet**
+- `hand_built` Prozessmasken (u. a. `lager/materialfluss`, `annahme/abrechnung`, Ernte-Erfassung, Schlagkartei, Milchvieh-Karte, Admin-Suite) — **nur mit Feld-/Aktionsparitaet**
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
 ## Tests

@@ -18,8 +18,7 @@
   "agrar/ernte-annahme-erfassung/:id",
   "agrar/ernte/:id",
   "agrar/erntefenster-konfig",
-  "agrar/sammelabrechnung",
-  "annahme/rohware"
+  "agrar/sammelabrechnung"
  ],
  "aktionen_nicht_deklariert": [
   "mask:admin/agenten-integration:bearbeiten",

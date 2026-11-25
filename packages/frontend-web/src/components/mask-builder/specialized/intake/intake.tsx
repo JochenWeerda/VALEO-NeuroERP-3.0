@@ -3,6 +3,12 @@ import { DomainContractBoundary } from './domain-runtime'
 import RegistrationSurface from './registration-surface'
 import QualitySurface from './quality-surface'
 import QueueSurface from './queue-surface'
+import RohwareSurface from './rohware-surface'
+
+const ROHWARE_FIELDS = [
+  'lieferant', 'kennzeichen', 'lieferscheinNr', 'datum', 'artikel',
+  'bruttoKg', 'taraKg', 'lagerZiel', 'feuchtePct', 'besatzPct', 'fallzahl', 'customer_id',
+]
 
 export function Intake({ contract, plan }: SpecializedComponentProps): JSX.Element {
   if (!plan || plan.specialized?.id !== contract.id || plan.specialized.type !== contract.type
@@ -14,6 +20,8 @@ export function Intake({ contract, plan }: SpecializedComponentProps): JSX.Eleme
       return <DomainContractBoundary plan={plan} fields={['lieferscheinNr', 'artikel', 'feuchtigkeit', 'protein', 'verunreinigung', 'fremdgeruch', 'schaedlinge', 'farbe', 'bemerkungen', 'ergebnis']}><QualitySurface plan={plan} /></DomainContractBoundary>
     case 'annahme/warteschlange':
       return <DomainContractBoundary plan={plan} fields={['kennzeichen', 'lieferant', 'artikel', 'status', 'ankunft', 'wartezeit', 'lieferschein_nr']}><QueueSurface plan={plan} /></DomainContractBoundary>
+    case 'annahme/rohware':
+      return <DomainContractBoundary plan={plan} fields={ROHWARE_FIELDS}><RohwareSurface plan={plan} /></DomainContractBoundary>
     default: return <p role="alert">Unbekannter Annahmevertrag.</p>
   }
 }

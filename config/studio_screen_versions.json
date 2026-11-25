@@ -1718,6 +1718,17 @@
       "studio_draft_clean": true,
       "version": "1.0.0"
     },
+    "annahme/rohware": {
+      "definition_hash": "107769fdc7bb3101e03544d76e7f8b83cce3eb2b1dc12a878e35758c8b63859a",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
     "annahme/muster": {
       "definition_hash": "a7e6b0517f5648838d0215944556de403d8b9ab48621eb9350ae7a0f35064cea",
       "gates_passed": [
