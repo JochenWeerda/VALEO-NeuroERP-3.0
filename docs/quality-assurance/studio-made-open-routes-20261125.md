@@ -135,10 +135,15 @@ Alle verbleibenden `createLegacyMaskPage`-Wrapper (Admin-Suite, Admin-Ops, Agrar
 Home, Konditionen, KIM-Panels) auf direkte Re-Exports umgestellt.
 Inventar: `legacy_wrapper` **0** (vorher 35).
 
+## Sechzehnte Hebung (Batch 16)
+
+| Maske | Vorher | Nachher |
+|-------|--------|---------|
+| `fibu/abschluss-checklist-detail` | Factory+Legacy | POST `/api/v1/finance/closing-checklists` |
+
 ## Noch offen (Folge)
 
 - `einkauf/angebot`, `einkauf/anlieferavis`: kein flaches POST — Factory+Legacy bis API
-- `fibu/abschluss-checklist-detail`: Prozessmaske, Create weiter Legacy
 - `hand_built` Prozessmasken weiter auf Studio-Patterns (Gate A–E) heben
 - Gate D Browser/Image pro Maske; Permission-Projektion nach Generatorlauf nachziehen
 
