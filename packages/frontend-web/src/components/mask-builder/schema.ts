@@ -602,6 +602,8 @@ export interface ScreenDefinition {
     detailRoute: string
     cancelRoute?: string
     defaults?: Record<string, unknown>
+    /** Key of the created entity id in the POST response (default `id`). */
+    responseIdKey?: string
   }
   creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1

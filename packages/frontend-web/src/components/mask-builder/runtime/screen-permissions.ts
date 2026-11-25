@@ -60,6 +60,17 @@ export function getScreenPermissions(screen: ScreenDefinition | undefined, user:
     if (permission.startsWith('einkauf.anfrage.')) {
       return roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN') || roles.has('manager')
     }
+    // Reklamation Create mirrors SCHREIBEN["QUALITAET"] (Lager/Einkauf/Sales/Agrar/Futtermittel).
+    if (permission.startsWith('qualitaet.reklamation.')) {
+      return (
+        roles.has('LAGER_BEARBEITEN') || roles.has('LAGER_ADMIN')
+        || roles.has('EINKAUF_BEARBEITEN') || roles.has('EINKAUF_ADMIN')
+        || roles.has('SALES_BEARBEITEN') || roles.has('SALES_ADMIN')
+        || roles.has('AGRAR_BEARBEITEN') || roles.has('AGRAR_ADMIN')
+        || roles.has('FUTTERMITTEL_BEARBEITEN') || roles.has('FUTTERMITTEL_ADMIN')
+        || roles.has('manager')
+      )
+    }
     return false
   })
 }

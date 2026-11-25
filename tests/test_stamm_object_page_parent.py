@@ -224,6 +224,18 @@ def test_einkauf_anfrage_has_native_creation() -> None:
     assert any(field.get("required") and field["key"] == "anforderer" for field in creation["fields"])
 
 
+def test_qualitaet_reklamation_has_native_creation() -> None:
+    """Batch 3: Reklamation Create mit responseIdKey reklamation_id."""
+    screen = get_screen_definition("qualitaet/reklamation")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/reklamationen"
+    assert creation["detailRoute"] == "/qualitaet/reklamation/{entity_id}"
+    assert creation["responseIdKey"] == "reklamation_id"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"lieferant_id", "typ", "zustaendiger", "frist_datum", "positionen"} <= keys
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")

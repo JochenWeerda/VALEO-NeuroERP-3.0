@@ -59,6 +59,13 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(anfrage, user([], ['CRM_BEARBEITEN']))).toEqual([])
     expect(getScreenPermissions(anfrage, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.anfrage.create'])
   })
+  it('matches QUALITAET write roles for Reklamation creation', () => {
+    const rek: ScreenDefinition = { ...screen, id: 'qualitaet/reklamation', domain: 'qualitaet', actions: [],
+      creation: { endpoint: '/api/v1/reklamationen', permission: 'qualitaet.reklamation.create', detailRoute: '/qualitaet/reklamation/{entity_id}', responseIdKey: 'reklamation_id' } }
+    expect(getScreenPermissions(rek, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(rek, user([], ['LAGER_BEARBEITEN']))).toEqual(['qualitaet.reklamation.create'])
+    expect(getScreenPermissions(rek, user([], ['AGRAR_ADMIN']))).toEqual(['qualitaet.reklamation.create'])
+  })
 })
 
 
