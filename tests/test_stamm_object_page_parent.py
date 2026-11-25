@@ -247,6 +247,13 @@ def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
         # Annahme-Wizards (LKW-Registrierung, Qualitaetspruefung) stehen in der Registry, sind aber
         # gefuehrte Formulare ohne Objektquelle; fuer sie gelten nur Bereitschaft und Aktionsrechte.
         assert screen.get("mode") == "wizard", screen_id
+    elif screen["layout"].get("floorplan") == "worklist":
+        assert screen["mode"] == "list", screen_id
+        sources = {source["key"]: source["endpoint"] for source in screen["dataSources"]}
+        assert screen["tables"], screen_id
+        for table in screen["tables"]:
+            endpoint = sources[table["dataSourceKey"]]
+            assert endpoint.startswith("/api/") and "{" not in endpoint, screen_id
     else:
         entity = next(ds for ds in screen["dataSources"] if ds["key"] == "entity")
         assert "{entity_id}" in entity["endpoint"] or "{id}" in entity["endpoint"]
@@ -255,10 +262,11 @@ def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
             kopf = next(tab for tab in screen["tabs"] if tab["key"] == "kopf")
             keys = {f["key"] for f in kopf.get("fields") or []}
             assert identity in keys, f"{screen_id}: identityField {identity} fehlt im Kopf-Tab"
-    for action in screen["actions"]:
-        # Reine Ortswechsel (localEffect navigation/view ohne Endpunkt) brauchen kein Recht. Das
-        # Studio-Schema kennt kein kind "navigation"; die alte Ausnahme traf deshalb nie.
-        rein_lokal = (action.get("localEffect") in {"navigation", "view"}
+    for action in screen.get("actions", []):
+        # Lokale Navigation und CSV aus der bereits autorisierten Liste haben keinen Schreibendpunkt.
+        local_effect = action.get("localEffect")
+        local_csv = local_effect == "download" and action.get("command") == "list.exportCsv"
+        rein_lokal = ((local_effect in {"navigation", "view"} or local_csv)
                       and not action.get("commandEndpoint") and not action.get("inputFlow"))
         if not rein_lokal:
             assert action.get("permission"), f"{screen_id}: action {action['key']} ohne permission"

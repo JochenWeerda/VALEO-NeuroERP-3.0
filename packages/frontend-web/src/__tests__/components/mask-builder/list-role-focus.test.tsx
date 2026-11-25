@@ -5,8 +5,10 @@ import { evaluateListExperience, focusListInsights } from '@/components/mask-bui
 import type { ScreenDefinition } from '@/components/mask-builder/schema'
 const state=vi.hoisted(() => ({ setQuery:vi.fn(), rows:[{id:'A-1',status:'offen'},{id:'A-2',status:'angenommen'}], definition:{} as ScreenDefinition }))
 vi.mock('@/lib/api/masks', () => ({useScreenDefinition:() => ({data:state.definition})}))
-vi.mock('@/components/mask-builder', () => ({
+vi.mock('@/components/mask-builder/UniversalMaskRenderer', () => ({
   UniversalMaskRenderer: ({tables}:{tables:{list:unknown[]}}) => <p>{tables.list.length} unveränderte Datensätze</p>,
+}))
+vi.mock('@/components/mask-builder/runtime/useUniversalMaskRuntime', () => ({
   useUniversalMaskRuntime:() => ({plan:{...state.definition,tablesByKey:{list:{}}},filteredTableRows:{list:state.rows},tableRows:{list:state.rows},tableQueryStates:{list:{page:1}},setTableQuery:state.setQuery}),
 }))
 beforeEach(() => {

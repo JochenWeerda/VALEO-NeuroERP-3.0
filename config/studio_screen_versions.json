@@ -36,7 +36,7 @@
       "version": "1.0.0"
     },
     "admin/api-keys": {
-      "definition_hash": "2e8871bc1537a47cddf82e38ff2dd0e4a20fb85896fce50af12f13644332ea19",
+      "definition_hash": "f465e04e72d5fc7535cd0581a2dddf6c32eacaf5c51b17ad29f1c9841ec1e029",
       "gates_passed": [
         "A",
         "B",
@@ -113,7 +113,18 @@
       "version": "1.0.0"
     },
     "admin/branches": {
-      "definition_hash": "1392706fde834c0d97762a44bfb88a6ca5b85cb5a5ec459cf5d59581ee801489",
+      "definition_hash": "287e4ff93af198b9b2ce8bf9f73c92abfd55a5bf3b00924669a2da78fdcfbc97",
+      "gates_passed": [
+        "A",
+        "B",
+        "C",
+        "E"
+      ],
+      "studio_draft_clean": true,
+      "version": "1.0.0"
+    },
+    "admin/branches/detail": {
+      "definition_hash": "0576d0aa5950d18b728d9f8d2a89c18cf14b9651e9032becc84d1c308d77dac5",
       "gates_passed": [
         "A",
         "B",
@@ -410,7 +421,7 @@
       "version": "1.0.0"
     },
     "admin/tenants": {
-      "definition_hash": "92a5ad3d786edbc8edfcac4c7552d8b52b70a21a3f83419001a8d070d5d766b1",
+      "definition_hash": "039050e6156c1ad21c4963049f1e7548e0f29e507eb953f09c7200f0a573f1d4",
       "gates_passed": [
         "A",
         "B",
@@ -443,7 +454,7 @@
       "version": "1.0.0"
     },
     "admin/users": {
-      "definition_hash": "743fa9b2ee69ac1bcb0272017d98f4ee808ef7693db58c7fd73d50dbaeb9f275",
+      "definition_hash": "d7502a6401ba65f4a34ad7f6e07d131a6275e23b3779ac1967afea1d82feb382",
       "gates_passed": [
         "A",
         "B",
@@ -674,7 +685,7 @@
       "version": "1.0.0"
     },
     "agrar/feed-readiness": {
-      "definition_hash": "d94250d2440c0f416bf2cd7766b99758f2fd2319ae9ebab6ebdd688934ec6c4f",
+      "definition_hash": "11989ec5977a3e936c0e46cef93c579fe2eb8894410c75e2261a52430d258b00",
       "gates_passed": [
         "A",
         "B",
@@ -685,7 +696,7 @@
       "version": "1.0.0"
     },
     "agrar/feeding-actuals": {
-      "definition_hash": "9eb90c44f2f560eba75219aa489d4039ce0126beb07c06810fc302ddc0f579d9",
+      "definition_hash": "9501d8481055297907d919318c424610a5251e07e9d58fb75a1d75c4acc43d30",
       "gates_passed": [
         "A",
         "B",
@@ -729,7 +740,7 @@
       "version": "1.0.0"
     },
     "agrar/feeding-plan": {
-      "definition_hash": "661a906cba9e70873d799b583d9587e6d508dde0b39871b1830c441763fdef09",
+      "definition_hash": "069613d7fac2885a6b8b0f8dae3252b765483439c9322c04b567982ca845e2af",
       "gates_passed": [
         "A",
         "B",
@@ -795,7 +806,7 @@
       "version": "1.0.0"
     },
     "agrar/harvest-controls": {
-      "definition_hash": "b9760cb7b44acb4697550d22b4536c7aaa8557958d2dcfaa9318c21912dac2dd",
+      "definition_hash": "5e2bf8baeb11f03f7833af036828bc992cd83a7d6173c02c42a37b2defd5eec5",
       "gates_passed": [
         "A",
         "B",
@@ -2038,7 +2049,7 @@
       "version": "1.0.0"
     },
     "auswertungen/abfrage-center": {
-      "definition_hash": "a985182cfd89e5f77b42239cb0cbac1c8491e747c57a431273820d1591463419",
+      "definition_hash": "c189844992924dc5c2a5f361287f894d77f02e183a99d79567af9f2863d7afac",
       "gates_passed": [
         "A",
         "B",
@@ -3589,7 +3600,7 @@
       "version": "1.0.0"
     },
     "crm/kontakt": {
-      "definition_hash": "4bda06010d4167f29c171549b61ed54d48b04398eedb81b9c7000e7716846ae8",
+      "definition_hash": "b138778265d738df32e015ec51e8218b9b6517785952106f0c0ad0a263be6bbb",
       "gates_passed": [
         "A",
         "B",
@@ -5287,7 +5298,7 @@
       "version": "1.0.0"
     },
     "finance/pruefkorb": {
-      "definition_hash": "2301efa98298db05c80caf19bf2e6a06e5981a117c39fe7ffa88b808dd048b09",
+      "definition_hash": "6da0e1e1e941839fbb59da62ecc2e158bcc2e891f604bc849c1bf4e88f0ecbbd",
       "gates_passed": [
         "A",
         "B",
@@ -6002,7 +6013,7 @@
       "version": "1.0.0"
     },
     "lager/fremdware": {
-      "definition_hash": "8709b776512e5c32ef7da8aa6b8309897af85025b8a4021685221092bc702580",
+      "definition_hash": "30620a891e4b61febd3575c0e10d7eb9dd00938ca618941511941681e17471e8",
       "gates_passed": [
         "A",
         "B",
@@ -6046,7 +6057,7 @@
       "version": "1.0.0"
     },
     "lager/inventur-nebenlaeufe": {
-      "definition_hash": "428c54fc9f7326551c28a89cea162d555e30615b4bd005f74943b76d7fda2390",
+      "definition_hash": "19641a24b604a7c60d7babf2340a15526c28d7b0f0e3de9cd0068cb32541b0f1",
       "gates_passed": [
         "A",
         "B",
@@ -6244,7 +6255,7 @@
       "version": "1.0.0"
     },
     "logistik/tourenplanung": {
-      "definition_hash": "263f5986e07c33b43e0c534abdda8cd9cfd7ba17e79c0472eff3e76912ae3770",
+      "definition_hash": "e4f1f40a5cbb8fe427e7b544492cf3108b6fd77ffd662c42f72b08e0b23d2a8f",
       "gates_passed": [
         "A",
         "B",
@@ -6882,7 +6893,7 @@
       "version": "1.0.0"
     },
     "process/background-jobs": {
-      "definition_hash": "1aeb4e0125fcfbf81e758827a31e906344c1688b3c6d67ecf2b3e241bc1e2c6d",
+      "definition_hash": "d2ed5e575ed8d38f567ddc61cee3f542036a43a8acddf971835c41acc33ab758",
       "gates_passed": [
         "A",
         "B",
@@ -6926,7 +6937,7 @@
       "version": "1.0.0"
     },
     "produktion/produktionsleitstand": {
-      "definition_hash": "8e096b64524df2a633a491595a7c65511f41a5325f7b667674527233c661a87e",
+      "definition_hash": "6e2e7dc978a4506a4c6f979203a89585cc0729590b7cdded4766ed6ae272318f",
       "gates_passed": [
         "A",
         "B",
@@ -8231,7 +8242,7 @@
       "version": "1.0.0"
     },
     "workspace/letzte-dokumente": {
-      "definition_hash": "eed430bdd0c465370fc910f2937be3f8a2d0ebddf4e10f0a99d327d1d894711e",
+      "definition_hash": "21a0ff372ab4e21d3cb8312781de0e791a3aa12be18e2d1a620ead38ca9bdbdf",
       "gates_passed": [
         "A",
         "B",

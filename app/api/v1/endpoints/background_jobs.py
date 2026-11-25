@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from app.core.tenant import get_tenant_id
 from app.core.background_jobs import (
     JobEnqueueRequest,
     JobPrioritaet,
@@ -57,23 +58,34 @@ def list_background_jobs(
     tenant_id: str = "",
     typ: str = "",
     limit: int = Query(default=100, ge=1, le=500),
+    page: int = Query(default=1, ge=1),
+    active_tenant_id: str = Depends(get_tenant_id),
 ) -> dict[str, Any]:
     registry = get_background_job_registry()
-    status_enum = JobStatus(status) if status else None
-    typ_enum = JobTyp(typ) if typ else None
-    jobs = registry.list(status=status_enum, tenant_id=tenant_id or None, typ=typ_enum, limit=limit)
+    if tenant_id and tenant_id != active_tenant_id:
+        raise HTTPException(403, "Requested tenant does not match the verified context")
+    try:
+        status_enum = JobStatus(status) if status else None
+        typ_enum = JobTyp(typ) if typ else None
+    except ValueError as exc:
+        raise HTTPException(422, "Ungültiger Jobstatus oder Jobtyp") from exc
+    jobs = registry.list(status=status_enum, tenant_id=active_tenant_id, typ=typ_enum)
+    offset = (page - 1) * limit
+    page_jobs = [job.as_dict() for job in jobs[offset:offset + limit]]
     return {
         "schema_version": 1,
-        "summary": registry.summary(),
-        "job_count": len(jobs),
-        "jobs": [job.as_dict() for job in jobs],
+        "summary": registry.summary(tenant_id=active_tenant_id),
+        "job_count": len(page_jobs),
+        "total": len(jobs),
+        "items": page_jobs,
+        "jobs": page_jobs,
     }
 
 
 @router.get("/queue", response_model=BackgroundJobOut, summary="Background job queue abrufen")
-def get_background_job_queue() -> dict[str, Any]:
+def get_background_job_queue(active_tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     registry = get_background_job_registry()
-    summary = registry.summary()
+    summary = registry.summary(tenant_id=active_tenant_id)
     return {
         "schema_version": 1,
         "queue": summary["queue"],
@@ -84,41 +96,43 @@ def get_background_job_queue() -> dict[str, Any]:
 
 
 @router.post("/enqueue", response_model=BackgroundJobOut, status_code=201, summary="Background job enqueue", dependencies=SCHREIBEN["FACHLICH"])
-def enqueue_background_job(body: BackgroundJobEnqueueIn) -> dict[str, Any]:
+def enqueue_background_job(body: BackgroundJobEnqueueIn, active_tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     registry = get_background_job_registry()
+    if body.tenant_id and body.tenant_id != active_tenant_id:
+        raise HTTPException(403, "Requested tenant does not match the verified context")
     req = JobEnqueueRequest(
         typ=body.typ,
         angefordert_von=body.angefordert_von,
         parameter=body.parameter,
         prioritaet_override=body.prioritaet_override,
-        tenant_id=body.tenant_id,
+        tenant_id=active_tenant_id,
     )
     job, routing = registry.enqueue(req)
     return {
         "schema_version": 1,
         "job": job.as_dict(),
         "routing": routing.as_dict(),
-        "queue": registry.summary()["queue"],
+        "queue": registry.summary(tenant_id=active_tenant_id)["queue"],
     }
 
 
 @router.post("/dequeue", response_model=BackgroundJobOut, summary="Background job dequeue", dependencies=SCHREIBEN["FACHLICH"])
-def dequeue_background_job() -> dict[str, Any]:
+def dequeue_background_job(active_tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     registry = get_background_job_registry()
-    job = registry.dequeue_next()
+    job = registry.dequeue_next(tenant_id=active_tenant_id)
     if job is None:
         raise HTTPException(status_code=404, detail="No pending jobs in queue")
     return {
         "schema_version": 1,
         "job": job.as_dict(),
-        "queue": registry.summary()["queue"],
+        "queue": registry.summary(tenant_id=active_tenant_id)["queue"],
     }
 
 
 @router.get("/{job_id}", response_model=BackgroundJobOut, summary="Background job abrufen")
-def get_background_job(job_id: str) -> dict[str, Any]:
+def get_background_job(job_id: str, active_tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
     registry = get_background_job_registry()
-    job = registry.get(job_id)
+    job = registry.get(job_id, tenant_id=active_tenant_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Background job not found")
     return {
@@ -128,26 +142,34 @@ def get_background_job(job_id: str) -> dict[str, Any]:
 
 
 @router.post("/{job_id}/complete", response_model=BackgroundJobOut, summary="Background job complete", dependencies=SCHREIBEN["FACHLICH"])
-def complete_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
+def complete_background_job(
+    job_id: str,
+    body: BackgroundJobMutationIn | None = None,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     registry = get_background_job_registry()
-    job = registry.complete(job_id, ergebnis_summary=(body.ergebnis_summary if body else ""))
+    job = registry.complete(job_id, ergebnis_summary=(body.ergebnis_summary if body else ""), tenant_id=active_tenant_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Background job not found")
     return {
         "schema_version": 1,
         "job": job.as_dict(),
-        "queue": registry.summary()["queue"],
+        "queue": registry.summary(tenant_id=active_tenant_id)["queue"],
     }
 
 
 @router.post("/{job_id}/fail", response_model=BackgroundJobOut, summary="Background job fail", dependencies=SCHREIBEN["FACHLICH"])
-def fail_background_job(job_id: str, body: BackgroundJobMutationIn | None = None) -> dict[str, Any]:
+def fail_background_job(
+    job_id: str,
+    body: BackgroundJobMutationIn | None = None,
+    active_tenant_id: str = Depends(get_tenant_id),
+) -> dict[str, Any]:
     registry = get_background_job_registry()
-    job = registry.fail(job_id, fehler_meldung=(body.fehler_meldung if body else "Unspecified failure"))
+    job = registry.fail(job_id, fehler_meldung=(body.fehler_meldung if body else "Unspecified failure"), tenant_id=active_tenant_id)
     if job is None:
         raise HTTPException(status_code=404, detail="Background job not found")
     return {
         "schema_version": 1,
         "job": job.as_dict(),
-        "queue": registry.summary()["queue"],
+        "queue": registry.summary(tenant_id=active_tenant_id)["queue"],
     }
