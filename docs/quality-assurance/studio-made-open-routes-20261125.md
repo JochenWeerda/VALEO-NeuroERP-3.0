@@ -349,6 +349,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - DMS-Setup: Status-Load-Fehler sichtbar (`role="alert"`) statt stilles `setStatus(null)`
 - Hinweis: Theme-Smoke ersetzt **nicht** Live-SSO; Image-CI bleibt Codex
 
+### Batch 40 — Gate-D Smoke-Lauf belegt + Qualitätsversprechen nachgezogen
+
+- `npx playwright test tests/e2e/uix-gate-d-studio-cockpit-smoke.spec.ts` → **6/6 passed** (Europe/Berlin 2026-11-25 ~22:02)
+- Screenshots: `packages/frontend-web/test-results/gate-d-*-{light,dark}.png` (Artifact-Kopie unter Agent-Store `media/gate-d-smoke/`)
+- `made-by-studio-qualitaetsversprechen.md` Belegstand aktualisiert (A/B/C/E 829/829, Routen-`hand_built` 0; Gate-D Rest Live-SSO/Image)
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -356,7 +362,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — 3 Cockpits × Hell/Dunkel = 6 Cases; Mock-SD + UI-Token; Screenshots unter `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-25)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **6/6 passed** (3× Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
