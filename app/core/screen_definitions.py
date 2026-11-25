@@ -5745,6 +5745,24 @@ def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None
     definition["tiles"] = sorted(tiles, key=lambda t: rank.get(t.get("key"), len(order)))
 
 
+def _ensure_table_query_flags(definition: dict[str, Any]) -> None:
+    """Advisory sort_whitelist/filter_columns: mind. eine sortier-/filterbare Spalte je Tabelle."""
+    trivial = {"id", "pk", "uuid", "key"}
+    tables = list(definition.get("tables") or [])
+    for tab in definition.get("tabs") or []:
+        tables.extend(tab.get("tables") or [])
+    for table in tables:
+        cols = [c for c in (table.get("columns") or []) if isinstance(c, dict) and c.get("key")]
+        if not cols:
+            continue
+        if not any(c.get("sortable") for c in cols):
+            target = next((c for c in cols if str(c.get("key", "")).lower() not in trivial), cols[0])
+            target["sortable"] = True
+        if not any(c.get("filterable") for c in cols):
+            target = next((c for c in cols if str(c.get("key", "")).lower() not in trivial), cols[0])
+            target["filterable"] = True
+
+
 def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
     definition = _with_meridian_action_contract(_with_meridian_identity(_with_meridian_layout(definition)))
     contract = definition.setdefault("agentContract", {})
@@ -5759,6 +5777,12 @@ def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: 
                 declared.add(action["key"])
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
+    if not contract.get("businessPurpose"):
+        contract["businessPurpose"] = definition.get("title") or mask_id
+    selectors = contract.setdefault("testSelectors", {})
+    if not selectors.get("screenRoot"):
+        selectors["screenRoot"] = f"[data-testid='screen-{mask_id}']"
+    _ensure_table_query_flags(definition)
     _resolve_tile_routes(definition)
     _apply_season_profile(definition, today)
     from app.core.process_chains import attach_process_chain

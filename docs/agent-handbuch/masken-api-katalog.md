@@ -1491,7 +1491,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `admin/branches` — Niederlassungen
 
-**Zweck:** Niederlassungen — admin
+**Zweck:** Niederlassungen
 
 | | |
 |---|---|
@@ -1509,7 +1509,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 ### `admin/branches/detail` — Niederlassung
 
-**Zweck:** Niederlassung — admin
+**Zweck:** Niederlassung
 
 | | |
 |---|---|

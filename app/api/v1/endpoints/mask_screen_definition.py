@@ -324,7 +324,11 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
 
     # 12. workflow_declared
     needs_wf = definition.get("mode") in ("detail", "cockpit")
-    has_wf = bool((definition.get("workflow") or {}).get("processKey")) or bool(definition.get("noWorkflowReason"))
+    has_wf = (
+        bool((definition.get("workflow") or {}).get("processKey"))
+        or bool(definition.get("noWorkflowReason"))
+        or bool((definition.get("flowSpineWorkspace") or {}).get("processKey"))
+    )
     a("workflow_declared", not needs_wf or has_wf,
       "OK" if has_wf else (f"mode={definition.get('mode')} — gate skipped" if not needs_wf else "detail/cockpit screen missing workflow or noWorkflowReason"))
 
@@ -342,12 +346,20 @@ def _check_readiness(definition: dict[str, Any]) -> dict[str, Any]:
     a("table_query_contract", not generic_cols, f"generic unstable column keys: {', '.join(generic_cols)}" if generic_cols else "OK")
 
     # 15. cockpit_content (UIX-061) — cockpit-Workspaces brauchen Inhalt:
-    # entweder Kacheln (tiles) oder Tabellen. Advisory, damit leere Cockpits
-    # als Warnung auffallen statt still generatorReady zu sein.
+    # Kacheln, Tabellen, Kalender, spezialisierte Workbench oder Flow-Spine-Flaeche.
+    # Advisory, damit leere Cockpits als Warnung auffallen statt still generatorReady zu sein.
     is_cockpit = definition.get("mode") == "cockpit" or layout.get("floorplan") == "cockpit"
-    has_cockpit_content = bool(definition.get("tiles")) or bool(definition.get("calendar")) or bool(all_tables)
+    has_cockpit_content = (
+        bool(definition.get("tiles"))
+        or bool(definition.get("calendar"))
+        or bool(all_tables)
+        or bool(definition.get("specialized"))
+        or bool(definition.get("flowSpineWorkspace"))
+        or bool(definition.get("flowSpineCatalog"))
+        or bool(definition.get("twin"))
+    )
     a("cockpit_content", not is_cockpit or has_cockpit_content,
-      "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles or tables"))
+      "OK" if not is_cockpit else ("OK" if has_cockpit_content else "cockpit without tiles, tables, specialized, twin or flow-spine surface"))
 
     # 16. missing_process_chain (UIX-091-GATE) — Belegmasken ohne Kette oder
     # noProcessChainReason blockieren generatorReady. Stammdaten und Fuetterung

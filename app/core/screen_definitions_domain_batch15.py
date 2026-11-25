@@ -2868,6 +2868,7 @@ def _build_flow_spine_workspace(process_key: str) -> dict[str, Any]:
         "title": process_key, "adapter": {"type": "native", "sourceId": screen_id, "temporary": False},
         "layout": {"floorplan": "cockpit", "density": "expertDense", "contextRail": "workflow"},
         "flowSpineWorkspace": {"processKey": process_key},
+        "workflow": {"processKey": process_key, "status": "process-workspace"},
         "agentContract": {"businessPurpose": "Prozessraum und Vorgänge bedienen.", "examplePrompts": ["Zeige den Prozessraum."], "sensitiveFields": [], "forbiddenAgentTasks": [], "testSelectors": {"screenRoot": f"[data-testid=\"workflow-flow-spine-{process_key}\"]"}},
     }
 

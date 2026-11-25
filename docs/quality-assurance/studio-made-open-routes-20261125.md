@@ -310,6 +310,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - `generate_action_permission_projection.py`: Leaf-APIRoute unter FastAPI-Include-Routern;
   Projektion neu geschrieben (231 Aktionsrechte), `--check` grün
 
+### Batch 34 — Advisory Score 1.0
+
+- Hydrate: Tabellen erhalten fehlende `sortable`/`filterable`; Agent-Contract Defaults
+- `cockpit_content` erkennt `specialized`, Flow-Spine und Twin-Panels (keine False-Positives)
+- `workflow_declared` akzeptiert `flowSpineWorkspace.processKey`
+- Verifier: **A/B/C/E = 829/829**, Draft-clean **829/829**, advisory Ø **1.0**
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
