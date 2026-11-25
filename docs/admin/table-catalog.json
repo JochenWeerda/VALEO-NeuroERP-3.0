@@ -12185,6 +12185,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/rfq_service.py",
             "app/services/spiegel_op_abgleich.py",
+            "app/services/spiegel_uebernahme.py",
             "app/services/whatsapp_intake_service.py"
           ],
           "screens": [
@@ -32869,7 +32870,8 @@
             "app/services/inventory_movement_direction.py",
             "app/services/inventory_stock_balance.py",
             "app/services/mcp_execution_service.py",
-            "app/services/procurement_service.py"
+            "app/services/procurement_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
@@ -36268,7 +36270,8 @@
             "app/services/customer_reference.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/seeds/inventory_seed.py"

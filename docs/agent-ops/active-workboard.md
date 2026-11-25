@@ -1323,8 +1323,13 @@ Abhaengigkeiten M7/M8 gegen M6 und Bestand: docs/roadmap/m7-m8-vorarbeiten.md. O
 
 ## M6-SPIEGEL-KUNDEN-20261125 — zur Abnahme, Claude Code (M6)
 Objektart kunde in der Spiegeluebernahme (domain_crm.customers): Kundennummer, Name, Anschrift, USt-ID, Sperre; wiederholbar, Aenderungen mit Felddifferenz, Fremdbestand als Fehlerzeile. L3-Debitorennummer ohne Ziel bis ADR Stufe 3b - im Differenzbericht 'nicht_zugeordnet'. Dateibesitz: app/services/spiegel_uebernahme.py, tests/test_spiegel_uebernahme.py.
+
+## M6-SPIEGEL-BESTAND-20261125 — zur Abnahme, Claude Code (M6)
+Objektart bestand: erster Abzug bucht Anfangsbestand ueber InventoryService (opening_balance, Schluessel spiegel:bestand:<artikel>:<lager>); Folgeabzuege vergleichen L3-Bestand mit dem Lagersaldo aus dem Bestandsjournal (direction_sql) und melden Abweichungen, ohne zu buchen (auch bei unveraendertem L3-Inhalt). Fremdbestand ohne Quellreferenz, unbekannter Artikel/Lager = Fehlerzeile. Gestapelt auf #212.
 ## AUFBEWAHRUNG-GELTENDES-RECHT-20261125 — zur Abnahme, Claude Code (M7/M5)
 Nutzerauftrag 25.11.2026: Aufbewahrungspflichten nach geltendem Recht. gobd_retention.py einzige Quelle (BEG IV: Belege/Rechnungen 8 J., Buecher 10, Briefe/Vertraege 6, Lieferschein bis Rechnung, PSM 3, DueV 7, Fristbeginn Kalenderjahresende, Ablaufhemmung). Finance-Router, Standardrichtlinien (Migration aufbewahrung_geltendes_recht_20261125), Governance, Personalakte angeglichen; Ratsche tests/test_aufbewahrungsfristen_recht.py.
 
 ## M6-SPIEGEL-OP-ABGLEICH-20261125 — zur Abnahme, Claude Code (M6)
 OP-Abgleich L3 (FIBU_OP1) gegen domain_erp.offene_posten ueber das Partnerkonto (L3-Nummer = debtor/creditor_account, Nutzerentscheid 25.11.): je Posten gleich/abweichend/fehlt in VALEO, dazu fehlt in L3 und Salden je Konto; liest nur, schreibt nur das Spiegelprotokoll. Anfangs-OP-Uebernahme bleibt Saldenvortrag unter Finance. Dateibesitz: app/services/spiegel_op_abgleich.py, tests/test_spiegel_op_abgleich.py.
+## M6-L3-TESTDATENABZUG-20261125 — zur Abnahme, Claude Code (M6)
+Nutzerangabe: L3 = Firebird mit SQL-Maske und Calc-Uebergabe. Runbook docs/migration/m6-l3-testdatenabzug.md mit Firebird-Abfragen (3 Artikel je Gruppe, Bestand, pseudonymisierte Kunden, OPs, Belege) und DSGVO-Regeln (pseudonymisiert in der Abfrage, nur lokal, nicht an KI-Dienste, eigener Testmandant, Loeschen mit Protokoll). scripts/l3_testdaten_import.py: Klartextsperre (E-Mail/Telefon/IBAN/Strasse), Ausgabe nur Zaehlwerte, --loeschen nur fuer l3-test*. .gitignore sperrt l3_abzug_*.
