@@ -282,6 +282,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `flow_spine_instance_documents_20260915` | FSX-DOC-LINKS: beteiligte Belege je Flow-Spine-Vorgang |
 | `flow_spine_instances_20260326` | Flow Spine Instance persistence table |
 | `flow_spine_lifecycle_20260417` | Extend flow spine instances with lifecycle state and timeline events |
+| `folgeartikel_fremdschluessel_20261124` | Folgeartikel referenziell: Artikel und Folgeartikel muessen im selben Mandanten existieren (24.11.2026). |
 | `foreign_goods_worklist_20260821` | Audit trail for the foreign-goods operator worklist. |
 | `fuhrpark_tables_speditionen_20260225` | Add Fuhrpark sub-tables and Speditionen Frachttarife |
 | `fuhrpark_tenant_ce_20261009` | Fuhrpark: additive tenant_id fuer Masken-CRUD (CE+MCP Isolation). |
@@ -320,6 +321,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `journal_entries_unify_20260301` | Journal: Eine Tabelle für List + Connector (domain_erp.journal_entries) |
 | `journal_number_tenant_20261005` | Journal numbers identify entries within a tenant, never across tenants. |
 | `journal_periode_nachfuellen_20261119` | Buchungsperiode der Journalbuchungen aus dem Buchungsdatum nachfuellen (M3). |
+| `journal_status_pflicht_20261124` | Journalstatus ist Pflicht: Vorgabe draft, NOT NULL, nur die vier Status des Buchungsdienstes (24.11.2026). |
 | `konto_sperre_20261012` | Kontosperre: ein gesperrtes Konto nimmt keine neue Buchungszeile an. |
 | `kontrakt_disposition_20261005` | Der Abruf einer kontrahierten Menge — als Tabelle, nicht als Laufzeit-DDL. |
 | `kontrakt_lifecycle_fixing_20260623` | DOM-CON-004 — Kontrakt Lifecycle, Fixing, Settlement Tabellen |
