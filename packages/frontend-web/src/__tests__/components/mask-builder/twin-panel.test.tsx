@@ -86,7 +86,7 @@ describe('cellStyle — Metrik-Farblogik', () => {
   it('warnAbove-Ueberschreitung → danger-Kontur', () => {
     const ok = cellStyle(METRICS, { moisture: 13 })
     const warn = cellStyle(METRICS, { moisture: 15 })
-    expect(warn.stroke).toBe('#dc2626')
+    expect(warn.stroke).toBe('hsl(var(--status-error-hsl))')
     expect(warn.strokeWidth).toBeGreaterThan(ok.strokeWidth)
   })
   it('locked=true → Schraffur', () => {
