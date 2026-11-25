@@ -138,7 +138,7 @@ export default function MilchviehKartePage(): JSX.Element {
   }, [ready, mapData.data])
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col p-4">
+    <section className="flex h-[calc(100vh-4rem)] flex-col p-4" aria-label="Milchvieh-Karte Arbeitsbereich">
       <div className="mb-3">
         <h1 className="text-2xl font-semibold">Milchvieh-Betriebe (Karte)</h1>
         <p className="text-sm text-muted-foreground">
@@ -163,19 +163,19 @@ export default function MilchviehKartePage(): JSX.Element {
               onChange={(e) => setFilter((f) => ({ ...f, min_kuehe: e.target.value ? Number(e.target.value) : undefined }))} />
           </label>
           <div className="ml-auto flex items-center gap-4 text-xs">
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#16a34a' }} /> niedrig</span>
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#eab308' }} /> mittel</span>
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#dc2626' }} /> hoch</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-success" /> niedrig</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-warning" /> mittel</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-error" /> hoch</span>
             <span className="text-muted-foreground">{mapData.data ? `${mapData.data.features.length} Betriebe` : ''}</span>
           </div>
         </CardContent>
       </Card>
 
       {error ? (
-        <div className="flex flex-1 items-center justify-center rounded-md border text-sm text-destructive">{error}</div>
+        <div role="alert" className="flex flex-1 items-center justify-center rounded-md border text-sm text-status-error">{error}</div>
       ) : (
         <div ref={mapContainer} className="min-h-[50vh] flex-1 overflow-hidden rounded-md border" />
       )}
-    </div>
+    </section>
   )
 }

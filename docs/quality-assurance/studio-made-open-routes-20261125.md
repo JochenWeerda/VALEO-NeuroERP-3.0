@@ -408,6 +408,12 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Mahnlauf-Surface: `aria-label="Mahnlauf Arbeitsbereich"`
 - Gate-D + `mahnwesen/mahnlauf` → **24/24 passed**
 
+### Batch 49 — Micro-Label-Ratsche + Milchvieh-Karte Gate-D
+
+- FlowSpine + Mobile-Feeding: arbiträre 10/11px → `text-2xs`
+- Vitest-Ratsche gegen Micro-Label-Arbitraries (Allowlist nur Rationsoptimierung)
+- Milchvieh-Karte: Status-Token-Legende + Landmark; Gate-D → **26/26 passed**
+
 ### Gate D Browser / Image (Stand 2026-11-25, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -415,7 +421,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-25)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **24/24 passed** (12 Masken × Hell/Dunkel; inkl. Agrar-/Finance-/Mahnlauf-Workbenches); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-25)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **26/26 passed** (13 Masken × Hell/Dunkel; inkl. Milchvieh-Karte); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 

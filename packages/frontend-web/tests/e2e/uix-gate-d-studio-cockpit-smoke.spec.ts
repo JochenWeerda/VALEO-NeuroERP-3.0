@@ -185,6 +185,18 @@ const COCKPIT_CASES: CockpitCase[] = [
     ],
     specializedLandmark: 'Mahnlauf Arbeitsbereich',
   },
+  {
+    label: 'agrar/milchvieh-karte',
+    path: '/agrar/milchvieh-karte',
+    screenId: 'agrar/milchvieh-karte',
+    testId: 'screen-agrar/milchvieh-karte',
+    title: 'Milchvieh-Karte',
+    specializedType: 'agrar_workbench',
+    specializedFields: [
+      { key: 'feature_count', label: 'Betriebe' },
+    ],
+    specializedLandmark: 'Milchvieh-Karte Arbeitsbereich',
+  },
   // Prefixe, die vor Batch 41 an page-module-loader scheiterten
   {
     label: 'dms/archiv-suche',
@@ -364,6 +376,15 @@ async function installCockpitMocks(page: Page, c: CockpitCase): Promise<void> {
         status: 200,
         contentType: 'application/json',
         body: JSON.stringify({ items: [] }),
+      })
+    })
+  }
+  if (c.screenId === 'agrar/milchvieh-karte') {
+    await page.route(/\/api\/v1\/agrar\/milchvieh-crosssell\/map(?:\?.*)?$/, async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ type: 'FeatureCollection', features: [] }),
       })
     })
   }

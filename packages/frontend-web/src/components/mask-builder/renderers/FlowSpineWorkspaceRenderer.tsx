@@ -387,7 +387,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             */}
             {viewMode !== 'fokus' ? (
             <div className="mb-6">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
+              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-slate-500">Prozesse</p>
               <div className="space-y-2">
                 {processNavItems.length === 0 ? (
                   <p className="rounded-2xl border border-status-warning/20 bg-status-warning/10 px-3 py-2 text-xs text-status-warning">
@@ -411,7 +411,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
             </div>
             ) : null}
             <div className="mb-6">
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
+              <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.24em] text-slate-500">Vorgaenge</p>
               <Input
                 placeholder="Suchen..."
                 value={instanceSearch}
@@ -442,7 +442,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         </span>
                       ) : null}
                     </div>
-                    <div className="text-[11px] text-slate-400 truncate">
+                    <div className="text-2xs text-slate-400 truncate">
                       {inst.customer_name || inst.label || inst.subject || '\u2013'}
                     </div>
                   </button>
@@ -630,7 +630,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                         {/* FSX-003: metric/submetric sind operativ. Fehlen sie, bleibt die
                             Zeile leer statt einen Registry-Vorgabewert zu zeigen. */}
                         {node.metric ? <div className="text-xs text-slate-500">{node.metric}</div> : null}
-                        {node.submetric ? <div className="text-[11px] text-slate-400">{node.submetric}</div> : null}
+                        {node.submetric ? <div className="text-2xs text-slate-400">{node.submetric}</div> : null}
                       </button>
                     )
                   })}
@@ -942,7 +942,7 @@ export function FlowSpineWorkspaceRenderer({ state }: { state: FlowSpineWorkspac
                               <History className="h-4 w-4 text-muted-foreground" />
                               {event.event_type}
                             </div>
-                            <div className="text-[11px] text-slate-500">{formatDateTime(event.created_at)}</div>
+                            <div className="text-2xs text-slate-500">{formatDateTime(event.created_at)}</div>
                           </div>
                           <div className="mt-2 space-y-1 text-xs text-slate-400">
                             <div>Status: {event.from_lifecycle_status || '—'} → {event.to_lifecycle_status || '—'}</div>
