@@ -11,6 +11,8 @@ description: Sichere Verwaltung von Eskalations- und Betriebssecrets via SealedS
 
 # Secrets-Handling für Inventory: SealedSecrets & ExternalSecrets
 
+Inventar aller Geheimnisse, Einstufung und Rotationsplan (M5): `docs/security/geheimnis-inventar-rotationsplan.md`.
+
 Dieses Runbook beschreibt, wie Eskalations- und Betriebs-Secrets (z. B. `INVENTORY_TEAMS_WEBHOOK_URL`) sicher verwaltet werden.
 
 ## Optionen

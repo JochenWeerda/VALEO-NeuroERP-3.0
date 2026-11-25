@@ -21704,7 +21704,7 @@
             },
             {
               "name": "status",
-              "nullable": true,
+              "nullable": false,
               "type": "character varying"
             },
             {
@@ -49421,7 +49421,24 @@
               "type": "timestamp with time zone"
             }
           ],
-          "foreign_keys": [],
+          "foreign_keys": [
+            {
+              "column": "artikel_nr",
+              "references": "domain_inventory.articles.article_number"
+            },
+            {
+              "column": "folge_artikel_nr",
+              "references": "domain_inventory.articles.article_number"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            },
+            {
+              "column": "tenant_id",
+              "references": "domain_inventory.articles.tenant_id"
+            }
+          ],
           "owner_domain": "platform",
           "ownership_reason": "Custodian domain_shared / Domain platform.",
           "placement": "native",
