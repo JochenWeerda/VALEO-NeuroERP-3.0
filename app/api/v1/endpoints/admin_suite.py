@@ -18,7 +18,6 @@ from app.core.rbac import ROLE_PERMISSIONS, Role
 from app.core.tenant import get_tenant_id
 from app.services.integration_bootstrap import build_integration_bootstrap_summary
 
-
 router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness"])
 
 ReadinessStatus = Literal["ready", "warning", "blocked", "unchecked"]
@@ -72,7 +71,6 @@ MIGRATION_PROFILES = (
 )
 RECONCILIATION_KEYS = ("record_counts", "balances", "open_items", "inventory")
 
-
 class ReadinessEvidence(BaseModel):
     key: str
     label: str
@@ -81,7 +79,6 @@ class ReadinessEvidence(BaseModel):
     evidence: str
     details: list[str] = Field(default_factory=list)
     checked_at: datetime
-
 
 class AdminSuiteReadinessOut(BaseModel):
     status: ReadinessStatus
@@ -94,7 +91,6 @@ class AdminSuiteReadinessOut(BaseModel):
     checked_at: datetime
     evidence: list[ReadinessEvidence]
 
-
 class SetupStepOut(BaseModel):
     key: str
     label: str
@@ -104,7 +100,6 @@ class SetupStepOut(BaseModel):
     responsible: str | None = None
     updated_at: datetime | None = None
 
-
 class SetupSessionOut(BaseModel):
     tenant_id: str
     status: SetupStepStatus
@@ -113,12 +108,10 @@ class SetupSessionOut(BaseModel):
     updated_at: datetime | None = None
     steps: list[SetupStepOut]
 
-
 class SetupStepUpdate(BaseModel):
     status: SetupStepStatus
     evidence: str | None = Field(default=None, max_length=1000)
     responsible: str | None = Field(default=None, max_length=120)
-
 
 class MigrationProfileOut(BaseModel):
     id: str | None = None
@@ -132,7 +125,6 @@ class MigrationProfileOut(BaseModel):
         if not self.id:
             object.__setattr__(self, "id", self.key)
 
-
 class MigrationBatchCreate(BaseModel):
     source_profile: str
     source_ref: str = Field(min_length=1, max_length=255)
@@ -140,10 +132,8 @@ class MigrationBatchCreate(BaseModel):
     mapping_version: str = Field(min_length=1, max_length=80)
     dry_run: Literal[True] = True
 
-
 class MigrationReconciliationUpdate(BaseModel):
     checks: dict[str, bool]
-
 
 class MigrationBatchOut(BaseModel):
     id: str
@@ -158,11 +148,9 @@ class MigrationBatchOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
 class MigrationCockpitOut(BaseModel):
     profiles: list[MigrationProfileOut]
     batches: list[MigrationBatchOut]
-
 
 class SecurityRoleOut(BaseModel):
     id: str | None = None
@@ -178,7 +166,6 @@ class SecurityRoleOut(BaseModel):
         if self.permissions_text is None:
             object.__setattr__(self, "permissions_text", ", ".join(self.permissions))
 
-
 class SecuritySimulationIn(BaseModel):
     """Rollenliste — Studio sendet oft kommagetrennten Text; Liste bleibt gueltig."""
 
@@ -189,17 +176,14 @@ class SecuritySimulationIn(BaseModel):
             return [part.strip() for part in self.roles.split(",") if part.strip()]
         return [str(part).strip() for part in self.roles if str(part).strip()]
 
-
 class SecuritySimulationOut(BaseModel):
     roles: list[str]
     effective_permissions: list[str]
     sod_warnings: list[str]
 
-
 class SecurityCockpitOut(BaseModel):
     roles: list[SecurityRoleOut]
     agent_roles: list[SecurityRoleOut]
-
 
 class ConnectorOut(BaseModel):
     id: str
@@ -211,7 +195,6 @@ class ConnectorOut(BaseModel):
     source: str
     notes: str
 
-
 class DeviceCapabilityOut(BaseModel):
     id: str
     key: str
@@ -222,7 +205,6 @@ class DeviceCapabilityOut(BaseModel):
     test_actions: list[str]
     notes: str
 
-
 class OperationsEvidenceOut(BaseModel):
     id: str
     key: str
@@ -231,7 +213,6 @@ class OperationsEvidenceOut(BaseModel):
     runtime_status: Literal["unchecked"]
     source: str
     notes: str
-
 
 class ComplianceEvidenceOut(BaseModel):
     id: str
@@ -244,7 +225,6 @@ class ComplianceEvidenceOut(BaseModel):
     target_path: str | None = None
     notes: str
 
-
 class SystemStatusEvidenceOut(BaseModel):
     id: str
     key: str
@@ -255,7 +235,6 @@ class SystemStatusEvidenceOut(BaseModel):
     target_path: str | None = None
     notes: str
 
-
 class DiagnosticManifestItemOut(BaseModel):
     id: str
     key: str
@@ -264,7 +243,6 @@ class DiagnosticManifestItemOut(BaseModel):
     collection_status: Literal["not_collected"]
     redaction: Literal["required", "metadata_only"]
     notes: str
-
 
 def _evidence(
     *,
@@ -285,7 +263,6 @@ def _evidence(
         details=details or [],
         checked_at=checked_at,
     )
-
 
 def _integration_evidence(summary: dict[str, Any], checked_at: datetime) -> ReadinessEvidence:
     blockers = [str(item) for item in summary.get("required_blockers", [])]
@@ -310,7 +287,6 @@ def _integration_evidence(summary: dict[str, Any], checked_at: datetime) -> Read
         checked_at=checked_at,
         details=details,
     )
-
 
 def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
     checked_at = datetime.now(timezone.utc)
@@ -398,7 +374,6 @@ def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
         evidence=items,
     )
 
-
 def _load_tenant_settings(db: Session, tenant_id: str) -> dict[str, Any]:
     row = db.execute(
         text("SELECT settings FROM domain_shared.tenants WHERE id = :tenant_id"),
@@ -417,14 +392,12 @@ def _load_tenant_settings(db: Session, tenant_id: str) -> dict[str, Any]:
     except Exception:
         return {}
 
-
 def _save_tenant_settings(db: Session, tenant_id: str, settings: dict[str, Any]) -> None:
     db.execute(
         text("UPDATE domain_shared.tenants SET settings = :settings, updated_at = NOW() WHERE id = :tenant_id"),
         {"tenant_id": tenant_id, "settings": json.dumps(settings)},
     )
     db.commit()
-
 
 def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> SetupSessionOut:
     stored = payload if isinstance(payload, dict) else {}
@@ -461,7 +434,6 @@ def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> Setu
         steps=steps,
     )
 
-
 def _migration_store(settings: dict[str, Any]) -> dict[str, Any]:
     store = settings.get("admin_suite_migration")
     if not isinstance(store, dict):
@@ -472,20 +444,17 @@ def _migration_store(settings: dict[str, Any]) -> dict[str, Any]:
     store["batches"] = batches
     return store
 
-
 def _migration_cockpit(tenant_id: str, store: dict[str, Any]) -> MigrationCockpitOut:
     return MigrationCockpitOut(
         profiles=[MigrationProfileOut(**profile) for profile in MIGRATION_PROFILES],
         batches=[MigrationBatchOut(**batch) for batch in store.get("batches", [])],
     )
 
-
 def _find_batch(store: dict[str, Any], batch_id: str) -> dict[str, Any]:
     batch = next((item for item in store["batches"] if item.get("id") == batch_id), None)
     if not isinstance(batch, dict):
         raise HTTPException(status_code=404, detail=f"Migration batch not found: {batch_id}")
     return batch
-
 
 def _security_roles() -> list[SecurityRoleOut]:
     return [
@@ -496,7 +465,6 @@ def _security_roles() -> list[SecurityRoleOut]:
         )
         for role in Role
     ]
-
 
 def _agent_roles() -> list[SecurityRoleOut]:
     return [
@@ -514,7 +482,6 @@ def _agent_roles() -> list[SecurityRoleOut]:
         ),
     ]
 
-
 def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
     known_roles = {role.key: role for role in [*_security_roles(), *_agent_roles()]}
     unknown = sorted(set(roles) - set(known_roles))
@@ -529,7 +496,6 @@ def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
     if any(role.startswith("agent_") for role in roles) and "manage_system" in permissions:
         warnings.append("Agentenrolle darf keine Systemadministration erhalten.")
     return SecuritySimulationOut(roles=roles, effective_permissions=permissions, sod_warnings=warnings)
-
 
 def _connector_catalog() -> list[ConnectorOut]:
     summary = build_integration_bootstrap_summary()
@@ -569,7 +535,6 @@ def _connector_catalog() -> list[ConnectorOut]:
     )
     return items
 
-
 def _device_catalog() -> list[DeviceCapabilityOut]:
     return [
         DeviceCapabilityOut(id="printer", key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
@@ -579,7 +544,6 @@ def _device_catalog() -> list[DeviceCapabilityOut]:
         DeviceCapabilityOut(id="mobile", key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
     ]
 
-
 def _operations_catalog() -> list[OperationsEvidenceOut]:
     return [
         OperationsEvidenceOut(id="database_backup", key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
@@ -588,7 +552,6 @@ def _operations_catalog() -> list[OperationsEvidenceOut]:
         OperationsEvidenceOut(id="alembic", key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
         OperationsEvidenceOut(id="diagnostics", key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
     ]
-
 
 def _compliance_catalog() -> list[ComplianceEvidenceOut]:
     return [
@@ -602,7 +565,6 @@ def _compliance_catalog() -> list[ComplianceEvidenceOut]:
         ComplianceEvidenceOut(id="sanctions", key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
     ]
 
-
 def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
     return [
         SystemStatusEvidenceOut(id="api_liveness", key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
@@ -615,7 +577,6 @@ def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
         SystemStatusEvidenceOut(id="voice", key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
     ]
 
-
 def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     return [
         DiagnosticManifestItemOut(id="release_metadata", key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
@@ -627,56 +588,10 @@ def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
         DiagnosticManifestItemOut(id="audit_summary", key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
     ]
 
-
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
     return build_admin_suite_readiness()
-
-
-@router.get("/readiness/evidence", summary="Admin Suite readiness Evidenzliste")
-async def list_admin_suite_readiness_evidence() -> list[dict[str, Any]]:
-    """Flache Evidenzliste fuer Studio-Cockpit-Tabelle (wie Legacy-Karten)."""
-    readiness = build_admin_suite_readiness()
-    rows: list[dict[str, Any]] = []
-    for item in readiness.evidence:
-        rows.append(
-            {
-                "id": item.key,
-                "key": item.key,
-                "label": item.label,
-                "status": item.status,
-                "source": item.source,
-                "evidence": item.evidence,
-                "details": "; ".join(item.details) if item.details else "",
-                "checked_at": item.checked_at.isoformat(),
-            }
-        )
-    return rows
-
-
-@router.get("/setup/steps", summary="Admin Suite Setup-Schritte auflisten")
-async def list_setup_steps(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> list[dict[str, Any]]:
-    """Flache Setup-Schritte fuer NativeList (Human/CI/MCP)."""
-    settings = _load_tenant_settings(db, tenant_id)
-    session = _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
-    return [
-        {
-            "id": step.key,
-            "key": step.key,
-            "label": step.label,
-            "status": step.status,
-            "target_path": step.target_path,
-            "evidence": step.evidence,
-            "responsible": step.responsible,
-            "updated_at": step.updated_at.isoformat() if step.updated_at else None,
-        }
-        for step in session.steps
-    ]
-
 
 @router.get("/setup", response_model=SetupSessionOut, summary="Admin Suite setup session abrufen")
 async def get_setup_session(
@@ -686,7 +601,6 @@ async def get_setup_session(
     """Liefert den wiederaufnehmbaren Setup-Fortschritt eines Tenants."""
     settings = _load_tenant_settings(db, tenant_id)
     return _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
-
 
 @router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren", dependencies=[Depends(require_roles("admin"))])
 async def update_setup_step(
@@ -719,7 +633,6 @@ async def update_setup_step(
     _save_tenant_settings(db, tenant_id, settings)
     return _build_setup_session(tenant_id, setup)
 
-
 @router.get("/migration", response_model=MigrationCockpitOut, summary="Migration Cockpit abrufen")
 async def get_migration_cockpit(
     tenant_id: str = Depends(get_tenant_id),
@@ -727,75 +640,6 @@ async def get_migration_cockpit(
 ) -> MigrationCockpitOut:
     settings = _load_tenant_settings(db, tenant_id)
     return _migration_cockpit(tenant_id, _migration_store(settings))
-
-
-@router.get("/migration/profiles", summary="Migration-Profile auflisten")
-async def list_migration_profiles() -> list[dict[str, Any]]:
-    """Flache Profile-Liste fuer Studio-Cockpit-Tabelle."""
-    return [
-        {
-            "id": profile["key"],
-            "key": profile["key"],
-            "label": profile["label"],
-            "status": profile["status"],
-            "adapter": profile.get("adapter"),
-            "notes": profile["notes"],
-        }
-        for profile in MIGRATION_PROFILES
-    ]
-
-
-@router.get("/migration/batches", summary="Migration-Batches auflisten")
-async def list_migration_batches(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> list[dict[str, Any]]:
-    """Flache Batch-Liste fuer Studio-Cockpit-Tabelle (Human/CI/MCP)."""
-    settings = _load_tenant_settings(db, tenant_id)
-    store = _migration_store(settings)
-    rows: list[dict[str, Any]] = []
-    for batch in store.get("batches", []):
-        if not isinstance(batch, dict):
-            continue
-        recon = batch.get("reconciliation") if isinstance(batch.get("reconciliation"), dict) else {}
-        rows.append(
-            {
-                "id": batch.get("id"),
-                "tenant_id": batch.get("tenant_id"),
-                "source_profile": batch.get("source_profile"),
-                "source_ref": batch.get("source_ref"),
-                "source_hash": batch.get("source_hash"),
-                "mapping_version": batch.get("mapping_version"),
-                "dry_run": batch.get("dry_run"),
-                "status": batch.get("status"),
-                "reconciliation_ok": all(bool(v) for v in recon.values()) if recon else False,
-                "created_at": batch.get("created_at"),
-                "updated_at": batch.get("updated_at"),
-            }
-        )
-    return rows
-
-
-@router.get("/migration/overview", summary="Migration Cockpit KPI-Ueberblick")
-async def get_migration_overview(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    """Flache KPIs fuer Studio-Cockpit-Summary."""
-    settings = _load_tenant_settings(db, tenant_id)
-    cockpit = _migration_cockpit(tenant_id, _migration_store(settings))
-    available = sum(1 for p in cockpit.profiles if p.status == "available")
-    blocked = sum(1 for p in cockpit.profiles if p.status == "blocked")
-    approved = sum(1 for b in cockpit.batches if b.status == "approved")
-    return {
-        "profile_count": len(cockpit.profiles),
-        "available_profiles": available,
-        "blocked_profiles": blocked,
-        "batch_count": len(cockpit.batches),
-        "approved_batches": approved,
-        "execute_locked": True,
-    }
-
 
 @router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen", dependencies=[Depends(require_roles("admin"))])
 async def create_migration_batch(
@@ -830,7 +674,6 @@ async def create_migration_batch(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren", dependencies=[Depends(require_roles("admin"))])
 async def update_migration_reconciliation(
     batch_id: str,
@@ -853,7 +696,6 @@ async def update_migration_reconciliation(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben", dependencies=[Depends(require_roles("admin"))])
 async def approve_migration_batch(
     batch_id: str,
@@ -875,88 +717,42 @@ async def approve_migration_batch(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.get("/security", response_model=SecurityCockpitOut, summary="Security Governance Cockpit abrufen")
 async def get_security_cockpit() -> SecurityCockpitOut:
     return SecurityCockpitOut(roles=_security_roles(), agent_roles=_agent_roles())
-
-
-@router.get("/security/overview", summary="Security Governance KPI-Ueberblick")
-async def get_security_overview() -> dict[str, Any]:
-    """Flache KPIs fuer Studio-Cockpit-Summary."""
-    humans = _security_roles()
-    agents = _agent_roles()
-    return {
-        "human_role_count": len(humans),
-        "agent_role_count": len(agents),
-        "role_count": len(humans) + len(agents),
-        "sod_simulation_only": True,
-        "agent_admin_blocked": True,
-    }
-
-
-def _security_role_row(role: SecurityRoleOut) -> dict[str, Any]:
-    return {
-        "id": role.key,
-        "key": role.key,
-        "actor_type": role.actor_type,
-        "notes": role.notes or "",
-        "permissions_text": ", ".join(role.permissions),
-        "permission_count": len(role.permissions),
-    }
-
-
-@router.get("/security/roles", summary="Menschenrollen auflisten")
-async def list_security_roles() -> list[dict[str, Any]]:
-    """Flache Menschenrollen fuer Studio-Cockpit-Tabelle."""
-    return [_security_role_row(role) for role in _security_roles()]
-
-
-@router.get("/security/agent-roles", summary="Agentenrollen auflisten")
-async def list_security_agent_roles() -> list[dict[str, Any]]:
-    """Flache Agentenrollen fuer Studio-Cockpit-Tabelle."""
-    return [_security_role_row(role) for role in _agent_roles()]
-
 
 @router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren", dependencies=[Depends(require_roles("admin"))])
 async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
     """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
     return _simulate_security(payload.resolved_roles())
 
-
 @router.get("/connectors", response_model=list[ConnectorOut], summary="Connector Hub abrufen")
 async def get_connector_hub() -> list[ConnectorOut]:
     """Liefert redigierte Connector-Metadaten ohne Secrets oder Live-Probes."""
     return _connector_catalog()
 
-
 @router.get("/devices", response_model=list[DeviceCapabilityOut], summary="Hardware Center abrufen")
 async def get_device_center() -> list[DeviceCapabilityOut]:
     return _device_catalog()
 
-
 @router.get("/operations", response_model=list[OperationsEvidenceOut], summary="Operations Center abrufen")
 async def get_operations_center() -> list[OperationsEvidenceOut]:
     return _operations_catalog()
-
 
 @router.get("/compliance", response_model=list[ComplianceEvidenceOut], summary="Compliance Evidence Center abrufen")
 async def get_compliance_center() -> list[ComplianceEvidenceOut]:
     """Liefert Compliance-Evidenzmetadaten ohne Live-Probes oder externe Erfolgsannahmen."""
     return _compliance_catalog()
 
-
 @router.get("/system-status", response_model=list[SystemStatusEvidenceOut], summary="System Status Evidence Center abrufen")
 async def get_system_status_center() -> list[SystemStatusEvidenceOut]:
     """Liefert Runtime-Probe-Metadaten ohne Live-Probes auszuloesen."""
     return _system_status_catalog()
 
-
 @router.get("/diagnostics", response_model=list[DiagnosticManifestItemOut], summary="Diagnosepaket Manifest abrufen")
 async def get_diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     """Liefert erlaubte Diagnosekategorien ohne Daten zu sammeln oder zu exportieren."""
     return _diagnostic_manifest()
-
 
 # ── LLM-Gateway (anbieterunabhängige KI-Konfiguration) ────────────────────────
 from app.services.llm_gateway import (  # noqa: E402
@@ -966,7 +762,6 @@ from app.services.llm_gateway import (  # noqa: E402
     LLMGateway,
     load_config as load_llm_config,
 )
-
 
 class LlmGatewayConfigOut(BaseModel):
     provider: str
@@ -978,7 +773,6 @@ class LlmGatewayConfigOut(BaseModel):
     available: bool
     providers: list[str] = Field(default_factory=lambda: list(LLM_PROVIDERS))
 
-
 class LlmGatewayUpdateIn(BaseModel):
     provider: str | None = None
     base_url: str | None = None
@@ -987,13 +781,11 @@ class LlmGatewayUpdateIn(BaseModel):
     temperature: float | None = None
     enabled: bool | None = None
 
-
 class LlmTestOut(BaseModel):
     ok: bool
     provider: str
     model: str
     detail: str
-
 
 def _llm_config_out(cfg: LLMConfig) -> LlmGatewayConfigOut:
     return LlmGatewayConfigOut(
@@ -1006,7 +798,6 @@ def _llm_config_out(cfg: LLMConfig) -> LlmGatewayConfigOut:
         available=LLMGateway(config=cfg).available(),
     )
 
-
 @router.get("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration abrufen")
 async def get_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
@@ -1014,7 +805,6 @@ async def get_llm_gateway(
 ) -> LlmGatewayConfigOut:
     """Aktuelle KI-Anbieter-Konfiguration (Key redigiert, nie im Klartext)."""
     return _llm_config_out(load_llm_config(db, tenant_id))
-
 
 @router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_llm_gateway(
@@ -1040,7 +830,6 @@ async def update_llm_gateway(
     _save_tenant_settings(db, tenant_id, settings)
     return _llm_config_out(load_llm_config(db, tenant_id))
 
-
 @router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen", dependencies=[Depends(require_roles("admin"))])
 async def test_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
@@ -1049,12 +838,10 @@ async def test_llm_gateway(
     """Konfigurations-/Erreichbarkeitsprobe des aktuell gewählten Anbieters."""
     return LlmTestOut(**LLMGateway(db, tenant_id).test())
 
-
 # ── Connector-Konfiguration (Auto-Capture: STT + IMAP) ──────────────────────────
 from app.services.connector_config import load_imap_config, load_stt_config, save_connectors  # noqa: E402
 from app.services.mail_ingest_service import MailIngestService  # noqa: E402
 from app.services.stt_client import SttClient  # noqa: E402
-
 
 class ConnectorSttOut(BaseModel):
     enabled: bool
@@ -1063,7 +850,6 @@ class ConnectorSttOut(BaseModel):
     language: str
     api_key_set: bool
     configured: bool
-
 
 class ConnectorImapOut(BaseModel):
     enabled: bool
@@ -1078,49 +864,23 @@ class ConnectorImapOut(BaseModel):
     password_set: bool
     configured: bool
 
-
 class ConnectorsConfigOut(BaseModel):
     stt: ConnectorSttOut
     imap: ConnectorImapOut
-
-
-class ConnectorSttUpdate(BaseModel):
-    enabled: bool | None = None
-    base_url: str | None = None
-    model: str | None = None
-    language: str | None = None
-    api_key: str | None = None  # leer = behalten
-
-
-class ConnectorImapUpdate(BaseModel):
-    enabled: bool | None = None
-    host: str | None = None
-    port: int | None = None
-    ssl: bool | None = None
-    user: str | None = None
-    password: str | None = None  # leer = behalten
-    inbox: str | None = None
-    sent: str | None = None
-    own_addresses: str | None = None  # kommagetrennt
-    poll_seconds: int | None = None
-
 
 class ConnectorsUpdateIn(BaseModel):
     stt: ConnectorSttUpdate | None = None
     imap: ConnectorImapUpdate | None = None
 
-
 class ConnectorTestOut(BaseModel):
     ok: bool
     detail: str
-
 
 class ConnectorPollOut(BaseModel):
     ok: bool
     detail: str
     processed: int = 0
     created: int = 0
-
 
 def _connectors_out(db: Session, tenant_id: str) -> ConnectorsConfigOut:
     stt = load_stt_config(db, tenant_id)
@@ -1149,7 +909,6 @@ def _connectors_out(db: Session, tenant_id: str) -> ConnectorsConfigOut:
         ),
     )
 
-
 @router.get("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration abrufen")
 async def get_connectors(
     tenant_id: str = Depends(get_tenant_id),
@@ -1157,7 +916,6 @@ async def get_connectors(
 ) -> ConnectorsConfigOut:
     """STT- und IMAP-Einstellungen der Auto-Capture-Connectoren (Secrets redigiert)."""
     return _connectors_out(db, tenant_id)
-
 
 @router.put("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_connectors(
@@ -1174,57 +932,6 @@ async def update_connectors(
     )
     return _connectors_out(db, tenant_id)
 
-
-@router.get("/capture-connectors/overview", summary="Capture-Connector KPI-Ueberblick")
-async def get_capture_connectors_overview(
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> dict[str, Any]:
-    """Flache STT-/IMAP-Statusfelder fuer Studio-Cockpit (ohne Secrets)."""
-    out = _connectors_out(db, tenant_id)
-    return {
-        "stt_enabled": out.stt.enabled,
-        "stt_configured": out.stt.configured,
-        "stt_base_url": out.stt.base_url,
-        "stt_model": out.stt.model,
-        "stt_language": out.stt.language,
-        "stt_api_key_set": out.stt.api_key_set,
-        "imap_enabled": out.imap.enabled,
-        "imap_configured": out.imap.configured,
-        "imap_host": out.imap.host,
-        "imap_port": out.imap.port,
-        "imap_ssl": out.imap.ssl,
-        "imap_user": out.imap.user,
-        "imap_inbox": out.imap.inbox,
-        "imap_sent": out.imap.sent,
-        "imap_own_addresses": out.imap.own_addresses,
-        "imap_poll_seconds": out.imap.poll_seconds,
-        "imap_password_set": out.imap.password_set,
-    }
-
-
-@router.put("/capture-connectors/stt", response_model=ConnectorsConfigOut, summary="STT-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
-async def update_connector_stt(
-    payload: ConnectorSttUpdate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> ConnectorsConfigOut:
-    """Flaches STT-Update fuer Studio-Aktionen (Human/CI/MCP gleiche Endpunkte)."""
-    save_connectors(db, tenant_id, stt=payload.model_dump(exclude_none=True), imap=None)
-    return _connectors_out(db, tenant_id)
-
-
-@router.put("/capture-connectors/imap", response_model=ConnectorsConfigOut, summary="IMAP-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
-async def update_connector_imap(
-    payload: ConnectorImapUpdate,
-    tenant_id: str = Depends(get_tenant_id),
-    db: Session = Depends(get_db),
-) -> ConnectorsConfigOut:
-    """Flaches IMAP-Update fuer Studio-Aktionen (Human/CI/MCP gleiche Endpunkte)."""
-    save_connectors(db, tenant_id, stt=None, imap=payload.model_dump(exclude_none=True))
-    return _connectors_out(db, tenant_id)
-
-
 @router.post("/capture-connectors/stt/test", response_model=ConnectorTestOut, summary="STT-Server testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_stt(
     tenant_id: str = Depends(get_tenant_id),
@@ -1234,7 +941,6 @@ async def test_connector_stt(
     res = SttClient.for_tenant(db, tenant_id).test()
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
 
-
 @router.post("/capture-connectors/imap/test", response_model=ConnectorTestOut, summary="IMAP-Postfach testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_imap(
     tenant_id: str = Depends(get_tenant_id),
@@ -1243,7 +949,6 @@ async def test_connector_imap(
     """Verbindungs-/Login-Probe des IMAP-Postfachs (kein Abruf)."""
     res = MailIngestService(db, tenant_id).test()
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
-
 
 @router.post("/capture-connectors/imap/poll", response_model=ConnectorPollOut, summary="IMAP jetzt abrufen", dependencies=[Depends(require_roles("admin"))])
 async def poll_connector_imap(

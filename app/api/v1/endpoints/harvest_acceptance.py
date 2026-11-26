@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.nuts2_utils import derive_nuts2_from_postal_code, validate_nuts2_code
+from app.core.business_time import business_today
 from app.core.tenant import get_tenant_id
 from app.auth.finance_roles import beleg_read, beleg_write
 from app.auth.deps import get_current_user
@@ -401,7 +402,7 @@ async def create_rohware_acceptance(
     if article is not None:
         article_id = str(article.id)
 
-    delivery_date = date.today()
+    delivery_date = business_today()
     delivery_time: Optional[str] = None
     if payload.datum:
         raw = payload.datum.replace("Z", "+00:00")
