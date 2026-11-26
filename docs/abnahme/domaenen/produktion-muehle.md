@@ -106,7 +106,7 @@ Erzeugt mit `python scripts/domaenen_abnahme.py` aus [`produktion-muehle.yaml`](
 
 ## Maskenabnahme (maschinell)
 
-Bereiche im Inventar: futter, futtermittel, produktion, rezepte. Routen: 38 — screen_definition 1, studio_versioniert 37.
+Bereiche im Inventar: futter, futtermittel, produktion, rezepte. Routen: 38 — screen_definition 3, studio_versioniert 35.
 
 Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 10:
 
