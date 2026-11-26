@@ -1165,7 +1165,8 @@ class DocflowService:
                 gruppen = self._steuergruppen_der_rechnung(doc_id, nummer)
                 finance_result = {"journal_entry_id": buche_verkaufsgutschrift(
                     self.db, self.tenant_id, nummer=nummer, datum=header.get("document_date"), gruppen=gruppen,
-                    rechnungsnummer=self._bezugsnummer(doc_id, "invoice_to_credit_memo"), posted_by=wer)}
+                    rechnungsnummer=self._bezugsnummer(doc_id, "invoice_to_credit_memo"), posted_by=wer,
+                    kunden_id=header.get("customer_id"))}
             elif doc_type in {"purchase_invoice", "purchase_credit_memo"}:
                 if not str(header.get("supplier_id") or ""):
                     raise ValidationFailedError("Ein Einkaufsbeleg wird nur mit Lieferant gebucht.")

@@ -22,6 +22,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ValidationFailedError
+from app.finance.personenkonto import debitorkonto_fuer_kunde, kreditorkonto_fuer_lieferant
 from app.finance.steuerschluessel import Steuergruppe, Steuerklaerung, Vorsteuergruppe
 from app.services.finance_eingangsrechnung_buchung import kreditorenkonto
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -56,7 +57,7 @@ def _mindere_op(db: Session, tenant_id: str, konto_typ: str, rechnungsnummer: Op
 
 def buche_verkaufsgutschrift(
     db: Session, tenant_id: str, *, nummer: str, datum: Any, gruppen: list[Steuergruppe],
-    rechnungsnummer: Optional[str], posted_by: Optional[str],
+    rechnungsnummer: Optional[str], posted_by: Optional[str], kunden_id: Optional[str] = None,
 ) -> str:
     """Erloes netto und Umsatzsteuer je Steuerschluessel im Soll, Forderungen brutto im Haben."""
     brutto = sum((g.netto + g.steuer for g in gruppen), Decimal("0"))
@@ -72,7 +73,8 @@ def buche_verkaufsgutschrift(
                            "credit_amount": 0,
                            "description": f"Umsatzsteuerberichtigung {g.satz.normalize():f} % Steuerschluessel {g.tax_code}"})
     zeilen.append({"account_id": fin.account_id_for_number(FORDERUNGEN), "debit_amount": 0, "credit_amount": float(brutto),
-                   "description": f"Forderungsminderung {nummer}"})
+                   "description": f"Forderungsminderung {nummer}",
+                   "partner_konto": debitorkonto_fuer_kunde(db, tenant_id, kunden_id)})  # Personenkonto (M3)
     tag = _tag(datum)
     journal = fin.create(
         entry_number=f"GS-{nummer}"[:20], description=f"Gutschrift {nummer}", entry_date=tag, lines=zeilen,
@@ -94,7 +96,9 @@ def buche_einkaufsgutschrift(
     fin = FinanceTransactionService(db, tenant_id, commit_on_success=False)
     zeilen: list[dict[str, Any]] = [{
         "account_id": fin.account_id_for_number(kreditorenkonto(db, tenant_id, beleg or {})),
-        "debit_amount": float(brutto), "credit_amount": 0, "description": f"Verbindlichkeitsminderung {nummer}"}]
+        "debit_amount": float(brutto), "credit_amount": 0, "description": f"Verbindlichkeitsminderung {nummer}",
+        "partner_konto": kreditorkonto_fuer_lieferant(  # Personenkonto (M3)
+            db, tenant_id, (beleg or {}).get("supplierId") or (beleg or {}).get("customerId"))}]
     for g in gruppen:
         zeilen.append({"account_id": fin.account_id_for_number(g.aufwandskonto), "debit_amount": 0,
                        "credit_amount": float(g.netto), "description": f"Aufwandsminderung Steuerschluessel {g.tax_code}"})

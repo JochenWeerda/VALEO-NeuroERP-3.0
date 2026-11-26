@@ -1,14 +1,14 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 778,
+  "tables": 779,
   "by_class": {
-   "A": 713,
+   "A": 714,
    "B": 22,
    "C": 8,
    "D": 35
   },
-  "rls_enabled": 681,
+  "rls_enabled": 682,
   "tenant_types": {
    "character varying": 335,
    "character varying(100)": 9,
@@ -19,7 +19,7 @@
    "character varying(50)": 1,
    "character varying(64)": 103,
    "character varying(80)": 24,
-   "text": 113,
+   "text": 114,
    "uuid": 4
   }
  },
@@ -5139,6 +5139,14 @@
   },
   {
    "table": "domain_shared.lieferavise",
+   "class": "A",
+   "tenant_type": "text",
+   "rls": true,
+   "force_rls": false,
+   "policies": 4
+  },
+  {
+   "table": "domain_shared.loeschauftraege",
    "class": "A",
    "tenant_type": "text",
    "rls": true,
