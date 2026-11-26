@@ -731,6 +731,11 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Gate-D +12 Create: Kunde/Service-Anfrage/Schulung/Mitarbeiter; Einkauf Anfrage/Angebot/Lieferant; Debitor/Kontakt/Opportunity; Field-Service; Permanente Inventur
 - Gate-D → **1004/1004 passed** (502 Masken × Hell/Dunkel)
 
+### Batch 108 — Native-Create Smoke (Stammdaten/Agrar/Finance/Einkauf)
+
+- Gate-D +12 Create: Artikel-Stoffstrom/Bestandteile/Verpackung/Individuelle Nr.; Rohwarengruppen/Vermehrungsverträge/Dünger/Saatgut; Bank/Kreditor; Anlieferavis/Auftragsbestätigung
+- Gate-D → **1028/1028 passed** (514 Masken × Hell/Dunkel)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -738,7 +743,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **1004/1004 passed** (502 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **1028/1028 passed** (514 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
