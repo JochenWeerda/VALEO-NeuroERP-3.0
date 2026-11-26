@@ -775,6 +775,11 @@ Routen `hand_built` weiter **0**. Die 37 Seiten-Dateien sind keine offenen Fachm
 
 Inventar-Messung: `python scripts/mask_route_migration_inventory.py` → `docs/architecture/uix/mask-route-migration-inventory.md`.
 
+### Batch 114 — NativeList Pfad-/Screen-Abdeckung
+
+- Gate-D +12: Field-Service-Edit; Kalkulation/Charge/Consent/DSGVO-Public; Sales-Listen (Lieferschein/Angebot/Rechnung/Auftrag); contracts-v2; weighing; policy-manager
+- Gate-D → **1160/1160 passed** (580 Masken × Hell/Dunkel)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -782,7 +787,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **1136/1136 passed** (568 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **1160/1160 passed** (580 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
