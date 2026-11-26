@@ -36,7 +36,7 @@ id: produktion-muehle
 titel: Produktion und Muehle (Rezeptur bis Chargenfreigabe)
 reifematrix: D13
 l3_referenz: l3-produktion-referenz
-erhoben: 2026-11-23
+erhoben: 2026-11-26
 pruefer: Cursor
 bereiche: [produktion, futter, futtermittel, rezepte]
 screen_domains: [produktion, futtermittel, rezepte]
@@ -325,33 +325,25 @@ prozesse:
     l3: PRODUKTION > Chargen > Nachbearbeitung "Chargen-Nummern bearbeiten" — Filter Artikel, Chg.-Nr., Chrg. Lief.; Tabelle mit Lieferantencharge, Anerkennungs-Nr., Freigabe, Freigabe-Datum
     routen: [futtermittel/charge-verfolgung]
     rolle: LAGER (SCHREIBEN["LAGER"]) fuer /chargen; AGRAR (SCHREIBEN["AGRAR"]) fuer Freigabeentscheidung; Mandant aus dem Token
-    nachweise: []
+    nachweise:
+      - tests/test_m4_pm_chargen_mandant.py::test_release_decision_aktualisiert_ops_chargen_nur_im_mandanten
+      - tests/test_m4_pm_chargen_mandant.py::test_charge_delete_blockiert_freigegebene
+      - tests/test_m4_pm_chargen_mandant.py::test_charge_delete_blockiert_produktionsbezug
+      - tests/test_m4_pm_chargen_mandant.py::test_charge_delete_erlaubt_ohne_bindung
     status: teilweise
     befund: >-
       Die Maske produktion/chargen-bearbeiten (Seite chargen-bearbeiten.tsx, nicht in route-aliases.json) liest /api/v1/chargen und
       bietet Kennzeichen pflegen (PATCH lieferanten_charge, anerkennungs_nr) und Auswahl freigeben (POST /chargen/operator/
       bulk-release mit Pflichtgrund; schreibt je Charge ops_chargen_audit mit Akteur aus dem Token und verlangt qualitaetsstatus
-      freigegeben, sonst 409). Es gibt keinen Test gegen PostgreSQL fuer /chargen: test_charges_api.py akzeptiert (200, 201, 422)
-      und zaehlt nicht; test_feed_chain_003.py (Freigabeentscheidung) ist MagicMock; die Chargen-Tests in test_feed_production_chain.py
-      lesen nur die Charge. Im Quelltext: (1) quality_lot_binding.create_release_decision setzt
-      "UPDATE domain_ops.ops_chargen SET qualitaetsstatus = :qs WHERE chargen_id = :cid" ohne tenant_id; chargen_id ist nur je
-      Mandant eindeutig (uq_ops_chargen_tenant_charge), ops_chargen hat keine RLS (rls-exceptions.json), und create_lot nimmt lot_id
-      frei vom Client — ein Mandant mit gleichnamigem Lot kann die Qualitaetsfreigabe fremder Chargen setzen oder entziehen; die
-      Freigebenden-Angabe decided_by kommt aus dem Body. (2) PATCH/PUT /chargen/{id} setzt qualitaetsstatus und status auf
-      freigegeben ohne Pruefstatus, ohne Grund, ohne Audit-Eintrag und mit der Lagerrolle (Charge.rohstoffe, produktionsprozess und
-      digitales_mischbuch sind ebenfalls ueber ChargeUpdate beschreibbar); der bulk-release prueft nur das so gesetzte Feld.
-      (3) DELETE /chargen/{id} loescht die Zeile hart (ChargeRepository.delete) — mit Mischprotokoll und ohne Pruefung auf
-      Produktionsauftrag (futtermittel_produktionsauftraege.charge_id), Lagerbewegung oder Lieferung; ohne Audit, ohne Fremdschluessel
-      auf ops_chargen. Die Maske selbst fragt Kennzeichen und Grund per window.prompt ab und kehrt bei zu kurzem Grund ohne Meldung
-      zurueck. Die Route futtermittel/charge-verfolgung ist eine Exportliste auf /futter/chargen mit Spaltenschluesseln
-      (chargenNummer, futtermittel, herkunft ...), die nicht zu den gelieferten Feldern (chargen_id, artikel, menge, status,
-      eingang) passen.
+      freigegeben, sonst 409). create_release_decision aktualisiert ops_chargen nur noch mit tenant_id (M4-PM-P0);
+      ChargeRepository.delete sperrt freigegebene Chargen und Chargen mit Produktionsauftrag (409). Beleg:
+      test_m4_pm_chargen_mandant.py (Unit/Mock). Offen: PATCH/PUT kann qualitaetsstatus weiter ohne Prueflauf setzen;
+      Loeschen ohne Audit/Lagerbewegungspruefung; kein PostgreSQL-Vertragstest; decided_by aus dem Body; ops_chargen ohne RLS.
+      Die Route futtermittel/charge-verfolgung ist eine Exportliste mit Spaltenschluesseln, die nicht zur Quelle passen.
     luecken:
-      - text: Freigabeentscheidung aktualisiert ops_chargen ohne tenant_id (quality_lot_binding.create_release_decision) — fremde Chargen mit gleicher Nummer koennen freigegeben oder gesperrt werden, ops_chargen ohne RLS
-        prio: P0
-      - text: Charge loeschen (DELETE /chargen/{id}) entfernt die Zeile hart samt Mischprotokoll, ohne Pruefung auf Produktionsauftrag, Lagerbewegung oder Lieferung und ohne Audit
-        prio: P0
       - text: Freigabe ohne Prueflauf — PATCH setzt qualitaetsstatus und status freigegeben ohne Grund, Audit und Qualitaetsrolle; Massenfreigabe prueft nur das so gesetzte Feld; Vier-Augen-Prinzip und Laborbezug fehlen
+        prio: P1
+      - text: Charge loeschen ohne Audit und ohne Pruefung auf Lagerbewegung/Lieferung (Produktionsbezug und Freigabe sind gesperrt)
         prio: P1
       - text: Kein Test gegen PostgreSQL fuer /chargen (Anlegen, Aendern, Freigabe, Massenfreigabe, Loeschen, Mandant); test_charges_api.py akzeptiert (200, 201, 422)
         prio: P2

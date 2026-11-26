@@ -407,8 +407,11 @@ async def delete_charge(
     tenant_id: str = Depends(get_tenant_id),
 ):
     repo = ChargeRepository(db, tenant_id)
-    if not repo.delete(charge_id):
-        raise HTTPException(status_code=404, detail="Charge not found")
+    try:
+        if not repo.delete(charge_id):
+            raise HTTPException(status_code=404, detail="Charge not found")
+    except ValueError as fehler:
+        raise HTTPException(status_code=409, detail=str(fehler)) from fehler
 
 
 @router.get("/stats/summary", response_model=ChargeOut, summary="Charge stats abrufen")
