@@ -2763,7 +2763,7 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.ernte_annahme.write",
-          "commandEndpoint": "/api/v1/agrar/harvest-acceptance",
+          "commandEndpoint": "/api/v1/agrar/harvest-acceptance/",
           "method": "POST",
           "stubReason": null
         },
@@ -6210,7 +6210,7 @@
           "humanApprovalRequired": false,
           "requiresConfirmation": false,
           "permission": "agrar.settlement.write",
-          "commandEndpoint": "/api/v1/agrar/settlements",
+          "commandEndpoint": "/api/v1/agrar/settlements/",
           "method": "POST",
           "stubReason": null
         },

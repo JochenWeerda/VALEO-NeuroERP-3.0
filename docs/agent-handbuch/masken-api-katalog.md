@@ -1243,7 +1243,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `entity` → `/api/v1/gap/pipeline/status`
+- `entity` → `/api/v1/gap/pipeline/status?year=2026`
 
 **Beispiel-Prompts:**
 
@@ -2815,7 +2815,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 | key | label | danger | Human-Approval | commandEndpoint |
 |---|---|---|---|---|
-| `anlegen` | Annahme anlegen | moderate | nein | `/api/v1/agrar/harvest-acceptance` |
+| `anlegen` | Annahme anlegen | moderate | nein | `/api/v1/agrar/harvest-acceptance/` |
 | `speichern` | Annahme speichern | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}` |
 | `berechnen` | Berechnen | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}/calculate` |
 | `freigeben` | Freigeben | moderate | nein | `/api/v1/agrar/harvest-acceptance/{entity_id}/release` |
@@ -6596,7 +6596,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `billing_preview` | Abrechnungsgewicht Vorschau | moderate | nein | `/api/v1/agrar/settlements/billing-weight/preview` |
 | `drying_compute` | Trocknung berechnen | moderate | nein | `/api/v1/agrar/settlements/drying/compute` |
 | `settlement_preview` | Abrechnung Vorschau | moderate | nein | `/api/v1/agrar/settlements/preview` |
-| `anlegen` | Abrechnung anlegen | moderate | nein | `/api/v1/agrar/settlements` |
+| `anlegen` | Abrechnung anlegen | moderate | nein | `/api/v1/agrar/settlements/` |
 | `post_fibu` | FiBu buchen | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/post-fibu` |
 | `freigabe` | Freigabe | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/freigabe` |
 | `stornieren` | Stornieren | moderate | nein | `/api/v1/agrar/settlements/{entity_id}/cancel` |

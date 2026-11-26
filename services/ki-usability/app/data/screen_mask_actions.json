@@ -2139,7 +2139,7 @@
       "source": {
         "screenId": "agrar/ernte-annahme-erfassung",
         "actionKey": "anlegen",
-        "commandEndpoint": "/api/v1/agrar/harvest-acceptance",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/",
         "navigationRoute": null,
         "command": null,
         "method": "POST",
@@ -4034,7 +4034,7 @@
       "source": {
         "screenId": "annahme/abrechnung",
         "actionKey": "anlegen",
-        "commandEndpoint": "/api/v1/agrar/settlements",
+        "commandEndpoint": "/api/v1/agrar/settlements/",
         "navigationRoute": null,
         "command": null,
         "method": "POST",
