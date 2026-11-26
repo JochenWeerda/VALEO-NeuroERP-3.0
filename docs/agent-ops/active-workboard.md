@@ -1353,3 +1353,6 @@ Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_disc
 Nutzerentscheid 26.11.: Personenkonten im Hauptbuch. journal_entry_lines.partner_konto (Migration personenkonto_journalzeile_20261126); FinanceTransactionService nimmt es als Zeilenzusatz; Ausgangsrechnung (SalesPostingService.post_ausgangsrechnung_with_op) und Eingangsrechnung setzen Debitor-/Kreditorkonto des Partners; app/finance/personenkonto.py: Sammelkonten je Kontenrahmen, Saldenliste je Personenkonto. Fix Nebenbuchabstimmung: Kreditoren suchte LIKE '44%' (im SKR03 Erloese), Debitoren LIKE '14%' (im SKR04 Vorsteuer) -> Sammelkonto des Kontenrahmens. Weitere Buchungswege (Gutschriften, Abrechnungen) folgen.
 ## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
 Nutzerentscheid 26.11.: guenstigerer Preis gilt. Kaskadenstufe aktion (Preisliste Typ aktion, nach der Preisliste, nur wenn guenstiger; Kontrakt/Kundenpreis gehen vor; nicht additiv). Spiegeluebernahme aktion/aktionspreis aus WWS_AKTIONSPREISE; auf Lager/Kundenauswahl beschraenkte Aktionen = Fehlerzeile.
+
+## M6-SALDENABGLEICH-20261126 — zur Abnahme, Claude Code (M6)
+Monatlicher Saldenabgleich L3 (DEBITOREN/KREDITOREN, Saldo zum Monatsende) gegen personenkonto.saldenliste je Personenkonto: gleich/abweichend/fehlt in VALEO, fehlt in L3, Zeilen ohne Personenkonto; liest nur. Gestapelt auf #223.

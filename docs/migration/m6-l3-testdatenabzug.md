@@ -161,6 +161,17 @@ WHERE o.KONTONR IN (/* DEBITORKTO aus 2.4 */)
 Ob `OFFEN` den offenen Betrag oder ein Kennzeichen fuehrt, zeigt das erste Ergebnis. Danach wird das Profil-Mapping
 (`OFFENBETRAG` -> `offener_betrag`) festgelegt. `BUCHUNGSTEXT`, `INFOTEXT` und `CMAHNTEXT` werden nicht gezogen.
 
+### 2.5a Monatssalden der gezogenen Konten
+
+```sql
+SELECT 'kontosaldo' AS TYP, d.DEBITORNR || '/2026-11' AS QUELLE, d.DEBITORNR AS KONTO, d.JAHR, 11 AS MONAT,
+       d.EBVORTRAG + d.SIST01 + d.SIST02 /* ... bis SIST11 */ AS SALDO
+FROM DEBITOREN d WHERE d.JAHR = 2026 AND d.DEBITORNR IN (/* DEBITORKTO aus 2.4 */)
+```
+
+Ob `SIST` die Monatsbewegung oder den kumulierten Stand fuehrt, zeigt das erste Ergebnis. Danach wird die Summe
+angepasst. Kreditoren entsprechend aus `KREDITOREN`/`KREDITORNR`.
+
 ### 2.6 Geschaeftsvorfaelle
 
 Fuer den Belegabgleich je Belegkopf eine Zeile mit `TYP 'beleg'`. Die Abfrage setzt die VALEO-Belegart, z. B. fuer
