@@ -1,7 +1,7 @@
-# Architecture Index — generiert 2026-11-25
+# Architecture Index — generiert 2026-11-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-25T16:11:35Z'
+generated_at: '2026-11-26T06:23:12Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1405,6 +1405,7 @@ domains:
     - fints_connector
     - ist_aggregation_service
     - l3_report_catalog_service
+    - loeschpruefung
     - meldewesen_lifecycle_service
     - open_item_read_source
     - payment_run_freigabe
@@ -2096,6 +2097,10 @@ domains:
     - scheduler_service
     - secrets_vault
     - security_observability
+    - spiegel_abgleich_basis
+    - spiegel_beleg_abgleich
+    - spiegel_op_abgleich
+    - spiegel_preise
     - spiegel_uebernahme
     - stt_client
     - studio_catalog_contracts
@@ -2398,8 +2403,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1147
   frontend_routes_mapped: 1147
-  backend_services_total: 354
-  backend_services_mapped: 354
+  backend_services_total: 359
+  backend_services_mapped: 359
   backend_endpoints_total: 474
   backend_endpoints_mapped: 474
 unmapped:

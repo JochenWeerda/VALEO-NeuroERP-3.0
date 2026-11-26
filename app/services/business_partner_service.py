@@ -748,6 +748,7 @@ class BusinessPartnerService:
         partner_id: Optional[str] = None,
         neu_erzwingen: bool = False,
         rollenfelder: Optional[dict[str, Any]] = None,
+        konto: Optional[str] = None,
     ) -> str:
         """Partnerbruecke (ADR Geschaeftspartnerstamm, Stufe 1): Partner-ID fuer eine neue Kunden- oder
         Lieferantenrolle.
@@ -780,7 +781,7 @@ class BusinessPartnerService:
                 {"pid": partner_id, "tid": self.tenant_id},
             )
             self._rollenfelder_setzen(partner_id, rollenfelder)
-            self._konto_vergeben(partner_id, flag)
+            self._konto_vergeben(partner_id, flag, konto)
             return partner_id
         neu = str(uuid7())
         flags = [f for f in self._flags_ohne_default() if f != flag]
@@ -798,7 +799,7 @@ class BusinessPartnerService:
              "email": email or None, "tel": phone or None},
         )
         self._rollenfelder_setzen(neu, rollenfelder)
-        self._konto_vergeben(neu, flag)
+        self._konto_vergeben(neu, flag, konto)
         return neu
 
     def naechste_kontonummer(self, flag: str) -> str:
@@ -842,8 +843,12 @@ class BusinessPartnerService:
         )
         return f"{kreis.prefix}{frei:0{kreis.digit_count}d}"
 
-    def _konto_vergeben(self, partner_id: str, flag: str) -> None:
-        """Konto der Rolle vergeben, wenn der Partner noch keins hat; ein vorhandenes bleibt unveraendert."""
+    def _konto_vergeben(self, partner_id: str, flag: str, vorgabe: Optional[str] = None) -> None:
+        """Konto der Rolle vergeben, wenn der Partner noch keins hat; ein vorhandenes bleibt unveraendert.
+
+        ``vorgabe``: uebernommene Kontonummer (L3-Spiegelbetrieb, Nutzerentscheid 25.11.2026) statt des Nummernkreises.
+        Weicht sie von einem schon vergebenen Konto ab, wird abgelehnt - vergebene Konten aendern sich nie.
+        """
         spalte = KONTOKREISE[flag][0]
         vorhanden = self.db.execute(
             text(f"SELECT {spalte} FROM domain_crm.business_partners "  # nosec B608
@@ -851,11 +856,13 @@ class BusinessPartnerService:
             {"pid": partner_id, "tid": self.tenant_id},
         ).scalar()
         if vorhanden:
+            if vorgabe and str(vorhanden) != str(vorgabe):
+                raise ConflictError(f"Partner hat bereits das Konto {vorhanden} ({spalte}); Vorgabe {vorgabe} abgelehnt.")
             return
         self.db.execute(
             text(f"UPDATE domain_crm.business_partners SET {spalte} = :nr, updated_at = NOW() "  # nosec B608
                  "WHERE partner_id = :pid AND tenant_id = :tid"),  # reviewed-safe: Spalte aus KONTOKREISE
-            {"nr": self.naechste_kontonummer(flag), "pid": partner_id, "tid": self.tenant_id},
+            {"nr": vorgabe or self.naechste_kontonummer(flag), "pid": partner_id, "tid": self.tenant_id},
         )
 
     def _rollenfelder_setzen(self, partner_id: str, rollenfelder: Optional[dict[str, Any]]) -> None:

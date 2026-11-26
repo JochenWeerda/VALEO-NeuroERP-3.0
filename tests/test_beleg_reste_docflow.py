@@ -203,8 +203,9 @@ def _alle_felder(knoten):
 
 
 def test_innovation_nach_der_ersten_lieferung(k):
-    from datetime import date, timedelta
+    from datetime import timedelta
 
+    from app.core.business_time import business_today
     from app.services.procurement_service import ProcurementService
 
     artikel, lager = str(uuid.uuid4()), str(uuid.uuid4())
@@ -216,8 +217,11 @@ def test_innovation_nach_der_ersten_lieferung(k):
                          bausteine='{"bestellfall": {"bestellfall": "innovation"}}')
     k["db"].execute(sa.text("UPDATE domain_docflow.document_headers SET document_date = NOW() - INTERVAL '40 days' "
                             "WHERE id = :id"), {"id": probe})  # bestellt vor 40 Tagen, geliefert vor 30
-    vor_dreissig = date.today() - timedelta(days=30)
-    for art, menge, tag in (("in", 10, vor_dreissig), ("out", -8, date.today())):
+    # Geschaeftsdatum wie der Dienst (Europe/Berlin): date.today() laeuft in der CI in UTC und lag zwischen 23 und 24
+    # Uhr UTC einen Tag hinter dem Dienst (26.11.2026: 31 statt 30 Tage).
+    heute = business_today()
+    vor_dreissig = heute - timedelta(days=30)
+    for art, menge, tag in (("in", 10, vor_dreissig), ("out", -8, heute)):
         k["db"].execute(sa.text(
             "INSERT INTO domain_inventory.inventory_stock_movements (id, article_id, warehouse_id, movement_type, "
             "quantity, previous_stock, new_stock, tenant_id, movement_date) "

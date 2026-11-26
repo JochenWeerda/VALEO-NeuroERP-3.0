@@ -55,16 +55,21 @@ unten beruht auf Tabellen- und Spaltennamen, die **Bedeutung der Spalten ist am 
 | Artikel | `WWS_ARTIKEL` (180 Spalten, u. a. ARTIKELNR, ARTIKELGRP, BEZEICHN1/2, ME1, GESPERRT, BEWERTART, HAUPTARTIKELNR) | `domain_inventory.articles` | **umgesetzt** (Kernfelder) |
 | Artikelgruppe | `WWS_ARTIKELGRP` (GRUPPE, BEZEICHNUNG, EINKKONTO, ERLKONTO, UMSATZGRP, ARTNRVON/ARTNRBIS/ARTNRLFD) | `domain_shared.warengruppen` (Hierarchie Haupt/Ober/Waren) | offen - Zuordnung zur dreistufigen Hierarchie ungeklaert |
 | Alternativ-Einheiten | `WWS_ARTIKELEINH` (EINHSCHL, UMRECHNUNG, UMR_ZU_EINH, GEBINDE, RUNDEN) | Gebindefaktoren Stufe 3 (#191) | offen - Umrechnungsrichtung ungeklaert |
-| Kunden | `KUNDEN` (KUNDENNR, KUNDNAME, USTID, SPERRE; Anschrift ueber ADRNR1 aus `ADRESSEN`, im Abzug verbunden) | `domain_crm.customers` (fuehrt die Debitoren im Uebergang) | **umgesetzt** (Kernfelder); DEBITORKTO ohne Ziel bis ADR Stufe 3b (`business_partners.debtor_account`), im Differenzbericht als nicht zugeordnet |
-| Lieferanten | `KUNDEN` mit KREDITORKTO, `WWS_ARTLIEF`, `WWS_LIEFERANTEN_PREISE` | Lieferantenstamm, Ziel Geschaeftspartner | offen - Zielstamm im Partnermodell klaeren |
-| Preise / Konditionen | `WWS_ARTPREIS1/2`, `WWS_PREISTAB1/2`, `WWS_KUNDEN_PREISE`, `WWS_PREISLISTE1-3`, `WWS_AKTIONSPREISE`, `KONDITIONEN`, `WWS_RABATTSTAFFEL1/2` | Preisfindung (pricing) | offen |
-| Bestaende / Bewegungen | `WWS_ARTBESTAND`, `WWS_LAGERBESTAND`, `WWS_ARTBEWEGUNG*`, `WWS_LAGERPLATZ` | Bestandsjournal ueber den Buchungsdienst | offen - Anfangsbestand als Bestandsvortrag (#206) |
+| Kunden | `KUNDEN` (KUNDENNR, KUNDNAME, USTID, SPERRE; Anschrift ueber ADRNR1 aus `ADRESSEN`, im Abzug verbunden) | `domain_crm.customers` (fuehrt die Debitoren im Uebergang) | **umgesetzt** (Kernfelder); DEBITORKTO wird das Konto des Geschaeftspartners (`business_partners.debtor_account`, Nutzerentscheid 25.11.2026: L3-Nummern uebernehmen); Partner ueber die Partnerbruecke, vergebenes oder abweichendes Konto = Fehlerzeile |
+| Lieferanten | `KUNDEN` mit KREDITORKTO (Anschrift aus `ADRESSEN`) | `domain_einkauf.lieferanten` (fuehrender Kreditorenstamm laut ADR) | **umgesetzt**: KREDITORKTO wird `creditor_account` am Partner; Landwirt als Kunde und Lieferant = ein Partner mit beiden Konten; Lieferanten-Artikel und -Preise (`WWS_ARTLIEF`, `WWS_LIEFERANTEN_PREISE`) offen |
+| Preise | `WWS_PREISTAB1` -> Preisliste; `WWS_ARTPREIS1/2` -> Preislistenposition (Gueltigkeit, Staffel ab Menge); `WWS_KUNDEN_PREISE` -> Preisvereinbarung am Partner | `domain_pricing.price_lists`/`price_list_items`, `domain_crm.business_partner_price_agreements` | **umgesetzt** (`app/services/spiegel_preise.py`): Preisbezug je Preiseinheit wird verlustfrei in den Einzelpreis umgerechnet (sonst Fehlerzeile); Kundenpreis mit eigenem Preisbezug |
+| Kundenrabatte | `WWS_KUNDRABATT` (KUNDENNR, ARTIKELNR, RABATT, RABATTART, LISTENR) | `business_partner_discount_items` = Stufe `customer_article_discount` der Preiskaskade | **umgesetzt** (nur Prozentrabatte; welche RABATTART-Codes Prozent bedeuten, am Abzug bestaetigen) |
+| Aktionen | `WWS_AKTIONSPREISE` (AKTIONNR, DATUMVON/BIS, ARTIKELNR, PREISNETTO, LAGER, KUNDENSELEKTION) | Preisliste Typ `aktion` + Kaskadenstufe `aktion` (guenstigerer Preis gilt, Nutzerentscheid 26.11.2026) | **umgesetzt**; auf Lager oder Kundenauswahl beschraenkte Aktionen = Fehlerzeile (in VALEO nicht abbildbar) |
+| Rabattstaffeln, Rabattlisten | `WWS_RABATTSTAFFEL1/2`, `WWS_RABATTLISTE`, Zu-/Abschlaege | Preisfindung | offen |
+| (kein Handel) | `KONDITIONEN` gehoert zur Lohnabrechnung (PERSONALNR, LOHNARTNR) | - | entfaellt |
+| Bestaende | `WWS_ARTBESTAND`, `WWS_LAGERBESTAND` (je Artikel und Lager) | Bestandsjournal ueber den Buchungsdienst | **umgesetzt**: erster Abzug bucht den Anfangsbestand (`opening_balance`, Schluessel `spiegel:bestand:`), jeder weitere Abzug vergleicht nur - Abweichung = Felddifferenz `menge`, keine Korrekturbuchung |
+| Bewegungen | `WWS_ARTBEWEGUNG*`, `WWS_LAGERPLATZ` | Belege des Spiegelzeitraums | offen - entstehen in VALEO aus den nachvollzogenen Belegen |
 | Angebote | `WWS_ANGEBOT`, `WWS_ANGEBOT_POS`, `WWS_KAUFANGEBOT*` | DocFlow | offen |
 | Auftraege | `WWS_VERKAUF1/2`, `AUFTRAG` | DocFlow | offen |
 | Lieferscheine | `WWS_VLIEFER1/2` (Verkauf), `WWS_ELIEFER1/2` (Einkauf) | DocFlow | offen |
 | Bestellungen | `WWS_BESTELLUNG1-3` | DocFlow | offen |
 | Rechnungen | `WWS_ARECHNUNG1-5` (Ausgang), `WWS_EINKAUF1/2`, `RECHNUNG_EINGANG` | DocFlow, Buchung ueber Finance | offen |
-| Offene Posten | `FIBU*`-Tabellen (u. a. `FIBUKUNDEN`), genaue Tabelle ungeklaert | Debitoren-/Kreditoren-OP | offen - Tabelle bestimmen |
+| Offene Posten | `FIBU_OP1` (KONTONR, RECHNNR, RECHNBETRAG, KZSH, OFFEN, MAHNSTUFE); Kontensalden je Jahr/Monat in `DEBITOREN`/`KREDITOREN` (EBVORTRAG, SIST01-12) | `domain_erp.offene_posten` ueber das Partnerkonto | **Abgleich umgesetzt** (`app/services/spiegel_op_abgleich.py`, liest nur): gleich / Betrag abweichend / fehlt in VALEO / fehlt in L3, Salden je Konto. Uebernahme der Anfangs-OPs offen - gehoert zum Saldenvortrag unter Finance |
 | Kontrakte | `WWS_KONTRAKT1-6`, `WWS_KS_KONTRAKT*` | Kontrakte (Agrar) | offen |
 | Dokumente | `DOKUVERWALTUNG`, `DOKVERW_DOCS`, `WWS_ARTIKEL_UNTERLAGEN`, `*_UNTERLAGEN` | DMS (Paperless) mit Belegbezug | offen |
 
@@ -77,6 +82,10 @@ unten beruht auf Tabellen- und Spaltennamen, die **Bedeutung der Spalten ist am 
 5. Belege des Spiegelzeitraums: Angebot, Auftrag, Lieferschein, Rechnung, Bestellung, Kontrakt; je Beleg Quellreferenz
    und Belegkette.
 6. Taeglicher Abgleich (Belege, Betraege, Bestaende) und monatlicher Abgleich (offene Posten, Journal, UStVA).
+   Belegabgleich umgesetzt (`app/services/spiegel_beleg_abgleich.py`, liest nur): Ein nachvollzogener Beleg traegt
+   `source_system = 'l3'` und `source_ref = <L3-Belegnummer>`. Je L3-Beleg wird er als gleich, abweichend (Datum,
+   netto, brutto) oder nicht nachvollzogen eingestuft. Dazu kommen die L3-Belege in VALEO, die im Abzug fehlen, und
+   die Summen je Belegart.
 
 ## 4. Abnahmekriterien (Nutzer 25.11.2026)
 

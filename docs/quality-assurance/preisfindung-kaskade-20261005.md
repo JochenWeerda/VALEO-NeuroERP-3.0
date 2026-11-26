@@ -190,3 +190,16 @@ Revisionsziel statt `head`. Die Zusammenführung macht, wer zuletzt committet.
    benutzten. Ein ADR zum führenden Preismodell fehlt.
 4. Dass die Kaskade jetzt 503 statt des Listenpreises liefert, macht bisher
    unsichtbare Störungen sichtbar. Beabsichtigt.
+
+## Nachtrag 26.11.2026: Aktion
+
+Nutzerentscheid: Bei einem gueltigen Aktionspreis gilt der guenstigere Preis. Aktionen sind Preislisten vom Typ `aktion`
+(`price_list_type`); die normale Preislistenstufe liest sie nicht. Direkt nach der Preisliste prueft
+`preisfindung_service.aktionspreis` die guenstigste heute gueltige Aktion des Artikels. Sie ersetzt den Listenpreis nur,
+wenn sie guenstiger ist, oder wenn der Artikel weder Listen- noch Grundpreis hat. Quelle ist dann `aktion`.
+
+- Kontrakt und Kundenpreis gehen der Aktion vor, weil sie den Listenpreis danach ersetzen.
+- Wie jede Stufe gilt die Aktion allein. Staffel und Kundenrabatte setzen nicht auf einem Aktionspreis auf.
+
+Tests: `tests/test_preisfindung_kaskade_vertrag.py::TestAktion`.
+

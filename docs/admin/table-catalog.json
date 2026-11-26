@@ -10666,7 +10666,11 @@
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py",
-            "app/services/business_partner_service.py"
+            "app/services/business_partner_service.py",
+            "app/services/spiegel_preise.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_preise.py"
           ]
         },
         "business_partner_dispatch_media": {
@@ -11192,7 +11196,11 @@
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py",
-            "app/services/business_partner_service.py"
+            "app/services/business_partner_service.py",
+            "app/services/spiegel_preise.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_preise.py"
           ]
         },
         "business_partner_pricing_rules": {
@@ -12184,6 +12192,8 @@
             "app/services/kunden_merge.py",
             "app/services/mcp_execution_service.py",
             "app/services/rfq_service.py",
+            "app/services/spiegel_op_abgleich.py",
+            "app/services/spiegel_uebernahme.py",
             "app/services/whatsapp_intake_service.py"
           ],
           "screens": [
@@ -13711,6 +13721,7 @@
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -15472,6 +15483,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
             "app/services/gutschrift_docflow.py",
+            "app/services/loeschpruefung.py",
             "app/services/o2c_chain_service.py",
             "app/services/procurement_match_service.py",
             "app/services/sales_credit_service.py",
@@ -15667,6 +15679,7 @@
             "app/services/gutschrift_docflow.py",
             "app/services/ist_aggregation_service.py",
             "app/services/kontrollkorb.py",
+            "app/services/loeschpruefung.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
@@ -15677,6 +15690,7 @@
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py",
+            "app/services/spiegel_beleg_abgleich.py",
             "app/services/warehouse_service.py",
             "app/services/wareneingang_avis_service.py"
           ],
@@ -18887,10 +18901,12 @@
             "app/services/einkauf_compat_service.py",
             "app/services/mask_rollout_summary_service.py",
             "app/services/mcp_execution_service.py",
-            "app/services/rfq_service.py"
+            "app/services/rfq_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/stammdaten_bearbeiten.py"
+            "app/api/v1/endpoints/stammdaten_bearbeiten.py",
+            "app/services/spiegel_uebernahme.py"
           ]
         },
         "paletten_konto_buchungen": {
@@ -21818,6 +21834,7 @@
             "app/services/finance_saldenvortrag_service.py",
             "app/services/finance_transaction_service.py",
             "app/services/kontrollkorb.py",
+            "app/services/loeschpruefung.py",
             "app/services/open_item_read_source.py",
             "app/services/sales_posting_service.py",
             "app/workers/monthly_report_worker.py",
@@ -22320,6 +22337,7 @@
             "app/services/open_item_read_source.py",
             "app/services/sales_posting_service.py",
             "app/services/scheduler_service.py",
+            "app/services/spiegel_op_abgleich.py",
             "app/services/wf_trigger_service.py"
           ],
           "screens": [
@@ -28294,6 +28312,7 @@
             "app/api/v1/endpoints/legacy_interface_adapters.py",
             "app/api/v1/schemas/legacy_interface_adapters_schemas.py",
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_abgleich_basis.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -28439,6 +28458,7 @@
           ],
           "read_by": [
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_abgleich_basis.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -28518,6 +28538,7 @@
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
+            "app/services/spiegel_abgleich_basis.py",
             "app/services/spiegel_uebernahme.py"
           ]
         },
@@ -28599,6 +28620,7 @@
             "quellschluessel"
           ],
           "read_by": [
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -30465,6 +30487,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/preisfindung_service.py",
             "app/services/procurement_service.py",
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py",
             "app/services/warehouse_service.py",
             "app/services/whatsapp_intake_service.py"
@@ -32864,7 +32887,8 @@
             "app/services/inventory_movement_direction.py",
             "app/services/inventory_stock_balance.py",
             "app/services/mcp_execution_service.py",
-            "app/services/procurement_service.py"
+            "app/services/procurement_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/api/v1/endpoints/compat.py",
@@ -36263,7 +36287,8 @@
             "app/services/customer_reference.py",
             "app/services/docflow_lagerzugang.py",
             "app/services/feed_inventory_link_service.py",
-            "app/services/mask_rollout_summary_service.py"
+            "app/services/mask_rollout_summary_service.py",
+            "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
             "app/seeds/inventory_seed.py"
@@ -46267,10 +46292,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/price_lists.py",
-            "app/services/preisfindung_service.py"
+            "app/services/preisfindung_service.py",
+            "app/services/spiegel_preise.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/price_lists.py"
+            "app/api/v1/endpoints/price_lists.py",
+            "app/services/spiegel_preise.py"
           ]
         },
         "price_lists": {
@@ -46340,10 +46367,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/price_lists.py",
-            "app/services/preisfindung_service.py"
+            "app/services/preisfindung_service.py",
+            "app/services/spiegel_preise.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/price_lists.py"
+            "app/api/v1/endpoints/price_lists.py",
+            "app/services/spiegel_preise.py"
           ]
         },
         "staffelrabatt_artikel": {

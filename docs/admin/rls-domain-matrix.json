@@ -1106,6 +1106,7 @@
     "app/services/sales_match_service.py",
     "app/services/sales_posting_service.py",
     "app/services/sepa_xml_generator.py",
+    "app/services/spiegel_preise.py",
     "app/services/webshop_integration_service.py",
     "app/services/whatsapp_agent_service.py",
     "app/workers/compliance_monitor.py",
@@ -1641,7 +1642,8 @@
     "app/services/finance_period_service.py",
     "app/services/mcp_execution_service.py",
     "app/services/open_item_read_source.py",
-    "app/services/scheduler_service.py"
+    "app/services/scheduler_service.py",
+    "app/services/spiegel_op_abgleich.py"
    ],
    "schreiber": [
     "app/api/v1/endpoints/credit_debit_memos.py",

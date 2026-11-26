@@ -624,6 +624,7 @@ exact_service_stems:
   bewerbung_einwilligung_service: hr
   interessent_service: crm
   payment_run_freigabe: finance
+  loeschpruefung: finance
   etikettendruck_service: inventory
   schaden_service: dms-compliance
   eudr_register_service: dms-compliance
@@ -661,6 +662,10 @@ exact_service_stems:
   l3_report_catalog_service: finance
   legacy_interface_adapter_service: platform
   spiegel_uebernahme: platform
+  spiegel_op_abgleich: platform
+  spiegel_preise: platform
+  spiegel_beleg_abgleich: platform
+  spiegel_abgleich_basis: platform
   mail_workspace_service: crm
   production_control_service: agrar
   recent_documents_service: platform

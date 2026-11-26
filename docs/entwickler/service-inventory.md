@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-25
+last_reviewed: 2026-11-26
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -227,6 +227,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `list_presets` | Registered read-only list selectors, shared by REST, MCP and CLI. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
+| `loeschpruefung` | Loeschpruefung nach den Aufbewahrungsfristen (M7 Loeschkonzept, 26.11.2026) - Bericht, loescht nie. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |
 | `lohn_service` | Payroll calculation and closeout contracts. |
@@ -324,6 +325,10 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_drying_service` | Drying calculation service for Agrar settlements (AGRAR-SET-TROCKNUNG). |
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
+| `spiegel_abgleich_basis` | Gemeinsame Bausteine der lesenden Spiegelabgleiche (OP, Belege) - M6, 26.11.2026. |
+| `spiegel_beleg_abgleich` | Spiegelbetrieb L3 -> VALEO: taeglicher Belegabgleich (M6, 26.11.2026) - liest nur, bucht nie. |
+| `spiegel_op_abgleich` | Spiegelbetrieb L3 -> VALEO: Abgleich der offenen Posten (M6, 25.11.2026) - liest nur, bucht nie. |
+| `spiegel_preise` | Spiegelbetrieb L3 -> VALEO: Preise (M6, 26.11.2026) - preisliste, artikelpreis, kundenpreis, kundenrabatt. |
 | `spiegel_uebernahme` | Spiegelbetrieb L3 -> VALEO: Uebernahme freigegebener Adapter-Batches in die Fachtabellen (M6, 25.11.2026). |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
 | `studio_catalog_contracts` | Bounded metadata for the registered Flow Spine catalog cockpit. |
