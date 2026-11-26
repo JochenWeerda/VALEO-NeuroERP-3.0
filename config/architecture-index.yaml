@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-26T13:21:06Z'
+generated_at: '2026-11-26T14:46:22Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1406,6 +1406,7 @@ domains:
     - fints_connector
     - ist_aggregation_service
     - l3_report_catalog_service
+    - loeschlauf
     - loeschpruefung
     - meldewesen_lifecycle_service
     - open_item_read_source
@@ -2410,8 +2411,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1150
   frontend_routes_mapped: 1150
-  backend_services_total: 360
-  backend_services_mapped: 360
+  backend_services_total: 361
+  backend_services_mapped: 361
   backend_endpoints_total: 477
   backend_endpoints_mapped: 477
 unmapped:

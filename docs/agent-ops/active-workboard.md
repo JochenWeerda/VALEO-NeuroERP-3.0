@@ -1352,6 +1352,8 @@ Taeglicher Belegabgleich L3 gegen nachvollzogene VALEO-Belege (source_system='l3
 ## M6-SPIEGEL-KUNDENRABATTE-20261126 — zur Abnahme, Claude Code (M6)
 Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_discount_items (Kaskadenstufe customer_article_discount), Test bis get_customer_article_discount. Aktionen/Rabattstaffeln offen (Rangfolge in der Kaskade fachlich klaeren); KONDITIONEN ist Lohn, entfaellt.
 
+## M7-LOESCHLAUF-20261126 — zur Abnahme, Claude Code (M7)
+Nutzerentscheid 26.11.: Vier-Augen-Freigabe. Loeschauftrag (domain_shared.loeschauftraege, Migration loeschauftrag_20261126) beantragt -> freigegeben (zweite Person, nie Agent/technisches Konto, DB-Check) -> ausgefuehrt mit Loeschnachweis ohne Inhalte; nur mit Festsetzungsfrist-Datum; erneute Pruefung bei Ausfuehrung; freigeschaltet: Handelsbriefe, Lieferscheine ohne Buchungsbezug.
 ## M3-PERSONENKONTEN-20261126 — zur Abnahme, Claude Code (M3)
 Nutzerentscheid 26.11.: Personenkonten im Hauptbuch. journal_entry_lines.partner_konto (Migration personenkonto_journalzeile_20261126); FinanceTransactionService nimmt es als Zeilenzusatz; Ausgangsrechnung (SalesPostingService.post_ausgangsrechnung_with_op) und Eingangsrechnung setzen Debitor-/Kreditorkonto des Partners; app/finance/personenkonto.py: Sammelkonten je Kontenrahmen, Saldenliste je Personenkonto. Fix Nebenbuchabstimmung: Kreditoren suchte LIKE '44%' (im SKR03 Erloese), Debitoren LIKE '14%' (im SKR04 Vorsteuer) -> Sammelkonto des Kontenrahmens. Weitere Buchungswege (Gutschriften, Abrechnungen) folgen.
 ## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
