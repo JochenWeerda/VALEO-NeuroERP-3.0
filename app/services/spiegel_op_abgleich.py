@@ -17,15 +17,13 @@ Uebernahme: Anfangs-OPs gehoeren zum Saldenvortrag unter der Buchungsautoritaet 
 """
 from __future__ import annotations
 
-import json
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.uuid7 import uuid7
-from app.services.legacy_interface_adapter_service import LegacyAdapterError, LegacyInterfaceAdapterService
+from app.services.spiegel_abgleich_basis import abschliessen, freigegebene_zeilen, neuer_zaehler, protokolliere
 
 OBJEKTART = "offener_posten"
 KONTOARTEN = {"debtor_account": "debitoren", "creditor_account": "kreditoren"}
@@ -62,17 +60,8 @@ def _valeo_posten(db: Session, tenant_id: str, partner_id: str, konto_typ: str) 
 
 def abgleichen(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason: str) -> dict[str, Any]:
     """Gleicht die offenen L3-Posten eines freigegebenen Batches mit VALEO ab. Schreibt nur das Spiegelprotokoll."""
-    batch = db.execute(text(
-        "SELECT profile_key, status FROM domain_integration.legacy_adapter_batches "
-        "WHERE id = :id AND tenant_id = :t"), {"id": batch_id, "t": tenant_id}).mappings().first()
-    if not batch or batch["status"] != "approved" or batch["profile_key"] != "l3_spiegel":
-        raise LegacyAdapterError("Nur freigegebene Batches mit Profil l3_spiegel sind abgleichsfaehig")
-    zeilen = db.execute(text(
-        "SELECT line_no, source_ref, canonical_payload FROM domain_integration.legacy_adapter_staging "
-        "WHERE tenant_id = :t AND batch_id = :b AND validation_status = 'valid' AND record_type = :o "
-        "ORDER BY line_no"), {"t": tenant_id, "b": batch_id, "o": OBJEKTART}).mappings().all()
-
-    zaehler = {"neu": 0, "geaendert": 0, "unveraendert": 0, "fehler": 0}
+    profil, zeilen = freigegebene_zeilen(db, tenant_id, batch_id, OBJEKTART)
+    zaehler = neuer_zaehler()
     konten: dict[str, dict[str, Any]] = {}
     gesehen: dict[tuple[str, str], set[str]] = {}
     for z in zeilen:
@@ -101,11 +90,7 @@ def abgleichen(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason
         except ValueError as exc:
             ergebnis, fehler = "fehler", str(exc)
         zaehler[ergebnis] += 1
-        db.execute(text(
-            "INSERT INTO domain_integration.spiegel_protokoll (id, tenant_id, batch_id, line_no, objektart, "
-            "quellschluessel, ergebnis, differenzen, fehler) VALUES (:id, :t, :b, :n, :o, :k, :e, CAST(:d AS JSONB), :f)"),
-            {"id": str(uuid7()), "t": tenant_id, "b": batch_id, "n": z["line_no"], "o": OBJEKTART,
-             "k": z["source_ref"], "e": ergebnis, "d": json.dumps(differenzen), "f": fehler})
+        protokolliere(db, tenant_id, batch_id, z, OBJEKTART, ergebnis, differenzen, fehler)
 
     fehlt_in_l3 = []
     for (partner, konto_typ), nummern in gesehen.items():
@@ -115,9 +100,7 @@ def abgleichen(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason
                 fehlt_in_l3.append({"konto": konto, "rechnungsnr": nr, "valeo_offen": str(offen)})
     salden = {k: {"konto_typ": v["konto_typ"], "l3": str(v["l3"]), "valeo": str(v["valeo"]),
                   "differenz": str(v["valeo"] - v["l3"])} for k, v in sorted(konten.items())}
-    LegacyInterfaceAdapterService(db, tenant_id)._audit(
-        batch["profile_key"], "mirror_op_reconciled", actor, reason, batch_id=batch_id,
-        details={**zaehler, "fehlt_in_l3": len(fehlt_in_l3)})
-    db.commit()
+    abschliessen(db, tenant_id, batch_id, profil, "mirror_op_reconciled", actor, reason,
+                 {**zaehler, "fehlt_in_l3": len(fehlt_in_l3)})
     return {"batch_id": batch_id, **zaehler, "fehlt_in_l3": fehlt_in_l3, "salden": salden,
             "abweichungsfrei": zaehler["geaendert"] == 0 and zaehler["fehler"] == 0 and not fehlt_in_l3}

@@ -139,6 +139,18 @@ Ob `OFFEN` den offenen Betrag oder ein Kennzeichen fuehrt, zeigt das erste Ergeb
 
 ### 2.6 Geschaeftsvorfaelle
 
+Fuer den Belegabgleich je Belegkopf eine Zeile mit `TYP 'beleg'`. Die Abfrage setzt die VALEO-Belegart, z. B. fuer
+Ausgangsrechnungen:
+
+```sql
+SELECT 'beleg' AS TYP, 'sales_invoice:' || r.RECHNUNGNR AS QUELLE, 'sales_invoice' AS BELEGART,
+       r.RECHNUNGNR AS BELEGNR, r.RECHNDATUM AS DATUM, r.NETTO, r.BRUTTO
+FROM WWS_ARECHNUNG1 r WHERE r.RECHNDATUM BETWEEN '2026-11-01' AND '2026-11-30'
+```
+
+Die Spaltennamen von `WWS_ARECHNUNG1` sind am Ergebnis zu bestaetigen; fuer die uebrigen Belegarten gilt dasselbe
+Muster. In VALEO nachvollzogene Belege tragen `source_system = 'l3'` und `source_ref = <L3-Belegnummer>`.
+
 Belegkoepfe und Positionen (`WWS_VERKAUF1/2`, `WWS_VLIEFER1/2`, `WWS_ARECHNUNG1-5`, `WWS_BESTELLUNG1-3`) werden nach
 denselben Regeln gezogen: nur Belege der Beispielartikel und gezogenen Kunden, nur Nummern, Daten, Mengen und Betraege.
 Die Uebernahme der Belege ist in VALEO noch nicht gebaut; die Abzuege werden bis dahin lokal aufbewahrt.
