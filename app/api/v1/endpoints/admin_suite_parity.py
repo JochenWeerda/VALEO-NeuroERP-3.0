@@ -8,7 +8,6 @@ from typing import Any
 
 from fastapi import APIRouter, Depends
 from app.auth.deps import require_roles
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -17,29 +16,6 @@ from app.services.connector_config import save_connectors
 from app.api.v1.endpoints import admin_suite as suite
 
 router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness", "parity"])
-class ConnectorSttUpdate(BaseModel):
-    enabled: bool | None = None
-    base_url: str | None = None
-    model: str | None = None
-    language: str | None = None
-    api_key: str | None = None  # leer = behalten
-
-
-
-class ConnectorImapUpdate(BaseModel):
-    enabled: bool | None = None
-    host: str | None = None
-    port: int | None = None
-    ssl: bool | None = None
-    user: str | None = None
-    password: str | None = None  # leer = behalten
-    inbox: str | None = None
-    sent: str | None = None
-    own_addresses: str | None = None  # kommagetrennt
-    poll_seconds: int | None = None
-
-
-
 @router.get("/readiness/evidence", summary="Admin Suite readiness Evidenzliste")
 async def list_admin_suite_readiness_evidence() -> list[dict[str, Any]]:
     """Flache Evidenzliste fuer Studio-Cockpit-Tabelle (wie Legacy-Karten)."""
@@ -219,7 +195,7 @@ async def get_capture_connectors_overview(
 
 @router.put("/capture-connectors/stt", response_model=suite.ConnectorsConfigOut, summary="STT-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_connector_stt(
-    payload: ConnectorSttUpdate,
+    payload: suite.ConnectorSttUpdate,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> suite.ConnectorsConfigOut:
@@ -230,7 +206,7 @@ async def update_connector_stt(
 
 @router.put("/capture-connectors/imap", response_model=suite.ConnectorsConfigOut, summary="IMAP-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_connector_imap(
-    payload: ConnectorImapUpdate,
+    payload: suite.ConnectorImapUpdate,
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
 ) -> suite.ConnectorsConfigOut:

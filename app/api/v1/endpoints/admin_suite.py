@@ -868,6 +868,27 @@ class ConnectorsConfigOut(BaseModel):
     stt: ConnectorSttOut
     imap: ConnectorImapOut
 
+
+class ConnectorSttUpdate(BaseModel):
+    enabled: bool | None = None
+    base_url: str | None = None
+    model: str | None = None
+    language: str | None = None
+    api_key: str | None = None  # leer = behalten
+
+
+class ConnectorImapUpdate(BaseModel):
+    enabled: bool | None = None
+    host: str | None = None
+    port: int | None = None
+    ssl: bool | None = None
+    user: str | None = None
+    password: str | None = None  # leer = behalten
+    inbox: str | None = None
+    sent: str | None = None
+    own_addresses: str | None = None  # kommagetrennt
+    poll_seconds: int | None = None
+
 class ConnectorsUpdateIn(BaseModel):
     stt: ConnectorSttUpdate | None = None
     imap: ConnectorImapUpdate | None = None

@@ -33,6 +33,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `admin_reporting_kommandos` | Report-Berechtigungen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/report-berechtigungen``). |
 | `admin_rollen_kommandos` | Rollen als Fachaktion fuer Maske, CLI und MCP (Studio-Liste ``admin/rollen-verwaltung``, 09.11.2026). |
 | `admin_suite` | Read-only Admin Suite production-readiness aggregation. |
+| `admin_suite_parity` | Studio-Parity-Listen und -Overview der Admin Suite (Godfile-Auslagerung). |
 | `agent_autonomie` | Agentenautonomie (ADR-086): Politikfreigabe, Delegation, Qualitaetsmodell, Entscheidungsprotokoll. |
 | `agent_context_api` | — |
 | `agent_tool_contracts` | External agent tool contracts. |
@@ -176,6 +177,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `einkauf_avis_kommandos` | Zeilenaktionen der Anlieferavis-Liste als Fachaktion fuer Maske, CLI und MCP (MASK-STUDIO-ROLLOUT, Welle 1). |
 | `einkauf_bestellvorschlag` | Einkauf â€” Bestell-Vorschlag Endpoints |
 | `einkauf_bestellvorschlag_kommandos` | Bestellvorschlag als Fachaktion fuer Maske, CLI und MCP (Familie ``bestellvorschlag``, 09.11.2026). |
+| `einkauf_compat_writes` | Einkauf Angebot/Anlieferavis Write-Endpunkte (Godfile-Auslagerung aus compat). |
 | `einkauf_kpis` | Einkauf — KPIs |
 | `einkauf_lieferschein` | Einkauf Lieferschein + Frachtauftrag CRUD endpoints. |
 | `erechnung_import` | E-Rechnung Import — ZUGFeRD / XRechnung stub. |
@@ -375,6 +377,7 @@ Vollständiges Inventar aller FastAPI-Endpoint-Module mit Kurzbeschreibung. Besc
 | `pricing` | Pricing calculation endpoints with hierarchical cascade logic. |
 | `pricing_governance` | Pricing Governance Endpoints — Wave 3 AP4 |
 | `process_kernel_api` | Process Kernel API â€” Wave 11 |
+| `process_kernel_idempotency_lists` | Idempotenz-Listen und Overview-Parity der Process-Kernel-API (Godfile-Auslagerung). |
 | `process_map` | P2.1 — Workflow-Prozesskarte API. |
 | `process_mining_api` | — |
 | `process_mining_observation` | — |
