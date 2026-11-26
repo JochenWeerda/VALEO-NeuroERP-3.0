@@ -51,8 +51,8 @@ it.each(['neu', 'new'])('mounts /agrar/saatgut-stamm/%s as native create (kein D
   render(<QueryClientProvider client={client}><MemoryRouter initialEntries={[`/agrar/saatgut-stamm/${creationId}`]}>
     <TypedParamsContext.Provider value={{ id: creationId }}><SaatgutStammPage /></TypedParamsContext.Provider>
   </MemoryRouter></QueryClientProvider>)
-  // Ohne creation-Block in der ScreenDefinition: Native Create meldet fehlende Freigabe.
-  expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent(/keine Neuanlage/i)
+  // creation-Block vorhanden, Auth-Mock ohne Permission → Native Create meldet fehlende Berechtigung.
+  expect(await screen.findByRole('alert', {}, { timeout: 5000 })).toHaveTextContent(/Keine Berechtigung zur Anlage/i)
   expect(transport.get).toHaveBeenCalledWith('/api/v1/masks/agrar__saatgut/screen-definition', expect.anything())
   expect(transport.get).not.toHaveBeenCalledWith(`/api/v1/agrar/saatgut/${creationId}`)
   expect(transport.post).not.toHaveBeenCalledWith('/api/v1/agrar/saatgut', expect.anything())

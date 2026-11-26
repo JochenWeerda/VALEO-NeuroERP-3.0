@@ -1124,5 +1124,196 @@
         "screenRoot": "[data-testid='native-cockpit-waage-wiegungen']"
       }
     }
+  },
+  "annahme/rohware": {
+    "schemaVersion": 1,
+    "id": "annahme/rohware",
+    "domain": "agrar",
+    "mode": "wizard",
+    "title": "Rohware-Annahme",
+    "subtitle": "Annahme, Qualität und Wiegen",
+    "adapter": {
+      "type": "native",
+      "sourceId": "annahme/rohware",
+      "temporary": false
+    },
+    "layout": {
+      "floorplan": "wizard",
+      "density": "expertDense",
+      "contextRail": "combined",
+      "tableProfile": "inventory"
+    },
+    "fields": [
+      {
+        "key": "lieferant",
+        "label": "Lieferant",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "kennzeichen",
+        "label": "Kennzeichen",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "lieferscheinNr",
+        "label": "Lieferschein-Nr.",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "datum",
+        "label": "Datum/Uhrzeit",
+        "type": "datetime",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "artikel",
+        "label": "Artikel",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "bruttoKg",
+        "label": "Bruttogewicht kg",
+        "type": "number",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "taraKg",
+        "label": "Taragewicht kg",
+        "type": "number",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "lagerZiel",
+        "label": "Lager-Ziel",
+        "type": "text",
+        "required": true,
+        "readOnly": false
+      },
+      {
+        "key": "feuchtePct",
+        "label": "Feuchte %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "besatzPct",
+        "label": "Besatz %",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "fallzahl",
+        "label": "Fallzahl",
+        "type": "number",
+        "required": false,
+        "readOnly": false
+      },
+      {
+        "key": "customer_id",
+        "label": "Debitor-Kto.",
+        "type": "text",
+        "required": false,
+        "readOnly": false
+      }
+    ],
+    "actions": [
+      {
+        "key": "submit",
+        "label": "Rohware annehmen",
+        "kind": "primary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "permission": "studio.submit.intake-weighing",
+        "inputFlow": {
+          "kind": "humanForm",
+          "submitEndpoint": "/api/v1/agrar/harvest-acceptance/rohware",
+          "method": "POST"
+        }
+      },
+      {
+        "key": "billing",
+        "label": "Zur Abrechnung",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view",
+        "surfaceOnly": true
+      },
+      {
+        "key": "cancel",
+        "label": "Zur Warteschlange",
+        "kind": "secondary",
+        "dangerLevel": "safe",
+        "forbiddenForAgents": true,
+        "localEffect": "view"
+      }
+    ],
+    "dataSources": [
+      {
+        "key": "supply",
+        "endpoint": "/api/v1/supply-chain/overview",
+        "staleTimeMs": 15000
+      },
+      {
+        "key": "articles",
+        "endpoint": "/api/v1/articles?limit=100",
+        "staleTimeMs": 15000
+      }
+    ],
+    "specialized": {
+      "type": "intake",
+      "id": "annahme/rohware"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "operator-workspace",
+      "auditRequired": true
+    },
+    "performance": {
+      "initialPayloadBudgetKb": 100,
+      "requiresLazyTabs": true,
+      "requiresVirtualTables": true,
+      "lookupMinChars": 2,
+      "bundleGroup": "agrar"
+    },
+    "agentContract": {
+      "businessPurpose": "Rohware-Annahme über die vorhandenen Fachverträge bearbeiten.",
+      "examplePrompts": [
+        "Welche Eingaben und Aktionen sind verfügbar?"
+      ],
+      "sensitiveFields": [
+        "lieferant",
+        "kennzeichen",
+        "lieferscheinNr",
+        "datum",
+        "artikel",
+        "bruttoKg",
+        "taraKg",
+        "lagerZiel",
+        "feuchtePct",
+        "besatzPct",
+        "fallzahl",
+        "customer_id"
+      ],
+      "forbiddenAgentTasks": [
+        "Fachaktionen dieser Bedienoberfläche ausführen"
+      ],
+      "testSelectors": {
+        "screenRoot": "[data-testid='native-cockpit-annahme-rohware']"
+      }
+    }
   }
 }
