@@ -20,8 +20,8 @@ MAPPING = {"TYP": "record_type", "ARTIKELNR": "source_ref", "ARTNR": "artikelnum
            "GESPERRT": "gesperrt"}
 MAPPING.update({"QUELLE": "source_ref", "KUNDENNR": "kundennummer", "KUNDNAME": "name", "STRASSE": "strasse",
                 "PLZ": "plz", "ORT": "ort", "STAAT": "land", "USTID": "ust_id", "DEBITORKTO": "debitorkonto",
-                "SPERRE": "gesperrt", "LAGER": "lager", "BESTAND": "menge", "EINHEIT": "einheit"})
-VERTRAG = {"encoding": "utf-8", "record_types": ["artikel", "kunde", "bestand"], "sample_hash": "synthetisch", "export_stand": "Test"}
+                "SPERRE": "gesperrt", "LIEFERANTENNR": "lieferantennummer", "KREDITORKTO": "kreditorkonto", "LAGER": "lager", "BESTAND": "menge", "EINHEIT": "einheit"})
+VERTRAG = {"encoding": "utf-8", "record_types": ["artikel", "kunde", "lieferant", "bestand"], "sample_hash": "synthetisch", "export_stand": "Test"}
 
 
 def _artikel(nr: str, bezeichnung: str, **mehr) -> dict:
@@ -52,6 +52,7 @@ def mandant():
                         "DELETE FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.articles WHERE tenant_id = :t",
                         "DELETE FROM domain_crm.customers WHERE tenant_id = :t",
+                        "DELETE FROM domain_einkauf.lieferanten WHERE tenant_id = :t",
                         "DELETE FROM domain_crm.business_partners WHERE tenant_id = :t",
                         "DELETE FROM domain_inventory.warehouses WHERE tenant_id = :t",
                         "DELETE FROM domain_integration.legacy_adapter_staging WHERE tenant_id = :t",
@@ -328,3 +329,37 @@ def test_bestand_ohne_artikel_lager_oder_mit_fremdbestand_wird_fehlerzeile(manda
 
     assert (ergebnis["neu"], ergebnis["fehler"]) == (0, 3)
 
+
+def _lieferant(nr: str, name: str, **mehr) -> dict:
+    return {"TYP": "lieferant", "QUELLE": f"L{nr}", "LIEFERANTENNR": nr, "KUNDNAME": name, "PLZ": "26000",
+            "STAAT": "D", "KREDITORKTO": f"7{nr}", **mehr}
+
+
+def _partnerkonten(t: str) -> list[tuple]:
+    with SessionLocal() as db:
+        return [tuple(r) for r in db.execute(text(
+            "SELECT name_1, debtor_account, creditor_account FROM domain_crm.business_partners WHERE tenant_id = :t "
+            "ORDER BY name_1"), {"t": t})]
+
+
+def test_lieferant_mit_l3_kreditorenkonto_und_wiederholung(mandant):
+    erster = _lauf(mandant, "lf-1", [_lieferant("0001", "Saatzucht Nord")])
+    zweiter = _lauf(mandant, "lf-2", [_lieferant("0001", "Saatzucht Nord")])
+
+    assert (erster["neu"], zweiter["unveraendert"]) == (1, 1)
+    assert _partnerkonten(mandant) == [("Saatzucht Nord", None, "70001")]
+
+
+def test_landwirt_als_kunde_und_lieferant_ist_ein_partner_mit_zwei_konten(mandant):
+    _lauf(mandant, "lf-1", [_kunde("10001", "Hof Janssen", USTID="DE123456789"),
+                            _lieferant("0002", "Hof Janssen", USTID="DE123456789")])
+
+    assert _partnerkonten(mandant) == [("Hof Janssen", "10001", "70002")]
+
+
+def test_vergebenes_kreditorenkonto_wird_fehlerzeile(mandant):
+    ergebnis = _lauf(mandant, "lf-1", [_lieferant("0001", "Saatzucht Nord"),
+                                       _lieferant("0003", "Agrarhandel Sued", KREDITORKTO="70001")])
+
+    assert (ergebnis["neu"], ergebnis["fehler"]) == (1, 1)
+

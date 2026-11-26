@@ -93,6 +93,20 @@ WHERE k.DEBITORKTO IS NOT NULL AND k.DEBITORKTO <> ''
 
 Nicht ausgegeben: NAME1/2, STRASSE, ORT, TELEFON1/2, TELEFAX, EMAIL, USTID, Bankverbindung, Bemerkungen, Freifelder.
 
+### 2.4a Lieferanten (pseudonymisiert)
+
+```sql
+SELECT FIRST 20 'lieferant' AS TYP, 'L' || k.KUNDENNR AS QUELLE, k.KUNDENNR AS LIEFERANTENNR,
+       'Testlieferant ' || k.KUNDENNR AS KUNDNAME, SUBSTRING(a.PLZ FROM 1 FOR 2) || '000' AS PLZ, k.STAAT,
+       k.KREDITORKTO, k.SPERRE
+FROM KUNDEN k LEFT JOIN ADRESSEN a ON a.NUMMER = k.ADRNR1
+WHERE k.KREDITORKTO IS NOT NULL AND k.KREDITORKTO <> ''
+```
+
+Ein Landwirt, der Kunde und Lieferant ist, erscheint in beiden Abzuegen. In VALEO wird er ein Geschaeftspartner mit
+Debitoren- und Kreditorenkonto, wenn USt-IdNr. und Name uebereinstimmen. Weil die Abfrage den Namen pseudonymisiert
+("Testkunde"/"Testlieferant") und keine USt-IdNr. zieht, bleiben es im Testabzug zwei Partner.
+
 ### 2.5 Offene Posten der gezogenen Kunden
 
 ```sql

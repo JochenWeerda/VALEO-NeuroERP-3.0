@@ -12,8 +12,8 @@ Freigabe) - keine zweite Importstrecke. Grundsaetze:
   ein Zielobjekt, das schon ohne Quellreferenz existiert, werden Fehlerzeilen im Protokoll statt Annahmen.
 - **Eine Zeile scheitert allein.** Jede Zeile laeuft in einem eigenen Sicherungspunkt.
 
-Objektarten: ``artikel``, ``kunde``, ``bestand``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im Adapterprofil
-(``field_mapping``); siehe ``docs/migration/m6-spiegelbetrieb-l3.md``.
+Objektarten: ``artikel``, ``kunde``, ``lieferant``, ``bestand``. Die Zuordnung L3-Spalte -> kanonisches Feld steht im
+Adapterprofil (``field_mapping``); siehe ``docs/migration/m6-spiegelbetrieb-l3.md``.
 """
 from __future__ import annotations
 
@@ -298,6 +298,82 @@ def _bestand_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str,
     """Keine Buchung: Abweichungen bleiben sichtbar (siehe oben)."""
 
 
+# --- Objektart lieferant (L3 KUNDEN mit KREDITORKTO; Anschrift aus ADRESSEN, im Abzug verbunden) -------------------
+#
+# Ziel ist der fuehrende Kreditorenstamm domain_einkauf.lieferanten (ADR Geschaeftspartnerstamm). Die L3-Kreditorennummer
+# wird das Konto des Geschaeftspartners (creditor_account) - Nutzerentscheid 25.11.2026, wie bei den Kunden. Lieferant
+# und Kunde mit gleicher USt-IdNr. und gleichem Namen teilen ueber die Partnerbruecke einen Partner (Landwirt).
+# lieferantennummer ist ohne Eindeutigkeitsregel in der DB: die Uebernahme prueft sie selbst.
+
+
+def _lieferant_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "lieferantennummer": _text(p, "lieferantennummer", pflicht=True),
+        "firmenname": _text(p, "name", pflicht=True),
+        "strasse": _text(p, "strasse"),
+        "plz": _text(p, "plz"),
+        "ort": _text(p, "ort"),
+        "land": _text(p, "land"),
+        "ust_id": _text(p, "ust_id"),
+        "telefon": _text(p, "telefon"),
+        "email": _text(p, "email"),
+        "aktiv": not _ja(p, "gesperrt"),
+        "kreditorkonto": _text(p, "kreditorkonto"),
+    }
+
+
+def _lieferant_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
+    zeile = db.execute(text(
+        "SELECT l.lieferantennummer, l.firmenname, l.strasse, l.plz, l.ort, l.land, l.ust_id, l.telefon, l.email, "
+        "l.aktiv, bp.creditor_account AS kreditorkonto FROM domain_einkauf.lieferanten l "
+        "LEFT JOIN domain_crm.business_partners bp ON bp.partner_id::text = l.partner_id AND bp.tenant_id = l.tenant_id "
+        "WHERE l.tenant_id = :t AND l.id::text = :id"), {"t": tenant_id, "id": ziel_id}).mappings().first()
+    return dict(zeile) if zeile else None
+
+
+def _lieferant_partner(db: Session, tenant_id: str, werte: dict[str, Any], partner_id: str | None) -> str:
+    from app.core.exceptions import ConflictError
+    from app.services.business_partner_service import BusinessPartnerService
+
+    try:
+        return BusinessPartnerService(db, tenant_id).partner_fuer_rolle(
+            "lieferant", name=werte["firmenname"], vat_id=werte["ust_id"], street=werte["strasse"],
+            postal_code=werte["plz"], city=werte["ort"], country=werte["land"], email=werte["email"],
+            phone=werte["telefon"], partner_id=partner_id, konto=werte["kreditorkonto"])
+    except ConflictError as fehler:
+        raise ZeilenFehler(f"Kreditorenkonto: {fehler}") from fehler
+
+
+def _lieferant_spalten(werte: dict[str, Any]) -> dict[str, Any]:
+    return {k: v for k, v in werte.items() if k != "kreditorkonto"}
+
+
+def _lieferant_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    if db.execute(text("SELECT 1 FROM domain_einkauf.lieferanten WHERE tenant_id = :t AND lieferantennummer = :n"),
+                  {"t": tenant_id, "n": werte["lieferantennummer"]}).first():
+        raise ZeilenFehler(f"Lieferant {werte['lieferantennummer']} existiert bereits ohne L3-Quellreferenz - "
+                           "Zuordnung fachlich klaeren")
+    ziel_id = str(uuid7())
+    partner = _lieferant_partner(db, tenant_id, werte, None)
+    db.execute(text(
+        "INSERT INTO domain_einkauf.lieferanten (id, tenant_id, lieferantennummer, partner_id, firmenname, strasse, plz, "
+        "ort, land, ust_id, telefon, email, aktiv) VALUES (CAST(:id AS uuid), :t, :lieferantennummer, :partner, "
+        ":firmenname, :strasse, :plz, :ort, :land, :ust_id, :telefon, :email, :aktiv)"),
+        {"id": ziel_id, "t": tenant_id, "partner": partner, **_lieferant_spalten(werte)})
+    return ziel_id
+
+
+def _lieferant_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    partner = db.execute(text("SELECT partner_id FROM domain_einkauf.lieferanten WHERE tenant_id = :t "
+                              "AND id::text = :id"), {"t": tenant_id, "id": ziel_id}).scalar()
+    partner = _lieferant_partner(db, tenant_id, werte, str(partner) if partner else None)
+    db.execute(text(
+        "UPDATE domain_einkauf.lieferanten SET lieferantennummer = :lieferantennummer, partner_id = :partner, "
+        "firmenname = :firmenname, strasse = :strasse, plz = :plz, ort = :ort, land = :land, ust_id = :ust_id, "
+        "telefon = :telefon, email = :email, aktiv = :aktiv, updated_at = now() WHERE tenant_id = :t AND id::text = :id"),
+        {"id": ziel_id, "t": tenant_id, "partner": partner, **_lieferant_spalten(werte)})
+
+
 #: Quellfelder ohne VALEO-Ziel je Objektart - im Differenzbericht ausgewiesen, nicht verworfen.
 NICHT_ZUGEORDNET: dict[str, dict[str, str]] = {
 }
@@ -318,6 +394,8 @@ ZIELARTEN: dict[str, Zielart] = {
     "artikel": Zielart("domain_inventory.articles", _artikel_zielwerte, _artikel_lesen, _artikel_anlegen,
                        _artikel_aendern),
     "kunde": Zielart("domain_crm.customers", _kunde_zielwerte, _kunde_lesen, _kunde_anlegen, _kunde_aendern),
+    "lieferant": Zielart("domain_einkauf.lieferanten", _lieferant_zielwerte, _lieferant_lesen, _lieferant_anlegen,
+                         _lieferant_aendern),
     "bestand": Zielart("domain_inventory.inventory_stock_movements", _bestand_zielwerte, _bestand_lesen,
                        _bestand_anlegen, _bestand_aendern, immer_vergleichen=True),
 }
