@@ -18,9 +18,10 @@ type CockpitCase = {
   overviewEndpoint?: string
   /**
    * Runtime-Attribut der Shell: Cockpits/NativeList nutzen `native-cockpit`,
-   * UniversalNativeDetailPage nutzt `native` (Batch 105).
+   * UniversalNativeDetailPage nutzt `native` (Batch 105),
+   * UniversalNativeCreatePage nutzt `native-create` (Batch 106).
    */
-  runtime?: 'native-cockpit' | 'native'
+  runtime?: 'native-cockpit' | 'native' | 'native-create'
   /** Specialized workbench contract — mounts Fach-Surface inside native-cockpit. */
   specializedType?:
     | 'pricing_workbench'
@@ -3276,6 +3277,103 @@ const COCKPIT_CASES: CockpitCase[] = [
     title: 'Token Consumption',
     runtime: 'native',
   },
+  // UniversalNativeCreatePage Stamm-Anlagen (Batch 106) — data-runtime=native-create
+  {
+    label: 'fibu/geschaeftsjahre',
+    path: '/fibu/geschaeftsjahre',
+    screenId: 'fibu/geschaeftsjahre',
+    testId: 'fibu-geschaeftsjahre-create',
+    title: 'Geschaeftsjahr anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'fibu/stammdaten',
+    path: '/fibu/stammdaten',
+    screenId: 'fibu/stammdaten',
+    testId: 'fibu-stammdaten-create',
+    title: 'Zahlungsformular anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'fibu/zahlungsmeldungen',
+    path: '/fibu/zahlungsmeldungen',
+    screenId: 'fibu/zahlungsmeldungen',
+    testId: 'fibu-zahlungsmeldungen-create',
+    title: 'Zahlungsmeldung anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'stammdaten/mengeneinheiten',
+    path: '/stammdaten/mengeneinheiten',
+    screenId: 'stammdaten/mengeneinheiten',
+    testId: 'stammdaten-mengeneinheiten-create',
+    title: 'Mengeneinheit anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'stammdaten/betriebsstaetten',
+    path: '/stammdaten/betriebsstaetten',
+    screenId: 'stammdaten/betriebsstaetten',
+    testId: 'stammdaten-betriebsstaetten-create',
+    title: 'Betriebsstaette anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'stammdaten/hausbanken',
+    path: '/stammdaten/hausbanken',
+    screenId: 'stammdaten/hausbanken',
+    testId: 'stammdaten-hausbanken-create',
+    title: 'Hausbank anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'preise/rabattgruppen',
+    path: '/preise/rabattgruppen',
+    screenId: 'preise/rabattgruppen',
+    testId: 'preise-rabattgruppen-create',
+    title: 'Rabattgruppe anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'preise/individualpreise',
+    path: '/preise/individualpreise',
+    screenId: 'preise/individualpreise',
+    testId: 'preise-individualpreise-create',
+    title: 'Individualpreis anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'preise/zu-abschlaggruppen',
+    path: '/preise/zu-abschlaggruppen',
+    screenId: 'preise/zu-abschlaggruppen',
+    testId: 'preise-zu-abschlaggruppen-create',
+    title: 'Zu-Abschlaggruppe anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'produktion/rezepturgruppen',
+    path: '/produktion/rezepturgruppen',
+    screenId: 'produktion/rezepturgruppen',
+    testId: 'produktion-rezepturgruppen-create',
+    title: 'Rezepturgruppe anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'lager/massebilanz',
+    path: '/lager/massebilanz',
+    screenId: 'lager/massebilanz',
+    testId: 'lager-massebilanz-create',
+    title: 'Massebilanz anlegen',
+    runtime: 'native-create',
+  },
+  {
+    label: 'verkauf/dauerauftraege',
+    path: '/verkauf/dauerauftraege',
+    screenId: 'verkauf/dauerauftraege',
+    testId: 'verkauf-dauerauftraege-create',
+    title: 'Dauerauftrag anlegen',
+    runtime: 'native-create',
+  },
   // Specialized workbenches (Batches 28–38): native-cockpit shell + specialized surface
   {
     label: 'lager/materialfluss',
@@ -3807,11 +3905,12 @@ function minimalCockpitDefinition(c: CockpitCase) {
     readOnly: true,
   }))
   const isDetail = c.runtime === 'native'
+  const isCreate = c.runtime === 'native-create'
   return {
     schemaVersion: 1,
     id: c.screenId,
     domain: c.screenId.split('/')[0],
-    mode: isDetail ? 'object' : 'cockpit',
+    mode: isDetail || isCreate ? 'object' : 'cockpit',
     title: c.title,
     adapter: { type: 'native', sourceId: c.screenId, temporary: false },
     fields: [
@@ -3858,7 +3957,7 @@ function minimalCockpitDefinition(c: CockpitCase) {
       preferredMode: 'desktopDense',
       mobileMode: 'mobileStack',
       touchTargetPx: 44,
-      floorplan: isDetail ? 'objectPage' : 'cockpit',
+      floorplan: isDetail || isCreate ? 'objectPage' : 'cockpit',
       density: 'compact',
       contextRail: 'combined',
       tableProfile: 'audit',
@@ -3870,6 +3969,18 @@ function minimalCockpitDefinition(c: CockpitCase) {
       lookupMinChars: 2,
     },
     noWorkflowReason: 'Gate-D-Smoke ohne Beleg-Lebenszyklus.',
+    ...(isCreate
+      ? {
+          creation: {
+            endpoint: `/api/v1/masks/${maskPath(c.screenId)}/create`,
+            permission: '*',
+            fields: [
+              { key: 'label', label: 'Name', type: 'text', required: true },
+              { key: 'status', label: 'Status', type: 'text' },
+            ],
+          },
+        }
+      : {}),
     ...(c.specializedType
       ? {
           specialized: {

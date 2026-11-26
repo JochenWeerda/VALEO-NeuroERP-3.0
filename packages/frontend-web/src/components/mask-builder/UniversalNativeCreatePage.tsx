@@ -144,7 +144,7 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
   if (inboxId && (!inboxQuery.data || inboxQuery.isFetching)) return <p role="status">Inbox-Vorschlag wird geprüft…</p>
   if (initialized.current !== formContext) return <p role="status">Anlagemaske wird vorbereitet…</p>
   return (
-    <div data-testid={testId}>
+    <div data-testid={testId} data-runtime="native-create">
       <Button type="button" variant="outline" onClick={() => {
         const route = original.creation?.cancelRoute
         if (route?.startsWith('/') && !route.startsWith('//') && !route.includes('\\')
