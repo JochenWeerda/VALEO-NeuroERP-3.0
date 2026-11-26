@@ -3232,6 +3232,28 @@ const COCKPIT_CASES: CockpitCase[] = [
     testId: 'einkauf-anfrage-erfassung',
     title: 'Anfrage Erfassung',
   },
+  // Letzte Cockpit-Routen (Batch 103)
+  {
+    label: 'schnittstelle/legacy-adapter-monitor',
+    path: '/schnittstelle/legacy-adapter-monitor',
+    screenId: 'schnittstelle/legacy-adapter-monitor',
+    testId: 'legacy-adapter-monitor',
+    title: 'Legacy-Adapter-Monitor',
+  },
+  {
+    label: 'workflow/flow-spine-studio',
+    path: '/workflow/flow-spine-studio',
+    screenId: 'workflow/flow-spine-studio',
+    testId: 'screen-workflow/flow-spine-studio',
+    title: 'FlowSpine Studio',
+  },
+  {
+    label: 'workspace/letzte-dokumente',
+    path: '/workspace/letzte-dokumente',
+    screenId: 'workspace/letzte-dokumente',
+    testId: 'letzte-dokumente',
+    title: 'Letzte Dokumente',
+  },
   // Specialized workbenches (Batches 28–38): native-cockpit shell + specialized surface
   {
     label: 'lager/materialfluss',
