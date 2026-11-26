@@ -7,6 +7,8 @@ import AnnahmeAbrechnungPage from '@/pages/annahme/abrechnung-legacy'
 const apiGetMock = vi.hoisted(() => vi.fn())
 const apiPostMock = vi.hoisted(() => vi.fn())
 const toastMock = vi.hoisted(() => vi.fn())
+const navigateMock = vi.hoisted(() => vi.fn())
+const locationStateMock = vi.hoisted(() => ({ current: null as Record<string, unknown> | null }))
 
 vi.mock('@/hooks/use-toast', () => ({
   useToast: () => ({ toast: toastMock }),
@@ -18,6 +20,18 @@ vi.mock('@/lib/api-client', () => ({
     post: apiPostMock,
   },
 }))
+
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual<typeof import('@/app/routing/typed-router')>('@/app/routing/typed-router')
+  return {
+    ...actual,
+    useNavigate: () => navigateMock,
+    useLocation: () => ({
+      ...actual.useLocation(),
+      state: locationStateMock.current,
+    }),
+  }
+})
 
 vi.mock('@/components/workflow/ProcessStatusPanel', () => ({
   ProcessStatusPanel: () => <div data-testid="process-status-panel" />,
@@ -35,6 +49,9 @@ describe('AnnahmeAbrechnungPage', () => {
   beforeEach(() => {
     apiGetMock.mockReset()
     apiPostMock.mockReset()
+    navigateMock.mockReset()
+    toastMock.mockReset()
+    locationStateMock.current = null
     apiPostMock.mockResolvedValue({ data: {} })
     apiGetMock.mockImplementation(async (url: string) => {
       if (url.includes('/api/v1/agrar/settlements')) {
@@ -53,12 +70,23 @@ describe('AnnahmeAbrechnungPage', () => {
               net_amount_eur: 240,
               status: 'posted',
               approval_status: 'VERBUCHT',
-              approval_history: [],
+              posted_journal_ref: 'JNL-1',
+              approval_history: [
+                {
+                  previous_status: 'ENTWURF',
+                  new_status: 'FREIGEGEBEN',
+                  decided_at: '2026-07-10T09:00:00Z',
+                  actor_id: 'u1',
+                  reason: 'ok',
+                },
+              ],
               allowed_transitions: [],
               can_post_fibu: false,
-              correction_options: [{ memo_type: 'credit' }],
+              correction_options: [{ memo_type: 'credit' }, { memo_type: 'debit' }],
               deductions: [
                 { id: 'd1', deduction_type: 'drying', mode: 'per_ton', amount_eur: 10 },
+                { id: 'd3', deduction_type: 'freight', mode: 'fixed', amount_eur: 4 },
+                { id: 'd4', deduction_type: 'other', mode: 'per_ton', amount_eur: 1 },
               ],
               created_at: '2026-07-10T10:00:00Z',
               row_version: 2,
@@ -241,5 +269,195 @@ describe('AnnahmeAbrechnungPage', () => {
     await waitFor(() => {
       expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Lieferant fehlt' }))
     })
+  })
+
+  it('fuehrt Freigeben/Ablehnen/Zuruecksetzen und Korrekturen aus', async () => {
+    apiPostMock.mockImplementation(async (url: string, payload?: Record<string, unknown>) => {
+      if (url.includes('/freigabe')) {
+        return {
+          data: {
+            allowed: payload?.target_status !== 'ABGELEHNT',
+            reason: 'ok',
+            new_status: payload?.target_status,
+            previous_status: 'ENTWURF',
+          },
+        }
+      }
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+    expect(screen.getByText(/Journal: JNL-1/)).toBeInTheDocument()
+    expect(screen.getAllByText(/Fracht/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/Sonstiges/).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Freigabehistorie/i)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/set-draft/freigabe',
+        expect.objectContaining({ target_status: 'FREIGEGEBEN' }),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ablehnen' }))
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Freigabeschritt abgelehnt' }))
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zurück in Entwurf' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/set-draft/freigabe',
+        expect.objectContaining({ target_status: 'ENTWURF' }),
+      )
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Gutschrift' }))
+    expect(navigateMock).toHaveBeenCalledWith('/einkauf/gutschriften-belastungen/credit?settlementId=set-1')
+    fireEvent.click(screen.getByRole('button', { name: 'Belastung' }))
+    expect(navigateMock).toHaveBeenCalledWith('/einkauf/gutschriften-belastungen/debit?settlementId=set-1')
+  })
+
+  it('erzeugt Vorschau und zeigt Exception-Hinweise', async () => {
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/billing-weight/preview')) {
+        return { data: { billing_weight_kg: 940, deduction_kg: 10 } }
+      }
+      if (url.includes('/settlements/preview')) {
+        return {
+          data: {
+            billing_quantity_kg: 940,
+            gross_amount_eur: 200,
+            total_deductions_eur: 15,
+            net_amount_eur: 185,
+            exception_hints: [
+              {
+                rule_id: 'R1',
+                category: 'qualitaet',
+                decision_mode: 'manual',
+                description: 'Hinweis A',
+                requires_approval: true,
+                approver_roles: ['AGRONOM'],
+              },
+            ],
+            reference_context: {
+              process_key: 'settlement',
+              anchor_entity: 'settlement',
+              anchor_id: 'tmp',
+              chain: { step: '1' },
+            },
+            explainability: null,
+          },
+        }
+      }
+      if (url.includes('/drying/compute')) {
+        throw new Error('no drying')
+      }
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByLabelText('Lieferant')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Lieferant'), { target: { value: 'LW-P' } })
+    const freightFixed = document.getElementById('freightFixed')
+    if (freightFixed) {
+      fireEvent.change(freightFixed, { target: { value: '12.5' } })
+    }
+    fireEvent.click(screen.getByRole('button', { name: 'Vorschau' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/preview',
+        expect.objectContaining({ supplier_id: 'LW-P' }),
+      )
+    })
+    expect(await screen.findByText('Hinweis A')).toBeInTheDocument()
+    expect(screen.getByText(/Nettobetrag/)).toBeInTheDocument()
+    expect(screen.getAllByText(/Ausnahmehinweise/).length).toBeGreaterThan(0)
+  })
+
+  it('meldet Konflikt bei 409 auf Fibu-Buchung', async () => {
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/post-fibu')) throw new Error('Version veraltet')
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'In Fibu buchen' }))
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Fehler', description: 'Version veraltet' }),
+      )
+    })
+  })
+
+  it('bricht Storno ab wenn Confirm verweigert wird', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Stornieren' }))
+    expect(confirmSpy).toHaveBeenCalled()
+    expect(apiPostMock).not.toHaveBeenCalledWith(
+      expect.stringContaining('/cancel'),
+      expect.anything(),
+      expect.anything(),
+    )
+    confirmSpy.mockRestore()
+  })
+
+  it('setzt Freigabe-Akteur und uebernimmt QualitaetsCheck-State', async () => {
+    locationStateMock.current = {
+      fromQualitaetsCheck: true,
+      artikel: 'WHEAT',
+      feuchtigkeit: 16.5,
+      verunreinigung: 3.2,
+    }
+    apiPostMock.mockImplementation(async (url: string, payload?: Record<string, unknown>) => {
+      if (url.includes('/drying/compute')) {
+        return {
+          data: {
+            invoice_weight_kg: 900,
+            loss_kg: 50,
+            crop_code: 'WHEAT',
+            moisture_pct: 16.5,
+          },
+        }
+      }
+      if (url.includes('/billing-weight/preview')) {
+        return { data: { billing_weight_kg: 900, deduction_kg: 50 } }
+      }
+      if (url === '/api/v1/agrar/settlements') {
+        return { data: { id: 'set-q', ...payload } }
+      }
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByLabelText('Freigabe durch (ID)')).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('Freigabe durch (ID)'), { target: { value: 'approver-9' } })
+    expect(screen.getByLabelText('Freigabe durch (ID)')).toHaveValue('approver-9')
+    // NativeSelect ohne htmlFor — Rolle über Combobox
+    const roleSelects = screen.getAllByRole('combobox')
+    if (roleSelects.length > 0) {
+      fireEvent.change(roleSelects[0], { target: { value: 'PROKURIST' } })
+    }
+
+    fireEvent.change(screen.getByLabelText('Lieferant'), { target: { value: 'LW-Q' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements',
+        expect.objectContaining({
+          supplier_id: 'LW-Q',
+          article_id: 'WHEAT',
+        }),
+      )
+    })
+  })
+
+  it('zeigt Fehlerzustand der Settlement-Liste', async () => {
+    apiGetMock.mockImplementation(async () => {
+      throw new Error('Liste down')
+    })
+    renderPage()
+    expect(await screen.findByText(/Liste down|fehlgeschlagen|konnten nicht/i)).toBeInTheDocument()
   })
 })

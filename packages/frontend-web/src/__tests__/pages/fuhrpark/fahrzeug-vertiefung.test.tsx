@@ -138,4 +138,55 @@ describe('FahrzeugVertiefungPage', () => {
       expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' })),
     )
   })
+
+  it('leitet Leasing-Rueckgabe ein und meldet Fehler', async () => {
+    const user = userEvent.setup()
+    api.leasing.mockResolvedValue({ rueckgabe_protokoll: { status: 'ok', km: 45000 } })
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-LR' } })
+    await user.click(screen.getByRole('tab', { name: 'Leasing-Rückgabe' }))
+    expect(await screen.findByRole('button', { name: 'Leasing-Rückgabe einleiten' })).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText('z. B. 145000'), { target: { value: '45000' } })
+    fireEvent.change(screen.getByPlaceholderText(/leichte Kratzer/i), { target: { value: 'ok' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Leasing-Rückgabe einleiten' }))
+    await waitFor(() =>
+      expect(api.leasing).toHaveBeenCalledWith(
+        'FZ-LR',
+        expect.objectContaining({ km_stand_bei_rueckgabe: 45000, zustand_bemerkung: 'ok' }),
+      ),
+    )
+    expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Leasing-Rückgabe eingeleitet' }))
+    expect(await screen.findByText(/Rückgabe protokolliert/)).toBeTruthy()
+
+    api.leasing.mockRejectedValueOnce(new Error('lr-fail'))
+    fireEvent.click(screen.getByRole('button', { name: 'Leasing-Rückgabe einleiten' }))
+    await waitFor(() =>
+      expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'lr-fail' })),
+    )
+  })
+
+  it('meldet Fehler beim Anlegen von Schaden und Bussgeld', async () => {
+    const user = userEvent.setup()
+    api.createSchaden.mockRejectedValueOnce(new Error('s-fail'))
+    api.createBussgeld.mockRejectedValueOnce(new Error('b-fail'))
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-ERR' } })
+    await user.click(screen.getByRole('tab', { name: 'Schadensfälle' }))
+    fireEvent.change(screen.getByPlaceholderText('z. B. Autobahn A7, km 123'), { target: { value: 'Hof' } })
+    fireEvent.change(screen.getByPlaceholderText('Kurzbeschreibung des Schadensereignisses'), { target: { value: 'Delle' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Schadensfall anlegen' }))
+    await waitFor(() =>
+      expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ variant: 'destructive' })),
+    )
+
+    await user.click(screen.getByRole('tab', { name: 'Bußgelder' }))
+    fireEvent.change(screen.getByPlaceholderText(/Überladung/i), { target: { value: 'Parken' } })
+    fireEvent.change(screen.getByPlaceholderText('395.00'), { target: { value: '35' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Bußgeld anlegen' }))
+    await waitFor(() =>
+      expect(api.toast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Fehler', description: expect.stringMatching(/Bußgeld/i) }),
+      ),
+    )
+  })
 })
