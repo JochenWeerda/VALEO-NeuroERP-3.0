@@ -208,21 +208,15 @@ prozesse:
     l3: VALEO-eigen (Schnellerfassung SPA 962 laut Modulkommentar); in L3 die Produktion mit gespeicherter Rezeptur
     routen: []
     rolle: PRODUKTION (SCHREIBEN["PRODUKTION"]); Mandant aus dem Token
-    nachweise: []
+    nachweise:
+      - tests/test_m4_pm_chargen_mandant.py::test_schnellerfassung_legt_auftrag_als_erstellt_an
     status: teilweise
     befund: >-
-      POST /produktion/mischfutter/schnellerfassung/{vorlage_id}/buchen (produktion_rezepturgruppen.py, buche_schnellerfassung)
-      legt direkt einen futtermittel_produktionsauftraege-Satz mit Status freigegeben an, ohne Bestandspruefung, ohne Abzug und
-      ohne Verbrauchs-Snapshot (bestands_abzug_erfolgt bleibt false, verbrauch leer). Die Freigabe-Logik (Abzug, Snapshot,
-      Lagerbewegung) haengt in update_auftrag_status am Uebergang nach freigegeben; von freigegeben aus ist der Uebergang
-      freigegeben -> freigegeben ungueltig (409), in_produktion und fertig sind aber erlaubt. Ein so angelegter Auftrag kann daher
-      in_produktion und fertig werden: complete_to_charge erzeugt eine Charge, deren Rohstoffliste aus dem Rezept
-      (snapshot_or_recipe) stammt, obwohl nichts abgebucht wurde. Standard-Chargen-Nr. ist "CH-SCHNELL-" plus die ersten sechs
-      Zeichen der Vorlagen-ID (uuid7, zeitbasiert; jede Buchung derselben Vorlage ohne eigene Nr. trifft auf dieselbe Nummer).
-      Kein Test gegen die Datenbank (nur Pydantic-Schemata, nicht gezaehlt), keine Maske, kein Eintrag in route-aliases.
+      POST .../schnellerfassung/{vorlage_id}/buchen legt den Auftrag mit Status erstellt an (nicht mehr freigegeben).
+      Bestandsabzug/Snapshot laufen erst ueber update_auftrag_status → freigegeben (FEED-CHAIN). Beleg:
+      test_schnellerfassung_legt_auftrag_als_erstellt_an. Offen: kein Datenbanktest, keine Maske, Rezept-FK und
+      Mengenvertrag nicht belegt; Standard-Chargen-Nr. aus Vorlagen-Praefix kann kollidieren.
     luecken:
-      - text: Schnellerfassung legt einen freigegebenen Auftrag ohne Bestandsabzug und ohne Snapshot an; Fertigmeldung erzeugt danach eine Charge mit Rohstoffliste, ohne dass Rohstoff abgebucht wurde — falsche Buchung
-        prio: P0
       - text: Schnellerfassung ohne Datenbanktest, ohne Maske und ohne Rezeptpruefung (rezept_id ohne FK-Pruefung im Mandanten, keine Menge je Rezept)
         prio: P2
       - text: Standard-Chargen-Nr. aus Vorlagen-ID-Praefix kollidiert bei Folgebuchungen und zwischen zeitnah angelegten Vorlagen

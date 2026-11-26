@@ -221,7 +221,7 @@ def buche_schnellerfassung(
             (id, tenant_id, chargen_id, rezept_id, rezept_name,
              menge_t, status, erstellt_von, bemerkung)
         VALUES (:id, :tid, :chargen_id, :rezept_id, :rezept_name,
-                :menge, 'freigegeben', 'Schnellerfassung', :bem)
+                :menge, 'erstellt', 'Schnellerfassung', :bem)
     """), {
         "id": auftrag_id, "tid": tenant_id,
         "chargen_id": chargen_id,
@@ -245,6 +245,7 @@ def buche_schnellerfassung(
         "chargen_id": chargen_id,
         "rezept_name": v["rezept_name"],
         "menge_t": float(payload.menge_t),
-        "status": "freigegeben",
-        "hinweis": "Schnellerfassung: vereinfachter Auftrag ohne vollständigen Workflow.",
+        "status": "erstellt",
+        # Freigabe (Bestandsabzug) laeuft ueber update_auftrag_status → freigegeben (M4-PM-P0).
+        "hinweis": "Schnellerfassung: Auftrag erstellt — Freigabe mit Bestandsabzug separat ausloesen.",
     }

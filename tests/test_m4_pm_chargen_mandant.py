@@ -8,6 +8,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from app.api.v1.endpoints import produktion_rezepturgruppen as schnelle
 from app.api.v1.endpoints import quality_lot_binding as qlb
 from app.domains.operations.models import ChargeStatus
 from app.domains.operations.repository import ChargeRepository
@@ -16,6 +17,12 @@ from app.domains.operations.repository import ChargeRepository
 def test_release_decision_aktualisiert_ops_chargen_nur_im_mandanten():
     src = inspect.getsource(qlb.create_release_decision)
     assert "WHERE chargen_id = :cid AND tenant_id = :tid" in src
+
+
+def test_schnellerfassung_legt_auftrag_als_erstellt_an():
+    src = inspect.getsource(schnelle.buche_schnellerfassung)
+    assert ", 'erstellt'," in src
+    assert "status\": \"erstellt\"" in src or "\"status\": \"erstellt\"" in src
 
 
 def test_charge_delete_blockiert_freigegebene():
