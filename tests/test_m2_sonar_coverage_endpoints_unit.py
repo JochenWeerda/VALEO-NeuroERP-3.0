@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.api.v1.endpoints import artikel_bestandteile, mask_registry, rohwarengruppen
+from app.api.v1.endpoints import artikel_bestandteile, inventur_piv, mask_registry, rohwarengruppen
 from app.services.studio_draft_store import StudioStorageUnavailable
 
 
@@ -128,3 +128,60 @@ def test_artikel_bestandteile_list_get_create_paths():
     created = artikel_bestandteile.create_bestandteil_def(payload, db=db, tenant_id="t1")
     assert created.bestandteil_nr == "B1"
     db.commit.assert_called()
+
+
+def test_rohwarengruppen_list_active_filter():
+    db = MagicMock()
+    row = SimpleNamespace(
+        _mapping={
+            "id": "g1",
+            "tenant_id": "t1",
+            "gruppe_nr": "GE",
+            "bezeichnung": "Getreide",
+            "artikel_nr": None,
+            "ek_aktiv": True,
+            "vk_aktiv": True,
+            "waehrung": "EUR",
+            "mengeneinheit": "t",
+            "aktiv": True,
+            "created_at": datetime(2026, 1, 1, tzinfo=timezone.utc),
+        }
+    )
+    result = MagicMock()
+    result.fetchall.return_value = [row]
+    db.execute.return_value = result
+    listed = rohwarengruppen.list_rohwarengruppen(nur_aktive=True, db=db, tenant_id="t1")
+    assert listed[0].gruppe_nr == "GE"
+    sql = str(db.execute.call_args.args[0])
+    assert "tenant_id" in sql
+
+
+def test_inventur_piv_list_and_get_404():
+    db = MagicMock()
+    row = SimpleNamespace(
+        _mapping={
+            "id": "p1",
+            "abschluss_datum": datetime(2026, 1, 1, tzinfo=timezone.utc).date(),
+            "inventurgruppe_nr": "IG1",
+            "lager_nr": "L1",
+            "status": "offen",
+            "erfasst_von": None,
+            "abgeschlossen_von": None,
+            "abgeschlossen_am": None,
+            "anzahl_positionen": 0,
+            "differenzwert_eur": None,
+            "bemerkung": None,
+            "created_at": datetime(2026, 1, 1, tzinfo=timezone.utc),
+        }
+    )
+    list_result = MagicMock()
+    list_result.fetchall.return_value = [row]
+    missing = MagicMock()
+    missing.fetchone.return_value = None
+    db.execute.side_effect = [list_result, missing]
+
+    listed = inventur_piv.list_piv_abschluesse(status="offen", lager_nr="L1", db=db, tenant_id="t1")
+    assert listed[0].id == "p1"
+    with pytest.raises(HTTPException) as exc:
+        inventur_piv.get_piv_abschluss("missing", db=db, tenant_id="t1")
+    assert exc.value.status_code == 404

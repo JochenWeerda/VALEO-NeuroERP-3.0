@@ -102,7 +102,7 @@ function settlementRowVersion(s: Settlement): number {
   return typeof s.row_version === 'number' && s.row_version >= 1 ? s.row_version : 1
 }
 
-function describeApiError(e: unknown): string {
+export function describeApiError(e: unknown): string {
   if (isAxiosError(e)) {
     const d = e.response?.data?.detail
     if (typeof d === 'string') return d
@@ -226,7 +226,7 @@ type QualitaetsCheckState = {
   lieferscheinNr?: string
 }
 
-function settlementStatusLabel(status: string): string {
+export function settlementStatusLabel(status: string): string {
   switch (status) {
     case 'draft':
       return 'Entwurf'
@@ -239,7 +239,7 @@ function settlementStatusLabel(status: string): string {
   }
 }
 
-function approvalStatusLabel(status: string): string {
+export function approvalStatusLabel(status: string): string {
   switch (status) {
     case 'ENTWURF':
       return 'Entwurf'
@@ -258,7 +258,7 @@ function approvalStatusLabel(status: string): string {
   }
 }
 
-function deductionTypeLabel(type: string): string {
+export function deductionTypeLabel(type: string): string {
   switch (type) {
     case 'drying':
       return 'Trocknung'
@@ -273,7 +273,7 @@ function deductionTypeLabel(type: string): string {
   }
 }
 
-function deductionModeLabel(mode: string): string {
+export function deductionModeLabel(mode: string): string {
   return mode === 'per_ton' ? 'je t' : mode === 'fixed' ? 'fix' : mode
 }
 

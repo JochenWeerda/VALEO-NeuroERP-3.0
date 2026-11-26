@@ -10,7 +10,7 @@ import {
   limitDisplayToFm,
   limitFmToDisplay,
 } from '@/components/mask-builder/specialized/feed/ration-optimization-surface'
-import type { FeedIngredient, UploadedCompoundFeed } from '@/lib/api/rations-optimization'
+import type { FeedIngredient, GrundfutterAnalyse, UploadedCompoundFeed } from '@/lib/api/rations-optimization'
 
 const weights = (partial: Partial<Record<string, number>> = {}) => ({
   cost: 50,
@@ -119,12 +119,28 @@ describe('ration-optimization helpers (new-code coverage)', () => {
       sugar_g_kgdm: 20, fat_g_kgdm: 25, ca_g_kgdm: 1, p_g_kgdm: 2, na_g_kgdm: 0.3,
       min_kgdm: 0, max_kgdm: 20, active: true,
     }]
-    const wd = { ...baseWizard(), compoundFeeds: [doc] }
+    const gfa = {
+      id: 'gfa-1',
+      tenant_id: 't1',
+      bezeichnung: 'Gras',
+      trockensubstanz_os: 40,
+      me_gfe2023_ts: 10,
+      sidp_ts: 80,
+      andfom_ts: 40,
+      gesamtzucker_ts: 4,
+      rohfett_ts: 3,
+      calcium_ts: 0.5,
+      phosphor_ts: 0.3,
+      natrium_ts: 0.1,
+    } as GrundfutterAnalyse
+    const wd = { ...baseWizard(), compoundFeeds: [doc], customFeeds: [gfa] }
     const dm = buildFeedDmById(base, wd as never)
     expect(dm.get('base-1')).toBe(0.35)
     expect(dm.get('c1')).toBe(0.9)
+    expect(dm.get('gfa_gfa-1')).toBe(0.4)
     const lookup = buildFeedLookupMap(base, wd as never)
     expect(lookup.get('c1')?.name).toBe('Kraft')
+    expect(lookup.get('gfa_gfa-1')?.name).toBe('Gras')
     expect(buildFeedLookupMap(base, null).size).toBe(1)
   })
 })

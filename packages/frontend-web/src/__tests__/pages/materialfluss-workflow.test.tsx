@@ -495,4 +495,36 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     fireEvent.click(within(row).getByRole('button', { name: 'Aus silo_lots sync' }))
     await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sync fehlgeschlagen' })))
   })
+
+  it('lehnt ungültiges Knoten-Layout ab und meldet VK-Fehler', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      contamination_risk_class: 'A',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+      layout_x: '5',
+      layout_y: '6',
+    }]
+    fixture.patchCell.mockRejectedValueOnce(new Error('VK gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('contamination_risk_class'), { target: { value: 'C' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'VK speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Speichern fehlgeschlagen' })))
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_y'), { target: { value: 'nope' } })
+    fireEvent.click(within(nodeRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'layout_y ungültig' })))
+  })
 })

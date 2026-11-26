@@ -59,11 +59,11 @@ const BOOTSTRAP_FAILURE_TITLE = 'Bootstrap-Fehler'
 const VALIDATION_FAILURE_TITLE = 'Validierung fehlgeschlagen'
 const VALIDATION_FAILURE_DESCRIPTION = 'Bitte Base-URL und Token eingeben'
 
-const isNonEmptyString = (value: unknown): value is string => {
+export const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-const formatBootstrapSummary = (result: BootstrapResult): string => {
+export const formatBootstrapSummary = (result: BootstrapResult): string => {
   const docTypes = typeof result.document_types === 'number' ? result.document_types : 0
   const metadataTypes = typeof result.metadata_types === 'number' ? result.metadata_types : 0
   const created = typeof result.created === 'number' ? result.created : 0
@@ -72,7 +72,7 @@ const formatBootstrapSummary = (result: BootstrapResult): string => {
   return `${docTypes} Dokumenttypen, ${metadataTypes} Metadaten, ${created} Bindings, ${updated} aktualisiert`
 }
 
-const openExternal = (target?: string): void => {
+export const openExternal = (target?: string): void => {
   if (isNonEmptyString(target)) {
     window.open(target, '_blank', 'noopener')
   }
