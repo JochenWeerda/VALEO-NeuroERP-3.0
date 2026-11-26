@@ -28687,7 +28687,19 @@
         "title": "BusinessOverviewOut",
         "type": "object"
       },
-      "BusinessPartnerEnvelope": {
+      "BusinessPartnerEnvelope-Input": {
+        "properties": {
+          "business_partner": {
+            "$ref": "#/components/schemas/BusinessPartnerPayload"
+          }
+        },
+        "required": [
+          "business_partner"
+        ],
+        "title": "BusinessPartnerEnvelope",
+        "type": "object"
+      },
+      "BusinessPartnerEnvelope-Output": {
         "properties": {
           "business_partner": {
             "$ref": "#/components/schemas/BusinessPartnerPayload"
@@ -251516,7 +251528,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                    "$ref": "#/components/schemas/BusinessPartnerEnvelope-Output"
                   },
                   "title": "Response List Business Partners Api V1 Crm Business Partners  Get",
                   "type": "array"
@@ -251553,7 +251565,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                "$ref": "#/components/schemas/BusinessPartnerEnvelope-Input"
               }
             }
           },
@@ -251564,7 +251576,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                  "$ref": "#/components/schemas/BusinessPartnerEnvelope-Output"
                 }
               }
             },
@@ -252021,7 +252033,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                  "$ref": "#/components/schemas/BusinessPartnerEnvelope-Output"
                 }
               }
             },
@@ -252066,7 +252078,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                "$ref": "#/components/schemas/BusinessPartnerEnvelope-Input"
               }
             }
           },
@@ -252077,7 +252089,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BusinessPartnerEnvelope"
+                  "$ref": "#/components/schemas/BusinessPartnerEnvelope-Output"
                 }
               }
             },

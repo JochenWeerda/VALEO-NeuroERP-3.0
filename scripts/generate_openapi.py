@@ -33,11 +33,41 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = REPO_ROOT / "docs" / "schnittstellen" / "openapi.json"
 DEFAULT_API_VERSION = "3.0.0"
+REQUIREMENTS_TXT = REPO_ROOT / "requirements.txt"
+
+
+def _pinned_fastapi_version() -> str | None:
+    """Liest die gepinnte fastapi==…-Zeile aus requirements.txt."""
+    if not REQUIREMENTS_TXT.exists():
+        return None
+    for line in REQUIREMENTS_TXT.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("fastapi=="):
+            return stripped.split("==", 1)[1].strip()
+    return None
+
+
+def _assert_fastapi_matches_pin() -> None:
+    """Verhindert Spec-Drift durch lokale FastAPI-Version ≠ CI-Pin."""
+    import fastapi
+
+    pinned = _pinned_fastapi_version()
+    if pinned is None:
+        return
+    installed = fastapi.__version__
+    if installed != pinned:
+        raise SystemExit(
+            f"FastAPI-Version drift: installiert={installed}, "
+            f"requirements.txt pin={pinned}. "
+            f"Bitte 'pip install fastapi=={pinned}' und Spec neu erzeugen."
+        )
 
 
 def build_spec() -> dict:
     sys.path.insert(0, str(REPO_ROOT))
     import importlib
+
+    _assert_fastapi_matches_pin()
 
     # Bewusst die Wurzel-``main``: app.main ist die Test-Schicht ohne Auth
     # und ohne die zusaetzlich in main.py registrierten Router.
