@@ -33,14 +33,15 @@ MAPPING = {
     "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis",
     "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste",
     "AKTIONNR": "aktion", "KUNDENSELEKTION": "kundenselektion", "PREISNETTO": "preis",
+    "KONTO": "konto", "JAHR": "jahr", "MONAT": "monat", "SALDO": "saldo",
     "BELEGART": "belegart", "BELEGNR": "belegnummer", "DATUM": "datum", "NETTO": "netto", "BRUTTO": "brutto",
 }
 REIHENFOLGE = ("artikel", "kunde", "lieferant", "bestand", "preisliste", "artikelpreis", "kundenpreis",
-               "kundenrabatt", "aktion", "aktionspreis", "offener_posten", "beleg")
+               "kundenrabatt", "aktion", "aktionspreis", "offener_posten", "kontosaldo", "beleg")
 #: Schluesselspalten werden nicht auf Klartext geprueft (Nummern, keine Personendaten).
 SCHLUESSEL = {"TYP", "QUELLE", "ARTNR", "ARTIKELGRP", "ME1", "KUNDENNR", "DEBITORKTO", "LIEFERANTENNR", "KREDITORKTO", "LAGER", "KONTONR", "RECHNNR",
               "BESTAND", "OFFENBETRAG", "RECHNBETRAG", "OFFEN", "MAHNSTUFE", "PLZ", "GESPERRT", "SPERRE", "STAAT", "KZSH",
-              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO", "RABATTPROZ", "LISTENR", "AKTIONNR", "PREISNETTO"}
+              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO", "RABATTPROZ", "LISTENR", "AKTIONNR", "PREISNETTO", "KONTO", "JAHR", "MONAT", "SALDO"}
 KLARTEXT = {
     "E-Mail": re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"),
     "Telefon": re.compile(r"(?:\+49|\b0)\d{2,5}[ /-]?\d{4,}"),
@@ -133,6 +134,13 @@ def einlesen(ordner: Path, mandant: str) -> int:
                         print(f"  {datei.name}: {schritt.__name__} nicht moeglich ({fehlerart(str(fehler))})")
                         break
             with SessionLocal() as db:
+                if art == "kontosaldo":
+                    from app.services.spiegel_saldenabgleich import abgleichen as salden_abgleichen
+
+                    ergebnis = salden_abgleichen(db, mandant, batch, actor="l3_testdaten_import", reason="M6 Testdaten")
+                    print(f"{art:15s} {datei.name}: gleich {ergebnis['unveraendert']}, abweichend {ergebnis['geaendert']}, "
+                          f"fehler {ergebnis['fehler']}, fehlt in L3 {len(ergebnis['fehlt_in_l3'])}")
+                    continue
                 if art == "beleg":
                     from app.services.spiegel_beleg_abgleich import abgleichen as belege_abgleichen
 

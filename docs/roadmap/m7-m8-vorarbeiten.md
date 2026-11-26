@@ -19,15 +19,15 @@ die nicht vom Abschluss von M6 abhaengen. Bestand ermittelt aus dem Repository a
 | Lieferung | Haengt an M6? | Bestand | Naechster Schritt |
 |---|---|---|---|
 | Installationspaket, Update-Verfahren | nein (braucht M5-Betriebsreife) | Produktions-Compose mit Pflichtgeheimnissen (#177), Migrationen per Alembic | Installationsskript aus dem Repo auf leerem Host, als Probe in der CI |
-| Installations- und Betriebshandbuch | nein | `docs/admin/backup-restore.md`, Runbooks unter `docs/deployment/` | Handbuch-Gerippe entlang der Neuinstallation |
+| Installations- und Betriebshandbuch | nein | `docs/admin/backup-restore.md`, Runbooks unter `docs/deployment/` | Handbuch-Gerippe: [`docs/deployment/installationshandbuch.md`](../deployment/installationshandbuch.md) (2026-11-26) |
 | Fernwartungskonzept | nein | - | Konzept: Zugang nur auf Anforderung, protokolliert, Agentenmatrix (`docs/security/umgebungen-und-agentenrechte.md`) |
 | Modul- und Lizenzsteuerung | nein | `app/core/module_registry.py` (INSTALLED_MODULES, TENANT_MODULE_FLAGS aus der Konfiguration) | Lizenzdatei signiert pruefen statt Konfiguration; keine Lizenzlogik bisher |
 | Preismodell | nein, fachlich | - | Geschaeftsfuehrung |
 | AVV, TOM, Verarbeitungsverzeichnis, Loeschkonzept | nein | Verarbeitungsverzeichnis als Maske (`pages/compliance/verarbeitungsverzeichnis.tsx`), DSGVO-Loeschung Art. 17 im System, GoBD-Loeschsperren | Loeschkonzept aus den vorhandenen Fristen und Sperren ableiten; AVV/TOM als Entwurf, **rechtliche Pruefung extern** |
 | AGB, SLA, Supportprozess | nein, rechtlich | - | Entwurf nur mit rechtlicher Pruefung (extern) |
-| Demo-Mandant, Schulungsunterlagen, In-App-Hilfe | nein | Benutzerhandbuch `docs/benutzerhandbuch/`, Mandanten-Anlageweg (M5) | Demo-Mandant mit synthetischen Daten als ein Kommando |
+| Demo-Mandant, Schulungsunterlagen, In-App-Hilfe | nein | Benutzerhandbuch `docs/benutzerhandbuch/`, Mandanten-Anlageweg (M5) | Demo-Kommando: `scripts/demo_mandant.py` (`--anlegen` / `--loeschen`, synthetisch) |
 | Lasttest | teilweise - realistische Mengen kommen aus dem Spiegelbetrieb | Artillery entfernt (PR #41) | Lastprofil mit synthetischen Daten; Nachmessung mit Spiegelmengen |
-| Barrierefreiheitsbericht | nein | Designregeln WCAG AA (CLAUDE.md), Kontrast-Utilities | Bericht nach BFSG/EN 301 549 aus automatischer Pruefung + Stichproben |
+| Barrierefreiheitsbericht | nein | Designregeln WCAG AA (CLAUDE.md), Kontrast-Utilities | Gerüst: [`docs/compliance/barrierefreiheitsbericht.md`](../compliance/barrierefreiheitsbericht.md) (axe Kernrouten; Stichproben offen) |
 | SBOM | nein | **vorhanden**: CycloneDX in `quality-gate.yml` (Job `sbom`) | dem Installationspaket beilegen |
 | Penetrationstest | nein, extern | - | extern beauftragen, sobald STAGING steht |
 | **Abnahme** (Installation bei fremdem Betrieb) | **ja** - nach Abloesung von L3 | - | - |
