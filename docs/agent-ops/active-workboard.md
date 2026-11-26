@@ -1352,5 +1352,5 @@ Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_disc
 ## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
 Nutzerentscheid 26.11.: guenstigerer Preis gilt. Kaskadenstufe aktion (Preisliste Typ aktion, nach der Preisliste, nur wenn guenstiger; Kontrakt/Kundenpreis gehen vor; nicht additiv). Spiegeluebernahme aktion/aktionspreis aus WWS_AKTIONSPREISE; auf Lager/Kundenauswahl beschraenkte Aktionen = Fehlerzeile.
 
-## M4-DOMAENEN-ABNAHME-BLAETTER-20261126 — zur Abnahme, Cursor Cloud (PR folgt)
-Meilenstein: M4. Goal 26.11.2026 Bahn 2: Abnahmeblaetter `docs/abnahme/domaenen/` aus YAML + Masken-Inventar neu erzeugen; `python scripts/domaenen_abnahme.py --check` gruen. Dateibesitz: `docs/abnahme/domaenen/*.md`, Workboard. Keine YAML-Fachstatus-Aenderungen in diesem Schnitt (nur Generator-Nachzug). Merge: Claude Admin nach CI-gruen.
+## M4-DOMAENEN-ABNAHME-BLAETTER-20261126 — zur Abnahme, Cursor Cloud (PR #225)
+Meilenstein: M4. Goal 26.11.2026 Bahn 2: Abnahmeblaetter aktuell; `python scripts/domaenen_abnahme.py --check` gruen. Dateibesitz: `docs/abnahme/domaenen/*`, Workboard. Schnitt 2 (26.11.): CRM-P0 Mandantenlecks (Lookup/KIM/Akte/Merge/Kontakte) als geschlossen dokumentiert — Beleg `tests/test_m4_cr_p0_mandantenleck.py` + `app/core/public_kunden_mandant.py`; P1/P2 bleiben offen. Merge: Claude Admin nach CI-gruen.

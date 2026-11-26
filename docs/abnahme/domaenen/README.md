@@ -4,7 +4,7 @@ Erzeugt mit `python scripts/domaenen_abnahme.py`; Quelle je Domaene ist die YAML
 
 | Domaene | Reifematrix | Prozesse | abgenommen | teilweise | fehlt | hoechste Luecke | Platzhaltermasken | Festwert-Treffer |
 |---|---|---:|---:|---:|---:|---|---:|---:|
-| [CRM (Kundenakte bis Wiedervorlage)](crm.md) | D04 | 13 | 0 | 11 | 2 | P0 | 0 | 15 |
+| [CRM (Kundenakte bis Wiedervorlage)](crm.md) | D04 | 13 | 0 | 11 | 2 | P1 | 0 | 15 |
 | [Einkauf (Anfrage bis Eingangsrechnung)](einkauf.md) | D02 | 9 | 0 | 9 | 0 | P1 | 2 | 4 |
 | [Annahme, Waage und Ernte (Wiegung bis Gutschrift)](ernte-waage.md) | D06 | 13 | 0 | 13 | 0 | P1 | 8 | 0 |
 | [Kontrakte und Streckengeschaeft](kontrakte-strecke.md) | D11 | 23 | 2 | 19 | 2 | P1 | 3 | 0 |
