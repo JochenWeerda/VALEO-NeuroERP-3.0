@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, architect, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-25
+last_reviewed: 2026-11-26
 version: 1.0.0
 description: Generierter Katalog der domain_*-Tabellen aus information_schema.
 ---
@@ -648,7 +648,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_shared.futtermittel_einzelfutter` | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py`, `app/infrastructure/models/futtermittel_models.py`, `app/services/feed_inventory_link_service.py`, `app/services/feeding_actual_measure_service.py`, `app/services/feeding_actual_service.py`, `app/services/feeding_assist_service.py`, `app/services/feeding_feed_analysis_service.py`, `app/services/feeding_feed_catalog_service.py`, `app/services/feeding_supply_service.py`, `app/services/rations_readiness_service.py` | `app/services/feed_inventory_link_service.py`, `app/services/feeding_feed_catalog_service.py` | — |
 | `domain_shared.futtermittel_haccp_plaene` | `app/api/v1/endpoints/futtermittel_qs.py`, `app/api/v1/schemas/futtermittel_qs_schemas.py` | `app/api/v1/endpoints/futtermittel_qs.py` | — |
 | `domain_shared.futtermittel_mischfutter` | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py`, `app/api/v1/endpoints/compat.py`, `app/api/v1/endpoints/stammdaten_bearbeiten.py`, `app/infrastructure/models/futtermittel_models.py` | `app/api/v1/endpoints/agrar_stammdaten_kommandos.py` | — |
-| `domain_shared.futtermittel_produktionsauftraege` | `app/infrastructure/models/futtermittel_models.py`, `app/services/production_control_service.py` | `app/api/v1/endpoints/produktion_rezepturgruppen.py` | — |
+| `domain_shared.futtermittel_produktionsauftraege` | `app/domains/operations/repository.py`, `app/infrastructure/models/futtermittel_models.py`, `app/services/production_control_service.py` | `app/api/v1/endpoints/produktion_rezepturgruppen.py` | — |
 | `domain_shared.futtermittel_qs_pruefpunkte` | `app/api/v1/endpoints/futtermittel_qs.py`, `app/api/v1/schemas/futtermittel_qs_schemas.py` | `app/api/v1/endpoints/futtermittel_qs.py` | — |
 | `domain_shared.futtermittel_rezept_komponenten` | `app/infrastructure/models/futtermittel_models.py` | — | — |
 | `domain_shared.futtermittel_rezepte` | `app/infrastructure/models/futtermittel_models.py` | — | — |

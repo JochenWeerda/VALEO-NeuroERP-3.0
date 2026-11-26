@@ -220,7 +220,7 @@ async def create_release_decision(
          "lid": lot_id, "tid": tenant_id},
     )
 
-    # Charge-Rückkopplung: qualitaetsstatus auf ops_chargen setzen (lot_id = chargen_id)
+    # Charge-Rückkopplung: qualitaetsstatus nur im eigenen Mandanten (M4-PM-P0).
     chargen_status_map = {"approve": "freigegeben", "reject": "gesperrt", "hold": "quarantaene"}
     chargen_status = chargen_status_map.get(decision.decision)
     if chargen_status:
@@ -228,9 +228,9 @@ async def create_release_decision(
             text("""
                 UPDATE domain_ops.ops_chargen
                 SET qualitaetsstatus = :qs
-                WHERE chargen_id = :cid
+                WHERE chargen_id = :cid AND tenant_id = :tid
             """),
-            {"qs": chargen_status, "cid": lot_id},
+            {"qs": chargen_status, "cid": lot_id, "tid": tenant_id},
         )
 
     db.commit()
