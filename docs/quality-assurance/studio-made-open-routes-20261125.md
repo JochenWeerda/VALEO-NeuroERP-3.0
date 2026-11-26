@@ -816,8 +816,13 @@ Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind keine Route
 ## Noch offen (Folge / Goal)
 
 - Gate D SSO Hell+Dunkel + Image-CI `table-catalog` → Codex `STUDIO-ENTITY-RELEASE` (oder Freigabe Dateibesitz)
-- Playwright Gate-D-Smoke einmal gegen laufendes Frontend ausfuehren
 - Goal-Complete erst nach Gate-D-Image/SSO-Beleg
+
+## Workboard / Handshake (2026-11-26)
+
+- Workboard: `STUDIO-MADE-OPEN-ROUTES-20261125` → **zur Abnahme** (`docs/agent-ops/active-workboard.md`)
+- Handshake: [`docs/agent-ops/handshakes/studio-made-open-routes-20261126.md`](../agent-ops/handshakes/studio-made-open-routes-20261126.md)
+- Nutzerauftrag Integration: nach `main` mergen, `develop` auf `main` syncen; Gate-D-Rest bleibt Codex
 
 ## Tests
 
