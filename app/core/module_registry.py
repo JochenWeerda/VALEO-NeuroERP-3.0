@@ -41,7 +41,10 @@ class ModuleRegistry:
             tenant_modules = settings.TENANT_MODULE_FLAGS.get(tenant_id)
             if tenant_modules is not None:
                 installed = set(tenant_modules)
-        return name in installed
+        # M7: in STAGING/PRODUCTION zusaetzlich die signierte Lizenz (app/core/lizenz.py)
+        from app.core.lizenz import modul_lizenziert
+
+        return name in installed and modul_lizenziert(name, tenant_id)
 
     def enabled_modules(self, tenant_id: str | None = None) -> List[ModuleDefinition]:
         return [m for m in self.list_all() if self.is_enabled(m.name, tenant_id=tenant_id)]

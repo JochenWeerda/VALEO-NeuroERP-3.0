@@ -35,6 +35,10 @@ services:
       - OIDC_CLIENT_ID=valeo-neuro-erp-backend
       - OIDC_CLIENT_SECRET=${OIDC_CLIENT_SECRET:?OIDC_CLIENT_SECRET fehlt (Produktionsgeheimnis)}
       - APP_ENV=production
+      # M5/M7: Umgebung ausdruecklich production -> Agenten nur je Aktion freigegeben, Module nur mit Lizenz
+      - VALEO_UMGEBUNG=production
+      - VALEO_LIZENZ_DATEI=${VALEO_LIZENZ_DATEI:?VALEO_LIZENZ_DATEI fehlt (Pfad zur Lizenzdatei)}
+      - VALEO_LIZENZ_OEFFENTLICHER_SCHLUESSEL=${VALEO_LIZENZ_OEFFENTLICHER_SCHLUESSEL:?Oeffentlicher Lizenzschluessel fehlt}
       - DEBUG=false
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - CORS_ORIGINS=${CORS_ORIGINS}
