@@ -459,7 +459,65 @@ class TestFehlerIstKeinPreis:
             "customer_discount",
             "employee_discount",
         )
-        assert set(dienst.QUELLEN) == {"base", "price_list", *dienst.STUFEN}
+        # "aktion" ersetzt den Listenpreis nur, wenn guenstiger (Nutzerentscheid 26.11.2026) - keine Kaskadenstufe
+        # nach der Preisliste, sondern ein Ersatz des Listenpreises wie die Preisliste selbst.
+        assert set(dienst.QUELLEN) == {"base", "price_list", "aktion", *dienst.STUFEN}
 
     def test_unbekannter_artikel_ist_ein_404(self, client):
         assert preis(client, HAUS_A, artikel=str(uuid.uuid4())).status_code == 404
+
+
+# ── 6. Aktion: der guenstigere Preis gilt (Nutzerentscheid 26.11.2026) ─────────
+
+
+@pytest.fixture
+def preislisten(engine):
+    """Legt Preislisten fuer Haus A an und raeumt sie danach weg."""
+    from sqlalchemy import text
+
+    def anlegen(preis, typ=None, gueltig_bis=None):
+        liste = str(uuid.uuid4())
+        with engine.begin() as v:
+            v.execute(text("INSERT INTO domain_pricing.price_lists (id, tenant_id, name, price_list_type, valid_until, "
+                           "is_active) VALUES (:id, :tid, :name, :typ, :bis, TRUE)"),
+                      {"id": liste, "tid": HAUS_A, "name": f"Liste {typ or 'normal'}", "typ": typ, "bis": gueltig_bis})
+            v.execute(text("INSERT INTO domain_pricing.price_list_items (id, tenant_id, price_list_id, article_id, "
+                           "unit_price) VALUES (:id, :tid, :liste, :aid, :preis)"),
+                      {"id": str(uuid.uuid4()), "tid": HAUS_A, "liste": liste, "aid": ARTIKEL_A, "preis": preis})
+        return liste
+
+    yield anlegen
+    with engine.begin() as v:
+        v.execute(text("DELETE FROM domain_pricing.price_lists WHERE tenant_id = :h"), {"h": HAUS_A})
+
+
+class TestAktion:
+    def test_guenstigere_aktion_ersetzt_den_listenpreis(self, preislisten, client):
+        preislisten(80)
+        aktion = preislisten(70, typ="aktion")
+        daten = preis(client, HAUS_A).json()
+        assert daten["source"] == "aktion"
+        assert zahl(daten["list_price"]) == 70.0
+        assert daten["price_list_id"] == aktion
+
+    def test_teurere_aktion_greift_nicht(self, preislisten, client):
+        preislisten(80)
+        preislisten(85, typ="aktion")
+        daten = preis(client, HAUS_A).json()
+        assert daten["source"] == "price_list"
+        assert zahl(daten["list_price"]) == 80.0
+
+    def test_aktion_gilt_nicht_als_preisliste(self, preislisten, client):
+        """Ohne normale Preisliste: die Aktion (90) ist guenstiger als der Basispreis (100)."""
+        preislisten(90, typ="aktion")
+        assert preis(client, HAUS_A).json()["source"] == "aktion"
+
+    def test_abgelaufene_aktion_wirkt_nicht(self, preislisten, client):
+        preislisten(50, typ="aktion", gueltig_bis="2020-12-31")
+        assert preis(client, HAUS_A).json()["source"] == "base"
+
+    def test_kontrakt_geht_der_aktion_vor(self, preislisten, client):
+        preislisten(50, typ="aktion")
+        daten = preis(client, HAUS_A, contract_id=KONTRAKT).json()
+        assert daten["source"] == "contract"
+        assert zahl(daten["list_price"]) == 90.0

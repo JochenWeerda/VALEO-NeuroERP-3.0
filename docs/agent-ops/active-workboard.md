@@ -1348,3 +1348,6 @@ Taeglicher Belegabgleich L3 gegen nachvollzogene VALEO-Belege (source_system='l3
 
 ## M6-SPIEGEL-KUNDENRABATTE-20261126 — zur Abnahme, Claude Code (M6)
 Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_discount_items (Kaskadenstufe customer_article_discount), Test bis get_customer_article_discount. Aktionen/Rabattstaffeln offen (Rangfolge in der Kaskade fachlich klaeren); KONDITIONEN ist Lohn, entfaellt.
+
+## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
+Nutzerentscheid 26.11.: guenstigerer Preis gilt. Kaskadenstufe aktion (Preisliste Typ aktion, nach der Preisliste, nur wenn guenstiger; Kontrakt/Kundenpreis gehen vor; nicht additiv). Spiegeluebernahme aktion/aktionspreis aus WWS_AKTIONSPREISE; auf Lager/Kundenauswahl beschraenkte Aktionen = Fehlerzeile.
