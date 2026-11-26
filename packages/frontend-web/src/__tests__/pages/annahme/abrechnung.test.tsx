@@ -151,4 +151,12 @@ describe('AnnahmeAbrechnungPage', () => {
       )
     })
   })
+
+  it('zeigt Freigabe/Storno-Aktionen fuer vorhandene Settlements', async () => {
+    renderPage()
+    expect(await screen.findByText('SET-1')).toBeInTheDocument()
+    expect(screen.getByText(/Bestehende Abrechnungen/i)).toBeInTheDocument()
+    expect(screen.getByText(/Netto: 240,00/)).toBeInTheDocument()
+    expect(screen.getByText(/Lieferant: LW-1/)).toBeInTheDocument()
+  })
 })

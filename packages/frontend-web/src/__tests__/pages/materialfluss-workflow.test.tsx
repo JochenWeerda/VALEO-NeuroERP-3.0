@@ -16,12 +16,35 @@ vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: fixture.toast })
 vi.mock('@/components/navigation/PageToolbar', () => ({
   PageToolbar: ({ rightSlot }: { rightSlot?: ReactNode }) => <header>{rightSlot}</header>,
 }))
-vi.mock('@xyflow/react', () => ({
-  ReactFlow: ({ children }: { children?: ReactNode }) => <section aria-label="Materialflussgraph">{children}</section>,
-  Background: () => null, Controls: () => null, Handle: () => null, MiniMap: () => null,
-  Panel: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Position: { Left: 'left', Right: 'right' },
-}))
+vi.mock('@xyflow/react', async () => {
+  const React = await import('react')
+  return {
+    ReactFlow: ({
+      children,
+      nodes,
+      nodeTypes,
+    }: {
+      children?: ReactNode
+      nodes?: Array<{ id: string; type?: string; data?: Record<string, unknown> }>
+      nodeTypes?: Record<string, React.ComponentType<{ id: string; data: Record<string, unknown> }>>
+    }) => (
+      <section aria-label="Materialflussgraph">
+        {(nodes ?? []).map((node) => {
+          const Comp = node.type ? nodeTypes?.[node.type] : undefined
+          return Comp ? (
+            <div key={node.id} data-testid={`mf-node-${node.id}`}>
+              {React.createElement(Comp, { id: node.id, data: node.data ?? {} })}
+            </div>
+          ) : null
+        })}
+        {children}
+      </section>
+    ),
+    Background: () => null, Controls: () => null, Handle: () => null, MiniMap: () => null,
+    Panel: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    Position: { Left: 'left', Right: 'right' },
+  }
+})
 vi.mock('@/lib/api/inventory', () => ({
   useWarehouses: () => ({ data: { items: [{ id: 'warehouse-a', code: 'A', name: 'Testlager A' }, { id: 'warehouse-b', code: 'B', name: 'Testlager B' }] } }),
 }))
@@ -156,5 +179,53 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     const row = screen.getByRole('row', { name: /NODE-A/ })
     fireEvent.change(within(row).getByRole('combobox'), { target: { value: 'maintenance' } })
     await waitFor(() => expect(fixture.patchNode).toHaveBeenCalledExactlyOnceWith({ nodeId: 'node-a', warehouseId: 'warehouse-a', body: { status: 'maintenance' } }))
+  })
+
+  it('rendert Demo-Knoten inkl. Statuslabel und Untertitel', () => {
+    render(<MaterialflussPage />)
+    expect(screen.getByTestId('mf-node-n-intake')).toBeTruthy()
+    expect(screen.getByText('Annahme')).toBeTruthy()
+    expect(screen.getByText('Silozelle A1')).toBeTruthy()
+    expect(screen.getByText('Weizen')).toBeTruthy()
+    expect(screen.getByText('QS gesperrt')).toBeTruthy()
+  })
+
+  it('speichert Material/Lot einer Zelle und setzt Legacy-Silo', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+      legacy_silo_id: 'LEG-1',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    const materialInput = within(row).getByPlaceholderText('current_material_id')
+    const lotInput = within(row).getByPlaceholderText('current_lot_id')
+    fireEvent.change(materialInput, { target: { value: 'MAT-2' } })
+    fireEvent.change(lotInput, { target: { value: 'LOT-2' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Material / Lot speichern' }))
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cellId: 'cell-a',
+        warehouseId: 'warehouse-a',
+        body: expect.objectContaining({ current_material_id: 'MAT-2', current_lot_id: 'LOT-2' }),
+      }),
+    ))
+  })
+
+  it('zeigt Live-Knoten im Graph nach Lagerwahl', () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'Annahme Live', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'Waage Live', node_type: 'scale', status: 'blocked', sub: 'gesperrt' },
+    ]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    expect(screen.getByTestId('mf-node-node-a')).toBeTruthy()
+    expect(screen.getByText('Annahme Live')).toBeTruthy()
+    expect(screen.getByText('Waage Live')).toBeTruthy()
   })
 })
