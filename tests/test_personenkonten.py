@@ -97,3 +97,27 @@ def test_ohne_kontenrahmen_keine_sammelkonten():
         ergebnis = saldenliste(db, f"ohne-{uuid.uuid4().hex[:6]}")
     assert ergebnis["personenkonten"] == {}
     assert "nicht festgelegt" in ergebnis["hinweis"]
+
+
+def test_verkaufsgutschrift_mindert_den_personenkontosaldo(haus):
+    from app.finance.steuerschluessel import Steuergruppe
+    from app.services.finance_belegbuchung import buche_verkaufsgutschrift
+    from app.services.sales_posting_service import SalesPostingService
+
+    t = haus["t"]
+    with SessionLocal() as db:
+        SalesPostingService(db, t).post_ausgangsrechnung_with_op(
+            invoice_number=f"AR-{uuid.uuid4().hex[:4]}", invoice_date=date(2026, 11, 2), customer_id=haus["kunde"],
+            net_amount=Decimal("100.00"), tax_amount=Decimal("19.00"), gross_amount=Decimal("119.00"), posted_by="test")
+    with SessionLocal() as db:
+        buche_verkaufsgutschrift(
+            db, t, nummer=f"GS-{uuid.uuid4().hex[:4]}", datum="2026-11-05", rechnungsnummer=None, posted_by="test",
+            kunden_id=haus["kunde"], gruppen=[Steuergruppe(tax_code="U19", satz=Decimal("19"), netto=Decimal("10.00"),
+                                                           steuer=Decimal("1.90"), erloeskonto="8400",
+                                                           steuerkonto="1776")])
+        db.commit()
+    with SessionLocal() as db:
+        salden = saldenliste(db, t)
+
+    assert salden["personenkonten"]["10001"]["saldo"] == "107.10"  # 119,00 - 11,90
+    assert salden["ohne_personenkonto"] == {}

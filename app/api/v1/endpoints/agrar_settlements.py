@@ -96,7 +96,8 @@ class SettlementCreate(BaseModel):
 
 class SettlementPostRequest(BaseModel):
     debit_account: str = Field(default="5000", min_length=3, max_length=20)
-    credit_account_supplier: str = Field(default="3300", min_length=3, max_length=20)
+    # Ohne Angabe: Kreditorenkonto des Kontenrahmens (SKR03 1600, SKR04 3300) - vorher fest "3300".
+    credit_account_supplier: Optional[str] = Field(default=None, min_length=3, max_length=20)
     credit_account_deductions: str = Field(default="5490", min_length=3, max_length=20)
     posting_date: Optional[datetime] = None
     expected_row_version: Optional[int] = Field(

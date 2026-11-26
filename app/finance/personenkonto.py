@@ -5,6 +5,11 @@ Jede Buchungszeile auf ein Sammelkonto Forderungen bzw. Verbindlichkeiten aus Li
 des Geschaeftspartners in ``journal_entry_lines.partner_konto``. Daraus entstehen die Saldenliste je Debitor/Kreditor
 und der monatliche Saldenabgleich gegen L3.
 
+Buchungswege mit Personenkonto: Ausgangsrechnung, Eingangsrechnung, Verkaufs- und Einkaufsgutschrift, Ernte-
+Abrechnung (Kreditor), Storno (die Gegenbuchung kopiert das Personenkonto). Noch ohne: Genossenschaft
+(Mitgliederverbindlichkeit), Fracht (Spediteur); die Selbstfakturierung bucht nicht ins Journal (Weg defekt, s.
+Workboard M3-PERSONENKONTEN-WEGE).
+
 Konto-Ermittlung: Kunde -> ``customers.business_partner_id`` -> ``business_partners.debtor_account``; Lieferant ->
 ``lieferanten.partner_id`` -> ``business_partners.creditor_account``. Ohne Partner oder Konto ergibt sich ``None`` -
 die Buchung bleibt moeglich, die Zeile erscheint dann in der Saldenliste unter "ohne Personenkonto" (sichtbar statt
