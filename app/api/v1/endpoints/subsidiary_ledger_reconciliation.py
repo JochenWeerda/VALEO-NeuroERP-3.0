@@ -19,6 +19,9 @@ from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.finance.personenkonto import sammelkonten
+from app.finance.steuerschluessel import DEBITORENKONTO, KREDITORENKONTO
+
 from ....core.tenant import get_tenant_id
 from ....core.database import get_db
 
@@ -121,13 +124,14 @@ async def reconcile_ar(
                 SELECT id, account_number, COALESCE(account_name, account_number)
                 FROM domain_erp.chart_of_accounts
                 WHERE tenant_id = :tenant_id
-                  AND account_number LIKE '14%'
-                  AND LOWER(account_type) = 'asset'
+                  AND account_number = ANY(:konten)
                 ORDER BY account_number
                 LIMIT 1
                 """
             ),
-            {"tenant_id": tenant_id},
+            # Sammelkonto Forderungen LuL des Kontenrahmens (SKR03 1400, SKR04 1200) - vorher LIKE '14%', das im
+            # SKR04 die Vorsteuer traf. Ohne festgelegten Kontenrahmen kein Konto.
+            {"tenant_id": tenant_id, "konten": sammelkonten(db, tenant_id, DEBITORENKONTO)},
         ).fetchone()
 
         if not ar_account:
@@ -212,13 +216,14 @@ async def reconcile_ap(
                 SELECT id, account_number, COALESCE(account_name, account_number)
                 FROM domain_erp.chart_of_accounts
                 WHERE tenant_id = :tenant_id
-                  AND account_number LIKE '44%'
-                  AND LOWER(account_type) = 'liability'
+                  AND account_number = ANY(:konten)
                 ORDER BY account_number
                 LIMIT 1
                 """
             ),
-            {"tenant_id": tenant_id},
+            # Sammelkonto Verbindlichkeiten LuL des Kontenrahmens (SKR03 1600, SKR04 3300) - vorher LIKE '44%' mit
+            # Typ 'liability': im SKR03 ist 4400 ein Erloeskonto, die Kreditorenabstimmung fand nie ein Konto.
+            {"tenant_id": tenant_id, "konten": sammelkonten(db, tenant_id, KREDITORENKONTO)},
         ).fetchone()
 
         if not ap_account:

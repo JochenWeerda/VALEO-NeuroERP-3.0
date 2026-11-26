@@ -38,6 +38,7 @@ class _CapturingDb:
 async def test_reconcile_ar_uses_context_tenant():
     db = _CapturingDb(
         queue=[
+            _FakeResult(scalar_value="SKR03"),  # Kontenrahmen des Mandanten (Sammelkonto 1400), seit 26.11.2026
             _FakeResult(rows=[("coa-1", "1400", "Debitoren")]),
             _FakeResult(rows=[(Decimal("150.00"), Decimal("25.00"))]),
             _FakeResult(scalar_value="domain_erp.offene_posten"),
@@ -51,8 +52,11 @@ async def test_reconcile_ar_uses_context_tenant():
         db=db,
     )
 
-    account_statement, account_params = db.calls[0]
-    open_items_statement, open_items_params = db.calls[3]
+    rahmen_statement, rahmen_params = db.calls[0]
+    assert "system_properties" in rahmen_statement and rahmen_params["tid"] == "tenant-a"
+    account_statement, account_params = db.calls[1]
+    assert account_params["konten"] == ["1400"]
+    open_items_statement, open_items_params = db.calls[4]
     assert "WHERE tenant_id = :tenant_id" in account_statement
     assert account_params["tenant_id"] == "tenant-a"
     assert "tenant_id = :tenant_id" in open_items_statement
