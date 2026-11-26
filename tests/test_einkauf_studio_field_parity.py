@@ -75,15 +75,16 @@ def test_angebot_studio_covers_legacy_fields_and_actions():
     missing = required - _collect_sd_field_keys(sd)
     assert not missing, f"Studio Angebot fehlt Legacy-Felder: {sorted(missing)}"
 
-    legacy_actions = {"pruefen", "genehmigen", "ablehnen", "inBestellung"}
-    missing_actions = legacy_actions - _collect_sd_action_keys(sd)
-    assert not missing_actions, f"Studio Angebot fehlt Legacy-Aktionen: {sorted(missing_actions)}"
+    # bestellen ist die kanonische Fachaktion (Maske/MCP/CLI); Legacy-UI-Label bleibt „In Bestellung“.
+    fachaktionen = {"pruefen", "genehmigen", "ablehnen", "bestellen"}
+    missing_actions = fachaktionen - _collect_sd_action_keys(sd)
+    assert not missing_actions, f"Studio Angebot fehlt Fachaktionen: {sorted(missing_actions)}"
 
     endpoints = {a["key"]: a.get("commandEndpoint", "") for a in sd["actions"]}
     assert endpoints["pruefen"].endswith("/review")
     assert endpoints["genehmigen"].endswith("/approve")
     assert endpoints["ablehnen"].endswith("/reject")
-    assert endpoints["inBestellung"].endswith("/convert-to-order")
+    assert endpoints["bestellen"].endswith("/actions/bestellen")
     assert sd["creation"]["endpoint"] == "/api/v1/einkauf/angebote"
     assert any(a.get("method") == "PUT" for a in sd["actions"])
 

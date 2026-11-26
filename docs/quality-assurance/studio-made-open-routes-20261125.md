@@ -158,7 +158,7 @@ und keine fehlenden Datenfelder** haben. Human, CI und MCP bedienen dieselben
 
 | Maske | Nachweis |
 |-------|----------|
-| `einkauf/angebot` | Legacy-Felder (Stammdaten/Angebot/Konditionen) + Aktionen pruefen/genehmigen/ablehnen/inBestellung + PUT; Test `tests/test_einkauf_studio_field_parity.py` |
+| `einkauf/angebot` | Legacy-Felder (Stammdaten/Angebot/Konditionen) + Fachaktion `bestellen` (Label „In Bestellung“, Endpoint `/actions/bestellen`, Maske/MCP/CLI) + pruefen/genehmigen/ablehnen + PUT; Test `tests/test_einkauf_studio_field_parity.py` |
 | `einkauf/anlieferavis` | Legacy-Felder (Bestellung/Fahrzeug/Positionen/Bemerkungen) + senden/bestaetigen/stornieren (+ wareneingang additiv) + PUT; gleicher Test |
 
 Inventar: `belegSeite(...)` zaehlt als `runtime_wired` (`mask_runtime_evidence`).

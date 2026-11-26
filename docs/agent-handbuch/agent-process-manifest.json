@@ -14577,13 +14577,13 @@
           "stubReason": null
         },
         {
-          "key": "inBestellung",
+          "key": "bestellen",
           "label": "In Bestellung",
           "dangerLevel": "moderate",
           "humanApprovalRequired": false,
           "requiresConfirmation": true,
           "permission": "einkauf.angebot.order",
-          "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/convert-to-order",
+          "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen",
           "method": "POST",
           "stubReason": null
         }

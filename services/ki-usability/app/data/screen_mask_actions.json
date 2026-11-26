@@ -10079,6 +10079,31 @@
       }
     },
     {
+      "id": "mask:einkauf/angebot:bestellen",
+      "label": "In Bestellung",
+      "description": "In Bestellung (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "In Bestellung"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "bestellen",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.angebot.order",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:einkauf/angebot:genehmigen",
       "label": "Genehmigen",
       "description": "Genehmigen (einkauf/angebot)",
@@ -10100,31 +10125,6 @@
         "method": "POST",
         "permission": "einkauf.angebot.update",
         "dangerLevel": "safe"
-      }
-    },
-    {
-      "id": "mask:einkauf/angebot:inBestellung",
-      "label": "In Bestellung",
-      "description": "In Bestellung (einkauf/angebot)",
-      "category": "mask-action",
-      "domain": "einkauf",
-      "mask": "einkauf/angebot",
-      "intent_phrases": [
-        "In Bestellung"
-      ],
-      "required_data": [
-        "entity_id"
-      ],
-      "source": {
-        "screenId": "einkauf/angebot",
-        "actionKey": "inBestellung",
-        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/convert-to-order",
-        "navigationRoute": null,
-        "command": null,
-        "method": "POST",
-        "permission": "einkauf.angebot.order",
-        "requiresConfirmation": true,
-        "dangerLevel": "moderate"
       }
     },
     {

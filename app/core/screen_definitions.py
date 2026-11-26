@@ -2079,9 +2079,10 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
             {"key": "ablehnen", "label": "Ablehnen", "kind": "secondary", "dangerLevel": "critical",
              "permission": "einkauf.angebot.update", "requiresConfirmation": True,
              "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/reject", "method": "POST"},
-            {"key": "inBestellung", "label": "In Bestellung", "kind": "secondary", "dangerLevel": "moderate",
+            # Fachaktion bestellen = Maske/MCP/CLI/REST gleicher Weg (MCP-MASK-WRITES-NEXT + UIX-053)
+            {"key": "bestellen", "label": "In Bestellung", "kind": "secondary", "dangerLevel": "moderate",
              "permission": "einkauf.angebot.order", "requiresConfirmation": True,
-             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/convert-to-order", "method": "POST",
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST",
              "resultNavigationRoute": "/einkauf/bestellung/{purchaseOrderId}"},
         ],
         "creation": {
@@ -2111,7 +2112,7 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                 {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
             ],
         },
-        "noWorkflowReason": "Angebots-Stand kommt aus Status + Aktionen pruefen/genehmigen/ablehnen/inBestellung — kein separater Workflow-YAML.",
+        "noWorkflowReason": "Angebots-Stand kommt aus Status + Aktionen pruefen/genehmigen/ablehnen/bestellen — kein separater Workflow-YAML.",
         "agentContract": {
             "businessPurpose": "Lieferantenangebot: Stammdaten, Angebotsdetails, Konditionen und Bestellueberfuehrung — gleiche Wege fuer Human, CI und MCP.",
             "examplePrompts": [

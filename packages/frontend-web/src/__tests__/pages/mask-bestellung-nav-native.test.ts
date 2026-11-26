@@ -29,9 +29,11 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
     expect(src).not.toContain('endpoint="/api/v1/einkauf/bestellungen"')
   })
 
-  it('Angebot inBestellung navigiert zur nativen Bestell-Detailroute (ScreenDefinition)', () => {
+  it('Angebot bestellen navigiert zur nativen Bestell-Detailroute (ScreenDefinition)', () => {
     const sdPath = resolve(repoRoot, 'app/core/screen_definitions.py')
     const src = readFileSync(sdPath, 'utf8')
+    expect(src).toContain('"key": "bestellen"')
+    expect(src).toContain('/actions/bestellen')
     expect(src).toContain('"resultNavigationRoute": "/einkauf/bestellung/{purchaseOrderId}"')
     expect(src).not.toContain('"resultNavigationRoute": "/einkauf/bestellungen/{purchaseOrderId}"')
     expect(read('einkauf/angebot-stamm.tsx')).toContain("createStammNativeDetailPage(")

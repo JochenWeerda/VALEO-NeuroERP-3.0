@@ -13893,7 +13893,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 | `pruefen` | Pruefen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/review` |
 | `genehmigen` | Genehmigen | safe | nein | `/api/v1/einkauf/angebote/{entity_id}/approve` |
 | `ablehnen` | Ablehnen | critical | ja | `/api/v1/einkauf/angebote/{entity_id}/reject` |
-| `inBestellung` | In Bestellung | moderate | nein | `/api/v1/einkauf/angebote/{entity_id}/convert-to-order` |
+| `bestellen` | In Bestellung | moderate | nein | `/api/v1/einkauf/angebote/{entity_id}/actions/bestellen` |
 
 ---
 

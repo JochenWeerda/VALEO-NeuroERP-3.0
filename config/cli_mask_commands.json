@@ -329,7 +329,6 @@
     "mask:einkauf/angebot:bearbeiten",
     "mask:einkauf/angebot:bestellen",
     "mask:einkauf/angebot:genehmigen",
-    "mask:einkauf/angebot:inBestellung",
     "mask:einkauf/angebot:pruefen",
     "mask:einkauf/angebote:ablehnen",
     "mask:einkauf/angebote:bestellen",
