@@ -56,9 +56,11 @@ Produktive Mandantenanlage folgt dem M5-Mandantenweg (offen / nicht dieser
 Schnitt). Für **synthetische** Demo-/Schulungsdaten:
 
 ```bash
-# gegen valeo_probe / TEST_DATABASE_URL
+# gegen valeo_probe (TEST_DATABASE_URL hat Vorrang)
+export TEST_DATABASE_URL=postgresql://…@127.0.0.1:5432/valeo_probe
 python scripts/demo_mandant.py --anlegen
 python scripts/demo_mandant.py --loeschen
+# Test: python -m pytest tests/test_demo_mandant.py -o addopts=
 ```
 
 Keine echten Personen- oder L3-Daten.
