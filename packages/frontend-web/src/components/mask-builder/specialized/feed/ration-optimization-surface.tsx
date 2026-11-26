@@ -122,7 +122,7 @@ const MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG = 2
 
 type ForagePerformancePayload = NonNullable<OptimizationResult['forage_performance']>
 
-function getMilkEpExcessKg(fp: ForagePerformancePayload): { ist: number; neu: number } {
+export function getMilkEpExcessKg(fp: ForagePerformancePayload): { ist: number; neu: number } {
   const fo = fp.forage_only
   const sup = fp.supplemented
   const eIst = Number(fo.milk_from_energy_kg ?? 0)
@@ -135,7 +135,7 @@ function getMilkEpExcessKg(fp: ForagePerformancePayload): { ist: number; neu: nu
   }
 }
 
-function epBalanceWithinGuidance(excessKg: number): boolean {
+export function epBalanceWithinGuidance(excessKg: number): boolean {
   return excessKg <= MILK_EP_BALANCE_MAX_PROTEIN_EXCESS_KG + 1e-6
 }
 
@@ -227,7 +227,7 @@ const DEFAULT_WIZARD_SOFT_GOALS: WizardSoftGoals = {
 }
 
 /** Prioritäten-Schieberegler → Solver-Stufe (`objective_strategy`). */
-function deriveObjectiveStrategy(mode: OptMode, w: PriorityWeights): ObjectiveStrategy {
+export function deriveObjectiveStrategy(mode: OptMode, w: PriorityWeights): ObjectiveStrategy {
   const balanceSignal = w.rumen + w.performance + w.health
   const costSignal = w.cost + w.simplicity * 0.5
   if (mode === 'Kosten minimieren' && w.cost >= 72 && costSignal > balanceSignal + 25) {
@@ -388,14 +388,14 @@ function fmt(v: number | null | undefined, d = 2) {
 type FeedLimitUnit = 'FM' | 'TM'
 
 /** Kanonischen FM-Grenzwert in die gewählte Anzeigeeinheit umrechnen (leer bleibt leer). */
-function limitFmToDisplay(fmValue: number | undefined, dmFrac: number, unit: FeedLimitUnit): number | '' {
+export function limitFmToDisplay(fmValue: number | undefined, dmFrac: number, unit: FeedLimitUnit): number | '' {
   if (fmValue == null) return ''
   if (unit === 'TM') return Math.round(fmValue * dmFrac * 1000) / 1000
   return fmValue
 }
 
 /** Eingegebenen Wert (in gewählter Einheit) zurück nach kg FM/Tag rechnen. FM bleibt kanonisch. */
-function limitDisplayToFm(entered: number, dmFrac: number, unit: FeedLimitUnit): number {
+export function limitDisplayToFm(entered: number, dmFrac: number, unit: FeedLimitUnit): number {
   if (unit === 'TM' && dmFrac > 0) return entered / dmFrac
   return entered
 }
@@ -404,7 +404,7 @@ function card(extra = '') {
   return `bg-card border border-border rounded-[6px] p-3 shadow-[0_1px_3px_rgba(0,0,0,0.05)] ${extra}`
 }
 
-function compoundFeedToDisplayFeed(doc: UploadedCompoundFeed): FeedIngredient & {
+export function compoundFeedToDisplayFeed(doc: UploadedCompoundFeed): FeedIngredient & {
   _isCustom: boolean
   _compoundId: string
   _docName: string
@@ -434,7 +434,7 @@ function compoundFeedToDisplayFeed(doc: UploadedCompoundFeed): FeedIngredient & 
   }
 }
 
-function buildFeedDmById(baseFeeds: FeedIngredient[], wd: WizardData): Map<string, number> {
+export function buildFeedDmById(baseFeeds: FeedIngredient[], wd: WizardData): Map<string, number> {
   const m = new Map<string, number>()
   for (const f of baseFeeds) m.set(f.id, f.dm_frac)
   for (const gfa of wd.customFeeds ?? []) {
@@ -449,7 +449,7 @@ function buildFeedDmById(baseFeeds: FeedIngredient[], wd: WizardData): Map<strin
 }
 
 /** DLG + Betriebsanalysen + Lieferschein-Rezepturen: gleiche Keys wie `ration_items[].feed_id` für ME/sidP-Spalten. */
-function buildFeedLookupMap(baseFeeds: FeedIngredient[], wd: WizardData | null): Map<string, FeedIngredient> {
+export function buildFeedLookupMap(baseFeeds: FeedIngredient[], wd: WizardData | null): Map<string, FeedIngredient> {
   const m = new Map<string, FeedIngredient>()
   for (const f of baseFeeds) m.set(f.id, f)
   if (!wd) return m

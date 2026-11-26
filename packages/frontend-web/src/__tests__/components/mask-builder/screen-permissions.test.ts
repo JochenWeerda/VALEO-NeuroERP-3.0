@@ -273,4 +273,42 @@ describe('studio workbench permission prefixes (M2 open routes)', () => {
       'personal.mitarbeiter.create',
     ])
   })
+
+  it('grants CRM/Opportunity/Einkauf/Qualitaet Fallback-Rollen ohne Screen-Projektion', () => {
+    expect(getScreenPermissions(action('crm.contact.create'), user([], ['CRM_ADMIN']))).toEqual(['crm.contact.create'])
+    expect(getScreenPermissions(action('crm.betriebsprofil.create'), user([], ['manager']))).toEqual(['crm.betriebsprofil.create'])
+    expect(getScreenPermissions(action('crm.opportunity.create'), user([], ['SALES_BEARBEITEN']))).toEqual(['crm.opportunity.create'])
+    expect(getScreenPermissions(action('einkauf.supplier.create'), user([], ['EINKAUF_ADMIN']))).toEqual(['einkauf.supplier.create'])
+    expect(getScreenPermissions(action('qualitaet.reklamation.create'), user([], ['SALES_ADMIN']))).toEqual(['qualitaet.reklamation.create'])
+    expect(getScreenPermissions(action('qualitaet.labor.create'), user([], ['HARVEST_BEARBEITEN']))).toEqual(['qualitaet.labor.create'])
+  })
+
+  it('grants Stammdaten/Verkauf/Preise/Produktion/FiBu/Lager-PIV Fallback-Rollen', () => {
+    expect(getScreenPermissions(action('stammdaten.betriebsstaette.create'), user([], ['SALES_BEARBEITEN']))).toEqual([
+      'stammdaten.betriebsstaette.create',
+    ])
+    expect(getScreenPermissions(action('verkauf.kunde.create'), user([], ['CRM_BEARBEITEN']))).toEqual(['verkauf.kunde.create'])
+    expect(getScreenPermissions(action('preise.individualpreis.create'), user([], ['SALES_ADMIN']))).toEqual([
+      'preise.individualpreis.create',
+    ])
+    expect(getScreenPermissions(action('preise.zuabschlaggruppe.create'), user([], ['KONTRAKT_BEARBEITEN']))).toEqual([
+      'preise.zuabschlaggruppe.create',
+    ])
+    expect(getScreenPermissions(action('produktion.rezepturgruppe.create'), user([], ['FUTTERMITTEL_ADMIN']))).toEqual([
+      'produktion.rezepturgruppe.create',
+    ])
+    expect(getScreenPermissions(action('fibu.geschaeftsjahr.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'fibu.geschaeftsjahr.create',
+    ])
+    expect(getScreenPermissions(action('fibu.zahlungsmeldung.create'), user([], ['FINANCE_BEARBEITEN']))).toEqual([
+      'fibu.zahlungsmeldung.create',
+    ])
+    expect(getScreenPermissions(action('lager.massebilanz.create'), user([], ['HARVEST_ADMIN']))).toEqual([
+      'lager.massebilanz.create',
+    ])
+    expect(getScreenPermissions(action('lager.piv.create'), user([], ['LAGER_BEARBEITEN']))).toEqual(['lager.piv.create'])
+    expect(getScreenPermissions(action('agribusiness.field_service.create'), user([], ['AGRAR_BEARBEITEN']))).toEqual([
+      'agribusiness.field_service.create',
+    ])
+  })
 })

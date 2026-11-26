@@ -423,4 +423,76 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     await waitFor(() => expect(fixture.suggestLot).toHaveBeenCalled())
     expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Vorschlag geladen' }))
   })
+
+  it('meldet QS-Erfolg und lehnt ungültiges Layout ab', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(row).getByRole('combobox'), { target: { value: 'gesperrt' } })
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalled())
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'QS-Status gespeichert' })))
+
+    fireEvent.change(within(row).getByPlaceholderText('layout_x'), { target: { value: 'xyz' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'layout_x ungültig' })))
+  })
+
+  it('setzt Kantenstatus zurück bei Fehler und speichert bei Erfolg', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'open',
+      contamination_guard_enabled: false,
+      flush_required: false,
+    }]
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Kante gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const statusSelect = within(edgeSection).getAllByRole('combobox')[0]
+    fireEvent.change(statusSelect, { target: { value: 'blocked' } })
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+    await waitFor(() => expect(statusSelect).toHaveValue('open'))
+
+    fixture.patchEdge.mockResolvedValueOnce({})
+    fireEvent.change(statusSelect, { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Kanten-Status gespeichert' })))
+  })
+
+  it('meldet Fehler bei Material/Lot und Sync', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+    }]
+    fixture.patchCell.mockRejectedValueOnce(new Error('Inventur gesperrt'))
+    fixture.syncLot.mockRejectedValueOnce(new Error('Sync down'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(row).getByPlaceholderText('current_material_id'), { target: { value: 'MAT-9' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Material / Lot speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Speichern fehlgeschlagen' })))
+    fireEvent.click(within(row).getByRole('button', { name: 'Aus silo_lots sync' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sync fehlgeschlagen' })))
+  })
 })
