@@ -78,7 +78,8 @@ def test_belegabgleich_findet_gleich_abweichend_fehlend_und_fehlt_in_l3(mandant)
     assert (ergebnis["unveraendert"], ergebnis["geaendert"], ergebnis["fehler"]) == (1, 1, 2)
     assert ergebnis["fehlt_in_l3"] == [{"belegart": "sales_delivery", "belegnummer": "VL-9"}]  # VR-7 ist nicht 'l3'
     assert ergebnis["summen"]["sales_invoice"] == {"l3": "184.95", "valeo": "178.50"}
-    assert ergebnis["zeitraum"] == ["2026-11-20", "2026-11-21"] and ergebnis["abweichungsfrei"] is False
+    assert ergebnis["zeitraum"] == ["2026-11-20", "2026-11-21"]
+    assert ergebnis["abweichungsfrei"] is False
     assert vorher == nachher  # liest nur
 
 
@@ -88,4 +89,5 @@ def test_abweichungsfreier_tagesabgleich(mandant):
     with SessionLocal() as db:
         ergebnis = abgleichen(db, mandant, batch, actor="test", reason="M6")
 
-    assert (ergebnis["unveraendert"], ergebnis["abweichungsfrei"]) == (2, True)
+    assert ergebnis["unveraendert"] == 2
+    assert ergebnis["abweichungsfrei"] is True

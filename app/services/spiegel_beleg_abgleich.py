@@ -15,7 +15,6 @@ im Zeitraum des Abzugs, die der Abzug nicht enthaelt. Summen je Belegart fuer de
 """
 from __future__ import annotations
 
-import json
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -23,8 +22,7 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from app.core.uuid7 import uuid7
-from app.services.legacy_interface_adapter_service import LegacyAdapterError, LegacyInterfaceAdapterService
+from app.services.spiegel_abgleich_basis import abschliessen, freigegebene_zeilen, neuer_zaehler, protokolliere
 
 OBJEKTART = "beleg"
 QUELLSYSTEM = "l3"
@@ -32,6 +30,7 @@ BELEGARTEN = frozenset({
     "sales_offer", "sales_order", "sales_delivery", "sales_invoice", "sales_credit_memo",
     "purchase_order", "goods_receipt", "purchase_invoice", "purchase_credit_memo",
 })
+FELDER = ("datum", "netto", "brutto")
 
 
 def _betrag(roh: Any) -> Decimal | None:
@@ -55,72 +54,78 @@ def _datum(roh: Any) -> str | None:
     return wert[:10]
 
 
+def _valeo_beleg(db: Session, tenant_id: str, art: str, nr: str) -> dict[str, Any] | None:
+    zeile = db.execute(text(
+        "SELECT document_date::date AS datum, total_net AS netto, total_gross AS brutto "
+        "FROM domain_docflow.document_headers WHERE tenant_id = :t AND source_system = :q AND source_ref = :nr "
+        "AND doc_type = :art AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1"),
+        {"t": tenant_id, "q": QUELLSYSTEM, "nr": nr, "art": art}).mappings().first()
+    if zeile is None:
+        return None
+    return {"datum": zeile["datum"].isoformat() if zeile["datum"] else None,
+            "netto": _betrag(zeile["netto"]), "brutto": _betrag(zeile["brutto"])}
+
+
+def _vergleiche(l3: dict[str, Any], ist: dict[str, Any]) -> dict[str, Any]:
+    def text_(wert: Any) -> str | None:
+        return None if wert is None else str(wert)
+
+    return {f: {"valeo": text_(ist[f]), "l3": text_(l3[f])} for f in FELDER if l3[f] is not None and ist[f] != l3[f]}
+
+
+def _fehlt_in_l3(db: Session, tenant_id: str, zeitraum: list[str], gesehen: set[tuple[str, str]]) -> list[dict[str, str]]:
+    if not zeitraum:
+        return []
+    zeilen = db.execute(text(
+        "SELECT doc_type, source_ref FROM domain_docflow.document_headers WHERE tenant_id = :t "
+        "AND source_system = :q AND deleted_at IS NULL AND document_date::date BETWEEN :von AND :bis "
+        "ORDER BY doc_type, source_ref"),
+        {"t": tenant_id, "q": QUELLSYSTEM, "von": min(zeitraum), "bis": max(zeitraum)}).fetchall()
+    return [{"belegart": str(art), "belegnummer": str(nr)} for art, nr in zeilen if (str(art), str(nr)) not in gesehen]
+
+
+class _Lauf:
+    """Zustand eines Abgleichslaufs: Summen, gesehene Belege, Zeitraum."""
+
+    def __init__(self) -> None:
+        self.summen: dict[str, dict[str, Decimal]] = defaultdict(lambda: {"l3": Decimal("0"), "valeo": Decimal("0")})
+        self.gesehen: set[tuple[str, str]] = set()
+        self.zeitraum: list[str] = []
+
+    def bewerte(self, db: Session, tenant_id: str, p: dict[str, Any]) -> tuple[str, dict[str, Any]]:
+        art, nr = str(p.get("belegart") or "").strip(), str(p.get("belegnummer") or "").strip()
+        if art not in BELEGARTEN:
+            raise ValueError(f"Belegart {art or '-'} ist nicht zugeordnet")
+        l3 = {"datum": _datum(p.get("datum")), "netto": _betrag(p.get("netto")), "brutto": _betrag(p.get("brutto"))}
+        if l3["datum"]:
+            self.zeitraum.append(l3["datum"])
+        self.gesehen.add((art, nr))
+        self.summen[art]["l3"] += l3["brutto"] or Decimal("0")
+        ist = _valeo_beleg(db, tenant_id, art, nr)
+        if ist is None:
+            raise ValueError(f"Beleg {art} {nr} ist in VALEO nicht nachvollzogen")
+        self.summen[art]["valeo"] += ist["brutto"] or Decimal("0")
+        differenzen = _vergleiche(l3, ist)
+        return ("geaendert" if differenzen else "unveraendert"), differenzen
+
+
 def abgleichen(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason: str) -> dict[str, Any]:
     """Gleicht die L3-Belege eines freigegebenen Batches mit den nachvollzogenen VALEO-Belegen ab."""
-    batch = db.execute(text(
-        "SELECT profile_key, status FROM domain_integration.legacy_adapter_batches "
-        "WHERE id = :id AND tenant_id = :t"), {"id": batch_id, "t": tenant_id}).mappings().first()
-    if not batch or batch["status"] != "approved" or batch["profile_key"] != "l3_spiegel":
-        raise LegacyAdapterError("Nur freigegebene Batches mit Profil l3_spiegel sind abgleichsfaehig")
-    zeilen = db.execute(text(
-        "SELECT line_no, source_ref, canonical_payload FROM domain_integration.legacy_adapter_staging "
-        "WHERE tenant_id = :t AND batch_id = :b AND validation_status = 'valid' AND record_type = :o "
-        "ORDER BY line_no"), {"t": tenant_id, "b": batch_id, "o": OBJEKTART}).mappings().all()
-
-    zaehler = {"neu": 0, "geaendert": 0, "unveraendert": 0, "fehler": 0}
-    summen: dict[str, dict[str, Decimal]] = defaultdict(lambda: {"l3": Decimal("0"), "valeo": Decimal("0")})
-    gesehen: set[tuple[str, str]] = set()
-    zeitraum: list[str] = []
+    profil, zeilen = freigegebene_zeilen(db, tenant_id, batch_id, OBJEKTART)
+    zaehler, lauf = neuer_zaehler(), _Lauf()
     for z in zeilen:
-        p = dict(z["canonical_payload"] or {})
-        art, nr = str(p.get("belegart") or "").strip(), str(p.get("belegnummer") or "").strip()
-        ergebnis, differenzen, fehler = "unveraendert", {}, None
+        differenzen: dict[str, Any] = {}
+        fehler = None
         try:
-            if art not in BELEGARTEN:
-                raise ValueError(f"Belegart {art or '-'} ist nicht zugeordnet")
-            l3 = {"datum": _datum(p.get("datum")), "netto": _betrag(p.get("netto")), "brutto": _betrag(p.get("brutto"))}
-            if l3["datum"]:
-                zeitraum.append(l3["datum"])
-            gesehen.add((art, nr))
-            summen[art]["l3"] += l3["brutto"] or Decimal("0")
-            valeo = db.execute(text(
-                "SELECT document_date::date AS datum, total_net AS netto, total_gross AS brutto "
-                "FROM domain_docflow.document_headers WHERE tenant_id = :t AND source_system = :q AND source_ref = :nr "
-                "AND doc_type = :art AND deleted_at IS NULL ORDER BY created_at DESC LIMIT 1"),
-                {"t": tenant_id, "q": QUELLSYSTEM, "nr": nr, "art": art}).mappings().first()
-            if valeo is None:
-                raise ValueError(f"Beleg {art} {nr} ist in VALEO nicht nachvollzogen")
-            ist = {"datum": valeo["datum"].isoformat() if valeo["datum"] else None,
-                   "netto": _betrag(valeo["netto"]), "brutto": _betrag(valeo["brutto"])}
-            summen[art]["valeo"] += ist["brutto"] or Decimal("0")
-            differenzen = {f: {"valeo": str(ist[f]) if ist[f] is not None else None,
-                               "l3": str(l3[f]) if l3[f] is not None else None}
-                           for f in ("datum", "netto", "brutto") if l3[f] is not None and ist[f] != l3[f]}
-            if differenzen:
-                ergebnis = "geaendert"
+            ergebnis, differenzen = lauf.bewerte(db, tenant_id, dict(z["canonical_payload"] or {}))
         except ValueError as exc:
             ergebnis, fehler = "fehler", str(exc)
         zaehler[ergebnis] += 1
-        db.execute(text(
-            "INSERT INTO domain_integration.spiegel_protokoll (id, tenant_id, batch_id, line_no, objektart, "
-            "quellschluessel, ergebnis, differenzen, fehler) VALUES (:id, :t, :b, :n, :o, :k, :e, CAST(:d AS JSONB), :f)"),
-            {"id": str(uuid7()), "t": tenant_id, "b": batch_id, "n": z["line_no"], "o": OBJEKTART,
-             "k": z["source_ref"], "e": ergebnis, "d": json.dumps(differenzen), "f": fehler})
-
-    fehlt_in_l3: list[dict[str, str]] = []
-    if zeitraum:
-        for art, nr in db.execute(text(
-                "SELECT doc_type, source_ref FROM domain_docflow.document_headers WHERE tenant_id = :t "
-                "AND source_system = :q AND deleted_at IS NULL AND document_date::date BETWEEN :von AND :bis "
-                "ORDER BY doc_type, source_ref"),
-                {"t": tenant_id, "q": QUELLSYSTEM, "von": min(zeitraum), "bis": max(zeitraum)}).fetchall():
-            if (str(art), str(nr)) not in gesehen:
-                fehlt_in_l3.append({"belegart": str(art), "belegnummer": str(nr)})
-    LegacyInterfaceAdapterService(db, tenant_id)._audit(
-        batch["profile_key"], "mirror_documents_reconciled", actor, reason, batch_id=batch_id,
-        details={**zaehler, "fehlt_in_l3": len(fehlt_in_l3)})
-    db.commit()
-    return {"batch_id": batch_id, **zaehler, "fehlt_in_l3": fehlt_in_l3,
-            "summen": {a: {k: str(v) for k, v in s.items()} for a, s in sorted(summen.items())},
-            "zeitraum": [min(zeitraum), max(zeitraum)] if zeitraum else None,
-            "abweichungsfrei": zaehler["geaendert"] == 0 and zaehler["fehler"] == 0 and not fehlt_in_l3}
+        protokolliere(db, tenant_id, batch_id, z, OBJEKTART, ergebnis, differenzen, fehler)
+    fehlt = _fehlt_in_l3(db, tenant_id, lauf.zeitraum, lauf.gesehen)
+    abschliessen(db, tenant_id, batch_id, profil, "mirror_documents_reconciled", actor, reason,
+                 {**zaehler, "fehlt_in_l3": len(fehlt)})
+    return {"batch_id": batch_id, **zaehler, "fehlt_in_l3": fehlt,
+            "summen": {a: {k: str(v) for k, v in s.items()} for a, s in sorted(lauf.summen.items())},
+            "zeitraum": [min(lauf.zeitraum), max(lauf.zeitraum)] if lauf.zeitraum else None,
+            "abweichungsfrei": zaehler["geaendert"] == 0 and zaehler["fehler"] == 0 and not fehlt}
