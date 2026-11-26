@@ -32,17 +32,6 @@ paths = [
   '''^config/security/dependency-decisions\.json$''',
 ]
 
-[[allowlists]]
-description = "ScreenDefinition-Feldschluessel sind Masken-Metadaten, keine API-Geheimnisse."
-regexTarget = "match"
-paths = [
-  '''^app/core/screen_definitions.*\.py$''',
-]
-regexes = [
-  # z.B. "key": "co2_aequivalent_kg_per_t" / "stufe1_bezeichnung"
-  '''key\"\s*:\s*\"[a-z0-9_]+\"''',
-]
-
 regexes = [
   # Dummy dev token used in tests
   '''dev-token''',
@@ -67,6 +56,17 @@ regexes = [
   '''TOKEN=\"REDACTED\"''',
   '''key\"\s*:\s*\"REDACTED\"''',
   '''templateKey\"\s*:\s*\"REDACTED\"''',
+]
+
+[[allowlists]]
+description = "ScreenDefinition-Feldschluessel sind Masken-Metadaten, keine API-Geheimnisse."
+# Match von generic-api-key sieht aus wie: key": "co2_aequivalent_kg_per_t"
+regexTarget = "match"
+paths = [
+  '''^app/core/screen_definitions.*\.py$''',
+]
+regexes = [
+  '''key\"\s*:\s*\"[a-z0-9_]+\"''',
 ]
 
 [[allowlists]]
