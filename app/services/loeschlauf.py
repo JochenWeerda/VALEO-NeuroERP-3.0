@@ -38,10 +38,11 @@ def _person(nutzer: Any) -> str:
     return name
 
 
-def _auftrag(db: Session, tenant_id: str, auftrag_id: str, *, sperren: bool = True) -> dict[str, Any]:
+def _auftrag(db: Session, tenant_id: str, auftrag_id: str) -> dict[str, Any]:
+    """Der Auftrag, fuer die Dauer der Transaktion gesperrt (kein zweiter Entscheid oder Lauf parallel)."""
     zeile = db.execute(text(
-        "SELECT * FROM domain_shared.loeschauftraege WHERE tenant_id = :t AND id = :id"
-        + (" FOR UPDATE" if sperren else "")), {"t": tenant_id, "id": auftrag_id}).mappings().first()
+        "SELECT * FROM domain_shared.loeschauftraege WHERE tenant_id = :t AND id = :id FOR UPDATE"),
+        {"t": tenant_id, "id": auftrag_id}).mappings().first()
     if zeile is None:
         raise EntityNotFoundError("Loeschauftrag nicht gefunden")
     return dict(zeile)
