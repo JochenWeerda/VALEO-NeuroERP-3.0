@@ -1,23 +1,23 @@
 {
  "_note": "Generiert von scripts/rls_inventory.py; nicht von Hand aendern. Plan: docs/architecture/rls-mandantenkernel-plan.md",
  "summary": {
-  "tables": 789,
+  "tables": 779,
   "by_class": {
-   "A": 719,
+   "A": 714,
    "B": 22,
-   "C": 13,
+   "C": 8,
    "D": 35
   },
   "rls_enabled": 682,
   "tenant_types": {
-   "character varying": 339,
+   "character varying": 335,
    "character varying(100)": 9,
    "character varying(120)": 63,
    "character varying(128)": 1,
    "character varying(255)": 1,
    "character varying(36)": 81,
    "character varying(50)": 1,
-   "character varying(64)": 104,
+   "character varying(64)": 103,
    "character varying(80)": 24,
    "text": 114,
    "uuid": 4
@@ -1212,17 +1212,6 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
-  },
-  {
-   "table": "domain_crm.contacts",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_crm.customers"
-   ]
   },
   {
    "table": "domain_crm.credit_limits",
@@ -2785,28 +2774,6 @@
    "policies": 4
   },
   {
-   "table": "domain_inventory.article_alternative_eans",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles"
-   ]
-  },
-  {
-   "table": "domain_inventory.article_analyses",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles"
-   ]
-  },
-  {
    "table": "domain_inventory.article_batches",
    "class": "A",
    "tenant_type": "character varying",
@@ -2831,17 +2798,6 @@
    "policies": 4
   },
   {
-   "table": "domain_inventory.article_print_settings",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles"
-   ]
-  },
-  {
    "table": "domain_inventory.article_selections",
    "class": "A",
    "tenant_type": "character varying",
@@ -2856,17 +2812,6 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
-  },
-  {
-   "table": "domain_inventory.article_units",
-   "class": "C",
-   "tenant_type": null,
-   "rls": false,
-   "force_rls": false,
-   "policies": 0,
-   "tenant_parents": [
-    "domain_inventory.articles"
-   ]
   },
   {
    "table": "domain_inventory.articles",
@@ -3093,28 +3038,12 @@
    "policies": 0
   },
   {
-   "table": "domain_inventory.nawaro_area_sheet_rows",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
-  },
-  {
    "table": "domain_inventory.nawaro_area_sheets",
    "class": "A",
    "tenant_type": "character varying",
    "rls": true,
    "force_rls": false,
    "policies": 4
-  },
-  {
-   "table": "domain_inventory.nawaro_contract_sheet_rows",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
   },
   {
    "table": "domain_inventory.nawaro_contract_sheets",
@@ -3131,22 +3060,6 @@
    "rls": true,
    "force_rls": false,
    "policies": 4
-  },
-  {
-   "table": "domain_inventory.nawaro_raps_balances",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
-  },
-  {
-   "table": "domain_inventory.nawaro_raps_certificates",
-   "class": "A",
-   "tenant_type": "character varying",
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
   },
   {
    "table": "domain_inventory.nawaro_raps_profiles",
@@ -6406,14 +6319,6 @@
    "table": "public.outbox_events",
    "class": "B",
    "tenant_type": "character varying(50)",
-   "rls": false,
-   "force_rls": false,
-   "policies": 0
-  },
-  {
-   "table": "public.read_model_snapshots",
-   "class": "A",
-   "tenant_type": "character varying(64)",
    "rls": false,
    "force_rls": false,
    "policies": 0
