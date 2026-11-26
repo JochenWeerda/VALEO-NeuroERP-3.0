@@ -121,3 +121,22 @@ def test_verkaufsgutschrift_mindert_den_personenkontosaldo(haus):
 
     assert salden["personenkonten"]["10001"]["saldo"] == "107.10"  # 119,00 - 11,90
     assert salden["ohne_personenkonto"] == {}
+
+
+def test_kreditorkonto_des_mitglieds_ueber_die_mitgliedschaft(haus):
+    from app.finance.personenkonto import kreditorkonto_fuer_mitglied
+
+    t = haus["t"]
+    with SessionLocal() as db:
+        partner = db.execute(text("SELECT partner_id FROM domain_crm.business_partners WHERE tenant_id = :t "
+                                  "AND creditor_account = '70001'"), {"t": t}).scalar_one()
+        db.execute(text("INSERT INTO domain_crm.business_partner_cooperative_memberships (id, tenant_id, partner_id, "
+                        "membership_number) VALUES (:id, :t, :p, 'M-17')"), {"id": str(uuid.uuid4()), "t": t, "p": partner})
+        db.commit()
+        konto = kreditorkonto_fuer_mitglied(db, t, "M-17")
+        unbekannt = kreditorkonto_fuer_mitglied(db, t, "M-99")
+        db.execute(text("DELETE FROM domain_crm.business_partner_cooperative_memberships WHERE tenant_id = :t"), {"t": t})
+        db.commit()
+
+    assert konto == "70001"
+    assert unbekannt is None
