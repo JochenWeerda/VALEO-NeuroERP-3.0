@@ -790,6 +790,14 @@ Inventar-Messung: `python scripts/mask_route_migration_inventory.py` → `docs/a
 - Live-Pfad: Specialized Surfaces (`vordruck-editor-surface`, `schlagkartei-surface`)
 - Rohpalette-Scan `*-legacy` + `mask-builder/specialized`: **0**
 
+### Batch 117 — Ernte-Annahme Mutations-Invarianten
+
+- Live via `ernte-annahme-surface` → `ernte-annahme-erfassung-legacy.tsx`
+- `handleCalculate` / `handleAbschlagrechnung` / `handleEndabrechnung`: Pending-Guard (`isSaving`) + Buttons `disabled`
+- `handleRelease` / `handleDelete`: Early-Return bei laufendem Pending
+- `persistWorkflowResume`: best-effort (Checkpoint darf Speichern nicht blockieren)
+- Inventar: Routen `hand_built` **0**, `pages_hand` **37**, Gates A/B/C/E **829/829**
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

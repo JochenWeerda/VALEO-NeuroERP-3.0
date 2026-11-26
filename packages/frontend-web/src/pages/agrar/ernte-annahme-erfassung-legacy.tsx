@@ -292,17 +292,21 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
     const effectiveId = savedId || state.id || acceptanceId || undefined
     const query = buildWorkflowResumeQuery(effectiveId)
     const basePath = effectiveId ? `/agrar/ernte-annahme-erfassung/${effectiveId}` : '/agrar/ernte-annahme-erfassung'
-    await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
-      resume_node_id: 'acceptance',
-      resume_route: `${basePath}${query ? `?${query}` : ''}`,
-      resume_payload: {
-        screen: 'harvest-acceptance',
-        acceptanceId: effectiveId,
-        workflowCase: workflowContext.caseNumber || undefined,
-      },
-      business_status: effectiveId ? 'annahme_erfasst' : 'annahme_in_bearbeitung',
-      action_label: effectiveId ? 'Ernte-Annahme gespeichert' : 'Ernte-Annahme begonnen',
-    })
+    try {
+      await saveFlowSpineResumeCheckpoint(workflowContext.process, workflowContext.instanceId, {
+        resume_node_id: 'acceptance',
+        resume_route: `${basePath}${query ? `?${query}` : ''}`,
+        resume_payload: {
+          screen: 'harvest-acceptance',
+          acceptanceId: effectiveId,
+          workflowCase: workflowContext.caseNumber || undefined,
+        },
+        business_status: effectiveId ? 'annahme_erfasst' : 'annahme_in_bearbeitung',
+        action_label: effectiveId ? 'Ernte-Annahme gespeichert' : 'Ernte-Annahme begonnen',
+      })
+    } catch {
+      // best-effort: Flow-Spine-Checkpoint ist sekundär und darf Speichern nicht blockieren
+    }
   }
   const qualityCheckHandoverState = (location.state as QualityCheckHandoverState | null) ?? null
 
@@ -733,7 +737,9 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Bitte speichern Sie zuerst die Ernte-Annahme')
       return
     }
+    if (isSaving) return
 
+    setIsSaving(true)
     try {
       await apiClient.post(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
       push('Berechnung erfolgreich durchgeführt')
@@ -743,6 +749,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
       push(`Fehler bei der Berechnung: ${errorMessage(_rawErr)}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -770,6 +778,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
 
   const handleAbschlagrechnung = async (): Promise<void> => {
     if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
+    if (isSaving) return
+    setIsSaving(true)
     try {
       const { data: calcResult } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
       const brutto = calcResult?.total_gross_amount_eur != null ? `${Number(calcResult.total_gross_amount_eur).toFixed(2)} EUR` : '-'
@@ -778,11 +788,15 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
       push(`Fehler: ${errorMessage(_rawErr)}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
   const handleEndabrechnung = async (): Promise<void> => {
     if (!state.id) { push('Bitte zuerst Ernte-Annahme speichern'); return }
+    if (isSaving) return
+    setIsSaving(true)
     try {
       const { data: calcResult } = await apiClient.post<{ total_gross_amount_eur?: number }>(`/api/v1/agrar/harvest-acceptance/${state.id}/calculate`)
       const brutto = calcResult?.total_gross_amount_eur != null ? `${Number(calcResult.total_gross_amount_eur).toFixed(2)} EUR` : '-'
@@ -791,6 +805,8 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       _applyAcceptanceResponse(response)
     } catch (_rawErr: unknown) {
       push(`Fehler: ${errorMessage(_rawErr)}`)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -855,6 +871,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push('Bitte speichern Sie zuerst die Ernte-Annahme')
       return
     }
+    if (isSaving) return
 
     setIsSaving(true)
     try {
@@ -1089,6 +1106,7 @@ export default function ErnteAnnahmeErfassungPage(): JSX.Element {
       push(`Ernte-Annahme kann nicht gelöscht werden. Status: ${state.releaseStatus}. Nur 'draft' kann gelöscht werden.`)
       return
     }
+    if (isSaving) return
 
     setIsSaving(true)
     try {
@@ -1797,15 +1815,15 @@ Suchen
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex flex-wrap gap-2">
                 <ShortcutHintButton shortcut="Strg+F5">
-                  <Button variant="outline" onClick={() => void handleCalculate()} className="min-h-touch gap-2 touch-manipulation">
+                  <Button variant="outline" onClick={() => void handleCalculate()} disabled={isSaving} className="min-h-touch gap-2 touch-manipulation">
                     <Calculator className="h-4 w-4" />
                     → Berechnung neu
                   </Button>
                 </ShortcutHintButton>
-                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleAbschlagrechnung()} title="Abschlagrechnung">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleAbschlagrechnung()} disabled={isSaving} title="Abschlagrechnung">
                   Abschlagrechnung
                 </Button>
-                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleEndabrechnung()} title="Endabrechnung">
+                <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => void handleEndabrechnung()} disabled={isSaving} title="Endabrechnung">
                   Endabrechnung
                 </Button>
                 <Button variant="outline" className="min-h-touch gap-2 touch-manipulation" onClick={() => setShowVarietyDialog(true)} title="Sorte bearbeiten">
