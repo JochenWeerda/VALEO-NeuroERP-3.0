@@ -10,6 +10,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from typing import Any, List, Optional, Tuple
 
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.business_time import business_date_after, business_now, business_today
@@ -661,11 +662,22 @@ class AgrarSettlementService:
         deductions_amt = _round_money(settlement.total_deductions_eur)
         net = _round_money(settlement.net_amount_eur)
 
+        # Verbindlichkeit: ausdrueckliches Konto, sonst das Kreditorenkonto des Kontenrahmens (vorher fest "3300" - im
+        # SKR03 ist 3300 Wareneingang). Personenkonto = Kreditorenkonto des Geschaeftspartners (M3).
+        from app.finance.steuerschluessel import KREDITORENKONTO, kontenrahmen
+
+        lieferantenkonto = payload.credit_account_supplier or KREDITORENKONTO.get(kontenrahmen(self.db, self.tenant_id) or "")
+        if not lieferantenkonto:
+            raise ValidationFailedError("Kein Verbindlichkeitskonto: weder angegeben noch Kontenrahmen des Mandanten festgelegt")
+        kreditorkonto = self.db.execute(text(
+            "SELECT creditor_account FROM domain_crm.business_partners WHERE tenant_id = :t AND partner_id::text = :p"),
+            {"t": self.tenant_id, "p": str(settlement.supplier_id or "")}).scalar()
         lines = [
             {"account_id": fin.account_id_for_number(payload.debit_account), "debit_amount": float(gross), "credit_amount": 0.0,
              "description": f"Agrar settlement {settlement.settlement_number} gross"},
-            {"account_id": fin.account_id_for_number(payload.credit_account_supplier), "debit_amount": 0.0, "credit_amount": float(net),
-             "description": f"Supplier payable {settlement.supplier_id}"},
+            {"account_id": fin.account_id_for_number(lieferantenkonto), "debit_amount": 0.0, "credit_amount": float(net),
+             "description": f"Supplier payable {settlement.supplier_id}",
+             "partner_konto": str(kreditorkonto) if kreditorkonto else None},
         ]
         if deductions_amt > 0:
             lines.append({"account_id": fin.account_id_for_number(payload.credit_account_deductions), "debit_amount": 0.0,

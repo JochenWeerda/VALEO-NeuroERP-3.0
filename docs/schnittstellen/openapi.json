@@ -151748,11 +151748,17 @@
             "type": "string"
           },
           "credit_account_supplier": {
-            "default": "3300",
-            "maxLength": 20,
-            "minLength": 3,
-            "title": "Credit Account Supplier",
-            "type": "string"
+            "anyOf": [
+              {
+                "maxLength": 20,
+                "minLength": 3,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Credit Account Supplier"
           },
           "debit_account": {
             "default": "5000",
