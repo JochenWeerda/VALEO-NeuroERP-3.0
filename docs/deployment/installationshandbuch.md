@@ -88,3 +88,17 @@ DRILL_OPERATOR="<name>" bash scripts/run_restore_drill.sh
 - `docs/admin/backup-restore.md`
 - `docs/roadmap/m7-m8-vorarbeiten.md`
 - `scripts/demo_mandant.py`
+
+## Lizenz (M7)
+
+In PRODUCTION und STAGING laufen fachliche Module nur mit einer gueltigen, signierten Lizenz. Ohne Lizenz bleibt allein
+das Kernmodul aktiv.
+
+1. Der Hersteller stellt die Lizenzdatei aus: `python scripts/lizenz_ausstellen.py ausstellen ...`. Den privaten
+   Schluessel verwahrt nur der Hersteller.
+2. Die Lizenzdatei kommt auf den Server, ihr Pfad nach `VALEO_LIZENZ_DATEI`.
+3. Den oeffentlichen Schluessel des Herstellers nach `VALEO_LIZENZ_OEFFENTLICHER_SCHLUESSEL`.
+4. `docker-compose.production.yml` verlangt beide Werte und setzt `VALEO_UMGEBUNG=production`.
+
+Pruefung: `app/core/lizenz.py`. Eine abgelaufene oder manipulierte Lizenz wirkt wie eine fehlende.
+

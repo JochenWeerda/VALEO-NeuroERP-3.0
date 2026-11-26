@@ -1363,3 +1363,6 @@ Meilenstein: M7 (ohne M6). Goal 26.11.2026 Bahn 3: Installationshandbuch-Geruest
 
 ## M3-PERSONENKONTEN-WEGE-20261126 — zur Abnahme, Claude Code (M3)
 Personenkonto auch in Verkaufs-/Einkaufsgutschrift und Ernte-Abrechnung; Storno kopiert es. Ernte-Abrechnung: Verbindlichkeitskonto ohne Angabe = Kreditorenkonto des Kontenrahmens (vorher fest 3300 = im SKR03 Wareneingang); Aufwandskonto-Vorgabe 5000/5490 (SKR04-Stil) bleibt offene Fachfrage. BEFUND Selbstfakturierung (self_billing.py Buchungsweg): importiert nicht vorhandenes Modell Buchung -> Weg bricht ab (500); inhaltlich zudem falsch (Soll Kreditor an Erloes 4200, USt auf 1400 = Forderungen). Neubau ueber Finance braucht Entscheid zur USt-Pauschalierung (§ 24 UStG). Offen: Genossenschaft, Fracht.
+
+## M7-LIZENZPRUEFUNG-20261126 — zur Abnahme, Claude Code (M7)
+Lizenzpruefung: app/core/lizenz.py (Ed25519-Signatur ueber kanonisches JSON: Kunde, Module, Mandanten, Ablauf), ModuleRegistry.is_enabled schneidet in STAGING/PRODUCTION (VALEO_UMGEBUNG ausdruecklich) mit der Lizenz; ohne gueltige Lizenz nur core. Herstellerwerkzeug scripts/lizenz_ausstellen.py (privater Schluessel nie im Repo). Produktions-Compose setzt VALEO_UMGEBUNG=production und verlangt Lizenzdatei + oeffentlichen Schluessel.
