@@ -315,6 +315,7 @@ def _hauptbuch_buchen(
     """
     if typ not in GL_PFLICHTIG:
         return None
+    from app.finance.personenkonto import kreditorkonto_fuer_mitglied
     from app.services.finance_transaction_service import FinanceTransactionService
 
     fin = FinanceTransactionService(db, tenant_id)
@@ -335,7 +336,9 @@ def _hauptbuch_buchen(
                  "description": f"Anteilsrueckzahlung Mitglied {mitglieds_nr}"},
                 {"account_id": fin.account_id_for_number(KONTO_VERBINDLICHKEIT_MITGLIED),
                  "debit_amount": 0.0, "credit_amount": wert,
-                 "description": "Auseinandersetzungsguthaben (§ 73 GenG)"},
+                 "description": "Auseinandersetzungsguthaben (§ 73 GenG)",
+                 # Personenkonto des Mitglieds (M3) - ueber die Mitgliedschaft am Geschaeftspartner
+                 "partner_konto": kreditorkonto_fuer_mitglied(db, tenant_id, mitglieds_nr)},
             ]
         eintrag = fin.create(
             entry_number=_belegnummer(bewegung_id),

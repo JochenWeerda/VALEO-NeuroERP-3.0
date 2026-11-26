@@ -24,6 +24,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
+from app.finance.personenkonto import kreditorkonto_fuer_lieferant
 from app.core.tenant import get_tenant_id
 
 from app.api.v1.schemas.base import IDResponse, TypedObjectOut
@@ -389,7 +390,9 @@ def create_carrier_invoice(
                  "description": f"Frachtkosten Tour {body.tour_id} ({body.carrier_id})"},
                 {"account_id": fin.account_id_for_number(body.credit_account), "debit_amount": 0.0,
                  "credit_amount": gross,
-                 "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}"},
+                 "description": f"AP Spediteur {body.carrier_id} {body.invoice_number}",
+                 # Personenkonto des Spediteurs als Lieferant (M3); ohne Lieferantensatz sichtbar ohne Konto
+                 "partner_konto": kreditorkonto_fuer_lieferant(db, tenant_id, body.carrier_id)},
             ]
             if body.tax_amount_eur > 0:
                 lines.append({
