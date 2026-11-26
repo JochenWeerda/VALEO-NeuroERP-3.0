@@ -414,6 +414,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `performance_indexes_20260526` | Performance indexes for high-frequency query patterns. |
 | `periode_statuswoerterbuch_20261001` | Eine Buchungsperiode hat einen Zustand, nicht drei Vokabulare. |
 | `personal_organisation_zeitkonto_20261006` | Organisationseinheiten und Zeitkontokorrekturen — zwei fehlende Tabellen. |
+| `personenkonto_journalzeile_20261126` | Personenkonto an der Journalzeile (M3, Nutzerentscheid 26.11.2026). |
 | `portal_interessenten_preise_20261020` | Kundenportal: Interessenten und Preisspiegel als Tabellen statt Arbeitsspeicher. |
 | `portal_kundenzugaenge_20261014` | Portal: gepruefte Zuordnung einer Anmeldung zu Kundenkonten (TENANT-DOC-001). |
 | `portal_lohndienst_persistenz_20261014` | Portal: Lohndienst-Auftraege und Empfehlungen in PostgreSQL; Portalrollen (PORTAL-CONTEXT-001). |
