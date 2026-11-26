@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import FahrzeugVertiefungPage from '@/pages/fuhrpark/fahrzeug-vertiefung-legacy'
@@ -76,6 +77,28 @@ describe('FahrzeugVertiefungPage', () => {
     expect(await screen.findByText('Tour')).toBeTruthy()
     expect(screen.getAllByText('Unterwegs').length).toBeGreaterThan(0)
     expect(screen.getByText(/100\s*km/)).toBeTruthy()
+  })
+
+  it('laedt Wartungsvorhersage und Bußgelder in den Tabs', async () => {
+    const user = userEvent.setup()
+    api.wartung.mockResolvedValue({
+      aktueller_km_stand: 12000,
+      tuev_faellig_in_tagen: 40,
+      asu_faellig_in_tagen: 20,
+      inspektion_faellig_in_tagen: null,
+      vorhersagen_nach_km: [
+        { terminart: 'Ölwechsel', intervall_km: 15000, faellig_in_km: 3000, faellig_bei_km: 15000, dringend: false },
+      ],
+    })
+    api.listBussgeld.mockResolvedValue([
+      { id: 'bg-1', datum: '2026-10-01T00:00:00Z', betrag_eur: 60, status: 'offen', tatbestand: 'Tempo' },
+    ])
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-9' } })
+    await user.click(screen.getByRole('tab', { name: 'Wartungsvorhersage' }))
+    await waitFor(() => expect(api.wartung).toHaveBeenCalledWith('FZ-9'))
+    await user.click(screen.getByRole('tab', { name: 'Bußgelder' }))
+    await waitFor(() => expect(api.listBussgeld).toHaveBeenCalledWith('FZ-9'))
   })
 
   it('meldet Fehler bei fehlgeschlagenem Statuswechsel', async () => {

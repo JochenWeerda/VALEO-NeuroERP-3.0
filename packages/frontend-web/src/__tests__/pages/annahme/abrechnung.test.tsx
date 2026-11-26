@@ -56,9 +56,12 @@ describe('AnnahmeAbrechnungPage', () => {
               approval_history: [],
               allowed_transitions: [],
               can_post_fibu: false,
-              correction_options: [],
-              deductions: [],
+              correction_options: [{ memo_type: 'credit' }],
+              deductions: [
+                { id: 'd1', deduction_type: 'drying', mode: 'per_ton', amount_eur: 10 },
+              ],
               created_at: '2026-07-10T10:00:00Z',
+              row_version: 2,
             },
             {
               id: 'set-2',
@@ -79,6 +82,29 @@ describe('AnnahmeAbrechnungPage', () => {
               correction_options: [],
               deductions: [],
               created_at: '2026-08-10T10:00:00Z',
+            },
+            {
+              id: 'set-draft',
+              settlement_number: 'SET-DRAFT',
+              campaign_id: 'camp-1',
+              supplier_id: 'LW-3',
+              gross_quantity_kg: 800,
+              billing_quantity_kg: 780,
+              unit_price_eur_per_ton: 200,
+              gross_amount_eur: 160,
+              total_deductions_eur: 5,
+              net_amount_eur: 155,
+              status: 'draft',
+              approval_status: 'ENTWURF',
+              approval_history: [],
+              allowed_transitions: ['ZUR_FREIGABE', 'FREIGEGEBEN', 'ABGELEHNT', 'ENTWURF'],
+              can_post_fibu: true,
+              correction_options: [],
+              deductions: [
+                { id: 'd2', deduction_type: 'cleaning', mode: 'fixed', amount_eur: 5 },
+              ],
+              created_at: '2026-07-11T10:00:00Z',
+              row_version: 1,
             },
           ],
         }
@@ -158,5 +184,62 @@ describe('AnnahmeAbrechnungPage', () => {
     expect(screen.getByText(/Bestehende Abrechnungen/i)).toBeInTheDocument()
     expect(screen.getByText(/Netto: 240,00/)).toBeInTheDocument()
     expect(screen.getByText(/Lieferant: LW-1/)).toBeInTheDocument()
+    expect(screen.getByText(/Trocknung \(je t\)/)).toBeInTheDocument()
+    expect(screen.getByText(/Reinigung \(fix\)/)).toBeInTheDocument()
+  })
+
+  it('reicht Entwurf zur Freigabe ein und storniert mit Bestaetigung', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/freigabe')) {
+        return { data: { allowed: true, reason: 'ok', new_status: 'ZUR_FREIGABE', previous_status: 'ENTWURF' } }
+      }
+      if (url.includes('/cancel')) {
+        return { data: { id: 'set-draft', status: 'cancelled' } }
+      }
+      if (url.includes('/post-fibu')) {
+        return { data: { id: 'set-draft' } }
+      }
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Zur Freigabe' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/set-draft/freigabe',
+        expect.objectContaining({ target_status: 'ZUR_FREIGABE', expected_row_version: 1 }),
+      )
+    })
+    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Freigabeschritt gespeichert' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'In Fibu buchen' }))
+    await waitFor(() => {
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/set-draft/post-fibu',
+        expect.objectContaining({ expected_row_version: 1 }),
+      )
+    })
+    expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Fibu-Buchung erstellt' }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stornieren' }))
+    await waitFor(() => {
+      expect(confirmSpy).toHaveBeenCalled()
+      expect(apiPostMock).toHaveBeenCalledWith(
+        '/api/v1/agrar/settlements/set-draft/cancel',
+        {},
+        expect.objectContaining({ params: { expected_row_version: 1 } }),
+      )
+    })
+    confirmSpy.mockRestore()
+  })
+
+  it('blockiert Speichern ohne Lieferant', async () => {
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }))
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Lieferant fehlt' }))
+    })
   })
 })

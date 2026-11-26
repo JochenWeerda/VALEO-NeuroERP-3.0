@@ -9,7 +9,7 @@ const fixture = vi.hoisted(() => ({
   toast: vi.fn(), createSystem: vi.fn(), createCell: vi.fn(),
   warehouseReads: vi.fn(),
   cells: [] as Record<string, unknown>[], nodes: [] as Record<string, unknown>[], edges: [] as Record<string, unknown>[],
-  patchCell: vi.fn(), patchNode: vi.fn(), patchEdge: vi.fn(),
+  patchCell: vi.fn(), patchNode: vi.fn(), patchEdge: vi.fn(), syncLot: vi.fn(),
 }))
 vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => vi.fn() }))
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: fixture.toast }) }))
@@ -66,7 +66,8 @@ vi.mock('@/lib/api/agri-material-flow', async importOriginal => {
     usePatchAgriFlowNode: () => ({ mutateAsync: fixture.patchNode }),
     usePatchAgriFlowEdge: () => ({ mutateAsync: fixture.patchEdge }),
     useCreateAgriFlowNode: mutation, useCreateAgriFlowEdge: mutation,
-    useBookAgriMaterialTransfer: mutation, useBookAgriLotToCell: mutation, useSyncAgriSiloCellFromLots: mutation,
+    useBookAgriMaterialTransfer: mutation, useBookAgriLotToCell: mutation,
+    useSyncAgriSiloCellFromLots: () => ({ mutateAsync: fixture.syncLot, isPending: false }),
   }
 })
 function selectWarehouse(id = 'warehouse-a') {
@@ -81,6 +82,7 @@ beforeEach(() => {
   fixture.patchCell.mockResolvedValue({})
   fixture.patchNode.mockResolvedValue({})
   fixture.patchEdge.mockResolvedValue({})
+  fixture.syncLot.mockResolvedValue({})
   fixture.createSystem.mockResolvedValue({ id: 'new-system' })
   fixture.createCell.mockResolvedValue({ id: 'new-cell' })
 })
@@ -215,6 +217,16 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
         body: expect.objectContaining({ current_material_id: 'MAT-2', current_lot_id: 'LOT-2' }),
       }),
     ))
+    fireEvent.change(within(row).getByPlaceholderText('legacy_silo_id'), { target: { value: 'LEG-9' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Legacy-Silo speichern' }))
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cellId: 'cell-a',
+        body: expect.objectContaining({ legacy_silo_id: 'LEG-9' }),
+      }),
+    ))
+    fireEvent.click(within(row).getByRole('button', { name: 'Aus silo_lots sync' }))
+    await waitFor(() => expect(fixture.syncLot).toHaveBeenCalled())
   })
 
   it('zeigt Live-Knoten im Graph nach Lagerwahl', () => {

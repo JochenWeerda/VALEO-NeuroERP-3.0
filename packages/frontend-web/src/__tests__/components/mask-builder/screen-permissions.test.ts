@@ -213,3 +213,64 @@ it('requires the backend admin role for renaming a branch', () => {
   expect(getScreenPermissions(branch, user(['admin:all']))).toEqual([])
   expect(getScreenPermissions(branch, user([], ['admin']))).toEqual(['admin:all'])
 })
+
+
+describe('studio workbench permission prefixes (M2 open routes)', () => {
+  const action = (permission: string): ScreenDefinition => ({
+    ...screen,
+    id: `wb/${permission}`,
+    actions: [{ key: 'act', label: 'Act', permission }],
+  })
+
+  it('grants rohwarengruppe via LAGER and vermehrung via AGRAR/KONTRAKT', () => {
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), user([], ['LAGER_BEARBEITEN']))).toEqual([
+      'agrar.rohwarengruppe.create',
+    ])
+    expect(getScreenPermissions(action('agrar.vermehrungsvertrag.create'), user([], ['KONTRAKT_ADMIN']))).toEqual([
+      'agrar.vermehrungsvertrag.create',
+    ])
+  })
+
+  it('grants Mengenzeitraum/ZuAbschlag via KONTRAKT and Zins via FINANCE', () => {
+    expect(getScreenPermissions(action('kontrakte.mengenzeitraum.create'), user([], ['KONTRAKT_BEARBEITEN']))).toEqual([
+      'kontrakte.mengenzeitraum.create',
+    ])
+    expect(getScreenPermissions(action('finance.zinsabrechnung.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'finance.zinsabrechnung.create',
+    ])
+  })
+
+  it('grants Admin-Ops AI/Command/Suite only to ADMIN/manager (+ Finance for AI)', () => {
+    expect(getScreenPermissions(action('admin.ai_approvals.decide'), user([], ['FINANCE_BEARBEITEN']))).toEqual([
+      'admin.ai_approvals.decide',
+    ])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), user([], ['ADMIN']))).toEqual([
+      'admin.command_monitor.read',
+    ])
+    expect(getScreenPermissions(action('admin.admin_suite.read'), user([], ['manager']))).toEqual([
+      'admin.admin_suite.read',
+    ])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), user([], ['CRM_BEARBEITEN']))).toEqual([])
+  })
+
+  it('grants Agrar-Arbeitsplaetze und Materialfluss den Fachrollen', () => {
+    expect(getScreenPermissions(action('agrar.schlagkartei.read'), user([], ['AGRAR_LESEN']))).toEqual([
+      'agrar.schlagkartei.read',
+    ])
+    expect(getScreenPermissions(action('agrar.settlement.write'), user([], ['CRM_ADMIN']))).toEqual([
+      'agrar.settlement.write',
+    ])
+    expect(getScreenPermissions(action('lager.materialfluss.write'), user([], ['LAGER_LESEN']))).toEqual([
+      'lager.materialfluss.write',
+    ])
+  })
+
+  it('grants Service-Anfrage fachlich und Personal/Mitarbeiter', () => {
+    expect(getScreenPermissions(action('service.anfrage.create'), user([], ['LAGER_ADMIN']))).toEqual([
+      'service.anfrage.create',
+    ])
+    expect(getScreenPermissions(action('personal.mitarbeiter.create'), user([], ['PERSONAL_ADMIN']))).toEqual([
+      'personal.mitarbeiter.create',
+    ])
+  })
+})
