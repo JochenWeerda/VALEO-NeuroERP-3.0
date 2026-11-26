@@ -31,6 +31,8 @@ class JournalEntryLine(Base):
     cost_center = Column(String(100), nullable=True)
     profit_center = Column(String(100), nullable=True)
     reference = Column(String(255), nullable=True)
+    # Personenkonto (Debitor/Kreditor) auf Sammelkonto-Zeilen - M3, app/finance/personenkonto.py.
+    partner_konto = Column(String(20), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     journal_entry = relationship(

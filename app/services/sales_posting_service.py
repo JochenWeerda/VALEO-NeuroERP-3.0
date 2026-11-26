@@ -10,6 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.business_time import business_today
+from app.finance.personenkonto import debitorkonto_fuer_kunde
 from app.core.exceptions import ValidationFailedError
 from app.core.uuid7 import uuid7
 from app.services.finance_transaction_service import FinanceTransactionService
@@ -223,6 +224,8 @@ class SalesPostingService:
                     "debit_amount": float(gross),
                     "credit_amount": 0,
                     "description": f"Forderung {invoice_number}",
+                    # Personenkonto des Debitors (M3, app/finance/personenkonto.py)
+                    "partner_konto": debitorkonto_fuer_kunde(self.db, self.tenant_id, customer_id),
                 },
             ]
             if steuergruppen is not None:

@@ -20,6 +20,7 @@ from typing import Any, Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.finance.personenkonto import kreditorkonto_fuer_lieferant
 from app.finance.steuerschluessel import (
     KREDITORENKONTO,
     Steuerklaerung,
@@ -106,6 +107,9 @@ def buche_eingangsrechnung(
         "account_id": fin.account_id_for_number(kreditorenkonto(db, tenant_id, invoice)),
         "debit_amount": 0, "credit_amount": float(brutto),
         "description": f"Verbindlichkeit {nummer}",
+        # Personenkonto des Kreditors (M3, app/finance/personenkonto.py)
+        "partner_konto": kreditorkonto_fuer_lieferant(
+            db, tenant_id, invoice.get("supplierId") or invoice.get("customerId")),
     })
     journal = fin.create(
         entry_number=f"AP-{nummer}"[:20],
