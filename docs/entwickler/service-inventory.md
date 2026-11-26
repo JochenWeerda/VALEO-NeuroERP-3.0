@@ -227,6 +227,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `list_presets` | Registered read-only list selectors, shared by REST, MCP and CLI. |
 | `lkv_pipeline` | LKV-Pipeline – Download der LKV-Weser-Ems-Jahresberichte (Milchleistungsprüfung). |
 | `llm_gateway` | Anbieterunabhängiges LLM-Gateway. |
+| `loeschlauf` | Loeschlauf mit Vier-Augen-Freigabe (M7 Loeschkonzept, Nutzerentscheid 26.11.2026). |
 | `loeschpruefung` | Loeschpruefung nach den Aufbewahrungsfristen (M7 Loeschkonzept, 26.11.2026) - Bericht, loescht nie. |
 | `logistics_disposition_service` | DOM-LOG-004.2 — Tour-Dispositions-Service (Kapazität + Zeitfenster). |
 | `logistics_epod_service` | DOM-LOG-004.3 — ePOD-Lifecycle-Service (Ablieferungsbeleg → Settlement). |

@@ -91,5 +91,16 @@ mit den IDs der loeschbaren Saetze und ohne Inhalte. Einbezogen sind:
 
 Die Pruefung loescht nichts. Test: `tests/test_loeschpruefung.py`.
 
-Naechster Schritt: ein Loeschlauf mit Freigabe durch eine Person (irreversibel, Agentenmatrix) und Loeschnachweis,
-dazu die Datenkategorien ausserhalb von Docflow und Journal (Portal, Personal, Protokolle).
+**Loeschlauf (26.11.2026, Nutzerentscheid Vier-Augen-Freigabe):** `app/services/loeschlauf.py`, Tabelle
+`domain_shared.loeschauftraege`.
+
+- **Ablauf:** beantragt -> freigegeben durch eine zweite Person -> ausgefuehrt mit Loeschnachweis. Der Nachweis traegt
+  Zaehlwerte und IDs, keine Inhalte.
+- **Wer entscheidet:** Der Antragsteller entscheidet nie, technische Konten und Agenten ebenfalls nicht. Die
+  Datenbank sichert die Funktionstrennung zusaetzlich ab.
+- **Voraussetzungen:** Ein Antrag braucht das Datum der offenen Festsetzungsfrist. Bei der Ausfuehrung wird die
+  Loeschbarkeit erneut geprueft.
+- **Freigeschaltete Kategorien:** nur buchungsfreie Handelsbelege (Angebote, Auftraege, Bestellungen) und
+  Lieferscheine. Belege mit Buchungsbezug werden uebersprungen.
+- **Noch nicht freigeschaltet:** gebuchte Rechnungen und das Journal (GoBD-Archiv, Hash-Kette) sowie die Kategorien
+  ausserhalb von Docflow (Portal, Personal, Protokolle).
