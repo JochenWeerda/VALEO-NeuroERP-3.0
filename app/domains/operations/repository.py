@@ -783,12 +783,37 @@ class ChargeRepository:
         return charge
 
     def delete(self, charge_id: str) -> bool:
+        """Hartes Löschen nur ohne Freigabe und ohne Produktionsbezug (M4-PM-P0).
+
+        Wirft ``ValueError`` mit Fachgrund, wenn die Charge nicht gelöscht werden darf.
+        """
+        from sqlalchemy import text
+
         charge = self.get_by_id(charge_id)
-        if charge:
-            self.db.delete(charge)
-            self.db.commit()
-            return True
-        return False
+        if not charge:
+            return False
+        if (charge.status or "") == ChargeStatus.FREIGEGEBEN.value or (
+            charge.qualitaetsstatus or ""
+        ) == ChargeStatus.FREIGEGEBEN.value:
+            raise ValueError("Freigegebene Charge darf nicht gelöscht werden.")
+        gebunden = self.db.execute(
+            text(
+                "SELECT 1 FROM domain_shared.futtermittel_produktionsauftraege "
+                "WHERE tenant_id = :tid "
+                "AND (chargen_id = :cid OR charge_id = :id) "
+                "LIMIT 1"
+            ),
+            {
+                "tid": self.tenant_id,
+                "cid": charge.chargen_id,
+                "id": charge.id,
+            },
+        ).first()
+        if gebunden:
+            raise ValueError("Charge ist an einen Produktionsauftrag gebunden.")
+        self.db.delete(charge)
+        self.db.commit()
+        return True
 
     def get_stats(self) -> dict:
         scoped = self.db.query(Charge).filter(Charge.tenant_id == self.tenant_id)

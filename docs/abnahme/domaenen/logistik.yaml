@@ -37,7 +37,7 @@ reifematrix: D07
 l3_referenz: >-
   l3-crm-organisation-referenz (Fuhrpark) — L3 hat keinen eigenen Logistik-Skill; Frachtauftrag und Spedition stehen auch in
   l3-einkauf-referenz und l3-vertrieb-referenz
-erhoben: 2026-11-23
+erhoben: 2026-11-26
 pruefer: Cursor
 bereiche: [fuhrpark, transporte, logistik, versand, verladung, disposition]
 screen_domains: [logistics, logistik, transporte, verladung]
@@ -86,24 +86,22 @@ prozesse:
     l3: Fuhrpark-/Personalstamm Fahrer (Fuehrerschein, ADR, Verfuegbarkeit) — in L3 ueber Fuhrpark und Personal; kein eigener Fahrer-Skill
     routen: [transporte/fahrer, transporte/fahrer/neu]
     rolle: Lesen ohne Mandantenbezug; Schreiben SCHREIBEN LOGISTIK (Endpunkte in transporte.py)
-    nachweise: []
+    nachweise:
+      - tests/test_m4_lo_p0_fahrer_mandant.py::test_liste_zeigt_nur_eigenen_mandanten
+      - tests/test_m4_lo_p0_fahrer_mandant.py::test_get_fremder_fahrer_404
+      - tests/test_m4_lo_p0_fahrer_mandant.py::test_patch_fremder_fahrer_404
+      - tests/test_m4_lo_p0_fahrer_mandant.py::test_delete_fremder_fahrer_404
     status: teilweise
     befund: >-
-      Mandantenleck: app/api/v1/endpoints/transporte.py (list_fahrer, get_fahrer, create_fahrer, update_fahrer, delete_fahrer)
-      nimmt keinen Mandanten und fragt db.query(Fahrer) ohne Filter ab; das Modell Fahrer (ops_fahrer) hat kein tenant_id, die
-      personalnummer ist systemweit eindeutig, FahrerRepository (repository.py) kennt keinen Mandanten. Jeder angemeldete Mandant
-      liest, aendert und loescht damit alle Fahrer samt Geburtsdatum, Fuehrerschein und Kontaktdaten. Die Luecke ist in
-      alembic/versions/rls_domain_ops_teil2_20261028.py (Docstring) und docs/admin/rls-domain-matrix.md bekannt, aber nicht
-      geschlossen; ops_fahrzeug_touren.fahrer_id verweist auf diese Tabelle. Bedienung: die Liste transporte/fahrer ist eine echte
-      Maske, doch transporte/fahrer/neu und transporte/fahrer/:id rendern nach route-tree.gen.tsx nur pages/transporte/fahrer-liste;
-      die Aktion Neuer Fahrer ist ohne Serverwirkung (nur lokale Navigation), Verfuegbaren Fahrer oeffnen und Export sind als nicht
-      verfuegbar gekennzeichnet. Ein Fahrer ist im Browser weder anlegbar noch aenderbar. Kein Test fuer transporte/fahrer.
+      Mandantengrenze geschlossen: ops_fahrer traegt tenant_id (Migration ops_fahrer_tenant_20261124), FahrerRepository
+      filtert immer auf den verifizierten Mandanten, transporte.py reicht get_tenant_id durch — belegt gegen den
+      Pruefstand in test_m4_lo_p0_fahrer_mandant.py (Liste nur eigener Mandant; GET/PATCH/DELETE fremd = 404).
+      Bedienung: die Liste transporte/fahrer ist eine echte Maske, doch transporte/fahrer/neu und
+      transporte/fahrer/:id rendern nach route-tree.gen.tsx nur pages/transporte/fahrer-liste; die Aktion Neuer Fahrer
+      ist ohne Serverwirkung (nur lokale Navigation), Verfuegbaren Fahrer oeffnen und Export sind als nicht verfuegbar
+      gekennzeichnet. Ein Fahrer ist im Browser weder anlegbar noch aenderbar.
     luecken:
-      - text: "Mandantenleck: ops_fahrer ohne tenant_id und transporte.py ohne Mandantenfilter — alle Mandanten sehen, aendern und loeschen alle Fahrer (personenbezogene Daten); Personalnummer systemweit eindeutig"
-        prio: P0
       - text: "Fahrer ist im Browser nicht anlegbar oder aenderbar: transporte/fahrer/neu und transporte/fahrer/:id rendern nur die Liste, Aktion Neuer Fahrer ohne Serverwirkung"
-        prio: P1
-      - text: "Kein Datenbanktest fuer die Fahrer-Endpunkte (Vertrag, Fehlerpfade, Mandantengrenze)"
         prio: P1
       - text: "Platzhalterliste transporte/fahrer-liste (id/name/status/datum) ist in der Registry noch vorhanden, wird von keiner Route genutzt"
         prio: P3
