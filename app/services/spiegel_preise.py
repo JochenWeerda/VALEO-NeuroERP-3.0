@@ -98,7 +98,8 @@ def _preisliste_id(db: Session, tenant_id: str, nummer: str) -> str:
     return str(ziel)
 
 
-def _artikelpreis_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+def _einzelpreis_werte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    """Artikel, verlustfreier Einzelpreis (Preis / Preisbezug) und Gueltigkeit einer Preiszeile."""
     nummer = _text(p, "artikelnummer", pflicht=True)
     preis = _zahl(p, "preis", pflicht=True)
     preis_je = _zahl(p, "preis_je") or Decimal("1")
@@ -108,10 +109,15 @@ def _artikelpreis_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> d
     if einzel != einzel.quantize(VIER_STELLEN):
         raise ZeilenFehler(f"Preis {preis} je {preis_je} ist als Einzelpreis nicht verlustfrei mit vier Nachkommastellen "
                            "darstellbar - Preisbezug fachlich klaeren")
-    return {"price_list_id": _preisliste_id(db, tenant_id, _text(p, "preistabelle", pflicht=True)),
-            "article_id": _artikel_id(db, tenant_id, nummer), "article_number": nummer,
-            "unit_price": _text_zahl(einzel), "min_quantity": _text_zahl(_zahl(p, "ab_menge") or Decimal("0")),
-            "valid_from": _datum(p, "gueltig_von"), "valid_until": _datum(p, "gueltig_bis")}
+    return {"article_id": _artikel_id(db, tenant_id, nummer), "article_number": nummer,
+            "unit_price": _text_zahl(einzel), "valid_from": _datum(p, "gueltig_von"),
+            "valid_until": _datum(p, "gueltig_bis")}
+
+
+def _artikelpreis_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    werte = _einzelpreis_werte(db, tenant_id, p)
+    return {**werte, "price_list_id": _preisliste_id(db, tenant_id, _text(p, "preistabelle", pflicht=True)),
+            "min_quantity": _text_zahl(_zahl(p, "ab_menge") or Decimal("0"))}
 
 
 def _artikelpreis_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
@@ -255,6 +261,59 @@ def _kundenrabatt_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict
         "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
 
 
+# --- aktion / aktionspreis ---------------------------------------------------------------------------------------
+#
+# L3 ``WWS_AKTIONSPREISE`` (AKTIONNR, DATUMVON, DATUMBIS, ARTIKELNR, PREISNETTO, LAGER, KUNDENSELEKTION). Eine Aktion
+# wird eine Preisliste vom Typ ``aktion`` mit Laufzeit; die Preiskaskade wendet sie nur an, wenn sie guenstiger ist
+# (Nutzerentscheid 26.11.2026). Auf ein Lager oder eine Kundenauswahl beschraenkte L3-Aktionen kann VALEO nicht
+# abbilden - sie wuerden fuer alle gelten und werden deshalb Fehlerzeilen.
+
+
+def _aktion_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    nummer = _text(p, "aktion", pflicht=True)
+    return {"name": _text(p, "bezeichnung") or f"L3-Aktion {nummer}", "description": f"L3-Aktion {nummer}",
+            "valid_from": _datum(p, "gueltig_von"), "valid_until": _datum(p, "gueltig_bis"), "is_active": True}
+
+
+def _aktion_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
+    zeile = db.execute(text("SELECT name, description, valid_from, valid_until, is_active FROM domain_pricing.price_lists "
+                            "WHERE tenant_id = :t AND id = :id"), {"t": tenant_id, "id": ziel_id}).mappings().first()
+    if not zeile:
+        return None
+    werte = dict(zeile)
+    for feld in ("valid_from", "valid_until"):
+        werte[feld] = werte[feld].isoformat() if werte[feld] is not None else None
+    return werte
+
+
+def _aktion_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    ziel_id = str(uuid7())
+    db.execute(text("INSERT INTO domain_pricing.price_lists (id, tenant_id, name, description, currency, price_list_type, "
+                    "valid_from, valid_until, is_active) VALUES (:id, :t, :name, :description, 'EUR', 'aktion', "
+                    ":valid_from, :valid_until, :is_active)"), {"id": ziel_id, "t": tenant_id, **werte})
+    return ziel_id
+
+
+def _aktion_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    db.execute(text("UPDATE domain_pricing.price_lists SET name = :name, description = :description, "
+                    "valid_from = :valid_from, valid_until = :valid_until, is_active = :is_active, updated_at = now() "
+                    "WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+
+
+def _aktionspreis_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    if _text(p, "lager") or _text(p, "kundenselektion"):
+        raise ZeilenFehler("Aktion ist auf Lager oder Kundenauswahl beschraenkt - in VALEO nicht abbildbar, "
+                           "wuerde fuer alle gelten")
+    aktion = _text(p, "aktion", pflicht=True)
+    ziel = db.execute(text(
+        "SELECT ziel_id FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t AND quellsystem = :q "
+        "AND objektart = 'aktion' AND quellschluessel = :k"), {"t": tenant_id, "q": QUELLSYSTEM, "k": aktion}).scalar()
+    if ziel is None:
+        raise ZeilenFehler(f"Aktion {aktion} ist nicht uebernommen - zuerst Aktionen uebernehmen")
+    werte = _einzelpreis_werte(db, tenant_id, p)
+    return {**werte, "price_list_id": str(ziel), "min_quantity": "0"}
+
+
 def zielarten() -> dict[str, Any]:
     from app.services.spiegel_uebernahme import Zielart
 
@@ -267,4 +326,8 @@ def zielarten() -> dict[str, Any]:
                                _kundenpreis_lesen, _kundenpreis_anlegen, _kundenpreis_aendern),
         "kundenrabatt": Zielart("domain_crm.business_partner_discount_items", _kundenrabatt_zielwerte,
                                 _kundenrabatt_lesen, _kundenrabatt_anlegen, _kundenrabatt_aendern),
+        "aktion": Zielart("domain_pricing.price_lists", _aktion_zielwerte, _aktion_lesen, _aktion_anlegen,
+                          _aktion_aendern),
+        "aktionspreis": Zielart("domain_pricing.price_list_items", _aktionspreis_zielwerte, _artikelpreis_lesen,
+                                _artikelpreis_anlegen, _artikelpreis_aendern),
     }
