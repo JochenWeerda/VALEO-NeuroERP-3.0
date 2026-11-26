@@ -689,7 +689,7 @@ mappings:
   domain: agrar
   action_key: anlegen
   label: Annahme anlegen
-  command_endpoint: /api/v1/agrar/harvest-acceptance
+  command_endpoint: /api/v1/agrar/harvest-acceptance/
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
@@ -1177,7 +1177,7 @@ mappings:
   domain: agrar
   action_key: anlegen
   label: Abrechnung anlegen
-  command_endpoint: /api/v1/agrar/settlements
+  command_endpoint: /api/v1/agrar/settlements/
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
