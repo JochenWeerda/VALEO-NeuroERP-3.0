@@ -6,9 +6,9 @@ des Geschaeftspartners in ``journal_entry_lines.partner_konto``. Daraus entstehe
 und der monatliche Saldenabgleich gegen L3.
 
 Buchungswege mit Personenkonto: Ausgangsrechnung, Eingangsrechnung, Verkaufs- und Einkaufsgutschrift, Ernte-
-Abrechnung (Kreditor), Storno (die Gegenbuchung kopiert das Personenkonto). Noch ohne: Genossenschaft
-(Mitgliederverbindlichkeit), Fracht (Spediteur); die Selbstfakturierung bucht nicht ins Journal (Weg defekt, s.
-Workboard M3-PERSONENKONTEN-WEGE).
+Abrechnung (Kreditor), Storno (die Gegenbuchung kopiert das Personenkonto), Genossenschaft (Auseinandersetzungsguthaben
+ueber die Mitgliedschaft am Partner), Fracht (Spediteur als Lieferant). Die Selbstfakturierung bucht nicht ins Journal
+(Weg defekt, s. Workboard M3-PERSONENKONTEN-WEGE).
 
 Konto-Ermittlung: Kunde -> ``customers.business_partner_id`` -> ``business_partners.debtor_account``; Lieferant ->
 ``lieferanten.partner_id`` -> ``business_partners.creditor_account``. Ohne Partner oder Konto ergibt sich ``None`` -
@@ -56,6 +56,19 @@ def kreditorkonto_fuer_lieferant(db: Session, tenant_id: str, lieferant_id: Opti
         "ON bp.partner_id::text = l.partner_id AND bp.tenant_id = l.tenant_id "
         "WHERE l.tenant_id = :t AND (l.id::text = :k OR l.lieferantennummer = :k OR l.partner_id = :k) LIMIT 1"),
         {"t": tenant_id, "k": str(lieferant_id)}).scalar()
+    return str(konto) if konto else None
+
+
+def kreditorkonto_fuer_mitglied(db: Session, tenant_id: str, mitglieds_nr: Optional[str]) -> Optional[str]:
+    """Kreditorenkonto des Geschaeftspartners hinter einer Genossenschafts-Mitgliedsnummer
+    (``business_partner_cooperative_memberships.membership_number``) - Auseinandersetzungsguthaben (§ 73 GenG)."""
+    if not mitglieds_nr:
+        return None
+    konto = db.execute(text(
+        "SELECT bp.creditor_account FROM domain_crm.business_partner_cooperative_memberships m "
+        "JOIN domain_crm.business_partners bp ON bp.partner_id = m.partner_id AND bp.tenant_id = m.tenant_id "
+        "WHERE m.tenant_id = :t AND m.membership_number = :n LIMIT 1"),
+        {"t": tenant_id, "n": str(mitglieds_nr)}).scalar()
     return str(konto) if konto else None
 
 

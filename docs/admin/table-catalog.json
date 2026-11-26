@@ -10362,6 +10362,7 @@
             "id"
           ],
           "read_by": [
+            "app/finance/personenkonto.py",
             "app/infrastructure/models/__init__.py"
           ]
         },
