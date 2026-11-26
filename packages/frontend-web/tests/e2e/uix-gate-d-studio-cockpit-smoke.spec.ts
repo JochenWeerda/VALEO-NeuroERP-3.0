@@ -16,6 +16,11 @@ type CockpitCase = {
   title: string
   listEndpoint?: string
   overviewEndpoint?: string
+  /**
+   * Runtime-Attribut der Shell: Cockpits/NativeList nutzen `native-cockpit`,
+   * UniversalNativeDetailPage nutzt `native` (Batch 105).
+   */
+  runtime?: 'native-cockpit' | 'native'
   /** Specialized workbench contract — mounts Fach-Surface inside native-cockpit. */
   specializedType?:
     | 'pricing_workbench'
@@ -3254,6 +3259,23 @@ const COCKPIT_CASES: CockpitCase[] = [
     testId: 'letzte-dokumente',
     title: 'Letzte Dokumente',
   },
+  // UniversalNativeDetailPage (Batch 105) — data-runtime=native, feste entityId
+  {
+    label: 'admin/identity-budgets',
+    path: '/admin/identity-budgets',
+    screenId: 'admin/identity-budgets',
+    testId: 'admin-identity-budgets',
+    title: 'Identity Budgets',
+    runtime: 'native',
+  },
+  {
+    label: 'admin/token-consumption',
+    path: '/admin/token-consumption',
+    screenId: 'admin/token-consumption',
+    testId: 'admin-token-consumption',
+    title: 'Token Consumption',
+    runtime: 'native',
+  },
   // Specialized workbenches (Batches 28–38): native-cockpit shell + specialized surface
   {
     label: 'lager/materialfluss',
@@ -3784,11 +3806,12 @@ function minimalCockpitDefinition(c: CockpitCase) {
     type: 'number' as const,
     readOnly: true,
   }))
+  const isDetail = c.runtime === 'native'
   return {
     schemaVersion: 1,
     id: c.screenId,
     domain: c.screenId.split('/')[0],
-    mode: 'cockpit',
+    mode: isDetail ? 'object' : 'cockpit',
     title: c.title,
     adapter: { type: 'native', sourceId: c.screenId, temporary: false },
     fields: [
@@ -3835,7 +3858,7 @@ function minimalCockpitDefinition(c: CockpitCase) {
       preferredMode: 'desktopDense',
       mobileMode: 'mobileStack',
       touchTargetPx: 44,
-      floorplan: 'cockpit',
+      floorplan: isDetail ? 'objectPage' : 'cockpit',
       density: 'compact',
       contextRail: 'combined',
       tableProfile: 'audit',
@@ -4251,7 +4274,7 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
 
   for (const c of COCKPIT_CASES) {
     for (const theme of ['light', 'dark'] as const) {
-      test(`${c.label} — native-cockpit Runtime, Titel sichtbar (${theme})`, async ({ page }) => {
+      test(`${c.label} — native Runtime, Titel sichtbar (${theme})`, async ({ page }) => {
         await applyTheme(page, theme)
         await installCockpitMocks(page, c)
         const response = await page.goto(c.path, { waitUntil: 'domcontentloaded' })
@@ -4262,7 +4285,8 @@ test.describe('Gate D — Studio Cockpit Browser Smoke (Made-by-Studio)', () => 
         )
 
         // Cockpit-Shell und Renderer teilen oft denselben testId — Runtime-Attribut ist eindeutig.
-        const root = page.locator(`[data-testid="${c.testId}"][data-runtime="native-cockpit"]`)
+        const runtimeAttr = c.runtime ?? 'native-cockpit'
+        const root = page.locator(`[data-testid="${c.testId}"][data-runtime="${runtimeAttr}"]`)
         await expect(root).toBeVisible({ timeout: 30_000 })
         await expect(page.getByRole('heading', { name: c.title }).first()).toBeVisible({
           timeout: 30_000,

@@ -713,6 +713,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Verbleibende `pages_hand` sind bewusst: Specialized-Legacy-Surfaces (`*-legacy.tsx`), Chart-/Report-Fragmente unter `pages/`, Kontrakt-Dialoge — keine offenen Fach-Routen `hand_built` (Routen weiter **0**)
 - Gate-D unverändert **952/952** (kein neuer Smoke-Fall nötig)
 
+### Batch 105 — Gate E service/anfrage + Detail-Smoke
+
+- `service/anfrage-detail.tsx` → kanonische ScreenId `service/anfrage` (Stamm); Alias `service/anfrage-detail` → `service/anfrage` in Gate-E-Map
+- Gates A/B/C/E: **829/829** (Gate E zuvor 828)
+- Gate-D Harness: optional `runtime: 'native'` fuer UniversalNativeDetailPage; +2 Identity-Budgets / Token-Consumption
+- Gate-D → **956/956 passed** (478 Masken × Hell/Dunkel)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -720,7 +727,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **952/952 passed** (476 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **956/956 passed** (478 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 

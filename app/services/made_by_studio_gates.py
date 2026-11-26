@@ -65,6 +65,8 @@ _RUNTIME_LIST_WIRE_ALIASES: dict[str, str] = {
     "verkauf/kunden-stamm": "crm/customer-360",
     "verkauf/auftraege/neu": "beleg-liste/sales-order",
     "zertifikate/neu": "zertifikate/liste",
+    # Batch 105: Detailroute nutzt kanonisches Stamm-SD; Batch-15-ID bleibt Alias
+    "service/anfrage-detail": "service/anfrage",
 }
 
 
