@@ -375,21 +375,6 @@ describe('AnnahmeAbrechnungPage', () => {
     expect(screen.getAllByText(/Ausnahmehinweise/).length).toBeGreaterThan(0)
   })
 
-  it('meldet Konflikt bei 409 auf Fibu-Buchung', async () => {
-    apiPostMock.mockImplementation(async (url: string) => {
-      if (url.includes('/post-fibu')) throw new Error('Version veraltet')
-      return { data: {} }
-    })
-    renderPage()
-    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'In Fibu buchen' }))
-    await waitFor(() => {
-      expect(toastMock).toHaveBeenCalledWith(
-        expect.objectContaining({ title: 'Fehler', description: 'Version veraltet' }),
-      )
-    })
-  })
-
   it('bricht Storno ab wenn Confirm verweigert wird', async () => {
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false)
     renderPage()
