@@ -11192,7 +11192,11 @@
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py",
-            "app/services/business_partner_service.py"
+            "app/services/business_partner_service.py",
+            "app/services/spiegel_preise.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_preise.py"
           ]
         },
         "business_partner_pricing_rules": {
@@ -13713,6 +13717,7 @@
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
             "app/services/sales_posting_service.py",
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py",
             "app/services/webshop_integration_service.py",
             "app/services/whatsapp_agent_service.py"
@@ -28610,6 +28615,7 @@
             "quellschluessel"
           ],
           "read_by": [
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
@@ -30476,6 +30482,7 @@
             "app/services/mcp_execution_service.py",
             "app/services/preisfindung_service.py",
             "app/services/procurement_service.py",
+            "app/services/spiegel_preise.py",
             "app/services/spiegel_uebernahme.py",
             "app/services/warehouse_service.py",
             "app/services/whatsapp_intake_service.py"
@@ -46280,10 +46287,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/price_lists.py",
-            "app/services/preisfindung_service.py"
+            "app/services/preisfindung_service.py",
+            "app/services/spiegel_preise.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/price_lists.py"
+            "app/api/v1/endpoints/price_lists.py",
+            "app/services/spiegel_preise.py"
           ]
         },
         "price_lists": {
@@ -46353,10 +46362,12 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/price_lists.py",
-            "app/services/preisfindung_service.py"
+            "app/services/preisfindung_service.py",
+            "app/services/spiegel_preise.py"
           ],
           "written_by": [
-            "app/api/v1/endpoints/price_lists.py"
+            "app/api/v1/endpoints/price_lists.py",
+            "app/services/spiegel_preise.py"
           ]
         },
         "staffelrabatt_artikel": {

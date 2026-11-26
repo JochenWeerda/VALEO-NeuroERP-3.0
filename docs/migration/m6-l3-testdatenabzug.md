@@ -107,6 +107,24 @@ Ein Landwirt, der Kunde und Lieferant ist, erscheint in beiden Abzuegen. In VALE
 Debitoren- und Kreditorenkonto, wenn USt-IdNr. und Name uebereinstimmen. Weil die Abfrage den Namen pseudonymisiert
 ("Testkunde"/"Testlieferant") und keine USt-IdNr. zieht, bleiben es im Testabzug zwei Partner.
 
+### 2.4b Preise der Beispielartikel
+
+```sql
+SELECT 'preisliste' AS TYP, PREISTABNR AS QUELLE, PREISTABNR, BEZEICHNUNG FROM WWS_PREISTAB1
+```
+
+```sql
+SELECT 'artikelpreis' AS TYP,
+       p.ARTIKELNR || '|' || p.PREISTABNR || '|' || p.DATUMVON || '|' || COALESCE(p.ABMENGE, 0) AS QUELLE,
+       p.ARTIKELNR AS ARTNR, p.PREISTABNR, p.PREIS, a.PE1 AS PREISJE, p.ABMENGE, p.DATUMVON, p.DATUMBIS
+FROM WWS_ARTPREIS2 p JOIN WWS_ARTIKEL a ON a.ARTIKELNR = p.ARTIKELNR
+WHERE p.ARTIKELNR IN (/* Artikelnummern aus 2.2 */)
+```
+
+`PREISJE` ist der Preisbezug (z. B. 100 fuer "je 100 kg"); ob `PE1` ihn traegt, zeigt das erste Ergebnis.
+Kundenpreise: `WWS_KUNDEN_PREISE` mit `TYP 'kundenpreis'`, `QUELLE = KUNDENNR || '|' || ARTIKELNR`, nur fuer gezogene
+Kunden und Beispielartikel, ohne `BEMERKUNG` und `BEDIENER`.
+
 ### 2.5 Offene Posten der gezogenen Kunden
 
 ```sql

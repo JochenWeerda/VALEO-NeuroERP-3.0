@@ -326,6 +326,7 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `settlement_pdf_service` | PDF generation and GoBD archiving for Agrar settlement self-billing documents. |
 | `silo_rule_engine_service` | WM-SILO-RULE-ENGINE-001 — Automatische Zielzellen-Vorschlaege fuer Einlagerung. |
 | `spiegel_op_abgleich` | Spiegelbetrieb L3 -> VALEO: Abgleich der offenen Posten (M6, 25.11.2026) - liest nur, bucht nie. |
+| `spiegel_preise` | Spiegelbetrieb L3 -> VALEO: Preise (M6, 26.11.2026) - Objektarten preisliste, artikelpreis, kundenpreis. |
 | `spiegel_uebernahme` | Spiegelbetrieb L3 -> VALEO: Uebernahme freigegebener Adapter-Batches in die Fachtabellen (M6, 25.11.2026). |
 | `stt_client` | Speech-to-Text-Client (anbieterunabhängig, OpenAI-kompatibel). |
 | `studio_catalog_contracts` | Bounded metadata for the registered Flow Spine catalog cockpit. |
