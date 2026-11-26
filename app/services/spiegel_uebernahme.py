@@ -401,6 +401,14 @@ ZIELARTEN: dict[str, Zielart] = {
 }
 
 
+
+def alle_zielarten() -> dict[str, Zielart]:
+    """Stammdaten-Objektarten dieses Moduls und die Preis-Objektarten (``spiegel_preise``, verzoegert importiert)."""
+    from app.services.spiegel_preise import zielarten as preis_zielarten
+
+    return {**ZIELARTEN, **preis_zielarten()}
+
+
 # --- Lauf ------------------------------------------------------------------------------------------------------
 
 def _differenzen(alt: dict[str, Any] | None, neu: dict[str, Any]) -> dict[str, Any]:
@@ -410,7 +418,7 @@ def _differenzen(alt: dict[str, Any] | None, neu: dict[str, Any]) -> dict[str, A
 
 def _zeile(db: Session, tenant_id: str, batch_id: str, objektart: str, quellschluessel: str,
            payload: dict[str, Any]) -> tuple[str, dict[str, Any]]:
-    art = ZIELARTEN[objektart]
+    art = alle_zielarten()[objektart]
     summe = pruefsumme(payload)
     referenz = db.execute(text(
         "SELECT ziel_id, payload_hash FROM domain_integration.spiegel_quellreferenzen WHERE tenant_id = :t "
@@ -479,7 +487,7 @@ def uebernehme(db: Session, tenant_id: str, batch_id: str, *, actor: str, reason
         fehler = None
         sicherung = db.begin_nested()
         try:
-            if objektart not in ZIELARTEN:
+            if objektart not in alle_zielarten():
                 raise ZeilenFehler(f"Objektart {objektart or '-'} ist fuer die Uebernahme nicht freigegeben")
             payload = dict(z["canonical_payload"] or {})
             payload.pop("record_type", None)

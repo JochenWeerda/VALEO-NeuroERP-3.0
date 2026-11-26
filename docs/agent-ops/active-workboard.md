@@ -1339,3 +1339,6 @@ Objektart lieferant -> domain_einkauf.lieferanten (fuehrender Kreditorenstamm la
 
 ## M7-LOESCHPRUEFUNG-20261126 — zur Abnahme, Claude Code (M7)
 Loeschpruefung nach gobd_retention: Belege (Docflow) und Journal je Kategorie in_frist/gesperrt/loeschbar mit IDs, Lieferschein ueber verknuepfte Rechnung, Loeschsperren, Ablaufhemmung (Vorbehalt ohne Festsetzungsfrist-Datum). Nur Bericht, keine Loeschung. Dateibesitz: app/services/loeschpruefung.py, tests/test_loeschpruefung.py.
+
+## M6-SPIEGEL-PREISE-20261126 — zur Abnahme, Claude Code (M6)
+Objektarten preisliste/artikelpreis/kundenpreis (app/services/spiegel_preise.py): Preistabelle -> price_lists, Artikelpreis mit Gueltigkeit und Staffel -> price_list_items, Kundenpreis -> business_partner_price_agreements. Preisbezug je Preiseinheit verlustfrei in den Einzelpreis (sonst Fehlerzeile; Diesel 168,79 je 100 l = 1,6879). Konditionen/Aktionen offen.

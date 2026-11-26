@@ -663,6 +663,7 @@ exact_service_stems:
   legacy_interface_adapter_service: platform
   spiegel_uebernahme: platform
   spiegel_op_abgleich: platform
+  spiegel_preise: platform
   mail_workspace_service: crm
   production_control_service: agrar
   recent_documents_service: platform

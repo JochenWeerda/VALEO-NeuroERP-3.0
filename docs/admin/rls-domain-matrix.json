@@ -1106,6 +1106,7 @@
     "app/services/sales_match_service.py",
     "app/services/sales_posting_service.py",
     "app/services/sepa_xml_generator.py",
+    "app/services/spiegel_preise.py",
     "app/services/webshop_integration_service.py",
     "app/services/whatsapp_agent_service.py",
     "app/workers/compliance_monitor.py",
