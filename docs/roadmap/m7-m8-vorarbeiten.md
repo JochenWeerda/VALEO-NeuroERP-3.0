@@ -21,7 +21,7 @@ die nicht vom Abschluss von M6 abhaengen. Bestand ermittelt aus dem Repository a
 | Installationspaket, Update-Verfahren | nein (braucht M5-Betriebsreife) | Produktions-Compose mit Pflichtgeheimnissen (#177), Migrationen per Alembic | Installationsskript aus dem Repo auf leerem Host, als Probe in der CI |
 | Installations- und Betriebshandbuch | nein | `docs/admin/backup-restore.md`, Runbooks unter `docs/deployment/` | Handbuch-Gerippe: [`docs/deployment/installationshandbuch.md`](../deployment/installationshandbuch.md) (2026-11-26) |
 | Fernwartungskonzept | nein | - | Konzept: Zugang nur auf Anforderung, protokolliert, Agentenmatrix (`docs/security/umgebungen-und-agentenrechte.md`) |
-| Modul- und Lizenzsteuerung | nein | `app/core/module_registry.py` (INSTALLED_MODULES, TENANT_MODULE_FLAGS aus der Konfiguration) | Lizenzdatei signiert pruefen statt Konfiguration; keine Lizenzlogik bisher |
+| Modul- und Lizenzsteuerung | nein | **umgesetzt 26.11.2026**: `app/core/lizenz.py` (Ed25519-signierte Lizenz: Module, Mandanten, Ablauf), am Modulregister durchgesetzt in STAGING/PRODUCTION; Herstellerwerkzeug `scripts/lizenz_ausstellen.py` | Preismodell (fachlich) |
 | Preismodell | nein, fachlich | - | Geschaeftsfuehrung |
 | AVV, TOM, Verarbeitungsverzeichnis, Loeschkonzept | nein | Verarbeitungsverzeichnis als Maske (`pages/compliance/verarbeitungsverzeichnis.tsx`), DSGVO-Loeschung Art. 17 im System, GoBD-Loeschsperren | Loeschkonzept aus den vorhandenen Fristen und Sperren ableiten; AVV/TOM als Entwurf, **rechtliche Pruefung extern** |
 | AGB, SLA, Supportprozess | nein, rechtlich | - | Entwurf nur mit rechtlicher Pruefung (extern) |

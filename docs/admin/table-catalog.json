@@ -53403,6 +53403,7 @@
             "id"
           ],
           "read_by": [
+            "app/domains/operations/repository.py",
             "app/infrastructure/models/futtermittel_models.py",
             "app/services/production_control_service.py"
           ],

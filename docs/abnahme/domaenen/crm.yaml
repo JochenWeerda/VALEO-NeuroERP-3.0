@@ -32,7 +32,7 @@ id: crm
 titel: 'CRM (Kundenakte bis Wiedervorlage)'
 reifematrix: D04
 l3_referenz: l3-crm-organisation-referenz
-erhoben: 2026-11-23
+erhoben: 2026-11-26
 pruefer: Cursor
 bereiche: [crm, termine, benachrichtigungen, marketing, prospecting]
 screen_domains: [crm]
@@ -52,30 +52,26 @@ prozesse:
       - tests/test_kunden_stamm_pflege.py::test_anschrift_anlegen_aendern_entfernen
       - tests/test_kunden_stamm_pflege.py::test_fremder_mandant_sieht_die_zeile_nicht
       - tests/test_customer_master_profile_postgres.py::test_postgres_roundtrip_version_replay_actor_and_tenant_isolation
+      - tests/test_m4_cr_p0_mandantenleck.py::test_lookup_zeigt_nur_eigenen_mandanten
+      - tests/test_m4_cr_p0_mandantenleck.py::test_kim_liste_und_fremder_kunde_404
+      - tests/test_m4_cr_p0_mandantenleck.py::test_kim_update_und_kontakt_fremder_mandant_404
     status: teilweise
     befund: >-
       Anlage und Pflege sind gegen PostgreSQL belegt: Debitor-Anlage landet im fuehrenden Stamm und oeffnet in der
       Detailansicht, Nummern sind je Mandant eindeutig, Kunde und Lieferant haengen an einem Partner und ein fremder
       Mandant teilt keinen Partner, Anschrift anlegen/aendern/entfernen laeuft mit Grund und Trockenlauf, das
-      Stammprofil schreibt versioniert und idempotent. Der operative Bestand liegt aber noch in public.kunden, und
-      dort fehlt die Mandantengrenze. Die Maske crm/kunden-liste liest /crm/customers/lookup, das ueber
-      BusinessPartnerService.search_lookup die View public.kunden_lookup abfragt (public.kunden hat laut Migrationen
-      kunden_bp_bridge_20260601 und kunden_domain_tables_20260602 kein tenant_id) — jeder Mandant listet damit den
-      gesamten Kundenstamm. Ausserdem liefert KundenLookupItem weder id noch telefon, email, status: die
-      Zeilenverknuepfung /crm/kunden/{id} loest sich zu /crm/kunden/ auf (resolveRowRoute ersetzt fehlende Felder
-      durch leer), drei von sieben Spalten bleiben leer. Das KIM-Backend /crm/kim/customers (crm_kim.py) liest und
-      aendert public.kunden und public.kunden_crm360 per kunden_nr ohne Mandantenfilter (PUT /crm/kim/customers/{nr}
-      schreibt mandantenuebergreifend); belegt ist es nur durch Mock-/Reine-Logik-Tests (test_crm_kim*.py), die nicht
-      zaehlen. Die Anlage ueber verkauf/kunde/neu ist als Route vorhanden; eine Browserkette Anlegen > in der Liste
-      finden > Akte oeffnen gegen echtes Backend fehlt.
+      Stammprofil schreibt versioniert und idempotent. public.kunden und kunden_lookup tragen weiter kein eigenes
+      tenant_id; die Mandantengrenze laeuft seit app/core/public_kunden_mandant.py ueber business_partners/customers
+      (KUNDE_GEHOERT_MANDANT). search_lookup und KIM list_customers/update_customer binden :tid und weisen fremde
+      kunden_nr mit 404 ab — belegt gegen den Pruefstand in test_m4_cr_p0_mandantenleck.py. Offen bleibt die
+      Listen-UX: KundenLookupItem liefert weder id noch telefon, email, status; die Zeilenverknuepfung
+      /crm/kunden/{id} loest sich zu /crm/kunden/ auf (resolveRowRoute ersetzt fehlende Felder durch leer). Die
+      Anlage ueber verkauf/kunde/neu ist als Route vorhanden; eine Browserkette Anlegen > in der Liste finden >
+      Akte oeffnen gegen echtes Backend fehlt.
     luecken:
-      - text: Kundenliste crm/kunden-liste zeigt den Kundenstamm aller Mandanten (/crm/customers/lookup > public.kunden_lookup ohne tenant_id) — Mandantenleck lesend
-        prio: P0
-      - text: KIM-Backend /crm/kim/customers liest und aendert public.kunden/kunden_crm360 per kunden_nr ohne Mandantenfilter (crm_kim.py update_customer, list_customers) — Mandantenleck lesend und schreibend, ohne Datenbanktest
-        prio: P0
       - text: Zeile der Kundenliste oeffnet die Akte nicht — Lookup liefert kein Feld id, Zielroute /crm/kunden/{id} wird leer aufgeloest; Spalten Telefon, E-Mail und Status sind nicht im Lookup-Vertrag und bleiben leer
         prio: P1
-      - text: Pflegeweg public.kunden hat keinen Mandantenbezug; der Test test_ein_reiner_bestandskunde_oeffnet_die_akte schreibt das Fehlverhalten (Bestandskunde unter fremdem Mandanten sichtbar) als Sollwert fest
+      - text: Pflegeweg public.kunden hat keinen eigenen Mandantenbezug in der Tabelle (Grenze nur ueber Partner/Customers); Alt-Sollwert test_ein_reiner_bestandskunde_oeffnet_die_akte ist durch test_unverbundener_bestandskunde_ist_404 abgeloest — Restabgleich der Akte-Lesetests offen
         prio: P1
       - text: Browserkette Kunde anlegen > Liste > Akte oeffnen > Feld aendern gegen echtes Backend fehlt
         prio: P2
@@ -116,19 +112,19 @@ prozesse:
       - tests/test_kunden_stamm_pflege.py::test_fremder_mandant_sieht_die_zeile_nicht
       - tests/test_kunden_crm_core_mandant.py::test_fremder_kunde_ist_nicht_abrufbar_aenderbar_oder_loeschbar
       - tests/test_customer_master_profile_postgres.py::test_postgres_roundtrip_version_replay_actor_and_tenant_isolation
+      - tests/test_m4_cr_p0_mandantenleck.py::test_kim_update_und_kontakt_fremder_mandant_404
     status: teilweise
     befund: >-
       Bank und Skonto liegen am Partner und erscheinen in der Detailmaske, der Ansprechpartner wird ueber die
       Aktion ansprechpartner_anlegen mit Mandantenpruefung angelegt, Rabatt mit ungueltigem Prozentsatz wird
       abgewiesen, das Stammprofil (partner_iban) schreibt versioniert. Teilbeleg: test_kunden_crm_core_mandant.py
-      simuliert crm-core per AsyncMock. Das alte KIM-Backend legt Ansprechpartner in public.kunden_ansprechpartner
-      ohne Mandant an und liest sie so (crm_kim.py list_contacts/create_contact); Mock-Tests zaehlen nicht.
-      Der Ansprechpartner-Detail in der Akte (Funktion, Telefon, Mail je Person, wie in der L3-Kundenmaske) fehlt
-      laut Parity-Slice. Zahlungsbedingung wird als Feld des Stammprofils gefuehrt; eine Pruefung des Wirkens in
-      Auftrag/Rechnung ist nicht Teil dieses Blatts.
+      simuliert crm-core per AsyncMock. KIM list_contacts/create_contact pruefen den Kunden zuerst mit
+      _require_kunde_im_mandanten (public_kunde_im_mandanten); fremde kunden_nr ergeben 404 — belegt in
+      test_m4_cr_p0_mandantenleck.py. public.kunden_ansprechpartner selbst bleibt ohne tenant_id-Spalte (Grenze
+      ueber den Stamm). Der Ansprechpartner-Detail in der Akte (Funktion, Telefon, Mail je Person, wie in der
+      L3-Kundenmaske) fehlt laut Parity-Slice. Zahlungsbedingung wird als Feld des Stammprofils gefuehrt; eine
+      Pruefung des Wirkens in Auftrag/Rechnung ist nicht Teil dieses Blatts.
     luecken:
-      - text: KIM-Ansprechpartner (crm_kim.py create_contact/list_contacts) schreibt und liest public.kunden_ansprechpartner ohne Mandantenfilter
-        prio: P0
       - text: Ansprechpartner-Detail (Person mit Funktion, Telefon, Mail, Rolle) fehlt in der Kundenakte
         prio: P1
       - text: Zahlungsbedingung und Bankverbindung der Akte ohne Browserkette gegen echtes Backend
@@ -144,27 +140,27 @@ prozesse:
       - tests/test_crm360_kunde_wird_gefunden.py::test_offene_posten_erscheinen_in_dokumenten_und_im_kopf
       - tests/test_crm360_kunde_wird_gefunden.py::test_ein_kunde_den_es_nicht_gibt_bleibt_ein_404
       - tests/test_crm360_kontrakte_erscheinen.py::test_ein_fremder_mandant_sieht_den_kontrakt_nicht
+      - tests/test_m4_cr_p0_mandantenleck.py::test_kunde_finden_ohne_mandant_und_fremd
+      - tests/test_m4_cr_p0_mandantenleck.py::test_unverbundener_bestandskunde_ist_404
     status: teilweise
     befund: >-
       Die native Akte crm/customer-360 hat 28 Reiter (u. a. Stamm, Anschrift, Kontakte, Finanzen, Auftraege, Aktivitaeten,
       Dokumente, Aufgaben, Kontrakte, Angebote, Historie, Praesente, Postfach, Steuer, Bank, Qualitaet,
       Marketing, Genossenschaft, Ausgabe, Schnittstellen, Potenzial, Chefanweisungen, Anschriften, Kontoauszug, CPD,
       Rabatte, Preise). Die Lesetests laufen ueber HTTP gegen echte PostgreSQL, aber gegen die Entwicklungsdatenbank
-      valeo_neuro_erp (Dev-Token) und mit eigener Skip-Logik: nur Teilbeleg. Mandantengrenze: der Suchweg
-      _kunde_finden (crm_360_sql.py) faellt als dritte Stufe auf public.kunden per kunden_nr ohne Mandantenfilter
-      zurueck und liefert den Satz auch ohne mandantengebundenen Partner; test_ein_reiner_bestandskunde_oeffnet_die_akte
-      legt dieses Verhalten fest. Die Register lesen ueber _query_many, das jede SQL-Ausnahme mit Rollback in eine leere
-      Liste verwandelt und auf 25 Zeilen kuerzt (fetchmany(25)) — ein Lesefehler sieht aus wie keine Daten. Die
-      Kennzahl Kunden-Nr. der Akte zeigt laut Beobachtung -; im Code bleibt die Summary-Kachel kunden_nr in der
-      Definition ohne Wert und wird erst in build_customer_screen_summary aus customer.get(kunden_nr) befuellt (Ursache
-      nicht per Lauf bestaetigt). Der Reiter dokumente zeigt Offene Posten statt der Unterlagenablage, finance und
-      dokumente teilen sich dieselbe Quelle. Es fehlen laut Slice M4-CRM-KUNDENAKTE-PARITAET-20261123 (im Worktree-
-      Workboard nicht auffindbar, vom Auftrag benannt): Drucken, Waehlen/TAPI, Ansprechpartner-Detail, KI-Zusammenfassung,
-      Angebot mit Kundenkontext, Beleg aus dem Register oeffnen, Sprung in OP-Debitoren, Leads/Karte, Unterlagenablage.
-      Die Browserkette crm360-kundenakte.spec.ts liegt nur auf dem Branch cursor/m0-e2e-full-uat-20261123.
+      valeo_neuro_erp (Dev-Token) und mit eigener Skip-Logik: nur Teilbeleg. Mandantengrenze: _kunde_finden
+      (crm_360_sql.py) verlangt tenant_id und loest public.kunden nur noch ueber public_kunde_im_mandanten auf;
+      ohne Mandant und fremde kunden_nr liefern None — belegt in test_m4_cr_p0_mandantenleck.py. Die Register lesen
+      ueber _query_many, das jede SQL-Ausnahme mit Rollback in eine leere Liste verwandelt und auf 25 Zeilen kuerzt
+      (fetchmany(25)) — ein Lesefehler sieht aus wie keine Daten. Die Kennzahl Kunden-Nr. der Akte zeigt laut
+      Beobachtung -; im Code bleibt die Summary-Kachel kunden_nr in der Definition ohne Wert und wird erst in
+      build_customer_screen_summary aus customer.get(kunden_nr) befuellt (Ursache nicht per Lauf bestaetigt). Der
+      Reiter dokumente zeigt Offene Posten statt der Unterlagenablage, finance und dokumente teilen sich dieselbe
+      Quelle. Es fehlen laut Slice M4-CRM-KUNDENAKTE-PARITAET-20261123 (im Worktree-Workboard nicht auffindbar, vom
+      Auftrag benannt): Drucken, Waehlen/TAPI, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot mit Kundenkontext,
+      Beleg aus dem Register oeffnen, Sprung in OP-Debitoren, Leads/Karte, Unterlagenablage. Die Browserkette
+      crm360-kundenakte.spec.ts liegt nur auf dem Branch cursor/m0-e2e-full-uat-20261123.
     luecken:
-      - text: Kundenakte findet Kunden ueber public.kunden ohne Mandantenfilter (crm_360_sql._kunde_finden Fallback 3) — Name und Nummer fremder Mandanten abrufbar
-        prio: P0
       - text: Akte ohne Drucken, Waehlen/TAPI, KI-Zusammenfassung, Angebot mit Kundenkontext, Beleg aus dem Register oeffnen und Sprung in OP-Debitoren (Slice M4-CRM-KUNDENAKTE-PARITAET-20261123)
         prio: P1
       - text: Kennzahl Kunden-Nr. der Akte zeigt - (Summary-Kachel kunden_nr)
@@ -338,20 +334,17 @@ prozesse:
     nachweise:
       - tests/test_partner_rollenfelder_postgres.py::test_klaerfall_zuordnen_nur_mit_grund_und_eigenem_partner
       - tests/test_partner_rollenfelder_postgres.py::test_klaerfall_neuer_partner_und_rolle
+      - tests/test_m4_cr_p0_mandantenleck.py::test_merge_fremder_mandant_scheitert
     status: teilweise
     befund: >-
-      Nur der Klaerfall-Weg (Zuordnen mit Grund zum eigenen Partner, neuer Partner mit Rolle) ist gegen PostgreSQL
-      belegt. Die Dublettenpruefung und das Zusammenfuehren (crm_duplicates.py, crm_merge_service.py) sind nur durch
-      reine Logik-Tests abgedeckt (test_crm_duplicates.py: Normalisierung, UnionFind; test_kunden_merge.py) — Teilbeleg ohne
-      HTTP und ohne Datenbank. Im Code verschiebt das Zusammenfuehren Datensaetze per UPDATE public.{tabelle} SET
-      kunden_nr = :m WHERE kunden_nr = :d und markiert den Verlierer in public.kunden (geloescht, merged_into), alles ohne
-      tenant_id; ein Kunde eines anderen Mandanten laesst sich damit zusammenfuehren, und die Belege wandern
-      mandantenuebergreifend. Das Merge-Protokoll schreibt tenant_id, der Bediener kommt aus dem Body. _count
-      schluckt SQL-Fehler.
+      Der Klaerfall-Weg (Zuordnen mit Grund zum eigenen Partner, neuer Partner mit Rolle) ist gegen PostgreSQL
+      belegt. CrmMergeService verlangt tenant_id und prueft Master/Duplikat mit public_kunde_im_mandanten; Preview
+      und Merge scheitern mit MergeError bei fremdem Mandanten — belegt in test_m4_cr_p0_mandantenleck.py. Die
+      physischen UPDATEs auf public.* laufen weiter ueber kunden_nr (Tabellen ohne tenant_id-Spalte); die Grenze
+      sitzt vor dem Schreiben. Dublettenpruefung und Merge-HTTP bleiben schwach belegt (test_crm_duplicates.py /
+      test_kunden_merge.py = Teilbeleg ohne HTTP). Der Bediener kommt aus dem Body. _count schluckt SQL-Fehler.
     luecken:
-      - text: Zusammenfuehren (crm_merge_service) verschiebt und loescht public.* ueber kunden_nr ohne tenant_id — Datenverlust und Mandantenleck, ohne Datenbanktest
-        prio: P0
-      - text: Dublettenpruefung und Merge nur durch reine Logik-Tests belegt, kein HTTP-Vertrag gegen PostgreSQL
+      - text: Dublettenpruefung und Merge nur durch reine Logik-Tests bzw. einen Negativ-Service-Test belegt, kein voller HTTP-Vertrag gegen PostgreSQL
         prio: P2
       - text: Bediener des Zusammenfuehrens aus dem Body statt aus dem verifizierten Token
         prio: P2
