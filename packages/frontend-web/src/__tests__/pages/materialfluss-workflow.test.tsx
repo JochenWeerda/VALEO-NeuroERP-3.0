@@ -10,6 +10,8 @@ const fixture = vi.hoisted(() => ({
   warehouseReads: vi.fn(),
   cells: [] as Record<string, unknown>[], nodes: [] as Record<string, unknown>[], edges: [] as Record<string, unknown>[],
   patchCell: vi.fn(), patchNode: vi.fn(), patchEdge: vi.fn(), syncLot: vi.fn(),
+  createNode: vi.fn(), createEdge: vi.fn(), bookTransfer: vi.fn(), bookLot: vi.fn(),
+  validateRoute: vi.fn(), suggestLot: vi.fn(),
 }))
 vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => vi.fn() }))
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: fixture.toast }) }))
@@ -65,9 +67,13 @@ vi.mock('@/lib/api/agri-material-flow', async importOriginal => {
     usePatchAgriSiloCell: () => ({ mutateAsync: fixture.patchCell }),
     usePatchAgriFlowNode: () => ({ mutateAsync: fixture.patchNode }),
     usePatchAgriFlowEdge: () => ({ mutateAsync: fixture.patchEdge }),
-    useCreateAgriFlowNode: mutation, useCreateAgriFlowEdge: mutation,
-    useBookAgriMaterialTransfer: mutation, useBookAgriLotToCell: mutation,
+    useCreateAgriFlowNode: () => ({ mutateAsync: fixture.createNode, isPending: false }),
+    useCreateAgriFlowEdge: () => ({ mutateAsync: fixture.createEdge, isPending: false }),
+    useBookAgriMaterialTransfer: () => ({ mutateAsync: fixture.bookTransfer, isPending: false }),
+    useBookAgriLotToCell: () => ({ mutateAsync: fixture.bookLot, isPending: false }),
     useSyncAgriSiloCellFromLots: () => ({ mutateAsync: fixture.syncLot, isPending: false }),
+    validateAgriMaterialRoute: (...args: unknown[]) => fixture.validateRoute(...args),
+    suggestAgriLotLink: (...args: unknown[]) => fixture.suggestLot(...args),
   }
 })
 function selectWarehouse(id = 'warehouse-a') {
@@ -85,6 +91,12 @@ beforeEach(() => {
   fixture.syncLot.mockResolvedValue({})
   fixture.createSystem.mockResolvedValue({ id: 'new-system' })
   fixture.createCell.mockResolvedValue({ id: 'new-cell' })
+  fixture.createNode.mockResolvedValue({ id: 'node-new' })
+  fixture.createEdge.mockResolvedValue({ id: 'edge-new' })
+  fixture.bookTransfer.mockResolvedValue({ ok: true })
+  fixture.bookLot.mockResolvedValue({ ok: true })
+  fixture.validateRoute.mockResolvedValue({ valid: true, path: ['node-a', 'node-b'] })
+  fixture.suggestLot.mockResolvedValue({ lot_id: 'LOT-S', cell_id: 'cell-a' })
 })
 afterEach(cleanup)
 
@@ -239,5 +251,55 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     expect(screen.getByTestId('mf-node-node-a')).toBeTruthy()
     expect(screen.getByText('Annahme Live')).toBeTruthy()
     expect(screen.getByText('Waage Live')).toBeTruthy()
+  })
+
+  it('legt Knoten und Kante an und prueft Route sowie Transfer/Lot', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.cells = [
+      { id: 'cell-a', cell_code: 'CELL-A', name: 'Zelle A', qs_status: 'frei', current_material_id: 'ART-1', current_lot_id: 'LOT-A', current_stock_kg: 50 },
+      { id: 'cell-b', cell_code: 'CELL-B', name: 'Zelle B', qs_status: 'frei', current_stock_kg: 0 },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      capacity_kg: 1000,
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.change(screen.getByLabelText('code'), { target: { value: ' NEW-N ' } })
+    fireEvent.change(screen.getByLabelText('name', { selector: '#mf-node-name' }), { target: { value: ' Neu ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Knoten anlegen' }))
+    await waitFor(() => expect(fixture.createNode).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('von_node_id'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('nach_node_id'), { target: { value: 'node-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Kante anlegen' }))
+    await waitFor(() => expect(fixture.createEdge).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('Von-Knoten'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Knoten'), { target: { value: 'node-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.validateRoute).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('Von-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Silozelle'), { target: { value: 'cell-b' } })
+    fireEvent.change(screen.getByLabelText('quantity_kg'), { target: { value: '10' } })
+    fireEvent.change(screen.getByLabelText('article_id'), { target: { value: 'ART-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => expect(fixture.bookTransfer).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('lot_id (silo_lots)'), { target: { value: 'LOT-1' } })
+    fireEvent.change(screen.getByLabelText('Ziel-Silozelle'), { target: { value: 'cell-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lot in Silozelle buchen' }))
+    await waitFor(() => expect(fixture.bookLot).toHaveBeenCalled())
   })
 })
