@@ -664,6 +664,7 @@ exact_service_stems:
   spiegel_uebernahme: platform
   spiegel_op_abgleich: platform
   spiegel_preise: platform
+  spiegel_beleg_abgleich: platform
   mail_workspace_service: crm
   production_control_service: agrar
   recent_documents_service: platform

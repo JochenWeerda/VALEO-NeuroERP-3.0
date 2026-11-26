@@ -15686,6 +15686,7 @@
             "app/services/sales_match_service.py",
             "app/services/sales_offer_import.py",
             "app/services/settlement_document_archive_service.py",
+            "app/services/spiegel_beleg_abgleich.py",
             "app/services/warehouse_service.py",
             "app/services/wareneingang_avis_service.py"
           ],
@@ -28307,6 +28308,7 @@
             "app/api/v1/endpoints/legacy_interface_adapters.py",
             "app/api/v1/schemas/legacy_interface_adapters_schemas.py",
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_beleg_abgleich.py",
             "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ],
@@ -28453,6 +28455,7 @@
           ],
           "read_by": [
             "app/services/legacy_interface_adapter_service.py",
+            "app/services/spiegel_beleg_abgleich.py",
             "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ],
@@ -28533,6 +28536,7 @@
             "app/services/spiegel_uebernahme.py"
           ],
           "written_by": [
+            "app/services/spiegel_beleg_abgleich.py",
             "app/services/spiegel_op_abgleich.py",
             "app/services/spiegel_uebernahme.py"
           ]

@@ -1342,3 +1342,6 @@ Loeschpruefung nach gobd_retention: Belege (Docflow) und Journal je Kategorie in
 
 ## M6-SPIEGEL-PREISE-20261126 — zur Abnahme, Claude Code (M6)
 Objektarten preisliste/artikelpreis/kundenpreis (app/services/spiegel_preise.py): Preistabelle -> price_lists, Artikelpreis mit Gueltigkeit und Staffel -> price_list_items, Kundenpreis -> business_partner_price_agreements. Preisbezug je Preiseinheit verlustfrei in den Einzelpreis (sonst Fehlerzeile; Diesel 168,79 je 100 l = 1,6879). Konditionen/Aktionen offen.
+
+## M6-SPIEGEL-BELEGABGLEICH-20261126 — zur Abnahme, Claude Code (M6)
+Taeglicher Belegabgleich L3 gegen nachvollzogene VALEO-Belege (source_system='l3', source_ref=L3-Nummer): gleich/abweichend (Datum, netto, brutto)/nicht nachvollzogen, fehlt in L3, Summen je Belegart; liest nur. Testdatenabzug um Belegabfrage ergaenzt.

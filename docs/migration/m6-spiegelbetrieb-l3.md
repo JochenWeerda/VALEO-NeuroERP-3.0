@@ -79,6 +79,10 @@ unten beruht auf Tabellen- und Spaltennamen, die **Bedeutung der Spalten ist am 
 5. Belege des Spiegelzeitraums: Angebot, Auftrag, Lieferschein, Rechnung, Bestellung, Kontrakt; je Beleg Quellreferenz
    und Belegkette.
 6. Taeglicher Abgleich (Belege, Betraege, Bestaende) und monatlicher Abgleich (offene Posten, Journal, UStVA).
+   Belegabgleich umgesetzt (`app/services/spiegel_beleg_abgleich.py`, liest nur): Ein nachvollzogener Beleg traegt
+   `source_system = 'l3'` und `source_ref = <L3-Belegnummer>`. Je L3-Beleg wird er als gleich, abweichend (Datum,
+   netto, brutto) oder nicht nachvollzogen eingestuft. Dazu kommen die L3-Belege in VALEO, die im Abzug fehlen, und
+   die Summen je Belegart.
 
 ## 4. Abnahmekriterien (Nutzer 25.11.2026)
 
