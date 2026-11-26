@@ -91,6 +91,7 @@ domains:
       - export
       - pricing
       - preise
+      - konditionen
       - auswertungen
     service_prefixes:
       - finance_

@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-26T06:23:12Z'
+generated_at: '2026-11-26T12:18:17Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -1345,6 +1345,7 @@ domains:
     - /finanzplanung/liquiditaet
     - /kasse/historie
     - /kasse/tagesabschluss
+    - /konditionen/konditionssystem
     - /pos/customer-display
     - /pos/gift-card-neu
     - /pos/gift-card/:id
@@ -1791,6 +1792,7 @@ domains:
     frontend_routes:
     - /fuhrpark/ausgehende-belege-dokumente
     - /fuhrpark/fahrzeug-stamm
+    - /fuhrpark/fahrzeug-vertiefung
     - /fuhrpark/fahrzeug/:id
     - /fuhrpark/fahrzeug/neu
     - /fuhrpark/fahrzeuge
@@ -1890,6 +1892,7 @@ domains:
     - /
     - /admin-suite
     - /admin-suite/compliance
+    - /admin-suite/connectoren
     - /admin-suite/connectors
     - /admin-suite/devices
     - /admin-suite/diagnostics
@@ -2145,6 +2148,7 @@ domains:
     - admin_reporting_kommandos
     - admin_rollen_kommandos
     - admin_suite
+    - admin_suite_parity
     - agent_autonomie
     - agent_context_api
     - agent_tool_contracts
@@ -2213,6 +2217,7 @@ domains:
     - planung_kalender
     - preis_kalkulation_bridge
     - process_kernel_api
+    - process_kernel_idempotency_lists
     - process_map
     - process_mining_api
     - process_mining_observation
@@ -2385,6 +2390,7 @@ domains:
     - einkauf_avis_kommandos
     - einkauf_bestellvorschlag
     - einkauf_bestellvorschlag_kommandos
+    - einkauf_compat_writes
     - einkauf_kpis
     - einkauf_lieferschein
     - procurement_match
@@ -2401,12 +2407,12 @@ domains:
     - docs/adr/adr-086-risk-based-autonomous-erp.md
     - docs/adr/adr-business-partner-debitoren-kreditoren-20261101.md
 mapping_stats:
-  frontend_routes_total: 1147
-  frontend_routes_mapped: 1147
+  frontend_routes_total: 1150
+  frontend_routes_mapped: 1150
   backend_services_total: 359
   backend_services_mapped: 359
-  backend_endpoints_total: 474
-  backend_endpoints_mapped: 474
+  backend_endpoints_total: 477
+  backend_endpoints_mapped: 477
 unmapped:
   frontend_routes: []
   backend_services: []

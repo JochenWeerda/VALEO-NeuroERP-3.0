@@ -193970,7 +193970,8 @@
         "summary": "IMAP-Konfiguration speichern",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194056,7 +194057,8 @@
         "summary": "Capture-Connector KPI-Ueberblick",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194104,7 +194106,8 @@
         "summary": "STT-Konfiguration speichern",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194421,7 +194424,8 @@
         "summary": "Migration-Batches auflisten",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       },
       "post": {
@@ -194602,7 +194606,8 @@
         "summary": "Migration Cockpit KPI-Ueberblick",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194635,7 +194640,8 @@
         "summary": "Migration-Profile auflisten",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194727,7 +194733,8 @@
         "summary": "Admin Suite readiness Evidenzliste",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194787,7 +194794,8 @@
         "summary": "Agentenrollen auflisten",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194817,7 +194825,8 @@
         "summary": "Security Governance KPI-Ueberblick",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194850,7 +194859,8 @@
         "summary": "Menschenrollen auflisten",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194959,7 +194969,8 @@
         "summary": "Admin Suite Setup-Schritte auflisten",
         "tags": [
           "admin-suite",
-          "readiness"
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -280118,7 +280129,9 @@
         ],
         "summary": "Angebot anlegen einkauf",
         "tags": [
-          "compat"
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -280222,7 +280235,9 @@
         ],
         "summary": "Angebot aktualisieren einkauf",
         "tags": [
-          "compat"
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -280718,7 +280733,9 @@
         ],
         "summary": "Anlieferavis anlegen einkauf",
         "tags": [
-          "compat"
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -280822,7 +280839,9 @@
         ],
         "summary": "Anlieferavis aktualisieren einkauf",
         "tags": [
-          "compat"
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -369417,7 +369436,7 @@
         "summary": "Idempotente Aggregate auflisten",
         "tags": [
           "process-kernel",
-          "commands"
+          "parity"
         ]
       }
     },
@@ -369452,7 +369471,7 @@
         "summary": "Idempotente Commands auflisten",
         "tags": [
           "process-kernel",
-          "commands"
+          "parity"
         ]
       }
     },
@@ -369487,13 +369506,13 @@
         "summary": "Idempotenz-Lookup-Pfade",
         "tags": [
           "process-kernel",
-          "commands"
+          "parity"
         ]
       }
     },
     "/api/v1/process/actions/idempotency/overview": {
       "get": {
-        "description": "Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer.",
+        "description": "Liefert einen Monitoring-Ueberblick ueber den Idempotenz-Layer inkl. flacher KPIs.",
         "operationId": "get_idempotency_overview_api_v1_process_actions_idempotency_overview_get",
         "responses": {
           "200": {
@@ -369515,7 +369534,7 @@
         "summary": "Idempotency overview abrufen",
         "tags": [
           "process-kernel",
-          "commands"
+          "parity"
         ]
       }
     },

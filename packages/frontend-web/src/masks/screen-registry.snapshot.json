@@ -2174,7 +2174,7 @@
       {
        "auditReasonRequired": true,
        "commandEndpoint": "/api/v1/logistik/frachttabellen/{entity_id}",
-       "dangerLevel": "destructive",
+       "dangerLevel": "critical",
        "disabledWhen": {
         "field": "gesperrt",
         "values": [

@@ -1,12 +1,12 @@
 schema_version: '1.0'
 slice_id: MCP-MASK-WRITE-PARITY-20261008
-generated_on: '2026-11-25'
+generated_on: '2026-11-26'
 sources:
   screen_mask_actions: services/ki-usability/app/data/screen_mask_actions.json
   mcp_erp_tools: config/mcp_erp_tools.yaml
   action_stats:
-    actions: 797
-    screens_with_actions: 407
+    actions: 901
+    screens_with_actions: 436
     domains: 50
 mcp_write_tools:
 - crm.contact.log
@@ -93,17 +93,18 @@ fin_close:
   notes: FIN-CLOSE absichtlich nicht als MCP-Tool. Kein Adapter, kein Scheinabschluss. Bleibt offener
     Fachvertrag ausserhalb Mask-Write-Parität.
 stats:
-  mask_actions_considered: 317
-  mask_mutations_considered: 258
+  mask_actions_considered: 407
+  mask_mutations_considered: 348
   by_coverage:
-    blocked_human_only: 84
-    blocked_unreleased: 129
+    blocked_human_only: 124
+    blocked_unreleased: 162
     local_ui: 59
     mapped: 38
     mapped_generic: 1
     mapped_propose_only: 1
     mapped_read: 1
     open_high: 4
+    open_medium: 17
 mappings:
 - mask_action_id: mask:abrechnung/eb-lieferschein-kontrolle:assign_me
   mask: abrechnung/eb-lieferschein-kontrolle
@@ -146,6 +147,158 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:admin-suite/connectoren:imap_abrufen
+  mask: admin-suite/connectoren
+  domain: admin
+  action_key: imap_abrufen
+  label: IMAP jetzt abrufen
+  command_endpoint: /api/v1/admin-suite/capture-connectors/imap/poll
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/connectoren:imap_speichern
+  mask: admin-suite/connectoren
+  domain: admin
+  action_key: imap_speichern
+  label: IMAP speichern
+  command_endpoint: /api/v1/admin-suite/capture-connectors/imap
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/connectoren:imap_testen
+  mask: admin-suite/connectoren
+  domain: admin
+  action_key: imap_testen
+  label: IMAP testen
+  command_endpoint: /api/v1/admin-suite/capture-connectors/imap/test
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/connectoren:stt_speichern
+  mask: admin-suite/connectoren
+  domain: admin
+  action_key: stt_speichern
+  label: STT speichern
+  command_endpoint: /api/v1/admin-suite/capture-connectors/stt
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/connectoren:stt_testen
+  mask: admin-suite/connectoren
+  domain: admin
+  action_key: stt_testen
+  label: STT testen
+  command_endpoint: /api/v1/admin-suite/capture-connectors/stt/test
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/ki-anbieter:speichern
+  mask: admin-suite/ki-anbieter
+  domain: admin
+  action_key: speichern
+  label: Speichern
+  command_endpoint: /api/v1/admin-suite/llm-gateway
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/ki-anbieter:testen
+  mask: admin-suite/ki-anbieter
+  domain: admin
+  action_key: testen
+  label: Verbindung testen
+  command_endpoint: /api/v1/admin-suite/llm-gateway/test
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/migration:dry_run_anlegen
+  mask: admin-suite/migration
+  domain: admin
+  action_key: dry_run_anlegen
+  label: Dry-Run anlegen
+  command_endpoint: /api/v1/admin-suite/migration/batches
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/migration:freigeben
+  mask: admin-suite/migration
+  domain: admin
+  action_key: freigeben
+  label: Freigeben
+  command_endpoint: /api/v1/admin-suite/migration/batches/{entity_id}/approve
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/pos-fiscalization:speichern
+  mask: admin-suite/pos-fiscalization
+  domain: admin
+  action_key: speichern
+  label: Konfiguration speichern
+  command_endpoint: /api/v1/pos/fiscalization/config
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/security:simulieren
+  mask: admin-suite/security
+  domain: admin
+  action_key: simulieren
+  label: Rechte simulieren
+  command_endpoint: /api/v1/admin-suite/security/simulate
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/setup:abschliessen
+  mask: admin-suite/setup
+  domain: admin
+  action_key: abschliessen
+  label: Abschliessen
+  command_endpoint: /api/v1/admin-suite/setup/steps/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin-suite/setup:in_arbeit
+  mask: admin-suite/setup
+  domain: admin
+  action_key: in_arbeit
+  label: In Arbeit
+  command_endpoint: /api/v1/admin-suite/setup/steps/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin/GapPipelineConsole:import_pipeline
+  mask: admin/GapPipelineConsole
+  domain: admin
+  action_key: import_pipeline
+  label: Import
+  command_endpoint: /api/v1/gap/pipeline/import
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/GapPipelineConsole:run_pipeline
+  mask: admin/GapPipelineConsole
+  domain: admin
+  action_key: run_pipeline
+  label: Pipeline starten
+  command_endpoint: /api/v1/gap/pipeline/run-year
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:admin/branches/detail:bearbeiten
   mask: admin/branches/detail
   domain: admin
@@ -157,6 +310,36 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:admin/control-center/superglue:connector_override
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: connector_override
+  label: Connector Override speichern
+  command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:admin/control-center/superglue:policy_override
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: policy_override
+  label: Policy Override speichern
+  command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/policy
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:admin/control-center/superglue:wizard_apply
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: wizard_apply
+  label: Wizard-Schritt anwenden
+  command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard/apply
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:admin/identity-budgets:allocate
   mask: admin/identity-budgets
   domain: platform
@@ -229,6 +412,17 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin/postfaecher-anmeldung-rueckruf:callback
+  mask: admin/postfaecher-anmeldung-rueckruf
+  domain: admin
+  action_key: callback
+  label: Anmeldung abschliessen
+  command_endpoint: /api/v1/admin/postfaecher/anmeldung/abschluss
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:admin/postfaecher:entfernen
   mask: admin/postfaecher
   domain: platform
@@ -332,6 +526,83 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:admin/setup/dms-integration:bootstrap
+  mask: admin/setup/dms-integration
+  domain: admin
+  action_key: bootstrap
+  label: DMS bootstrap
+  command_endpoint: /api/v1/admin/dms/bootstrap
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/setup/dms-integration:test
+  mask: admin/setup/dms-integration
+  domain: admin
+  action_key: test
+  label: Verbindung testen
+  command_endpoint: /api/v1/admin/dms/test
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/vordruck-editor:anlegen
+  mask: admin/vordruck-editor
+  domain: admin
+  action_key: anlegen
+  label: Vordruck anlegen
+  command_endpoint: /api/v1/admin/vordrucke
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/vordruck-editor:duplizieren
+  mask: admin/vordruck-editor
+  domain: admin
+  action_key: duplizieren
+  label: Duplizieren
+  command_endpoint: /api/v1/admin/vordrucke/{entity_id}/duplizieren
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/vordruck-editor:loeschen
+  mask: admin/vordruck-editor
+  domain: admin
+  action_key: loeschen
+  label: Loeschen
+  command_endpoint: /api/v1/admin/vordrucke/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/vordruck-editor:seed_standard
+  mask: admin/vordruck-editor
+  domain: admin
+  action_key: seed_standard
+  label: Standard-Vordrucke seeden
+  command_endpoint: /api/v1/admin/vordrucke/seed-standard
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:admin/vordruck-editor:speichern
+  mask: admin/vordruck-editor
+  domain: admin
+  action_key: speichern
+  label: Vordruck speichern
+  command_endpoint: /api/v1/admin/vordrucke/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:admin/webhooks-liste:register
   mask: admin/webhooks-liste
   domain: admin
@@ -384,6 +655,26 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/annahmen-qualitaet-nachtrag:batch_nachtragen
+  mask: agrar/annahmen-qualitaet-nachtrag
+  domain: agrar
+  action_key: batch_nachtragen
+  label: Batch speichern
+  command_endpoint: /api/v1/agrar/harvest-acceptance/quality-batch
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/annahmen-qualitaet-nachtrag:nachtragen
+  mask: agrar/annahmen-qualitaet-nachtrag
+  domain: agrar
+  action_key: nachtragen
+  label: Nachtragen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{entity_id}/qualitaetsprotokoll
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/duenger-liste:deaktivieren
   mask: agrar/duenger-liste
   domain: agrar
@@ -404,6 +695,61 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:agrar/ernte-annahme-erfassung:anlegen
+  mask: agrar/ernte-annahme-erfassung
+  domain: agrar
+  action_key: anlegen
+  label: Annahme anlegen
+  command_endpoint: /api/v1/agrar/harvest-acceptance
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/ernte-annahme-erfassung:berechnen
+  mask: agrar/ernte-annahme-erfassung
+  domain: agrar
+  action_key: berechnen
+  label: Berechnen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{entity_id}/calculate
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/ernte-annahme-erfassung:freigeben
+  mask: agrar/ernte-annahme-erfassung
+  domain: agrar
+  action_key: freigeben
+  label: Freigeben
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{entity_id}/release
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/ernte-annahme-erfassung:loeschen
+  mask: agrar/ernte-annahme-erfassung
+  domain: agrar
+  action_key: loeschen
+  label: Loeschen
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/ernte-annahme-erfassung:speichern
+  mask: agrar/ernte-annahme-erfassung
+  domain: agrar
+  action_key: speichern
+  label: Annahme speichern
+  command_endpoint: /api/v1/agrar/harvest-acceptance/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:agrar/ernte-liste:neu
   mask: agrar/ernte-liste
   domain: agrar
@@ -414,6 +760,26 @@ mappings:
   coverage: local_ui
   mcp_tool_id: null
   notes: Reine Oberflaechenwirkung (localEffect/navigationRoute) ohne Serverwirkung.
+- mask_action_id: mask:agrar/erntefenster-konfig:alt_daten_zuordnen
+  mask: agrar/erntefenster-konfig
+  domain: agrar
+  action_key: alt_daten_zuordnen
+  label: Alt-Daten zuordnen
+  command_endpoint: /api/v1/agrar/settlements/campaign-reference/backfill/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/erntefenster-konfig:anlegen
+  mask: agrar/erntefenster-konfig
+  domain: agrar
+  action_key: anlegen
+  label: Kampagne aus Vorlage
+  command_endpoint: /api/v1/admin/erntefenster-from-template
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/feed-readiness:create_handoff
   mask: agrar/feed-readiness
   domain: agrar
@@ -583,6 +949,39 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:agrar/kunden-schlagkartei:ankaufsangebot
+  mask: agrar/kunden-schlagkartei
+  domain: agrar
+  action_key: ankaufsangebot
+  label: Ankaufsangebot erstellen
+  command_endpoint: /api/v1/portal/empfehlungen/generieren/schlagkartei
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/kunden-schlagkartei:lohn_spritz
+  mask: agrar/kunden-schlagkartei
+  domain: agrar
+  action_key: lohn_spritz
+  label: Lohnspritz-Auftrag
+  command_endpoint: /api/v1/portal/lohndienste
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:agrar/kunden-schlagkartei:mahl_misch
+  mask: agrar/kunden-schlagkartei
+  domain: agrar
+  action_key: mahl_misch
+  label: Mahl+Misch-Termin
+  command_endpoint: /api/v1/portal/lohndienste
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:agrar/probenehmer-stamm:bearbeiten
   mask: agrar/probenehmer-stamm
   domain: agrar
@@ -694,6 +1093,46 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:agrar/sammelabrechnung:anlegen
+  mask: agrar/sammelabrechnung
+  domain: agrar
+  action_key: anlegen
+  label: Anlegen
+  command_endpoint: /api/v1/agrar/sammelabrechnung
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/sammelabrechnung:berechnen
+  mask: agrar/sammelabrechnung
+  domain: agrar
+  action_key: berechnen
+  label: Berechnen
+  command_endpoint: /api/v1/agrar/sammelabrechnung/{entity_id}/berechnen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/sammelabrechnung:buchen
+  mask: agrar/sammelabrechnung
+  domain: agrar
+  action_key: buchen
+  label: Buchen
+  command_endpoint: /api/v1/agrar/sammelabrechnung/{entity_id}/buchen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/sammelabrechnung:loeschen
+  mask: agrar/sammelabrechnung
+  domain: agrar
+  action_key: loeschen
+  label: Loeschen
+  command_endpoint: /api/v1/agrar/sammelabrechnung/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:agrar/vertraege/formular:bearbeiten
   mask: agrar/vertraege/formular
   domain: agrar
@@ -704,11 +1143,138 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/zinsabrechnung:anlegen
+  mask: agrar/zinsabrechnung
+  domain: agrar
+  action_key: anlegen
+  label: Anlegen
+  command_endpoint: /api/v1/zinsabrechnung
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/zinsabrechnung:buchen
+  mask: agrar/zinsabrechnung
+  domain: agrar
+  action_key: buchen
+  label: Buchen
+  command_endpoint: /api/v1/zinsabrechnung/{entity_id}/buchen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/zinsabrechnung:drucken
+  mask: agrar/zinsabrechnung
+  domain: agrar
+  action_key: drucken
+  label: Drucken
+  command_endpoint: /api/v1/zinsabrechnung/{entity_id}/drucken
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:agrar/zinsabrechnung:stornieren
+  mask: agrar/zinsabrechnung
+  domain: agrar
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/zinsabrechnung/{entity_id}/stornieren
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:annahme/abrechnung:anlegen
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: anlegen
+  label: Abrechnung anlegen
+  command_endpoint: /api/v1/agrar/settlements
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:billing_preview
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: billing_preview
+  label: Abrechnungsgewicht Vorschau
+  command_endpoint: /api/v1/agrar/settlements/billing-weight/preview
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:drying_compute
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: drying_compute
+  label: Trocknung berechnen
+  command_endpoint: /api/v1/agrar/settlements/drying/compute
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:freigabe
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: freigabe
+  label: Freigabe
+  command_endpoint: /api/v1/agrar/settlements/{entity_id}/freigabe
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:post_fibu
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: post_fibu
+  label: FiBu buchen
+  command_endpoint: /api/v1/agrar/settlements/{entity_id}/post-fibu
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:settlement_preview
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: settlement_preview
+  label: Abrechnung Vorschau
+  command_endpoint: /api/v1/agrar/settlements/preview
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:annahme/abrechnung:stornieren
+  mask: annahme/abrechnung
+  domain: agrar
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/agrar/settlements/{entity_id}/cancel
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:annahme/qualitaets-check:save
   mask: annahme/qualitaets-check
   domain: agrar
   action_key: save
   label: Qualitätsprüfung speichern
+  command_endpoint: null
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:annahme/rohware:submit
+  mask: annahme/rohware
+  domain: agrar
+  action_key: submit
+  label: Rohware annehmen
   command_endpoint: null
   command: null
   mcp_tool_id: null
@@ -2035,16 +2601,57 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:einkauf/angebot:ablehnen
+  mask: einkauf/angebot
+  domain: einkauf
+  action_key: ablehnen
+  label: Ablehnen
+  command_endpoint: /api/v1/einkauf/angebote/{entity_id}/reject
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:einkauf/angebot:bearbeiten
+  mask: einkauf/angebot
+  domain: einkauf
+  action_key: bearbeiten
+  label: Bearbeiten
+  command_endpoint: /api/v1/einkauf/angebote/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/angebot:bestellen
   mask: einkauf/angebot
   domain: einkauf
   action_key: bestellen
-  label: Bestellung erstellen
+  label: In Bestellung
   command_endpoint: /api/v1/einkauf/angebote/{entity_id}/actions/bestellen
   command: null
   mcp_tool_id: einkauf.angebot.bestellen
   coverage: mapped
   notes: MCP-MASK-WRITES-NEXT-20261008; Angebot→Bestellung via EinkaufCompatService.
+- mask_action_id: mask:einkauf/angebot:genehmigen
+  mask: einkauf/angebot
+  domain: einkauf
+  action_key: genehmigen
+  label: Genehmigen
+  command_endpoint: /api/v1/einkauf/angebote/{entity_id}/approve
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:einkauf/angebot:pruefen
+  mask: einkauf/angebot
+  domain: einkauf
+  action_key: pruefen
+  label: Pruefen
+  command_endpoint: /api/v1/einkauf/angebote/{entity_id}/review
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
 - mask_action_id: mask:einkauf/angebote:ablehnen
   mask: einkauf/angebote
   domain: einkauf
@@ -2136,6 +2743,47 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:einkauf/anlieferavis:bearbeiten
+  mask: einkauf/anlieferavis
+  domain: einkauf
+  action_key: bearbeiten
+  label: Bearbeiten
+  command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:einkauf/anlieferavis:bestaetigen
+  mask: einkauf/anlieferavis
+  domain: einkauf
+  action_key: bestaetigen
+  label: Bestaetigen
+  command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/confirm
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:einkauf/anlieferavis:senden
+  mask: einkauf/anlieferavis
+  domain: einkauf
+  action_key: senden
+  label: Avis senden
+  command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/send
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:einkauf/anlieferavis:stornieren
+  mask: einkauf/anlieferavis
+  domain: einkauf
+  action_key: stornieren
+  label: Stornieren
+  command_endpoint: /api/v1/einkauf/anlieferavis/{entity_id}/cancel
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (menschliche_genehmigung); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:einkauf/anlieferavis:wareneingang
   mask: einkauf/anlieferavis
   domain: einkauf
@@ -2571,6 +3219,66 @@ mappings:
   mcp_tool_id: logistik.fahrzeug.speichern
   coverage: mapped
   notes: FUHRPARK-TENANT-CE-20261009; CE /api/v1/fuhrpark/fahrzeuge/actions/speichern; Token-Mandant.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_anlegen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: bussgeld_anlegen
+  label: Bussgeld anlegen
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_bezahlt
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: bussgeld_bezahlt
+  label: Bussgeld bezahlt
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld/{bg_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:leasing_rueckgabe
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: leasing_rueckgabe
+  label: Leasing-Rueckgabe
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_abschliessen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: schaden_abschliessen
+  label: Schaden abschliessen
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden/{schaden_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_anlegen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: schaden_anlegen
+  label: Schaden anlegen
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:status_wechseln
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: logistik
+  action_key: status_wechseln
+  label: Status wechseln
+  command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/status
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:fuhrpark/fahrzeuge:neu
   mask: fuhrpark/fahrzeuge
   domain: logistics
@@ -2767,6 +3475,122 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:konditionen/konditionssystem:individualpreis_anlegen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: individualpreis_anlegen
+  label: Individualpreis anlegen
+  command_endpoint: /api/v1/preise/individualpreise
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:individualpreis_loeschen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: individualpreis_loeschen
+  label: Individualpreis loeschen
+  command_endpoint: /api/v1/preise/individualpreise/{id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:konditionen/konditionssystem:preis_berechnen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: preis_berechnen
+  label: Preis berechnen
+  command_endpoint: /api/v1/pricing/calculate
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:preisliste_anlegen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: preisliste_anlegen
+  label: Preisliste anlegen
+  command_endpoint: /api/v1/price-lists/
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:preisliste_loeschen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: preisliste_loeschen
+  label: Preisliste loeschen
+  command_endpoint: /api/v1/price-lists/{id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_anlegen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattgruppe_anlegen
+  label: Rabattgruppe anlegen
+  command_endpoint: /api/v1/preise/rabatte/gruppen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_loeschen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattgruppe_loeschen
+  label: Rabattgruppe loeschen
+  command_endpoint: /api/v1/preise/rabatte/gruppen/{id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:konditionen/konditionssystem:rabattklasse_anlegen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattklasse_anlegen
+  label: Rabattklasse anlegen
+  command_endpoint: /api/v1/preise/rabatte/klassen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:rabattklasse_loeschen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattklasse_loeschen
+  label: Rabattklasse loeschen
+  command_endpoint: /api/v1/preise/rabatte/klassen/{id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:konditionen/konditionssystem:rabattsatz_anlegen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattsatz_anlegen
+  label: Rabattsatz anlegen
+  command_endpoint: /api/v1/preise/rabatte/saetze
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:konditionen/konditionssystem:rabattsatz_loeschen
+  mask: konditionen/konditionssystem
+  domain: agrar
+  action_key: rabattsatz_loeschen
+  label: Rabattsatz loeschen
+  command_endpoint: /api/v1/preise/rabatte/saetze/{id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:kontrakt-liste/mahnung:mahnen
   mask: kontrakt-liste/mahnung
   domain: agrar
@@ -2849,6 +3673,56 @@ mappings:
   coverage: blocked_human_only
   notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
     Endpunkt.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:abschlag_anlegen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: abschlag_anlegen
+  label: Zu-/Abschlag anlegen
+  command_endpoint: /api/v1/kontrakte/zuabschlagsgruppen/{entity_id}/positionen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:gruppe_anlegen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: gruppe_anlegen
+  label: Zu-/Abschlagsgruppe anlegen
+  command_endpoint: /api/v1/kontrakte/zuabschlagsgruppen
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_unreleased
+  notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraeume_generieren
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraeume_generieren
+  label: Mengenzeiträume generieren
+  command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_anlegen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraum_anlegen
+  label: Mengenzeitraum anlegen
+  command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_loeschen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraum_loeschen
+  label: Mengenzeitraum loeschen
+  command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}
+  command: null
+  mcp_tool_id: null
+  coverage: open_medium
+  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_control
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -2890,6 +3764,72 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_unreleased
   notes: MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt.
+- mask_action_id: mask:lager/materialfluss:edge_anlegen
+  mask: lager/materialfluss
+  domain: lager
+  action_key: edge_anlegen
+  label: Kante anlegen
+  command_endpoint: /api/v1/lager/wms/agri/material-flow/edges
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:lager/materialfluss:lot_link
+  mask: lager/materialfluss
+  domain: lager
+  action_key: lot_link
+  label: Charge verknuepfen
+  command_endpoint: /api/v1/lager/wms/agri/material-flow/lot-link
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:lager/materialfluss:node_anlegen
+  mask: lager/materialfluss
+  domain: lager
+  action_key: node_anlegen
+  label: Knoten anlegen
+  command_endpoint: /api/v1/lager/wms/agri/material-flow/nodes
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:lager/materialfluss:route_pruefen
+  mask: lager/materialfluss
+  domain: lager
+  action_key: route_pruefen
+  label: Route pruefen
+  command_endpoint: /api/v1/lager/wms/agri/material-flow/validate-route
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:lager/materialfluss:transfer
+  mask: lager/materialfluss
+  domain: lager
+  action_key: transfer
+  label: Material transferieren
+  command_endpoint: /api/v1/lager/wms/agri/material-flow/transfer
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
+- mask_action_id: mask:lager/materialfluss:zelle_anlegen
+  mask: lager/materialfluss
+  domain: lager
+  action_key: zelle_anlegen
+  label: Silo-Zelle anlegen
+  command_endpoint: /api/v1/lager/wms/agri/silo-cells
+  command: null
+  mcp_tool_id: null
+  coverage: blocked_human_only
+  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
+    Endpunkt.
 - mask_action_id: mask:lager/stock-movement:stornieren
   mask: lager/stock-movement
   domain: lager
@@ -3377,110 +4317,8 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_human_only
   notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
-- mask_action_id: mask:admin/control-center/superglue:connector_override
-  mask: admin/control-center/superglue
-  domain: admin
-  action_key: connector_override
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:admin/control-center/superglue:policy_override
-  mask: admin/control-center/superglue
-  domain: admin
-  action_key: policy_override
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:admin/control-center/superglue:wizard_apply
-  mask: admin/control-center/superglue
-  domain: admin
-  action_key: wizard_apply
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_anlegen
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: bussgeld_anlegen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_bezahlt
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: bussgeld_bezahlt
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:leasing_rueckgabe
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: leasing_rueckgabe
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_abschliessen
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: schaden_abschliessen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_anlegen
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: schaden_anlegen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:status_wechseln
-  mask: fuhrpark/fahrzeug-vertiefung
-  domain: fuhrpark
-  action_key: status_wechseln
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:konditionen/konditionssystem:individualpreis_loeschen
-  mask: konditionen/konditionssystem
-  domain: konditionen
-  action_key: individualpreis_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:konditionen/konditionssystem:preisliste_loeschen
-  mask: konditionen/konditionssystem
-  domain: konditionen
-  action_key: preisliste_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_loeschen
-  mask: konditionen/konditionssystem
-  domain: konditionen
-  action_key: rabattgruppe_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:konditionen/konditionssystem:rabattklasse_loeschen
-  mask: konditionen/konditionssystem
-  domain: konditionen
-  action_key: rabattklasse_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:konditionen/konditionssystem:rabattsatz_loeschen
-  mask: konditionen/konditionssystem
-  domain: konditionen
-  action_key: rabattsatz_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraeume_generieren
-  mask: kontrakte/mengenzeitraeume
-  domain: kontrakte
-  action_key: zeitraeume_generieren
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_anlegen
-  mask: kontrakte/mengenzeitraeume
-  domain: kontrakte
-  action_key: zeitraum_anlegen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
-- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_loeschen
-  mask: kontrakte/mengenzeitraeume
-  domain: kontrakte
-  action_key: zeitraum_loeschen
-  coverage: blocked_human_only
-  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 0; blocked_human_only 84; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 17; blocked_human_only 124; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'
