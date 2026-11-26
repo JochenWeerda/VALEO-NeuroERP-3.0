@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-25
+last_reviewed: 2026-11-26
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -5070,12 +5070,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 - Oeffne Rohwarengruppen.
 - Lege eine Rohwarengruppe an.
 
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
-
 ---
 
 ### `agrar/saatgut` — Saatgut
@@ -6254,12 +6248,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Oeffne Vermehrungsvertraege.
 - Lege einen Vermehrungsvertrag an.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 
@@ -8557,12 +8545,6 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 - Oeffne Field-Service Aufgabe neu.
 - Lege einen Field-Service-Einsatz an.
-
-**Actions:**
-
-| key | label | danger | Human-Approval | commandEndpoint |
-|---|---|---|---|---|
-| `edit` | Bearbeiten | safe | nein | `—` |
 
 ---
 

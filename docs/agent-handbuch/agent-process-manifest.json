@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-25",
+  "generatedAt": "2026-11-26",
   "schemaVersion": 1,
   "sources": [
     "app/core/flow_spine_registry.py",
@@ -4898,19 +4898,7 @@
       "screen_definition_url": "/api/v1/masks/agrar/rohwarengruppen/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/rohwarengruppen/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "agrar.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -5888,19 +5876,7 @@
       "screen_definition_url": "/api/v1/masks/agrar/vermehrungsvertraege/screen-definition",
       "readiness_url": "/api/v1/masks/agrar/vermehrungsvertraege/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "agrar.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": [
         "agrar.contract.get",
@@ -9110,19 +9086,7 @@
       "screen_definition_url": "/api/v1/masks/agribusiness/field-service-tasks/neu/screen-definition",
       "readiness_url": "/api/v1/masks/agribusiness/field-service-tasks/neu/readiness",
       "risk_summary": "low",
-      "actions": [
-        {
-          "key": "edit",
-          "label": "Bearbeiten",
-          "dangerLevel": "safe",
-          "humanApprovalRequired": false,
-          "requiresConfirmation": false,
-          "permission": "agribusiness.write",
-          "commandEndpoint": null,
-          "method": null,
-          "stubReason": null
-        }
-      ],
+      "actions": [],
       "sensitive_fields": [],
       "mcp_tool_ids": []
     },
