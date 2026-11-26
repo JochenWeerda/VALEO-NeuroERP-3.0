@@ -191,7 +191,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `domain_crm.business_partner_contacts` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_cooperative_memberships` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_cpd_accounts` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |
-| `domain_crm.business_partner_discount_items` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py`, `app/services/business_partner_service.py` | — | — |
+| `domain_crm.business_partner_discount_items` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py`, `app/services/business_partner_service.py`, `app/services/spiegel_preise.py` | `app/services/spiegel_preise.py` | — |
 | `domain_crm.business_partner_dispatch_media` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_email_distributions` | `app/infrastructure/models/__init__.py` | — | — |
 | `domain_crm.business_partner_instructions` | `app/api/v1/endpoints/crm_360_reads.py`, `app/infrastructure/models/__init__.py` | — | — |

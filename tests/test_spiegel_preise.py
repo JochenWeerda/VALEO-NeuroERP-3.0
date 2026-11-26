@@ -10,7 +10,8 @@ from test_spiegel_uebernahme import MAPPING, _artikel, _kunde, _lauf, mandant  #
 pytestmark = pytest.mark.integration
 
 MAPPING.update({"PREISTABNR": "preistabelle", "BEZEICHNUNG": "bezeichnung", "PREIS": "preis", "PREISJE": "preis_je",
-                "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis"})
+                "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis",
+                "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste"})
 
 
 def _tabelle(nr: str, name: str) -> dict:
@@ -31,7 +32,8 @@ def _kpreis(kd: str, art: str, preis: str, je: str = "100") -> dict:
 def mit_preisen(mandant):  # noqa: F811
     yield mandant
     with SessionLocal() as db:
-        for sql in ("DELETE FROM domain_crm.business_partner_price_agreements WHERE tenant_id = :t",
+        for sql in ("DELETE FROM domain_crm.business_partner_discount_items WHERE tenant_id = :t",
+                    "DELETE FROM domain_crm.business_partner_price_agreements WHERE tenant_id = :t",
                     "DELETE FROM domain_pricing.price_list_items WHERE tenant_id = :t",
                     "DELETE FROM domain_pricing.price_lists WHERE tenant_id = :t"):
             db.execute(text(sql), {"t": mandant})
@@ -83,3 +85,23 @@ def test_artikelpreis_ohne_uebernommene_preistabelle_wird_fehlerzeile(mit_preise
 
     assert ergebnis["fehler"] == 1
 
+
+def _krabatt(kd: str, art: str, prozent: str) -> dict:
+    return {"TYP": "kundenrabatt", "QUELLE": f"{kd}|{art}", "KUNDENNR": kd, "ARTNR": art, "RABATTPROZ": prozent,
+            "DATUMVON": "2026-01-01", "LISTENR": "3"}
+
+
+def test_kundenrabatt_kommt_in_der_preiskaskade_an(mit_preisen):
+    from app.services.business_partner_service import BusinessPartnerService
+
+    t = mit_preisen
+    ergebnis = _lauf(t, "kr-1", [_artikel("151704", "ZINTAN"), _kunde("10001", "Hof Janssen"),
+                                 _krabatt("10001", "151704", "7,5"), _krabatt("10001", "151704x", "1"),
+                                 _krabatt("10001", "151704", "120")])
+    with SessionLocal() as db:
+        kunde = db.execute(text("SELECT id FROM domain_crm.customers WHERE tenant_id = :t"), {"t": t}).scalar_one()
+        rabatt = BusinessPartnerService(db, t).get_customer_article_discount(str(kunde), "151704")
+
+    assert ergebnis["fehler"] == 2  # unbekannter Artikel, Rabatt ueber 100 %
+    assert rabatt is not None and float(rabatt) == 7.5
+

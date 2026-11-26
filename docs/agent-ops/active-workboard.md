@@ -1345,3 +1345,6 @@ Objektarten preisliste/artikelpreis/kundenpreis (app/services/spiegel_preise.py)
 
 ## M6-SPIEGEL-BELEGABGLEICH-20261126 — zur Abnahme, Claude Code (M6)
 Taeglicher Belegabgleich L3 gegen nachvollzogene VALEO-Belege (source_system='l3', source_ref=L3-Nummer): gleich/abweichend (Datum, netto, brutto)/nicht nachvollzogen, fehlt in L3, Summen je Belegart; liest nur. Testdatenabzug um Belegabfrage ergaenzt.
+
+## M6-SPIEGEL-KUNDENRABATTE-20261126 — zur Abnahme, Claude Code (M6)
+Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_discount_items (Kaskadenstufe customer_article_discount), Test bis get_customer_article_discount. Aktionen/Rabattstaffeln offen (Rangfolge in der Kaskade fachlich klaeren); KONDITIONEN ist Lohn, entfaellt.

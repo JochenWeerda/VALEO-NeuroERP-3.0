@@ -10666,7 +10666,11 @@
           "read_by": [
             "app/api/v1/endpoints/crm_360_reads.py",
             "app/infrastructure/models/__init__.py",
-            "app/services/business_partner_service.py"
+            "app/services/business_partner_service.py",
+            "app/services/spiegel_preise.py"
+          ],
+          "written_by": [
+            "app/services/spiegel_preise.py"
           ]
         },
         "business_partner_dispatch_media": {
