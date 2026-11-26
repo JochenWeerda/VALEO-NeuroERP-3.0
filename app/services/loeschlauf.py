@@ -44,7 +44,7 @@ def _auftrag(db: Session, tenant_id: str, auftrag_id: str) -> dict[str, Any]:
         "SELECT * FROM domain_shared.loeschauftraege WHERE tenant_id = :t AND id = :id FOR UPDATE"),
         {"t": tenant_id, "id": auftrag_id}).mappings().first()
     if zeile is None:
-        raise EntityNotFoundError("Loeschauftrag nicht gefunden")
+        raise EntityNotFoundError("Loeschauftrag", auftrag_id)
     return dict(zeile)
 
 
