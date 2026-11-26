@@ -1,7 +1,7 @@
 # Architecture Index — generiert 2026-11-26
 # Nicht manuell bearbeiten. Prefix-Regeln: config/architecture-domain-prefixes.yaml
 schema_version: 1.1.0
-generated_at: '2026-11-26T12:20:03Z'
+generated_at: '2026-11-26T13:21:06Z'
 generated_by: scripts/generate_architecture_index.py
 prefix_rules: config/architecture-domain-prefixes.yaml
 delivery_ref: docs/architecture/process-kernel/STATUS.md
@@ -2104,6 +2104,7 @@ domains:
     - spiegel_beleg_abgleich
     - spiegel_op_abgleich
     - spiegel_preise
+    - spiegel_saldenabgleich
     - spiegel_uebernahme
     - stt_client
     - studio_catalog_contracts
@@ -2409,8 +2410,8 @@ domains:
 mapping_stats:
   frontend_routes_total: 1150
   frontend_routes_mapped: 1150
-  backend_services_total: 359
-  backend_services_mapped: 359
+  backend_services_total: 360
+  backend_services_mapped: 360
   backend_endpoints_total: 477
   backend_endpoints_mapped: 477
 unmapped:
