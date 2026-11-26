@@ -302,4 +302,34 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Lot in Silozelle buchen' }))
     await waitFor(() => expect(fixture.bookLot).toHaveBeenCalled())
   })
+
+  it('patcht Kanten-Status, Verschleppung, Spuelcharge und Kapazitaet', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active', layout_x: '10', layout_y: '20' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      max_capacity_kg_h: '100',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const selects = within(edgeSection).getAllByRole('combobox')
+    fireEvent.change(selects[1], { target: { value: '1' } }) // Verschleppungsschutz an
+    fireEvent.change(selects[2], { target: { value: '1' } }) // Spülcharge nötig
+    await waitFor(() => expect(fixture.patchEdge.mock.calls.length).toBeGreaterThanOrEqual(2))
+
+    const capacityInput = within(edgeSection).getByDisplayValue('100')
+    fireEvent.change(capacityInput, { target: { value: '250' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+  })
 })
