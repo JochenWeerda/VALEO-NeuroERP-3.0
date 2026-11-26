@@ -582,6 +582,11 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Gate-D +12 NativeList: Agrar Laborwerte/Mykotoxine/Saatzucht-Partien/Sammelabrechnung; FiBu Atlas/Debitoren; Finance Buchungsimport/Kasse; Lager Bestandsübersicht/Kommissionierung; Compliance EUDR/LKSG
 - Gate-D → **406/406 passed** (203 Masken × Hell/Dunkel)
 
+### Batch 80 — Agrar/FiBu/Finance/Lager/Compliance/Admin NativeList Gate-D
+
+- Gate-D +12 NativeList: Agrar Qualitaets-Nachtrag/Düngeplanung/Kampagnenabschluss; FiBu Erlöskennziffern/Erlöskontenzuordnung; Finance Lastschriften/OP-Debitoren; Lager Bestandskorrektur/Rückverfolgbarkeit; Compliance Meldewesen/Gefahrstoff; Admin DMS
+- Gate-D → **430/430 passed** (215 Masken × Hell/Dunkel)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -589,7 +594,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **406/406 passed** (203 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **430/430 passed** (215 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
