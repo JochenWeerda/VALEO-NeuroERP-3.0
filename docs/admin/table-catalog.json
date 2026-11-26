@@ -15335,7 +15335,8 @@
           ],
           "read_by": [
             "app/services/docflow_screen_provenance.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/loeschlauf.py"
           ],
           "written_by": [
             "app/api/v1/command_handlers/logistics.py",
@@ -15485,6 +15486,7 @@
             "app/services/docflow_freigabe.py",
             "app/services/docflow_service.py",
             "app/services/gutschrift_docflow.py",
+            "app/services/loeschlauf.py",
             "app/services/loeschpruefung.py",
             "app/services/o2c_chain_service.py",
             "app/services/procurement_match_service.py",
@@ -15705,6 +15707,7 @@
             "app/services/docflow_gobd_service.py",
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",
+            "app/services/loeschlauf.py",
             "app/services/mcp_execution_service.py",
             "app/services/settlement_document_archive_service.py",
             "app/services/wareneingang_avis_service.py"
@@ -15929,6 +15932,7 @@
             "app/services/docflow_update_command.py",
             "app/services/gebinde_aufloesung.py",
             "app/services/ist_aggregation_service.py",
+            "app/services/loeschlauf.py",
             "app/services/logistics_disposition_service.py",
             "app/services/mcp_execution_service.py",
             "app/services/procurement_match_service.py",
@@ -16040,6 +16044,7 @@
             "app/services/docflow_service.py",
             "app/services/docflow_update_command.py",
             "app/services/document_control_projection.py",
+            "app/services/loeschlauf.py",
             "app/services/mcp_execution_service.py",
             "app/services/procurement_match_service.py",
             "app/services/sales_match_service.py"
@@ -16125,7 +16130,8 @@
           "read_by": [
             "app/services/docflow_belegadapter.py",
             "app/services/docflow_evidence_service.py",
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/loeschlauf.py"
           ],
           "written_by": [
             "app/services/docflow_service.py"
@@ -16374,7 +16380,8 @@
             "id"
           ],
           "read_by": [
-            "app/services/docflow_service.py"
+            "app/services/docflow_service.py",
+            "app/services/loeschlauf.py"
           ]
         },
         "dsfinvk_exports": {
@@ -56039,6 +56046,98 @@
           ],
           "written_by": [
             "app/api/v1/endpoints/versandprofile.py"
+          ]
+        },
+        "loeschauftraege": {
+          "columns": [
+            {
+              "name": "id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "tenant_id",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "kategorie",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "satz_ids",
+              "nullable": false,
+              "type": "jsonb"
+            },
+            {
+              "name": "anzahl",
+              "nullable": false,
+              "type": "integer"
+            },
+            {
+              "name": "status",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "beantragt_von",
+              "nullable": false,
+              "type": "text"
+            },
+            {
+              "name": "beantragt_am",
+              "nullable": false,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "entschieden_von",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "entschieden_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "grund",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "ausgefuehrt_von",
+              "nullable": true,
+              "type": "text"
+            },
+            {
+              "name": "ausgefuehrt_am",
+              "nullable": true,
+              "type": "timestamp with time zone"
+            },
+            {
+              "name": "nachweis",
+              "nullable": true,
+              "type": "jsonb"
+            }
+          ],
+          "foreign_keys": [
+            {
+              "column": "tenant_id",
+              "references": "domain_shared.tenants.id"
+            }
+          ],
+          "owner_domain": "platform",
+          "ownership_reason": "Custodian domain_shared / Domain platform.",
+          "placement": "native",
+          "primary_key": [
+            "id"
+          ],
+          "read_by": [
+            "app/services/loeschlauf.py"
+          ],
+          "written_by": [
+            "app/services/loeschlauf.py"
           ]
         },
         "logistik_frachttabellen": {
