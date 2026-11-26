@@ -97,8 +97,35 @@ describe('FahrzeugVertiefungPage', () => {
     fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-9' } })
     await user.click(screen.getByRole('tab', { name: 'Wartungsvorhersage' }))
     await waitFor(() => expect(api.wartung).toHaveBeenCalledWith('FZ-9'))
+    expect(await screen.findByText('12.000')).toBeTruthy()
     await user.click(screen.getByRole('tab', { name: 'Bußgelder' }))
     await waitFor(() => expect(api.listBussgeld).toHaveBeenCalledWith('FZ-9'))
+    fireEvent.change(screen.getByPlaceholderText(/Überladung/i), { target: { value: 'Zu schnell' } })
+    fireEvent.change(screen.getByPlaceholderText('395.00'), { target: { value: '80' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Bußgeld anlegen' }))
+    await waitFor(() =>
+      expect(api.createBussgeld).toHaveBeenCalledWith(
+        'FZ-9',
+        expect.objectContaining({ tatbestand: 'Zu schnell', betrag_eur: 80 }),
+      ),
+    )
+  })
+
+  it('legt Schadensfall im Tab an', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-10' } })
+    await user.click(screen.getByRole('tab', { name: 'Schadensfälle' }))
+    expect(await screen.findByText('Neuen Schadensfall anlegen')).toBeTruthy()
+    fireEvent.change(screen.getByPlaceholderText('z. B. Autobahn A7, km 123'), { target: { value: 'Hof' } })
+    fireEvent.change(screen.getByPlaceholderText('Kurzbeschreibung des Schadensereignisses'), { target: { value: 'Delle' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Schadensfall anlegen' }))
+    await waitFor(() =>
+      expect(api.createSchaden).toHaveBeenCalledWith(
+        'FZ-10',
+        expect.objectContaining({ ort: 'Hof', beschreibung: 'Delle' }),
+      ),
+    )
   })
 
   it('meldet Fehler bei fehlgeschlagenem Statuswechsel', async () => {

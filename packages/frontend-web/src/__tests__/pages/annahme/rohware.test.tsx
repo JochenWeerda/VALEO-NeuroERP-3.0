@@ -135,4 +135,36 @@ describe('RohwareAnnahmePage', () => {
       )
     })
   })
+
+  it('validiert Lagerziel und Nettogewicht im Ware-Schritt', async () => {
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('Name des Lieferanten'), { target: { value: 'Testhof Nord' } })
+    fireEvent.change(screen.getByPlaceholderText(/AB-CD 1234/i), { target: { value: 'AB CD 999' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await waitFor(() => expect(screen.getAllByText('Ware & Gewicht').length).toBeGreaterThanOrEqual(1))
+
+    fireEvent.click(screen.getByText('Weizen'))
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Schritt unvollstaendig',
+          description: 'Bitte ein Lagerziel auswaehlen.',
+          variant: 'destructive',
+        }),
+      )
+    })
+
+    fireEvent.click(screen.getByText('Silo 1'))
+    fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))
+    await waitFor(() => {
+      expect(toastMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Schritt unvollstaendig',
+          description: expect.stringMatching(/Nettogewicht/),
+          variant: 'destructive',
+        }),
+      )
+    })
+  })
 })
