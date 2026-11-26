@@ -53,9 +53,18 @@
 - Nutzerauftrag 26.11.2026 autorisiert Doku-Nachzug sowie Merge nach `main` und Sync `develop` (hebt früheres „Kein Self-Merge“ für diesen Integrationsschritt auf).
 - `docs/admin/table-catalog.json|.md` bleiben Codex-Besitz.
 
+## Ratsche M2 (Nachzug 26.11.2026)
+
+| Bucket | Vorher | Nachher |
+|--------|--------|---------|
+| `handgebaut_routen` | 2 | **0** |
+| `altmuster_routen` | 14 | **0** |
+
+Live-Stufen der geschlossenen Routen: `studio_versioniert` / `screen_definition` (kein handgebaut/Altmuster mehr).  
+`python scripts/mask_studio_inventory.py --check` bleibt **rot** wegen Codex-Bahn: 3× `aktionen_nicht_deklariert` neu, 17× ohne MCP, 91× ohne CLI.
+
 ## Nächster konkreter Schritt
 
-1. Diesen Handshake + Workboard committen und Feature-Branch pushen.
-2. Feature-Branch mit `origin/main` integrieren, nach `main` mergen.
-3. `develop` auf `main` fast-forwarden.
-4. Codex: Gate D Live-SSO + Image-CI.
+1. PR #213 CI am neuen Head abwarten → Claude Admin-Merge („bereit zum Merge, Head \<sha\>“).
+2. Codex: Aktions-Ratsche + Gate D Live-SSO/Image-CI.
+3. Cursor Goal Bahn 2–3: M4 `domaenen_abnahme.py --check`, M7 Handbuch/Demo/A11y.
