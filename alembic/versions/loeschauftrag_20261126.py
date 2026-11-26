@@ -1,7 +1,7 @@
 """Loeschauftrag mit Vier-Augen-Freigabe (M7 Loeschkonzept, Nutzerentscheid 26.11.2026).
 
 Revision ID: loeschauftrag_20261126
-Revises: aufbewahrung_geltendes_recht_20261125
+Revises: personenkonto_journalzeile_20261126
 
 Die Loeschpruefung (``app/services/loeschpruefung.py``) zeigt, was nach Fristablauf loeschbar waere. Geloescht wird
 nur ueber einen Auftrag: beantragt -> freigegeben (zweite Person, nie ein technisches Konto) -> ausgefuehrt. Der
@@ -13,7 +13,7 @@ from __future__ import annotations
 from alembic import op
 
 revision = "loeschauftrag_20261126"
-down_revision = "aufbewahrung_geltendes_recht_20261125"
+down_revision = "personenkonto_journalzeile_20261126"
 branch_labels = None
 depends_on = None
 

@@ -28,7 +28,7 @@ class FinanceTransactionService:
     """Encapsulates journal entry creation, validation, posting, and GoBD compliance."""
 
     # Optionale Kontierungszusaetze, die eine Zeile mitbringen darf.
-    ZEILEN_ZUSAETZE = ("tax_code", "cost_center", "profit_center", "reference")
+    ZEILEN_ZUSAETZE = ("tax_code", "cost_center", "profit_center", "reference", "partner_konto")
 
     def __init__(self, db: Session, tenant_id: str, *, commit_on_success: bool = True) -> None:
         """Set False when the caller owns commit/rollback for a larger transaction."""
