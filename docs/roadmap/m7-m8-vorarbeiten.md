@@ -80,5 +80,16 @@ Qualitaetsprotokolle (5 Jahre). Kundenstammdaten haben keine eigene Frist; sie s
 laufender Frist mehr auf sie verweist. Die Archivklassen fuer Workflow-Instanzen (`process_archive_contracts`) sind
 keine rechtlichen Dokumentarten und bleiben unveraendert.
 
-Naechster Schritt: Loeschkonzept je Datenkategorie mit Loeschlauf und Nachweis, Pruefung der offenen Festsetzungsfrist
-vor jeder Loeschung.
+**Loeschpruefung (26.11.2026):** `app/services/loeschpruefung.py` bewertet Belege (Docflow) und Journal je Kategorie
+nach dem Katalog. Der Bericht zeigt je Kategorie, wie viele Saetze noch aufzubewahren, gesperrt oder loeschbar sind,
+mit den IDs der loeschbaren Saetze und ohne Inhalte. Einbezogen sind:
+
+- Lieferscheine ueber die verknuepfte Rechnung, ohne Verknuepfung vorsichtig als Buchungsbeleg,
+- aktive Loeschsperren,
+- die Ablaufhemmung: ohne Datum der Festsetzungsfrist steht ein Vorbehalt im Bericht, mit Datum ist bis dahin nichts
+  loeschbar.
+
+Die Pruefung loescht nichts. Test: `tests/test_loeschpruefung.py`.
+
+Naechster Schritt: ein Loeschlauf mit Freigabe durch eine Person (irreversibel, Agentenmatrix) und Loeschnachweis,
+dazu die Datenkategorien ausserhalb von Docflow und Journal (Portal, Personal, Protokolle).
