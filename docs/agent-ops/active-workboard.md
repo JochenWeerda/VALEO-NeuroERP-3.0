@@ -1336,3 +1336,6 @@ Nutzerangabe: L3 = Firebird mit SQL-Maske und Calc-Uebergabe. Runbook docs/migra
 
 ## M6-SPIEGEL-LIEFERANTEN-20261125 — zur Abnahme, Claude Code (M6)
 Objektart lieferant -> domain_einkauf.lieferanten (fuehrender Kreditorenstamm laut ADR); L3-KREDITORKTO = creditor_account am Partner (Nutzerentscheid 25.11.); Landwirt als Kunde und Lieferant = ein Partner mit beiden Konten; Testdatenabzug um Lieferanten-Abfrage ergaenzt.
+
+## M7-LOESCHPRUEFUNG-20261126 — zur Abnahme, Claude Code (M7)
+Loeschpruefung nach gobd_retention: Belege (Docflow) und Journal je Kategorie in_frist/gesperrt/loeschbar mit IDs, Lieferschein ueber verknuepfte Rechnung, Loeschsperren, Ablaufhemmung (Vorbehalt ohne Festsetzungsfrist-Datum). Nur Bericht, keine Loeschung. Dateibesitz: app/services/loeschpruefung.py, tests/test_loeschpruefung.py.
