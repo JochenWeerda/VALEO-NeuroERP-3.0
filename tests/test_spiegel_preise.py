@@ -103,5 +103,21 @@ def test_kundenrabatt_kommt_in_der_preiskaskade_an(mit_preisen):
         rabatt = BusinessPartnerService(db, t).get_customer_article_discount(str(kunde), "151704")
 
     assert ergebnis["fehler"] == 2  # unbekannter Artikel, Rabatt ueber 100 %
-    assert rabatt is not None and float(rabatt) == 7.5
+    assert rabatt is not None
+    assert float(rabatt) == 7.5
+
+
+
+def test_rabattaenderung_mit_differenz_und_unbekannter_kunde(mit_preisen):
+    t = mit_preisen
+    basis = [_artikel("151704", "ZINTAN"), _kunde("10001", "Hof Janssen")]
+    _lauf(t, "kr-1", basis + [_krabatt("10001", "151704", "7.5")])
+    zweiter = _lauf(t, "kr-2", basis + [_krabatt("10001", "151704", "10"), _krabatt("19999", "151704", "5")])
+    with SessionLocal() as db:
+        prozent = db.execute(text("SELECT discount_percent FROM domain_crm.business_partner_discount_items "
+                                  "WHERE tenant_id = :t"), {"t": t}).scalar_one()
+
+    assert zweiter["geaendert"] == 1
+    assert zweiter["fehler"] == 1  # Kunde 19999 nicht uebernommen
+    assert float(prozent) == 10.0
 
