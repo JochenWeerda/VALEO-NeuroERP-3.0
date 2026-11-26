@@ -706,6 +706,13 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Studio-Cockpit-Routen im Smoke damit praktisch ausgeschoepft
 - Gate-D → **952/952 passed** (476 Masken × Hell/Dunkel)
 
+### Batch 104 — Home-Redirect + pages_hand-Taxonomie
+
+- `Home.tsx`: Re-Export `Home-legacy` entfernt → Navigate-only auf `/` (`start-dashboard`); `Home-legacy.tsx` gelöscht
+- Inventar: `pages_hand` **38 → 37** (Home jetzt `technical_page`)
+- Verbleibende `pages_hand` sind bewusst: Specialized-Legacy-Surfaces (`*-legacy.tsx`), Chart-/Report-Fragmente unter `pages/`, Kontrakt-Dialoge — keine offenen Fach-Routen `hand_built` (Routen weiter **0**)
+- Gate-D unverändert **952/952** (kein neuer Smoke-Fall nötig)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;

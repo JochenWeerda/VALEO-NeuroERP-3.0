@@ -1,6 +1,6 @@
 # Masken-Routen-Migrationsinventar
 
-Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
+Stand: 2026-11-26 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 > Studio-Entwuerfe in der DB sind **kein** Nachweis produktiver Ablösung.
 > Nur `runtime_wired` (ScreenDefinition → RenderPlan → useUniversalMaskRuntime /
@@ -22,10 +22,10 @@ Stand: 2026-11-25 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 983 |
+| Gesamt TSX-Seiten | 982 |
 | runtime_wired | 930 |
 | legacy_mask_pattern | 0 |
-| hand_built | 38 |
+| hand_built | 37 |
 
 ## ScreenDefinitions / Studio
 
