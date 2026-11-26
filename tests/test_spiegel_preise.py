@@ -11,7 +11,8 @@ pytestmark = pytest.mark.integration
 
 MAPPING.update({"PREISTABNR": "preistabelle", "BEZEICHNUNG": "bezeichnung", "PREIS": "preis", "PREISJE": "preis_je",
                 "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis",
-                "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste"})
+                "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste", "AKTIONNR": "aktion",
+                "KUNDENSELEKTION": "kundenselektion", "PREISNETTO": "preis"})
 
 
 def _tabelle(nr: str, name: str) -> dict:
@@ -120,4 +121,32 @@ def test_rabattaenderung_mit_differenz_und_unbekannter_kunde(mit_preisen):
     assert zweiter["geaendert"] == 1
     assert zweiter["fehler"] == 1  # Kunde 19999 nicht uebernommen
     assert float(prozent) == 10.0
+
+
+
+def _aktion(nr: str, von: str = "2026-01-01", bis: str = "2099-12-31") -> dict:
+    return {"TYP": "aktion", "QUELLE": nr, "AKTIONNR": nr, "BEZEICHNUNG": f"Fruehjahr {nr}", "DATUMVON": von,
+            "DATUMBIS": bis}
+
+
+def _aktionspreis(nr: str, art: str, preis: str, **mehr) -> dict:
+    return {"TYP": "aktionspreis", "QUELLE": f"{nr}|{art}", "AKTIONNR": nr, "ARTNR": art, "PREISNETTO": preis,
+            "PREISJE": "1", **mehr}
+
+
+def test_aktion_wird_preisliste_vom_typ_aktion_und_beschraenkte_aktion_wird_fehlerzeile(mit_preisen):
+    t = mit_preisen
+    ergebnis = _lauf(t, "ak-1", [_artikel("151704", "ZINTAN"), _artikel("151705", "Zweit"), _aktion("A7"),
+                                 _aktionspreis("A7", "151704", "399.00"),
+                                 _aktionspreis("A7", "151705", "10.00", LAGER="L2"),
+                                 _aktionspreis("A9", "151704", "1.00")])
+    with SessionLocal() as db:
+        zeile = db.execute(text(
+            "SELECT pl.price_list_type, pl.valid_until::text, pli.unit_price::text FROM domain_pricing.price_lists pl "
+            "JOIN domain_pricing.price_list_items pli ON pli.price_list_id = pl.id WHERE pl.tenant_id = :t"),
+            {"t": t}).one()
+
+    assert ergebnis["neu"] == 4  # 2 Artikel, Aktion, ein Aktionspreis
+    assert ergebnis["fehler"] == 2  # Lagerbeschraenkung, unbekannte Aktion
+    assert tuple(zeile) == ("aktion", "2099-12-31", "399.0000")
 

@@ -105,6 +105,18 @@ async def calculate_price(
         source = "price_list"
         price_list_id = position["price_list_id"]
 
+    # 1b. Aktion - nur wenn guenstiger als der Listenpreis (Nutzerentscheid 26.11.2026); spaetere Stufen gehen vor.
+    try:
+        aktion = preis.aktionspreis(db, tenant_id, artikel)
+    except Exception as fehler:  # noqa: BLE001
+        raise preis.stufe_nicht_lesbar(db, fehler, "aktion", tenant_id) from fehler
+    ohne_preis = source == "base" and list_price == 0
+    if aktion and aktion["unit_price"] is not None and (ohne_preis or Decimal(str(aktion["unit_price"])) < list_price):
+        list_price = Decimal(str(aktion["unit_price"]))
+        discount = Decimal("0")
+        source = "aktion"
+        price_list_id = aktion["price_list_id"]
+
     # 2. Kontrakt — eine Zusage geht jeder allgemeinen Regel vor.
     if contract_id:
         try:
