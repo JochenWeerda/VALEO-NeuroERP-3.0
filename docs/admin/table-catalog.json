@@ -12183,6 +12183,7 @@
             "app/infrastructure/models/__init__.py",
             "app/infrastructure/models/einkauf_models.py",
             "app/infrastructure/models/l3c_models.py",
+            "app/services/agrar_settlement_service.py",
             "app/services/beleg_liste.py",
             "app/services/business_partner_service.py",
             "app/services/crm_segment_service.py",
