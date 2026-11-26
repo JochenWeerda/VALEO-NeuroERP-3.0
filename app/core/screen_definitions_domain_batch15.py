@@ -3026,7 +3026,7 @@ def build_zertifikate_neu_screen_definition() -> dict[str, Any]:
 
 
 def build_agrar_vermehrungsvertraege_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="agrar/vermehrungsvertraege",
         domain="agrar",
         title="Vermehrungsvertrag anlegen",
@@ -3068,10 +3068,13 @@ def build_agrar_vermehrungsvertraege_screen_definition() -> dict[str, Any]:
         example_prompts=["Oeffne Vermehrungsvertraege.", "Lege einen Vermehrungsvertrag an."],
         test_id="agrar-vermehrungsvertraege",
     )
+    # Create-Maske: Phantom-edit ohne REST entfernt (Ratsche aktionen_nicht_deklariert).
+    definition["actions"] = [a for a in definition["actions"] if a.get("key") != "edit"]
+    return definition
 
 
 def build_agrar_rohwarengruppen_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="agrar/rohwarengruppen",
         domain="agrar",
         title="Rohwarengruppe anlegen",
@@ -3108,10 +3111,13 @@ def build_agrar_rohwarengruppen_screen_definition() -> dict[str, Any]:
         example_prompts=["Oeffne Rohwarengruppen.", "Lege eine Rohwarengruppe an."],
         test_id="agrar-rohwarengruppen",
     )
+    # Create-only: kein PUT auf /rohware/gruppen — edit ohne Vertrag entfernen.
+    definition["actions"] = [a for a in definition["actions"] if a.get("key") != "edit"]
+    return definition
 
 
 def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, Any]:
-    return build_stamm_object_page(
+    definition = build_stamm_object_page(
         screen_id="agribusiness/field-service-tasks/neu",
         domain="agribusiness",
         title="Field-Service Aufgabe neu",
@@ -3155,6 +3161,9 @@ def build_agribusiness_field_service_tasks_neu_screen_definition() -> dict[str, 
         example_prompts=["Oeffne Field-Service Aufgabe neu.", "Lege einen Field-Service-Einsatz an."],
         test_id="agribusiness-field-service-tasks-neu",
     )
+    # Create-Maske: Phantom-edit entfernt; Anlage laeuft ueber creation.
+    definition["actions"] = [a for a in definition["actions"] if a.get("key") != "edit"]
+    return definition
 
 
 BATCH15_SCREEN_BUILDERS: dict[str, Any] = {

@@ -3377,6 +3377,108 @@ mappings:
   mcp_tool_id: null
   coverage: blocked_human_only
   notes: Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt.
+- mask_action_id: mask:admin/control-center/superglue:connector_override
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: connector_override
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:admin/control-center/superglue:policy_override
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: policy_override
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:admin/control-center/superglue:wizard_apply
+  mask: admin/control-center/superglue
+  domain: admin
+  action_key: wizard_apply
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_anlegen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: bussgeld_anlegen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_bezahlt
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: bussgeld_bezahlt
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:leasing_rueckgabe
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: leasing_rueckgabe
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_abschliessen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: schaden_abschliessen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_anlegen
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: schaden_anlegen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:status_wechseln
+  mask: fuhrpark/fahrzeug-vertiefung
+  domain: fuhrpark
+  action_key: status_wechseln
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:konditionen/konditionssystem:individualpreis_loeschen
+  mask: konditionen/konditionssystem
+  domain: konditionen
+  action_key: individualpreis_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:konditionen/konditionssystem:preisliste_loeschen
+  mask: konditionen/konditionssystem
+  domain: konditionen
+  action_key: preisliste_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_loeschen
+  mask: konditionen/konditionssystem
+  domain: konditionen
+  action_key: rabattgruppe_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:konditionen/konditionssystem:rabattklasse_loeschen
+  mask: konditionen/konditionssystem
+  domain: konditionen
+  action_key: rabattklasse_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:konditionen/konditionssystem:rabattsatz_loeschen
+  mask: konditionen/konditionssystem
+  domain: konditionen
+  action_key: rabattsatz_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraeume_generieren
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraeume_generieren
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_anlegen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraum_anlegen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
+- mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_loeschen
+  mask: kontrakte/mengenzeitraeume
+  domain: kontrakte
+  action_key: zeitraum_loeschen
+  coverage: blocked_human_only
+  notes: Studio-made Open Routes — Schreibweg bis Codex-Freigabe nur Mensch.
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
