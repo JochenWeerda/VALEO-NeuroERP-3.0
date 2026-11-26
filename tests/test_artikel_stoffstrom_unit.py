@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from types import SimpleNamespace
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from fastapi import HTTPException
@@ -43,25 +43,16 @@ def test_get_stoffstrom_found_and_404():
         "gueltig_ab": None,
         "gueltig_bis": None,
     }
-    # StoffstromOut may require more fields — fall back to MagicMock row if schema is strict
     db.execute.return_value.fetchone.return_value = SimpleNamespace(_mapping=mapping)
-    try:
-        out = stoff.get_stoffstrom("ss-1", db=db, tenant_id="t1")
-        assert getattr(out, "id", None) == "ss-1" or out["id"] == "ss-1"
-    except Exception:
-        # Minimal: force dict-compatible via patching model
-        class FakeOut(dict):
-            def __init__(self, **kwargs):
-                super().__init__(kwargs)
-                self.__dict__.update(kwargs)
 
-        original = stoff.StoffstromOut
-        stoff.StoffstromOut = FakeOut  # type: ignore[misc,assignment]
-        try:
-            out = stoff.get_stoffstrom("ss-1", db=db, tenant_id="t1")
-            assert out["id"] == "ss-1"
-        finally:
-            stoff.StoffstromOut = original  # type: ignore[misc]
+    class FakeOut(dict):
+        def __init__(self, **kwargs):
+            super().__init__(kwargs)
+            self.__dict__.update(kwargs)
+
+    with patch.object(stoff, "StoffstromOut", FakeOut):
+        out = stoff.get_stoffstrom("ss-1", db=db, tenant_id="t1")
+    assert out["id"] == "ss-1"
 
     db.execute.return_value.fetchone.return_value = None
     with pytest.raises(HTTPException) as exc:

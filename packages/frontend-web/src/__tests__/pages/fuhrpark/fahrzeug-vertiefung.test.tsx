@@ -17,15 +17,18 @@ const api = vi.hoisted(() => ({
 }))
 
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: api.toast }) }))
+const updateSchadenMock = vi.hoisted(() => vi.fn())
+const updateBussgeldMock = vi.hoisted(() => vi.fn())
+
 vi.mock('@/lib/api/fuhrpark', () => ({
   getFahrzeugStatusHistorie: (...args: unknown[]) => api.getHistorie(...args),
   changeFahrzeugStatus: (...args: unknown[]) => api.changeStatus(...args),
   listFahrzeugSchaeden: (...args: unknown[]) => api.listSchaeden(...args),
   createFahrzeugSchaden: (...args: unknown[]) => api.createSchaden(...args),
-  updateFahrzeugSchaden: vi.fn(),
+  updateFahrzeugSchaden: (...args: unknown[]) => updateSchadenMock(...args),
   listFahrzeugBussgeld: (...args: unknown[]) => api.listBussgeld(...args),
   createFahrzeugBussgeld: (...args: unknown[]) => api.createBussgeld(...args),
-  updateFahrzeugBussgeld: vi.fn(),
+  updateFahrzeugBussgeld: (...args: unknown[]) => updateBussgeldMock(...args),
   getFahrzeugWartungVorhersage: (...args: unknown[]) => api.wartung(...args),
   leasingRueckgabe: (...args: unknown[]) => api.leasing(...args),
 }))
@@ -52,6 +55,10 @@ describe('FahrzeugVertiefungPage', () => {
     api.createSchaden.mockResolvedValue({})
     api.createBussgeld.mockResolvedValue({})
     api.leasing.mockResolvedValue({})
+    updateSchadenMock.mockReset()
+    updateBussgeldMock.mockReset()
+    updateSchadenMock.mockResolvedValue({})
+    updateBussgeldMock.mockResolvedValue({})
   })
 
   it('laedt Statushistorie nach Fahrzeug-ID und wechselt Status', async () => {
@@ -163,6 +170,49 @@ describe('FahrzeugVertiefungPage', () => {
     await waitFor(() =>
       expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ description: 'lr-fail' })),
     )
+  })
+
+  it('schliesst Schadensfall ab und markiert Bussgeld als bezahlt', async () => {
+    const user = userEvent.setup()
+    api.listSchaeden.mockResolvedValue([
+      {
+        id: 'sch-1',
+        datum: '2026-10-01T00:00:00Z',
+        ort: 'Hof',
+        beschreibung: 'Delle',
+        status: 'offen',
+        schadenhoehe_eur: 100,
+        versicherung_gemeldet: false,
+      },
+    ])
+    api.listBussgeld.mockResolvedValue([
+      { id: 'bg-2', datum: '2026-10-02T00:00:00Z', betrag_eur: 40, status: 'offen', tatbestand: 'Parken', ort: 'Ort' },
+    ])
+    renderPage()
+    fireEvent.change(screen.getByPlaceholderText('z. B. F-ABC12345'), { target: { value: 'FZ-PAY' } })
+    await user.click(screen.getByRole('tab', { name: 'Schadensfälle' }))
+    expect(await screen.findByText('Hof')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Abschließen' }))
+    await waitFor(() =>
+      expect(updateSchadenMock).toHaveBeenCalledWith(
+        'FZ-PAY',
+        'sch-1',
+        expect.objectContaining({ status: 'abgeschlossen' }),
+      ),
+    )
+    expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Schadensfall abgeschlossen' }))
+
+    await user.click(screen.getByRole('tab', { name: 'Bußgelder' }))
+    expect(await screen.findByText('Parken')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Bezahlt' }))
+    await waitFor(() =>
+      expect(updateBussgeldMock).toHaveBeenCalledWith(
+        'FZ-PAY',
+        'bg-2',
+        expect.objectContaining({ status: 'bezahlt' }),
+      ),
+    )
+    expect(api.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Als bezahlt markiert' }))
   })
 
   it('meldet Fehler beim Anlegen von Schaden und Bussgeld', async () => {

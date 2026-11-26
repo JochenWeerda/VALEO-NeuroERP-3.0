@@ -332,4 +332,95 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
     await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
   })
+
+  it('speichert Silozellen-Layout und VK-Klasse sowie Knoten-Position', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      contamination_risk_class: 'A',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+      layout_x: '5',
+      layout_y: '6',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('contamination_risk_class'), { target: { value: 'B' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'VK speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cellId: 'cell-a',
+          body: expect.objectContaining({ contamination_risk_class: 'B' }),
+        }),
+      ),
+    )
+
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_x'), { target: { value: '11' } })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_y'), { target: { value: '22' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cellId: 'cell-a',
+          body: expect.objectContaining({ layout_x: 11, layout_y: 22 }),
+        }),
+      ),
+    )
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_x'), { target: { value: '33' } })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_y'), { target: { value: '44' } })
+    fireEvent.click(within(nodeRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchNode).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nodeId: 'node-a',
+          body: expect.objectContaining({ layout_x: 33, layout_y: 44 }),
+        }),
+      ),
+    )
+  })
+
+  it('validiert Transfer und laedt Lot-Vorschlag', async () => {
+    fixture.cells = [
+      { id: 'cell-a', cell_code: 'CELL-A', name: 'Zelle A', qs_status: 'frei', current_material_id: 'ART-1', current_stock_kg: 50 },
+      { id: 'cell-b', cell_code: 'CELL-B', name: 'Zelle B', qs_status: 'frei', current_stock_kg: 0 },
+    ]
+    fixture.suggestLot.mockResolvedValue({
+      lot_id: 'LOT-S',
+      suggested_cell_id: 'cell-b',
+      suggested_cell_code: 'CELL-B',
+      suggested_quantity_kg: 12,
+    })
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.change(screen.getByLabelText('Von-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('quantity_kg'), { target: { value: '5' } })
+    fireEvent.change(screen.getByLabelText('article_id'), { target: { value: 'ART-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => {
+      expect(fixture.toast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Ungültiger Transfer' }),
+      )
+    })
+
+    fireEvent.change(screen.getByLabelText('ticket_id / Wiegeschein-Nr.'), { target: { value: 'T-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vorschlag aus Ticket/Annahme' }))
+    await waitFor(() => expect(fixture.suggestLot).toHaveBeenCalled())
+    expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Vorschlag geladen' }))
+  })
 })
