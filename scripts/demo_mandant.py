@@ -7,7 +7,7 @@
 
 Ziel: ein Kommando für Schulung/Demo ohne echte Personen- oder L3-Daten
 (M7, docs/roadmap/m7-m8-vorarbeiten.md). Vorgesehen gegen ``valeo_probe``
-(``TEST_DATABASE_URL``).
+(``TEST_DATABASE_URL`` hat Vorrang vor ``DATABASE_URL``).
 
 Der Mandant hat eine feste synthetische UUID und den Namen „Demo (synthetisch)“.
 Löschen entfernt nur diesen Mandanten und klar zugehörige Demo-Kontenrahmen-
@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from sqlalchemy import create_engine, text  # noqa: E402
-from sqlalchemy.orm import sessionmaker  # noqa: E402
+from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 
 from app.core.uuid7 import uuid7  # noqa: E402
 
@@ -34,21 +34,27 @@ DEMO_DOMAIN = "demo-synthetisch.invalid"
 
 
 def _url() -> str:
-    url = os.environ.get("DATABASE_URL") or os.environ.get("TEST_DATABASE_URL")
+    # TEST_DATABASE_URL zuerst — Absicht: Prüfstand, nicht die gewachsene Dev-DB.
+    url = os.environ.get("TEST_DATABASE_URL") or os.environ.get("DATABASE_URL")
     if not url:
         raise SystemExit(
-            "DATABASE_URL oder TEST_DATABASE_URL setzen "
+            "TEST_DATABASE_URL oder DATABASE_URL setzen "
             "(empfohlen: postgresql://…/valeo_probe)."
+        )
+    if "valeo_probe" not in url and os.environ.get("ALLOW_DEMO_MANDANT_ANY_DB") != "1":
+        raise SystemExit(
+            "Demo-Mandant nur gegen valeo_probe "
+            "(oder ALLOW_DEMO_MANDANT_ANY_DB=1 setzen)."
         )
     return url
 
 
-def _session():
+def _session() -> Session:
     engine = create_engine(_url())
     return sessionmaker(bind=engine)()
 
 
-def vorhanden(db, tenant_id: str = DEMO_TENANT_ID) -> bool:
+def vorhanden(db: Session, tenant_id: str = DEMO_TENANT_ID) -> bool:
     return bool(
         db.execute(
             text("SELECT 1 FROM domain_shared.tenants WHERE id = :id"),
@@ -57,20 +63,37 @@ def vorhanden(db, tenant_id: str = DEMO_TENANT_ID) -> bool:
     )
 
 
-def anlegen(db, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
-    """Legt den Demo-Mandanten und ein synthetisches Erfolgskonto an (ohne Commit)."""
+def _hat_spalte(db: Session, schema: str, tabelle: str, spalte: str) -> bool:
+    return bool(
+        db.execute(
+            text(
+                "SELECT 1 FROM information_schema.columns "
+                "WHERE table_schema = :s AND table_name = :t AND column_name = :c"
+            ),
+            {"s": schema, "t": tabelle, "c": spalte},
+        ).first()
+    )
+
+
+def _hat_tabelle(db: Session, schema: str, tabelle: str) -> bool:
+    return bool(
+        db.execute(
+            text(
+                "SELECT 1 FROM information_schema.tables "
+                "WHERE table_schema = :s AND table_name = :t"
+            ),
+            {"s": schema, "t": tabelle},
+        ).first()
+    )
+
+
+def anlegen(db: Session, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
+    """Legt den Demo-Mandanten und optional ein synthetisches Erfolgskonto an (ohne Commit)."""
     bericht: dict[str, object] = {"mandant": False, "konto_8000": False}
     if vorhanden(db, tenant_id):
         return bericht
 
-    hat_domain = db.execute(
-        text(
-            "SELECT 1 FROM information_schema.columns "
-            "WHERE table_schema = 'domain_shared' AND table_name = 'tenants' "
-            "AND column_name = 'domain'"
-        )
-    ).first()
-    if hat_domain:
+    if _hat_spalte(db, "domain_shared", "tenants", "domain"):
         db.execute(
             text(
                 "INSERT INTO domain_shared.tenants (id, name, domain, is_active) "
@@ -88,19 +111,17 @@ def anlegen(db, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
         )
     bericht["mandant"] = True
 
-    # Rein synthetisches Erfolgskonto — keine Personen-/L3-Daten.
-    if db.execute(
-        text(
-            "SELECT 1 FROM information_schema.tables "
-            "WHERE table_schema = 'domain_erp' AND table_name = 'chart_of_accounts'"
-        )
-    ).first() and not db.execute(
-        text(
-            "SELECT 1 FROM domain_erp.chart_of_accounts "
-            "WHERE tenant_id = :t AND account_number = '8000'"
-        ),
-        {"t": tenant_id},
-    ).first():
+    # Rein synthetisches Erfolgskonto — keine Personen-/L3-Daten. Schema kann fehlen.
+    if (
+        _hat_tabelle(db, "domain_erp", "chart_of_accounts")
+        and not db.execute(
+            text(
+                "SELECT 1 FROM domain_erp.chart_of_accounts "
+                "WHERE tenant_id = :t AND account_number = '8000'"
+            ),
+            {"t": tenant_id},
+        ).first()
+    ):
         db.execute(
             text(
                 "INSERT INTO domain_erp.chart_of_accounts "
@@ -115,15 +136,10 @@ def anlegen(db, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
     return bericht
 
 
-def loeschen(db, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
+def loeschen(db: Session, tenant_id: str = DEMO_TENANT_ID) -> dict[str, object]:
     """Entfernt Demo-Konten und den Demo-Mandanten (ohne Commit)."""
     bericht: dict[str, object] = {"konto_zeilen": 0, "mandant": False}
-    if db.execute(
-        text(
-            "SELECT 1 FROM information_schema.tables "
-            "WHERE table_schema = 'domain_erp' AND table_name = 'chart_of_accounts'"
-        )
-    ).first():
+    if _hat_tabelle(db, "domain_erp", "chart_of_accounts"):
         res = db.execute(
             text("DELETE FROM domain_erp.chart_of_accounts WHERE tenant_id = :t"),
             {"t": tenant_id},
