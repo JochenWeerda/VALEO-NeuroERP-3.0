@@ -59,8 +59,13 @@ STUFEN = (
     "employee_discount",
 )
 
-#: Alle Werte, die ``source`` annehmen kann.
-QUELLEN = ("base", "price_list", *STUFEN)
+#: Alle Werte, die ``source`` annehmen kann. ``aktion`` (Nutzerentscheid 26.11.2026): eine gueltige Aktion ersetzt
+#: den Listenpreis nur, wenn sie guenstiger ist; jede spaetere Stufe (Kontrakt, Kundenpreis) geht ihr vor, und wie jede
+#: Stufe gilt sie allein - keine Staffel oder Kundenrabatt obendrauf.
+QUELLEN = ("base", "price_list", "aktion", *STUFEN)
+
+#: Preislisten dieses Typs sind Aktionen (L3 ``WWS_AKTIONSPREISE``) - die normale Preislistenstufe liest sie nicht.
+AKTIONSLISTE = "aktion"
 
 MIGRATIONS_HINWEIS = {
     "X-Migration-Hint": "Run: alembic upgrade head (preisfindung_rabattregeln_20261005)"
@@ -119,6 +124,7 @@ def preisliste(
             f"FROM {PREISLISTENPOSITIONEN} pli "  # nosec B608  # reviewed-safe: Tabellennamen sind Code-Literale
             f"JOIN {PREISLISTEN} pl ON pl.id = pli.price_list_id "
             "WHERE pl.tenant_id = :tid AND pl.is_active = TRUE "
+            "  AND COALESCE(pl.price_list_type, '') <> :aktion "
             "  AND (pl.valid_from IS NULL OR pl.valid_from <= CURRENT_DATE) "
             "  AND (pl.valid_until IS NULL OR pl.valid_until >= CURRENT_DATE) "
             "  AND (pli.article_id = :aid OR pli.article_number = :anr) "
@@ -132,7 +138,27 @@ def preisliste(
             "aid": artikel["id"],
             "anr": artikel.get("article_number") or "",
             "menge": float(menge),
+            "aktion": AKTIONSLISTE,
         },
+    ).mappings().first()
+
+
+def aktionspreis(db: Session, tenant_id: str, artikel: dict) -> Optional[dict]:
+    """Der guenstigste heute gueltige Aktionspreis des Artikels - oder nichts."""
+    return db.execute(
+        text(
+            "SELECT pli.price_list_id, pli.unit_price, pl.name AS aktion "
+            f"FROM {PREISLISTENPOSITIONEN} pli "  # nosec B608  # reviewed-safe: Tabellennamen sind Code-Literale
+            f"JOIN {PREISLISTEN} pl ON pl.id = pli.price_list_id "
+            "WHERE pl.tenant_id = :tid AND pl.is_active = TRUE AND pl.price_list_type = :aktion "
+            "  AND (pl.valid_from IS NULL OR pl.valid_from <= CURRENT_DATE) "
+            "  AND (pl.valid_until IS NULL OR pl.valid_until >= CURRENT_DATE) "
+            "  AND (pli.article_id = :aid OR pli.article_number = :anr) "
+            "  AND (pli.valid_from IS NULL OR pli.valid_from <= CURRENT_DATE) "
+            "  AND (pli.valid_until IS NULL OR pli.valid_until >= CURRENT_DATE) "
+            "ORDER BY pli.unit_price ASC LIMIT 1"
+        ),
+        {"tid": tenant_id, "aid": artikel["id"], "anr": artikel.get("article_number") or "", "aktion": AKTIONSLISTE},
     ).mappings().first()
 
 

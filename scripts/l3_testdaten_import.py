@@ -32,14 +32,15 @@ MAPPING = {
     "PREISTABNR": "preistabelle", "BEZEICHNUNG": "bezeichnung", "PREIS": "preis", "PREISJE": "preis_je",
     "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis",
     "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste",
+    "AKTIONNR": "aktion", "KUNDENSELEKTION": "kundenselektion", "PREISNETTO": "preis",
     "BELEGART": "belegart", "BELEGNR": "belegnummer", "DATUM": "datum", "NETTO": "netto", "BRUTTO": "brutto",
 }
 REIHENFOLGE = ("artikel", "kunde", "lieferant", "bestand", "preisliste", "artikelpreis", "kundenpreis",
-               "kundenrabatt", "offener_posten", "beleg")
+               "kundenrabatt", "aktion", "aktionspreis", "offener_posten", "beleg")
 #: Schluesselspalten werden nicht auf Klartext geprueft (Nummern, keine Personendaten).
 SCHLUESSEL = {"TYP", "QUELLE", "ARTNR", "ARTIKELGRP", "ME1", "KUNDENNR", "DEBITORKTO", "LIEFERANTENNR", "KREDITORKTO", "LAGER", "KONTONR", "RECHNNR",
               "BESTAND", "OFFENBETRAG", "RECHNBETRAG", "OFFEN", "MAHNSTUFE", "PLZ", "GESPERRT", "SPERRE", "STAAT", "KZSH",
-              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO", "RABATTPROZ", "LISTENR"}
+              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO", "RABATTPROZ", "LISTENR", "AKTIONNR", "PREISNETTO"}
 KLARTEXT = {
     "E-Mail": re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"),
     "Telefon": re.compile(r"(?:\+49|\b0)\d{2,5}[ /-]?\d{4,}"),

@@ -134,6 +134,21 @@ FROM WWS_KUNDRABATT r
 WHERE r.RABATTART = /* Code fuer Prozentrabatt, am ersten Ergebnis bestimmen */ AND r.KUNDENNR IN (/* aus 2.4 */)
 ```
 
+### 2.4d Aktionen der Beispielartikel
+
+```sql
+SELECT DISTINCT 'aktion' AS TYP, AKTIONNR AS QUELLE, AKTIONNR, MIN(DATUMVON) AS DATUMVON, MAX(DATUMBIS) AS DATUMBIS
+FROM WWS_AKTIONSPREISE WHERE ARTIKELNR IN (/* aus 2.2 */) GROUP BY AKTIONNR
+```
+
+```sql
+SELECT 'aktionspreis' AS TYP, AKTIONNR || '|' || ARTIKELNR AS QUELLE, AKTIONNR, ARTIKELNR AS ARTNR, PREISNETTO,
+       1 AS PREISJE, LAGER, KUNDENSELEKTION
+FROM WWS_AKTIONSPREISE WHERE ARTIKELNR IN (/* aus 2.2 */)
+```
+
+Ob `PREISNETTO` je Grundeinheit oder je Preiseinheit gilt, zeigt das erste Ergebnis (dann `PREISJE` anpassen).
+
 ### 2.5 Offene Posten der gezogenen Kunden
 
 ```sql

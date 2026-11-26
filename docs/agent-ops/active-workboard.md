@@ -1351,3 +1351,5 @@ Objektart kundenrabatt: L3 WWS_KUNDRABATT (nur Prozent) -> business_partner_disc
 
 ## M7-LOESCHLAUF-20261126 — zur Abnahme, Claude Code (M7)
 Nutzerentscheid 26.11.: Vier-Augen-Freigabe. Loeschauftrag (domain_shared.loeschauftraege, Migration loeschauftrag_20261126) beantragt -> freigegeben (zweite Person, nie Agent/technisches Konto, DB-Check) -> ausgefuehrt mit Loeschnachweis ohne Inhalte; nur mit Festsetzungsfrist-Datum; erneute Pruefung bei Ausfuehrung; freigeschaltet: Handelsbriefe, Lieferscheine ohne Buchungsbezug.
+## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
+Nutzerentscheid 26.11.: guenstigerer Preis gilt. Kaskadenstufe aktion (Preisliste Typ aktion, nach der Preisliste, nur wenn guenstiger; Kontrakt/Kundenpreis gehen vor; nicht additiv). Spiegeluebernahme aktion/aktionspreis aus WWS_AKTIONSPREISE; auf Lager/Kundenauswahl beschraenkte Aktionen = Fehlerzeile.
