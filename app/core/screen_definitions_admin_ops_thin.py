@@ -79,7 +79,8 @@ def build_admin_gap_pipeline() -> dict[str, Any]:
             {"key": "gap_payments_count", "label": "GAP-Zahlungen", "type": "number", "readOnly": True},
         ],
         data_sources=[
-            {"key": "entity", "endpoint": "/api/v1/gap/pipeline/status", "staleTimeMs": 15_000},
+            # year ist Query-Pflicht am Status-Endpunkt; ohne Default liefert die Liste 422.
+            {"key": "entity", "endpoint": "/api/v1/gap/pipeline/status?year=2026", "staleTimeMs": 15_000},
         ],
         actions=[
             _refresh(),

@@ -213,7 +213,8 @@ def build_agrar_ernte_annahme_erfassung() -> dict[str, Any]:
             {"key": "delivery_date", "label": "Lieferdatum", "type": "date", "readOnly": True},
         ],
         "actions": [
-            _cmd("anlegen", "Annahme anlegen", endpoint=base, permission=perm, primary=True, fields=create_fields),
+            # FastAPI montiert POST "/" → kanonischer Pfad mit trailing slash.
+            _cmd("anlegen", "Annahme anlegen", endpoint=f"{base}/", permission=perm, primary=True, fields=create_fields),
             _cmd(
                 "speichern",
                 "Annahme speichern",
@@ -315,7 +316,8 @@ def build_annahme_abrechnung() -> dict[str, Any]:
             _cmd(
                 "anlegen",
                 "Abrechnung anlegen",
-                endpoint=base,
+                # FastAPI montiert POST "/" → kanonischer Pfad mit trailing slash.
+                endpoint=f"{base}/",
                 permission=perm,
                 primary=True,
                 fields=[
