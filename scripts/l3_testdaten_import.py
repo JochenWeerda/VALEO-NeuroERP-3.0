@@ -31,14 +31,15 @@ MAPPING = {
     "KONTONR": "konto", "RECHNNR": "rechnungsnr", "OFFENBETRAG": "offener_betrag",
     "PREISTABNR": "preistabelle", "BEZEICHNUNG": "bezeichnung", "PREIS": "preis", "PREISJE": "preis_je",
     "ABMENGE": "ab_menge", "DATUMVON": "gueltig_von", "DATUMBIS": "gueltig_bis",
+    "RABATTPROZ": "rabatt_prozent", "LISTENR": "rabattliste",
     "BELEGART": "belegart", "BELEGNR": "belegnummer", "DATUM": "datum", "NETTO": "netto", "BRUTTO": "brutto",
 }
 REIHENFOLGE = ("artikel", "kunde", "lieferant", "bestand", "preisliste", "artikelpreis", "kundenpreis",
-               "offener_posten", "beleg")
+               "kundenrabatt", "offener_posten", "beleg")
 #: Schluesselspalten werden nicht auf Klartext geprueft (Nummern, keine Personendaten).
 SCHLUESSEL = {"TYP", "QUELLE", "ARTNR", "ARTIKELGRP", "ME1", "KUNDENNR", "DEBITORKTO", "LIEFERANTENNR", "KREDITORKTO", "LAGER", "KONTONR", "RECHNNR",
               "BESTAND", "OFFENBETRAG", "RECHNBETRAG", "OFFEN", "MAHNSTUFE", "PLZ", "GESPERRT", "SPERRE", "STAAT", "KZSH",
-              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO"}
+              "RECHNDATUM", "PREISTABNR", "PREIS", "PREISJE", "ABMENGE", "DATUMVON", "DATUMBIS", "BELEGART", "BELEGNR", "DATUM", "NETTO", "BRUTTO", "RABATTPROZ", "LISTENR"}
 KLARTEXT = {
     "E-Mail": re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+"),
     "Telefon": re.compile(r"(?:\+49|\b0)\d{2,5}[ /-]?\d{4,}"),
@@ -161,7 +162,7 @@ def einlesen(ordner: Path, mandant: str) -> int:
 LOESCHEN = (
     "domain_integration.spiegel_protokoll", "domain_integration.spiegel_quellreferenzen",
     "domain_inventory.bestandsbuchung_schluessel", "domain_inventory.inventory_stock_movements",
-    "domain_crm.business_partner_price_agreements", "domain_pricing.price_list_items", "domain_pricing.price_lists",
+    "domain_crm.business_partner_discount_items", "domain_crm.business_partner_price_agreements", "domain_pricing.price_list_items", "domain_pricing.price_lists",
     "domain_erp.offene_posten", "domain_crm.customers", "domain_einkauf.lieferanten", "domain_crm.business_partners",
     "domain_inventory.articles", "domain_inventory.warehouses",
     "domain_integration.legacy_adapter_staging", "domain_integration.legacy_adapter_audit",

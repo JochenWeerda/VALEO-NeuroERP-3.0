@@ -1,4 +1,4 @@
-"""Spiegelbetrieb L3 -> VALEO: Preise (M6, 26.11.2026) - Objektarten preisliste, artikelpreis, kundenpreis.
+"""Spiegelbetrieb L3 -> VALEO: Preise (M6, 26.11.2026) - preisliste, artikelpreis, kundenpreis, kundenrabatt.
 
 Quellen (L3, Spaltenbedeutung am Abzug bestaetigen):
 - ``WWS_PREISTAB1`` (PREISTABNR, BEZEICHNUNG) -> ``domain_pricing.price_lists``
@@ -199,6 +199,62 @@ def _kundenpreis_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[
         {"id": ziel_id, "t": tenant_id, **werte})
 
 
+# --- kundenrabatt -----------------------------------------------------------------------------------------------
+#
+# L3 ``WWS_KUNDRABATT`` (KUNDENNR, ARTIKELNR, RABATT, RABATTART, GUELTIGAB, GUELTIGBIS, LISTENR) -> Rabattstufe
+# ``customer_article_discount`` der Preiskaskade (``business_partner_discount_items``). Uebernommen werden nur
+# Prozentrabatte: Welche RABATTART-Codes Prozent bedeuten, ist am Abzug zu bestaetigen; die Abzugsabfrage liefert
+# ``rabatt_prozent`` nur fuer diese Zeilen. Betragsrabatte und Zu-/Abschlaege (ZUABSCHLAGNR) bleiben offen.
+
+
+def _kundenrabatt_zielwerte(db: Session, tenant_id: str, p: dict[str, Any]) -> dict[str, Any]:
+    kunde = _text(p, "kundennummer", pflicht=True)
+    partner = db.execute(text("SELECT business_partner_id FROM domain_crm.customers WHERE tenant_id = :t "
+                              "AND customer_number = :n AND deleted_at IS NULL"), {"t": tenant_id, "n": kunde}).scalar()
+    if partner is None:
+        raise ZeilenFehler(f"Kunde {kunde} ist nicht uebernommen oder ohne Geschaeftspartner - zuerst Kunden uebernehmen")
+    nummer = _text(p, "artikelnummer", pflicht=True)
+    _artikel_id(db, tenant_id, nummer)
+    prozent = _zahl(p, "rabatt_prozent", pflicht=True)
+    if not Decimal("0") <= prozent <= Decimal("100"):
+        raise ZeilenFehler(f"Rabatt {prozent} % liegt nicht zwischen 0 und 100")
+    return {"partner_id": str(partner), "article_number": nummer, "discount_percent": _text_zahl(prozent),
+            "valid_from": _datum(p, "gueltig_von"), "valid_to": _datum(p, "gueltig_bis"),
+            "discount_list_number": _text(p, "rabattliste")}
+
+
+def _kundenrabatt_lesen(db: Session, tenant_id: str, ziel_id: str) -> dict[str, Any] | None:
+    zeile = db.execute(text(
+        "SELECT partner_id, article_number, discount_percent, valid_from, valid_to, discount_list_number "
+        "FROM domain_crm.business_partner_discount_items WHERE tenant_id = :t AND id = :id"),
+        {"t": tenant_id, "id": ziel_id}).mappings().first()
+    if not zeile:
+        return None
+    werte = dict(zeile)
+    werte["discount_percent"] = _text_zahl(Decimal(str(werte["discount_percent"])))
+    for feld in ("valid_from", "valid_to"):
+        werte[feld] = werte[feld].isoformat() if werte[feld] is not None else None
+    return werte
+
+
+def _kundenrabatt_anlegen(db: Session, tenant_id: str, werte: dict[str, Any]) -> str:
+    ziel_id = str(uuid7())
+    db.execute(text(
+        "INSERT INTO domain_crm.business_partner_discount_items (id, tenant_id, partner_id, article_number, "
+        "discount_percent, valid_from, valid_to, discount_list_number, source_type, created_by) VALUES (:id, :t, "
+        ":partner_id, :article_number, :discount_percent, :valid_from, :valid_to, :discount_list_number, 'import', "
+        "'l3_spiegel')"), {"id": ziel_id, "t": tenant_id, **werte})
+    return ziel_id
+
+
+def _kundenrabatt_aendern(db: Session, tenant_id: str, ziel_id: str, werte: dict[str, Any]) -> None:
+    db.execute(text(
+        "UPDATE domain_crm.business_partner_discount_items SET partner_id = :partner_id, "
+        "article_number = :article_number, discount_percent = :discount_percent, valid_from = :valid_from, "
+        "valid_to = :valid_to, discount_list_number = :discount_list_number, updated_by = 'l3_spiegel', "
+        "updated_at = now() WHERE tenant_id = :t AND id = :id"), {"id": ziel_id, "t": tenant_id, **werte})
+
+
 def zielarten() -> dict[str, Any]:
     from app.services.spiegel_uebernahme import Zielart
 
@@ -209,4 +265,6 @@ def zielarten() -> dict[str, Any]:
                                 _artikelpreis_anlegen, _artikelpreis_aendern),
         "kundenpreis": Zielart("domain_crm.business_partner_price_agreements", _kundenpreis_zielwerte,
                                _kundenpreis_lesen, _kundenpreis_anlegen, _kundenpreis_aendern),
+        "kundenrabatt": Zielart("domain_crm.business_partner_discount_items", _kundenrabatt_zielwerte,
+                                _kundenrabatt_lesen, _kundenrabatt_anlegen, _kundenrabatt_aendern),
     }

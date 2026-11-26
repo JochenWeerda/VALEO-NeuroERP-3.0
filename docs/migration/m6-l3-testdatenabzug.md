@@ -125,6 +125,15 @@ WHERE p.ARTIKELNR IN (/* Artikelnummern aus 2.2 */)
 Kundenpreise: `WWS_KUNDEN_PREISE` mit `TYP 'kundenpreis'`, `QUELLE = KUNDENNR || '|' || ARTIKELNR`, nur fuer gezogene
 Kunden und Beispielartikel, ohne `BEMERKUNG` und `BEDIENER`.
 
+### 2.4c Kundenrabatte (nur Prozent)
+
+```sql
+SELECT 'kundenrabatt' AS TYP, r.KUNDENNR || '|' || r.ARTIKELNR AS QUELLE, r.KUNDENNR, r.ARTIKELNR AS ARTNR,
+       r.RABATT AS RABATTPROZ, r.GUELTIGAB AS DATUMVON, r.GUELTIGBIS AS DATUMBIS, r.LISTENR
+FROM WWS_KUNDRABATT r
+WHERE r.RABATTART = /* Code fuer Prozentrabatt, am ersten Ergebnis bestimmen */ AND r.KUNDENNR IN (/* aus 2.4 */)
+```
+
 ### 2.5 Offene Posten der gezogenen Kunden
 
 ```sql
