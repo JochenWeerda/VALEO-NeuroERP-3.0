@@ -150,3 +150,20 @@ def test_aktion_wird_preisliste_vom_typ_aktion_und_beschraenkte_aktion_wird_fehl
     assert ergebnis["fehler"] == 2  # Lagerbeschraenkung, unbekannte Aktion
     assert tuple(zeile) == ("aktion", "2099-12-31", "399.0000")
 
+
+
+def test_geaenderte_aktion_und_geaenderter_aktionspreis_werden_aktualisiert(mit_preisen):
+    t = mit_preisen
+    _lauf(t, "ak-1", [_artikel("151704", "ZINTAN"), _aktion("A7", bis="2026-12-31"),
+                      _aktionspreis("A7", "151704", "399.00")])
+    zweiter = _lauf(t, "ak-2", [_artikel("151704", "ZINTAN"), _aktion("A7", bis="2027-01-31"),
+                                _aktionspreis("A7", "151704", "389.00")])
+    with SessionLocal() as db:
+        zeile = db.execute(text(
+            "SELECT pl.valid_until::text, pli.unit_price::text FROM domain_pricing.price_lists pl "
+            "JOIN domain_pricing.price_list_items pli ON pli.price_list_id = pl.id WHERE pl.tenant_id = :t"),
+            {"t": t}).one()
+
+    assert zweiter["geaendert"] == 2
+    assert tuple(zeile) == ("2027-01-31", "389.0000")
+
