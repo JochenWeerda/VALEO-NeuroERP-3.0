@@ -628,6 +628,11 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Gate-D +12 NativeList: PSM Tankmischung; Sachkundenachweise; Kostenträgerrechnung; Sicherheiten; Futtermittel-Wareneingang; Wareneingänge; Kontrakt-Abrechnung; NaWaRo-Ernterklärung; Chargen-Rückruf; Omnichannel-Handelskonflikt; Vertreterprovisionen; Dienstleistungen Haltung
 - Gate-D → **622/622 passed** (311 Masken × Hell/Dunkel)
 
+### Batch 89 — Agrar/Compliance/Controlling/Futtermittel/Beleg/Kontrakt/Strecke/Charge/CRM/Einkauf/Sales/POS NativeList Gate-D
+
+- Gate-D +12 NativeList: Sortenregister; Schadstoff-Monitoring; Liquiditätsplanung; Futteranalysen; Ausgangsrechnungen; Kontrakte; NaWaRo-Lieferungen; Chargen-Stamm; Wiedervorlagen; Frachtaufträge; Lieferung-Storno; Retoure
+- Gate-D → **646/646 passed** (323 Masken × Hell/Dunkel)
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
@@ -635,7 +640,7 @@ Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio
 
 | Gate-D-Teil | Stand | Beleg / Blocker |
 |-------------|-------|-----------------|
-| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **622/622 passed** (311 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
+| Browser-Smoke native-cockpit (publizierte Routen, Mock-SD) | **Teilbeleg gruen (lokal, 2026-11-26)** | `uix-gate-d-studio-cockpit-smoke.spec.ts` — **646/646 passed** (323 Masken × Hell/Dunkel); Screenshots `test-results/gate-d-*-{light,dark}.png` |
 | Reale SSO-Bedienung + Hell/Dunkel Screenshots | **teilweise / blockiert** | Theme-Smoke (Mock-Auth) vorhanden; **Live-SSO** weiterhin nicht in diesem Environment; Qualitaetsversprechen verlangt reale SSO der *publizierten* Maske |
 | Image-/CI-Nachlauf mit kanonischem `table-catalog.json` | **blockiert (Codex)** | Workboard-Slice `STUDIO-ENTITY-RELEASE-20261021` **reserviert, Owner Codex**; Dateibesitz Katalog/Image-Nachlauf dort. Lokal vorhanden und verdrahtet: `docs/admin/table-catalog.json` (31 Schemas), `Dockerfile.backend` COPY, `docker-compose.yml` RO-Mount, `.dockerignore` Freigabe — das ist **kein** Image-CI-Gruen-Nachweis |
 
