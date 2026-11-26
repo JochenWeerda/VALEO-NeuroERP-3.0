@@ -763,6 +763,18 @@ Made-by-Studio Gate E: 5 Alt-Screen-IDs ohne Runtime-Marker → Aliase auf verdr
 - Inventarisierte Unique-Detail-Screens mit UniversalNative* damit erschöpft (Aliase bleiben ausgespart)
 - Gate-D → **1136/1136 passed** (568 Masken × Hell/Dunkel)
 
+### pages_hand = 37 (bewusst, Stand Batch 113)
+
+Routen `hand_built` weiter **0**. Die 37 Seiten-Dateien sind keine offenen Fachmasken-Routen:
+
+| Bucket | Anzahl | Inhalt |
+|--------|--------|--------|
+| `*-legacy.tsx` | 22 | Specialized-Workbench-Altflächen (Admin/Agrar/Annahme/CRM-KIM/Fuhrpark/Konditionen/Lager/Rezepte/Studio) |
+| Chart/Report-Fragmente | 9 | `crm/charts/*`, `finance/reports/**` (keine Routen-Seiten) |
+| Dialoge / Panels | 6 | `kontrakte/Dlg*`, `disposition/DlgPositionDetails`, `crm/kim/components/*` |
+
+Inventar-Messung: `python scripts/mask_route_migration_inventory.py` → `docs/architecture/uix/mask-route-migration-inventory.md`.
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
