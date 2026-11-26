@@ -27,7 +27,8 @@ def test_ernte_annahme_erfassung_parity():
     assert sd["specialized"] == {"type": "agrar_workbench", "id": "agrar/ernte-annahme-erfassung"}
     assert not validate_runtime_surface(sd)
     actions = {a["key"]: a for a in sd["actions"]}
-    assert actions["anlegen"]["commandEndpoint"] == "/api/v1/agrar/harvest-acceptance"
+    # FastAPI: POST "/" unter prefix → kanonischer Pfad mit trailing slash
+    assert actions["anlegen"]["commandEndpoint"] == "/api/v1/agrar/harvest-acceptance/"
     assert actions["speichern"]["commandEndpoint"] == "/api/v1/agrar/harvest-acceptance/{entity_id}"
     assert actions["speichern"]["method"] == "PUT"
     assert actions["berechnen"]["commandEndpoint"] == "/api/v1/agrar/harvest-acceptance/{entity_id}/calculate"
@@ -46,7 +47,8 @@ def test_annahme_abrechnung_parity():
     assert sd["specialized"]["id"] == "annahme/abrechnung"
     assert not validate_runtime_surface(sd)
     actions = {a["key"]: a for a in sd["actions"]}
-    assert actions["anlegen"]["commandEndpoint"] == "/api/v1/agrar/settlements"
+    # FastAPI: POST "/" unter prefix → kanonischer Pfad mit trailing slash
+    assert actions["anlegen"]["commandEndpoint"] == "/api/v1/agrar/settlements/"
     assert actions["billing_preview"]["commandEndpoint"] == (
         "/api/v1/agrar/settlements/billing-weight/preview"
     )
