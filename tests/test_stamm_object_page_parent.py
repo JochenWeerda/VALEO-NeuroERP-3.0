@@ -400,6 +400,12 @@ def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
         for table in screen["tables"]:
             endpoint = sources[table["dataSourceKey"]]
             assert endpoint.startswith("/api/") and "{" not in endpoint, screen_id
+    elif screen["layout"].get("floorplan") == "cockpit":
+        # Overview-Cockpits (z. B. Command Monitor) ohne Objektpfad — nur API-Quellen und Tabellen.
+        entity = next((ds for ds in screen["dataSources"] if ds["key"] == "entity"), None)
+        if entity is not None:
+            assert str(entity["endpoint"]).startswith("/api/"), screen_id
+        assert screen.get("tables") or screen.get("summary"), screen_id
     else:
         entity = next(ds for ds in screen["dataSources"] if ds["key"] == "entity")
         assert "{entity_id}" in entity["endpoint"] or "{id}" in entity["endpoint"]

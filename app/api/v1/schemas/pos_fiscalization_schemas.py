@@ -63,6 +63,17 @@ class FiscalReadinessOut(BaseSchema):
     )
 
 
+class FiscalProductRowOut(BaseSchema):
+    """Flache Produktzeile fuer ``GET /pos/fiscalization/products`` (Studio-Cockpit)."""
+
+    id: Optional[str] = None
+    product: Optional[str] = None
+    label: Optional[str] = None
+    ready: bool = False
+    blockers: str = ""
+    execution_note: str = ""
+
+
 class FiscalDailySummaryOut(BaseSchema):
     """``GET /pos/fiscalization/daily-summary`` — signierte Tageswerte."""
 

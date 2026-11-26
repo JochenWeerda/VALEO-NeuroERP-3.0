@@ -96,7 +96,7 @@ stats:
   mask_actions_considered: 407
   mask_mutations_considered: 348
   by_coverage:
-    blocked_human_only: 124
+    blocked_human_only: 141
     blocked_unreleased: 162
     local_ui: 59
     mapped: 38
@@ -104,7 +104,6 @@ stats:
     mapped_propose_only: 1
     mapped_read: 1
     open_high: 4
-    open_medium: 17
 mappings:
 - mask_action_id: mask:abrechnung/eb-lieferschein-kontrolle:assign_me
   mask: abrechnung/eb-lieferschein-kontrolle
@@ -286,8 +285,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/GapPipelineConsole:run_pipeline
   mask: admin/GapPipelineConsole
   domain: admin
@@ -297,8 +295,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/branches/detail:bearbeiten
   mask: admin/branches/detail
   domain: admin
@@ -318,8 +315,8 @@ mappings:
   command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/control-center/superglue:policy_override
   mask: admin/control-center/superglue
   domain: admin
@@ -328,8 +325,8 @@ mappings:
   command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/policy
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/control-center/superglue:wizard_apply
   mask: admin/control-center/superglue
   domain: admin
@@ -338,8 +335,8 @@ mappings:
   command_endpoint: /api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard/apply
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/identity-budgets:allocate
   mask: admin/identity-budgets
   domain: platform
@@ -421,8 +418,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/postfaecher:entfernen
   mask: admin/postfaecher
   domain: platform
@@ -535,8 +531,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/setup/dms-integration:test
   mask: admin/setup/dms-integration
   domain: admin
@@ -546,8 +541,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/vordruck-editor:anlegen
   mask: admin/vordruck-editor
   domain: admin
@@ -557,8 +551,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/vordruck-editor:duplizieren
   mask: admin/vordruck-editor
   domain: admin
@@ -568,8 +561,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/vordruck-editor:loeschen
   mask: admin/vordruck-editor
   domain: admin
@@ -579,8 +571,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/vordruck-editor:seed_standard
   mask: admin/vordruck-editor
   domain: admin
@@ -590,8 +581,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/vordruck-editor:speichern
   mask: admin/vordruck-editor
   domain: admin
@@ -601,8 +591,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:admin/webhooks-liste:register
   mask: admin/webhooks-liste
   domain: admin
@@ -3227,8 +3216,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:bussgeld_bezahlt
   mask: fuhrpark/fahrzeug-vertiefung
   domain: logistik
@@ -3237,8 +3226,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld/{bg_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:leasing_rueckgabe
   mask: fuhrpark/fahrzeug-vertiefung
   domain: logistik
@@ -3247,8 +3236,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_abschliessen
   mask: fuhrpark/fahrzeug-vertiefung
   domain: logistik
@@ -3257,8 +3246,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden/{schaden_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:schaden_anlegen
   mask: fuhrpark/fahrzeug-vertiefung
   domain: logistik
@@ -3267,8 +3256,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeug-vertiefung:status_wechseln
   mask: fuhrpark/fahrzeug-vertiefung
   domain: logistik
@@ -3277,8 +3266,8 @@ mappings:
   command_endpoint: /api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/status
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:fuhrpark/fahrzeuge:neu
   mask: fuhrpark/fahrzeuge
   domain: logistics
@@ -3484,8 +3473,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:individualpreis_loeschen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3494,8 +3482,8 @@ mappings:
   command_endpoint: /api/v1/preise/individualpreise/{id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:preis_berechnen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3505,8 +3493,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:preisliste_anlegen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3516,8 +3503,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:preisliste_loeschen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3526,8 +3512,8 @@ mappings:
   command_endpoint: /api/v1/price-lists/{id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_anlegen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3537,8 +3523,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattgruppe_loeschen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3547,8 +3532,8 @@ mappings:
   command_endpoint: /api/v1/preise/rabatte/gruppen/{id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattklasse_anlegen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3558,8 +3543,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattklasse_loeschen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3568,8 +3552,8 @@ mappings:
   command_endpoint: /api/v1/preise/rabatte/klassen/{id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattsatz_anlegen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3579,8 +3563,7 @@ mappings:
   command: null
   mcp_tool_id: null
   coverage: blocked_human_only
-  notes: Maske behaelt die Aktion Menschen vor (fuer_agenten_gesperrt); CLI und Maske nutzen denselben
-    Endpunkt.
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:konditionen/konditionssystem:rabattsatz_loeschen
   mask: konditionen/konditionssystem
   domain: agrar
@@ -3589,8 +3572,8 @@ mappings:
   command_endpoint: /api/v1/preise/rabatte/saetze/{id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:kontrakt-liste/mahnung:mahnen
   mask: kontrakt-liste/mahnung
   domain: agrar
@@ -3701,8 +3684,8 @@ mappings:
   command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_anlegen
   mask: kontrakte/mengenzeitraeume
   domain: kontrakte
@@ -3711,8 +3694,8 @@ mappings:
   command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:kontrakte/mengenzeitraeume:zeitraum_loeschen
   mask: kontrakte/mengenzeitraeume
   domain: kontrakte
@@ -3721,8 +3704,8 @@ mappings:
   command_endpoint: /api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}
   command: null
   mcp_tool_id: null
-  coverage: open_medium
-  notes: Mutation mit Ausführungspfad in Mask-Katalog; noch kein MCP-Write-Adapter.
+  coverage: blocked_human_only
+  notes: 'surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt.'
 - mask_action_id: mask:lager/inventur-nebenlaeufe:create_control
   mask: lager/inventur-nebenlaeufe
   domain: inventory
@@ -4320,5 +4303,5 @@ mappings:
 next_medium_candidates: []
 classification_complete: true
 classification_notes: 'FUHRPARK-TENANT-CE-20261009: Fuhrpark 5× mapped (tenant_id+CE+MCP Isolation); blocked_missing_tenant
-  0. Rest: open_high 4; open_medium 17; blocked_human_only 124; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
+  0. Rest: open_high 4; open_medium 0; blocked_human_only 141; blocked_no_endpoint 0; local_ui 59; FIN-CLOSE
   blocked_adr_076.'

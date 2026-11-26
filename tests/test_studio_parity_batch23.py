@@ -64,7 +64,8 @@ def test_command_monitor_cockpit_parity():
 
 @pytest.mark.unit
 def test_idempotency_list_endpoints_declared_in_source():
-    src = (ROOT / "app/api/v1/endpoints/process_kernel_api.py").read_text(encoding="utf-8")
+    # Listen/Overview liegen seit Godfile-Auslagerung in process_kernel_idempotency_lists.
+    src = (ROOT / "app/api/v1/endpoints/process_kernel_idempotency_lists.py").read_text(encoding="utf-8")
     assert '"/actions/idempotency/commands"' in src
     assert '"/actions/idempotency/aggregates"' in src
     assert '"/actions/idempotency/lookup-paths"' in src

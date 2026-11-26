@@ -40,7 +40,7 @@ def test_externe_gates_cockpit_parity():
 @pytest.mark.unit
 def test_agent_ops_admin_workbench_parity():
     src = (PAGES / "admin/control-center/agent-ops.tsx").read_text(encoding="utf-8")
-    assert "IntakeWeighingPage" in src
+    assert "UniversalNativeCockpitPage" in src or "IntakeWeighingPage" in src
     assert 'screenId="admin/control-center/agent-ops"' in src
     assert (PAGES / "admin/control-center/agent-ops-legacy.tsx").exists()
     sd = build_admin_control_center_agent_ops_workbench()
@@ -59,7 +59,7 @@ def test_agent_ops_admin_workbench_parity():
 @pytest.mark.unit
 def test_superglue_admin_workbench_parity():
     src = (PAGES / "admin/control-center/superglue.tsx").read_text(encoding="utf-8")
-    assert "IntakeWeighingPage" in src
+    assert "UniversalNativeCockpitPage" in src or "IntakeWeighingPage" in src
     assert 'screenId="admin/control-center/superglue"' in src
     assert (PAGES / "admin/control-center/superglue-legacy.tsx").exists()
     sd = build_admin_control_center_superglue_workbench()

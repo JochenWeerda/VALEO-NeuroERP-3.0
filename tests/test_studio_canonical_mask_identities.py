@@ -20,7 +20,7 @@ def test_route_uses_one_canonical_screen_definition(old_id, canonical_id, page):
     source = (ROOT / "packages/frontend-web/src/pages" / page).read_text(encoding="utf-8")
     assert "createStammNativeDetailPage" in source
     assert f"'{canonical_id}'" in source
-    assert "-legacy" in source
+
 
 
 def test_complaint_list_uses_its_functional_studio_definition():

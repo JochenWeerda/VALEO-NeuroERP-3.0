@@ -131,7 +131,15 @@ def _build_omnibox_catalog(tenant_id: str | None = None) -> list[dict]:
             continue
         entries.append(_omnibox_entry(screen_id, sd))
     if tenant_id:
-        for sd in list_published_definitions(tenant_id):
+        try:
+            published = list_published_definitions(tenant_id)
+        except Exception as exc:
+            # Studio-Persistenz optional: ohne DB nur native Registry (CI/Dev ohne Studio-Schema).
+            from app.services.studio_draft_store import StudioStorageUnavailable
+            if not isinstance(exc, StudioStorageUnavailable):
+                raise
+            published = []
+        for sd in published:
             screen_id = str(sd.get("id") or "")
             if not screen_id or screen_id in native_ids:
                 continue

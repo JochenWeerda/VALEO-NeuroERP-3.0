@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import copy
 import importlib.util
+import json
 from pathlib import Path
 
 import pytest
@@ -58,13 +59,26 @@ def test_neue_serverwirksame_aktion_ohne_mcp_und_cli_macht_die_ratsche_rot(modul
     assert "aktionen_ohne_mcp_klassifikation" in out and "aktionen_ohne_cli" in out
 
 
-def test_geschlossene_luecke_ist_hinweis_kein_fehler(modul, inventar, capsys):
+def test_geschlossene_luecke_ist_hinweis_kein_fehler(modul, inventar, capsys, tmp_path, monkeypatch):
+    """Hinweis bei Schliessung einer Altstufe — auch wenn Baseline schon auf 0 ist (M2)."""
     inv = copy.deepcopy(inventar)
     route = next(
         (r for r in inv["seiten"] if r["stufe"] in ("handgebaut", "builder_altmuster")),
         None,
     )
-    assert route is not None, "Ratsche braucht mindestens eine offene Altstufen-Route im Baseline-Inventar"
+    if route is None:
+        route = {
+            "route": "test/altluecke-hinweis",
+            "stufe": "handgebaut",
+            "screen_ids": [],
+            "bereich": "test",
+        }
+        inv["seiten"].append(route)
+    # Baseline = aktueller Gap-Stand inkl. der Altstufe, damit nur die Schliessung zaehlt.
+    baseline = modul.gaps(inv)
+    ratchet = tmp_path / "mask_studio_ratchet.json"
+    ratchet.write_text(json.dumps(baseline, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    monkeypatch.setattr(modul, "RATCHET", ratchet)
     route["stufe"] = "studio_versioniert"
     assert modul.check(inv) == 0
     assert "geschlossen" in capsys.readouterr().out
@@ -109,12 +123,18 @@ def test_belegvarianten_liefern_ihre_aktionen(inventar):
 
 
 def test_cli_befund_kommt_allein_aus_dem_register(modul, inventar):
-    """CLI-Zugang hat genau, was das aus valeo_cli.support erzeugte Register fuehrt — nichts wird geschoent."""
+    """CLI-Zugang hat genau, was das aus valeo_cli.support erzeugte Register fuehrt — nichts wird geschoent.
+
+    surfaceOnly: Spezialoberflaeche besitzt den Weg (mehrteilige Pfadparameter); CLI-Ratsche gilt nicht.
+    """
     import json
     register = set(json.loads((ROOT / "config/cli_mask_commands.json").read_text(encoding="utf-8"))["mask_action_ids"])
     assert {a["id"] for a in inventar["aktionen"] if a["cli"]} == register
-    wirksam = {a["id"] for a in inventar["aktionen"] if a["art"] == "serverwirksam"}
-    assert set(modul.gaps(inventar)["aktionen_ohne_cli"]) == wirksam - register
+    cli_pflicht = {
+        a["id"] for a in inventar["aktionen"]
+        if a["art"] == "serverwirksam" and not a.get("surface_only")
+    }
+    assert set(modul.gaps(inventar)["aktionen_ohne_cli"]) == cli_pflicht - register
 
 
 def test_katalogaktion_ohne_route_oder_mcp_macht_die_ratsche_rot(modul, inventar, capsys):

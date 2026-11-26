@@ -72,6 +72,7 @@ def test_admin_suite_setup_actions_parity():
 
 @pytest.mark.unit
 def test_admin_suite_endpoints_declared():
-    src = (ROOT / "app/api/v1/endpoints/admin_suite.py").read_text(encoding="utf-8")
-    assert '"/readiness/evidence"' in src
-    assert '"/setup/steps"' in src
+    # Readiness/Evidence + Setup-Liste: admin_suite_parity (Godfile-Auslagerung).
+    parity = (ROOT / "app/api/v1/endpoints/admin_suite_parity.py").read_text(encoding="utf-8")
+    assert '"/readiness/evidence"' in parity
+    assert '"/setup/steps"' in parity

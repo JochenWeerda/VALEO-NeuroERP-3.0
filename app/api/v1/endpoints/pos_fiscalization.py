@@ -13,6 +13,7 @@ from app.core.tenant import get_tenant_id
 from app.api.v1.schemas.pos_fiscalization_schemas import (
     FiscalConfigOut,
     FiscalDailySummaryOut,
+    FiscalProductRowOut,
     FiscalReadinessOut,
 )
 from app.services.fiscalization.contracts import (
@@ -125,29 +126,29 @@ async def fiscalization_overview(
     }
 
 
-@router.get("/products", summary="Optionale fiskaly-Produkte auflisten")
+@router.get("/products", response_model=list[FiscalProductRowOut], summary="Optionale fiskaly-Produkte auflisten")
 async def list_fiscal_products(
     tenant_id: str = Depends(get_tenant_id),
     db: Session = Depends(get_db),
-) -> list[dict[str, Any]]:
+) -> list[FiscalProductRowOut]:
     """Flache Produkt-Readiness fuer Studio-Cockpit-Tabelle."""
     ready = _service(db, tenant_id).readiness()
     ready_dict = ready if isinstance(ready, dict) else (ready.model_dump() if hasattr(ready, "model_dump") else dict(ready))
-    rows: list[dict[str, Any]] = []
+    rows: list[FiscalProductRowOut] = []
     for product in ready_dict.get("products") or []:
         item = product.model_dump() if hasattr(product, "model_dump") else dict(product)
         details = item.get("details") or {}
         if hasattr(details, "model_dump"):
             details = details.model_dump()
         rows.append(
-            {
-                "id": item.get("product") or item.get("label"),
-                "product": item.get("product"),
-                "label": item.get("label"),
-                "ready": bool(item.get("ready")),
-                "blockers": "; ".join(item.get("blockers") or []),
-                "execution_note": (details or {}).get("execution_note") or "",
-            }
+            FiscalProductRowOut(
+                id=item.get("product") or item.get("label"),
+                product=item.get("product"),
+                label=item.get("label"),
+                ready=bool(item.get("ready")),
+                blockers="; ".join(item.get("blockers") or []),
+                execution_note=(details or {}).get("execution_note") or "",
+            )
         )
     return rows
 

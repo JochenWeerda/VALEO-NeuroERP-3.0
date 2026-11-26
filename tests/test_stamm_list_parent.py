@@ -82,8 +82,38 @@ def test_build_stamm_list_screen_validates_row_route_template() -> None:
         )
 
 
-#: Seit Runtime46 Cockpits statt Listen (handgebaute Altlast, Workboard STUDIO-UMBAU-RUNTIME46).
-COCKPIT_STATT_LISTE = frozenset({"waage/liste", "waage/waagen-liste", "waage/wiegungen-liste"})
+#: Seit Runtime46/M2 Cockpits statt Listen (Studio-Umbau; Floorplan cockpit statt worklist).
+COCKPIT_STATT_LISTE = frozenset({
+    "waage/liste",
+    "waage/waagen-liste",
+    "waage/wiegungen-liste",
+    "agrar/milchvieh-crosssell",
+    "agrar/kunden-schlagkartei",
+    "agrar/milchvieh-karte",
+    "agrar/ernte-annahme-erfassung",
+    "annahme/abrechnung",
+    "lager/materialfluss",
+    "konditionen/konditionssystem",
+    "fuhrpark/fahrzeug-vertiefung",
+    "admin/externe-gates",
+    "admin/control-center/agent-ops",
+    "admin/control-center/superglue",
+    "admin-suite",
+    "admin-suite/migration",
+    "admin-suite/security",
+    "admin-suite/ki-anbieter",
+    "admin-suite/connectoren",
+    "admin-suite/pos-fiscalization",
+    "admin/GapPipelineConsole",
+    "admin/agenten-integration",
+    "admin/postfaecher-anmeldung-rueckruf",
+    "admin/screen-studio",
+    "admin/setup",
+    "admin/setup/dms-integration",
+    "admin/voice-channel",
+    "admin/vordruck-editor",
+    "studio/workspace-composition-preview",
+})
 
 
 def test_all_listen_builders_use_parent_factory() -> None:

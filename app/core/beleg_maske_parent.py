@@ -518,6 +518,9 @@ def beleg_layout(
         "floorplan": "transaction",
         "sectionNavigation": "anchors",
         "summaryPlacement": "footer",
+        # ProcessBand/Status nach den Eingaben (UX004): Status folgt den Feldern,
+        # aus denen er abgeleitet wird — nicht davor.
+        "statusPlacement": "afterFields",
         "stickyHeader": True,
         "stickyFooter": True,
     }

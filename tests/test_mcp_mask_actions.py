@@ -52,6 +52,9 @@ def _agent_action():
 
 def _blocked_action():
     for sid, action in _registry_actions():
+        # Nur Screen-IDs, die list_actions/execute akzeptieren (keine CamelCase-Legacy-IDs).
+        if not isinstance(sid, str) or not mm._SCREEN_ID.match(sid):
+            continue
         if mm.agent_block(action, sid) == "fuer_agenten_gesperrt":
             return sid, action
     raise AssertionError("keine fuer Agenten gesperrte Aktion in der Registry")

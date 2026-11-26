@@ -16,6 +16,7 @@ from app.core.screen_definitions_listen import (
 ROOT = Path(__file__).resolve().parents[1]
 PAGES = ROOT / "packages/frontend-web/src/pages"
 ADMIN_API = ROOT / "app/api/v1/endpoints/admin_suite.py"
+ADMIN_PARITY_API = ROOT / "app/api/v1/endpoints/admin_suite_parity.py"
 POS_API = ROOT / "app/api/v1/endpoints/pos_fiscalization.py"
 
 
@@ -57,7 +58,7 @@ def test_migration_actions_and_endpoints():
     assert row_actions["freigeben"]["commandEndpoint"] == (
         "/api/v1/admin-suite/migration/batches/{entity_id}/approve"
     )
-    api = ADMIN_API.read_text(encoding="utf-8")
+    api = ADMIN_PARITY_API.read_text(encoding="utf-8") + ADMIN_API.read_text(encoding="utf-8")
     assert '"/migration/profiles"' in api
     assert '"/migration/batches"' in api
     assert '"/migration/overview"' in api
@@ -72,7 +73,7 @@ def test_security_simulate_parity():
     sources = {d["key"]: d["endpoint"] for d in sd.get("dataSources") or []}
     assert sources["roles"] == "/api/v1/admin-suite/security/roles"
     assert sources["agent_roles"] == "/api/v1/admin-suite/security/agent-roles"
-    api = ADMIN_API.read_text(encoding="utf-8")
+    api = ADMIN_PARITY_API.read_text(encoding="utf-8") + ADMIN_API.read_text(encoding="utf-8")
     assert '"/security/roles"' in api
     assert '"/security/agent-roles"' in api
     assert "resolved_roles" in api
@@ -99,7 +100,7 @@ def test_connectoren_flat_endpoints():
     assert actions["stt_testen"]["commandEndpoint"] == "/api/v1/admin-suite/capture-connectors/stt/test"
     assert actions["imap_testen"]["commandEndpoint"] == "/api/v1/admin-suite/capture-connectors/imap/test"
     assert actions["imap_abrufen"]["commandEndpoint"] == "/api/v1/admin-suite/capture-connectors/imap/poll"
-    api = ADMIN_API.read_text(encoding="utf-8")
+    api = ADMIN_PARITY_API.read_text(encoding="utf-8") + ADMIN_API.read_text(encoding="utf-8")
     assert '"/capture-connectors/stt"' in api
     assert '"/capture-connectors/imap"' in api
     assert '"/capture-connectors/overview"' in api

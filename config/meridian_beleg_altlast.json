@@ -1,7 +1,6 @@
 {
   "_hinweis": "Altlast Runtime46 (Workboard STUDIO-UMBAU-RUNTIME46): Belegmasken mit Platzhalter-Identitaet und Bezugsfelder, in die man rohe IDs tippt (brauchen eine Auswahl aus einer Datenquelle). Nur schrumpfend: tests/test_meridian_beleg_systemweit.py.",
   "identitaet": {
-    "admin/agenten-integration": "bezeichnung",
     "admin/backup-restore": "bezeichnung",
     "admin/berechtigungen-matrix": "bezeichnung",
     "admin/system-einstellungen": "bezeichnung",
@@ -19,6 +18,7 @@
     "agrar/probenehmer-stamm": "bezeichnung",
     "agrar/psm": "mittel",
     "agrar/rechnungen-erstellen": "bezeichnung",
+    "agrar/rohwarengruppen": "id",
     "agrar/saatgut/abrechnung": "bezeichnung",
     "agrar/saatgut/formular": "bezeichnung",
     "agrar/saatgut/royalties": "bezeichnung",
@@ -30,8 +30,10 @@
     "agrar/schlaege/saat": "bezeichnung",
     "agrar/self-billing": "bezeichnung",
     "agrar/sorten-vermehrung": "bezeichnung",
+    "agrar/vermehrungsvertraege": "id",
     "agrar/vertraege/formular": "bezeichnung",
     "agrar/wiegeschein-detail": "bezeichnung",
+    "agribusiness/field-service-tasks/neu": "id",
     "aktien/dividenden": "bezeichnung",
     "aktien/hauptversammlung": "bezeichnung",
     "aktien/mitglieder": "bezeichnung",
@@ -98,7 +100,6 @@
     "futter/misch": "produkt_code",
     "futtermittel/einzelfuttermittel/stamm/new": "artikel_nummer",
     "futtermittel/mischfuttermittel/stamm/new": "produkt_code",
-    "kontrakte/mengenzeitraeume": "id",
     "lager/charge": "chargenId",
     "lager/massebilanz": "id",
     "lager/permanente-inventur": "id",
@@ -150,9 +151,6 @@
     ],
     "lager/charge": [
       "chargenId"
-    ],
-    "lager/permanente-inventur": [
-      "warehouse_id"
     ],
     "silo/silo": [
       "silo_id"

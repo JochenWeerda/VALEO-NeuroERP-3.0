@@ -29,7 +29,7 @@ EXPECTED = {
 @pytest.mark.parametrize("screen_id,rel", sorted(EXPECTED.items()))
 def test_thin_admin_page_wired(screen_id: str, rel: str):
     src = (PAGES / rel).read_text(encoding="utf-8")
-    assert "IntakeWeighingPage" in src
+    assert "UniversalNativeCockpitPage" in src or "IntakeWeighingPage" in src
     assert f'screenId="{screen_id}"' in src
     assert screen_id in SPECIALIZED_SCREENS["admin_workbench"]
     sd = ADMIN_OPS_THIN_BUILDERS[screen_id]()
