@@ -9,8 +9,10 @@ vi.mock('@/pages/kontrakte/FrmKontraktDetail', () => ({
   default: () => <div data-testid="legacy-kontrakt-detail">Legacy</div>,
 }))
 
-vi.mock('@/pages/agrar/kontrakt-native', () => ({
-  default: () => <div data-testid="agrar-kontrakt">Native</div>,
+vi.mock('@/components/mask-builder/UniversalNativeDetailPage', () => ({
+  UniversalNativeDetailPage: ({ testId }: { testId?: string }) => (
+    <div data-testid={testId ?? 'agrar-kontrakt'}>Native</div>
+  ),
 }))
 
 vi.mock('@/app/routing/typed-router', () => ({

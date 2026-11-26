@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 const src = readFileSync(
-  resolve(__dirname, '../../../pages/annahme/abrechnung.tsx'),
+  resolve(__dirname, '../../../pages/annahme/abrechnung-legacy.tsx'),
   'utf8',
 )
 

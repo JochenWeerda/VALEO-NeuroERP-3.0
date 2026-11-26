@@ -43,6 +43,9 @@ def build_spec() -> dict:
     # und ohne die zusaetzlich in main.py registrierten Router.
     main = importlib.import_module("main")
     app = getattr(main, "app")
+    # Cache leeren: sonst kann ein teilbefuelltes openapi_schema (z. B. nach
+    # fehlgeschlagenem Router-Import) Drift gegen die kanonische Spec erzeugen.
+    app.openapi_schema = None
     spec = app.openapi()
 
     # Kanonische Spec-Version: fester Default (DEFAULT_API_VERSION), ueberschreibbar
@@ -76,10 +79,41 @@ def main() -> int:
             return 1
         current = OUTPUT.read_text(encoding="utf-8")
         if current != content:
+            import hashlib
+
+            gen_paths = len(spec.get("paths", {}))
+            try:
+                file_paths = len(json.loads(current).get("paths", {}))
+            except json.JSONDecodeError:
+                file_paths = -1
             print(
                 f"DRIFT: {OUTPUT} ist nicht aktuell. Bitte 'python scripts/generate_openapi.py' ausfuehren.",
                 file=sys.stderr,
             )
+            print(
+                f"  gen paths={gen_paths} chars={len(content)} "
+                f"sha256={hashlib.sha256(content.encode()).hexdigest()[:12]}",
+                file=sys.stderr,
+            )
+            print(
+                f"  file paths={file_paths} chars={len(current)} "
+                f"sha256={hashlib.sha256(current.encode()).hexdigest()[:12]}",
+                file=sys.stderr,
+            )
+            for i, (a, b) in enumerate(zip(current, content)):
+                if a != b:
+                    start = max(0, i - 40)
+                    print(
+                        f"  first diff @{i}: file={current[start:i+40]!r} gen={content[start:i+40]!r}",
+                        file=sys.stderr,
+                    )
+                    break
+            else:
+                if len(current) != len(content):
+                    print(
+                        f"  length mismatch only (file={len(current)} gen={len(content)})",
+                        file=sys.stderr,
+                    )
             return 1
         print(f"OK: {OUTPUT} ist aktuell ({len(spec.get('paths', {}))} Pfade).")
         return 0

@@ -1,7 +1,7 @@
 import { MemoryRouter } from '@/app/routing/test-router'
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import AdminSuiteHomePage from '@/pages/admin-suite/index'
+import AdminSuiteHomePage from '@/pages/admin-suite/index-legacy'
 
 const refetchMock = vi.hoisted(() => vi.fn())
 

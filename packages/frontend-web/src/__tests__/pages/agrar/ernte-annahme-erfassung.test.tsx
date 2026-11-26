@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from '@/app/routing/test-router'
-import ErnteAnnahmeErfassungPage from '@/pages/agrar/ernte-annahme-erfassung'
+import ErnteAnnahmeErfassungPage from '@/pages/agrar/ernte-annahme-erfassung-legacy'
 
 const pushMock = vi.hoisted(() => vi.fn())
 const axiosGetMock = vi.hoisted(() => vi.fn())

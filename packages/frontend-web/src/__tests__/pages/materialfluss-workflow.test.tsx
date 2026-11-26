@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import MaterialflussPage from '@/pages/lager/materialfluss'
+import MaterialflussPage from '@/pages/lager/materialfluss-legacy'
 
 const fixture = vi.hoisted(() => ({
   empty: [] as Record<string, unknown>[], error: false,

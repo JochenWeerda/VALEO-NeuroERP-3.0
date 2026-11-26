@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import VoiceChannelPage from '@/pages/admin/voice-channel'
+import VoiceChannelPage from '@/pages/admin/voice-channel-legacy'
 
 vi.mock('@/features/ki-usability/hooks/useVoiceIntent', () => ({
   useVoiceIntent: () => ({
