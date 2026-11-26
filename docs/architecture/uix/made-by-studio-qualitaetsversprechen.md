@@ -76,7 +76,7 @@ Bezug: PR #213 / `cursor/studio-made-open-routes-8809`; Generator-Report
 | A Entity-Stammdaten | **829/829** | `verify_made_by_studio_gates.py` — Meridian/Struktur grün |
 | B Entity CLI-Freigabe / Rechte | **829/829** | Action-Permission-Projektion; Draft-clean |
 | C Runtime Entity / Compiler | **829/829** | OpenAPI-Kanal + Advisory Ø **1.0** |
-| D Browser publiziert | **Teilbeleg** | Playwright Cockpit-Smoke **358/358** (179 Masken × Hell/Dunkel; inkl. Admin-/Agrar-/Finance-Listen-Ausbau; Specialized Landmark/Tablist, Mock-Auth); FlowSpine/Feed/Calendar/Chart/TileGrid/TwinPanel/Finance-Reports theme-tokenisiert; **Live-SSO** und Image-CI `table-catalog` weiter offen (Codex `STUDIO-ENTITY-RELEASE`) |
+| D Browser publiziert | **Teilbeleg** | Playwright Cockpit-Smoke **382/382** (191 Masken × Hell/Dunkel; inkl. PSM/FiBu/Lager-Listen-Ausbau; Specialized Landmark/Tablist, Mock-Auth); FlowSpine/Feed/Calendar/Chart/TileGrid/TwinPanel/Finance-Reports theme-tokenisiert; **Live-SSO** und Image-CI `table-catalog` weiter offen (Codex `STUDIO-ENTITY-RELEASE`) |
 | E Ablösung | **829/829** + Routen-`hand_built` **0** | Runtime-Aliase verdrahtet; `pages_hand` ≈38 bewusst (`*-legacy`/Dlg/Charts, keine Routen) |
 
 **Fazit:** A/B/C/E und Routen-Migration sind generatorseitig grün. Das Siegel A–D
