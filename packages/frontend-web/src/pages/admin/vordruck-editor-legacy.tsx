@@ -376,7 +376,7 @@ export default function VordruckEditorPage(): JSX.Element {
                           setSelectedElement(i)
                           dragRef.current = { index: i, startX: e.clientX, startY: e.clientY, elX: el.x, elY: el.y }
                         }}
-                        className={`absolute cursor-move select-none overflow-hidden border ${selectedElement === i ? 'border-blue-500 ring-1 ring-blue-400' : 'border-transparent hover:border-gray-300'}`}
+                        className={`absolute cursor-move select-none overflow-hidden border ${selectedElement === i ? 'border-primary ring-1 ring-primary/50' : 'border-transparent hover:border-border'}`}
                         style={{
                           left: el.x * scale,
                           top: el.y * scale,

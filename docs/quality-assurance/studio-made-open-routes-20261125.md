@@ -780,6 +780,16 @@ Inventar-Messung: `python scripts/mask_route_migration_inventory.py` → `docs/a
 - Gate-D +12: Field-Service-Edit; Kalkulation/Charge/Consent/DSGVO-Public; Sales-Listen (Lieferschein/Angebot/Rechnung/Auftrag); contracts-v2; weighing; policy-manager
 - Gate-D → **1160/1160 passed** (580 Masken × Hell/Dunkel)
 
+### Batch 115 — abgebrochen
+
+- Weitere Mock-Smokes auf Alias-Pfaden derselben ScreenIds = Doppelarbeit; WIP verworfen.
+
+### Batch 116 — Live-Legacy Design-Tokens
+
+- `vordruck-editor-legacy.tsx` / `kunden-schlagkartei-legacy.tsx`: Rohpalette → semantische Tokens (`primary` / `foreground` / `muted`)
+- Live-Pfad: Specialized Surfaces (`vordruck-editor-surface`, `schlagkartei-surface`)
+- Rohpalette-Scan `*-legacy` + `mask-builder/specialized`: **0**
+
 ### Gate D Browser / Image (Stand 2026-11-26, Europe/Berlin)
 
 Bezug: [Made-by-Studio Qualitaetsversprechen](../architecture/uix/made-by-studio-qualitaetsversprechen.md) §D;
