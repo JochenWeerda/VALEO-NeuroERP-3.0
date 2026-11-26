@@ -17,7 +17,7 @@ Quelle: `information_schema` nach `alembic upgrade head`. Verbraucher: SQL/ORM u
 Logisches Modell: [ERD Canonical Domain](../architecture/views/erd-canonical-domain.md).
 Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell-tenancy.md).
 
-**31 Schemas, 700 Tabellen, 9163 Spalten.**
+**31 Schemas, 700 Tabellen, 9164 Spalten.**
 
 ## Schemas
 
@@ -33,7 +33,7 @@ Lebenszyklus (Maske ≠ Drop): [Datenmodell & Tenancy](../entwickler/datenmodell
 | `domain_docflow` | `dms-compliance` | 28 | 360 |
 | `domain_docs` | `platform` | 2 | 25 |
 | `domain_einkauf` | `procurement` | 19 | 291 |
-| `domain_erp` | `finance` | 46 | 601 |
+| `domain_erp` | `finance` | 46 | 602 |
 | `domain_finance` | `finance` | 22 | 242 |
 | `domain_futtermittel` | `agrar` | 8 | 83 |
 | `domain_hr` | `hr` | 30 | 361 |
@@ -1037,7 +1037,7 @@ Quelle: SQL und ORM unter `app/`, native ScreenDefinition-`dataSources`.
 | `fibu_connector_runs` | `finance` | native | `id` | id, tenant_id, connector_type, direction, profile_id, idempotency_key, status, source_artifact_storage_key, source_artifact_sha256, source_artifact_file_name, protocol_artifact_storage_key, protocol_artifact_sha256, counts, totals, error_summary, started_at, finished_at, created_at, created_by |
 | `gift_cards` | `finance` | native | `id` | id, tenant_id, created_at |
 | `journal_entries` | `finance` | native | `id` | id, tenant_id, entry_number, entry_date, posting_date, document_type, document_number, reference, description, total_debit, total_credit, status, posted_by, posted_at, created_at, updated_at, source, reversed_entry_id, hash_prev, hash_current, sequence_number, currency, period, source_user |
-| `journal_entry_lines` | `finance` | native | `id` | id, journal_entry_id, account_id, description, debit, credit, cost_center, project, line_number, created_at, tenant_id, debit_amount, credit_amount, tax_code, profit_center, reference, updated_at |
+| `journal_entry_lines` | `finance` | native | `id` | id, journal_entry_id, account_id, description, debit, credit, cost_center, project, line_number, created_at, tenant_id, debit_amount, credit_amount, tax_code, profit_center, reference, updated_at, partner_konto |
 | `lohn_import_runs` | `finance` | native | `id` | id, tenant_id, period, source, status, journal_entry_count, total_debit, total_credit, message, created_at, updated_at, created_by |
 | `matching_rules` | `finance` | native | `id` | id, tenant_id, rule_name, priority, match_type, conditions, confidence_threshold, auto_apply, active, created_at, updated_at |
 | `offene_posten` | `finance` | native | `id` | id, tenant_id, rechnungsnr, datum, rechnungsdatum, booking_date, faelligkeit, due_date, konto_typ, kunde_id, kunde_name, lieferant_id, lieferant_name, debtor_id, creditor_id, waehrung, betrag, open_amount, offen, op_status, op_text, dunning_level, zahlbar, skonto_prozent, skonto_bis, created_at, updated_at, partner_id, partner_type, document_type, document_number, document_date, currency, gross_amount, discount_date, discount_amount, status |

@@ -21932,6 +21932,11 @@
               "name": "updated_at",
               "nullable": true,
               "type": "timestamp with time zone"
+            },
+            {
+              "name": "partner_konto",
+              "nullable": true,
+              "type": "character varying"
             }
           ],
           "foreign_keys": [
