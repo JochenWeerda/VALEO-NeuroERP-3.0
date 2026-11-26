@@ -1,7 +1,7 @@
 # Handshake: 2026-11-26 — M7-INSTALL-DEMO-A11Y-20261126
 
-**Von:** Cursor Cloud  
-**An:** Lead / Claude (Admin-Merge); Betrieb für Prüfstand-Lauf  
+**Von:** Cursor Cloud
+**An:** Lead / Claude (Admin-Merge); Betrieb für Prüfstand-Lauf
 **Ziel:** M7-Vorarbeiten ohne M6 — Installationshandbuch-Gerüst, Demo-Mandant, Barrierefreiheitsbericht-Gerüst.
 
 ## Stand

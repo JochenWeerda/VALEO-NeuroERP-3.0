@@ -1354,6 +1354,9 @@ Nutzerentscheid 26.11.: Personenkonten im Hauptbuch. journal_entry_lines.partner
 ## M6-AKTIONSPREISE-20261126 — zur Abnahme, Claude Code (M6)
 Nutzerentscheid 26.11.: guenstigerer Preis gilt. Kaskadenstufe aktion (Preisliste Typ aktion, nach der Preisliste, nur wenn guenstiger; Kontrakt/Kundenpreis gehen vor; nicht additiv). Spiegeluebernahme aktion/aktionspreis aus WWS_AKTIONSPREISE; auf Lager/Kundenauswahl beschraenkte Aktionen = Fehlerzeile.
 
+## M6-SALDENABGLEICH-20261126 — zur Abnahme, Claude Code (M6)
+Monatlicher Saldenabgleich L3 (DEBITOREN/KREDITOREN, Saldo zum Monatsende) gegen personenkonto.saldenliste je Personenkonto: gleich/abweichend/fehlt in VALEO, fehlt in L3, Zeilen ohne Personenkonto; liest nur. Gestapelt auf #223.
+
 ## M4-DOMAENEN-ABNAHME-BLAETTER-20261126 — zur Abnahme, Cursor Cloud (PR #225)
 Meilenstein: M4. Goal 26.11.2026 Bahn 2: Abnahmeblaetter aktuell; `python scripts/domaenen_abnahme.py --check` gruen. Dateibesitz: `docs/abnahme/domaenen/*`, Code fuer P0-Schliessungen (`quality_lot_binding`, `ChargeRepository.delete`, `buche_schnellerfassung`→erstellt), Workboard. Alle dokumentierten Domänen-P0 geschlossen (CRM, LO-02, PM-11, PM-06); P1/P2 bleiben offen. Merge: Claude Admin nach CI-gruen.
 
