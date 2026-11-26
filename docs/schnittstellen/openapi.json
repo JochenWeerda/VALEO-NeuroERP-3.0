@@ -70909,6 +70909,61 @@
         "title": "FiscalProductReadiness",
         "type": "object"
       },
+      "FiscalProductRowOut": {
+        "description": "Flache Produktzeile fuer ``GET /pos/fiscalization/products`` (Studio-Cockpit).",
+        "properties": {
+          "blockers": {
+            "default": "",
+            "title": "Blockers",
+            "type": "string"
+          },
+          "execution_note": {
+            "default": "",
+            "title": "Execution Note",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "product": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product"
+          },
+          "ready": {
+            "default": false,
+            "title": "Ready",
+            "type": "boolean"
+          }
+        },
+        "title": "FiscalProductRowOut",
+        "type": "object"
+      },
       "FiscalProviderConfigIn": {
         "properties": {
           "cash_register_id": {
@@ -363795,8 +363850,7 @@
               "application/json": {
                 "schema": {
                   "items": {
-                    "additionalProperties": true,
-                    "type": "object"
+                    "$ref": "#/components/schemas/FiscalProductRowOut"
                   },
                   "title": "Response List Fiscal Products Api V1 Pos Fiscalization Products Get",
                   "type": "array"
