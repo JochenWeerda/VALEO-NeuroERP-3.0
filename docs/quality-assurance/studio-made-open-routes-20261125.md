@@ -818,11 +818,12 @@ Inventar-Hinweis: `Dlg*` und Report-Chart-Module unter `pages/` sind keine Route
 - Gate D SSO Hell+Dunkel + Image-CI `table-catalog` → Codex `STUDIO-ENTITY-RELEASE` (oder Freigabe Dateibesitz)
 - Goal-Complete erst nach Gate-D-Image/SSO-Beleg
 
-## Workboard / Handshake (2026-11-26)
+## Workboard / Handshake (2026-11-27)
 
-- Workboard: `STUDIO-MADE-OPEN-ROUTES-20261125` → **zur Abnahme** (`docs/agent-ops/active-workboard.md`)
+- Workboard: `STUDIO-MADE-OPEN-ROUTES-20261125` → **abgeschlossen** (PR #213 gemergt `aa0b8829e`)
 - Handshake: [`docs/agent-ops/handshakes/studio-made-open-routes-20261126.md`](../agent-ops/handshakes/studio-made-open-routes-20261126.md)
-- Nutzerauftrag Integration: nach `main` mergen, `develop` auf `main` syncen; Gate-D-Rest bleibt Codex
+- Goal-Audit auf `main` 27.11.2026: `mask_studio_inventory.py --check` OK; `develop`-Sync folgt
+- Gate-D-Rest bleibt Codex `STUDIO-ENTITY-RELEASE`
 
 ## Tests
 

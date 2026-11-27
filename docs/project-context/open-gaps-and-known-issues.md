@@ -1546,13 +1546,16 @@ beide **offen** (Plan, nicht reserviert). **StammObjectPageParent-Rollout abgesc
 Naechste Cluster: KontrollWorklist-Ausbau, weitere Listen Dual-Pfad;
 Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
 
-## STUDIO — Made-by-Studio Open Routes (Nachtrag 2026-11-26)
+## STUDIO — Made-by-Studio Open Routes (Nachtrag 2026-11-27)
 
-Slice `STUDIO-MADE-OPEN-ROUTES-20261125` (PR #213, Batch 117): Routen `hand_built` **0**,
-Gates A/B/C/E **829/829**, Gate-D Mock **1160/1160**. `pages_hand` 37 bewusst.
+Slice `STUDIO-MADE-OPEN-ROUTES-20261125` **gemergt** (PR #213, Merge `aa0b8829e`, 27.11.2026).
+Routen `hand_built` **0**; Goal-Audit `mask_studio_inventory.py --check` auf `main` OK
+(`handgebaut_routen=0`, `altmuster_routen=0`). Gates A/B/C/E **829/829**, Gate-D Mock **1160/1160**.
 **Weiter offen:** Gate D Live-SSO + Image-CI `table-catalog` (`STUDIO-ENTITY-RELEASE-20261021`).
 Belege: [`studio-made-open-routes-20261125.md`](../quality-assurance/studio-made-open-routes-20261125.md),
 Handshake [`studio-made-open-routes-20261126.md`](../agent-ops/handshakes/studio-made-open-routes-20261126.md).
+M4 PR #225 / M7 PR #226 ebenfalls gemergt; Post-Merge-Audit 27.11.2026: `domaenen_abnahme --check`
+8/8, docs-gov OK, `demo_mandant` anlegen/löschen auf `valeo_probe` OK.
 
 ## STUDIO — Made-by-Studio Qualitätslücke (Nachtrag 2026-10-22)
 
