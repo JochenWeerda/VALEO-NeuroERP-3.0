@@ -195,13 +195,16 @@ def test_many_lines_use_one_validation_query_before_any_journal_write(
     [
         "app/services/sales_posting_service.py",
         "app/services/agrar_settlement_service.py",
-        "app/services/harvest_acceptance_service.py",
+        # Self-Billing M3: Erntefreigabe baut keine Journalzeilen mehr selbst —
+        # kanonischer kreditorischer Kern (auch AP-Eingangsrechnung).
+        "app/services/finance_eingangsrechnung_buchung.py",
         "app/api/v1/endpoints/asset_accounting.py",
         "app/api/v1/endpoints/genossenschaft.py",
         "app/api/v1/endpoints/logistics_freight.py",
     ],
 )
 def test_number_configured_service_callers_resolve_before_constructing_lines(file):
+    """Ratsche: wer Journalzeilen mit account_id baut, muss vorher account_id_for_number nutzen."""
     tree = ast.parse(Path(file).read_text(encoding="utf-8"))
     references = []
     for node in ast.walk(tree):
