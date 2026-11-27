@@ -12,11 +12,80 @@ from typing import Any, Optional
 from sqlalchemy import and_, or_, text
 from sqlalchemy.orm import Session
 
+from app.core.business_time import business_today
 from app.core.exceptions import ValidationFailedError
 from app.infrastructure.models import SupplierTaxProfile
 
 
 TRANSACTION_TYPE_SELF_BILLING = "self_billing_purchase"
+
+
+def ensure_self_billing_purchase_ready(
+    db: Session,
+    tenant_id: str,
+    partner_id: str,
+    *,
+    partner_name: str = "Self-Billing Lieferant",
+    taxation_type: str = "regular",
+    valid_from: Optional[date] = None,
+) -> None:
+    """
+    Idempotent: Lieferanten-Partner, Tab-24-Vereinbarung und Steuerprofil anlegen.
+
+    Für Simulationen und PostgreSQL-Verhaltenstests; Produktionspfade setzen Stammdaten
+    über die Partner-Maske.
+    """
+    from uuid import uuid4
+
+    stichtag = valid_from or date(2020, 1, 1)
+    db.execute(
+        text(
+            "INSERT INTO domain_crm.business_partners "
+            "(partner_id, tenant_id, partner_number, name_1, is_supplier, status) "
+            "VALUES (:id, :t, :nr, :name, true, 'active') "
+            "ON CONFLICT (partner_id) DO UPDATE SET "
+            "tenant_id = EXCLUDED.tenant_id, is_supplier = true, status = 'active'"
+        ),
+        {
+            "id": partner_id,
+            "t": tenant_id,
+            "nr": f"SB-{partner_id.replace('-', '')[:12]}",
+            "name": partner_name,
+        },
+    )
+    db.execute(
+        text(
+            "INSERT INTO domain_crm.business_partner_billing_configs "
+            "(id, partner_id, self_billing_purchase, self_billing_sales, "
+            "account_statement_print, account_statement_separate, account_statement_reprint, "
+            "print_ad_text, shipping_expenses_enabled, bonus_eligible, "
+            "remarkable_claim, vat_optimizer, tenant_id) "
+            "VALUES (:id, :pid, true, false, false, false, false, false, false, false, "
+            "false, false, :t) "
+            "ON CONFLICT (partner_id) DO UPDATE SET self_billing_purchase = true"
+        ),
+        {"id": str(uuid4()), "pid": partner_id, "t": tenant_id},
+    )
+    existing = db.query(SupplierTaxProfile).filter(
+        SupplierTaxProfile.tenant_id == tenant_id,
+        SupplierTaxProfile.supplier_id == partner_id,
+        SupplierTaxProfile.valid_from <= stichtag,
+        or_(
+            SupplierTaxProfile.valid_to.is_(None),
+            SupplierTaxProfile.valid_to >= stichtag,
+        ),
+    ).first()
+    if existing is None:
+        db.add(
+            SupplierTaxProfile(
+                id=str(uuid4()),
+                supplier_id=partner_id,
+                taxation_type=taxation_type,
+                valid_from=stichtag,
+                tenant_id=tenant_id,
+            )
+        )
+    db.flush()
 
 
 def get_taxation_type_for_supplier(
@@ -37,7 +106,7 @@ def get_taxation_type_for_supplier(
     Bei require_profile=True (endgültige Ausstellung/Buchung): hart ValidationFailedError (HTTP 422).
     """
     if not effective_date:
-        effective_date = date.today()
+        effective_date = business_today()
 
     profile = db.query(SupplierTaxProfile).filter(
         and_(
@@ -67,22 +136,30 @@ def require_self_billing_agreement(
     tenant_id: str,
     supplier_id: str,
 ) -> None:
-    """Selbstfakturierungsvereinbarung (Einkauf) muss am Partner gesetzt sein."""
+    """Selbstfakturierungsvereinbarung (Einkauf) in Tab-24-Billing-Config."""
     row = db.execute(
         text(
-            "SELECT self_billing_purchase FROM domain_crm.business_partners "
-            "WHERE tenant_id = :t AND partner_id = :p"
+            "SELECT bc.self_billing_purchase "
+            "FROM domain_crm.business_partner_billing_configs bc "
+            "JOIN domain_crm.business_partners bp ON bp.partner_id = bc.partner_id "
+            "WHERE bp.tenant_id = :t AND bc.partner_id = :p "
+            "AND (bc.tenant_id IS NULL OR bc.tenant_id = :t) "
+            "LIMIT 1"
         ),
         {"t": tenant_id, "p": supplier_id},
     ).first()
     if row is None:
-        # Fallback: Kundenstamm mit business_partner_id
+        # Fallback: Kundenstamm → business_partner_id bzw. Kunden-ID als Partner
         row = db.execute(
             text(
-                "SELECT bp.self_billing_purchase FROM domain_crm.business_partners bp "
-                "JOIN domain_crm.customers c ON c.business_partner_id = bp.partner_id "
-                "AND c.tenant_id = bp.tenant_id "
-                "WHERE bp.tenant_id = :t AND (c.id::text = :p OR bp.partner_id = :p) "
+                "SELECT bc.self_billing_purchase "
+                "FROM domain_crm.customers c "
+                "JOIN domain_crm.business_partner_billing_configs bc "
+                "  ON bc.partner_id = COALESCE(c.business_partner_id, c.id::text) "
+                "JOIN domain_crm.business_partners bp ON bp.partner_id = bc.partner_id "
+                " AND bp.tenant_id = c.tenant_id "
+                "WHERE c.tenant_id = :t AND (c.id::text = :p OR c.business_partner_id = :p) "
+                "AND (bc.tenant_id IS NULL OR bc.tenant_id = :t) "
                 "LIMIT 1"
             ),
             {"t": tenant_id, "p": supplier_id},
@@ -113,7 +190,7 @@ def resolve_self_billing_tax_code(
     if transaction_type != TRANSACTION_TYPE_SELF_BILLING:
         raise ValidationFailedError(f"Unbekannter Self-Billing-Transaktionstyp: {transaction_type}")
 
-    stichtag = delivery_date or date.today()
+    stichtag = delivery_date or business_today()
     # Explizite Property-Overrides (optional, nie alleiniger Tenant-Pauschalschlüssel als Default)
     override_keys = [
         f"agrar.self_billing.tax_code.{taxation_type}.{article_tax_class or '_'}",

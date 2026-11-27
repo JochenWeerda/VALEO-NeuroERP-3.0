@@ -16,7 +16,7 @@
 - Kanonischer Kern `app/services/self_billing_buchung.py` → `buche_eingangsrechnung` (posted + Personenkonto + OP).
 - DocFlow führend: `app/services/self_billing_docflow.py` (`purchase_invoice`, source `self_billing`); `SelfBillingInvoice` = Agrar-Erweiterung (`docflow_header_id`, `journal_entry_id`, `taxation_type`, `tax_context`).
 - Multi-Parameter-Steuer in `tax_profile_service.py`; fehlendes Profil → 422; Entwürfe ok.
-- Vereinbarung: `business_partners.self_billing_purchase`.
+- Vereinbarung: `business_partner_billing_configs.self_billing_purchase` (Tab 24).
 - Erntefreigabe endgültig nutzt Kern; vorläufig unverändert ohne endgültige Buchung.
 - API `…/buchung` nur Adapter (keine Freigabe-Umgehung); Legacy `Buchung`/1600/4200 entfernt.
 - Storno: Original-`taxation_type` / Journal-Reverse; Preview mandantengebunden.

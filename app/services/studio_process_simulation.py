@@ -107,7 +107,11 @@ def _grain_chain(db, seed, checks):
                           address="Simulation", city="Simulation", postal_code="00000")
     db.add_all([actor, customer, article, warehouse]); db.flush()
     from app.finance.steuerschluessel import richte_skr03_ein
+    from modules.agrar.services.tax_profile_service import ensure_self_billing_purchase_ready
     richte_skr03_ein(db, seed)
+    ensure_self_billing_purchase_ready(
+        db, seed, customer.id, partner_name="Simulation self-billing supplier"
+    )
     from app.services.number_range_service import NumberRangeService
     NumberRangeService(db).configure(seed, "self_billing", "GS", 1, 6)
     db.execute(text("INSERT INTO domain_shared.system_properties "

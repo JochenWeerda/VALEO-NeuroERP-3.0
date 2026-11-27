@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, qa]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-26
+last_reviewed: 2026-11-27
 version: 3.0.0
 description: Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Beschreibungen sind aus den Modul-Docstrings extrahiert.
 ---
@@ -319,6 +319,8 @@ Vollständiges Inventar aller Backend-Service-Module mit Kurzbeschreibung. Besch
 | `scheduler_service` | Scheduler Service |
 | `secrets_vault` | Secrets Vault Service — NC-15 |
 | `security_observability` | Central observability for security-relevant block and violation events. |
+| `self_billing_buchung` | Kanonischer Self-Billing-Buchungskern (M3-Konsolidierung). |
+| `self_billing_docflow` | Self-Billing in DocFlow (BELEG-052): purchase_invoice ist führender Beleg. |
 | `semantic_e2e_chain_service` | SEMANTIC-E2E-MATRIX-001 — Semantische Prozessketten-Validierung. |
 | `sepa_xml_generator` | SEPA pain.001.001.03 — XML einer Ueberweisungs-Sammeldatei fuer Zahlungslaeufe. |
 | `settlement_approval_service` | Approval workflow service for Agrar settlements (AGRAR-SET-FREIGABE). |

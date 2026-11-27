@@ -8,7 +8,7 @@ last_reviewed: 2026-11-27
 
 # Self-Billing M3 — Konsolidierung
 
-Kanonischer kreditorischer Buchungsweg über `buche_eingangsrechnung` (posted, Personenkonto, ein OP). DocFlow `purchase_invoice` (source `self_billing`) ist führend; `domain_finance.self_billing_invoices` ist Agrar-Erweiterung. Steuerauflösung multi-param; fehlendes Lieferantenprofil und fehlende Selbstfakturierungsvereinbarung (`self_billing_purchase`) blockieren endgültige Ausstellung mit HTTP 422. API-Buchung ist Adapter ohne Freigabe-Umgehung.
+Kanonischer kreditorischer Buchungsweg über `buche_eingangsrechnung` (posted, Personenkonto, ein OP). DocFlow `purchase_invoice` (source `self_billing`) ist führend; `domain_finance.self_billing_invoices` ist Agrar-Erweiterung. Steuerauflösung multi-param; fehlendes Lieferantenprofil und fehlende Selbstfakturierungsvereinbarung (`business_partner_billing_configs.self_billing_purchase`) blockieren endgültige Ausstellung mit HTTP 422. API-Buchung ist Adapter ohne Freigabe-Umgehung.
 
 ## Nachweise
 

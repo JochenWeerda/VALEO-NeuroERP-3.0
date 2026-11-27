@@ -4,7 +4,7 @@ type: reference
 audience: [entwickler, betrieb]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-26
+last_reviewed: 2026-11-27
 version: 3.0.0
 description: Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Beschreibungen sind aus den Datei-Docstrings extrahiert.
 ---
@@ -495,6 +495,7 @@ Vollständiges Inventar aller Alembic-Migrationsskripte mit Kurzbeschreibung. Be
 | `screen_definition_drafts_20260916` | Studio ScreenDefinition drafts for Masken-Studio persistency. |
 | `seed_anlage1_abzugstabelle_template_20260303` | seed Anlage 1 (Abzugstabelle Qualität) amendment template |
 | `seed_default_tenant_20260214` | seed default tenant for foreign-key constrained domain tables |
+| `self_billing_m3_konsolidierung_20261127` | Self-Billing M3: Agrar-Erweiterung an DocFlow + Idempotenz. |
 | `service_anfragen_20261027` | Service-Anfragen und ihre Rueckmeldungen liegen in der Datenbank. |
 | `spiegel_quellreferenz_20261125` | Spiegelbetrieb L3: Quellreferenz je uebernommenem Datensatz und Uebernahmeprotokoll (M6, 25.11.2026). |
 | `steuernachweis_mandant_20261001` | Steuerliche Nachweise bekommen eine Migration — und einen Mandanten. |
