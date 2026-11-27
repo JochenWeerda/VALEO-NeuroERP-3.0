@@ -7,10 +7,33 @@ FLOW_PROCESSES = frozenset({
 })
 SPECIALIZED_SCREENS = {
     "finance_workbench": frozenset({"finance/bank-abgleich", "mahnwesen/mahnlauf"}),
-    "admin_workbench": frozenset({"admin/webhooks-liste", "admin/control-center"}),
-    "intake": frozenset({"annahme/lkw-registrierung", "annahme/qualitaets-check", "annahme/warteschlange"}),
+    "admin_workbench": frozenset({
+        "admin/webhooks-liste",
+        "admin/control-center",
+        "admin/control-center/agent-ops",
+        "admin/control-center/superglue",
+        "admin/GapPipelineConsole",
+        "admin/agenten-integration",
+        "admin/postfaecher-anmeldung-rueckruf",
+        "admin/screen-studio",
+        "admin/setup",
+        "admin/setup/dms-integration",
+        "admin/voice-channel",
+        "admin/vordruck-editor",
+        "studio/workspace-composition-preview",
+    }),
+    "intake": frozenset({"annahme/lkw-registrierung", "annahme/qualitaets-check", "annahme/warteschlange", "annahme/rohware"}),
     "weighing": frozenset({"waage/liste", "waage/neu", "waage/waagen-liste", "waage/wiegungen", "waage/wiegungen-liste"}),
     "feed_workbench": frozenset({"futtermittel/rationseditor", "futtermittel/rationsoptimierung", "portal/rationsoptimierung", "futtermittel/fuetterungsdokumentation-mobil"}),
+    "agrar_workbench": frozenset({
+        "agrar/kunden-schlagkartei",
+        "agrar/milchvieh-karte",
+        "agrar/ernte-annahme-erfassung",
+        "annahme/abrechnung",
+    }),
+    "lager_workbench": frozenset({"lager/materialfluss"}),
+    "pricing_workbench": frozenset({"konditionen/konditionssystem"}),
+    "fleet_workbench": frozenset({"fuhrpark/fahrzeug-vertiefung"}),
 }
 
 

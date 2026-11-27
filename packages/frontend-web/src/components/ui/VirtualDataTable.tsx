@@ -179,7 +179,7 @@ export function VirtualDataTable<T extends Record<string, unknown>>({
           {/* Header and body reserve the same scrollbar gutter: columns stay aligned and the
               body's vertical scrollbar cannot push the rows into a second horizontal scrollbar. */}
           <div
-            className="grid overflow-y-hidden border-b bg-muted text-[11px] font-semibold uppercase tracking-normal text-muted-foreground"
+            className="grid overflow-y-hidden border-b bg-muted text-2xs font-semibold uppercase tracking-normal text-muted-foreground"
             style={{ gridTemplateColumns, scrollbarGutter: 'stable' }}
             role="row"
             aria-rowindex={1}

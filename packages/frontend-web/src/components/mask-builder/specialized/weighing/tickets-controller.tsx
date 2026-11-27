@@ -182,7 +182,7 @@ export function useTicketsController(plan: RenderPlan) {
     const total = tickets.length
     return {
       status: offeneTickets > 0 ? `${offeneTickets} offene Wiegung(en)` : total > 0 ? 'Alle Wiegungen abgeschlossen' : 'Keine Wiegungen',
-      statusColor: offeneTickets > 0 ? 'text-amber-700 bg-amber-50 border-amber-300' : 'text-green-700 bg-green-50 border-green-300',
+      statusColor: offeneTickets > 0 ? 'text-status-warning bg-status-warning/10 border-status-warning/40' : 'text-status-success bg-status-success/10 border-status-success/40',
       rueckstand: offeneTickets > 0 ? `${offeneTickets} Ticket(s) noch offen` : 'Kein Rueckstand',
       blocker: ohneKontrakt > 0 ? `${ohneKontrakt} Ticket(s) ohne Kontraktzuordnung` : 'Alle Tickets zugeordnet',
       folgepfad: offeneTickets > 0 ? 'Offene Tickets schliessen' : ohneKontrakt > 0 ? 'Kontraktzuordnung durchfuehren' : 'Keine dringende Aktion',

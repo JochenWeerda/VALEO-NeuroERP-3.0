@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import MaterialflussPage from '@/pages/lager/materialfluss'
+import MaterialflussPage from '@/pages/lager/materialfluss-legacy'
 
 const fixture = vi.hoisted(() => ({
   empty: [] as Record<string, unknown>[], error: false,
@@ -9,19 +9,44 @@ const fixture = vi.hoisted(() => ({
   toast: vi.fn(), createSystem: vi.fn(), createCell: vi.fn(),
   warehouseReads: vi.fn(),
   cells: [] as Record<string, unknown>[], nodes: [] as Record<string, unknown>[], edges: [] as Record<string, unknown>[],
-  patchCell: vi.fn(), patchNode: vi.fn(), patchEdge: vi.fn(),
+  patchCell: vi.fn(), patchNode: vi.fn(), patchEdge: vi.fn(), syncLot: vi.fn(),
+  createNode: vi.fn(), createEdge: vi.fn(), bookTransfer: vi.fn(), bookLot: vi.fn(),
+  validateRoute: vi.fn(), suggestLot: vi.fn(),
 }))
 vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => vi.fn() }))
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: fixture.toast }) }))
 vi.mock('@/components/navigation/PageToolbar', () => ({
   PageToolbar: ({ rightSlot }: { rightSlot?: ReactNode }) => <header>{rightSlot}</header>,
 }))
-vi.mock('@xyflow/react', () => ({
-  ReactFlow: ({ children }: { children?: ReactNode }) => <section aria-label="Materialflussgraph">{children}</section>,
-  Background: () => null, Controls: () => null, Handle: () => null, MiniMap: () => null,
-  Panel: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
-  Position: { Left: 'left', Right: 'right' },
-}))
+vi.mock('@xyflow/react', async () => {
+  const React = await import('react')
+  return {
+    ReactFlow: ({
+      children,
+      nodes,
+      nodeTypes,
+    }: {
+      children?: ReactNode
+      nodes?: Array<{ id: string; type?: string; data?: Record<string, unknown> }>
+      nodeTypes?: Record<string, React.ComponentType<{ id: string; data: Record<string, unknown> }>>
+    }) => (
+      <section aria-label="Materialflussgraph">
+        {(nodes ?? []).map((node) => {
+          const Comp = node.type ? nodeTypes?.[node.type] : undefined
+          return Comp ? (
+            <div key={node.id} data-testid={`mf-node-${node.id}`}>
+              {React.createElement(Comp, { id: node.id, data: node.data ?? {} })}
+            </div>
+          ) : null
+        })}
+        {children}
+      </section>
+    ),
+    Background: () => null, Controls: () => null, Handle: () => null, MiniMap: () => null,
+    Panel: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+    Position: { Left: 'left', Right: 'right' },
+  }
+})
 vi.mock('@/lib/api/inventory', () => ({
   useWarehouses: () => ({ data: { items: [{ id: 'warehouse-a', code: 'A', name: 'Testlager A' }, { id: 'warehouse-b', code: 'B', name: 'Testlager B' }] } }),
 }))
@@ -42,8 +67,13 @@ vi.mock('@/lib/api/agri-material-flow', async importOriginal => {
     usePatchAgriSiloCell: () => ({ mutateAsync: fixture.patchCell }),
     usePatchAgriFlowNode: () => ({ mutateAsync: fixture.patchNode }),
     usePatchAgriFlowEdge: () => ({ mutateAsync: fixture.patchEdge }),
-    useCreateAgriFlowNode: mutation, useCreateAgriFlowEdge: mutation,
-    useBookAgriMaterialTransfer: mutation, useBookAgriLotToCell: mutation, useSyncAgriSiloCellFromLots: mutation,
+    useCreateAgriFlowNode: () => ({ mutateAsync: fixture.createNode, isPending: false }),
+    useCreateAgriFlowEdge: () => ({ mutateAsync: fixture.createEdge, isPending: false }),
+    useBookAgriMaterialTransfer: () => ({ mutateAsync: fixture.bookTransfer, isPending: false }),
+    useBookAgriLotToCell: () => ({ mutateAsync: fixture.bookLot, isPending: false }),
+    useSyncAgriSiloCellFromLots: () => ({ mutateAsync: fixture.syncLot, isPending: false }),
+    validateAgriMaterialRoute: (...args: unknown[]) => fixture.validateRoute(...args),
+    suggestAgriLotLink: (...args: unknown[]) => fixture.suggestLot(...args),
   }
 })
 function selectWarehouse(id = 'warehouse-a') {
@@ -58,8 +88,15 @@ beforeEach(() => {
   fixture.patchCell.mockResolvedValue({})
   fixture.patchNode.mockResolvedValue({})
   fixture.patchEdge.mockResolvedValue({})
+  fixture.syncLot.mockResolvedValue({})
   fixture.createSystem.mockResolvedValue({ id: 'new-system' })
   fixture.createCell.mockResolvedValue({ id: 'new-cell' })
+  fixture.createNode.mockResolvedValue({ id: 'node-new' })
+  fixture.createEdge.mockResolvedValue({ id: 'edge-new' })
+  fixture.bookTransfer.mockResolvedValue({ ok: true })
+  fixture.bookLot.mockResolvedValue({ ok: true })
+  fixture.validateRoute.mockResolvedValue({ valid: true, path: ['node-a', 'node-b'] })
+  fixture.suggestLot.mockResolvedValue({ lot_id: 'LOT-S', cell_id: 'cell-a' })
 })
 afterEach(cleanup)
 
@@ -156,5 +193,487 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     const row = screen.getByRole('row', { name: /NODE-A/ })
     fireEvent.change(within(row).getByRole('combobox'), { target: { value: 'maintenance' } })
     await waitFor(() => expect(fixture.patchNode).toHaveBeenCalledExactlyOnceWith({ nodeId: 'node-a', warehouseId: 'warehouse-a', body: { status: 'maintenance' } }))
+  })
+
+  it('rendert Demo-Knoten inkl. Statuslabel und Untertitel', () => {
+    render(<MaterialflussPage />)
+    expect(screen.getByTestId('mf-node-n-intake')).toBeTruthy()
+    expect(screen.getByText('Annahme')).toBeTruthy()
+    expect(screen.getByText('Silozelle A1')).toBeTruthy()
+    expect(screen.getByText('Weizen')).toBeTruthy()
+    expect(screen.getByText('QS gesperrt')).toBeTruthy()
+  })
+
+  it('speichert Material/Lot einer Zelle und setzt Legacy-Silo', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+      legacy_silo_id: 'LEG-1',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    const materialInput = within(row).getByPlaceholderText('current_material_id')
+    const lotInput = within(row).getByPlaceholderText('current_lot_id')
+    fireEvent.change(materialInput, { target: { value: 'MAT-2' } })
+    fireEvent.change(lotInput, { target: { value: 'LOT-2' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Material / Lot speichern' }))
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cellId: 'cell-a',
+        warehouseId: 'warehouse-a',
+        body: expect.objectContaining({ current_material_id: 'MAT-2', current_lot_id: 'LOT-2' }),
+      }),
+    ))
+    fireEvent.change(within(row).getByPlaceholderText('legacy_silo_id'), { target: { value: 'LEG-9' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Legacy-Silo speichern' }))
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalledWith(
+      expect.objectContaining({
+        cellId: 'cell-a',
+        body: expect.objectContaining({ legacy_silo_id: 'LEG-9' }),
+      }),
+    ))
+    fireEvent.click(within(row).getByRole('button', { name: 'Aus silo_lots sync' }))
+    await waitFor(() => expect(fixture.syncLot).toHaveBeenCalled())
+  })
+
+  it('zeigt Live-Knoten im Graph nach Lagerwahl', () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'Annahme Live', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'Waage Live', node_type: 'scale', status: 'blocked', sub: 'gesperrt' },
+    ]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    expect(screen.getByTestId('mf-node-node-a')).toBeTruthy()
+    expect(screen.getByText('Annahme Live')).toBeTruthy()
+    expect(screen.getByText('Waage Live')).toBeTruthy()
+  })
+
+  it('legt Knoten und Kante an und prueft Route sowie Transfer/Lot', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.cells = [
+      { id: 'cell-a', cell_code: 'CELL-A', name: 'Zelle A', qs_status: 'frei', current_material_id: 'ART-1', current_lot_id: 'LOT-A', current_stock_kg: 50 },
+      { id: 'cell-b', cell_code: 'CELL-B', name: 'Zelle B', qs_status: 'frei', current_stock_kg: 0 },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      capacity_kg: 1000,
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.change(screen.getByLabelText('code'), { target: { value: ' NEW-N ' } })
+    fireEvent.change(screen.getByLabelText('name', { selector: '#mf-node-name' }), { target: { value: ' Neu ' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Knoten anlegen' }))
+    await waitFor(() => expect(fixture.createNode).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('von_node_id'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('nach_node_id'), { target: { value: 'node-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Kante anlegen' }))
+    await waitFor(() => expect(fixture.createEdge).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('Von-Knoten'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Knoten'), { target: { value: 'node-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.validateRoute).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('Von-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Silozelle'), { target: { value: 'cell-b' } })
+    fireEvent.change(screen.getByLabelText('quantity_kg'), { target: { value: '10' } })
+    fireEvent.change(screen.getByLabelText('article_id'), { target: { value: 'ART-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => expect(fixture.bookTransfer).toHaveBeenCalled())
+
+    fireEvent.change(screen.getByLabelText('lot_id (silo_lots)'), { target: { value: 'LOT-1' } })
+    fireEvent.change(screen.getByLabelText('Ziel-Silozelle'), { target: { value: 'cell-b' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Lot in Silozelle buchen' }))
+    await waitFor(() => expect(fixture.bookLot).toHaveBeenCalled())
+  })
+
+  it('patcht Kanten-Status, Verschleppung, Spuelcharge und Kapazitaet', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active', layout_x: '10', layout_y: '20' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      max_capacity_kg_h: '100',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const selects = within(edgeSection).getAllByRole('combobox')
+    fireEvent.change(selects[1], { target: { value: '1' } }) // Verschleppungsschutz an
+    fireEvent.change(selects[2], { target: { value: '1' } }) // Spülcharge nötig
+    await waitFor(() => expect(fixture.patchEdge.mock.calls.length).toBeGreaterThanOrEqual(2))
+
+    const capacityInput = within(edgeSection).getByDisplayValue('100')
+    fireEvent.change(capacityInput, { target: { value: '250' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+  })
+
+  it('speichert Silozellen-Layout und VK-Klasse sowie Knoten-Position', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      contamination_risk_class: 'A',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+      layout_x: '5',
+      layout_y: '6',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('contamination_risk_class'), { target: { value: 'B' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'VK speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cellId: 'cell-a',
+          body: expect.objectContaining({ contamination_risk_class: 'B' }),
+        }),
+      ),
+    )
+
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_x'), { target: { value: '11' } })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_y'), { target: { value: '22' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cellId: 'cell-a',
+          body: expect.objectContaining({ layout_x: 11, layout_y: 22 }),
+        }),
+      ),
+    )
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_x'), { target: { value: '33' } })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_y'), { target: { value: '44' } })
+    fireEvent.click(within(nodeRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchNode).toHaveBeenCalledWith(
+        expect.objectContaining({
+          nodeId: 'node-a',
+          body: expect.objectContaining({ layout_x: 33, layout_y: 44 }),
+        }),
+      ),
+    )
+  })
+
+  it('validiert Transfer und laedt Lot-Vorschlag', async () => {
+    fixture.cells = [
+      { id: 'cell-a', cell_code: 'CELL-A', name: 'Zelle A', qs_status: 'frei', current_material_id: 'ART-1', current_stock_kg: 50 },
+      { id: 'cell-b', cell_code: 'CELL-B', name: 'Zelle B', qs_status: 'frei', current_stock_kg: 0 },
+    ]
+    fixture.suggestLot.mockResolvedValue({
+      lot_id: 'LOT-S',
+      suggested_cell_id: 'cell-b',
+      suggested_cell_code: 'CELL-B',
+      suggested_quantity_kg: 12,
+    })
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.change(screen.getByLabelText('Von-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Silozelle'), { target: { value: 'cell-a' } })
+    fireEvent.change(screen.getByLabelText('quantity_kg'), { target: { value: '5' } })
+    fireEvent.change(screen.getByLabelText('article_id'), { target: { value: 'ART-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => {
+      expect(fixture.toast).toHaveBeenCalledWith(
+        expect.objectContaining({ title: 'Ungültiger Transfer' }),
+      )
+    })
+
+    fireEvent.change(screen.getByLabelText('ticket_id / Wiegeschein-Nr.'), { target: { value: 'T-1' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Vorschlag aus Ticket/Annahme' }))
+    await waitFor(() => expect(fixture.suggestLot).toHaveBeenCalled())
+    expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Vorschlag geladen' }))
+  })
+
+  it('meldet QS-Erfolg und lehnt ungültiges Layout ab', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(row).getByRole('combobox'), { target: { value: 'gesperrt' } })
+    await waitFor(() => expect(fixture.patchCell).toHaveBeenCalled())
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'QS-Status gespeichert' })))
+
+    fireEvent.change(within(row).getByPlaceholderText('layout_x'), { target: { value: 'xyz' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'layout_x ungültig' })))
+  })
+
+  it('setzt Kantenstatus zurück bei Fehler und speichert bei Erfolg', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'open',
+      contamination_guard_enabled: false,
+      flush_required: false,
+    }]
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Kante gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const statusSelect = within(edgeSection).getAllByRole('combobox')[0]
+    fireEvent.change(statusSelect, { target: { value: 'blocked' } })
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+    await waitFor(() => expect(statusSelect).toHaveValue('open'))
+
+    fixture.patchEdge.mockResolvedValueOnce({})
+    fireEvent.change(statusSelect, { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Kanten-Status gespeichert' })))
+  })
+
+  it('meldet Fehler bei Material/Lot und Sync', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      current_material_id: 'MAT-1',
+      current_lot_id: 'LOT-1',
+    }]
+    fixture.patchCell.mockRejectedValueOnce(new Error('Inventur gesperrt'))
+    fixture.syncLot.mockRejectedValueOnce(new Error('Sync down'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const row = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(row).getByPlaceholderText('current_material_id'), { target: { value: 'MAT-9' } })
+    fireEvent.click(within(row).getByRole('button', { name: 'Material / Lot speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Speichern fehlgeschlagen' })))
+    fireEvent.click(within(row).getByRole('button', { name: 'Aus silo_lots sync' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sync fehlgeschlagen' })))
+  })
+
+  it('speichert leeres Silozellen-Layout und Knoten-Status-Erfolg', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_x'), { target: { value: '' } })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_y'), { target: { value: '' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ layout_x: null, layout_y: null }),
+        }),
+      ),
+    )
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Silozellen-Layout gespeichert' })))
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByRole('combobox'), { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Knoten-Status gespeichert' })))
+  })
+
+  it('lehnt ungültiges Knoten-Layout ab und meldet VK-Fehler', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      contamination_risk_class: 'A',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+      layout_x: '5',
+      layout_y: '6',
+    }]
+    fixture.patchCell.mockRejectedValueOnce(new Error('VK gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('contamination_risk_class'), { target: { value: 'C' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'VK speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Speichern fehlgeschlagen' })))
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByPlaceholderText('layout_y'), { target: { value: 'nope' } })
+    fireEvent.click(within(nodeRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'layout_y ungültig' })))
+  })
+
+  it('deckt Route-Warnungen, Ablehnung, API-Fehler und fehlende Knoten ab', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Knoten fehlen' })))
+
+    fireEvent.change(screen.getByLabelText('Von-Knoten'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Knoten'), { target: { value: 'node-b' } })
+
+    fixture.validateRoute.mockResolvedValueOnce({
+      ok: true,
+      warnings: ['Kapazität knapp', 'Spülcharge empfohlen', 'Hinweis 3', 'Hinweis 4', 'Hinweis 5'],
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Route geprüft' })))
+
+    fixture.validateRoute.mockResolvedValueOnce({ ok: false, reason: 'Verschleppungsrisiko' })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Route nicht freigegeben' })))
+
+    fixture.validateRoute.mockRejectedValueOnce(new Error('Route-API down'))
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'API-Fehler' })))
+  })
+
+  it('setzt Kontaminations-/Spülschutz zurück bei Fehler und meldet Busy', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'open',
+      contamination_guard_enabled: false,
+      flush_required: false,
+    }]
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Guard gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const selects = within(edgeSection).getAllByRole('combobox')
+    fireEvent.change(selects[1], { target: { value: '1' } }) // Schutz an
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+    await waitFor(() => expect(selects[1]).toHaveValue('0'))
+
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Flush gesperrt'))
+    fireEvent.change(selects[2], { target: { value: '1' } }) // Spülcharge nötig
+    await waitFor(() => expect(selects[2]).toHaveValue('0'))
+  })
+
+  it('setzt Knoten-Status zurück bei Fehler', async () => {
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+    }]
+    fixture.patchNode.mockRejectedValueOnce(new Error('Knoten gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    const statusSelect = within(nodeRow).getByRole('combobox')
+    fireEvent.change(statusSelect, { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.patchNode).toHaveBeenCalled())
+    await waitFor(() => expect(statusSelect).toHaveValue('active'))
+  })
+
+  it('lehnt Transfer ohne Zellen und ungültige Kapazität ab', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      max_capacity_kg_h: '100',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Zellen fehlen' })))
+
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const capacityInput = within(edgeSection).getByDisplayValue('100')
+    fireEvent.change(capacityInput, { target: { value: '-5' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'kg/h ungültig' })))
+
+    fireEvent.change(capacityInput, { target: { value: '' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() =>
+      expect(fixture.patchEdge).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.objectContaining({ max_capacity_kg_h: null }) }),
+      ),
+    )
   })
 })

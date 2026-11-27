@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from testgrenze import ALLE_FACHROLLEN, ersetze_mandant, ersetze_nutzer
 from fastapi.testclient import TestClient
 
-from app.api.v1.endpoints import process_kernel_api
+from app.api.v1.endpoints import process_kernel_api, process_kernel_idempotency_lists
 from app.core.action_execution import ActionExecutionResult, ActionExecutionStatus
 from app.core.action_idempotency import get_action_idempotency_store
 
@@ -14,6 +14,7 @@ def _client() -> TestClient:
     ersetze_nutzer(app, *ALLE_FACHROLLEN)
     ersetze_mandant(app, "tenant-1")
     app.include_router(process_kernel_api.router)
+    app.include_router(process_kernel_idempotency_lists.router)
     return TestClient(app)
 
 

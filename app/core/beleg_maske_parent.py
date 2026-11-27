@@ -476,6 +476,21 @@ _PRODUCTION_NO_WORKFLOW_REASON = (
 )
 
 
+def _default_beleg_workflow(belegart: str, *, bucht: bool) -> dict[str, Any]:
+    """FSX-030 ProcessBand: statische Phasen; aktueller Stand kommt aus WorkflowState."""
+    phases: list[dict[str, str]] = [
+        {"key": "ERFASST", "label": "Erfasst"},
+        {"key": "FREIGEGEBEN", "label": "Freigegeben"},
+    ]
+    if bucht:
+        phases.append({"key": "GEBUCHT", "label": "Gebucht"})
+    return {
+        "processKey": f"beleg.{belegart}",
+        "documentType": belegart,
+        "phases": phases,
+    }
+
+
 def beleg_meridian_layout_extras(variante: Belegvariante) -> dict[str, Any]:
     """Meridian-Profil fuer Belegmasken (density, contextRail, tableProfile).
 
@@ -503,6 +518,9 @@ def beleg_layout(
         "floorplan": "transaction",
         "sectionNavigation": "anchors",
         "summaryPlacement": "footer",
+        # ProcessBand/Status nach den Eingaben (UX004): Status folgt den Feldern,
+        # aus denen er abgeleitet wird — nicht davor.
+        "statusPlacement": "afterFields",
         "stickyHeader": True,
         "stickyFooter": True,
     }
@@ -561,13 +579,12 @@ def build_beleg_maske_parent(
     - extra_aktionen: weitere Fachaktionen ergaenzen.
     - business_purpose, example_prompts, test_id, sensitive_fields: Belegart-spezifisch.
     - creation: abweichender Create-Flow (aber Default ist DocFlow).
-    - workflow: Prozess-Definition (BELEG-020 Entscheidung: ProcessBand koennte hier kommen,
-                aber aktuell ist noWorkflowReason Standard).
+    - workflow: Prozess-Definition (Default: DocFlow-Phasen + documentType fuer ProcessBand).
 
     ProcessBand-Invariante: Das Band zeigt den Stand eines *Vorgangs* (Phasen, eine naechste
     Aktion, Blocker). Es erbt von Parent; Child darf nicht eigene Phasendefinition in die
-    Maske schreiben. Die Phasen kommen aus workflow.phases (noch nicht konfiguriert als
-    Standard-Override; Erweiterung geplant).
+    Maske schreiben. Ohne explizites ``workflow`` liefert der Parent die Standard-Phasen
+    (Erfasst → Freigegeben → ggf. Gebucht) und ``documentType``.
 
     ProcessRibbon-Invariante: Das Ribbon navigiert die *Belegkette* (Schritt -> Zielmaske).
     Es ist **nicht** Teil des ProcessBand-Labels. Das Ribbon wird vom Renderer aus
@@ -695,8 +712,10 @@ def build_beleg_maske_parent(
 
     if workflow is not None:
         definition["workflow"] = workflow
+    elif no_workflow_reason is not None:
+        definition["noWorkflowReason"] = no_workflow_reason
     else:
-        definition["noWorkflowReason"] = no_workflow_reason or _DEFAULT_NO_WORKFLOW_REASON
+        definition["workflow"] = _default_beleg_workflow(belegart, bucht=bool(variante.bucht))
 
     if no_process_chain_reason:
         definition["noProcessChainReason"] = no_process_chain_reason

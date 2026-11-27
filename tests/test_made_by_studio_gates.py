@@ -119,6 +119,15 @@ def test_gate_e_accepts_stamm_listen_alias_for_legacy_worklist():
     assert check_gate_e("transporte/fahrer").passed
 
 
+def test_gate_e_accepts_ablose_aliases_for_legacy_screen_ids():
+    """Alt-IDs aus domain_batch15/Redirects zeigen auf verdrahtete Studio-Kanäle."""
+    assert check_gate_e("finance/bank-stamm").passed
+    assert check_gate_e("verkauf/kunde").passed
+    assert check_gate_e("verkauf/kunden-stamm").passed
+    assert check_gate_e("verkauf/auftraege/neu").passed
+    assert check_gate_e("zertifikate/neu").passed
+
+
 def test_runtime_evidence_resolves_both_visible_conditional_studio_definitions():
     source = """
     const screenId = comparisonId ? 'platform/studio-history-diff' : 'platform/studio-history'

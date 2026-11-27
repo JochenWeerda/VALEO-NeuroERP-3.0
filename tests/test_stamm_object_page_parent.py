@@ -163,6 +163,152 @@ def test_article_stock_and_crm_children_keep_domain_contracts() -> None:
     assert lead["creation"]["detailRoute"] == "/crm/lead/{entity_id}"
 
 
+def test_agrar_saatgut_and_duenger_have_native_creation() -> None:
+    """Create-Paritaet: keine Legacy-ObjectPage mehr fuer Neuanlage (STUDIO-MADE-OPEN-ROUTES)."""
+    for screen_id, endpoint, detail in (
+        ("agrar/saatgut", "/api/v1/agrar/saatgut/", "/agrar/saatgut/{entity_id}"),
+        ("agrar/duenger", "/api/v1/agrar/duenger/", "/agrar/duenger/{entity_id}"),
+    ):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        assert creation["detailRoute"] == detail
+        assert creation["permission"].endswith(".create")
+        assert any(field["required"] for field in creation["fields"])
+
+
+def test_bankkonto_kreditor_opportunity_have_native_creation() -> None:
+    """Batch 2 Create-Paritaet: Bankkonto/Kreditor/Opportunity ohne Legacy-Anlage."""
+    for screen_id, endpoint, detail, required_keys in (
+        (
+            "finance/bankkonto",
+            "/api/v1/banken/konten",
+            "/finance/bankkonto/{entity_id}",
+            {"iban", "bic", "bank_name", "kontoart"},
+        ),
+        (
+            "finance/kreditor",
+            "/api/v1/finance/creditors",
+            "/finance/kreditor/{entity_id}",
+            {"creditor_number", "company_name"},
+        ),
+        (
+            "crm/opportunity",
+            "/api/v1/crm/opportunities/",
+            "/crm/opportunity/{entity_id}",
+            {"name"},
+        ),
+    ):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        assert creation["detailRoute"] == detail
+        assert creation["permission"].endswith(".create")
+        keys = {field["key"] for field in creation["fields"]}
+        assert required_keys <= keys
+        assert "tenant_id" not in keys
+
+
+def test_einkauf_anfrage_has_native_creation() -> None:
+    """Batch 3: Einkaufsanfrage Create ohne Legacy-ObjectPage."""
+    screen = get_screen_definition("einkauf/anfrage")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/einkauf/anfragen"
+    assert creation["detailRoute"] == "/einkauf/anfrage/{entity_id}"
+    assert creation["permission"] == "einkauf.anfrage.create"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"typ", "anforderer"} <= keys
+    assert any(field.get("required") and field["key"] == "anforderer" for field in creation["fields"])
+
+
+def test_qualitaet_reklamation_has_native_creation() -> None:
+    """Batch 3: Reklamation Create mit responseIdKey reklamation_id."""
+    screen = get_screen_definition("qualitaet/reklamation")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/reklamationen"
+    assert creation["detailRoute"] == "/qualitaet/reklamation/{entity_id}"
+    assert creation["responseIdKey"] == "reklamation_id"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"lieferant_id", "typ", "zustaendiger", "frist_datum", "positionen"} <= keys
+
+
+def test_crm_kontakt_has_native_creation() -> None:
+    """Batch 3: Kontakt Create (nested data.id in der API-Antwort)."""
+    screen = get_screen_definition("crm/kontakt")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/crm/contacts/"
+    assert creation["detailRoute"] == "/crm/kontakt/{entity_id}"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"customer_id", "first_name", "last_name", "email"} <= keys
+
+
+def test_qualitaet_labor_has_native_creation() -> None:
+    """Batch 3: Laborauftrag Create an Detail-SD (nicht Listen-ID)."""
+    screen = get_screen_definition("qualitaet/labor-detail")
+    assert screen is not None
+    creation = screen["creation"]
+    assert creation["endpoint"] == "/api/v1/qualitaet/labor-auftraege"
+    assert creation["detailRoute"] == "/qualitaet/labor/{entity_id}"
+    keys = {field["key"] for field in creation["fields"]}
+    assert {"chargenId", "labor"} <= keys
+
+
+def test_service_anfrage_has_native_creation() -> None:
+    """Batch 3: Service-Anfrage Create (neu + detail)."""
+    for screen_id in ("service/anfrage/neu", "service/anfrage-detail"):
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == "/api/v1/service/anfragen"
+        assert creation["detailRoute"] == "/service/anfrage/{entity_id}"
+        keys = {field["key"] for field in creation["fields"]}
+        assert {"kunde", "betreff"} <= keys
+
+
+def test_betriebsprofil_mitarbeiter_betriebsstaette_have_native_creation() -> None:
+    """Batch 4: Betriebsprofil, Mitarbeiter, Betriebsstaette."""
+    cases = (
+        ("crm/betriebsprofil", "/api/v1/crm/betriebsprofile", {"name"}, None),
+        ("personal/mitarbeiter/neu", "/api/v1/personal/mitarbeiter", {"name", "email"}, None),
+        ("stammdaten/betriebsstaetten", "/api/v1/stammdaten/betriebsstaetten",
+         {"filial_nr", "bezeichnung"}, "filial_nr"),
+    )
+    for screen_id, endpoint, required, response_id_key in cases:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        keys = {field["key"] for field in creation["fields"]}
+        assert required <= keys
+        if response_id_key:
+            assert creation["responseIdKey"] == response_id_key
+
+
+def test_hausbank_mengeneinheit_vertreter_have_native_creation() -> None:
+    """Batch 5: Hausbank, Mengeneinheit, Vertreter."""
+    cases = (
+        ("stammdaten/hausbanken", "/api/v1/stammdaten/hausbanken",
+         {"bank_nr", "bezeichnung", "iban"}, "bank_nr"),
+        ("stammdaten/mengeneinheiten", "/api/v1/artikel/mengeneinheiten/stamm",
+         {"einheit_kuerzel", "bezeichnung"}, None),
+        ("crm/vertreter", "/api/v1/crm/vertreter", {"vertreter_nr", "name"}, "vertreter_nr"),
+    )
+    for screen_id, endpoint, required, response_id_key in cases:
+        screen = get_screen_definition(screen_id)
+        assert screen is not None
+        creation = screen["creation"]
+        assert creation["endpoint"] == endpoint
+        keys = {field["key"] for field in creation["fields"]}
+        assert required <= keys
+        if response_id_key:
+            assert creation["responseIdKey"] == response_id_key
+
+
 def test_futtermittel_and_artikel_stamm_keep_domain_tabs() -> None:
     efm = get_screen_definition("futtermittel/einzelfuttermittel")
     mfm = get_screen_definition("futtermittel/mischfuttermittel")
@@ -254,6 +400,12 @@ def test_batch9_stamm_builders_pass_gate_a(screen_id: str) -> None:
         for table in screen["tables"]:
             endpoint = sources[table["dataSourceKey"]]
             assert endpoint.startswith("/api/") and "{" not in endpoint, screen_id
+    elif screen["layout"].get("floorplan") == "cockpit":
+        # Overview-Cockpits (z. B. Command Monitor) ohne Objektpfad — nur API-Quellen und Tabellen.
+        entity = next((ds for ds in screen["dataSources"] if ds["key"] == "entity"), None)
+        if entity is not None:
+            assert str(entity["endpoint"]).startswith("/api/"), screen_id
+        assert screen.get("tables") or screen.get("summary"), screen_id
     else:
         entity = next(ds for ds in screen["dataSources"] if ds["key"] == "entity")
         assert "{entity_id}" in entity["endpoint"] or "{id}" in entity["endpoint"]

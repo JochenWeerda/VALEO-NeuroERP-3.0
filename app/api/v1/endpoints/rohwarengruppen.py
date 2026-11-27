@@ -498,3 +498,20 @@ def staffel_berechnen(
         ergebnis_typ=d["ergebnis_typ"],
         abrechnung_typ=d["abrechnung_typ"],
     )
+
+
+@router.get("/{gruppe_nr}", response_model=RohwarengruppeOut, summary="Rohwarengruppe abrufen")
+def get_rohwarengruppe(
+    gruppe_nr: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    """Nach allen statischen Unterpfaden registriert, damit /schemata|/qualitaeten|/staffeln nicht geschluckt werden."""
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.rohwarengruppen
+        WHERE tenant_id = :tid AND (gruppe_nr = :nr OR id::text = :nr)
+    """), {"tid": tenant_id, "nr": gruppe_nr}).fetchone()
+    if not row:
+        raise HTTPException(404, "Rohwarengruppe nicht gefunden.")
+    return RohwarengruppeOut(**dict(row._mapping))
+

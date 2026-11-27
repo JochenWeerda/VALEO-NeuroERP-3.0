@@ -94,7 +94,7 @@ export function DlgPositionDetails({
               <p><strong>Status:</strong> {drill.severity}</p>
             </div>
             <Tabs defaultValue="ek">
-              <TabsList>
+              <TabsList aria-label="Positionsdetails">
                 <TabsTrigger value="ek">Einkauf offen</TabsTrigger>
                 <TabsTrigger value="vk">Verkauf offen</TabsTrigger>
                 <TabsTrigger value="movements">Bewegungen</TabsTrigger>

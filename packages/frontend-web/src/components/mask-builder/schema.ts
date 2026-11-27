@@ -36,7 +36,7 @@ export type ScreenActionZone = 'header' | 'footer' | 'commit'
 export type ScreenVoiceProvider = 'webspeech' | 'server'
 export type ScreenAdapterType = 'native' | 'maskConfig' | 'crmMaskJson' | 'formSchema' | 'specialized'
 /** Nur explizit registrierte Spezialkomponenten. Weitere Typen brauchen eigenen Dateibesitz. */
-export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench'
+export type SpecializedComponentType = 'disposition_board' | 'intake' | 'weighing' | 'finance_workbench' | 'feed_workbench' | 'admin_workbench' | 'agrar_workbench' | 'lager_workbench' | 'pricing_workbench' | 'fleet_workbench'
 
 export interface ScreenSpecializedComponent {
   type: SpecializedComponentType
@@ -602,6 +602,10 @@ export interface ScreenDefinition {
     detailRoute: string
     cancelRoute?: string
     defaults?: Record<string, unknown>
+    /** Key of the created entity id in the POST response (default `id`). */
+    responseIdKey?: string
+    /** Wrap the flat form payload as `{ [payloadEnvelope]: payload }` (e.g. Training `data`). */
+    payloadEnvelope?: string
   }
   creationContext?: { screen_id: string; definition_hash: string }
   schemaVersion: 1
@@ -727,7 +731,7 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
 
   for (const action of screen.actions ?? []) {
     if (action.surfaceOnly !== undefined && (typeof action.surfaceOnly !== 'boolean'
-      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
+      || (action.surfaceOnly && (!['intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench', 'fleet_workbench'].includes(screen.specialized?.type ?? '') || (action.zone && action.zone !== 'header'))))) errors.push('surfaceOnly requires a registered domain action')
   }
   if (screen.flowSpineWorkspace !== undefined) {
     const key = screen.flowSpineWorkspace.processKey
@@ -858,15 +862,33 @@ export function validateScreenDefinition(screen: ScreenDefinition): string[] {
     errors.push('twin.endpoint is required')
   }
   if (screen.specialized) {
-    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench'].includes(screen.specialized.type)) {
+    if (!['disposition_board', 'intake', 'weighing', 'finance_workbench', 'feed_workbench', 'admin_workbench', 'agrar_workbench', 'lager_workbench', 'pricing_workbench', 'fleet_workbench'].includes(screen.specialized.type)) {
       errors.push(`specialized.type is invalid: ${String(screen.specialized.type)}`)
     }
     const nativeBindings: Record<string, string[]> = {
-      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange'],
+      intake: ['annahme/lkw-registrierung', 'annahme/qualitaets-check', 'annahme/warteschlange', 'annahme/rohware'],
       finance_workbench: ['finance/bank-abgleich', 'mahnwesen/mahnlauf'],
-      admin_workbench: ['admin/webhooks-liste', 'admin/control-center'],
+      admin_workbench: [
+        'admin/webhooks-liste',
+        'admin/control-center',
+        'admin/control-center/agent-ops',
+        'admin/control-center/superglue',
+        'admin/GapPipelineConsole',
+        'admin/agenten-integration',
+        'admin/postfaecher-anmeldung-rueckruf',
+        'admin/screen-studio',
+        'admin/setup',
+        'admin/setup/dms-integration',
+        'admin/voice-channel',
+        'admin/vordruck-editor',
+        'studio/workspace-composition-preview',
+      ],
       feed_workbench: ['futtermittel/rationseditor', 'futtermittel/rationsoptimierung', 'portal/rationsoptimierung', 'futtermittel/fuetterungsdokumentation-mobil'],
       weighing: ['waage/liste', 'waage/neu', 'waage/waagen-liste', 'waage/wiegungen', 'waage/wiegungen-liste'],
+      agrar_workbench: ['agrar/kunden-schlagkartei', 'agrar/milchvieh-karte', 'agrar/ernte-annahme-erfassung', 'annahme/abrechnung'],
+      lager_workbench: ['lager/materialfluss'],
+      pricing_workbench: ['konditionen/konditionssystem'],
+      fleet_workbench: ['fuhrpark/fahrzeug-vertiefung'],
     }
     const allowed = nativeBindings[screen.specialized.type]
     if (allowed && (!surfaceScreenId || !allowed.includes(surfaceScreenId) || screen.specialized.id !== surfaceScreenId)) errors.push('specialized native binding is invalid')

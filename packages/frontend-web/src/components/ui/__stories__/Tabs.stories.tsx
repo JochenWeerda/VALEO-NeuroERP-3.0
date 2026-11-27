@@ -21,7 +21,7 @@ type Story = StoryObj<typeof Tabs>
 export const SegmentedControl: Story = {
   render: () => (
     <Tabs defaultValue="uebersicht" className="max-w-xl">
-      <TabsList>
+      <TabsList aria-label="Beispiel">
         <TabsTrigger value="uebersicht">Übersicht</TabsTrigger>
         <TabsTrigger value="details">Details</TabsTrigger>
         <TabsTrigger value="verlauf">Verlauf</TabsTrigger>

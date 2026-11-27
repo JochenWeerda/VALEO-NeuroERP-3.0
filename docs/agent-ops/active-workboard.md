@@ -1313,6 +1313,9 @@ Meilenstein: M6 Spiegelbetrieb L3 (Nutzerauftrag 25.11.2026). Auf der vorhandene
 ## M5-UMGEBUNG-AGENTENMATRIX-20261125 — zur Abnahme, Claude Code (M5)
 Meilenstein: M5 (Nutzerentscheid 25.11.2026). app/core/umgebung.py: VALEO_UMGEBUNG local|ci|staging|production, nicht gesetzt = production (geschlossen). Agenten schreiben autonom nur in LOCAL/CI ueber alle deklarierten Kommandowege; STAGING/PRODUCTION Freigabe je Aktion; Fachregeln der Maske gelten ueberall. docker-compose.yml setzt local. Fiskaly-Werte aus .env.example entfernt (Werte nicht ausgegeben). Bestand der Umgebungen: docs/security/umgebungen-und-agentenrechte.md (nur LOCAL und CI in Betrieb).
 
+## STUDIO-MADE-OPEN-ROUTES-20261125 — zur Abnahme, Cursor Cloud (PR #213)
+Nutzerziel 25.11.2026 / Goal 26.11.2026 Bahn 1 (M2 Masken-Routen). **Stand 26.11.2026 (PR #213, Branch `cursor/studio-made-open-routes-8809`):** Inventar Masken-Studio: `handgebaut` **0**, `builder_altmuster` **0** (Live); Migration-Inventar Routen `hand_built` **0**. Gates A/B/C/E **829/829**; Gate-D Mock **1160/1160**. **Ratsche:** `handgebaut_routen`/`altmuster_routen` auf **[]** absenken (echter Abbau). **Nicht dieser Slice:** `aktionen_nicht_deklariert` / `aktionen_nicht_verfuegbar` / MCP/CLI-Aktionslücken → Codex. Gate D Live-SSO + Image-CI → Codex `STUDIO-ENTITY-RELEASE`. Dateibesitz: `config/mask_studio_ratchet.json` (nur Routen-Buckets), Frontend Studio-Routen/Specialized, QA/Handshake. Merge: nur Claude Admin nach CI-grün am Head; melden „bereit zum Merge, Head \<sha\>“.
+
 ## M2-UEBERNAHME-CODEX-CLAIMS-FREI-20261125 — Hinweis, Claude Code (M2)
 Nutzer 25.11.2026: Codex arbeitet nicht mehr, M2 uebernimmt Claude Code. Alle offenen Codex-Claims dieses Workboards (STUDIO-*, QUALITY-GATE-MASK-CONTRACT, Runtime46 u. a.) gelten als freigegeben; offene Codex-PRs (#163, #178, #179) fuehrt Claude Code weiter.
 

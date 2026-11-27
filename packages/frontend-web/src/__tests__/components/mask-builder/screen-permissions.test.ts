@@ -33,6 +33,92 @@ describe('authenticated mask permission projection', () => {
     expect(getScreenPermissions(lead, user([], ['CRM_LESEN']))).toEqual([])
     expect(getScreenPermissions(lead, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.lead.create'])
   })
+  it('matches CRM write roles for Kontakt creation', () => {
+    const kontakt: ScreenDefinition = { ...screen, id: 'crm/kontakt', domain: 'crm', actions: [],
+      creation: { endpoint: '/api/v1/crm/contacts/', permission: 'crm.contact.create', detailRoute: '/crm/kontakt/{entity_id}' } }
+    expect(getScreenPermissions(kontakt, user([], ['FINANCE_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(kontakt, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.contact.create'])
+  })
+  it('matches SCHREIBEN AGRAR roles for Saatgut/Duenger creation', () => {
+    const saatgut: ScreenDefinition = { ...screen, id: 'agrar/saatgut', domain: 'agrar', actions: [],
+      creation: { endpoint: '/api/v1/agrar/saatgut/', permission: 'agrar.saatgut.create', detailRoute: '/agrar/saatgut/{entity_id}' } }
+    expect(getScreenPermissions(saatgut, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(saatgut, user([], ['AGRAR_BEARBEITEN']))).toEqual(['agrar.saatgut.create'])
+    expect(getScreenPermissions(saatgut, user([], ['HARVEST_ADMIN']))).toEqual(['agrar.saatgut.create'])
+  })
+  it('matches FINANCE write roles for Bankkonto/Kreditor creation', () => {
+    const bank: ScreenDefinition = { ...screen, id: 'finance/bankkonto', domain: 'finance', actions: [],
+      creation: { endpoint: '/api/v1/banken/konten', permission: 'finance.bankkonto.create', detailRoute: '/finance/bankkonto/{entity_id}' } }
+    expect(getScreenPermissions(bank, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(bank, user([], ['FINANCE_BEARBEITEN']))).toEqual(['finance.bankkonto.create'])
+  })
+  it('matches CRM/SALES write roles for Opportunity creation', () => {
+    const opp: ScreenDefinition = { ...screen, id: 'crm/opportunity', domain: 'crm', actions: [],
+      creation: { endpoint: '/api/v1/crm/opportunities/', permission: 'crm.opportunity.create', detailRoute: '/crm/opportunity/{entity_id}' } }
+    expect(getScreenPermissions(opp, user([], ['FINANCE_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(opp, user([], ['CRM_BEARBEITEN']))).toEqual(['crm.opportunity.create'])
+    expect(getScreenPermissions(opp, user([], ['SALES_ADMIN']))).toEqual(['crm.opportunity.create'])
+  })
+  it('matches EINKAUF write roles for Anfrage creation', () => {
+    const anfrage: ScreenDefinition = { ...screen, id: 'einkauf/anfrage', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/anfragen', permission: 'einkauf.anfrage.create', detailRoute: '/einkauf/anfrage/{entity_id}' } }
+    expect(getScreenPermissions(anfrage, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(anfrage, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.anfrage.create'])
+  })
+  it('matches EINKAUF write roles for Angebot and Anlieferavis creation', () => {
+    const angebot: ScreenDefinition = { ...screen, id: 'einkauf/angebot', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/angebote', permission: 'einkauf.angebot.create', detailRoute: '/einkauf/angebot/{entity_id}' } }
+    const avis: ScreenDefinition = { ...screen, id: 'einkauf/anlieferavis', domain: 'einkauf', actions: [],
+      creation: { endpoint: '/api/v1/einkauf/anlieferavis', permission: 'einkauf.anlieferavis.create', detailRoute: '/einkauf/anlieferavis/{entity_id}' } }
+    expect(getScreenPermissions(angebot, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(angebot, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['einkauf.angebot.create'])
+    expect(getScreenPermissions(avis, user([], ['EINKAUF_ADMIN']))).toEqual(['einkauf.anlieferavis.create'])
+  })
+  it('matches QUALITAET write roles for Reklamation creation', () => {
+    const rek: ScreenDefinition = { ...screen, id: 'qualitaet/reklamation', domain: 'qualitaet', actions: [],
+      creation: { endpoint: '/api/v1/reklamationen', permission: 'qualitaet.reklamation.create', detailRoute: '/qualitaet/reklamation/{entity_id}', responseIdKey: 'reklamation_id' } }
+    expect(getScreenPermissions(rek, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(rek, user([], ['LAGER_BEARBEITEN']))).toEqual(['qualitaet.reklamation.create'])
+    expect(getScreenPermissions(rek, user([], ['AGRAR_ADMIN']))).toEqual(['qualitaet.reklamation.create'])
+  })
+  it('matches AGRAR write roles for Labor creation', () => {
+    const labor: ScreenDefinition = { ...screen, id: 'qualitaet/labor-detail', domain: 'qualitaet', actions: [],
+      creation: { endpoint: '/api/v1/qualitaet/labor-auftraege', permission: 'qualitaet.labor.create', detailRoute: '/qualitaet/labor/{entity_id}' } }
+    expect(getScreenPermissions(labor, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(labor, user([], ['AGRAR_BEARBEITEN']))).toEqual(['qualitaet.labor.create'])
+  })
+  it('matches STAMMDATEN write roles for Artikel-Stamm creation', () => {
+    const stoff: ScreenDefinition = { ...screen, id: 'stammdaten/artikel-stoffstrom', domain: 'stammdaten', actions: [],
+      creation: { endpoint: '/api/v1/artikel/stoffstrom', permission: 'stammdaten.stoffstrom.create', detailRoute: '/stammdaten/artikel-stoffstrom/{entity_id}' } }
+    expect(getScreenPermissions(stoff, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(stoff, user([], ['EINKAUF_BEARBEITEN']))).toEqual(['stammdaten.stoffstrom.create'])
+    expect(getScreenPermissions(stoff, user([], ['LAGER_ADMIN']))).toEqual(['stammdaten.stoffstrom.create'])
+  })
+  it('matches CRM/SALES write roles for Verkauf-Kunde creation', () => {
+    const kunde: ScreenDefinition = { ...screen, id: 'verkauf/kunde-neu', domain: 'verkauf', actions: [],
+      creation: { endpoint: '/api/v1/crm/customers/', permission: 'verkauf.kunde.create', detailRoute: '/crm/customer-360/{entity_id}' } }
+    expect(getScreenPermissions(kunde, user([], ['EINKAUF_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(kunde, user([], ['SALES_BEARBEITEN']))).toEqual(['verkauf.kunde.create'])
+    expect(getScreenPermissions(kunde, user([], ['CRM_ADMIN']))).toEqual(['verkauf.kunde.create'])
+  })
+  it('matches SALES write roles for Individualpreis creation', () => {
+    const preis: ScreenDefinition = { ...screen, id: 'preise/individualpreise', domain: 'preise', actions: [],
+      creation: { endpoint: '/api/v1/preise/individualpreise', permission: 'preise.individualpreis.create', detailRoute: '/preise/individualpreise/{entity_id}' } }
+    expect(getScreenPermissions(preis, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(preis, user([], ['SALES_BEARBEITEN']))).toEqual(['preise.individualpreis.create'])
+  })
+  it('matches KONTRAKT write roles for Zu-/Abschlaggruppe creation', () => {
+    const zagr: ScreenDefinition = { ...screen, id: 'preise/zu-abschlaggruppen', domain: 'preise', actions: [],
+      creation: { endpoint: '/api/v1/kontrakte/zuabschlagsgruppen', permission: 'preise.zuabschlaggruppe.create', detailRoute: '/preise/zu-abschlaggruppen/{entity_id}' } }
+    expect(getScreenPermissions(zagr, user([], ['SALES_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(zagr, user([], ['KONTRAKT_BEARBEITEN']))).toEqual(['preise.zuabschlaggruppe.create'])
+  })
+  it('matches PERSONAL write roles for Schulung creation', () => {
+    const schulung: ScreenDefinition = { ...screen, id: 'personal/schulung-neu', domain: 'personal', actions: [],
+      creation: { endpoint: '/api/v1/training/courses', permission: 'personal.schulung.create', detailRoute: '/personal/schulungen/{entity_id}', payloadEnvelope: 'data' } }
+    expect(getScreenPermissions(schulung, user([], ['CRM_BEARBEITEN']))).toEqual([])
+    expect(getScreenPermissions(schulung, user([], ['PERSONAL_BEARBEITEN']))).toEqual(['personal.schulung.create'])
+  })
 })
 
 
@@ -126,4 +212,136 @@ it('requires the backend admin role for renaming a branch', () => {
   } as ScreenDefinition
   expect(getScreenPermissions(branch, user(['admin:all']))).toEqual([])
   expect(getScreenPermissions(branch, user([], ['admin']))).toEqual(['admin:all'])
+})
+
+
+describe('studio workbench permission prefixes (M2 open routes)', () => {
+  const action = (permission: string): ScreenDefinition => ({
+    ...screen,
+    id: `wb/${permission}`,
+    actions: [{ key: 'act', label: 'Act', permission }],
+  })
+
+  it('grants rohwarengruppe via LAGER and vermehrung via AGRAR/KONTRAKT', () => {
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), user([], ['LAGER_BEARBEITEN']))).toEqual([
+      'agrar.rohwarengruppe.create',
+    ])
+    expect(getScreenPermissions(action('agrar.vermehrungsvertrag.create'), user([], ['KONTRAKT_ADMIN']))).toEqual([
+      'agrar.vermehrungsvertrag.create',
+    ])
+  })
+
+  it('grants Mengenzeitraum/ZuAbschlag via KONTRAKT and Zins via FINANCE', () => {
+    expect(getScreenPermissions(action('kontrakte.mengenzeitraum.create'), user([], ['KONTRAKT_BEARBEITEN']))).toEqual([
+      'kontrakte.mengenzeitraum.create',
+    ])
+    expect(getScreenPermissions(action('finance.zinsabrechnung.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'finance.zinsabrechnung.create',
+    ])
+  })
+
+  it('grants Admin-Ops AI/Command/Suite only to ADMIN/manager (+ Finance for AI)', () => {
+    expect(getScreenPermissions(action('admin.ai_approvals.decide'), user([], ['FINANCE_BEARBEITEN']))).toEqual([
+      'admin.ai_approvals.decide',
+    ])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), user([], ['ADMIN']))).toEqual([
+      'admin.command_monitor.read',
+    ])
+    expect(getScreenPermissions(action('admin.admin_suite.read'), user([], ['manager']))).toEqual([
+      'admin.admin_suite.read',
+    ])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), user([], ['CRM_BEARBEITEN']))).toEqual([])
+  })
+
+  it('grants Agrar-Arbeitsplaetze und Materialfluss den Fachrollen', () => {
+    expect(getScreenPermissions(action('agrar.schlagkartei.read'), user([], ['AGRAR_LESEN']))).toEqual([
+      'agrar.schlagkartei.read',
+    ])
+    expect(getScreenPermissions(action('agrar.settlement.write'), user([], ['CRM_ADMIN']))).toEqual([
+      'agrar.settlement.write',
+    ])
+    expect(getScreenPermissions(action('lager.materialfluss.write'), user([], ['LAGER_LESEN']))).toEqual([
+      'lager.materialfluss.write',
+    ])
+  })
+
+  it('grants Service-Anfrage fachlich und Personal/Mitarbeiter', () => {
+    expect(getScreenPermissions(action('service.anfrage.create'), user([], ['LAGER_ADMIN']))).toEqual([
+      'service.anfrage.create',
+    ])
+    expect(getScreenPermissions(action('personal.mitarbeiter.create'), user([], ['PERSONAL_ADMIN']))).toEqual([
+      'personal.mitarbeiter.create',
+    ])
+  })
+
+  it('grants CRM/Opportunity/Einkauf/Qualitaet Fallback-Rollen ohne Screen-Projektion', () => {
+    expect(getScreenPermissions(action('crm.contact.create'), user([], ['CRM_ADMIN']))).toEqual(['crm.contact.create'])
+    expect(getScreenPermissions(action('crm.betriebsprofil.create'), user([], ['manager']))).toEqual(['crm.betriebsprofil.create'])
+    expect(getScreenPermissions(action('crm.opportunity.create'), user([], ['SALES_BEARBEITEN']))).toEqual(['crm.opportunity.create'])
+    expect(getScreenPermissions(action('einkauf.supplier.create'), user([], ['EINKAUF_ADMIN']))).toEqual(['einkauf.supplier.create'])
+    expect(getScreenPermissions(action('qualitaet.reklamation.create'), user([], ['SALES_ADMIN']))).toEqual(['qualitaet.reklamation.create'])
+    expect(getScreenPermissions(action('qualitaet.labor.create'), user([], ['HARVEST_BEARBEITEN']))).toEqual(['qualitaet.labor.create'])
+  })
+
+  it('grants Stammdaten/Verkauf/Preise/Produktion/FiBu/Lager-PIV Fallback-Rollen', () => {
+    expect(getScreenPermissions(action('stammdaten.betriebsstaette.create'), user([], ['SALES_BEARBEITEN']))).toEqual([
+      'stammdaten.betriebsstaette.create',
+    ])
+    expect(getScreenPermissions(action('verkauf.kunde.create'), user([], ['CRM_BEARBEITEN']))).toEqual(['verkauf.kunde.create'])
+    expect(getScreenPermissions(action('preise.individualpreis.create'), user([], ['SALES_ADMIN']))).toEqual([
+      'preise.individualpreis.create',
+    ])
+    expect(getScreenPermissions(action('preise.zuabschlaggruppe.create'), user([], ['KONTRAKT_BEARBEITEN']))).toEqual([
+      'preise.zuabschlaggruppe.create',
+    ])
+    expect(getScreenPermissions(action('produktion.rezepturgruppe.create'), user([], ['FUTTERMITTEL_ADMIN']))).toEqual([
+      'produktion.rezepturgruppe.create',
+    ])
+    expect(getScreenPermissions(action('fibu.geschaeftsjahr.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'fibu.geschaeftsjahr.create',
+    ])
+    expect(getScreenPermissions(action('fibu.zahlungsmeldung.create'), user([], ['FINANCE_BEARBEITEN']))).toEqual([
+      'fibu.zahlungsmeldung.create',
+    ])
+    expect(getScreenPermissions(action('lager.massebilanz.create'), user([], ['HARVEST_ADMIN']))).toEqual([
+      'lager.massebilanz.create',
+    ])
+    expect(getScreenPermissions(action('lager.piv.create'), user([], ['LAGER_BEARBEITEN']))).toEqual(['lager.piv.create'])
+    expect(getScreenPermissions(action('agribusiness.field_service.create'), user([], ['AGRAR_BEARBEITEN']))).toEqual([
+      'agribusiness.field_service.create',
+    ])
+  })
+
+  it('deckt Manager-/Admin-Alternativrollen und fehlende scopes/roles ab', () => {
+    const bare = { sub: 'x', name: 'X', email: 'x@example.invalid', exp: 9 } as User
+    expect(getScreenPermissions(screen, bare)).toEqual([])
+
+    const mgr = user([], ['manager'])
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), mgr)).toEqual(['agrar.rohwarengruppe.create'])
+    expect(getScreenPermissions(action('kontrakte.mengenzeitraum.create'), mgr)).toEqual(['kontrakte.mengenzeitraum.create'])
+    expect(getScreenPermissions(action('finance.zinsabrechnung.create'), mgr)).toEqual(['finance.zinsabrechnung.create'])
+    expect(getScreenPermissions(action('admin.ai_approvals.read'), mgr)).toEqual(['admin.ai_approvals.read'])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), mgr)).toEqual(['admin.command_monitor.read'])
+    expect(getScreenPermissions(action('admin.admin_suite.read'), mgr)).toEqual(['admin.admin_suite.read'])
+    expect(getScreenPermissions(action('lager.materialfluss.read'), mgr)).toEqual(['lager.materialfluss.read'])
+    expect(getScreenPermissions(action('agrar.schlagkartei.read'), mgr)).toEqual(['agrar.schlagkartei.read'])
+    expect(getScreenPermissions(action('personal.mitarbeiter.create'), mgr)).toEqual(['personal.mitarbeiter.create'])
+    expect(getScreenPermissions(action('service.anfrage.create'), mgr)).toEqual(['service.anfrage.create'])
+
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), user([], ['LAGER_ADMIN']))).toEqual([
+      'agrar.rohwarengruppe.create',
+    ])
+    expect(getScreenPermissions(action('kontrakte.zuabschlag.create'), user([], ['KONTRAKT_ADMIN']))).toEqual([
+      'kontrakte.zuabschlag.create',
+    ])
+    expect(getScreenPermissions(action('finance.kreditor.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'finance.kreditor.create',
+    ])
+    expect(getScreenPermissions(action('lager.materialfluss.read'), user([], ['LAGER_LESEN']))).toEqual([
+      'lager.materialfluss.read',
+    ])
+    expect(getScreenPermissions(action('agrar.settlement.read'), user([], ['AGRAR_LESEN']))).toEqual([
+      'agrar.settlement.read',
+    ])
+  })
 })

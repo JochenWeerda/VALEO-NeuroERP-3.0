@@ -132,7 +132,11 @@ export default function GapPipelineConsole() {
   const pipelineComplete = status?.pipeline_complete ?? false
 
   return (
-    <div className="container mx-auto py-6 max-w-4xl">
+    <div
+      className="container mx-auto py-6 max-w-4xl"
+      role="region"
+      aria-label="GAP-Pipeline Arbeitsbereich"
+    >
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">GAP-Pipeline Konsole</h1>

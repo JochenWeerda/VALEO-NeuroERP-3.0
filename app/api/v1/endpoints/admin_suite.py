@@ -18,7 +18,6 @@ from app.core.rbac import ROLE_PERMISSIONS, Role
 from app.core.tenant import get_tenant_id
 from app.services.integration_bootstrap import build_integration_bootstrap_summary
 
-
 router = APIRouter(prefix="/admin-suite", tags=["admin-suite", "readiness"])
 
 ReadinessStatus = Literal["ready", "warning", "blocked", "unchecked"]
@@ -72,7 +71,6 @@ MIGRATION_PROFILES = (
 )
 RECONCILIATION_KEYS = ("record_counts", "balances", "open_items", "inventory")
 
-
 class ReadinessEvidence(BaseModel):
     key: str
     label: str
@@ -81,7 +79,6 @@ class ReadinessEvidence(BaseModel):
     evidence: str
     details: list[str] = Field(default_factory=list)
     checked_at: datetime
-
 
 class AdminSuiteReadinessOut(BaseModel):
     status: ReadinessStatus
@@ -94,7 +91,6 @@ class AdminSuiteReadinessOut(BaseModel):
     checked_at: datetime
     evidence: list[ReadinessEvidence]
 
-
 class SetupStepOut(BaseModel):
     key: str
     label: str
@@ -104,7 +100,6 @@ class SetupStepOut(BaseModel):
     responsible: str | None = None
     updated_at: datetime | None = None
 
-
 class SetupSessionOut(BaseModel):
     tenant_id: str
     status: SetupStepStatus
@@ -113,20 +108,22 @@ class SetupSessionOut(BaseModel):
     updated_at: datetime | None = None
     steps: list[SetupStepOut]
 
-
 class SetupStepUpdate(BaseModel):
     status: SetupStepStatus
     evidence: str | None = Field(default=None, max_length=1000)
     responsible: str | None = Field(default=None, max_length=120)
 
-
 class MigrationProfileOut(BaseModel):
+    id: str | None = None
     key: str
     label: str
     status: Literal["available", "blocked", "planned"]
     adapter: str | None = None
     notes: str
 
+    def model_post_init(self, __context: Any) -> None:  # noqa: N802
+        if not self.id:
+            object.__setattr__(self, "id", self.key)
 
 class MigrationBatchCreate(BaseModel):
     source_profile: str
@@ -135,10 +132,8 @@ class MigrationBatchCreate(BaseModel):
     mapping_version: str = Field(min_length=1, max_length=80)
     dry_run: Literal[True] = True
 
-
 class MigrationReconciliationUpdate(BaseModel):
     checks: dict[str, bool]
-
 
 class MigrationBatchOut(BaseModel):
     id: str
@@ -153,35 +148,45 @@ class MigrationBatchOut(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-
 class MigrationCockpitOut(BaseModel):
     profiles: list[MigrationProfileOut]
     batches: list[MigrationBatchOut]
 
-
 class SecurityRoleOut(BaseModel):
+    id: str | None = None
     key: str
     permissions: list[str]
     actor_type: Literal["human", "agent"]
     notes: str | None = None
+    permissions_text: str | None = None
 
+    def model_post_init(self, __context: Any) -> None:  # noqa: N802
+        if not self.id:
+            object.__setattr__(self, "id", self.key)
+        if self.permissions_text is None:
+            object.__setattr__(self, "permissions_text", ", ".join(self.permissions))
 
 class SecuritySimulationIn(BaseModel):
-    roles: list[str]
+    """Rollenliste — Studio sendet oft kommagetrennten Text; Liste bleibt gueltig."""
 
+    roles: list[str] | str
+
+    def resolved_roles(self) -> list[str]:
+        if isinstance(self.roles, str):
+            return [part.strip() for part in self.roles.split(",") if part.strip()]
+        return [str(part).strip() for part in self.roles if str(part).strip()]
 
 class SecuritySimulationOut(BaseModel):
     roles: list[str]
     effective_permissions: list[str]
     sod_warnings: list[str]
 
-
 class SecurityCockpitOut(BaseModel):
     roles: list[SecurityRoleOut]
     agent_roles: list[SecurityRoleOut]
 
-
 class ConnectorOut(BaseModel):
+    id: str
     key: str
     label: str
     config_status: Literal["configured", "partial", "disabled", "unchecked"]
@@ -190,8 +195,8 @@ class ConnectorOut(BaseModel):
     source: str
     notes: str
 
-
 class DeviceCapabilityOut(BaseModel):
+    id: str
     key: str
     label: str
     registry_source: str
@@ -200,8 +205,8 @@ class DeviceCapabilityOut(BaseModel):
     test_actions: list[str]
     notes: str
 
-
 class OperationsEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     implementation_status: Literal["available", "partial", "planned"]
@@ -209,8 +214,8 @@ class OperationsEvidenceOut(BaseModel):
     source: str
     notes: str
 
-
 class ComplianceEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     implementation_status: Literal["available", "partial", "planned"]
@@ -220,8 +225,8 @@ class ComplianceEvidenceOut(BaseModel):
     target_path: str | None = None
     notes: str
 
-
 class SystemStatusEvidenceOut(BaseModel):
+    id: str
     key: str
     label: str
     probe_status: Literal["available", "partial", "planned"]
@@ -230,15 +235,14 @@ class SystemStatusEvidenceOut(BaseModel):
     target_path: str | None = None
     notes: str
 
-
 class DiagnosticManifestItemOut(BaseModel):
+    id: str
     key: str
     label: str
     source: str
     collection_status: Literal["not_collected"]
     redaction: Literal["required", "metadata_only"]
     notes: str
-
 
 def _evidence(
     *,
@@ -259,7 +263,6 @@ def _evidence(
         details=details or [],
         checked_at=checked_at,
     )
-
 
 def _integration_evidence(summary: dict[str, Any], checked_at: datetime) -> ReadinessEvidence:
     blockers = [str(item) for item in summary.get("required_blockers", [])]
@@ -284,7 +287,6 @@ def _integration_evidence(summary: dict[str, Any], checked_at: datetime) -> Read
         checked_at=checked_at,
         details=details,
     )
-
 
 def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
     checked_at = datetime.now(timezone.utc)
@@ -372,7 +374,6 @@ def build_admin_suite_readiness() -> AdminSuiteReadinessOut:
         evidence=items,
     )
 
-
 def _load_tenant_settings(db: Session, tenant_id: str) -> dict[str, Any]:
     row = db.execute(
         text("SELECT settings FROM domain_shared.tenants WHERE id = :tenant_id"),
@@ -391,14 +392,12 @@ def _load_tenant_settings(db: Session, tenant_id: str) -> dict[str, Any]:
     except Exception:
         return {}
 
-
 def _save_tenant_settings(db: Session, tenant_id: str, settings: dict[str, Any]) -> None:
     db.execute(
         text("UPDATE domain_shared.tenants SET settings = :settings, updated_at = NOW() WHERE id = :tenant_id"),
         {"tenant_id": tenant_id, "settings": json.dumps(settings)},
     )
     db.commit()
-
 
 def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> SetupSessionOut:
     stored = payload if isinstance(payload, dict) else {}
@@ -435,7 +434,6 @@ def _build_setup_session(tenant_id: str, payload: dict[str, Any] | None) -> Setu
         steps=steps,
     )
 
-
 def _migration_store(settings: dict[str, Any]) -> dict[str, Any]:
     store = settings.get("admin_suite_migration")
     if not isinstance(store, dict):
@@ -446,20 +444,17 @@ def _migration_store(settings: dict[str, Any]) -> dict[str, Any]:
     store["batches"] = batches
     return store
 
-
 def _migration_cockpit(tenant_id: str, store: dict[str, Any]) -> MigrationCockpitOut:
     return MigrationCockpitOut(
         profiles=[MigrationProfileOut(**profile) for profile in MIGRATION_PROFILES],
         batches=[MigrationBatchOut(**batch) for batch in store.get("batches", [])],
     )
 
-
 def _find_batch(store: dict[str, Any], batch_id: str) -> dict[str, Any]:
     batch = next((item for item in store["batches"] if item.get("id") == batch_id), None)
     if not isinstance(batch, dict):
         raise HTTPException(status_code=404, detail=f"Migration batch not found: {batch_id}")
     return batch
-
 
 def _security_roles() -> list[SecurityRoleOut]:
     return [
@@ -470,7 +465,6 @@ def _security_roles() -> list[SecurityRoleOut]:
         )
         for role in Role
     ]
-
 
 def _agent_roles() -> list[SecurityRoleOut]:
     return [
@@ -488,7 +482,6 @@ def _agent_roles() -> list[SecurityRoleOut]:
         ),
     ]
 
-
 def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
     known_roles = {role.key: role for role in [*_security_roles(), *_agent_roles()]}
     unknown = sorted(set(roles) - set(known_roles))
@@ -503,7 +496,6 @@ def _simulate_security(roles: list[str]) -> SecuritySimulationOut:
     if any(role.startswith("agent_") for role in roles) and "manage_system" in permissions:
         warnings.append("Agentenrolle darf keine Systemadministration erhalten.")
     return SecuritySimulationOut(roles=roles, effective_permissions=permissions, sod_warnings=warnings)
-
 
 def _connector_catalog() -> list[ConnectorOut]:
     summary = build_integration_bootstrap_summary()
@@ -521,7 +513,7 @@ def _connector_catalog() -> list[ConnectorOut]:
         status = item.get("status")
         missing = item.get("missing") or []
         items.append(
-            ConnectorOut(
+            ConnectorOut(id=key, 
                 key=key,
                 label=label,
                 config_status="configured" if status == "ready" else ("disabled" if status == "disabled" else "partial"),
@@ -533,80 +525,73 @@ def _connector_catalog() -> list[ConnectorOut]:
         )
     items.extend(
         [
-            ConnectorOut(key="dms", label="Paperless / Mayan DMS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/admin/dms/status", notes="Separater Status- und Testvertrag vorhanden."),
-            ConnectorOut(key="fints", label="FinTS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/banken/fints/konten", notes="TAN-Flow vorhanden; produktiver Bankzugang extern."),
-            ConnectorOut(key="elster", label="ELSTER / ERiC", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/ebilanz/eric-readiness", notes="ERiC-Readiness vorhanden; externes Zertifikat erforderlich."),
-            ConnectorOut(key="fiskaly", label="Fiskaly / TSE", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="app.services.tse_fiskaly_service", notes="TSE-Service vorhanden; produktive Abnahme extern."),
-            ConnectorOut(key="datev", label="DATEV", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="config/fibu_cutover_mapping.template.yaml", notes="Cutover-Mapping benoetigt fachliche Freigabe."),
-            ConnectorOut(key="webhooks", label="Webhooks", config_status="unchecked", live_status="unchecked", credential_status="not_required", source="/admin/webhooks", notes="Registrierung vorhanden; Laufzeitstatus nicht aggregiert."),
+            ConnectorOut(id="dms", key="dms", label="Paperless / Mayan DMS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/admin/dms/status", notes="Separater Status- und Testvertrag vorhanden."),
+            ConnectorOut(id="fints", key="fints", label="FinTS", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/banken/fints/konten", notes="TAN-Flow vorhanden; produktiver Bankzugang extern."),
+            ConnectorOut(id="elster", key="elster", label="ELSTER / ERiC", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="/api/v1/ebilanz/eric-readiness", notes="ERiC-Readiness vorhanden; externes Zertifikat erforderlich."),
+            ConnectorOut(id="fiskaly", key="fiskaly", label="Fiskaly / TSE", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="app.services.tse_fiskaly_service", notes="TSE-Service vorhanden; produktive Abnahme extern."),
+            ConnectorOut(id="datev", key="datev", label="DATEV", config_status="unchecked", live_status="unchecked", credential_status="unchecked", source="config/fibu_cutover_mapping.template.yaml", notes="Cutover-Mapping benoetigt fachliche Freigabe."),
+            ConnectorOut(id="webhooks", key="webhooks", label="Webhooks", config_status="unchecked", live_status="unchecked", credential_status="not_required", source="/admin/webhooks", notes="Registrierung vorhanden; Laufzeitstatus nicht aggregiert."),
         ]
     )
     return items
 
-
 def _device_catalog() -> list[DeviceCapabilityOut]:
     return [
-        DeviceCapabilityOut(key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
-        DeviceCapabilityOut(key="scanner", label="Scanner", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_scan"], notes="Registry und Fachflows vorhanden; Heartbeat fehlt."),
-        DeviceCapabilityOut(key="scale", label="Waage", registry_source="/api/v1/waage/scales", registration_status="available", live_status="unchecked", test_actions=["test_weighing", "calibration_check"], notes="Waagen-CRUD und Kalibrierung vorhanden; Eich-UAT extern."),
-        DeviceCapabilityOut(key="pos_tse", label="POS / TSE", registry_source="/api/v1/admin/pos", registration_status="partial", live_status="unchecked", test_actions=["tse_smoke"], notes="Fiskaly-Service vorhanden; produktive TSE-Abnahme extern."),
-        DeviceCapabilityOut(key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
+        DeviceCapabilityOut(id="printer", key="printer", label="Drucker", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_print"], notes="Registry vorhanden; Testdruck-Evidenz noch nicht aggregiert."),
+        DeviceCapabilityOut(id="scanner", key="scanner", label="Scanner", registry_source="/api/v1/admin/devices", registration_status="available", live_status="unchecked", test_actions=["test_scan"], notes="Registry und Fachflows vorhanden; Heartbeat fehlt."),
+        DeviceCapabilityOut(id="scale", key="scale", label="Waage", registry_source="/api/v1/waage/scales", registration_status="available", live_status="unchecked", test_actions=["test_weighing", "calibration_check"], notes="Waagen-CRUD und Kalibrierung vorhanden; Eich-UAT extern."),
+        DeviceCapabilityOut(id="pos_tse", key="pos_tse", label="POS / TSE", registry_source="/api/v1/admin/pos", registration_status="partial", live_status="unchecked", test_actions=["tse_smoke"], notes="Fiskaly-Service vorhanden; produktive TSE-Abnahme extern."),
+        DeviceCapabilityOut(id="mobile", key="mobile", label="Mobile Lagergeraete", registry_source="/api/v1/admin/mobile", registration_status="available", live_status="unchecked", test_actions=["sync_probe"], notes="Mobile Registry vorhanden; reale Heartbeats fehlen."),
     ]
-
 
 def _operations_catalog() -> list[OperationsEvidenceOut]:
     return [
-        OperationsEvidenceOut(key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
-        OperationsEvidenceOut(key="restore_drill", label="Restore-Drill", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml", notes="Restore-Test-Job deploybar; letzter realer Drill nicht als Evidenz importiert."),
-        OperationsEvidenceOut(key="release", label="Release-Stand", implementation_status="partial", runtime_status="unchecked", source="docs/architecture/process-kernel/STATUS.md", notes="Repo-Status vorhanden; deployte Version fehlt."),
-        OperationsEvidenceOut(key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
-        OperationsEvidenceOut(key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
+        OperationsEvidenceOut(id="database_backup", key="database_backup", label="Datenbank-Backup", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/backup-cronjob.yaml", notes="CronJob deploybar; letzter produktiver Lauf nicht angebunden."),
+        OperationsEvidenceOut(id="restore_drill", key="restore_drill", label="Restore-Drill", implementation_status="available", runtime_status="unchecked", source="k8s/helm/valeo-erp/templates/restore-test-cronjob.yaml", notes="Restore-Test-Job deploybar; letzter realer Drill nicht als Evidenz importiert."),
+        OperationsEvidenceOut(id="release", key="release", label="Release-Stand", implementation_status="partial", runtime_status="unchecked", source="docs/architecture/process-kernel/STATUS.md", notes="Repo-Status vorhanden; deployte Version fehlt."),
+        OperationsEvidenceOut(id="alembic", key="alembic", label="Alembic Migration", implementation_status="available", runtime_status="unchecked", source="alembic/", notes="Migrationen vorhanden; Zielsystem-Head muss live geprueft werden."),
+        OperationsEvidenceOut(id="diagnostics", key="diagnostics", label="Diagnosepaket", implementation_status="planned", runtime_status="unchecked", source="admin-suite-roadmap", notes="Exportierbares Supportpaket folgt nach Ops-Adapter."),
     ]
-
 
 def _compliance_catalog() -> list[ComplianceEvidenceOut]:
     return [
-        ComplianceEvidenceOut(key="gobd", label="GoBD und Buchungsnachweis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="docs/GOBD-COMPLIANCE.md", target_path="/admin/audit-log", notes="Audit-, Archiv- und Stornovertraege sind vorhanden; produktiver Verfahrensnachweis und Testat bleiben externe Evidenz."),
-        ComplianceEvidenceOut(key="gdpr_art30", label="DSGVO Art. 30 Verarbeitungsverzeichnis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art30/activities", target_path="/compliance/verarbeitungsverzeichnis", notes="CRUD und Export sind vorhanden; produktive Pflege und Datenschutzfreigabe muessen betrieblich nachgewiesen werden."),
-        ComplianceEvidenceOut(key="gdpr_art33", label="DSGVO Art. 33 Datenpannen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art33/breaches", target_path="/compliance/datenpannen", notes="72h-Fristueberwachung ist vorhanden; Behoerdenkommunikation und reale Prozessprobe bleiben externe Nachweise."),
-        ComplianceEvidenceOut(key="pos_tse", label="POS / TSE und DSFinV-K", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/admin/pos/tse/status", target_path="/admin/pos", notes="TSE- und DSFinV-K-Vertraege sind vorhanden; produktiver Fiskaly-Zugang und Pruefwerkzeug-Abnahme bleiben extern."),
-        ComplianceEvidenceOut(key="elster", label="eBilanz / ELSTER", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/ebilanz/eric-readiness", target_path="/fibu/ebilanz", notes="ERiC-Readiness ist repo-seitig vorbereitet; Zertifikat und Steuerberaterfreigabe fehlen als Betriebsnachweis."),
-        ComplianceEvidenceOut(key="atlas", label="ATLAS Zollausfuhr", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/fibu/atlas", target_path="/fibu/atlas", notes="Zollausfuhrpfad ist implementiert; produktives ATLAS-Zertifikat bleibt externe Voraussetzung."),
-        ComplianceEvidenceOut(key="reporting", label="Meldewesen und Fachquittungen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/compliance/meldewesen-konsole", target_path="/compliance/meldewesen-konsole", notes="Meldewesen-Konsole und Exportpfade sind vorhanden; echte Einreichungsquittungen werden noch nicht aggregiert."),
-        ComplianceEvidenceOut(key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
+        ComplianceEvidenceOut(id="gobd", key="gobd", label="GoBD und Buchungsnachweis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="docs/GOBD-COMPLIANCE.md", target_path="/admin/audit-log", notes="Audit-, Archiv- und Stornovertraege sind vorhanden; produktiver Verfahrensnachweis und Testat bleiben externe Evidenz."),
+        ComplianceEvidenceOut(id="gdpr_art30", key="gdpr_art30", label="DSGVO Art. 30 Verarbeitungsverzeichnis", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art30/activities", target_path="/compliance/verarbeitungsverzeichnis", notes="CRUD und Export sind vorhanden; produktive Pflege und Datenschutzfreigabe muessen betrieblich nachgewiesen werden."),
+        ComplianceEvidenceOut(id="gdpr_art33", key="gdpr_art33", label="DSGVO Art. 33 Datenpannen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/gdpr/art33/breaches", target_path="/compliance/datenpannen", notes="72h-Fristueberwachung ist vorhanden; Behoerdenkommunikation und reale Prozessprobe bleiben externe Nachweise."),
+        ComplianceEvidenceOut(id="pos_tse", key="pos_tse", label="POS / TSE und DSFinV-K", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/api/v1/admin/pos/tse/status", target_path="/admin/pos", notes="TSE- und DSFinV-K-Vertraege sind vorhanden; produktiver Fiskaly-Zugang und Pruefwerkzeug-Abnahme bleiben extern."),
+        ComplianceEvidenceOut(id="elster", key="elster", label="eBilanz / ELSTER", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/ebilanz/eric-readiness", target_path="/fibu/ebilanz", notes="ERiC-Readiness ist repo-seitig vorbereitet; Zertifikat und Steuerberaterfreigabe fehlen als Betriebsnachweis."),
+        ComplianceEvidenceOut(id="atlas", key="atlas", label="ATLAS Zollausfuhr", implementation_status="partial", runtime_status="unchecked", external_gate="required", source="/api/v1/fibu/atlas", target_path="/fibu/atlas", notes="Zollausfuhrpfad ist implementiert; produktives ATLAS-Zertifikat bleibt externe Voraussetzung."),
+        ComplianceEvidenceOut(id="reporting", key="reporting", label="Meldewesen und Fachquittungen", implementation_status="available", runtime_status="unchecked", external_gate="required", source="/compliance/meldewesen-konsole", target_path="/compliance/meldewesen-konsole", notes="Meldewesen-Konsole und Exportpfade sind vorhanden; echte Einreichungsquittungen werden noch nicht aggregiert."),
+        ComplianceEvidenceOut(id="sanctions", key="sanctions", label="Sanktionspruefung", implementation_status="available", runtime_status="unchecked", external_gate="unchecked", source="/api/v1/sanctions/check", target_path="/compliance/sanktionspruefung", notes="Pruefpfad ist vorhanden; produktive Listenquelle und Aktualisierungsnachweis muessen betrieblich verifiziert werden."),
     ]
-
 
 def _system_status_catalog() -> list[SystemStatusEvidenceOut]:
     return [
-        SystemStatusEvidenceOut(key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
-        SystemStatusEvidenceOut(key="api_readiness", label="API Readiness", probe_status="available", runtime_status="unchecked", source="/ready", target_path="/admin/control-center", notes="Readiness-Probe ist vorhanden; beobachteter Laufzeitstatus benoetigt einen expliziten Probe-Adapter."),
-        SystemStatusEvidenceOut(key="startup", label="Startup Guards", probe_status="available", runtime_status="unchecked", source="/health/startup", target_path="/admin/control-center", notes="Startup-Probe und Guards sind vorhanden; letzter produktiver Status wird nicht importiert."),
-        SystemStatusEvidenceOut(key="release", label="Release und Deployment", probe_status="partial", runtime_status="unchecked", source="k8s/helm/valeo-erp", target_path="/admin-suite/operations", notes="Deployment-Manifeste sind vorhanden; deployte Version und Rollout-Status fehlen als Runtime-Evidenz."),
-        SystemStatusEvidenceOut(key="alembic", label="Alembic Head", probe_status="available", runtime_status="unchecked", source="scripts/check_alembic_single_head.py", target_path="/admin-suite/operations", notes="Repo-seitiger Single-Head-Check ist vorhanden; Zielsystem-Head wird nicht live abgefragt."),
-        SystemStatusEvidenceOut(key="event_bus", label="NATS Event Bus", probe_status="available", runtime_status="unchecked", source="monitoring/grafana/dashboards/event-bus-dashboard.json", target_path="/admin-suite/connectors", notes="Monitoring-Artefakte sind vorhanden; aktuelle Broker-Metriken benoetigen Monitoring-Import."),
-        SystemStatusEvidenceOut(key="workers", label="Worker und Jobs", probe_status="partial", runtime_status="unchecked", source="app/workers", target_path="/admin-suite/operations", notes="Worker und CronJobs sind implementiert; letzter Lauf und Queue-Lage werden noch nicht aggregiert."),
-        SystemStatusEvidenceOut(key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
+        SystemStatusEvidenceOut(id="api_liveness", key="api_liveness", label="API Liveness", probe_status="available", runtime_status="unchecked", source="/health/live", target_path="/admin/control-center", notes="Liveness-Probe ist vorhanden; dieser Katalog fuehrt sie nicht aus."),
+        SystemStatusEvidenceOut(id="api_readiness", key="api_readiness", label="API Readiness", probe_status="available", runtime_status="unchecked", source="/ready", target_path="/admin/control-center", notes="Readiness-Probe ist vorhanden; beobachteter Laufzeitstatus benoetigt einen expliziten Probe-Adapter."),
+        SystemStatusEvidenceOut(id="startup", key="startup", label="Startup Guards", probe_status="available", runtime_status="unchecked", source="/health/startup", target_path="/admin/control-center", notes="Startup-Probe und Guards sind vorhanden; letzter produktiver Status wird nicht importiert."),
+        SystemStatusEvidenceOut(id="release", key="release", label="Release und Deployment", probe_status="partial", runtime_status="unchecked", source="k8s/helm/valeo-erp", target_path="/admin-suite/operations", notes="Deployment-Manifeste sind vorhanden; deployte Version und Rollout-Status fehlen als Runtime-Evidenz."),
+        SystemStatusEvidenceOut(id="alembic", key="alembic", label="Alembic Head", probe_status="available", runtime_status="unchecked", source="scripts/check_alembic_single_head.py", target_path="/admin-suite/operations", notes="Repo-seitiger Single-Head-Check ist vorhanden; Zielsystem-Head wird nicht live abgefragt."),
+        SystemStatusEvidenceOut(id="event_bus", key="event_bus", label="NATS Event Bus", probe_status="available", runtime_status="unchecked", source="monitoring/grafana/dashboards/event-bus-dashboard.json", target_path="/admin-suite/connectors", notes="Monitoring-Artefakte sind vorhanden; aktuelle Broker-Metriken benoetigen Monitoring-Import."),
+        SystemStatusEvidenceOut(id="workers", key="workers", label="Worker und Jobs", probe_status="partial", runtime_status="unchecked", source="app/workers", target_path="/admin-suite/operations", notes="Worker und CronJobs sind implementiert; letzter Lauf und Queue-Lage werden noch nicht aggregiert."),
+        SystemStatusEvidenceOut(id="voice", key="voice", label="Voice Stack", probe_status="available", runtime_status="unchecked", source="/voice/status", target_path="/admin/voice-channel", notes="Voice-Readiness-Vertrag ist vorhanden; Admin Suite startet keine Voice-Probe."),
     ]
-
 
 def _diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     return [
-        DiagnosticManifestItemOut(key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
-        DiagnosticManifestItemOut(key="health_summary", label="Health-Zusammenfassung", source="/api/v1/admin-suite/system-status", collection_status="not_collected", redaction="metadata_only", notes="Nur normalisierte Probe-Ergebnisse; keine Rohantworten oder Umgebungsvariablen."),
-        DiagnosticManifestItemOut(key="migration_summary", label="Migrationsstand", source="scripts/check_alembic_single_head.py", collection_status="not_collected", redaction="metadata_only", notes="Nur Revisionskennungen und Ergebnisstatus; keine Connection Strings."),
-        DiagnosticManifestItemOut(key="connector_summary", label="Connector-Konfiguration", source="/api/v1/admin-suite/connectors", collection_status="not_collected", redaction="required", notes="Nur redigierte Metadaten; keine Tokens, Secrets, URLs mit Credentials oder Payloads."),
-        DiagnosticManifestItemOut(key="event_bus_summary", label="Event-Bus-Metriken", source="monitoring/grafana/dashboards/event-bus-dashboard.json", collection_status="not_collected", redaction="required", notes="Nur aggregierte Zaehler und Statuswerte; keine Event-Payloads."),
-        DiagnosticManifestItemOut(key="worker_summary", label="Worker- und Jobstatus", source="app/workers", collection_status="not_collected", redaction="required", notes="Nur Jobname, Zustand und Zeitstempel; keine fachlichen Payloads oder personenbezogenen Daten."),
-        DiagnosticManifestItemOut(key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
+        DiagnosticManifestItemOut(id="release_metadata", key="release_metadata", label="Release-Metadaten", source="docs/architecture/process-kernel/STATUS.md", collection_status="not_collected", redaction="metadata_only", notes="Commit, Version und Deployment-Referenz duerfen erst durch einen spaeteren Adapter gesammelt werden."),
+        DiagnosticManifestItemOut(id="health_summary", key="health_summary", label="Health-Zusammenfassung", source="/api/v1/admin-suite/system-status", collection_status="not_collected", redaction="metadata_only", notes="Nur normalisierte Probe-Ergebnisse; keine Rohantworten oder Umgebungsvariablen."),
+        DiagnosticManifestItemOut(id="migration_summary", key="migration_summary", label="Migrationsstand", source="scripts/check_alembic_single_head.py", collection_status="not_collected", redaction="metadata_only", notes="Nur Revisionskennungen und Ergebnisstatus; keine Connection Strings."),
+        DiagnosticManifestItemOut(id="connector_summary", key="connector_summary", label="Connector-Konfiguration", source="/api/v1/admin-suite/connectors", collection_status="not_collected", redaction="required", notes="Nur redigierte Metadaten; keine Tokens, Secrets, URLs mit Credentials oder Payloads."),
+        DiagnosticManifestItemOut(id="event_bus_summary", key="event_bus_summary", label="Event-Bus-Metriken", source="monitoring/grafana/dashboards/event-bus-dashboard.json", collection_status="not_collected", redaction="required", notes="Nur aggregierte Zaehler und Statuswerte; keine Event-Payloads."),
+        DiagnosticManifestItemOut(id="worker_summary", key="worker_summary", label="Worker- und Jobstatus", source="app/workers", collection_status="not_collected", redaction="required", notes="Nur Jobname, Zustand und Zeitstempel; keine fachlichen Payloads oder personenbezogenen Daten."),
+        DiagnosticManifestItemOut(id="audit_summary", key="audit_summary", label="Audit-Zusammenfassung", source="/api/v1/admin/audit-log", collection_status="not_collected", redaction="required", notes="Nur aggregierte Anzahl und Zeitraum; keine Audit-Rohdaten im automatischen Supportpaket."),
     ]
-
 
 @router.get("/readiness", response_model=AdminSuiteReadinessOut, summary="Admin Suite readiness abrufen")
 async def get_admin_suite_readiness() -> AdminSuiteReadinessOut:
     """Liefert konservative Go-Live-Evidenz ohne externe Live-Probes."""
     return build_admin_suite_readiness()
-
 
 @router.get("/setup", response_model=SetupSessionOut, summary="Admin Suite setup session abrufen")
 async def get_setup_session(
@@ -616,7 +601,6 @@ async def get_setup_session(
     """Liefert den wiederaufnehmbaren Setup-Fortschritt eines Tenants."""
     settings = _load_tenant_settings(db, tenant_id)
     return _build_setup_session(tenant_id, settings.get("admin_suite_setup"))
-
 
 @router.patch("/setup/steps/{step_key}", response_model=SetupSessionOut, summary="Admin Suite setup step aktualisieren", dependencies=[Depends(require_roles("admin"))])
 async def update_setup_step(
@@ -649,7 +633,6 @@ async def update_setup_step(
     _save_tenant_settings(db, tenant_id, settings)
     return _build_setup_session(tenant_id, setup)
 
-
 @router.get("/migration", response_model=MigrationCockpitOut, summary="Migration Cockpit abrufen")
 async def get_migration_cockpit(
     tenant_id: str = Depends(get_tenant_id),
@@ -657,7 +640,6 @@ async def get_migration_cockpit(
 ) -> MigrationCockpitOut:
     settings = _load_tenant_settings(db, tenant_id)
     return _migration_cockpit(tenant_id, _migration_store(settings))
-
 
 @router.post("/migration/batches", response_model=MigrationBatchOut, status_code=201, summary="Migration Dry Run Batch anlegen", dependencies=[Depends(require_roles("admin"))])
 async def create_migration_batch(
@@ -692,7 +674,6 @@ async def create_migration_batch(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.patch("/migration/batches/{batch_id}/reconciliation", response_model=MigrationBatchOut, summary="Migration Reconciliation aktualisieren", dependencies=[Depends(require_roles("admin"))])
 async def update_migration_reconciliation(
     batch_id: str,
@@ -715,7 +696,6 @@ async def update_migration_reconciliation(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.post("/migration/batches/{batch_id}/approve", response_model=MigrationBatchOut, summary="Migration Batch freigeben", dependencies=[Depends(require_roles("admin"))])
 async def approve_migration_batch(
     batch_id: str,
@@ -737,51 +717,42 @@ async def approve_migration_batch(
     _save_tenant_settings(db, tenant_id, settings)
     return MigrationBatchOut(**batch)
 
-
 @router.get("/security", response_model=SecurityCockpitOut, summary="Security Governance Cockpit abrufen")
 async def get_security_cockpit() -> SecurityCockpitOut:
     return SecurityCockpitOut(roles=_security_roles(), agent_roles=_agent_roles())
 
-
 @router.post("/security/simulate", response_model=SecuritySimulationOut, summary="Effektive Rechte simulieren", dependencies=[Depends(require_roles("admin"))])
 async def simulate_security(payload: SecuritySimulationIn) -> SecuritySimulationOut:
     """Simuliert effektive Rechte ohne Rollen oder Tenant-Daten zu veraendern."""
-    return _simulate_security(payload.roles)
-
+    return _simulate_security(payload.resolved_roles())
 
 @router.get("/connectors", response_model=list[ConnectorOut], summary="Connector Hub abrufen")
 async def get_connector_hub() -> list[ConnectorOut]:
     """Liefert redigierte Connector-Metadaten ohne Secrets oder Live-Probes."""
     return _connector_catalog()
 
-
 @router.get("/devices", response_model=list[DeviceCapabilityOut], summary="Hardware Center abrufen")
 async def get_device_center() -> list[DeviceCapabilityOut]:
     return _device_catalog()
 
-
 @router.get("/operations", response_model=list[OperationsEvidenceOut], summary="Operations Center abrufen")
 async def get_operations_center() -> list[OperationsEvidenceOut]:
     return _operations_catalog()
-
 
 @router.get("/compliance", response_model=list[ComplianceEvidenceOut], summary="Compliance Evidence Center abrufen")
 async def get_compliance_center() -> list[ComplianceEvidenceOut]:
     """Liefert Compliance-Evidenzmetadaten ohne Live-Probes oder externe Erfolgsannahmen."""
     return _compliance_catalog()
 
-
 @router.get("/system-status", response_model=list[SystemStatusEvidenceOut], summary="System Status Evidence Center abrufen")
 async def get_system_status_center() -> list[SystemStatusEvidenceOut]:
     """Liefert Runtime-Probe-Metadaten ohne Live-Probes auszuloesen."""
     return _system_status_catalog()
 
-
 @router.get("/diagnostics", response_model=list[DiagnosticManifestItemOut], summary="Diagnosepaket Manifest abrufen")
 async def get_diagnostic_manifest() -> list[DiagnosticManifestItemOut]:
     """Liefert erlaubte Diagnosekategorien ohne Daten zu sammeln oder zu exportieren."""
     return _diagnostic_manifest()
-
 
 # ── LLM-Gateway (anbieterunabhängige KI-Konfiguration) ────────────────────────
 from app.services.llm_gateway import (  # noqa: E402
@@ -791,7 +762,6 @@ from app.services.llm_gateway import (  # noqa: E402
     LLMGateway,
     load_config as load_llm_config,
 )
-
 
 class LlmGatewayConfigOut(BaseModel):
     provider: str
@@ -803,7 +773,6 @@ class LlmGatewayConfigOut(BaseModel):
     available: bool
     providers: list[str] = Field(default_factory=lambda: list(LLM_PROVIDERS))
 
-
 class LlmGatewayUpdateIn(BaseModel):
     provider: str | None = None
     base_url: str | None = None
@@ -812,13 +781,11 @@ class LlmGatewayUpdateIn(BaseModel):
     temperature: float | None = None
     enabled: bool | None = None
 
-
 class LlmTestOut(BaseModel):
     ok: bool
     provider: str
     model: str
     detail: str
-
 
 def _llm_config_out(cfg: LLMConfig) -> LlmGatewayConfigOut:
     return LlmGatewayConfigOut(
@@ -831,7 +798,6 @@ def _llm_config_out(cfg: LLMConfig) -> LlmGatewayConfigOut:
         available=LLMGateway(config=cfg).available(),
     )
 
-
 @router.get("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration abrufen")
 async def get_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
@@ -839,7 +805,6 @@ async def get_llm_gateway(
 ) -> LlmGatewayConfigOut:
     """Aktuelle KI-Anbieter-Konfiguration (Key redigiert, nie im Klartext)."""
     return _llm_config_out(load_llm_config(db, tenant_id))
-
 
 @router.put("/llm-gateway", response_model=LlmGatewayConfigOut, summary="LLM-Anbieter-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_llm_gateway(
@@ -865,7 +830,6 @@ async def update_llm_gateway(
     _save_tenant_settings(db, tenant_id, settings)
     return _llm_config_out(load_llm_config(db, tenant_id))
 
-
 @router.post("/llm-gateway/test", response_model=LlmTestOut, summary="LLM-Anbieter testen", dependencies=[Depends(require_roles("admin"))])
 async def test_llm_gateway(
     tenant_id: str = Depends(get_tenant_id),
@@ -874,12 +838,10 @@ async def test_llm_gateway(
     """Konfigurations-/Erreichbarkeitsprobe des aktuell gewählten Anbieters."""
     return LlmTestOut(**LLMGateway(db, tenant_id).test())
 
-
 # ── Connector-Konfiguration (Auto-Capture: STT + IMAP) ──────────────────────────
 from app.services.connector_config import load_imap_config, load_stt_config, save_connectors  # noqa: E402
 from app.services.mail_ingest_service import MailIngestService  # noqa: E402
 from app.services.stt_client import SttClient  # noqa: E402
-
 
 class ConnectorSttOut(BaseModel):
     enabled: bool
@@ -888,7 +850,6 @@ class ConnectorSttOut(BaseModel):
     language: str
     api_key_set: bool
     configured: bool
-
 
 class ConnectorImapOut(BaseModel):
     enabled: bool
@@ -902,7 +863,6 @@ class ConnectorImapOut(BaseModel):
     poll_seconds: int
     password_set: bool
     configured: bool
-
 
 class ConnectorsConfigOut(BaseModel):
     stt: ConnectorSttOut
@@ -929,23 +889,19 @@ class ConnectorImapUpdate(BaseModel):
     own_addresses: str | None = None  # kommagetrennt
     poll_seconds: int | None = None
 
-
 class ConnectorsUpdateIn(BaseModel):
     stt: ConnectorSttUpdate | None = None
     imap: ConnectorImapUpdate | None = None
 
-
 class ConnectorTestOut(BaseModel):
     ok: bool
     detail: str
-
 
 class ConnectorPollOut(BaseModel):
     ok: bool
     detail: str
     processed: int = 0
     created: int = 0
-
 
 def _connectors_out(db: Session, tenant_id: str) -> ConnectorsConfigOut:
     stt = load_stt_config(db, tenant_id)
@@ -974,7 +930,6 @@ def _connectors_out(db: Session, tenant_id: str) -> ConnectorsConfigOut:
         ),
     )
 
-
 @router.get("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration abrufen")
 async def get_connectors(
     tenant_id: str = Depends(get_tenant_id),
@@ -982,7 +937,6 @@ async def get_connectors(
 ) -> ConnectorsConfigOut:
     """STT- und IMAP-Einstellungen der Auto-Capture-Connectoren (Secrets redigiert)."""
     return _connectors_out(db, tenant_id)
-
 
 @router.put("/capture-connectors", response_model=ConnectorsConfigOut, summary="Connector-Konfiguration speichern", dependencies=[Depends(require_roles("admin"))])
 async def update_connectors(
@@ -999,7 +953,6 @@ async def update_connectors(
     )
     return _connectors_out(db, tenant_id)
 
-
 @router.post("/capture-connectors/stt/test", response_model=ConnectorTestOut, summary="STT-Server testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_stt(
     tenant_id: str = Depends(get_tenant_id),
@@ -1009,7 +962,6 @@ async def test_connector_stt(
     res = SttClient.for_tenant(db, tenant_id).test()
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
 
-
 @router.post("/capture-connectors/imap/test", response_model=ConnectorTestOut, summary="IMAP-Postfach testen", dependencies=[Depends(require_roles("admin"))])
 async def test_connector_imap(
     tenant_id: str = Depends(get_tenant_id),
@@ -1018,7 +970,6 @@ async def test_connector_imap(
     """Verbindungs-/Login-Probe des IMAP-Postfachs (kein Abruf)."""
     res = MailIngestService(db, tenant_id).test()
     return ConnectorTestOut(ok=bool(res.get("ok")), detail=str(res.get("detail", "")))
-
 
 @router.post("/capture-connectors/imap/poll", response_model=ConnectorPollOut, summary="IMAP jetzt abrufen", dependencies=[Depends(require_roles("admin"))])
 async def poll_connector_imap(

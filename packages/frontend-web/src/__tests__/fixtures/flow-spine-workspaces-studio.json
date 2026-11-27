@@ -18,6 +18,10 @@
     "flowSpineWorkspace": {
       "processKey": "order-to-cash"
     },
+    "workflow": {
+      "processKey": "order-to-cash",
+      "status": "process-workspace"
+    },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
       "examplePrompts": [
@@ -48,6 +52,10 @@
     },
     "flowSpineWorkspace": {
       "processKey": "procure-to-pay"
+    },
+    "workflow": {
+      "processKey": "procure-to-pay",
+      "status": "process-workspace"
     },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
@@ -80,6 +88,10 @@
     "flowSpineWorkspace": {
       "processKey": "inventory-to-settlement"
     },
+    "workflow": {
+      "processKey": "inventory-to-settlement",
+      "status": "process-workspace"
+    },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
       "examplePrompts": [
@@ -110,6 +122,10 @@
     },
     "flowSpineWorkspace": {
       "processKey": "harvest-to-settlement"
+    },
+    "workflow": {
+      "processKey": "harvest-to-settlement",
+      "status": "process-workspace"
     },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
@@ -142,6 +158,10 @@
     "flowSpineWorkspace": {
       "processKey": "contract-to-settlement"
     },
+    "workflow": {
+      "processKey": "contract-to-settlement",
+      "status": "process-workspace"
+    },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
       "examplePrompts": [
@@ -172,6 +192,10 @@
     },
     "flowSpineWorkspace": {
       "processKey": "complaint-to-resolution"
+    },
+    "workflow": {
+      "processKey": "complaint-to-resolution",
+      "status": "process-workspace"
     },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
@@ -204,6 +228,10 @@
     "flowSpineWorkspace": {
       "processKey": "service-to-customer"
     },
+    "workflow": {
+      "processKey": "service-to-customer",
+      "status": "process-workspace"
+    },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
       "examplePrompts": [
@@ -235,6 +263,10 @@
     "flowSpineWorkspace": {
       "processKey": "finance-to-close"
     },
+    "workflow": {
+      "processKey": "finance-to-close",
+      "status": "process-workspace"
+    },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",
       "examplePrompts": [
@@ -265,6 +297,10 @@
     },
     "flowSpineWorkspace": {
       "processKey": "compliance-to-report"
+    },
+    "workflow": {
+      "processKey": "compliance-to-report",
+      "status": "process-workspace"
     },
     "agentContract": {
       "businessPurpose": "Prozessraum und Vorgänge bedienen.",

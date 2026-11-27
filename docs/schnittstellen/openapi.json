@@ -34887,6 +34887,10 @@
             "title": "External Gate",
             "type": "string"
           },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "implementation_status": {
             "enum": [
               "available",
@@ -34930,6 +34934,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "implementation_status",
@@ -51189,6 +51194,10 @@
       },
       "DeviceCapabilityOut": {
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -51228,6 +51237,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "registry_source",
@@ -51325,6 +51335,10 @@
             "title": "Collection Status",
             "type": "string"
           },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -51351,6 +51365,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "source",
@@ -70894,6 +70909,61 @@
         "title": "FiscalProductReadiness",
         "type": "object"
       },
+      "FiscalProductRowOut": {
+        "description": "Flache Produktzeile fuer ``GET /pos/fiscalization/products`` (Studio-Cockpit).",
+        "properties": {
+          "blockers": {
+            "default": "",
+            "title": "Blockers",
+            "type": "string"
+          },
+          "execution_note": {
+            "default": "",
+            "title": "Execution Note",
+            "type": "string"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "product": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Product"
+          },
+          "ready": {
+            "default": false,
+            "title": "Ready",
+            "type": "boolean"
+          }
+        },
+        "title": "FiscalProductRowOut",
+        "type": "object"
+      },
       "FiscalProviderConfigIn": {
         "properties": {
           "cash_register_id": {
@@ -70936,6 +71006,18 @@
             "default": false,
             "title": "Simulation Allowed",
             "type": "boolean"
+          },
+          "terminal_id": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminal Id"
           }
         },
         "required": [
@@ -108693,6 +108775,44 @@
         "title": "MengeneinheitengruppeOut",
         "type": "object"
       },
+      "MengenzeitraeumeGenerierenIn": {
+        "description": "JSON-Body fuer Studio/MCP (Query-Parameter bleiben zusaetzlich gueltig).",
+        "properties": {
+          "bis_datum": {
+            "format": "date",
+            "title": "Bis Datum",
+            "type": "string"
+          },
+          "gesamt_menge_t": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Gesamt Menge T"
+          },
+          "variante": {
+            "default": "monatl. lin. Abnahme",
+            "title": "Variante",
+            "type": "string"
+          },
+          "von_datum": {
+            "format": "date",
+            "title": "Von Datum",
+            "type": "string"
+          }
+        },
+        "required": [
+          "von_datum",
+          "bis_datum",
+          "gesamt_menge_t"
+        ],
+        "title": "MengenzeitraeumeGenerierenIn",
+        "type": "object"
+      },
       "MengenzeitraumCreate": {
         "properties": {
           "bemerkung": {
@@ -109389,6 +109509,17 @@
               }
             ],
             "title": "Adapter"
+          },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
           },
           "key": {
             "title": "Key",
@@ -115111,6 +115242,10 @@
       },
       "OperationsEvidenceOut": {
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "implementation_status": {
             "enum": [
               "available",
@@ -115143,6 +115278,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "implementation_status",
@@ -135188,7 +135324,7 @@
         "type": "object"
       },
       "QualityBatchIn": {
-        "description": "Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch.",
+        "description": "Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch.\n\n``rows`` darf eine JSON-Zeichenkette sein (NativeListPage-Textarea / MCP).",
         "properties": {
           "analysendatum": {
             "anyOf": [
@@ -143936,6 +144072,145 @@
         "title": "RisikobewertungIn",
         "type": "object"
       },
+      "RohwareAcceptanceCreate": {
+        "description": "Wizard-/MCP-Payload der Rohware-Annahme (Paritaet zur Touch-Maske).",
+        "properties": {
+          "acceptance_mode": {
+            "anyOf": [
+              {
+                "enum": [
+                  "STORAGE_ONLY",
+                  "PURCHASE_AT_DELIVERY_PTBF",
+                  "ADVANCE_ON_STORAGE"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": "STORAGE_ONLY",
+            "title": "Acceptance Mode"
+          },
+          "artikel": {
+            "minLength": 1,
+            "title": "Artikel",
+            "type": "string"
+          },
+          "besatz_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Besatz Pct"
+          },
+          "brutto_kg": {
+            "minimum": 0.0,
+            "title": "Brutto Kg",
+            "type": "number"
+          },
+          "customer_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customer Id"
+          },
+          "datum": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datum"
+          },
+          "fallzahl": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fallzahl"
+          },
+          "feuchte_pct": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feuchte Pct"
+          },
+          "is_rohware": {
+            "default": true,
+            "title": "Is Rohware",
+            "type": "boolean"
+          },
+          "kennzeichen": {
+            "minLength": 1,
+            "title": "Kennzeichen",
+            "type": "string"
+          },
+          "lager_ziel": {
+            "minLength": 1,
+            "title": "Lager Ziel",
+            "type": "string"
+          },
+          "lieferant": {
+            "minLength": 1,
+            "title": "Lieferant",
+            "type": "string"
+          },
+          "lieferschein_nr": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieferschein Nr"
+          },
+          "netto_kg": {
+            "minimum": 0.0,
+            "title": "Netto Kg",
+            "type": "number"
+          },
+          "tara_kg": {
+            "minimum": 0.0,
+            "title": "Tara Kg",
+            "type": "number"
+          }
+        },
+        "required": [
+          "artikel",
+          "brutto_kg",
+          "tara_kg",
+          "netto_kg",
+          "lieferant",
+          "kennzeichen",
+          "lager_ziel"
+        ],
+        "title": "RohwareAcceptanceCreate",
+        "type": "object"
+      },
       "RohwareIn": {
         "properties": {
           "calcium_g": {
@@ -149727,6 +150002,17 @@
             "title": "Actor Type",
             "type": "string"
           },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -149748,6 +150034,17 @@
             },
             "title": "Permissions",
             "type": "array"
+          },
+          "permissions_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Permissions Text"
           }
         },
         "required": [
@@ -149759,13 +150056,21 @@
         "type": "object"
       },
       "SecuritySimulationIn": {
+        "description": "Rollenliste — Studio sendet oft kommagetrennten Text; Liste bleibt gueltig.",
         "properties": {
           "roles": {
-            "items": {
-              "type": "string"
-            },
-            "title": "Roles",
-            "type": "array"
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Roles"
           }
         },
         "required": [
@@ -160836,6 +161141,10 @@
       },
       "SystemStatusEvidenceOut": {
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -160879,6 +161188,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "probe_status",
@@ -180479,6 +180789,10 @@
             "title": "Credential Status",
             "type": "string"
           },
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
           "key": {
             "title": "Key",
             "type": "string"
@@ -180502,6 +180816,7 @@
           }
         },
         "required": [
+          "id",
           "key",
           "label",
           "config_status",
@@ -186280,15 +186595,21 @@
             "type": "string"
           },
           "tenant_id": {
-            "description": "Tenant identifier",
-            "maxLength": 64,
-            "title": "Tenant Id",
-            "type": "string"
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Tenant identifier (Kontext ist massgeblich)",
+            "title": "Tenant Id"
           }
         },
         "required": [
-          "name",
-          "tenant_id"
+          "name"
         ],
         "title": "OpportunityCreate",
         "type": "object"
@@ -193678,6 +193999,55 @@
         ]
       }
     },
+    "/api/v1/admin-suite/capture-connectors/imap": {
+      "put": {
+        "description": "Flaches IMAP-Update fuer Studio-Aktionen (Human/CI/MCP gleiche Endpunkte).",
+        "operationId": "update_connector_imap_api_v1_admin_suite_capture_connectors_imap_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectorImapUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorsConfigOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "IMAP-Konfiguration speichern",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
     "/api/v1/admin-suite/capture-connectors/imap/poll": {
       "post": {
         "description": "Holt neue Mails und erfasst sie als Kontakte (manueller Abruf).",
@@ -193731,6 +194101,86 @@
         "tags": [
           "admin-suite",
           "readiness"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/capture-connectors/overview": {
+      "get": {
+        "description": "Flache STT-/IMAP-Statusfelder fuer Studio-Cockpit (ohne Secrets).",
+        "operationId": "get_capture_connectors_overview_api_v1_admin_suite_capture_connectors_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Capture Connectors Overview Api V1 Admin Suite Capture Connectors Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Capture-Connector KPI-Ueberblick",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/capture-connectors/stt": {
+      "put": {
+        "description": "Flaches STT-Update fuer Studio-Aktionen (Human/CI/MCP gleiche Endpunkte).",
+        "operationId": "update_connector_stt_api_v1_admin_suite_capture_connectors_stt_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectorSttUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectorsConfigOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "STT-Konfiguration speichern",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194019,6 +194469,38 @@
       }
     },
     "/api/v1/admin-suite/migration/batches": {
+      "get": {
+        "description": "Flache Batch-Liste fuer Studio-Cockpit-Tabelle (Human/CI/MCP).",
+        "operationId": "list_migration_batches_api_v1_admin_suite_migration_batches_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Migration Batches Api V1 Admin Suite Migration Batches Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Migration-Batches auflisten",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      },
       "post": {
         "operationId": "create_migration_batch_api_v1_admin_suite_migration_batches_post",
         "requestBody": {
@@ -194171,6 +194653,71 @@
         ]
       }
     },
+    "/api/v1/admin-suite/migration/overview": {
+      "get": {
+        "description": "Flache KPIs fuer Studio-Cockpit-Summary.",
+        "operationId": "get_migration_overview_api_v1_admin_suite_migration_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Migration Overview Api V1 Admin Suite Migration Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Migration Cockpit KPI-Ueberblick",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/migration/profiles": {
+      "get": {
+        "description": "Flache Profile-Liste fuer Studio-Cockpit-Tabelle.",
+        "operationId": "list_migration_profiles_api_v1_admin_suite_migration_profiles_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Migration Profiles Api V1 Admin Suite Migration Profiles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Migration-Profile auflisten",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
     "/api/v1/admin-suite/operations": {
       "get": {
         "operationId": "get_operations_center_api_v1_admin_suite_operations_get",
@@ -194230,6 +194777,40 @@
         ]
       }
     },
+    "/api/v1/admin-suite/readiness/evidence": {
+      "get": {
+        "description": "Flache Evidenzliste fuer Studio-Cockpit-Tabelle (wie Legacy-Karten).",
+        "operationId": "list_admin_suite_readiness_evidence_api_v1_admin_suite_readiness_evidence_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Admin Suite Readiness Evidence Api V1 Admin Suite Readiness Evidence Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Suite readiness Evidenzliste",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
     "/api/v1/admin-suite/security": {
       "get": {
         "operationId": "get_security_cockpit_api_v1_admin_suite_security_get",
@@ -194254,6 +194835,105 @@
         "tags": [
           "admin-suite",
           "readiness"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/security/agent-roles": {
+      "get": {
+        "description": "Flache Agentenrollen fuer Studio-Cockpit-Tabelle.",
+        "operationId": "list_security_agent_roles_api_v1_admin_suite_security_agent_roles_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Security Agent Roles Api V1 Admin Suite Security Agent Roles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Agentenrollen auflisten",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/security/overview": {
+      "get": {
+        "description": "Flache KPIs fuer Studio-Cockpit-Summary.",
+        "operationId": "get_security_overview_api_v1_admin_suite_security_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Security Overview Api V1 Admin Suite Security Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Security Governance KPI-Ueberblick",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/security/roles": {
+      "get": {
+        "description": "Flache Menschenrollen fuer Studio-Cockpit-Tabelle.",
+        "operationId": "list_security_roles_api_v1_admin_suite_security_roles_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Security Roles Api V1 Admin Suite Security Roles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Menschenrollen auflisten",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -194330,6 +195010,40 @@
         "tags": [
           "admin-suite",
           "readiness"
+        ]
+      }
+    },
+    "/api/v1/admin-suite/setup/steps": {
+      "get": {
+        "description": "Flache Setup-Schritte fuer NativeList (Human/CI/MCP).",
+        "operationId": "list_setup_steps_api_v1_admin_suite_setup_steps_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Setup Steps Api V1 Admin Suite Setup Steps Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Admin Suite Setup-Schritte auflisten",
+        "tags": [
+          "admin-suite",
+          "readiness",
+          "parity"
         ]
       }
     },
@@ -210405,6 +211119,56 @@
         ]
       }
     },
+    "/api/v1/agrar/harvest-acceptance/rohware": {
+      "post": {
+        "description": "Mappt Wizard-Felder auf HarvestAcceptanceCreate (Human/CI/MCP gleicher Kanal).",
+        "operationId": "create_rohware_acceptance_api_v1_agrar_harvest_acceptance_rohware_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RohwareAcceptanceCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HarvestAcceptanceOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rohware-Annahme (Wizard-Compat)",
+        "tags": [
+          "agrar",
+          "harvest",
+          "acceptance",
+          "ernte-annahme"
+        ]
+      }
+    },
     "/api/v1/agrar/harvest-acceptance/settlement-controls/acceptances/{acceptance_id}/approve-calculation": {
       "post": {
         "operationId": "approve_calculation_api_v1_agrar_harvest_acceptance_settlement_controls_acceptances__acceptance_id__approve_calculation_post",
@@ -212663,6 +213427,41 @@
           }
         ],
         "summary": "Betriebe als GeoJSON (Karte + Kennzahlen-Flyover)",
+        "tags": [
+          "agrar",
+          "crosssell",
+          "agrar",
+          "crosssell"
+        ]
+      }
+    },
+    "/api/v1/agrar/milchvieh-crosssell/produktgruppen": {
+      "get": {
+        "description": "Flache Liste fuer Cockpit-Tabelle — dieselben Daten wie ``summary.produktgruppen``.",
+        "operationId": "crosssell_produktgruppen_api_v1_agrar_milchvieh_crosssell_produktgruppen_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response Crosssell Produktgruppen Api V1 Agrar Milchvieh Crosssell Produktgruppen Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Potenzial nach Produktgruppe (gesamt)",
         "tags": [
           "agrar",
           "crosssell",
@@ -228350,6 +229149,66 @@
         ]
       }
     },
+    "/api/v1/agrar/settlements/campaign-reference/backfill/{campaign_id}": {
+      "post": {
+        "description": "Alias fuer NativeListPage/MCP: Kampagne steht im Pfad statt im Body.",
+        "operationId": "backfill_settlement_campaign_reference_by_id_api_v1_agrar_settlements_campaign_reference_backfill__campaign_id__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "campaign_id",
+            "required": true,
+            "schema": {
+              "title": "Campaign Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dry_run",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Dry Run",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementCampaignBackfillResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Settlement campaign reference backfill (Pfad)",
+        "tags": [
+          "agrar",
+          "settlements",
+          "self-billing"
+        ]
+      }
+    },
     "/api/v1/agrar/settlements/drying-rules": {
       "get": {
         "description": "Liste aller Trocknungs-/Schwundtabellen (Leserechte für alle).",
@@ -235672,6 +236531,60 @@
           "Artikelstamm - Bestandteile & Qualitätsmerkmale"
         ]
       },
+      "get": {
+        "operationId": "get_bestandteil_def_api_v1_artikel_bestandteile_stamm__bestandteil_nr__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bestandteil_nr",
+            "required": true,
+            "schema": {
+              "title": "Bestandteil Nr",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BestandteilDefOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Bestandteil def abrufen",
+        "tags": [
+          "Artikelstamm - Bestandteile & Qualitätsmerkmale"
+        ]
+      },
       "put": {
         "operationId": "update_bestandteil_def_api_v1_artikel_bestandteile_stamm__bestandteil_nr__put",
         "parameters": [
@@ -237836,6 +238749,60 @@
           }
         ],
         "summary": "Stoffstrom löschen",
+        "tags": [
+          "Artikelstamm - Stoffstrom & THG"
+        ]
+      },
+      "get": {
+        "operationId": "get_stoffstrom_api_v1_artikel_stoffstrom__stoffstrom_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "stoffstrom_id",
+            "required": true,
+            "schema": {
+              "title": "Stoffstrom Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StoffstromOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Stoffstrom abrufen",
         "tags": [
           "Artikelstamm - Stoffstrom & THG"
         ]
@@ -279191,6 +280158,54 @@
         "tags": [
           "compat"
         ]
+      },
+      "post": {
+        "operationId": "einkauf_angebot_create_api_v1_einkauf_angebote_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufAngebotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Angebot anlegen einkauf",
+        "tags": [
+          "compat",
+          "einkauf",
+          "parity"
+        ]
       }
     },
     "/api/v1/einkauf/angebote/{angebot_id}": {
@@ -279237,6 +280252,65 @@
         "summary": "Angebot get einkauf",
         "tags": [
           "compat"
+        ]
+      },
+      "put": {
+        "operationId": "einkauf_angebot_update_api_v1_einkauf_angebote__angebot_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "angebot_id",
+            "required": true,
+            "schema": {
+              "title": "Angebot Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufAngebotOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Angebot aktualisieren einkauf",
+        "tags": [
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -279688,6 +280762,54 @@
         "tags": [
           "compat"
         ]
+      },
+      "post": {
+        "operationId": "einkauf_anlieferavis_create_api_v1_einkauf_anlieferavis_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufAnlieferavisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis anlegen einkauf",
+        "tags": [
+          "compat",
+          "einkauf",
+          "parity"
+        ]
       }
     },
     "/api/v1/einkauf/anlieferavis/{avis_id}": {
@@ -279734,6 +280856,65 @@
         "summary": "Anlieferavis get einkauf",
         "tags": [
           "compat"
+        ]
+      },
+      "put": {
+        "operationId": "einkauf_anlieferavis_update_api_v1_einkauf_anlieferavis__avis_id__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "avis_id",
+            "required": true,
+            "schema": {
+              "title": "Avis Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "title": "Payload",
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EinkaufAnlieferavisOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Anlieferavis aktualisieren einkauf",
+        "tags": [
+          "compat",
+          "einkauf",
+          "parity"
         ]
       }
     },
@@ -288883,6 +290064,69 @@
           }
         ],
         "summary": "Alle externen Gate-Status abrufen",
+        "tags": [
+          "external-gates",
+          "external-gates"
+        ]
+      }
+    },
+    "/api/v1/external-gates/items": {
+      "get": {
+        "description": "Flache Gate-Liste fuer Studio-Cockpit-Tabelle.",
+        "operationId": "list_gate_items_api_v1_external_gates_items_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": true,
+                    "type": "object"
+                  },
+                  "title": "Response List Gate Items Api V1 External Gates Items Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Externe Gates flach auflisten",
+        "tags": [
+          "external-gates",
+          "external-gates"
+        ]
+      }
+    },
+    "/api/v1/external-gates/overview": {
+      "get": {
+        "description": "Flache KPIs fuer Studio-Cockpit-Summary (Human/CI/MCP).",
+        "operationId": "get_gates_overview_api_v1_external_gates_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Get Gates Overview Api V1 External Gates Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Externe Gates KPI-Ueberblick",
         "tags": [
           "external-gates",
           "external-gates"
@@ -323383,6 +324627,62 @@
         ]
       }
     },
+    "/api/v1/inventur/piv/{abschluss_id}": {
+      "get": {
+        "operationId": "get_piv_abschluss_api_v1_inventur_piv__abschluss_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "abschluss_id",
+            "required": true,
+            "schema": {
+              "title": "Abschluss Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PIVAbschlussOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Piv abschluss abrufen",
+        "tags": [
+          "Lager - Permanente Inventur (PIV)"
+        ]
+      }
+    },
     "/api/v1/inventur/piv/{abschluss_id}/abschliessen": {
       "post": {
         "description": "PIV-Abschluss finalisieren — Differenzen festschreiben.\n\nFachlich: Nach dem Abschluss werden die Bestandsdifferenzen in den\nBuchbestand übernommen. Ignorierte PIV-Belege werden nicht gebucht.",
@@ -328929,7 +330229,7 @@
     },
     "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren": {
       "post": {
-        "description": "Mengenzeiträume automatisch generieren (z.B. monatlich linear).\n\nFachlich: Bei der Variante 'monatlich linear' wird die Gesamtmenge\ngleichmäßig auf die Monate des Kontraktzeitraums verteilt.",
+        "description": "Mengenzeiträume automatisch generieren (z.B. monatlich linear).\n\nFachlich: Bei der Variante 'monatlich linear' wird die Gesamtmenge\ngleichmäßig auf die Monate des Kontraktzeitraums verteilt.\n\nHuman/CI/MCP: Query-Parameter (Legacy-Client) oder JSON-Body (NativeListPage).",
         "operationId": "generiere_mengenzeitraeume_api_v1_kontrakte__kontrakt_nr__mengenzeitraeume_generieren_post",
         "parameters": [
           {
@@ -328944,27 +330244,41 @@
           {
             "in": "query",
             "name": "von_datum",
-            "required": true,
+            "required": false,
             "schema": {
-              "format": "date",
-              "title": "Von Datum",
-              "type": "string"
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Von Datum"
             }
           },
           {
             "in": "query",
             "name": "bis_datum",
-            "required": true,
+            "required": false,
             "schema": {
-              "format": "date",
-              "title": "Bis Datum",
-              "type": "string"
+              "anyOf": [
+                {
+                  "format": "date",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Bis Datum"
             }
           },
           {
             "in": "query",
             "name": "gesamt_menge_t",
-            "required": true,
+            "required": false,
             "schema": {
               "anyOf": [
                 {
@@ -328972,6 +330286,9 @@
                 },
                 {
                   "type": "string"
+                },
+                {
+                  "type": "null"
                 }
               ],
               "title": "Gesamt Menge T"
@@ -328988,6 +330305,23 @@
             }
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/MengenzeitraeumeGenerierenIn"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Body"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -362482,6 +363816,68 @@
         ]
       }
     },
+    "/api/v1/pos/fiscalization/overview": {
+      "get": {
+        "description": "Flache Config+Readiness-KPIs fuer Studio-Cockpit (Human/CI/MCP).",
+        "operationId": "fiscalization_overview_api_v1_pos_fiscalization_overview_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Fiscalization Overview Api V1 Pos Fiscalization Overview Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "POS-Fiskalisierung KPI-Ueberblick",
+        "tags": [
+          "pos",
+          "fiscalization"
+        ]
+      }
+    },
+    "/api/v1/pos/fiscalization/products": {
+      "get": {
+        "description": "Flache Produkt-Readiness fuer Studio-Cockpit-Tabelle.",
+        "operationId": "list_fiscal_products_api_v1_pos_fiscalization_products_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FiscalProductRowOut"
+                  },
+                  "title": "Response List Fiscal Products Api V1 Pos Fiscalization Products Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Optionale fiskaly-Produkte auflisten",
+        "tags": [
+          "pos",
+          "fiscalization"
+        ]
+      }
+    },
     "/api/v1/pos/fiscalization/readiness": {
       "get": {
         "operationId": "readiness_api_v1_pos_fiscalization_readiness_get",
@@ -368081,9 +369477,114 @@
         ]
       }
     },
+    "/api/v1/process/actions/idempotency/aggregates": {
+      "get": {
+        "description": "Flache Aggregate-Liste fuer Studio-Cockpit-Tabelle (wie Legacy-Chips).",
+        "operationId": "list_idempotency_aggregates_api_v1_process_actions_idempotency_aggregates_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response List Idempotency Aggregates Api V1 Process Actions Idempotency Aggregates Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Idempotente Aggregate auflisten",
+        "tags": [
+          "process-kernel",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/process/actions/idempotency/commands": {
+      "get": {
+        "description": "Flache Command-Liste fuer Studio-Cockpit-Tabelle (wie Legacy-Chips).",
+        "operationId": "list_idempotency_commands_api_v1_process_actions_idempotency_commands_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response List Idempotency Commands Api V1 Process Actions Idempotency Commands Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Idempotente Commands auflisten",
+        "tags": [
+          "process-kernel",
+          "parity"
+        ]
+      }
+    },
+    "/api/v1/process/actions/idempotency/lookup-paths": {
+      "get": {
+        "description": "Lookup-Pfade aus dem Overview als Liste (Human/CI/MCP).",
+        "operationId": "list_idempotency_lookup_paths_api_v1_process_actions_idempotency_lookup_paths_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
+                  },
+                  "title": "Response List Idempotency Lookup Paths Api V1 Process Actions Idempotency Lookup Paths Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Idempotenz-Lookup-Pfade",
+        "tags": [
+          "process-kernel",
+          "parity"
+        ]
+      }
+    },
     "/api/v1/process/actions/idempotency/overview": {
       "get": {
-        "description": "Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer.",
+        "description": "Liefert einen Monitoring-Ueberblick ueber den Idempotenz-Layer inkl. flacher KPIs.",
         "operationId": "get_idempotency_overview_api_v1_process_actions_idempotency_overview_get",
         "responses": {
           "200": {
@@ -368105,7 +369606,7 @@
         "summary": "Idempotency overview abrufen",
         "tags": [
           "process-kernel",
-          "commands"
+          "parity"
         ]
       }
     },
@@ -387123,6 +388624,52 @@
           }
         ],
         "summary": "Rohwarengruppe löschen",
+        "tags": [
+          "Rohware - Gruppen & Abrechnungsschemata"
+        ]
+      },
+      "get": {
+        "description": "Nach allen statischen Unterpfaden registriert, damit /schemata|/qualitaeten|/staffeln nicht geschluckt werden.",
+        "operationId": "get_rohwarengruppe_api_v1_rohware_gruppen__gruppe_nr__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "gruppe_nr",
+            "required": true,
+            "schema": {
+              "title": "Gruppe Nr",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RohwarengruppeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Rohwarengruppe abrufen",
         "tags": [
           "Rohware - Gruppen & Abrechnungsschemata"
         ]
@@ -413794,6 +415341,62 @@
           }
         ],
         "summary": "Zinsabrechnungen auflisten",
+        "tags": [
+          "Zinsabrechnung"
+        ]
+      },
+      "post": {
+        "description": "Flaches POST — gleicher Vertrag wie ``/berechnen`` (Maske/CLI/MCP).",
+        "operationId": "create_zinsabrechnung_api_v1_zinsabrechnung_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "X-Tenant-ID",
+            "required": true,
+            "schema": {
+              "title": "X-Tenant-Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ZinsabrechnungCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ZinsabrechnungOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Zinsabrechnung anlegen",
         "tags": [
           "Zinsabrechnung"
         ]

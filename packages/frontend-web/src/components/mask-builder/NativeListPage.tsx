@@ -133,8 +133,9 @@ export function NativeListPage({ screenId, testId }: { screenId: string; testId?
     laufend.current.add(schluessel)
     setSendet(true)
     try {
-      // Jeder Platzhalter aus der Zeile ({entity_id} = id, sonst gleichnamiges Feld), wie bei Navigationsrouten.
-      const pfad = zielRoute(aktion.commandEndpoint, row)
+      // Platzhalter aus Zeile + Eingabewerten ({entity_id} = id) — Header-Aktionen
+      // mit pfadgebundenen Endpunkten (z. B. /kontrakte/{kontrakt_nr}/…) brauchen die Formwerte.
+      const pfad = zielRoute(aktion.commandEndpoint, { ...row, ...werte })
       const versioniert = aktion.requiresExpectedVersion === true || /^\/api\/v1\/studio\/entities\/studio_[a-z0-9_]+\/[^/]+\/actions\/(update|delete)$/.test(pfad)
       if (versioniert && (!Number.isInteger(row.version) || Number(row.version) < 1)) {
         throw new Error('Die angezeigte Version fehlt. Bitte die Liste neu laden.')

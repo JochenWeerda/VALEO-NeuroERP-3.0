@@ -73,14 +73,11 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 2:
 - `einkauf/frachtauftraege-liste` — Frachtauftraege
 - `einkauf/wareneingangsabgleich` — Wareneingangsabgleich
 
-Aktionen der Domaenenmasken: 158, davon serverwirksam 74; ohne CLI 0; nicht verfuegbar 0; nicht deklariert 0.
+Aktionen der Domaenenmasken: 166, davon serverwirksam 82; ohne CLI 0; nicht verfuegbar 0; nicht deklariert 0.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 
-- `packages/frontend-web/src/pages/einkauf/anfrage-stamm-legacy.tsx:132` placeholder: t('crud.tooltips.placeholders.reason')
-- `packages/frontend-web/src/pages/einkauf/anfrage-stamm-legacy.tsx:154` placeholder: t('crud.tooltips.placeholders.notes')
-- `packages/frontend-web/src/pages/einkauf/angebot-stamm-legacy.tsx:105` { name: 'zahlungsbedingungen', label: t('crud.fields.paymentTerms'), type: 'text', placeholder: t('c
-- `packages/frontend-web/src/pages/einkauf/angebot-stamm-legacy.tsx:120` { name: 'bemerkungen', label: t('crud.fields.notes'), type: 'textarea', placeholder: t('crud.tooltip
+Keine Treffer.
 
 ## Rollen
 

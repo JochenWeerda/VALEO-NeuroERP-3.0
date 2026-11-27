@@ -222,7 +222,7 @@ export function CustomerCombobox({
                         <div className="flex items-center gap-2 truncate">
                           <span className="truncate font-medium">{customer.company_name || '(ohne Name)'}</span>
                           {customer.is_active === false ? (
-                            <span className="rounded bg-muted px-1 text-[10px] uppercase text-muted-foreground">
+                            <span className="rounded bg-muted px-1 text-2xs uppercase text-muted-foreground">
                               inaktiv
                             </span>
                           ) : null}

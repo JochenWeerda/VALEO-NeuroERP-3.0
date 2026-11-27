@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./system-status-legacy'))
+/** Native Liste: ScreenDefinition admin-suite/system-status */
+export default function AdminSuiteSystemStatusPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/system-status" testId="screen-admin-suite/system-status" />
+}

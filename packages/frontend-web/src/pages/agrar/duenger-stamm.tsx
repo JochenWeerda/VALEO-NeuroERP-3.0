@@ -1,7 +1,4 @@
 import { createStammNativeDetailPage } from '@/components/mask-builder'
 
-export default createStammNativeDetailPage(
-  'agrar/duenger',
-  'agrar-duenger-stamm',
-  () => import('./duenger-stamm-legacy'),
-)
+/** Native Detail + Create (ScreenDefinition ``creation``); Legacy-ObjectPage abgeloest. */
+export default createStammNativeDetailPage('agrar/duenger', 'agrar-duenger-stamm')

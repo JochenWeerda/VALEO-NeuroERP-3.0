@@ -1710,7 +1710,8 @@
             "key": "rechnungsNr",
             "label": "Rechnung",
             "filterable": true,
-            "priority": "primary"
+            "priority": "primary",
+            "sortable": true
           },
           {
             "key": "lieferant",
@@ -1951,7 +1952,8 @@
             "key": "rechnungsnr",
             "label": "Rechnung",
             "filterable": true,
-            "priority": "primary"
+            "priority": "primary",
+            "sortable": true
           },
           {
             "key": "lieferant",
@@ -3851,7 +3853,8 @@
             "key": "belegnummer",
             "label": "Beleg",
             "filterable": true,
-            "priority": "primary"
+            "priority": "primary",
+            "sortable": true
           },
           {
             "key": "konto",
@@ -4096,7 +4099,8 @@
             "key": "typ",
             "label": "Typ",
             "filterable": true,
-            "priority": "primary"
+            "priority": "primary",
+            "sortable": true
           },
           {
             "key": "status",
@@ -4809,7 +4813,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/finance/asset-accounting/assets",
         "pageSize": 100
       }
     ],
@@ -5056,7 +5060,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/finance/asset-accounting/assets",
         "pageSize": 100
       }
     ],
@@ -7207,7 +7211,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/fibu/anlagen",
+        "endpoint": "/api/v1/finance/asset-accounting/assets",
         "pageSize": 100
       }
     ],

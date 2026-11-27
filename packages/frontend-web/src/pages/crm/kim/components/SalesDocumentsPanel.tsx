@@ -1,3 +1,2 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
-
-export default createLegacyMaskPage(() => import('./SalesDocumentsPanel-legacy'))
+/** Prozess-/Ops-Maske — kein Stamm-Create-Factory. */
+export { default } from './SalesDocumentsPanel-legacy'

@@ -8,6 +8,8 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/charge/**/*.tsx',
   '../../pages/disposition/**/*.tsx',
   '../../pages/dokumente/**/*.tsx',
+  '../../pages/dms/**/*.tsx',
+  '../../pages/betrieb/**/*.tsx',
   '../../pages/einkauf/**/*.tsx',
   '../../pages/energie/**/*.tsx',
   '../../pages/etiketten/**/*.tsx',

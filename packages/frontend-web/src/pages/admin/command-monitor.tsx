@@ -1,7 +1,14 @@
-import { createStammNativeDetailPage } from '@/components/mask-builder'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default createStammNativeDetailPage(
-  'admin/command-monitor',
-  'admin-command-monitor',
-  () => import('./command-monitor-legacy'),
-)
+/**
+ * Native Cockpit: ScreenDefinition admin/command-monitor
+ * Idempotenz-KPIs + Commands/Aggregate/Lookup-Pfade — Parität zur Legacy-Maske.
+ */
+export default function CommandMonitorPage(): JSX.Element {
+  return (
+    <UniversalNativeCockpitPage
+      screenId="admin/command-monitor"
+      testId="screen-admin/command-monitor"
+    />
+  )
+}

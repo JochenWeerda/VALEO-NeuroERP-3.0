@@ -59,11 +59,11 @@ const BOOTSTRAP_FAILURE_TITLE = 'Bootstrap-Fehler'
 const VALIDATION_FAILURE_TITLE = 'Validierung fehlgeschlagen'
 const VALIDATION_FAILURE_DESCRIPTION = 'Bitte Base-URL und Token eingeben'
 
-const isNonEmptyString = (value: unknown): value is string => {
+export const isNonEmptyString = (value: unknown): value is string => {
   return typeof value === 'string' && value.trim().length > 0
 }
 
-const formatBootstrapSummary = (result: BootstrapResult): string => {
+export const formatBootstrapSummary = (result: BootstrapResult): string => {
   const docTypes = typeof result.document_types === 'number' ? result.document_types : 0
   const metadataTypes = typeof result.metadata_types === 'number' ? result.metadata_types : 0
   const created = typeof result.created === 'number' ? result.created : 0
@@ -72,7 +72,7 @@ const formatBootstrapSummary = (result: BootstrapResult): string => {
   return `${docTypes} Dokumenttypen, ${metadataTypes} Metadaten, ${created} Bindings, ${updated} aktualisiert`
 }
 
-const openExternal = (target?: string): void => {
+export const openExternal = (target?: string): void => {
   if (isNonEmptyString(target)) {
     window.open(target, '_blank', 'noopener')
   }
@@ -86,6 +86,7 @@ export default function DmsIntegrationCard(): JSX.Element {
   const [loading, setLoading] = useState<boolean>(false)
   const [testState, setTestState] = useState<TestState>('idle')
   const [status, setStatus] = useState<DmsStatus | null>(null)
+  const [statusLoadError, setStatusLoadError] = useState<string | null>(null)
   const [roleFocus, setRoleFocus] = useState<DmsSetupRole>('it')
   const isTouch = useTouchDevice()
 
@@ -111,11 +112,13 @@ export default function DmsIntegrationCard(): JSX.Element {
       const res = await apiClient.get<DmsStatus>('/api/v1/admin/dms/status')
       const data = res.data
       setStatus(data)
+      setStatusLoadError(null)
       if (data && isNonEmptyString(data.base)) {
         setBaseUrl(data.base)
       }
-    } catch (error) {
+    } catch {
       setStatus(null)
+      setStatusLoadError('Verbindungsstatus konnte nicht abgerufen werden. Bitte erneut versuchen.')
     }
   }, [])
 
@@ -200,11 +203,13 @@ export default function DmsIntegrationCard(): JSX.Element {
   }, [baseUrl, hasCredentials, loadStatus, toast, token])
 
   return (
+    <div role="region" aria-label="DMS-Integration Arbeitsbereich">
     <Card className="border border-dashed">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <CardTitle>Mayan DMS</CardTitle>
+            <h1 className="text-lg font-semibold tracking-tight">DMS-Integration</h1>
+            <CardTitle className="sr-only">Mayan DMS</CardTitle>
             <CardDescription>DMS-Integration fuellt Inbox, Dokument-Metadaten und Workflow.</CardDescription>
           </div>
           {isConfigured && (
@@ -217,6 +222,23 @@ export default function DmsIntegrationCard(): JSX.Element {
       </CardHeader>
 
       <CardContent className="p-0 space-y-4">
+        {statusLoadError ? (
+          <div
+            role="alert"
+            className="mx-6 mt-4 rounded-md border border-status-error/40 bg-status-error/10 px-3 py-2 text-sm text-status-error"
+          >
+            {statusLoadError}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="ml-3"
+              onClick={() => { void loadStatus() }}
+            >
+              Erneut laden
+            </Button>
+          </div>
+        ) : null}
         <div className="space-y-4 p-6 pb-0">
           {!isTouch ? (
           <>
@@ -384,5 +406,6 @@ export default function DmsIntegrationCard(): JSX.Element {
         )}
       </CardContent>
     </Card>
+    </div>
   )
 }

@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./diagnostics-legacy'))
+/** Native Liste: ScreenDefinition admin-suite/diagnostics */
+export default function AdminSuiteDiagnosticsPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/diagnostics" testId="screen-admin-suite/diagnostics" />
+}

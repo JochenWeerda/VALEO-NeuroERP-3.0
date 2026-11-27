@@ -78,7 +78,11 @@ export function TicketsRenderer({ state }: { state: TicketsState }): JSX.Element
   }
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Wiegungen Arbeitsbereich"
+    >
     <div className="space-y-4 p-3 md:p-6">
 
       <Card>

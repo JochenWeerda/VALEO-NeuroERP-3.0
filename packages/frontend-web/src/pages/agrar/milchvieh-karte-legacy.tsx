@@ -32,22 +32,37 @@ type PopupLike = {
 const nf = (n: unknown): string =>
   typeof n === 'number' ? n.toLocaleString('de-DE', { maximumFractionDigits: 0 }) : '–'
 
-const BEDARF_COLOR: Record<string, string> = { hoch: '#dc2626', mittel: '#eab308', niedrig: '#16a34a' }
+/** Löst Theme-HSL-Tokens für MapLibre-Paint (keine CSS-var-Expansion in Style-JSON). */
+function themeHsl(token: string): string {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(token).trim()
+  return raw ? `hsl(${raw})` : `hsl(var(${token}))`
+}
+
+function bedarfColors(): Record<string, string> {
+  return {
+    hoch: themeHsl('--status-error-hsl'),
+    mittel: themeHsl('--status-warning-hsl'),
+    niedrig: themeHsl('--status-success-hsl'),
+  }
+}
 
 function popupHtml(p: Record<string, unknown>): string {
   const zz = p.zellzahl_quelle === 'dev_synthetik' ? `${nf(p.zellzahl_tsd_ml)}~` : nf(p.zellzahl_tsd_ml)
+  const muted = 'hsl(var(--muted-foreground))'
+  const colors = bedarfColors()
+  const hygieneColor = colors[String(p.hygiene_bedarf)] ?? 'hsl(var(--foreground))'
   return `
-    <div style="font:12px system-ui;min-width:200px">
+    <div style="font:12px system-ui;min-width:200px;color:hsl(var(--foreground))">
       <div style="font-weight:600;margin-bottom:2px">${String(p.name ?? p.kunden_nr)}</div>
-      <div style="color:#64748b;margin-bottom:6px">${String(p.plz ?? '')} ${String(p.ort ?? '')}</div>
+      <div style="color:${muted};margin-bottom:6px">${String(p.plz ?? '')} ${String(p.ort ?? '')}</div>
       <table style="border-collapse:collapse">
-        <tr><td style="color:#64748b;padding-right:8px">Kühe</td><td style="text-align:right">${nf(p.herd_size_kuehe)}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">Milch l/J</td><td style="text-align:right">${nf(p.milchmenge_l_jahr)}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">ECM kg</td><td style="text-align:right">${nf(p.ecm_kg)}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">Zellzahl</td><td style="text-align:right">${zz}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">Hygiene</td><td style="text-align:right;font-weight:600;color:${BEDARF_COLOR[String(p.hygiene_bedarf)] ?? '#334155'}">${String(p.hygiene_bedarf)}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">Kraftfutter t/J</td><td style="text-align:right">${nf(p.kraftfutter_t_jahr_min)}–${nf(p.kraftfutter_t_jahr_max)}</td></tr>
-        <tr><td style="color:#64748b;padding-right:8px">Cross-Sell €</td><td style="text-align:right;font-weight:600">${nf(p.crosssell_ziel_eur)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Kühe</td><td style="text-align:right">${nf(p.herd_size_kuehe)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Milch l/J</td><td style="text-align:right">${nf(p.milchmenge_l_jahr)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">ECM kg</td><td style="text-align:right">${nf(p.ecm_kg)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Zellzahl</td><td style="text-align:right">${zz}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Hygiene</td><td style="text-align:right;font-weight:600;color:${hygieneColor}">${String(p.hygiene_bedarf)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Kraftfutter t/J</td><td style="text-align:right">${nf(p.kraftfutter_t_jahr_min)}–${nf(p.kraftfutter_t_jahr_max)}</td></tr>
+        <tr><td style="color:${muted};padding-right:8px">Cross-Sell €</td><td style="text-align:right;font-weight:600">${nf(p.crosssell_ziel_eur)}</td></tr>
       </table>
     </div>`
 }
@@ -94,16 +109,29 @@ export default function MilchviehKartePage(): JSX.Element {
         const popup = new ML.Popup({ closeButton: false, closeOnClick: false })
         map.on('load', () => {
           const m = mapRef.current as MapLike
+          const bedarf = bedarfColors()
+          const muted = themeHsl('--muted-foreground')
+          const stroke = themeHsl('--background')
           m.addSource('farms', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } })
           m.addLayer({
             id: 'farms',
             type: 'circle',
             source: 'farms',
             paint: {
-              'circle-color': ['match', ['get', 'hygiene_bedarf'], 'hoch', '#dc2626', 'mittel', '#eab308', 'niedrig', '#16a34a', '#94a3b8'],
+              'circle-color': [
+                'match',
+                ['get', 'hygiene_bedarf'],
+                'hoch',
+                bedarf.hoch,
+                'mittel',
+                bedarf.mittel,
+                'niedrig',
+                bedarf.niedrig,
+                muted,
+              ],
               'circle-radius': ['interpolate', ['linear'], ['get', 'herd_size_kuehe'], 30, 5, 300, 15],
               'circle-stroke-width': 1,
-              'circle-stroke-color': '#ffffff',
+              'circle-stroke-color': stroke,
               'circle-opacity': 0.85,
             },
           })
@@ -138,7 +166,7 @@ export default function MilchviehKartePage(): JSX.Element {
   }, [ready, mapData.data])
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col p-4">
+    <section className="flex h-[calc(100vh-4rem)] flex-col p-4" aria-label="Milchvieh-Karte Arbeitsbereich">
       <div className="mb-3">
         <h1 className="text-2xl font-semibold">Milchvieh-Betriebe (Karte)</h1>
         <p className="text-sm text-muted-foreground">
@@ -163,19 +191,19 @@ export default function MilchviehKartePage(): JSX.Element {
               onChange={(e) => setFilter((f) => ({ ...f, min_kuehe: e.target.value ? Number(e.target.value) : undefined }))} />
           </label>
           <div className="ml-auto flex items-center gap-4 text-xs">
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#16a34a' }} /> niedrig</span>
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#eab308' }} /> mittel</span>
-            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full" style={{ background: '#dc2626' }} /> hoch</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-success" /> niedrig</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-warning" /> mittel</span>
+            <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-status-error" /> hoch</span>
             <span className="text-muted-foreground">{mapData.data ? `${mapData.data.features.length} Betriebe` : ''}</span>
           </div>
         </CardContent>
       </Card>
 
       {error ? (
-        <div className="flex flex-1 items-center justify-center rounded-md border text-sm text-destructive">{error}</div>
+        <div role="alert" className="flex flex-1 items-center justify-center rounded-md border text-sm text-status-error">{error}</div>
       ) : (
         <div ref={mapContainer} className="min-h-[50vh] flex-1 overflow-hidden rounded-md border" />
       )}
-    </div>
+    </section>
   )
 }

@@ -1,6 +1,6 @@
 # Masken-Routen-Migrationsinventar
 
-Stand: 2026-10-23 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
+Stand: 2026-11-26 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 > Studio-Entwuerfe in der DB sind **kein** Nachweis produktiver Ablösung.
 > Nur `runtime_wired` (ScreenDefinition → RenderPlan → useUniversalMaskRuntime /
@@ -10,40 +10,40 @@ Stand: 2026-10-23 (Messung aus `route-inventory.gen.json` + Seitenquelltext).
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt Routen | 941 |
-| runtime_wired (UniversalMaskRuntime-Pfad) | 825 |
-| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 1 |
-| legacy_wrapper (laedt weiter die Altoberflaeche) | 50 |
-| technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 4 |
-| hand_built (weder Runtime noch ObjectPage/ListReport) | 61 |
+| Gesamt Routen | 1150 |
+| runtime_wired (UniversalMaskRuntime-Pfad) | 1131 |
+| legacy_mask_pattern (ObjectPage/ListReport ohne Runtime) | 0 |
+| legacy_wrapper (laedt weiter die Altoberflaeche) | 0 |
+| technical_page (Anmeldung/Fehlerseite, keine Fachmaske) | 19 |
+| hand_built (weder Runtime noch ObjectPage/ListReport) | 0 |
 | non_page_module (Layout/Redirect/sonstiges) | 0 |
 
 ## Seiten-Dateien (`src/pages/**/*.tsx`)
 
 | Klasse | Anzahl |
 |--------|--------|
-| Gesamt TSX-Seiten | 1127 |
-| runtime_wired | 857 |
-| legacy_mask_pattern | 40 |
-| hand_built | 178 |
+| Gesamt TSX-Seiten | 982 |
+| runtime_wired | 930 |
+| legacy_mask_pattern | 0 |
+| hand_built | 37 |
 
 ## ScreenDefinitions / Studio
 
-- Registrierte ScreenDefinition-Builder (`_SCREEN_DEFINITIONS`): **97**
-- Frontend capture/mask TS-Exports (`export const *Screen`): **31**
+- Registrierte ScreenDefinition-Builder (`_SCREEN_DEFINITIONS`): **95**
+- Frontend capture/mask TS-Exports (`export const *Screen`): **32**
 - Studio-Draft-Zaehlung erfordert Live-DB (`screen_definition_drafts`); ohne DB hier nicht gemessen.
 
 ### Vergleich zum frueheren Stand
 
 | Metrik | Frueher | Jetzt (2026-10-22) |
 |--------|---------|---------------------|
-| handgebaute Routen | 442 | 61 |
-| Routen mit alten Maskenmustern | 80 | 1 |
-| Runtime-verdrahtet | — | 825 |
+| handgebaute Routen | 442 | 0 |
+| Routen mit alten Maskenmustern | 80 | 0 |
+| Runtime-verdrahtet | — | 1131 |
 | Studio-Entwuerfe | 154 | (DB, nicht gemessen) |
 
 Hinweis: Fruehere 442/80 bezogen sich vermutlich auf eine engere Routen-/Seitenbasis;
-aktuell sind **941** generierte Routen inventarisiert. Die Absolute `hand_built`
+aktuell sind **1150** generierte Routen inventarisiert. Die Absolute `hand_built`
 ist deshalb nicht 1:1 vergleichbar, aber die Luecke zur Runtime bleibt gross.
 
 ## Dual-Pfad (Native Wrapper existiert, Primaernav oft Legacy)
@@ -56,30 +56,84 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 ## Legacy ObjectPage/ListReport (erste 40)
 
-- `finance/bank-abgleich` ← `src/pages/finance/bank-abgleich.tsx`
 
 ## Runtime-verdrahtet (alle)
 
 - `/` ← `src/pages/start-dashboard.tsx`
 - `abrechnung/eb-lieferschein-kontrolle` ← `src/pages/abrechnung/eb-lieferschein-kontrolle.tsx`
+- `admin-suite` ← `src/pages/admin-suite/index.tsx`
+- `admin-suite/compliance` ← `src/pages/admin-suite/compliance.tsx`
+- `admin-suite/connectoren` ← `src/pages/admin-suite/connectoren.tsx`
+- `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
+- `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
+- `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
+- `admin-suite/ki-anbieter` ← `src/pages/admin-suite/ki-anbieter.tsx`
+- `admin-suite/migration` ← `src/pages/admin-suite/migration.tsx`
+- `admin-suite/operations` ← `src/pages/admin-suite/operations.tsx`
+- `admin-suite/pos-fiscalization` ← `src/pages/admin-suite/pos-fiscalization.tsx`
+- `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
+- `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
+- `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
+- `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/agenten-integration` ← `src/pages/admin/agenten-integration.tsx`
 - `admin/ai-approvals` ← `src/pages/admin/ai-approvals.tsx`
+- `admin/api-keys` ← `src/pages/admin/api-keys.tsx`
 - `admin/audit-log` ← `src/pages/admin/audit-log.tsx`
+- `admin/background-jobs` ← `src/pages/admin/background-jobs.tsx`
+- `admin/backup-restore` ← `src/pages/admin/backup-restore.tsx`
+- `admin/belegfolgekonfig` ← `src/pages/admin/BelegfolgekonfigPage.tsx`
 - `admin/benutzer` ← `src/pages/admin/benutzer-liste.tsx`
 - `admin/benutzer-liste` ← `src/pages/admin/benutzer-liste.tsx`
 - `admin/benutzer/:id` ← `src/pages/admin/benutzer-liste.tsx`
 - `admin/benutzer/neu` ← `src/pages/admin/benutzer-liste.tsx`
+- `admin/berechtigungen-matrix` ← `src/pages/admin/berechtigungen-matrix.tsx`
+- `admin/branches` ← `src/pages/admin/branches.tsx`
+- `admin/branches/:id` ← `src/pages/admin/branch-detail.tsx`
 - `admin/command-monitor` ← `src/pages/admin/command-monitor.tsx`
 - `admin/compliance` ← `src/pages/admin/compliance-dashboard.tsx`
 - `admin/compliance-dashboard` ← `src/pages/admin/compliance-dashboard.tsx`
+- `admin/control-center` ← `src/pages/admin/control-center/index.tsx`
+- `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
+- `admin/control-center/incident-response` ← `src/pages/admin/control-center/incident-response.tsx`
+- `admin/control-center/security` ← `src/pages/admin/control-center/security.tsx`
+- `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
+- `admin/core/audit-governance` ← `src/pages/admin/core/audit-governance.tsx`
 - `admin/data-quality` ← `src/pages/admin/data-quality.tsx`
+- `admin/dms-integration` ← `src/pages/admin/dms-integration.tsx`
+- `admin/erntepeak-stabilitaet` ← `src/pages/admin/erntepeak-stabilitaet.tsx`
+- `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
+- `admin/gap-pipeline` ← `src/pages/admin/GapPipelineConsole.tsx`
 - `admin/identity-budgets` ← `src/pages/admin/identity-budgets.tsx`
 - `admin/integrationen-quarantaene` ← `src/pages/admin/integrationen-quarantaene.tsx`
+- `admin/monitoring/alerting` ← `src/pages/admin/monitoring/alerting.tsx`
+- `admin/monitoring/alerts` ← `src/pages/admin/monitoring/alerts.tsx`
 - `admin/monitoring/regeln` ← `src/pages/admin/monitoring/regeln.tsx`
+- `admin/nummernkreise` ← `src/pages/admin/nummernkreise.tsx`
+- `admin/omnichannel-handelskonflikt` ← `src/pages/admin/omnichannel-handelskonflikt.tsx`
 - `admin/postfaecher` ← `src/pages/admin/postfaecher.tsx`
+- `admin/postfaecher/anmeldung-rueckruf` ← `src/pages/admin/postfaecher-anmeldung-rueckruf.tsx`
 - `admin/qualitaets-cockpit` ← `src/pages/admin/qualitaets-cockpit.tsx`
+- `admin/report-berechtigungen` ← `src/pages/admin/report-berechtigungen.tsx`
+- `admin/rolle/:id` ← `src/pages/admin/rollen-verwaltung.tsx`
+- `admin/rolle/neu` ← `src/pages/admin/rollen-verwaltung.tsx`
+- `admin/rollen-verwaltung` ← `src/pages/admin/rollen-verwaltung.tsx`
+- `admin/screen-studio` ← `src/pages/admin/screen-studio.tsx`
+- `admin/setup` ← `src/pages/admin/setup/index.tsx`
+- `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
+- `admin/tankstelle-evb` ← `src/pages/admin/tankstelle-evb.tsx`
+- `admin/tenants` ← `src/pages/admin/tenants.tsx`
+- `admin/terminologie` ← `src/pages/admin/terminologie.tsx`
 - `admin/token-consumption` ← `src/pages/admin/token-consumption.tsx`
+- `admin/users` ← `src/pages/admin/users.tsx`
+- `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
+- `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
+- `admin/webhooks` ← `src/pages/admin/webhooks.tsx`
+- `admin/webshop` ← `src/pages/admin/webshop.tsx`
+- `admin/webshop/bestellungen` ← `src/pages/admin/webshop-bestellungen.tsx`
+- `admin/workflow-editor` ← `src/pages/admin/workflow-editor.tsx`
+- `admin/zeitachsen-editor` ← `src/pages/admin/zeitachsen-editor.tsx`
 - `agrar` ← `src/pages/agrar/aussaat/liste.tsx`
+- `agrar/annahmen-qualitaet-nachtrag` ← `src/pages/agrar/annahmen-qualitaet-nachtrag.tsx`
 - `agrar/aussaat` ← `src/pages/agrar/aussaat/liste.tsx`
 - `agrar/aussaat/:id` ← `src/pages/agrar/aussaat/liste.tsx`
 - `agrar/aussaat/liste` ← `src/pages/agrar/aussaat/liste.tsx`
@@ -92,8 +146,10 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/bodenprobe/neu` ← `src/pages/agrar/bodenproben/liste.tsx`
 - `agrar/bodenproben` ← `src/pages/agrar/bodenproben/liste.tsx`
 - `agrar/bodenproben/liste` ← `src/pages/agrar/bodenproben/liste.tsx`
+- `agrar/daily-prices` ← `src/pages/agrar/daily-prices.tsx`
 - `agrar/duenger` ← `src/pages/agrar/duenger/liste.tsx`
 - `agrar/duenger-liste` ← `src/pages/agrar/duenger-liste.tsx`
+- `agrar/duenger-rechner` ← `src/pages/agrar/duenger-rechner.tsx`
 - `agrar/duenger-stamm` ← `src/pages/agrar/duenger-stamm.tsx`
 - `agrar/duenger-stamm/:id` ← `src/pages/agrar/duenger-stamm.tsx`
 - `agrar/duenger/:id` ← `src/pages/agrar/duenger-native.tsx`
@@ -105,24 +161,57 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/duenger/stamm/:id/edit` ← `src/pages/agrar/duenger/stamm.tsx`
 - `agrar/duengung/planung` ← `src/pages/agrar/duengung/planung.tsx`
 - `agrar/ernte` ← `src/pages/agrar/ernte/liste.tsx`
+- `agrar/ernte-annahme-abrechnung` ← `src/pages/agrar/ernte-annahme-abrechnung.tsx`
+- `agrar/ernte-annahme-energiemais` ← `src/pages/agrar/ernte-annahme-energiemais.tsx`
+- `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
+- `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
+- `agrar/ernte-kampagne-erfassung` ← `src/pages/agrar/ernte-kampagne-erfassung.tsx`
+- `agrar/ernte-qualitaetsfreigabe` ← `src/pages/agrar/ernte-qualitaetsfreigabe.tsx`
+- `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
+- `agrar/ernte/kampagnenabschluss` ← `src/pages/agrar/ernte/kampagnenabschluss.tsx`
 - `agrar/ernte/liste` ← `src/pages/agrar/ernte/liste.tsx`
-- `agrar/ernte/neu` ← `src/pages/agrar/ernte/neu.tsx`
+- `agrar/erntefenster-konfig` ← `src/pages/agrar/erntefenster-konfig.tsx`
+- `agrar/feldbuch/ackerschlagkartei` ← `src/pages/agrar/feldbuch/ackerschlagkartei.tsx`
+- `agrar/feldbuch/flurstueck-kataster` ← `src/pages/agrar/feldbuch/flurstueck-kataster.tsx`
 - `agrar/feldbuch/massnahme/:id` ← `src/pages/agrar/feldbuch/massnahmen.tsx`
 - `agrar/feldbuch/massnahme/neu` ← `src/pages/agrar/feldbuch/massnahmen.tsx`
 - `agrar/feldbuch/massnahmen` ← `src/pages/agrar/feldbuch/massnahmen.tsx`
 - `agrar/feldbuch/schlag/:id` ← `src/pages/agrar/feldbuch/schlagkartei.tsx`
-- `agrar/feldbuch/schlag/neu` ← `src/pages/agrar/feldbuch/schlag/neu.tsx`
 - `agrar/feldbuch/schlagkartei` ← `src/pages/agrar/feldbuch/schlagkartei.tsx`
+- `agrar/futter/mischfutter-optimierung` ← `src/pages/agrar/futter/mischfutter-optimierung.tsx`
 - `agrar/harvest-settlement/:id` ← `src/pages/agrar/ernte-abrechnung-native.tsx`
+- `agrar/kontrakt-engagement` ← `src/pages/agrar/kontrakt-engagement.tsx`
+- `agrar/kontrakt-erfuellung` ← `src/pages/agrar/kontrakt-erfuellung.tsx`
+- `agrar/kontrakt-fixierung` ← `src/pages/agrar/kontrakt-fixierung.tsx`
+- `agrar/kontrakt-settlement` ← `src/pages/agrar/kontrakt-settlement.tsx`
 - `agrar/kontrakt/:id` ← `src/pages/agrar/kontrakt-native.tsx`
 - `agrar/kontrakte/:id` ← `src/pages/agrar/kontrakt-native.tsx`
+- `agrar/kultur-stamm` ← `src/pages/agrar/kultur-stamm.tsx`
 - `agrar/kulturpflanzen` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
 - `agrar/kulturpflanzen/:id` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
 - `agrar/kulturpflanzen/liste` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
 - `agrar/kulturpflanzen/neu` ← `src/pages/agrar/kulturpflanzen/liste.tsx`
+- `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
+- `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
+- `agrar/lieferschein-erstellen` ← `src/pages/agrar/LieferscheinErstellen.tsx`
+- `agrar/maschinen-auslastung` ← `src/pages/agrar/maschinen-auslastung.tsx`
+- `agrar/maschinenauslastung` ← `src/pages/agrar/maschinenauslastung.tsx`
+- `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
+- `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
+- `agrar/nachhaltigkeit-eudr` ← `src/pages/agrar/nachhaltigkeit-eudr.tsx`
+- `agrar/nawaro-erntemeldung` ← `src/pages/agrar/nawaro-erntemeldung.tsx`
+- `agrar/nawaro-kaskade` ← `src/pages/agrar/nawaro-kaskade.tsx`
+- `agrar/partie-historie` ← `src/pages/agrar/partie-historie.tsx`
+- `agrar/pflanzenschutz-applikationen` ← `src/pages/agrar/pflanzenschutz-applikationen.tsx`
+- `agrar/pflanzenschutz-liste` ← `src/pages/agrar/pflanzenschutz-liste.tsx`
+- `agrar/pflanzenschutz-rechner` ← `src/pages/agrar/pflanzenschutz-rechner.tsx`
 - `agrar/pflanzenschutz/applikation` ← `src/pages/agrar/pflanzenschutz/applikation.tsx`
+- `agrar/planung/duengeplanung` ← `src/pages/agrar/planung/duengeplanung.tsx`
+- `agrar/planung/fruchtfolge` ← `src/pages/agrar/planung/fruchtfolge.tsx`
+- `agrar/probenehmer-stamm` ← `src/pages/agrar/probenehmer-stamm.tsx`
 - `agrar/psm` ← `src/pages/agrar/psm/liste.tsx`
 - `agrar/psm/abgabedokumentation` ← `src/pages/agrar/psm/abgabedokumentation.tsx`
+- `agrar/psm/anwendungsprotokoll` ← `src/pages/agrar/psm/anwendungsprotokoll.tsx`
 - `agrar/psm/auflagen-manager` ← `src/pages/agrar/psm/auflagen-manager.tsx`
 - `agrar/psm/auflagen/:id/bearbeiten` ← `src/pages/agrar/psm/auflagen-manager.tsx`
 - `agrar/psm/beratung` ← `src/pages/agrar/psm/beratung.tsx`
@@ -133,7 +222,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/psm/sachkunde/neu` ← `src/pages/agrar/psm/sachkunde-register.tsx`
 - `agrar/psm/stamm` ← `src/pages/agrar/psm/stamm.tsx`
 - `agrar/psm/stamm/:id` ← `src/pages/agrar/psm/stamm.tsx`
+- `agrar/psm/tankmischung` ← `src/pages/agrar/psm/tankmischung.tsx`
 - `agrar/psm/wasserschutz` ← `src/pages/agrar/psm/wasserschutz.tsx`
+- `agrar/qualitaet/laborwerte` ← `src/pages/agrar/qualitaet/laborwerte.tsx`
+- `agrar/qualitaet/mykotoxine` ← `src/pages/agrar/qualitaet/mykotoxine.tsx`
+- `agrar/rechnungen-erstellen` ← `src/pages/agrar/rechnungen-erstellen.tsx`
+- `agrar/rohwarengruppen` ← `src/pages/agrar/rohwarengruppen.tsx`
 - `agrar/saatgut` ← `src/pages/agrar/saatgut-liste.tsx`
 - `agrar/saatgut-liste` ← `src/pages/agrar/saatgut-liste.tsx`
 - `agrar/saatgut-stamm` ← `src/pages/agrar/saatgut-stamm.tsx`
@@ -141,95 +235,209 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `agrar/saatgut/:id` ← `src/pages/agrar/saatgut-native.tsx`
 - `agrar/saatgut/bestellung` ← `src/pages/agrar/saatgut/bestellung.tsx`
 - `agrar/saatgut/liste` ← `src/pages/agrar/saatgut/liste.tsx`
+- `agrar/saatgut/royalties` ← `src/pages/agrar/saatgut/royalties.tsx`
 - `agrar/saatgut/sorte/:id` ← `src/pages/agrar/saatgut/sortenregister.tsx`
 - `agrar/saatgut/sorte/neu` ← `src/pages/agrar/saatgut/sortenregister.tsx`
 - `agrar/saatgut/sortenregister` ← `src/pages/agrar/saatgut/sortenregister.tsx`
 - `agrar/saatgut/stamm` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `agrar/saatgut/stamm/:id` ← `src/pages/agrar/saatgut/stamm.tsx`
 - `agrar/saatzucht` ← `src/pages/agrar/saatzucht.tsx`
+- `agrar/sammelabrechnung` ← `src/pages/agrar/sammelabrechnung.tsx`
 - `agrar/schlaege/karte` ← `src/pages/agrar/schlaege/karte.tsx`
+- `agrar/schlaege/kulturhistorie` ← `src/pages/agrar/schlaege/kulturhistorie.tsx`
+- `agrar/sektion-auswahl` ← `src/pages/agrar/sektion-auswahl.tsx`
+- `agrar/self-billing` ← `src/pages/agrar/self-billing.tsx`
+- `agrar/silo-belegung` ← `src/pages/agrar/silo-belegung.tsx`
+- `agrar/silo-qualitaet` ← `src/pages/agrar/silo-qualitaet.tsx`
+- `agrar/silo-trocknung` ← `src/pages/agrar/silo-trocknung.tsx`
+- `agrar/soil-samples` ← `src/pages/agrar/soil-samples.tsx`
+- `agrar/sorten-vermehrung` ← `src/pages/agrar/sorten-vermehrung.tsx`
+- `agrar/trocknungsregeln` ← `src/pages/agrar/trocknungsregeln.tsx`
+- `agrar/umwelt/nitrat` ← `src/pages/agrar/umwelt/nitrat.tsx`
+- `agrar/vermehrungsvertraege` ← `src/pages/agrar/vermehrungsvertraege.tsx`
+- `agrar/vertrag-kontingente` ← `src/pages/agrar/vertrag-kontingente.tsx`
 - `agrar/wetter/prognose` ← `src/pages/agrar/wetter/prognose.tsx`
+- `agrar/wetterwarnung` ← `src/pages/agrar/wetterwarnung.tsx`
+- `agrar/wiegeschein-detail` ← `src/pages/agrar/wiegeschein-detail.tsx`
+- `agrar/zinsabrechnung` ← `src/pages/agrar/zinsabrechnung.tsx`
 - `agribusiness/farmers` ← `src/pages/agribusiness/farmers.tsx`
 - `agribusiness/field-service-task-edit` ← `src/pages/agribusiness/field-service-task-edit.tsx`
 - `agribusiness/field-service-task-neu` ← `src/pages/agribusiness/field-service-task-neu.tsx`
 - `agribusiness/field-service-tasks` ← `src/pages/agribusiness/field-service-tasks.tsx`
 - `agribusiness/field-service-tasks/:taskId/bearbeiten` ← `src/pages/agribusiness/field-service-task-edit.tsx`
 - `agribusiness/field-service-tasks/neu` ← `src/pages/agribusiness/field-service-task-neu.tsx`
+- `aktien/dividenden` ← `src/pages/aktien/dividenden.tsx`
+- `aktien/hauptversammlung` ← `src/pages/aktien/hauptversammlung.tsx`
+- `aktien/stimmrechte` ← `src/pages/aktien/stimmrechte.tsx`
+- `aktien/zeichnungen` ← `src/pages/aktien/zeichnungen.tsx`
 - `alerts` ← `src/pages/workflow/workflow-monitoring.tsx`
+- `analysis/what-if-simulator` ← `src/pages/analysis/WhatIfSimulator.tsx`
 - `analytics` ← `src/pages/analytics.tsx`
+- `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
 - `annahme/annahme-qr` ← `src/pages/annahme/annahme-qr.tsx`
 - `annahme/klaerung-gesperrt` ← `src/pages/annahme/klaerung-gesperrt.tsx`
+- `annahme/lkw-registrierung` ← `src/pages/annahme/lkw-registrierung.tsx`
+- `annahme/muster` ← `src/pages/annahme/muster.tsx`
 - `annahme/qr` ← `src/pages/annahme/annahme-qr.tsx`
 - `annahme/qr-scanner` ← `src/pages/annahme/qr-scanner.tsx`
+- `annahme/qualitaets-check` ← `src/pages/annahme/qualitaets-check.tsx`
+- `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
+- `annahme/rohwaren-annahme` ← `src/pages/annahme/rohwaren-annahme.tsx`
+- `annahme/silo-zuweisung` ← `src/pages/annahme/silo-zuweisung.tsx`
+- `annahme/waage-1` ← `src/pages/annahme/waage-1.tsx`
+- `annahme/waage-2` ← `src/pages/annahme/waage-2.tsx`
+- `annahme/warteschlange` ← `src/pages/annahme/warteschlange.tsx`
+- `annahme/wartezeit` ← `src/pages/annahme/wartezeit.tsx`
 - `artikel` ← `src/pages/artikel/liste.tsx`
 - `artikel/:id` ← `src/pages/artikel/stamm.tsx`
+- `artikel/chargen-pflicht` ← `src/pages/artikel/chargen-pflicht.tsx`
+- `artikel/ersatzteile` ← `src/pages/artikel/ersatzteile.tsx`
+- `artikel/gebinde` ← `src/pages/artikel/gebinde.tsx`
+- `artikel/gefahrgut` ← `src/pages/artikel/gefahrgut.tsx`
+- `artikel/herkunft` ← `src/pages/artikel/herkunft.tsx`
+- `artikel/kategorien` ← `src/pages/artikel/kategorien.tsx`
+- `artikel/lieferanten-artikel` ← `src/pages/artikel/lieferanten-artikel.tsx`
 - `artikel/liste` ← `src/pages/artikel/liste.tsx`
 - `artikel/neu` ← `src/pages/artikel/stamm.tsx`
+- `artikel/preisstaffeln` ← `src/pages/artikel/preisstaffeln.tsx`
+- `artikel/qualitaetsmerkmale` ← `src/pages/artikel/qualitaetsmerkmale.tsx`
 - `artikel/stamm` ← `src/pages/artikel/stamm.tsx`
+- `artikel/stuecklisten` ← `src/pages/artikel/stuecklisten.tsx`
+- `artikel/texte-medien` ← `src/pages/artikel/texte-medien.tsx`
+- `artikel/umrechnungen` ← `src/pages/artikel/umrechnungen.tsx`
+- `artikel/verpackungen` ← `src/pages/artikel/verpackungen.tsx`
+- `artikel/zoll-intrastat` ← `src/pages/artikel/zoll-intrastat.tsx`
 - `auswertungen/abfrage-center` ← `src/pages/auswertungen/abfrage-center.tsx`
+- `auswertungen/abfrage-generator` ← `src/pages/auswertungen/abfrage-generator.tsx`
 - `auswertungen/aenderungshistorie` ← `src/pages/auswertungen/aenderungshistorie.tsx`
+- `auswertungen/agrarmarkt-bericht` ← `src/pages/auswertungen/agrarmarkt-bericht.tsx`
 - `auswertungen/auftrags-kontrolle` ← `src/pages/auswertungen/auftrags-kontrolle.tsx`
 - `auswertungen/beleg-kontrolle` ← `src/pages/auswertungen/beleg-kontrolle.tsx`
 - `auswertungen/bonus-berechnung` ← `src/pages/auswertungen/bonus-berechnung.tsx`
+- `auswertungen/deckungsbeitraege` ← `src/pages/auswertungen/deckungsbeitraege.tsx`
 - `auswertungen/dms-volltext` ← `src/pages/auswertungen/dms-volltext.tsx`
 - `auswertungen/duengemittelmengen` ← `src/pages/auswertungen/duengemittelmengen.tsx`
+- `auswertungen/erntebilanz` ← `src/pages/auswertungen/erntebilanz.tsx`
+- `auswertungen/kundenumsatz` ← `src/pages/auswertungen/kundenumsatz.tsx`
 - `auswertungen/l3-berichtskatalog` ← `src/pages/auswertungen/l3-berichtskatalog.tsx`
+- `auswertungen/lagerumschlag` ← `src/pages/auswertungen/lagerumschlag.tsx`
 - `auswertungen/lieferschein-kontrolle` ← `src/pages/auswertungen/lieferschein-kontrolle.tsx`
+- `auswertungen/rohertrag` ← `src/pages/auswertungen/rohertrag.tsx`
 - `auswertungen/sanktionspruefung-kunden` ← `src/pages/auswertungen/sanktionspruefung-kunden.tsx`
 - `auswertungen/sanktionspruefung-personal` ← `src/pages/auswertungen/sanktionspruefung-personal.tsx`
+- `auswertungen/umsatzstatistik` ← `src/pages/auswertungen/umsatzstatistik.tsx`
+- `auswertungen/vertriebstrichter` ← `src/pages/auswertungen/vertriebstrichter.tsx`
+- `auswertungen/warengruppen-analyse` ← `src/pages/auswertungen/warengruppen-analyse.tsx`
 - `banken/konten` ← `src/pages/banken/konten.tsx`
+- `banken/konten-stamm` ← `src/pages/banken/konten-stamm.tsx`
 - `banken/konto/:id` ← `src/pages/banken/konten.tsx`
 - `banken/konto/neu` ← `src/pages/banken/konten.tsx`
+- `banken/lastschriften` ← `src/pages/banken/lastschriften.tsx`
+- `banken/sepa-export` ← `src/pages/banken/sepa-export.tsx`
+- `banken/ueberweisungen` ← `src/pages/banken/ueberweisungen.tsx`
+- `banken/zahlungsavise` ← `src/pages/banken/zahlungsavise.tsx`
+- `belege/:belegart` ← `src/pages/belege/liste.tsx`
 - `belege/:belegart/:id` ← `src/pages/belege/beleg.tsx`
+- `belege/belegfolge` ← `src/pages/belege/BelegfolgePage.tsx`
 - `benachrichtigungen` ← `src/pages/benachrichtigungen/liste.tsx`
 - `benachrichtigungen/liste` ← `src/pages/benachrichtigungen/liste.tsx`
+- `betrieb/gefahrstoff-betriebsanweisung` ← `src/pages/betrieb/gefahrstoff-betriebsanweisung.tsx`
+- `betrieb/gefahrstoff-kataster` ← `src/pages/betrieb/gefahrstoff-kataster.tsx`
+- `betrieb/maschinen-stamm` ← `src/pages/betrieb/maschinen-stamm.tsx`
+- `betrieb/prueffristen` ← `src/pages/betrieb/prueffristen.tsx`
+- `betrieb/schadensmeldung` ← `src/pages/betrieb/schadensmeldung.tsx`
+- `betrieb/standorte` ← `src/pages/betrieb/standorte.tsx`
+- `betrieb/unterweisungen` ← `src/pages/betrieb/unterweisungen.tsx`
+- `betrieb/wartungsplan` ← `src/pages/betrieb/wartungsplan.tsx`
+- `charge/chargen-verfolgung` ← `src/pages/charge/chargen-verfolgung.tsx`
+- `charge/etiketten` ← `src/pages/charge/etiketten.tsx`
 - `charge/liste` ← `src/pages/charge/liste.tsx`
+- `charge/probenahme` ← `src/pages/charge/probenahme.tsx`
+- `charge/qualitaets-freigabe` ← `src/pages/charge/qualitaets-freigabe.tsx`
+- `charge/rueckruf` ← `src/pages/charge/rueckruf.tsx`
 - `charge/rueckverfolgung` ← `src/pages/charge/rueckverfolgung.tsx`
+- `charge/sperrlager` ← `src/pages/charge/sperrlager.tsx`
 - `charge/stamm` ← `src/pages/charge/stamm.tsx`
 - `charge/stamm/:id` ← `src/pages/charge/stamm.tsx`
 - `charge/wareneingang` ← `src/pages/charge/wareneingang.tsx`
+- `charge/zusammenfuehrung` ← `src/pages/charge/zusammenfuehrung.tsx`
 - `compliance/bvl-meldungen` ← `src/pages/compliance/bvl-umsatzmeldung.tsx`
 - `compliance/bvl-umsatzmeldung` ← `src/pages/compliance/bvl-umsatzmeldung.tsx`
 - `compliance/cross-compliance` ← `src/pages/compliance/cross-compliance.tsx`
+- `compliance/cross-compliance-liste` ← `src/pages/compliance/CrossCompliancePage.tsx`
 - `compliance/datenpannen` ← `src/pages/compliance/datenpannen.tsx`
+- `compliance/duenge-bilanz` ← `src/pages/compliance/duenge-bilanz.tsx`
 - `compliance/enni-meldungen` ← `src/pages/compliance/enni-meldungen.tsx`
 - `compliance/enni-neu` ← `src/pages/compliance/enni-meldungen.tsx`
+- `compliance/eudr-meldungen` ← `src/pages/compliance/eudr-meldungen.tsx`
 - `compliance/export-pruefprotokoll` ← `src/pages/compliance/export-pruefprotokoll.tsx`
+- `compliance/export-pruefung` ← `src/pages/compliance/export-pruefung.tsx`
+- `compliance/gefahrstoff-doku` ← `src/pages/compliance/gefahrstoff-doku.tsx`
+- `compliance/gefahrstoff-verzeichnis` ← `src/pages/compliance/gefahrstoff-verzeichnis.tsx`
 - `compliance/gelangensbestaetigung` ← `src/pages/compliance/gelangensbestaetigung.tsx`
 - `compliance/intrastat` ← `src/pages/compliance/intrastat.tsx`
 - `compliance/lksg` ← `src/pages/compliance/lksg.tsx`
+- `compliance/lksg-lieferkette` ← `src/pages/compliance/lksg-lieferkette.tsx`
 - `compliance/meldewesen-konsole` ← `src/pages/compliance/meldewesen-konsole.tsx`
 - `compliance/pcn-liste` ← `src/pages/compliance/pcn-liste.tsx`
 - `compliance/pcn-ufi` ← `src/pages/compliance/pcn-ufi.tsx`
+- `compliance/pflanzenschutz-nachweis` ← `src/pages/compliance/pflanzenschutz-nachweis.tsx`
+- `compliance/qs-audits` ← `src/pages/compliance/qs-audits.tsx`
 - `compliance/qs-checkliste` ← `src/pages/compliance/qs-checkliste.tsx`
 - `compliance/saatgut-nachbau` ← `src/pages/compliance/saatgut-nachbau.tsx`
 - `compliance/saatgut-nachbau-neu` ← `src/pages/compliance/saatgut-nachbau.tsx`
 - `compliance/sachkunde-neu` ← `src/pages/compliance/sachkunde-register.tsx`
 - `compliance/sachkunde-register` ← `src/pages/compliance/sachkunde-register.tsx`
 - `compliance/sanktionspruefung` ← `src/pages/compliance/sanktionspruefung.tsx`
+- `compliance/schadstoff-monitoring` ← `src/pages/compliance/schadstoff-monitoring.tsx`
+- `compliance/stichtagsmeldung-bestaende` ← `src/pages/compliance/stichtagsmeldung-bestaende.tsx`
+- `compliance/tierwohl-dokumentation` ← `src/pages/compliance/tierwohl-dokumentation.tsx`
+- `compliance/usp-konformitaet` ← `src/pages/compliance/usp-konformitaet.tsx`
 - `compliance/verarbeitungsverzeichnis` ← `src/pages/compliance/verarbeitungsverzeichnis.tsx`
 - `compliance/vvvo-register` ← `src/pages/compliance/vvvo-register.tsx`
+- `compliance/wasserschutz-auflagen` ← `src/pages/compliance/wasserschutz-auflagen.tsx`
 - `compliance/zulassungen-register` ← `src/pages/compliance/zulassungen-register.tsx`
 - `contracts` ← `src/pages/contracts-v2.tsx`
 - `contracts-v2` ← `src/pages/contracts-v2.tsx`
+- `contracts/contract` ← `src/pages/contracts/ContractPage.tsx`
+- `controlling/abweichungsanalyse` ← `src/pages/controlling/abweichungsanalyse.tsx`
+- `controlling/agrarkalkulation` ← `src/pages/controlling/agrarkalkulation.tsx`
 - `controlling/benchmark-cockpit` ← `src/pages/controlling/benchmark-cockpit.tsx`
+- `controlling/berichtswesen` ← `src/pages/controlling/berichtswesen.tsx`
+- `controlling/cashflow-prognose` ← `src/pages/controlling/cashflow-prognose.tsx`
 - `controlling/dashboard-verwaltung` ← `src/pages/controlling/dashboard-verwaltung.tsx`
+- `controlling/deckungsbeitragsrechnung` ← `src/pages/controlling/deckungsbeitragsrechnung.tsx`
+- `controlling/investitionsrechnung` ← `src/pages/controlling/investitionsrechnung.tsx`
+- `controlling/kampagnen-controlling` ← `src/pages/controlling/kampagnen-controlling.tsx`
+- `controlling/kennzahlen` ← `src/pages/controlling/kennzahlen.tsx`
+- `controlling/kostentraegerrechnung` ← `src/pages/controlling/kostentraegerrechnung.tsx`
 - `controlling/kpi-verwaltung` ← `src/pages/controlling/kpi-verwaltung.tsx`
+- `controlling/liquiditaetsplanung` ← `src/pages/controlling/liquiditaetsplanung.tsx`
 - `controlling/massnahmen` ← `src/pages/controlling/massnahmen.tsx`
 - `controlling/plan-ist` ← `src/pages/controlling/plan-ist.tsx`
+- `controlling/standort-vergleich` ← `src/pages/controlling/standort-vergleich.tsx`
 - `controlling/timeseries-erfassung` ← `src/pages/controlling/timeseries-erfassung.tsx`
+- `controlling/unternehmensplanung` ← `src/pages/controlling/unternehmensplanung.tsx`
 - `controlling/widget-verwaltung` ← `src/pages/controlling/widget-verwaltung.tsx`
 - `copilot` ← `src/pages/analytics.tsx`
+- `crm/activities` ← `src/pages/crm/activities.tsx`
+- `crm/activities/neu` ← `src/pages/crm/aktivitaeten.tsx`
+- `crm/activity-detail` ← `src/pages/crm/activity-detail.tsx`
 - `crm/aktivitaet-detail` ← `src/pages/crm/aktivitaet-detail.tsx`
 - `crm/aktivitaet/:id` ← `src/pages/crm/aktivitaet-detail.tsx`
+- `crm/aktivitaeten` ← `src/pages/crm/aktivitaeten.tsx`
+- `crm/anruf-protokoll` ← `src/pages/crm/anruf-protokoll.tsx`
 - `crm/audits/neu` ← `src/pages/crm/lieferanten-liste.tsx`
 - `crm/bedarfsdeckung-cockpit` ← `src/pages/crm/bedarfsdeckung-cockpit.tsx`
 - `crm/bestell-inbox` ← `src/pages/crm/bestell-inbox.tsx`
+- `crm/besuchsberichte` ← `src/pages/crm/besuchsberichte.tsx`
+- `crm/betreuungsgebiet` ← `src/pages/crm/betreuungsgebiet.tsx`
 - `crm/betrieb/:id` ← `src/pages/crm/betriebsprofil-detail.tsx`
 - `crm/betriebsprofil-detail` ← `src/pages/crm/betriebsprofil-detail.tsx`
 - `crm/betriebsprofil/:id` ← `src/pages/crm/betriebsprofil-detail.tsx`
 - `crm/betriebsprofile` ← `src/pages/crm/betriebsprofile-liste.tsx`
 - `crm/betriebsprofile-liste` ← `src/pages/crm/betriebsprofile-liste.tsx`
+- `crm/bonus-vereinbarungen` ← `src/pages/crm/bonus-vereinbarungen.tsx`
 - `crm/campaign-builder` ← `src/pages/crm/campaign-builder.tsx`
 - `crm/campaign-detail` ← `src/pages/crm/campaign-detail.tsx`
 - `crm/campaign-performance` ← `src/pages/crm/campaign-performance-dashboard.tsx`
@@ -242,6 +450,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/campaign/new` ← `src/pages/crm/campaign-detail.tsx`
 - `crm/campaigns` ← `src/pages/crm/campaigns.tsx`
 - `crm/campaigns/new` ← `src/pages/crm/campaign-detail.tsx`
+- `crm/churn-risiko` ← `src/pages/crm/churn-risiko.tsx`
 - `crm/consent-confirm` ← `src/pages/crm/consent-confirm.tsx`
 - `crm/consent-detail` ← `src/pages/crm/consent-detail.tsx`
 - `crm/consent-management` ← `src/pages/crm/consent-management.tsx`
@@ -249,18 +458,27 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/consent/confirm` ← `src/pages/crm/consent-confirm.tsx`
 - `crm/consent/new` ← `src/pages/crm/consent-detail.tsx`
 - `crm/consents` ← `src/pages/crm/consent-management.tsx`
+- `crm/contact-detail` ← `src/pages/crm/contact-detail.tsx`
 - `crm/crm-dashboard` ← `src/pages/crm/crm-dashboard.tsx`
+- `crm/cross-selling` ← `src/pages/crm/cross-selling.tsx`
 - `crm/customer-360/:id` ← `src/pages/crm/customer-360-native.tsx`
 - `crm/customers` ← `src/pages/crm/kunden-liste.tsx`
 - `crm/customers/:id` ← `src/pages/crm/kunden-stamm.tsx`
+- `crm/dokumente-kunden` ← `src/pages/crm/dokumente-kunden.tsx`
 - `crm/dubletten` ← `src/pages/crm/dubletten.tsx`
+- `crm/dubletten-pruefung` ← `src/pages/crm/dubletten-pruefung.tsx`
 - `crm/durchdringungs-pipeline` ← `src/pages/crm/durchdringungs-pipeline.tsx`
 - `crm/gdpr-request-detail` ← `src/pages/crm/gdpr-request-detail.tsx`
 - `crm/gdpr-request-public` ← `src/pages/crm/gdpr-request-public.tsx`
 - `crm/gdpr-request/:id` ← `src/pages/crm/gdpr-request-detail.tsx`
 - `crm/gdpr-request/new` ← `src/pages/crm/gdpr-request-detail.tsx`
 - `crm/gdpr-requests` ← `src/pages/crm/gdpr-requests.tsx`
+- `crm/gebietsschutz` ← `src/pages/crm/gebietsschutz.tsx`
+- `crm/geschenke-liste` ← `src/pages/crm/geschenke-liste.tsx`
+- `crm/interaktions-historie` ← `src/pages/crm/interaktions-historie.tsx`
+- `crm/kaufverhalten` ← `src/pages/crm/kaufverhalten.tsx`
 - `crm/klaerfall-inbox` ← `src/pages/crm/klaerfall-inbox.tsx`
+- `crm/kommunikation-center` ← `src/pages/crm/kommunikation-center.tsx`
 - `crm/kontakt-detail` ← `src/pages/crm/kontakt-detail.tsx`
 - `crm/kontakt-management` ← `src/pages/crm/kontakt-management.tsx`
 - `crm/kontakt/:id` ← `src/pages/crm/kontakt-detail.tsx`
@@ -273,6 +491,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/kunden-liste` ← `src/pages/crm/kunden-liste.tsx`
 - `crm/kunden-schnellauswahl` ← `src/pages/crm/kunden-schnellauswahl.tsx`
 - `crm/kunden-stamm` ← `src/pages/crm/kunden-stamm.tsx`
+- `crm/kunden-stamm-modern` ← `src/pages/crm/kunden-stamm-modern.tsx`
 - `crm/kunden-zuordnung` ← `src/pages/crm/kunden-zuordnung.tsx`
 - `crm/kunden/:id` ← `src/pages/crm/customer-360-native.tsx`
 - `crm/lead-detail` ← `src/pages/crm/lead-detail.tsx`
@@ -295,15 +514,19 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `crm/opportunity-detail` ← `src/pages/crm/opportunity-detail.tsx`
 - `crm/opportunity/:id` ← `src/pages/crm/opportunity-native.tsx`
 - `crm/opportunity/new` ← `src/pages/crm/opportunity-detail.tsx`
+- `crm/partner-klaerfaelle` ← `src/pages/crm/partner-klaerfaelle.tsx`
 - `crm/potential-analyse` ← `src/pages/crm/potential-analyse.tsx`
 - `crm/segment-detail` ← `src/pages/crm/segment-detail.tsx`
 - `crm/segment/:id` ← `src/pages/crm/segment-detail.tsx`
 - `crm/segment/new` ← `src/pages/crm/segment-detail.tsx`
 - `crm/segments` ← `src/pages/crm/segments.tsx`
 - `crm/vertreterprovisionen` ← `src/pages/crm/vertreterprovisionen.tsx`
+- `crm/vertreterprovisionen/staffeln` ← `src/pages/crm/vertreterprovisionen-staffeln.tsx`
 - `crm/vertreterstamm` ← `src/pages/crm/vertreterstamm.tsx`
+- `crm/wettbewerber` ← `src/pages/crm/wettbewerber.tsx`
 - `crm/wiedervorlagen` ← `src/pages/crm/wiedervorlagen.tsx`
 - `dashboard/customizable` ← `src/pages/dashboard/customizable.tsx`
+- `dashboard/customizable-dashboard` ← `src/pages/dashboard/customizable-dashboard.tsx`
 - `dashboard/einkauf` ← `src/pages/dashboard/einkauf-dashboard.tsx`
 - `dashboard/einkauf-dashboard` ← `src/pages/dashboard/einkauf-dashboard.tsx`
 - `dashboard/sales` ← `src/pages/dashboard/sales-dashboard.tsx`
@@ -314,10 +537,24 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `disposition/FrmCoverageMonitor` ← `src/pages/disposition/FrmCoverageMonitor.tsx`
 - `disposition/FrmPositionRules` ← `src/pages/disposition/FrmPositionRules.tsx`
 - `disposition/LstCommodityPositionMatrix` ← `src/pages/disposition/LstCommodityPositionMatrix.tsx`
+- `disposition/bestell-vorschlag` ← `src/pages/disposition/bestell-vorschlag.tsx`
 - `disposition/coverage-monitor` ← `src/pages/disposition/FrmCoverageMonitor.tsx`
+- `disposition/engpass-monitor` ← `src/pages/disposition/engpass-monitor.tsx`
+- `disposition/kontrakt-abruf` ← `src/pages/disposition/kontrakt-abruf.tsx`
+- `disposition/lager-reichweite` ← `src/pages/disposition/lager-reichweite.tsx`
 - `disposition/liste` ← `src/pages/disposition/liste.tsx`
 - `disposition/position-matrix` ← `src/pages/disposition/LstCommodityPositionMatrix.tsx`
 - `disposition/regeln` ← `src/pages/disposition/FrmPositionRules.tsx`
+- `disposition/saison-planung` ← `src/pages/disposition/saison-planung.tsx`
+- `disposition/strecken-disposition` ← `src/pages/disposition/strecken-disposition.tsx`
+- `disposition/touren-disposition` ← `src/pages/disposition/touren-disposition.tsx`
+- `dms/archiv-suche` ← `src/pages/dms/archiv-suche.tsx`
+- `dms/beleg-erkennung` ← `src/pages/dms/beleg-erkennung.tsx`
+- `dms/dokument-detail` ← `src/pages/dms/dokument-detail.tsx`
+- `dms/dokument-upload` ← `src/pages/dms/dokument-upload.tsx`
+- `dms/freigabe-workflow` ← `src/pages/dms/freigabe-workflow.tsx`
+- `dms/verschlagwortung` ← `src/pages/dms/verschlagwortung.tsx`
+- `dms/vorlagen-verwaltung` ← `src/pages/dms/vorlagen-verwaltung.tsx`
 - `docflow/artefakt-freigabe` ← `src/pages/docflow/artefakt-freigabe.tsx`
 - `docflow/dokumenten-ruecklauf` ← `src/pages/docflow/dokumenten-ruecklauf.tsx`
 - `docflow/gobd-export` ← `src/pages/docflow/gobd-export.tsx`
@@ -325,58 +562,80 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `docflow/nachweisraum` ← `src/pages/docflow/nachweisraum.tsx`
 - `docflow/nachweisraum/:id` ← `src/pages/docflow/nachweisraum.tsx`
 - `docflow/wiedervorlagen` ← `src/pages/docflow/wiedervorlagen.tsx`
-- `document` ← `src/pages/document.tsx`
 - `dokumente/ablage` ← `src/pages/dokumente/ablage.tsx`
 - `einkauf` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/anfrage` ← `src/pages/einkauf/anfrage-stamm.tsx`
 - `einkauf/anfrage-erfassung` ← `src/pages/einkauf/anfrage-erfassung.tsx`
+- `einkauf/anfrage-erstellen` ← `src/pages/einkauf/anfrage-erstellen.tsx`
 - `einkauf/anfrage-stamm` ← `src/pages/einkauf/anfrage-stamm.tsx`
 - `einkauf/anfrage/:id` ← `src/pages/einkauf/anfrage-native.tsx`
 - `einkauf/anfrage/neu` ← `src/pages/einkauf/anfrage-stamm.tsx`
 - `einkauf/anfragen` ← `src/pages/einkauf/anfragen-liste.tsx`
+- `einkauf/anfragen-create` ← `src/pages/einkauf/anfragen-create.tsx`
 - `einkauf/anfragen-liste` ← `src/pages/einkauf/anfragen-liste.tsx`
 - `einkauf/anfragen/:id` ← `src/pages/einkauf/anfrage-erfassung.tsx`
 - `einkauf/angebot` ← `src/pages/einkauf/angebot-stamm.tsx`
+- `einkauf/angebot-erfassen` ← `src/pages/einkauf/angebot-erfassen.tsx`
 - `einkauf/angebot-stamm` ← `src/pages/einkauf/angebot-stamm.tsx`
 - `einkauf/angebot/:id` ← `src/pages/einkauf/angebot-native.tsx`
 - `einkauf/angebot/neu` ← `src/pages/einkauf/angebot-stamm.tsx`
 - `einkauf/angebote` ← `src/pages/einkauf/angebote-liste.tsx`
 - `einkauf/angebote-liste` ← `src/pages/einkauf/angebote-liste.tsx`
+- `einkauf/angebote-vergleich` ← `src/pages/einkauf/angebote-vergleich.tsx`
 - `einkauf/angebote/:id` ← `src/pages/einkauf/angebot-stamm.tsx`
 - `einkauf/anlieferavis` ← `src/pages/einkauf/anlieferavis-liste.tsx`
+- `einkauf/anlieferavis-erfassen` ← `src/pages/einkauf/anlieferavis-erfassen.tsx`
 - `einkauf/anlieferavis-liste` ← `src/pages/einkauf/anlieferavis-liste.tsx`
 - `einkauf/anlieferavis/:id` ← `src/pages/einkauf/anlieferavis-native.tsx`
 - `einkauf/anlieferavis/neu` ← `src/pages/einkauf/anlieferavis.tsx`
 - `einkauf/audit-drilldown` ← `src/pages/einkauf/audit-drilldown.tsx`
 - `einkauf/auftragsbestaetigung` ← `src/pages/einkauf/auftragsbestaetigung.tsx`
+- `einkauf/auftragsbestaetigung-erfassen` ← `src/pages/einkauf/auftragsbestaetigung-erfassen.tsx`
 - `einkauf/auftragsbestaetigung/:id` ← `src/pages/einkauf/auftragsbestaetigung-native.tsx`
 - `einkauf/auftragsbestaetigung/neu` ← `src/pages/einkauf/auftragsbestaetigung.tsx`
 - `einkauf/auftragsbestaetigungen` ← `src/pages/einkauf/auftragsbestaetigungen-liste.tsx`
 - `einkauf/auftragsbestaetigungen-liste` ← `src/pages/einkauf/auftragsbestaetigungen-liste.tsx`
 - `einkauf/auftragsbestaetigungen/:id` ← `src/pages/einkauf/auftragsbestaetigung.tsx`
+- `einkauf/bestellung-anlegen` ← `src/pages/einkauf/bestellung-anlegen.tsx`
+- `einkauf/bestellung-freigabe` ← `src/pages/einkauf/bestellung-freigabe.tsx`
 - `einkauf/bestellung-stamm` ← `src/pages/einkauf/bestellung-stamm.tsx`
 - `einkauf/bestellung/:id` ← `src/pages/einkauf/bestellung-native.tsx`
 - `einkauf/bestellungen` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/bestellungen-liste` ← `src/pages/einkauf/bestellungen-liste.tsx`
 - `einkauf/bestellungen/:id` ← `src/pages/einkauf/bestellung-stamm.tsx`
+- `einkauf/bestellungen/neu` ← `src/pages/einkauf/bestellung-anlegen.tsx`
 - `einkauf/bestellvorschlaege` ← `src/pages/einkauf/bestellvorschlaege.tsx`
+- `einkauf/bestellvorschlaege/ansicht/:variante` ← `src/pages/einkauf/bestellvorschlag-ansicht.tsx`
+- `einkauf/bestellvorschlag-kontrakt` ← `src/pages/einkauf/bestellvorschlag-kontrakt.tsx`
 - `einkauf/bestellvorschlag-lager` ← `src/pages/einkauf/bestellvorschlag-lager.tsx`
 - `einkauf/bestellvorschlag-rohware` ← `src/pages/einkauf/bestellvorschlag-rohware.tsx`
+- `einkauf/bestellvorschlag-verbrauch` ← `src/pages/einkauf/bestellvorschlag-verbrauch.tsx`
 - `einkauf/bestellvorschlag-verkauf` ← `src/pages/einkauf/bestellvorschlag-verkauf.tsx`
+- `einkauf/dienstleistungen-haltung` ← `src/pages/einkauf/dienstleistungen-haltung.tsx`
 - `einkauf/edi-portal` ← `src/pages/einkauf/edi-portal.tsx`
+- `einkauf/einkauf-vorgang-liste` ← `src/pages/einkauf/EinkaufVorgangPage.tsx`
 - `einkauf/frachtauftraege-eingang` ← `src/pages/einkauf/frachtauftraege-eingang.tsx`
 - `einkauf/frachtauftrag/:id` ← `src/pages/einkauf/frachtauftraege-eingang.tsx`
+- `einkauf/gutschrift-belastung` ← `src/pages/einkauf/gutschrift-belastung.tsx`
 - `einkauf/gutschriften-belastungen` ← `src/pages/einkauf/gutschriften-belastungen.tsx`
 - `einkauf/gutschriften-belastungen/:type` ← `src/pages/einkauf/gutschriften-belastungen.tsx`
+- `einkauf/kontrakt-anlage` ← `src/pages/einkauf/kontrakt-anlage.tsx`
+- `einkauf/kontrakte-service` ← `src/pages/einkauf/kontrakte-service.tsx`
 - `einkauf/lieferant/:id` ← `src/pages/einkauf/lieferanten-stamm.tsx`
 - `einkauf/lieferant/neu` ← `src/pages/einkauf/lieferanten-stamm.tsx`
 - `einkauf/lieferanten` ← `src/pages/einkauf/lieferanten-liste.tsx`
+- `einkauf/lieferanten-angebote` ← `src/pages/einkauf/lieferanten-angebote.tsx`
 - `einkauf/lieferanten-dokumente` ← `src/pages/einkauf/lieferanten-dokumente.tsx`
+- `einkauf/lieferanten-konditionen` ← `src/pages/einkauf/lieferanten-konditionen.tsx`
 - `einkauf/lieferanten-liste` ← `src/pages/einkauf/lieferanten-liste.tsx`
+- `einkauf/lieferanten-reklamationen` ← `src/pages/einkauf/lieferanten-reklamationen.tsx`
 - `einkauf/lieferanten-stamm` ← `src/pages/einkauf/lieferanten-stamm.tsx`
 - `einkauf/lieferanten/:id` ← `src/pages/einkauf/supplier-native.tsx`
 - `einkauf/lieferantenbewertung` ← `src/pages/einkauf/lieferantenbewertung.tsx`
+- `einkauf/lieferschein-erfassen` ← `src/pages/einkauf/lieferschein-erfassen.tsx`
+- `einkauf/lieferschein-erfassung` ← `src/pages/einkauf/lieferschein-erfassung.tsx`
 - `einkauf/lieferschein-frachtauftrag` ← `src/pages/einkauf/lieferschein-frachtauftrag.tsx`
+- `einkauf/mahnwesen-lieferanten` ← `src/pages/einkauf/mahnwesen-lieferanten.tsx`
 - `einkauf/rechnung-abgleich` ← `src/pages/einkauf/rechnung-abgleich.tsx`
 - `einkauf/rechnung-abgleich/:invoiceId` ← `src/pages/einkauf/rechnung-abgleich.tsx`
 - `einkauf/rechnung-eingang-erfassung` ← `src/pages/einkauf/rechnung-eingang-erfassung.tsx`
@@ -403,6 +662,8 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `energie` ← `src/pages/energie/verbrauch.tsx`
 - `energie/verbrauch` ← `src/pages/energie/verbrauch.tsx`
 - `etiketten/drucken` ← `src/pages/etiketten/drucken.tsx`
+- `export/intrastat-meldung` ← `src/pages/export/intrastat-meldung.tsx`
+- `export/umsatzsteuer-voranmeldung` ← `src/pages/export/umsatzsteuer-voranmeldung.tsx`
 - `export/umsatzsteuervoranmeldung` ← `src/pages/export/umsatzsteuervoranmeldung.tsx`
 - `export/ustva` ← `src/pages/export/umsatzsteuervoranmeldung.tsx`
 - `fibu` ← `src/pages/fibu/abschluss-cockpit.tsx`
@@ -420,6 +681,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `fibu/buchungsjournal` ← `src/pages/fibu/buchungsjournal.tsx`
 - `fibu/buchungsuebernahme-connectors` ← `src/pages/fibu/buchungsuebernahme-connectors.tsx`
 - `fibu/bwa` ← `src/pages/fibu/bwa.tsx`
+- `fibu/debitoren` ← `src/pages/fibu/debitoren.tsx`
 - `fibu/debitoren-api` ← `src/pages/fibu/debitoren-api.tsx`
 - `fibu/elster-online` ← `src/pages/fibu/elster-online.tsx`
 - `fibu/erloeskennziffern` ← `src/pages/fibu/erloeskennziffern.tsx`
@@ -428,6 +690,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `fibu/geschaeftsjahre` ← `src/pages/fibu/geschaeftsjahre.tsx`
 - `fibu/guv` ← `src/pages/fibu/guv.tsx`
 - `fibu/hauptbuch` ← `src/pages/fibu/hauptbuch.tsx`
+- `fibu/kassenbuch` ← `src/pages/fibu/kassenbuch.tsx`
 - `fibu/kontenplan` ← `src/pages/fibu/kontenplan.tsx`
 - `fibu/kostenstellenrechnung` ← `src/pages/fibu/kostenstellenrechnung.tsx`
 - `fibu/kreditlinie-neu` ← `src/pages/fibu/kreditlinien.tsx`
@@ -454,7 +717,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `fibu/zahlungslaeufe` ← `src/pages/fibu/zahlungslaeufe.tsx`
 - `fibu/zahlungsmeldungen` ← `src/pages/fibu/zahlungsmeldungen.tsx`
 - `fibu/zahlungsvorschlaege` ← `src/pages/fibu/zahlungsvorschlaege.tsx`
-- `finance` ← `src/pages/finance/index.tsx`
 - `finance/abschluss` ← `src/pages/finance/abschluss.tsx`
 - `finance/accounts/:id` ← `src/pages/finance/chart-of-accounts.tsx`
 - `finance/ap-invoice-form` ← `src/pages/finance/ap-invoice-form.tsx`
@@ -466,6 +728,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `finance/ar-open-item/:id` ← `src/pages/finance/ar-open-item-native.tsx`
 - `finance/audit-trail` ← `src/pages/finance/audit-trail.tsx`
 - `finance/bank` ← `src/pages/finance/bankkonten-stamm.tsx`
+- `finance/bank-abgleich` ← `src/pages/finance/bank-abgleich.tsx`
 - `finance/bank-stamm` ← `src/pages/finance/bank-stamm.tsx`
 - `finance/bankkonten` ← `src/pages/finance/bankkonten-stamm.tsx`
 - `finance/bankkonten-stamm` ← `src/pages/finance/bankkonten-stamm.tsx`
@@ -484,15 +747,21 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `finance/debitoren-stamm` ← `src/pages/finance/debitoren-stamm.tsx`
 - `finance/debitoren/:id` ← `src/pages/finance/debitoren-stamm.tsx`
 - `finance/debitoren/new` ← `src/pages/finance/debitoren-stamm.tsx`
+- `finance/dunning` ← `src/pages/finance/mahnlauf.tsx`
 - `finance/dunning-editor` ← `src/pages/finance/dunning-editor.tsx`
+- `finance/invoice-form` ← `src/pages/finance/invoice-form.tsx`
 - `finance/invoices` ← `src/pages/finance/invoices-list.tsx`
 - `finance/invoices-list` ← `src/pages/finance/invoices-list.tsx`
+- `finance/invoices/neu` ← `src/pages/finance/invoice-form.tsx`
+- `finance/invoices/new` ← `src/pages/finance/invoice-form.tsx`
 - `finance/kasse` ← `src/pages/finance/kasse.tsx`
 - `finance/kontenplan` ← `src/pages/finance/chart-of-accounts.tsx`
 - `finance/kreditor/:id` ← `src/pages/finance/kreditor-native.tsx`
 - `finance/kreditoren` ← `src/pages/finance/kreditoren-liste.tsx`
 - `finance/kreditoren-stamm` ← `src/pages/finance/kreditoren-stamm.tsx`
 - `finance/lastschriften-debitoren` ← `src/pages/finance/lastschriften-debitoren.tsx`
+- `finance/mahnlauf` ← `src/pages/finance/mahnlauf.tsx`
+- `finance/mahnwesen` ← `src/pages/finance/mahnlauf.tsx`
 - `finance/nebenbuch-abstimmung` ← `src/pages/finance/nebenbuch-abstimmung.tsx`
 - `finance/offene-posten` ← `src/pages/fibu/offene-posten.tsx`
 - `finance/offene-posten-cockpit` ← `src/pages/finance/offene-posten-cockpit.tsx`
@@ -520,6 +789,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `foerderung/liste` ← `src/pages/foerderung/liste.tsx`
 - `fuhrpark/ausgehende-belege-dokumente` ← `src/pages/fuhrpark/ausgehende-belege-dokumente.tsx`
 - `fuhrpark/fahrzeug-stamm` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
+- `fuhrpark/fahrzeug-vertiefung` ← `src/pages/fuhrpark/fahrzeug-vertiefung.tsx`
 - `fuhrpark/fahrzeug/:id` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
 - `fuhrpark/fahrzeug/neu` ← `src/pages/fuhrpark/fahrzeug-stamm.tsx`
 - `fuhrpark/fahrzeuge` ← `src/pages/fuhrpark/fahrzeuge.tsx`
@@ -555,6 +825,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `futtermittel/einzelfuttermittel/stamm/:id` ← `src/pages/futtermittel/einzelfuttermittel-stamm.tsx`
 - `futtermittel/einzelfuttermittel/stamm/new` ← `src/pages/futtermittel/einzelfuttermittel-stamm.tsx`
 - `futtermittel/fuetterungsbetrieb/:id` ← `src/pages/futtermittel/fuetterungsbetrieb-native.tsx`
+- `futtermittel/fuetterungsdokumentation-mobil` ← `src/pages/futtermittel/fuetterungsdokumentation-mobil.tsx`
 - `futtermittel/fuetterungsplan/:id` ← `src/pages/futtermittel/fuetterungsplan-native.tsx`
 - `futtermittel/futtermittel-bestellung` ← `src/pages/futtermittel/futtermittel-bestellung.tsx`
 - `futtermittel/futtermittel-qualitaetskontrolle` ← `src/pages/futtermittel/futtermittel-qualitaetskontrolle.tsx`
@@ -571,11 +842,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `futtermittel/mischfuttermittel/stamm/new` ← `src/pages/futtermittel/mischfuttermittel-stamm.tsx`
 - `futtermittel/rations-schnittstellen-import` ← `src/pages/futtermittel/rations-schnittstellen-import.tsx`
 - `futtermittel/rations-zugang` ← `src/pages/futtermittel/rations-zugang.tsx`
+- `futtermittel/rationseditor` ← `src/pages/futtermittel/rationseditor.tsx`
+- `futtermittel/rationsoptimierung` ← `src/pages/futtermittel/rationsoptimierung.tsx`
 - `futtermittel/rationsvergleich` ← `src/pages/futtermittel/rationsvergleich.tsx`
 - `futtermittel/wareneingang` ← `src/pages/futtermittel/futtermittel-wareneingang.tsx`
 - `genossenschaft` ← `src/pages/genossenschaft/mitglieder.tsx`
 - `genossenschaft/mitglieder` ← `src/pages/genossenschaft/mitglieder.tsx`
-- `hilfe` ← `src/pages/hilfe.tsx`
 - `inbox` ← `src/pages/inbox/index.tsx`
 - `inventory` ← `src/pages/inventory.tsx`
 - `inventory-dashboard` ← `src/pages/inventory-dashboard.tsx`
@@ -584,8 +856,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `inventory/epcis` ← `src/pages/inventory/epcis/index.tsx`
 - `kasse/historie` ← `src/pages/kasse/tagesabschluss.tsx`
 - `kasse/tagesabschluss` ← `src/pages/kasse/tagesabschluss.tsx`
+- `konditionen/konditionssystem` ← `src/pages/konditionen/konditionssystem.tsx`
 - `kontrakte` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
+- `kontrakte/:id` ← `src/pages/kontrakte/KontraktDetailRoute.tsx`
 - `kontrakte/FrmKontraktDetail` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`
+- `kontrakte/FrmKontraktProtokoll` ← `src/pages/kontrakte/FrmKontraktProtokoll.tsx`
 - `kontrakte/KontraktAlarmDashboard` ← `src/pages/kontrakte/KontraktAlarmDashboard.tsx`
 - `kontrakte/KontraktPositionsmonitor` ← `src/pages/kontrakte/KontraktPositionsmonitor.tsx`
 - `kontrakte/LstKontraktUebersicht` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
@@ -594,9 +869,11 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `kontrakte/kontrakt-positionsmonitor` ← `src/pages/kontrakte/KontraktPositionsmonitor.tsx`
 - `kontrakte/kontrakt-uebersicht` ← `src/pages/kontrakte/LstKontraktUebersicht.tsx`
 - `kontrakte/kontraktklassen` ← `src/pages/kontrakte/kontraktklassen.tsx`
+- `kontrakte/listen/:variante` ← `src/pages/kontrakte/listen.tsx`
 - `kontrakte/mengenzeitraeume` ← `src/pages/kontrakte/mengenzeitraeume.tsx`
 - `kontrakte/neu` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`
 - `kontrakte/positionen` ← `src/pages/kontrakte/KontraktPositionsmonitor.tsx`
+- `kontrakte/vorgang/:variante/:id` ← `src/pages/kontrakte/vorgang.tsx`
 - `labor/probe/:id` ← `src/pages/labor/proben-liste.tsx`
 - `labor/probe/neu` ← `src/pages/labor/proben-liste.tsx`
 - `labor/proben` ← `src/pages/labor/proben-liste.tsx`
@@ -617,6 +894,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `lager/lagerbewegungen` ← `src/pages/lager/lagerbewegungen.tsx`
 - `lager/lagerplaetze` ← `src/pages/lager/lagerplaetze.tsx`
 - `lager/massebilanz` ← `src/pages/lager/massebilanz.tsx`
+- `lager/materialfluss` ← `src/pages/lager/materialfluss.tsx`
 - `lager/materialfluss-visualisierung` ← `src/pages/lager/materialfluss-visualisierung.tsx`
 - `lager/partiestamm` ← `src/pages/lager/partiestamm.tsx`
 - `lager/permanente-inventur` ← `src/pages/lager/permanente-inventur.tsx`
@@ -635,12 +913,14 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `logistik/tourenplanung` ← `src/pages/logistik/tourenplanung.tsx`
 - `logistik/verladungen` ← `src/pages/verladung/liste.tsx`
 - `logistik/versandprofile` ← `src/pages/logistik/versandprofile.tsx`
+- `mahnwesen/mahnlauf` ← `src/pages/finance/mahnlauf.tsx`
 - `management/executive-dashboard` ← `src/pages/management/executive-dashboard.tsx`
-- `marketing/kampagne/:id` ← `src/pages/marketing/kampagnen.tsx`
-- `marketing/kampagne/neu` ← `src/pages/marketing/kampagnen.tsx`
+- `marketing/kampagne/:id` ← `src/pages/crm/campaign-detail.tsx`
+- `marketing/kampagne/neu` ← `src/pages/crm/campaign-detail.tsx`
 - `marketing/kampagnen` ← `src/pages/marketing/kampagnen.tsx`
 - `mask-rollout/:screenId/:entityId` ← `src/pages/workflow/mask-rollout/MaskRolloutRoute.tsx`
 - `mobile/scanner` ← `src/pages/mobile/scanner.tsx`
+- `monitoring/alerts` ← `src/pages/admin/monitoring/alerts.tsx`
 - `monitoring/regeln` ← `src/pages/admin/monitoring/regeln.tsx`
 - `nachhaltigkeit/biodiversitaet` ← `src/pages/nachhaltigkeit/biodiversitaet.tsx`
 - `nachhaltigkeit/co2-bilanz` ← `src/pages/nachhaltigkeit/co2-bilanz.tsx`
@@ -713,7 +993,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `preise/konditionen` ← `src/pages/preise/konditionen.tsx`
 - `preise/rabattgruppen` ← `src/pages/preise/rabattgruppen.tsx`
 - `preise/zu-abschlaggruppen` ← `src/pages/preise/zu-abschlaggruppen.tsx`
-- `pricing` ← `src/pages/pricing.tsx`
 - `produktion` ← `src/pages/produktion/mischfutter-produktion.tsx`
 - `produktion/chargen-bearbeiten` ← `src/pages/produktion/chargen-bearbeiten.tsx`
 - `produktion/dokumente` ← `src/pages/produktion/produktions-dokumente-drucken.tsx`
@@ -737,6 +1016,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `qualitaet/labor/:id` ← `src/pages/qualitaet/labor-detail.tsx`
 - `qualitaet/reklamation-detail` ← `src/pages/qualitaet/reklamation-detail.tsx`
 - `qualitaet/reklamation/:id` ← `src/pages/qualitaet/reklamation-native.tsx`
+- `qualitaet/reklamationen` ← `src/pages/qualitaet/reklamationen.tsx`
 - `reports` ← `src/pages/reports.tsx`
 - `reports/ReportsDashboardCharts` ← `src/pages/reports/ReportsDashboardCharts.tsx`
 - `reports/deckungsbeitrag` ← `src/pages/reports/deckungsbeitrag.tsx`
@@ -747,10 +1027,12 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `sales/angebot-erstellen` ← `src/pages/sales/angebot-erstellen.tsx`
 - `sales/angebot/:id` ← `src/pages/sales/angebot-erstellen.tsx`
 - `sales/angebot/neu` ← `src/pages/sales/angebot-erstellen.tsx`
-- `sales/angebote` ← `src/pages/sales/angebot-erstellen.tsx`
+- `sales/angebote` ← `src/pages/sales/angebote-liste.tsx`
+- `sales/angebote-liste` ← `src/pages/sales/angebote-liste.tsx`
 - `sales/angebote/neu` ← `src/pages/sales/angebot-erstellen.tsx`
 - `sales/auftraege` ← `src/pages/sales/auftraege-liste.tsx`
 - `sales/auftraege-liste` ← `src/pages/sales/auftraege-liste.tsx`
+- `sales/auftraege/neu` ← `src/pages/sales/order-editor.tsx`
 - `sales/auftrag-lieferschein-abgleich` ← `src/pages/sales/auftrag-lieferschein-abgleich.tsx`
 - `sales/auftragskette` ← `src/pages/sales/auftragskette.tsx`
 - `sales/credit-note-editor` ← `src/pages/sales/credit-note-editor.tsx`
@@ -767,7 +1049,14 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `sales/kalkulationen/neu` ← `src/pages/preise/kalkulation.tsx`
 - `sales/kreditlimit-pruefung` ← `src/pages/sales/kreditlimit-pruefung.tsx`
 - `sales/lieferung-storno` ← `src/pages/sales/lieferung-storno.tsx`
+- `sales/lieferungen` ← `src/pages/sales/lieferungen-liste.tsx`
+- `sales/lieferungen-liste` ← `src/pages/sales/lieferungen-liste.tsx`
+- `sales/lieferungen/neu` ← `src/pages/sales/lieferung-neu.tsx`
+- `sales/order` ← `src/pages/sales/order-editor.tsx`
+- `sales/order-editor` ← `src/pages/sales/order-editor.tsx`
+- `sales/order-editor/:id` ← `src/pages/sales/order-editor.tsx`
 - `sales/orders-modern` ← `src/pages/sales/orders-modern.tsx`
+- `sales/orders/new` ← `src/pages/sales/order-editor.tsx`
 - `sales/rechnungen` ← `src/pages/verkauf/rechnungen-worklist.tsx`
 - `sales/rechnungen-liste` ← `src/pages/sales/rechnungen-liste.tsx`
 - `sales/sales-order/:id` ← `src/pages/sales/sales-order-native.tsx`
@@ -798,7 +1087,6 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `stammdaten/mengeneinheiten` ← `src/pages/stammdaten/mengeneinheiten.tsx`
 - `start-dashboard` ← `src/pages/start-dashboard.tsx`
 - `statistik/bewegungen` ← `src/pages/statistik/bewegungen.tsx`
-- `stock-management` ← `src/pages/stock-management.tsx`
 - `strecke/disposition` ← `src/pages/strecke/disposition.tsx`
 - `strecke/dokumente-drucken` ← `src/pages/strecke/dokumente-drucken.tsx`
 - `strecke/menu` ← `src/pages/strecke/menu.tsx`
@@ -812,6 +1100,7 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `strecke/streckengeschaeft` ← `src/pages/strecke/streckengeschaeft.tsx`
 - `strecke/vorlaeufige-streckengeschaefte` ← `src/pages/strecke/vorlaeufige-streckengeschaefte.tsx`
 - `studio/run/:screenId` ← `src/pages/admin/studio-run.tsx`
+- `studio/workspace-composition-preview` ← `src/pages/studio/workspace-composition-preview.tsx`
 - `subventionen/dashboard` ← `src/pages/subventionen/dashboard.tsx`
 - `system/live-monitor` ← `src/pages/system/live-monitor.tsx`
 - `tankstelle` ← `src/pages/tankstelle/zapfungen.tsx`
@@ -826,8 +1115,10 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `verify/:domain/:number/:hash` ← `src/pages/public/verify.tsx`
 - `verkauf` ← `src/pages/verkauf/lieferschein-erfassung.tsx`
 - `verkauf/auftraege` ← `src/pages/sales/auftraege-liste.tsx`
+- `verkauf/auftraege/neu` ← `src/pages/sales/order-editor.tsx`
 - `verkauf/betriebs-auftraege` ← `src/pages/verkauf/betriebs-auftraege.tsx`
 - `verkauf/dauerauftraege` ← `src/pages/verkauf/dauerauftraege.tsx`
+- `verkauf/gutschrift-buchungsvorschlaege` ← `src/pages/verkauf/gutschrift-buchungsvorschlaege.tsx`
 - `verkauf/kommissions-auftraege` ← `src/pages/verkauf/kommissions-auftraege.tsx`
 - `verkauf/kunde-neu` ← `src/pages/verkauf/kunde-neu.tsx`
 - `verkauf/kunden-liste` ← `src/pages/verkauf/kunden-liste.tsx`
@@ -854,16 +1145,30 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 - `vertrag/neu` ← `src/pages/kontrakte/FrmKontraktDetail.tsx`
 - `vertrag/rahmenvertraege` ← `src/pages/vertrag/rahmenvertraege.tsx`
 - `vertrieb/kundenumsatz` ← `src/pages/vertrieb/kundenumsatz.tsx`
+- `waage` ← `src/pages/waage/liste.tsx`
 - `waage/hofliste` ← `src/pages/waage/hofliste.tsx`
+- `waage/liste` ← `src/pages/waage/liste.tsx`
+- `waage/neu` ← `src/pages/waage/neu.tsx`
 - `waage/vorlagen` ← `src/pages/waage/vorlagen.tsx`
 - `waage/wiegeschein-detail` ← `src/pages/waage/wiegeschein-detail.tsx`
 - `waage/wiegeschein/:id` ← `src/pages/waage/wiegeschein-detail.tsx`
+- `waage/wiegungen` ← `src/pages/waage/wiegungen.tsx`
 - `wartung/anlage/:id` ← `src/pages/wartung/anlagen-liste.tsx`
 - `wartung/anlage/neu` ← `src/pages/wartung/anlagen-liste.tsx`
 - `wartung/anlagen` ← `src/pages/wartung/anlagen-liste.tsx`
 - `wartung/anlagen-liste` ← `src/pages/wartung/anlagen-liste.tsx`
 - `weighing` ← `src/pages/weighing.tsx`
 - `wissen/wissensbasis` ← `src/pages/wissen/wissensbasis.tsx`
+- `workflow/flow-spine-complaint-to-resolution` ← `src/pages/workflow/flow-spine-complaint-to-resolution.tsx`
+- `workflow/flow-spine-compliance-to-report` ← `src/pages/workflow/flow-spine-compliance-to-report.tsx`
+- `workflow/flow-spine-contract-to-settlement` ← `src/pages/workflow/flow-spine-contract-to-settlement.tsx`
+- `workflow/flow-spine-finance-to-close` ← `src/pages/workflow/flow-spine-finance-to-close.tsx`
+- `workflow/flow-spine-harvest-to-settlement` ← `src/pages/workflow/flow-spine-harvest-to-settlement.tsx`
+- `workflow/flow-spine-inventory-to-settlement` ← `src/pages/workflow/flow-spine-inventory-to-settlement.tsx`
+- `workflow/flow-spine-order-to-cash` ← `src/pages/workflow/flow-spine-order-to-cash.tsx`
+- `workflow/flow-spine-procure-to-pay` ← `src/pages/workflow/flow-spine-procure-to-pay.tsx`
+- `workflow/flow-spine-service-to-customer` ← `src/pages/workflow/flow-spine-service-to-customer.tsx`
+- `workflow/flow-spine-studio` ← `src/pages/workflow/flow-spine-studio.tsx`
 - `workflow/leitstand` ← `src/pages/workflow/leitstand.tsx`
 - `workflow/process-mining-analytics` ← `src/pages/workflow/process-mining-analytics.tsx`
 - `workflow/workflow-monitoring` ← `src/pages/workflow/workflow-monitoring.tsx`
@@ -888,63 +1193,3 @@ Detailnav sind auf Native umgehaengt; Neuanlage bleibt Legacy. Paritaetsluecken 
 
 ## Handgebaut — Migrationskandidaten (erste 60, alphabetisch)
 
-- `admin-suite` ← `src/pages/admin-suite/index.tsx`
-- `admin-suite/compliance` ← `src/pages/admin-suite/compliance.tsx`
-- `admin-suite/connectors` ← `src/pages/admin-suite/connectors.tsx`
-- `admin-suite/devices` ← `src/pages/admin-suite/devices.tsx`
-- `admin-suite/diagnostics` ← `src/pages/admin-suite/diagnostics.tsx`
-- `admin-suite/ki-anbieter` ← `src/pages/admin-suite/ki-anbieter.tsx`
-- `admin-suite/migration` ← `src/pages/admin-suite/migration.tsx`
-- `admin-suite/operations` ← `src/pages/admin-suite/operations.tsx`
-- `admin-suite/pos-fiscalization` ← `src/pages/admin-suite/pos-fiscalization.tsx`
-- `admin-suite/security` ← `src/pages/admin-suite/security.tsx`
-- `admin-suite/setup` ← `src/pages/admin-suite/setup.tsx`
-- `admin-suite/system-status` ← `src/pages/admin-suite/system-status.tsx`
-- `admin/GapPipelineConsole` ← `src/pages/admin/GapPipelineConsole.tsx`
-- `admin/control-center` ← `src/pages/admin/control-center/index.tsx`
-- `admin/control-center/agent-ops` ← `src/pages/admin/control-center/agent-ops.tsx`
-- `admin/control-center/superglue` ← `src/pages/admin/control-center/superglue.tsx`
-- `admin/externe-gates` ← `src/pages/admin/externe-gates.tsx`
-- `admin/gap-pipeline` ← `src/pages/admin/GapPipelineConsole.tsx`
-- `admin/monitoring/alerts` ← `src/pages/admin/monitoring/alerts.tsx`
-- `admin/nummernkreise` ← `src/pages/admin/nummernkreise.tsx`
-- `admin/postfaecher/anmeldung-rueckruf` ← `src/pages/admin/postfaecher-anmeldung-rueckruf.tsx`
-- `admin/report-berechtigungen` ← `src/pages/admin/report-berechtigungen.tsx`
-- `admin/rolle/:id` ← `src/pages/admin/rollen-verwaltung.tsx`
-- `admin/rolle/neu` ← `src/pages/admin/rollen-verwaltung.tsx`
-- `admin/rollen-verwaltung` ← `src/pages/admin/rollen-verwaltung.tsx`
-- `admin/screen-studio` ← `src/pages/admin/screen-studio.tsx`
-- `admin/setup` ← `src/pages/admin/setup/index.tsx`
-- `admin/setup/dms-integration` ← `src/pages/admin/setup/dms-integration.tsx`
-- `admin/terminologie` ← `src/pages/admin/terminologie.tsx`
-- `admin/voice-channel` ← `src/pages/admin/voice-channel.tsx`
-- `admin/vordruck-editor` ← `src/pages/admin/vordruck-editor.tsx`
-- `admin/webhooks` ← `src/pages/admin/webhooks.tsx`
-- `admin/webshop` ← `src/pages/admin/webshop.tsx`
-- `agrar/annahmen-qualitaet-nachtrag` ← `src/pages/agrar/annahmen-qualitaet-nachtrag.tsx`
-- `agrar/ernte-annahme-erfassung` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/ernte-annahme-erfassung/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/ernte/:id` ← `src/pages/agrar/ernte-annahme-erfassung.tsx`
-- `agrar/erntefenster-konfig` ← `src/pages/agrar/erntefenster-konfig.tsx`
-- `agrar/kontrakt-engagement` ← `src/pages/agrar/kontrakt-engagement.tsx`
-- `agrar/kontrakt-erfuellung` ← `src/pages/agrar/kontrakt-erfuellung.tsx`
-- `agrar/kontrakt-fixierung` ← `src/pages/agrar/kontrakt-fixierung.tsx`
-- `agrar/kontrakt-settlement` ← `src/pages/agrar/kontrakt-settlement.tsx`
-- `agrar/kunden-schlagkartei` ← `src/pages/agrar/kunden-schlagkartei.tsx`
-- `agrar/kunden-schlagkartei/:kunden_nr` ← `src/pages/agrar/kunden-schlagkartei.tsx`
-- `agrar/maschinenauslastung` ← `src/pages/agrar/maschinenauslastung.tsx`
-- `agrar/milchvieh-crosssell` ← `src/pages/agrar/milchvieh-crosssell.tsx`
-- `agrar/milchvieh-karte` ← `src/pages/agrar/milchvieh-karte.tsx`
-- `agrar/rohwarengruppen` ← `src/pages/agrar/rohwarengruppen.tsx`
-- `agrar/sammelabrechnung` ← `src/pages/agrar/sammelabrechnung.tsx`
-- `agrar/vermehrungsvertraege` ← `src/pages/agrar/vermehrungsvertraege.tsx`
-- `agrar/wetterwarnung` ← `src/pages/agrar/wetterwarnung.tsx`
-- `agrar/zinsabrechnung` ← `src/pages/agrar/zinsabrechnung.tsx`
-- `annahme/abrechnung` ← `src/pages/annahme/abrechnung.tsx`
-- `annahme/lkw-registrierung` ← `src/pages/annahme/lkw-registrierung.tsx`
-- `annahme/qualitaets-check` ← `src/pages/annahme/qualitaets-check.tsx`
-- `annahme/rohware` ← `src/pages/annahme/rohware.tsx`
-- `annahme/warteschlange` ← `src/pages/annahme/warteschlange.tsx`
-- `auth/callback` ← `src/pages/auth/Callback.tsx`
-- `auth/login` ← `src/pages/auth/Login.tsx`
-- `crm` ← `src/pages/crm/kim/index.tsx`

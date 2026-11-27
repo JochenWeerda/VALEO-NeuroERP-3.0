@@ -67,8 +67,13 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
       if (!original?.creation || !canCreate) throw new Error('Keine Berechtigung zur Anlage.')
       const fields = original.creation.fields ?? [...(original.fields ?? []), ...(original.tabs ?? []).flatMap(tab => tab.fields ?? [])]
       const allowed = new Set(fields.filter(field => !field.readOnly).map(field => field.key))
-      let payload = Object.fromEntries(Object.entries({ ...original.creation.defaults, ...values })
+      // Form values overwrite defaults; defaults may carry non-form payloads (e.g. empty arrays).
+      const fromForm = Object.fromEntries(Object.entries(values)
         .filter(([key, value]) => allowed.has(key) && value !== undefined && value !== ''))
+      let payload: Record<string, unknown> = { ...(original.creation.defaults ?? {}), ...fromForm }
+      payload = Object.fromEntries(Object.entries(payload).filter(([key, value]) =>
+        (allowed.has(key) || Object.prototype.hasOwnProperty.call(original.creation?.defaults ?? {}, key))
+        && value !== undefined && value !== ''))
       if (original.creation.adapter === 'docflow.create.v1') {
         const signature = JSON.stringify([screenId, original.documentVariant, original.creationContext, payload])
         if (intentRef.current?.signature !== signature) intentRef.current = { signature, key: crypto.randomUUID() }
@@ -79,15 +84,23 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
         if (intentRef.current?.signature !== signature) intentRef.current = {signature, key: crypto.randomUUID()}
         payload = {...payload, idempotency_key: intentRef.current.key}
       }
-      const response = await apiClient.post<{ id: string; doc_type?: string; status?: string; version?: number; screen_context?: { screen_id: string; definition_hash: string } }>(original.creation.endpoint, payload)
-      if (!response.data?.id) throw new Error('Anlageantwort enthält keine Datensatz-ID.')
-      if (original.creation.adapter === 'docflow.create.v1' && (response.data.doc_type !== original.documentVariant?.variantId ||
-        response.data.status !== 'draft' || response.data.version !== 1 ||
-        response.data.screen_context?.screen_id !== original.id ||
-        response.data.screen_context?.definition_hash !== original.creationContext?.definition_hash)) {
+      const envelope = original.creation.payloadEnvelope
+      const requestBody: Record<string, unknown> = envelope
+        ? { [envelope]: payload }
+        : payload
+      const response = await apiClient.post<Record<string, unknown>>(original.creation.endpoint, requestBody)
+      const idKey = original.creation.responseIdKey ?? 'id'
+      const body = response.data ?? {}
+      const nested = body.data && typeof body.data === 'object' ? body.data as Record<string, unknown> : undefined
+      const createdId = body[idKey] ?? nested?.[idKey]
+      if (createdId == null || createdId === '') throw new Error('Anlageantwort enthält keine Datensatz-ID.')
+      if (original.creation.adapter === 'docflow.create.v1' && (body.doc_type !== original.documentVariant?.variantId ||
+        body.status !== 'draft' || body.version !== 1 ||
+        (body.screen_context as { screen_id?: string } | undefined)?.screen_id !== original.id ||
+        (body.screen_context as { definition_hash?: string } | undefined)?.definition_hash !== original.creationContext?.definition_hash)) {
         throw new Error('Anlageantwort entspricht nicht dem geprueften Belegauftrag.')
       }
-      destinationRef.current = original.creation.detailRoute.replace('{entity_id}', encodeURIComponent(response.data.id))
+      destinationRef.current = original.creation.detailRoute.replace('{entity_id}', encodeURIComponent(String(createdId)))
     },
   })
   useEffect(() => {
@@ -131,7 +144,7 @@ export function UniversalNativeCreatePage({ screenId, testId }: { screenId: stri
   if (inboxId && (!inboxQuery.data || inboxQuery.isFetching)) return <p role="status">Inbox-Vorschlag wird geprüft…</p>
   if (initialized.current !== formContext) return <p role="status">Anlagemaske wird vorbereitet…</p>
   return (
-    <div data-testid={testId}>
+    <div data-testid={testId} data-runtime="native-create">
       <Button type="button" variant="outline" onClick={() => {
         const route = original.creation?.cancelRoute
         if (route?.startsWith('/') && !route.startsWith('//') && !route.includes('\\')

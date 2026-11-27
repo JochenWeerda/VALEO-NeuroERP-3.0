@@ -1,3 +1,14 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default createLegacyMaskPage(() => import('./milchvieh-crosssell-legacy'))
+/**
+ * Native Cockpit: ScreenDefinition agrar/milchvieh-crosssell
+ * KPIs + Kundenliste + Produktgruppen — Parität zur Legacy-Auswertungsmaske.
+ */
+export default function MilchviehCrossSellPage(): JSX.Element {
+  return (
+    <UniversalNativeCockpitPage
+      screenId="agrar/milchvieh-crosssell"
+      testId="screen-agrar/milchvieh-crosssell"
+    />
+  )
+}

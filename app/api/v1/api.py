@@ -143,6 +143,8 @@ from app.api.v1.endpoints import (
     admin_mobile,
     admin_reporting,
     admin_suite,
+    admin_suite_parity,
+    einkauf_compat_writes,
     config_service,
     job_runner,
     controlling,
@@ -218,7 +220,7 @@ from app.api.v1.endpoints import (
     ernte_planung,
 )
 # Wave 2-19 Process-Kernel Read-Models + Commands
-from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api
+from app.api.v1.endpoints import agent_context_api, finance_read_models, process_kernel_api, process_kernel_idempotency_lists
 
 # Wave 69 — Knowledge Core
 from app.api.v1.endpoints import knowledge_api
@@ -451,6 +453,8 @@ api_router.include_router(
 )
 
 api_router.include_router(admin_suite.router)
+api_router.include_router(admin_suite_parity.router)
+api_router.include_router(einkauf_compat_writes.router)
 
 api_router.include_router(
     config_service.router,
@@ -1846,6 +1850,7 @@ api_router.include_router(ernte_planung.router)
 # Wave 2-19 — Process-Kernel Finance Read-Models + Commands/Surfacing
 api_router.include_router(finance_read_models.router)
 api_router.include_router(process_kernel_api.router)
+api_router.include_router(process_kernel_idempotency_lists.router)
 api_router.include_router(agent_context_api.router)
 
 # Wave 69 — Knowledge Core

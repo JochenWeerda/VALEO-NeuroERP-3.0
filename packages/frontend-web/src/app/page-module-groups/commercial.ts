@@ -9,6 +9,8 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/vertrieb/**/*.tsx',
   '../../pages/kontrakte/**/*.tsx',
   '../../pages/preise/**/*.tsx',
+  '../../pages/konditionen/**/*.tsx',
+  '../../pages/aktien/**/*.tsx',
   '../../pages/service/**/*.tsx',
   '../../pages/termine/**/*.tsx',
   '../../pages/prospecting/**/*.tsx',
@@ -18,6 +20,7 @@ export const PAGE_MODULES = import.meta.glob([
   '../../pages/management/**/*.tsx',
   '../../pages/reports/**/*.tsx',
   '../../pages/genossenschaft/**/*.tsx',
+  '../../pages/contracts/**/*.tsx',
   '../../pages/contracts-v2.tsx',
   '../../pages/reports.tsx',
 ]) as PageModuleGlob

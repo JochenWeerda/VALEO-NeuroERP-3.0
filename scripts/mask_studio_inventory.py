@@ -383,6 +383,8 @@ def actions() -> list[dict]:
             rows.append({
                 "id": action_id, "maske": sid, "aktion": key, "label": action.get("label"), "art": art,
                 "rest": rest, "mcp": mcp_state, "mcp_grund": block, "cli": action_id in cli,
+                # surfaceOnly: Spezialoberflaeche besitzt den Weg; CLI-Ratsche gilt nicht.
+                "surface_only": bool(action.get("surfaceOnly")),
             })
     return rows
 
@@ -487,7 +489,9 @@ def gaps(inv: dict) -> dict[str, list[str]]:
         "aktionen_nicht_deklariert": sorted(a["id"] for a in inv["aktionen"] if a["art"] == "nicht_deklariert"),
         "aktionen_nicht_verfuegbar": sorted(a["id"] for a in inv["aktionen"] if a["art"] == "nicht_verfuegbar"),
         "aktionen_ohne_mcp_klassifikation": sorted(a["id"] for a in wirksam if a["mcp"] == "unklassifiziert"),
-        "aktionen_ohne_cli": sorted(a["id"] for a in wirksam if not a["cli"]),
+        "aktionen_ohne_cli": sorted(
+            a["id"] for a in wirksam if not a["cli"] and not a.get("surface_only")
+        ),
         "studio_katalog_nicht_bedienbar": sorted(
             [f"aktion:{a['aktion']}:ohne_route" for a in inv["studio_katalog"]["aktionen"] if not a["route"]]
             + [f"aktion:{a['aktion']}:ohne_cli" for a in inv["studio_katalog"]["aktionen"] if not a["cli"]]

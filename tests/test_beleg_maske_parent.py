@@ -436,6 +436,19 @@ class TestBelegMaskeParentWorkflow:
         assert definition["workflow"] == custom_workflow
 
     @pytest.mark.parametrize("belegart", sorted(BELEGARTEN.keys()))
+    def test_default_processband_phasen(self, belegart: str) -> None:
+        """Ohne Override liefert der Parent ProcessBand-Phasen + documentType."""
+        definition = _build_parent(belegart)
+        workflow = definition.get("workflow") or {}
+        assert workflow.get("documentType") == belegart
+        labels = [p["label"] for p in workflow.get("phases") or []]
+        assert labels[:2] == ["Erfasst", "Freigegeben"]
+        if BELEGARTEN[belegart].bucht:
+            assert "Gebucht" in labels
+        else:
+            assert "Gebucht" not in labels
+
+    @pytest.mark.parametrize("belegart", sorted(BELEGARTEN.keys()))
     def test_action_labels_keine_internen_schluessel(self, belegart: str) -> None:
         """Action-Labels zeigen keine internen Prozessschluessel."""
         definition = _build_parent(belegart)

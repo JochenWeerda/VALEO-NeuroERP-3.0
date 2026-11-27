@@ -1,7 +1,7 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, beforeEach, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from '@/app/routing/test-router'
-import ErnteAnnahmeErfassungPage from '@/pages/agrar/ernte-annahme-erfassung'
+import ErnteAnnahmeErfassungPage from '@/pages/agrar/ernte-annahme-erfassung-legacy'
 
 const pushMock = vi.hoisted(() => vi.fn())
 const axiosGetMock = vi.hoisted(() => vi.fn())
@@ -41,6 +41,24 @@ vi.mock('@/lib/axios', () => ({
   },
 }))
 
+vi.mock('@/lib/api-client', () => ({
+  apiClient: {
+    get: axiosGetMock,
+    post: axiosPostMock,
+    put: axiosPutMock,
+    delete: axiosDeleteMock,
+  },
+}))
+
+const paramsMock = vi.hoisted(() => ({ current: {} as Record<string, string | undefined> }))
+vi.mock('@/app/routing/typed-router', async () => {
+  const actual = await vi.importActual<typeof import('@/app/routing/typed-router')>('@/app/routing/typed-router')
+  return {
+    ...actual,
+    useParams: <T extends Record<string, string | undefined>>() => paramsMock.current as T,
+  }
+})
+
 describe('ErnteAnnahmeErfassungPage', () => {
   beforeEach(() => {
     pushMock.mockReset()
@@ -48,6 +66,7 @@ describe('ErnteAnnahmeErfassungPage', () => {
     axiosPostMock.mockReset()
     axiosPutMock.mockReset()
     axiosDeleteMock.mockReset()
+    paramsMock.current = {}
     axiosGetMock.mockImplementation(async (url: string) => {
       if (url === '/api/v1/articles') {
         return {
@@ -136,5 +155,70 @@ describe('ErnteAnnahmeErfassungPage', () => {
     expect(screen.getByDisplayValue('art-raps')).toBeInTheDocument()
     expect(screen.getByDisplayValue('Raps')).toBeInTheDocument()
     expect(screen.getByDisplayValue(/Warteschlange: queue-2/)).toBeInTheDocument()
+  })
+
+  it('fuehrt Berechnung, Abschlag und Endabrechnung fuer gespeicherte Annahme aus', async () => {
+    paramsMock.current = { id: 'ha-1' }
+    axiosGetMock.mockImplementation(async (url: string) => {
+      if (url === '/api/v1/articles') {
+        return { data: { items: [{ id: 'art-weizen', name: 'Weizen', article_number: 'ART-WEIZEN', vat_rate: 7 }] } }
+      }
+      if (url.includes('/api/v1/agrar/harvest-acceptance/ha-1')) {
+        return {
+          data: {
+            id: 'ha-1',
+            acceptance_number: 'EA-1',
+            positions: [
+              {
+                id: 'p1',
+                position_number: 1,
+                description: 'Weizen',
+                is_printable: true,
+                is_calculable: true,
+                lab_value_pct: null,
+                quantity_kg: 1000,
+                unit: 'kg',
+                price_per_unit_eur: 0.2,
+                amount_eur: 200,
+              },
+            ],
+            total_net_amount_eur: 200,
+            total_vat_amount_eur: 14,
+            total_gross_amount_eur: 214,
+            vat_rate_percent: 7,
+          },
+        }
+      }
+      return { data: [] }
+    })
+    axiosPostMock.mockResolvedValue({ data: { total_gross_amount_eur: 214 } })
+
+    render(
+      <MemoryRouter initialEntries={['/agrar/ernte-annahme-erfassung/ha-1']}>
+        <Routes>
+          <Route path="/agrar/ernte-annahme-erfassung/:id" element={<ErnteAnnahmeErfassungPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith('Ernte-Annahme geladen')
+    })
+    expect(await screen.findByRole('button', { name: /Berechnung neu/ })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /Berechnung neu/ }))
+    await waitFor(() => {
+      expect(axiosPostMock).toHaveBeenCalledWith('/api/v1/agrar/harvest-acceptance/ha-1/calculate')
+      expect(pushMock).toHaveBeenCalledWith('Berechnung erfolgreich durchgeführt')
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Abschlagrechnung' }))
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith(expect.stringMatching(/Abschlagrechnung berechnet/))
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Endabrechnung' }))
+    await waitFor(() => {
+      expect(pushMock).toHaveBeenCalledWith(expect.stringMatching(/Endabrechnung berechnet/))
+    })
   })
 })

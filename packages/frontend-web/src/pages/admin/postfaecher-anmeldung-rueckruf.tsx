@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { IntakeWeighingPage } from '@/components/mask-builder/specialized/intake/domain-runtime'
 
-export default createLegacyMaskPage(() => import('./postfaecher-anmeldung-rueckruf-legacy'))
+/** Native admin_workbench: ScreenDefinition admin/postfaecher-anmeldung-rueckruf (Batch 28b). */
+export default function Page(): JSX.Element {
+  return <IntakeWeighingPage screenId="admin/postfaecher-anmeldung-rueckruf" />
+}

@@ -217,7 +217,11 @@ export function QualityRenderer({ state }: { state: QualityState }): JSX.Element
   ]
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Qualitätsprüfung Arbeitsbereich"
+    >
     <div className="p-3 md:p-6">
       <Wizard
         title="Schnell-Qualitätsprüfung"

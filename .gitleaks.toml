@@ -59,6 +59,17 @@ regexes = [
 ]
 
 [[allowlists]]
+description = "ScreenDefinition-Feldschluessel sind Masken-Metadaten, keine API-Geheimnisse."
+# Match von generic-api-key sieht aus wie: key": "co2_aequivalent_kg_per_t"
+regexTarget = "match"
+paths = [
+  '''^app/core/screen_definitions.*\.py$''',
+]
+regexes = [
+  '''key\"\s*:\s*\"[a-z0-9_]+\"''',
+]
+
+[[allowlists]]
 description = "SHA256 evidence fingerprints for the dependency policy gate, not credentials."
 paths = [
   '''config/security/dependency-decisions\.json''',

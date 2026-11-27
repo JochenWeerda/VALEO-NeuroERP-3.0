@@ -22363,7 +22363,8 @@
           "screens": [
             "disposition/strecken-disposition",
             "fibu/op-skonto-auszifferung",
-            "fibu/zahlungsmeldungen"
+            "fibu/zahlungsmeldungen",
+            "verkauf/dauerauftraege"
           ],
           "written_by": [
             "app/api/v1/endpoints/credit_debit_memos.py",
@@ -50184,6 +50185,9 @@
           "read_by": [
             "app/api/v1/endpoints/artikel_stoffstrom.py"
           ],
+          "screens": [
+            "stammdaten/artikel-stoffstrom"
+          ],
           "written_by": [
             "app/api/v1/endpoints/artikel_stoffstrom.py"
           ]
@@ -50287,7 +50291,8 @@
             "app/api/v1/endpoints/artikel_verpackung.py"
           ],
           "screens": [
-            "artikel/verpackungen"
+            "artikel/verpackungen",
+            "stammdaten/artikelverpackung"
           ],
           "written_by": [
             "app/api/v1/endpoints/artikel_verpackung.py"
@@ -50525,6 +50530,9 @@
           "read_by": [
             "app/api/v1/endpoints/beleg_vordrucke.py"
           ],
+          "screens": [
+            "admin/vordruck-editor"
+          ],
           "written_by": [
             "app/api/v1/endpoints/beleg_vordrucke.py"
           ]
@@ -50624,13 +50632,7 @@
           ],
           "screens": [
             "betrieb/standorte",
-            "stammdaten/artikel-stoffstrom",
-            "stammdaten/artikelbestandteile",
-            "stammdaten/artikelverpackung",
-            "stammdaten/betriebsstaetten",
-            "stammdaten/hausbanken",
-            "stammdaten/individuelle-artikelnummern",
-            "stammdaten/mengeneinheiten"
+            "stammdaten/betriebsstaetten"
           ],
           "written_by": [
             "app/api/v1/endpoints/betriebsstaetten.py"
@@ -51580,6 +51582,9 @@
           "read_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
           ],
+          "screens": [
+            "verkauf/dauerauftraege"
+          ],
           "written_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
           ]
@@ -51636,6 +51641,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
+          ],
+          "screens": [
+            "verkauf/dauerauftraege"
           ],
           "written_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
@@ -51703,6 +51711,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
+          ],
+          "screens": [
+            "verkauf/dauerauftraege"
           ],
           "written_by": [
             "app/api/v1/endpoints/dauerauftraege.py"
@@ -54614,7 +54625,8 @@
             "app/api/v1/endpoints/hausbankenstamm.py"
           ],
           "screens": [
-            "stammdaten/hausbank"
+            "stammdaten/hausbank",
+            "stammdaten/hausbanken"
           ],
           "written_by": [
             "app/api/v1/endpoints/hausbankenstamm.py"
@@ -54779,7 +54791,8 @@
             "app/api/v1/endpoints/individuelle_artikelnummern.py"
           ],
           "screens": [
-            "stammdaten/individuelle-artikelnummer"
+            "stammdaten/individuelle-artikelnummer",
+            "stammdaten/individuelle-artikelnummern"
           ],
           "written_by": [
             "app/api/v1/endpoints/individuelle_artikelnummern.py"
@@ -54933,6 +54946,9 @@
           "read_by": [
             "app/api/v1/endpoints/inventur_piv.py"
           ],
+          "screens": [
+            "lager/permanente-inventur"
+          ],
           "written_by": [
             "app/api/v1/endpoints/inventur_piv.py"
           ]
@@ -55019,6 +55035,9 @@
           ],
           "read_by": [
             "app/api/v1/endpoints/inventur_piv.py"
+          ],
+          "screens": [
+            "lager/permanente-inventur"
           ],
           "written_by": [
             "app/api/v1/endpoints/inventur_piv.py"
@@ -55546,8 +55565,7 @@
             "agrar/kontrakte",
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
-            "disposition/kontrakt-abruf",
-            "kontrakte/mengenzeitraeume"
+            "disposition/kontrakt-abruf"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -55753,8 +55771,7 @@
             "agrar/kontrakte",
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
-            "disposition/kontrakt-abruf",
-            "kontrakte/mengenzeitraeume"
+            "disposition/kontrakt-abruf"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -55813,8 +55830,7 @@
             "agrar/kontrakte",
             "agrar/kontrakte/formular",
             "agrar/vertraege/formular",
-            "disposition/kontrakt-abruf",
-            "kontrakte/mengenzeitraeume"
+            "disposition/kontrakt-abruf"
           ],
           "written_by": [
             "app/api/v1/endpoints/kontrakt_mengenzeitraum.py"
@@ -58494,6 +58510,9 @@
             "app/api/v1/endpoints/rohwarengruppen.py",
             "app/services/rohware_schema_service.py"
           ],
+          "screens": [
+            "agrar/rohwarengruppen"
+          ],
           "written_by": [
             "app/api/v1/endpoints/rohware_schema.py",
             "app/services/rohware_schema_service.py"
@@ -58893,6 +58912,9 @@
           "read_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ],
+          "screens": [
+            "agrar/rohwarengruppen"
+          ],
           "written_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ]
@@ -59022,6 +59044,9 @@
           "read_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ],
+          "screens": [
+            "agrar/rohwarengruppen"
+          ],
           "written_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ]
@@ -59103,6 +59128,9 @@
           "read_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ],
+          "screens": [
+            "agrar/rohwarengruppen"
+          ],
           "written_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
           ]
@@ -59176,6 +59204,9 @@
             "app/api/v1/endpoints/rohware_schema.py",
             "app/api/v1/endpoints/rohwarengruppen.py",
             "app/services/rohware_schema_service.py"
+          ],
+          "screens": [
+            "agrar/rohwarengruppen"
           ],
           "written_by": [
             "app/api/v1/endpoints/rohwarengruppen.py"
@@ -59286,7 +59317,8 @@
           ],
           "screens": [
             "agrar/saatgut/vermehrung",
-            "agrar/sorten-vermehrung"
+            "agrar/sorten-vermehrung",
+            "agrar/vermehrungsvertraege"
           ],
           "written_by": [
             "app/api/v1/endpoints/vermehrungsvertrag.py"

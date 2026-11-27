@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { IntakeWeighingPage } from '@/components/mask-builder/specialized/intake/domain-runtime'
 
-export default createLegacyMaskPage(() => import('./vordruck-editor-legacy'))
+/** Native admin_workbench: ScreenDefinition admin/vordruck-editor (Batch 28b). */
+export default function Page(): JSX.Element {
+  return <IntakeWeighingPage screenId="admin/vordruck-editor" />
+}

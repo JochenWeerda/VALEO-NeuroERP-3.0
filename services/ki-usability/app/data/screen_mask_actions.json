@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "generator": "scripts/generate_screen_action_catalog.py",
   "stats": {
-    "actions": 797,
-    "screens_with_actions": 407,
+    "actions": 901,
+    "screens_with_actions": 436,
     "domains": 50
   },
   "actions": [
@@ -107,6 +107,494 @@
       }
     },
     {
+      "id": "mask:admin-suite/compliance:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/compliance)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/compliance",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/compliance",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectoren:imap_abrufen",
+      "label": "IMAP jetzt abrufen",
+      "description": "IMAP jetzt abrufen (admin-suite/connectoren)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectoren",
+      "intent_phrases": [
+        "IMAP jetzt abrufen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectoren",
+        "actionKey": "imap_abrufen",
+        "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/poll",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.connectoren",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectoren:imap_speichern",
+      "label": "IMAP speichern",
+      "description": "IMAP speichern (admin-suite/connectoren)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectoren",
+      "intent_phrases": [
+        "IMAP speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectoren",
+        "actionKey": "imap_speichern",
+        "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "admin.admin_suite.connectoren",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectoren:imap_testen",
+      "label": "IMAP testen",
+      "description": "IMAP testen (admin-suite/connectoren)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectoren",
+      "intent_phrases": [
+        "IMAP testen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectoren",
+        "actionKey": "imap_testen",
+        "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/test",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.connectoren",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectoren:stt_speichern",
+      "label": "STT speichern",
+      "description": "STT speichern (admin-suite/connectoren)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectoren",
+      "intent_phrases": [
+        "STT speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectoren",
+        "actionKey": "stt_speichern",
+        "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "admin.admin_suite.connectoren",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectoren:stt_testen",
+      "label": "STT testen",
+      "description": "STT testen (admin-suite/connectoren)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectoren",
+      "intent_phrases": [
+        "STT testen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectoren",
+        "actionKey": "stt_testen",
+        "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt/test",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.connectoren",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/connectors:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/connectors)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/connectors",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/connectors",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/devices:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/devices)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/devices",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/devices",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/diagnostics:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/diagnostics)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/diagnostics",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/diagnostics",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/ki-anbieter:speichern",
+      "label": "Speichern",
+      "description": "Speichern (admin-suite/ki-anbieter)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/ki-anbieter",
+      "intent_phrases": [
+        "Speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/ki-anbieter",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/admin-suite/llm-gateway",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "admin.admin_suite.ki",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/ki-anbieter:testen",
+      "label": "Verbindung testen",
+      "description": "Verbindung testen (admin-suite/ki-anbieter)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/ki-anbieter",
+      "intent_phrases": [
+        "Verbindung testen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/ki-anbieter",
+        "actionKey": "testen",
+        "commandEndpoint": "/api/v1/admin-suite/llm-gateway/test",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.ki",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/migration:dry_run_anlegen",
+      "label": "Dry-Run anlegen",
+      "description": "Dry-Run anlegen (admin-suite/migration)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/migration",
+      "intent_phrases": [
+        "Dry-Run anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/migration",
+        "actionKey": "dry_run_anlegen",
+        "commandEndpoint": "/api/v1/admin-suite/migration/batches",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.migration",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/migration:freigeben",
+      "label": "Freigeben",
+      "description": "Freigeben (admin-suite/migration)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/migration",
+      "intent_phrases": [
+        "Freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin-suite/migration",
+        "actionKey": "freigeben",
+        "commandEndpoint": "/api/v1/admin-suite/migration/batches/{entity_id}/approve",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.migration",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/operations:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/operations)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/operations",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/operations",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/pos-fiscalization:speichern",
+      "label": "Konfiguration speichern",
+      "description": "Konfiguration speichern (admin-suite/pos-fiscalization)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/pos-fiscalization",
+      "intent_phrases": [
+        "Konfiguration speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/pos-fiscalization",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/pos/fiscalization/config",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "admin.admin_suite.pos",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/security:simulieren",
+      "label": "Rechte simulieren",
+      "description": "Rechte simulieren (admin-suite/security)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/security",
+      "intent_phrases": [
+        "Rechte simulieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/security",
+        "actionKey": "simulieren",
+        "commandEndpoint": "/api/v1/admin-suite/security/simulate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "admin.admin_suite.security",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/setup:abschliessen",
+      "label": "Abschliessen",
+      "description": "Abschliessen (admin-suite/setup)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/setup",
+      "intent_phrases": [
+        "Abschliessen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin-suite/setup",
+        "actionKey": "abschliessen",
+        "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PATCH",
+        "permission": "admin.admin_suite.setup",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin-suite/setup:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/setup)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/setup",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/setup",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/setup:in_arbeit",
+      "label": "In Arbeit",
+      "description": "In Arbeit (admin-suite/setup)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/setup",
+      "intent_phrases": [
+        "In Arbeit"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin-suite/setup",
+        "actionKey": "in_arbeit",
+        "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PATCH",
+        "permission": "admin.admin_suite.setup",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin-suite/system-status:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (admin-suite/system-status)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin-suite/system-status",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin-suite/system-status",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/GapPipelineConsole:import_pipeline",
+      "label": "Import",
+      "description": "Import (admin/GapPipelineConsole)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/GapPipelineConsole",
+      "intent_phrases": [
+        "Import"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/GapPipelineConsole",
+        "actionKey": "import_pipeline",
+        "commandEndpoint": "/api/v1/gap/pipeline/import",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.gap",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/GapPipelineConsole:run_pipeline",
+      "label": "Pipeline starten",
+      "description": "Pipeline starten (admin/GapPipelineConsole)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/GapPipelineConsole",
+      "intent_phrases": [
+        "Pipeline starten"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/GapPipelineConsole",
+        "actionKey": "run_pipeline",
+        "commandEndpoint": "/api/v1/gap/pipeline/run-year",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.gap",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:admin/audit-log-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (admin/audit-log-liste)",
@@ -195,6 +683,75 @@
         "command": null,
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/control-center/superglue:connector_override",
+      "label": "Connector Override speichern",
+      "description": "Connector Override speichern (admin/control-center/superglue)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center/superglue",
+      "intent_phrases": [
+        "Connector Override speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center/superglue",
+        "actionKey": "connector_override",
+        "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/connectors/{connector_key}/config",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-control-center.superglue",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/control-center/superglue:policy_override",
+      "label": "Policy Override speichern",
+      "description": "Policy Override speichern (admin/control-center/superglue)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center/superglue",
+      "intent_phrases": [
+        "Policy Override speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center/superglue",
+        "actionKey": "policy_override",
+        "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/policy",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-control-center.superglue",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/control-center/superglue:wizard_apply",
+      "label": "Wizard-Schritt anwenden",
+      "description": "Wizard-Schritt anwenden (admin/control-center/superglue)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/control-center/superglue",
+      "intent_phrases": [
+        "Wizard-Schritt anwenden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/control-center/superglue",
+        "actionKey": "wizard_apply",
+        "commandEndpoint": "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}/wizard/apply",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-control-center.superglue",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
       }
     },
     {
@@ -503,6 +1060,29 @@
         "permission": "admin.number_range.update",
         "requiresConfirmation": true,
         "auditReasonRequired": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/postfaecher-anmeldung-rueckruf:callback",
+      "label": "Anmeldung abschliessen",
+      "description": "Anmeldung abschliessen (admin/postfaecher-anmeldung-rueckruf)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/postfaecher-anmeldung-rueckruf",
+      "intent_phrases": [
+        "Anmeldung abschliessen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/postfaecher-anmeldung-rueckruf",
+        "actionKey": "callback",
+        "commandEndpoint": "/api/v1/admin/postfaecher/anmeldung/abschluss",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.postfaecher",
+        "forbiddenForAgents": true,
         "dangerLevel": "moderate"
       }
     },
@@ -855,6 +1435,52 @@
       }
     },
     {
+      "id": "mask:admin/setup/dms-integration:bootstrap",
+      "label": "DMS bootstrap",
+      "description": "DMS bootstrap (admin/setup/dms-integration)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/setup/dms-integration",
+      "intent_phrases": [
+        "DMS bootstrap"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/setup/dms-integration",
+        "actionKey": "bootstrap",
+        "commandEndpoint": "/api/v1/admin/dms/bootstrap",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.dms",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/setup/dms-integration:test",
+      "label": "Verbindung testen",
+      "description": "Verbindung testen (admin/setup/dms-integration)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/setup/dms-integration",
+      "intent_phrases": [
+        "Verbindung testen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/setup/dms-integration",
+        "actionKey": "test",
+        "commandEndpoint": "/api/v1/admin/dms/test",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.dms",
+        "forbiddenForAgents": true,
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:admin/terminologie:export",
       "label": "CSV-Export",
       "description": "CSV-Export (admin/terminologie)",
@@ -916,6 +1542,129 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/vordruck-editor:anlegen",
+      "label": "Vordruck anlegen",
+      "description": "Vordruck anlegen (admin/vordruck-editor)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/vordruck-editor",
+      "intent_phrases": [
+        "Vordruck anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/vordruck-editor",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/vordrucke",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.vordruck",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/vordruck-editor:duplizieren",
+      "label": "Duplizieren",
+      "description": "Duplizieren (admin/vordruck-editor)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/vordruck-editor",
+      "intent_phrases": [
+        "Duplizieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/vordruck-editor",
+        "actionKey": "duplizieren",
+        "commandEndpoint": "/api/v1/admin/vordrucke/{entity_id}/duplizieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.vordruck",
+        "forbiddenForAgents": true,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:admin/vordruck-editor:loeschen",
+      "label": "Loeschen",
+      "description": "Loeschen (admin/vordruck-editor)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/vordruck-editor",
+      "intent_phrases": [
+        "Loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/vordruck-editor",
+        "actionKey": "loeschen",
+        "commandEndpoint": "/api/v1/admin/vordrucke/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "studio.admin-ops.vordruck",
+        "forbiddenForAgents": true,
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
+      "id": "mask:admin/vordruck-editor:seed_standard",
+      "label": "Standard-Vordrucke seeden",
+      "description": "Standard-Vordrucke seeden (admin/vordruck-editor)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/vordruck-editor",
+      "intent_phrases": [
+        "Standard-Vordrucke seeden"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "admin/vordruck-editor",
+        "actionKey": "seed_standard",
+        "commandEndpoint": "/api/v1/admin/vordrucke/seed-standard",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "studio.admin-ops.vordruck",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:admin/vordruck-editor:speichern",
+      "label": "Vordruck speichern",
+      "description": "Vordruck speichern (admin/vordruck-editor)",
+      "category": "mask-action",
+      "domain": "admin",
+      "mask": "admin/vordruck-editor",
+      "intent_phrases": [
+        "Vordruck speichern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "admin/vordruck-editor",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/admin/vordrucke/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "studio.admin-ops.vordruck",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
       }
     },
     {
@@ -1179,6 +1928,73 @@
       }
     },
     {
+      "id": "mask:agrar/annahmen-qualitaet-nachtrag:batch_nachtragen",
+      "label": "Batch speichern",
+      "description": "Batch speichern (agrar/annahmen-qualitaet-nachtrag)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/annahmen-qualitaet-nachtrag",
+      "intent_phrases": [
+        "Batch speichern"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/annahmen-qualitaet-nachtrag",
+        "actionKey": "batch_nachtragen",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/quality-batch",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.qualitaet_nachtrag.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/annahmen-qualitaet-nachtrag:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/annahmen-qualitaet-nachtrag)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/annahmen-qualitaet-nachtrag",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/annahmen-qualitaet-nachtrag",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/annahmen-qualitaet-nachtrag:nachtragen",
+      "label": "Nachtragen",
+      "description": "Nachtragen (agrar/annahmen-qualitaet-nachtrag)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/annahmen-qualitaet-nachtrag",
+      "intent_phrases": [
+        "Nachtragen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/annahmen-qualitaet-nachtrag",
+        "actionKey": "nachtragen",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}/qualitaetsprotokoll",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.qualitaet_nachtrag.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
       "id": "mask:agrar/biostimulanzien-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/biostimulanzien-liste)",
@@ -1310,6 +2126,129 @@
       }
     },
     {
+      "id": "mask:agrar/ernte-annahme-erfassung:anlegen",
+      "label": "Annahme anlegen",
+      "description": "Annahme anlegen (agrar/ernte-annahme-erfassung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ernte-annahme-erfassung",
+      "intent_phrases": [
+        "Annahme anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/ernte-annahme-erfassung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.ernte_annahme.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/ernte-annahme-erfassung:berechnen",
+      "label": "Berechnen",
+      "description": "Berechnen (agrar/ernte-annahme-erfassung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ernte-annahme-erfassung",
+      "intent_phrases": [
+        "Berechnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ernte-annahme-erfassung",
+        "actionKey": "berechnen",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}/calculate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.ernte_annahme.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/ernte-annahme-erfassung:freigeben",
+      "label": "Freigeben",
+      "description": "Freigeben (agrar/ernte-annahme-erfassung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ernte-annahme-erfassung",
+      "intent_phrases": [
+        "Freigeben"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ernte-annahme-erfassung",
+        "actionKey": "freigeben",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}/release",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.ernte_annahme.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/ernte-annahme-erfassung:loeschen",
+      "label": "Loeschen",
+      "description": "Loeschen (agrar/ernte-annahme-erfassung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ernte-annahme-erfassung",
+      "intent_phrases": [
+        "Loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ernte-annahme-erfassung",
+        "actionKey": "loeschen",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.ernte_annahme.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/ernte-annahme-erfassung:speichern",
+      "label": "Annahme speichern",
+      "description": "Annahme speichern (agrar/ernte-annahme-erfassung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/ernte-annahme-erfassung",
+      "intent_phrases": [
+        "Annahme speichern"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/ernte-annahme-erfassung",
+        "actionKey": "speichern",
+        "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "agrar.ernte_annahme.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:agrar/ernte-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/ernte-liste)",
@@ -1348,6 +2287,122 @@
         "navigationRoute": "/agrar/ernte/neu",
         "command": null,
         "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/erntefenster-konfig:alt_daten_zuordnen",
+      "label": "Alt-Daten zuordnen",
+      "description": "Alt-Daten zuordnen (agrar/erntefenster-konfig)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/erntefenster-konfig",
+      "intent_phrases": [
+        "Alt-Daten zuordnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/erntefenster-konfig",
+        "actionKey": "alt_daten_zuordnen",
+        "commandEndpoint": "/api/v1/agrar/settlements/campaign-reference/backfill/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.erntefenster.backfill",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/erntefenster-konfig:anlegen",
+      "label": "Kampagne aus Vorlage",
+      "description": "Kampagne aus Vorlage (agrar/erntefenster-konfig)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/erntefenster-konfig",
+      "intent_phrases": [
+        "Kampagne aus Vorlage"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/erntefenster-konfig",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/admin/erntefenster-from-template",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.erntefenster.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/erntefenster-konfig:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/erntefenster-konfig)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/erntefenster-konfig",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/erntefenster-konfig",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/erntefenster-konfig:sandbox",
+      "label": "In Sandbox pruefen",
+      "description": "In Sandbox pruefen (agrar/erntefenster-konfig)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/erntefenster-konfig",
+      "intent_phrases": [
+        "In Sandbox pruefen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/erntefenster-konfig",
+        "actionKey": "sandbox",
+        "commandEndpoint": null,
+        "navigationRoute": "/workflow/workflow-sandbox?process={process_key}&date={start_date}&campaign={id}",
+        "command": null,
+        "method": null,
+        "permission": "agrar.erntefenster.read",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/erntefenster-konfig:settlement_pruefen",
+      "label": "Settlement-Abschluss pruefen",
+      "description": "Settlement-Abschluss pruefen (agrar/erntefenster-konfig)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/erntefenster-konfig",
+      "intent_phrases": [
+        "Settlement-Abschluss pruefen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/erntefenster-konfig",
+        "actionKey": "settlement_pruefen",
+        "commandEndpoint": null,
+        "navigationRoute": "/annahme/abrechnung?campaignId={id}&campaignName={name}&campaignStart={start_date}&campaignEnd={end_date}",
+        "command": null,
+        "method": null,
+        "permission": "agrar.erntefenster.read",
         "dangerLevel": "safe"
       }
     },
@@ -1948,6 +3003,75 @@
       }
     },
     {
+      "id": "mask:agrar/kunden-schlagkartei:ankaufsangebot",
+      "label": "Ankaufsangebot erstellen",
+      "description": "Ankaufsangebot erstellen (agrar/kunden-schlagkartei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/kunden-schlagkartei",
+      "intent_phrases": [
+        "Ankaufsangebot erstellen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/kunden-schlagkartei",
+        "actionKey": "ankaufsangebot",
+        "commandEndpoint": "/api/v1/portal/empfehlungen/generieren/schlagkartei",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.schlagkartei.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/kunden-schlagkartei:lohn_spritz",
+      "label": "Lohnspritz-Auftrag",
+      "description": "Lohnspritz-Auftrag (agrar/kunden-schlagkartei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/kunden-schlagkartei",
+      "intent_phrases": [
+        "Lohnspritz-Auftrag"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/kunden-schlagkartei",
+        "actionKey": "lohn_spritz",
+        "commandEndpoint": "/api/v1/portal/lohndienste",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.schlagkartei.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/kunden-schlagkartei:mahl_misch",
+      "label": "Mahl+Misch-Termin",
+      "description": "Mahl+Misch-Termin (agrar/kunden-schlagkartei)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/kunden-schlagkartei",
+      "intent_phrases": [
+        "Mahl+Misch-Termin"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/kunden-schlagkartei",
+        "actionKey": "mahl_misch",
+        "commandEndpoint": "/api/v1/portal/lohndienste",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.schlagkartei.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:agrar/maschinen-auslastung-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/maschinen-auslastung-liste)",
@@ -2492,6 +3616,123 @@
       }
     },
     {
+      "id": "mask:agrar/sammelabrechnung:anlegen",
+      "label": "Anlegen",
+      "description": "Anlegen (agrar/sammelabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/sammelabrechnung",
+      "intent_phrases": [
+        "Anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/sammelabrechnung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/agrar/sammelabrechnung",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.sammelabrechnung.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/sammelabrechnung:berechnen",
+      "label": "Berechnen",
+      "description": "Berechnen (agrar/sammelabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/sammelabrechnung",
+      "intent_phrases": [
+        "Berechnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/sammelabrechnung",
+        "actionKey": "berechnen",
+        "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/berechnen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.sammelabrechnung.berechnen",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/sammelabrechnung:buchen",
+      "label": "Buchen",
+      "description": "Buchen (agrar/sammelabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/sammelabrechnung",
+      "intent_phrases": [
+        "Buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/sammelabrechnung",
+        "actionKey": "buchen",
+        "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/buchen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.sammelabrechnung.buchen",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/sammelabrechnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/sammelabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/sammelabrechnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/sammelabrechnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/sammelabrechnung:loeschen",
+      "label": "Loeschen",
+      "description": "Loeschen (agrar/sammelabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/sammelabrechnung",
+      "intent_phrases": [
+        "Loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/sammelabrechnung",
+        "actionKey": "loeschen",
+        "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.sammelabrechnung.delete",
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
       "id": "mask:agrar/schlaege-karte-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agrar/schlaege-karte-liste)",
@@ -2642,6 +3883,123 @@
       }
     },
     {
+      "id": "mask:agrar/zinsabrechnung:anlegen",
+      "label": "Anlegen",
+      "description": "Anlegen (agrar/zinsabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/zinsabrechnung",
+      "intent_phrases": [
+        "Anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/zinsabrechnung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/zinsabrechnung",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "finance.zinsabrechnung.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/zinsabrechnung:buchen",
+      "label": "Buchen",
+      "description": "Buchen (agrar/zinsabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/zinsabrechnung",
+      "intent_phrases": [
+        "Buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/zinsabrechnung",
+        "actionKey": "buchen",
+        "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/buchen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "finance.zinsabrechnung.buchen",
+        "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:agrar/zinsabrechnung:drucken",
+      "label": "Drucken",
+      "description": "Drucken (agrar/zinsabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/zinsabrechnung",
+      "intent_phrases": [
+        "Drucken"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/zinsabrechnung",
+        "actionKey": "drucken",
+        "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/drucken",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "finance.zinsabrechnung.drucken",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/zinsabrechnung:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (agrar/zinsabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/zinsabrechnung",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "agrar/zinsabrechnung",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:agrar/zinsabrechnung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (agrar/zinsabrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "agrar/zinsabrechnung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "agrar/zinsabrechnung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/stornieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "finance.zinsabrechnung.stornieren",
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
       "id": "mask:agribusiness/farmers:export",
       "label": "CSV-Export",
       "description": "CSV-Export (agribusiness/farmers)",
@@ -2660,6 +4018,173 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:anlegen",
+      "label": "Abrechnung anlegen",
+      "description": "Abrechnung anlegen (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Abrechnung anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "anlegen",
+        "commandEndpoint": "/api/v1/agrar/settlements/",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:billing_preview",
+      "label": "Abrechnungsgewicht Vorschau",
+      "description": "Abrechnungsgewicht Vorschau (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Abrechnungsgewicht Vorschau"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "billing_preview",
+        "commandEndpoint": "/api/v1/agrar/settlements/billing-weight/preview",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:drying_compute",
+      "label": "Trocknung berechnen",
+      "description": "Trocknung berechnen (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Trocknung berechnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "drying_compute",
+        "commandEndpoint": "/api/v1/agrar/settlements/drying/compute",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:freigabe",
+      "label": "Freigabe",
+      "description": "Freigabe (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Freigabe"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "freigabe",
+        "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/freigabe",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:post_fibu",
+      "label": "FiBu buchen",
+      "description": "FiBu buchen (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "FiBu buchen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "post_fibu",
+        "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/post-fibu",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:settlement_preview",
+      "label": "Abrechnung Vorschau",
+      "description": "Abrechnung Vorschau (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Abrechnung Vorschau"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "settlement_preview",
+        "commandEndpoint": "/api/v1/agrar/settlements/preview",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:annahme/abrechnung:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (annahme/abrechnung)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/abrechnung",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "annahme/abrechnung",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/agrar/settlements/{entity_id}/cancel",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.settlement.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
       }
     },
     {
@@ -2752,6 +4277,29 @@
         "command": null,
         "method": null,
         "permission": "studio.start.intake-weighing",
+        "forbiddenForAgents": true,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:annahme/rohware:submit",
+      "label": "Rohware annehmen",
+      "description": "Rohware annehmen (annahme/rohware)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "annahme/rohware",
+      "intent_phrases": [
+        "Rohware annehmen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "annahme/rohware",
+        "actionKey": "submit",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": null,
+        "method": null,
+        "permission": "studio.submit.intake-weighing",
         "forbiddenForAgents": true,
         "dangerLevel": "safe"
       }
@@ -8481,14 +10029,64 @@
       }
     },
     {
-      "id": "mask:einkauf/angebot:bestellen",
-      "label": "Bestellung erstellen",
-      "description": "Bestellung erstellen (einkauf/angebot)",
+      "id": "mask:einkauf/angebot:ablehnen",
+      "label": "Ablehnen",
+      "description": "Ablehnen (einkauf/angebot)",
       "category": "mask-action",
       "domain": "einkauf",
       "mask": "einkauf/angebot",
       "intent_phrases": [
-        "Bestellung erstellen"
+        "Ablehnen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "ablehnen",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/reject",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.angebot.update",
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebot:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "einkauf.angebot.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebot:bestellen",
+      "label": "In Bestellung",
+      "description": "In Bestellung (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "In Bestellung"
       ],
       "required_data": [
         "entity_id"
@@ -8502,6 +10100,54 @@
         "method": "POST",
         "permission": "einkauf.angebot.order",
         "requiresConfirmation": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebot:genehmigen",
+      "label": "Genehmigen",
+      "description": "Genehmigen (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "Genehmigen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "genehmigen",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/approve",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.angebot.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:einkauf/angebot:pruefen",
+      "label": "Pruefen",
+      "description": "Pruefen (einkauf/angebot)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/angebot",
+      "intent_phrases": [
+        "Pruefen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/angebot",
+        "actionKey": "pruefen",
+        "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/review",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.angebot.update",
         "dangerLevel": "safe"
       }
     },
@@ -8791,6 +10437,104 @@
         "permission": "lager.wareneingang.create",
         "requiresConfirmation": true,
         "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis:bearbeiten",
+      "label": "Bearbeiten",
+      "description": "Bearbeiten (einkauf/anlieferavis)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis",
+      "intent_phrases": [
+        "Bearbeiten"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anlieferavis",
+        "actionKey": "bearbeiten",
+        "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PUT",
+        "permission": "einkauf.anlieferavis.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis:bestaetigen",
+      "label": "Bestaetigen",
+      "description": "Bestaetigen (einkauf/anlieferavis)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis",
+      "intent_phrases": [
+        "Bestaetigen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anlieferavis",
+        "actionKey": "bestaetigen",
+        "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/confirm",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.anlieferavis.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis:senden",
+      "label": "Avis senden",
+      "description": "Avis senden (einkauf/anlieferavis)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis",
+      "intent_phrases": [
+        "Avis senden"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anlieferavis",
+        "actionKey": "senden",
+        "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/send",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.anlieferavis.update",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:einkauf/anlieferavis:stornieren",
+      "label": "Stornieren",
+      "description": "Stornieren (einkauf/anlieferavis)",
+      "category": "mask-action",
+      "domain": "einkauf",
+      "mask": "einkauf/anlieferavis",
+      "intent_phrases": [
+        "Stornieren"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "einkauf/anlieferavis",
+        "actionKey": "stornieren",
+        "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/cancel",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "einkauf.anlieferavis.update",
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
       }
     },
     {
@@ -11374,6 +13118,144 @@
       }
     },
     {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:bussgeld_anlegen",
+      "label": "Bussgeld anlegen",
+      "description": "Bussgeld anlegen (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Bussgeld anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "bussgeld_anlegen",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:bussgeld_bezahlt",
+      "label": "Bussgeld bezahlt",
+      "description": "Bussgeld bezahlt (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Bussgeld bezahlt"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "bussgeld_bezahlt",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/bussgeld/{bg_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PATCH",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:leasing_rueckgabe",
+      "label": "Leasing-Rueckgabe",
+      "description": "Leasing-Rueckgabe (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Leasing-Rueckgabe"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "leasing_rueckgabe",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/leasing-rueckgabe",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:schaden_abschliessen",
+      "label": "Schaden abschliessen",
+      "description": "Schaden abschliessen (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Schaden abschliessen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "schaden_abschliessen",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden/{schaden_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "PATCH",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:schaden_anlegen",
+      "label": "Schaden anlegen",
+      "description": "Schaden anlegen (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Schaden anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "schaden_anlegen",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/schaeden",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:fuhrpark/fahrzeug-vertiefung:status_wechseln",
+      "label": "Status wechseln",
+      "description": "Status wechseln (fuhrpark/fahrzeug-vertiefung)",
+      "category": "mask-action",
+      "domain": "logistik",
+      "mask": "fuhrpark/fahrzeug-vertiefung",
+      "intent_phrases": [
+        "Status wechseln"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "fuhrpark/fahrzeug-vertiefung",
+        "actionKey": "status_wechseln",
+        "commandEndpoint": "/api/v1/fuhrpark/fahrzeuge/{fahrzeug_id}/status",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "logistik.fuhrpark.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:fuhrpark/fahrzeuge-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (fuhrpark/fahrzeuge-liste)",
@@ -12192,6 +14074,269 @@
         "command": "list.exportCsv",
         "method": null,
         "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:individualpreis_anlegen",
+      "label": "Individualpreis anlegen",
+      "description": "Individualpreis anlegen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Individualpreis anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "individualpreis_anlegen",
+        "commandEndpoint": "/api/v1/preise/individualpreise",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:individualpreis_loeschen",
+      "label": "Individualpreis loeschen",
+      "description": "Individualpreis loeschen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Individualpreis loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "individualpreis_loeschen",
+        "commandEndpoint": "/api/v1/preise/individualpreise/{id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:preis_berechnen",
+      "label": "Preis berechnen",
+      "description": "Preis berechnen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Preis berechnen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "preis_berechnen",
+        "commandEndpoint": "/api/v1/pricing/calculate",
+        "navigationRoute": null,
+        "command": null,
+        "method": "GET",
+        "permission": "agrar.konditionen.read",
+        "forbiddenForAgents": true,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:preisliste_anlegen",
+      "label": "Preisliste anlegen",
+      "description": "Preisliste anlegen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Preisliste anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "preisliste_anlegen",
+        "commandEndpoint": "/api/v1/price-lists/",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:preisliste_loeschen",
+      "label": "Preisliste loeschen",
+      "description": "Preisliste loeschen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Preisliste loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "preisliste_loeschen",
+        "commandEndpoint": "/api/v1/price-lists/{id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattgruppe_anlegen",
+      "label": "Rabattgruppe anlegen",
+      "description": "Rabattgruppe anlegen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattgruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattgruppe_anlegen",
+        "commandEndpoint": "/api/v1/preise/rabatte/gruppen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattgruppe_loeschen",
+      "label": "Rabattgruppe loeschen",
+      "description": "Rabattgruppe loeschen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattgruppe loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattgruppe_loeschen",
+        "commandEndpoint": "/api/v1/preise/rabatte/gruppen/{id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattklasse_anlegen",
+      "label": "Rabattklasse anlegen",
+      "description": "Rabattklasse anlegen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattklasse anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattklasse_anlegen",
+        "commandEndpoint": "/api/v1/preise/rabatte/klassen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattklasse_loeschen",
+      "label": "Rabattklasse loeschen",
+      "description": "Rabattklasse loeschen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattklasse loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattklasse_loeschen",
+        "commandEndpoint": "/api/v1/preise/rabatte/klassen/{id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattsatz_anlegen",
+      "label": "Rabattsatz anlegen",
+      "description": "Rabattsatz anlegen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattsatz anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattsatz_anlegen",
+        "commandEndpoint": "/api/v1/preise/rabatte/saetze",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:konditionen/konditionssystem:rabattsatz_loeschen",
+      "label": "Rabattsatz loeschen",
+      "description": "Rabattsatz loeschen (konditionen/konditionssystem)",
+      "category": "mask-action",
+      "domain": "agrar",
+      "mask": "konditionen/konditionssystem",
+      "intent_phrases": [
+        "Rabattsatz loeschen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "konditionen/konditionssystem",
+        "actionKey": "rabattsatz_loeschen",
+        "commandEndpoint": "/api/v1/preise/rabatte/saetze/{id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "agrar.konditionen.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
       }
     },
     {
@@ -13923,6 +16068,141 @@
       }
     },
     {
+      "id": "mask:kontrakte/mengenzeitraeume:abschlag_anlegen",
+      "label": "Zu-/Abschlag anlegen",
+      "description": "Zu-/Abschlag anlegen (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "Zu-/Abschlag anlegen"
+      ],
+      "required_data": [
+        "entity_id"
+      ],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "abschlag_anlegen",
+        "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen/{entity_id}/positionen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakte.zuabschlag.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakte/mengenzeitraeume:export",
+      "label": "CSV-Export",
+      "description": "CSV-Export (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "CSV-Export"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "export",
+        "commandEndpoint": null,
+        "navigationRoute": null,
+        "command": "list.exportCsv",
+        "method": null,
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakte/mengenzeitraeume:gruppe_anlegen",
+      "label": "Zu-/Abschlagsgruppe anlegen",
+      "description": "Zu-/Abschlagsgruppe anlegen (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "Zu-/Abschlagsgruppe anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "gruppe_anlegen",
+        "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakte.zuabschlag.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakte/mengenzeitraeume:zeitraeume_generieren",
+      "label": "Mengenzeiträume generieren",
+      "description": "Mengenzeiträume generieren (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "Mengenzeiträume generieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "zeitraeume_generieren",
+        "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakte.mengenzeitraum.create",
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:kontrakte/mengenzeitraeume:zeitraum_anlegen",
+      "label": "Mengenzeitraum anlegen",
+      "description": "Mengenzeitraum anlegen (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "Mengenzeitraum anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "zeitraum_anlegen",
+        "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "kontrakte.mengenzeitraum.create",
+        "dangerLevel": "safe"
+      }
+    },
+    {
+      "id": "mask:kontrakte/mengenzeitraeume:zeitraum_loeschen",
+      "label": "Mengenzeitraum loeschen",
+      "description": "Mengenzeitraum loeschen (kontrakte/mengenzeitraeume)",
+      "category": "mask-action",
+      "domain": "kontrakte",
+      "mask": "kontrakte/mengenzeitraeume",
+      "intent_phrases": [
+        "Mengenzeitraum loeschen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "kontrakte/mengenzeitraeume",
+        "actionKey": "zeitraum_loeschen",
+        "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",
+        "navigationRoute": null,
+        "command": null,
+        "method": "DELETE",
+        "permission": "kontrakte.mengenzeitraum.delete",
+        "humanApprovalRequired": true,
+        "requiresConfirmation": true,
+        "dangerLevel": "critical"
+      }
+    },
+    {
       "id": "mask:kontrakte/positionen:export",
       "label": "CSV-Export",
       "description": "CSV-Export (kontrakte/positionen)",
@@ -14290,6 +16570,144 @@
       }
     },
     {
+      "id": "mask:lager/materialfluss:edge_anlegen",
+      "label": "Kante anlegen",
+      "description": "Kante anlegen (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Kante anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "edge_anlegen",
+        "commandEndpoint": "/api/v1/lager/wms/agri/material-flow/edges",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:lager/materialfluss:lot_link",
+      "label": "Charge verknuepfen",
+      "description": "Charge verknuepfen (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Charge verknuepfen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "lot_link",
+        "commandEndpoint": "/api/v1/lager/wms/agri/material-flow/lot-link",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:lager/materialfluss:node_anlegen",
+      "label": "Knoten anlegen",
+      "description": "Knoten anlegen (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Knoten anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "node_anlegen",
+        "commandEndpoint": "/api/v1/lager/wms/agri/material-flow/nodes",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:lager/materialfluss:route_pruefen",
+      "label": "Route pruefen",
+      "description": "Route pruefen (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Route pruefen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "route_pruefen",
+        "commandEndpoint": "/api/v1/lager/wms/agri/material-flow/validate-route",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:lager/materialfluss:transfer",
+      "label": "Material transferieren",
+      "description": "Material transferieren (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Material transferieren"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "transfer",
+        "commandEndpoint": "/api/v1/lager/wms/agri/material-flow/transfer",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
+      "id": "mask:lager/materialfluss:zelle_anlegen",
+      "label": "Silo-Zelle anlegen",
+      "description": "Silo-Zelle anlegen (lager/materialfluss)",
+      "category": "mask-action",
+      "domain": "lager",
+      "mask": "lager/materialfluss",
+      "intent_phrases": [
+        "Silo-Zelle anlegen"
+      ],
+      "required_data": [],
+      "source": {
+        "screenId": "lager/materialfluss",
+        "actionKey": "zelle_anlegen",
+        "commandEndpoint": "/api/v1/lager/wms/agri/silo-cells",
+        "navigationRoute": null,
+        "command": null,
+        "method": "POST",
+        "permission": "lager.materialfluss.write",
+        "forbiddenForAgents": true,
+        "dangerLevel": "moderate"
+      }
+    },
+    {
       "id": "mask:lager/partiestamm-liste:export",
       "label": "CSV-Export",
       "description": "CSV-Export (lager/partiestamm-liste)",
@@ -14489,7 +16907,7 @@
         "forbiddenForAgents": true,
         "requiresConfirmation": true,
         "auditReasonRequired": true,
-        "dangerLevel": "destructive"
+        "dangerLevel": "critical"
       }
     },
     {

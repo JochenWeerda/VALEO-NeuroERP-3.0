@@ -751,6 +751,55 @@
       "bundleGroup": "agrar"
     },
     "identityField": "artikelnummer",
+    "creation": {
+      "endpoint": "/api/v1/agrar/saatgut/",
+      "permission": "agrar.saatgut.create",
+      "detailRoute": "/agrar/saatgut/{entity_id}",
+      "defaults": {
+        "waehrung": "EUR"
+      },
+      "fields": [
+        {
+          "key": "artikelnummer",
+          "label": "Artikel-Nr.",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "name",
+          "label": "Bezeichnung",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "sorte",
+          "label": "Sorte",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "art",
+          "label": "Kulturart",
+          "type": "text",
+          "required": true
+        },
+        {
+          "key": "zuechter",
+          "label": "Zuechter",
+          "type": "text"
+        },
+        {
+          "key": "zulassungsnummer",
+          "label": "Zulassungs-Nr.",
+          "type": "text"
+        },
+        {
+          "key": "tkm",
+          "label": "TKG (g)",
+          "type": "number"
+        }
+      ]
+    },
     "noWorkflowReason": "Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
     "noProcessChainReason": "Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
     "summary": [

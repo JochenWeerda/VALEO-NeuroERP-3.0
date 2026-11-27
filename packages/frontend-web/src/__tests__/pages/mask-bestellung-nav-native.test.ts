@@ -29,14 +29,15 @@ describe('MASK-BESTELLUNG-NAV-NATIVE-20261022', () => {
     expect(src).not.toContain('endpoint="/api/v1/einkauf/bestellungen"')
   })
 
-  it('Angebot-Stamm Folgebestellung oeffnet die native Detailroute', () => {
-    const src = read('einkauf/angebot-stamm-legacy.tsx')
-    expect(src).toContain(
-      '`/einkauf/bestellung/${encodeURIComponent(response.data.purchaseOrderId)}`',
-    )
-    expect(src).not.toContain(
-      '`/einkauf/bestellungen/${encodeURIComponent(response.data.purchaseOrderId)}`',
-    )
+  it('Angebot bestellen navigiert zur nativen Bestell-Detailroute (ScreenDefinition)', () => {
+    const sdPath = resolve(repoRoot, 'app/core/screen_definitions.py')
+    const src = readFileSync(sdPath, 'utf8')
+    expect(src).toContain('"key": "bestellen"')
+    expect(src).toContain('/actions/bestellen')
+    expect(src).toContain('"resultNavigationRoute": "/einkauf/bestellung/{purchaseOrderId}"')
+    expect(src).not.toContain('"resultNavigationRoute": "/einkauf/bestellungen/{purchaseOrderId}"')
+    expect(read('einkauf/angebot-stamm.tsx')).toContain("createStammNativeDetailPage(")
+    expect(read('einkauf/angebot-stamm.tsx')).toContain("'einkauf/angebot'")
   })
 
   it('Bestellung-Anlegen legt ueber die Belegmaske an (DocFlow, BELEG-052)', () => {

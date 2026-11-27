@@ -36,10 +36,10 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
   const lifecycleBusy = saveInstance.isPending || resumeInstance.isPending || holdInstance.isPending || completeInstance.isPending || cancelInstance.isPending || failInstance.isPending
   return (<>
       <Dialog open={showNewInstanceDialog} onOpenChange={setShowNewInstanceDialog}>
-          <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
+          <DialogContent className="border-border bg-card text-foreground">
           <DialogHeader>
             <DialogTitle>{startConfig.dialogTitle}</DialogTitle>
-            <DialogDescription className="text-slate-400">{startConfig.dialogDescription}</DialogDescription>
+            <DialogDescription className="text-muted-foreground">{startConfig.dialogDescription}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="grid gap-3 md:grid-cols-3">
@@ -51,19 +51,19 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                       className={cn(
                         'rounded-2xl border px-4 py-3 text-left text-sm transition',
                         newInstanceEntryMode === mode.value
-                          ? 'border-indigo-400/60 bg-indigo-500/15 text-indigo-100'
-                          : 'border-white/10 bg-white/5 text-slate-300 hover:bg-white/10',
+                          ? 'border-primary/60 bg-primary/15 text-primary'
+                          : 'border-border bg-muted text-muted-foreground hover:bg-muted',
                       )}
                     >
                       <div className="font-medium">{mode.value}</div>
-                      <div className="mt-1 text-xs text-slate-400">{mode.description}</div>
+                      <div className="mt-1 text-xs text-muted-foreground">{mode.description}</div>
                     </button>
                   ))}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="instance-partner" className="text-slate-300">{startConfig.partnerLabel}</Label>
+              <Label htmlFor="instance-partner" className="text-muted-foreground">{startConfig.partnerLabel}</Label>
               {processKey === 'order-to-cash' ? (
-                <Suspense fallback={<div className="h-10 animate-pulse rounded bg-slate-800" />}><CustomerCombobox
+                <Suspense fallback={<div className="h-10 animate-pulse rounded bg-muted" />}><CustomerCombobox
                   id="instance-partner"
                   value={newInstanceCustomer}
                   onChange={(c) => {
@@ -90,35 +90,35 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                     value={newInstancePartnerName}
                     onChange={(e) => setNewInstancePartnerName(e.target.value)}
                     placeholder="z.B. Agrarhandel Nord eG"
-                    className="border-white/10 bg-white/5 pl-9 text-slate-100 placeholder:text-slate-500"
+                    className="border-border bg-muted pl-9 text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="instance-subject" className="text-slate-300">{startConfig.subjectLabel}</Label>
+              <Label htmlFor="instance-subject" className="text-muted-foreground">{startConfig.subjectLabel}</Label>
               <Input
                 id="instance-subject"
                 value={newInstanceSubject}
                 onChange={(e) => setNewInstanceSubject(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateInstance() }}
                 placeholder="z.B. Themenbeschreibung oder operative Referenz"
-                className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/3 px-4 py-3 text-sm text-slate-300">
-              <div className="font-medium text-slate-100">Praxislogik</div>
+            <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+              <div className="font-medium text-foreground">Praxislogik</div>
               <div className="mt-1">{startConfig.explanation}</div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="instance-label" className="text-slate-300">{startConfig.labelLabel}</Label>
+              <Label htmlFor="instance-label" className="text-muted-foreground">{startConfig.labelLabel}</Label>
               <Input
                 id="instance-label"
                 value={newInstanceLabel}
                 onChange={(e) => setNewInstanceLabel(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter') void handleCreateInstance() }}
                 placeholder={startConfig.labelPlaceholder}
-                className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
               />
             </div>
           </div>
@@ -126,14 +126,14 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
             <Button
               variant="outline"
               onClick={() => { setShowNewInstanceDialog(false); setNewInstanceLabel(''); setNewInstancePartnerName(''); setNewInstanceSubject(''); setNewInstanceEntryMode(startConfig.entryModes[0]?.value ?? 'Direktauftrag'); setNewInstanceCustomer(null) }}
-              className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+              className="border-border bg-muted text-foreground hover:bg-muted"
             >
               Abbrechen
             </Button>
             <Button
               onClick={() => void handleCreateInstance()}
               disabled={(!newInstanceLabel.trim() && !newInstancePartnerName.trim() && !newInstanceSubject.trim()) || createInstance.isPending}
-              className="bg-indigo-500 text-white hover:bg-indigo-400"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {createInstance.isPending ? 'Wird erstellt...' : startConfig.submitLabel}
             </Button>
@@ -142,7 +142,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
       </Dialog>
 
       <Dialog open={!!lifecycleDialog} onOpenChange={(open) => { if (!open) closeLifecycleDialog() }}>
-        <DialogContent className="border-white/10 bg-slate-900 text-slate-100">
+        <DialogContent className="border-border bg-card text-foreground">
           <DialogHeader>
             <DialogTitle>
               {lifecycleDialog?.mode === 'hold' && 'Vorgang pausieren'}
@@ -150,7 +150,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
               {lifecycleDialog?.mode === 'cancel' && 'Vorgang abbrechen'}
               {lifecycleDialog?.mode === 'fail' && 'Vorgang als gescheitert markieren'}
             </DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogDescription className="text-muted-foreground">
               Der Dialog ist bewusst prozessneutral. Flow-spezifische Grundkataloge folgen in einem spaeteren Slice.
             </DialogDescription>
           </DialogHeader>
@@ -158,22 +158,22 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
             <div className="space-y-4 py-2">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Business-Status</Label>
+                  <Label className="text-muted-foreground">Business-Status</Label>
                   <Input
                     value={lifecycleDialog.businessStatus}
                     onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, businessStatus: e.target.value })}
                     placeholder="z.B. lieferung_blockiert"
-                    className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                    className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
                 {lifecycleDialog.mode === 'hold' ? (
                   <div className="space-y-2">
-                    <Label className="text-slate-300">Blockiert bis</Label>
+                    <Label className="text-muted-foreground">Blockiert bis</Label>
                     <Input
                       type="datetime-local"
                       value={lifecycleDialog.blockedUntil}
                       onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, blockedUntil: e.target.value })}
-                      className="border-white/10 bg-white/5 text-slate-100"
+                      className="border-border bg-muted text-foreground"
                     />
                   </div>
                 ) : null}
@@ -182,7 +182,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
               {lifecycleDialog.mode !== 'complete' ? (
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label className="text-slate-300">
+                    <Label className="text-muted-foreground">
                       Kategorie <span className="text-status-error">*</span>
                     </Label>
                     <Select
@@ -192,8 +192,8 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                       <SelectTrigger
                         aria-required="true"
                         className={cn(
-                          'border-white/10 bg-white/5 text-slate-100',
-                          !lifecycleDialog.reasonCategory && 'border-rose-400/40',
+                          'border-border bg-muted text-foreground',
+                          !lifecycleDialog.reasonCategory && 'border-status-error/40',
                         )}
                       >
                         <SelectValue placeholder="Kategorie waehlen …" />
@@ -209,7 +209,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-slate-300">
+                    <Label className="text-muted-foreground">
                       Grundcode <span className="text-status-error">*</span>
                     </Label>
                     <Input
@@ -218,8 +218,8 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                       onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonCode: e.target.value })}
                       placeholder="z.B. customer_order_cancelled"
                       className={cn(
-                        'border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500',
-                        !lifecycleDialog.reasonCode.trim() && 'border-rose-400/40',
+                        'border-border bg-muted text-foreground placeholder:text-muted-foreground',
+                        !lifecycleDialog.reasonCode.trim() && 'border-status-error/40',
                       )}
                     />
                     {!lifecycleDialog.reasonCode.trim() && (
@@ -229,23 +229,23 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                 </div>
               ) : (
                 <div className="space-y-2">
-                  <Label className="text-slate-300">Abschlusscode</Label>
+                  <Label className="text-muted-foreground">Abschlusscode</Label>
                   <Input
                     value={lifecycleDialog.reasonCode}
                     onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonCode: e.target.value })}
                     placeholder="z.B. workflow_completed"
-                    className="border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                    className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
                   />
                 </div>
               )}
 
               <div className="space-y-2">
-                <Label className="text-slate-300">Bemerkung</Label>
+                <Label className="text-muted-foreground">Bemerkung</Label>
                 <Textarea
                   value={lifecycleDialog.reasonNote}
                   onChange={(e) => setLifecycleDialog({ ...lifecycleDialog, reasonNote: e.target.value })}
                   placeholder="Freitext fuer Ursache, Kontext oder Lessons Learned"
-                  className="min-h-[110px] border-white/10 bg-white/5 text-slate-100 placeholder:text-slate-500"
+                  className="min-h-[110px] border-border bg-muted text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             </div>
@@ -254,7 +254,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
             <Button
               variant="outline"
               onClick={closeLifecycleDialog}
-              className="border-white/10 bg-white/5 text-slate-200 hover:bg-white/10"
+              className="border-border bg-muted text-foreground hover:bg-muted"
             >
               Abbrechen
             </Button>
@@ -266,7 +266,7 @@ export function FlowSpineWorkspaceDialogs({ state }: { state: FlowSpineWorkspace
                 (lifecycleDialog.mode !== 'complete' &&
                   (!lifecycleDialog.reasonCategory || !lifecycleDialog.reasonCode.trim()))
               }
-              className="bg-indigo-500 text-white hover:bg-indigo-400"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
             >
               {lifecycleBusy ? 'Wird gespeichert...' : 'Bestaetigen'}
             </Button>

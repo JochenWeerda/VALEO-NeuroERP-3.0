@@ -139,6 +139,47 @@ async def get_all_gates(tenant_id: str = Depends(get_tenant_id)) -> dict[str, An
     }
 
 
+@router.get("/overview", summary="Externe Gates KPI-Ueberblick")
+async def get_gates_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
+    """Flache KPIs fuer Studio-Cockpit-Summary (Human/CI/MCP)."""
+    payload = await get_all_gates(tenant_id)
+    summary = payload.get("status_zusammenfassung") or {}
+    problem = int(summary.get("faellig") or 0) + int(summary.get("fehler") or 0) + int(summary.get("warning") or 0)
+    return {
+        "gesamt": payload.get("gesamt", 0),
+        "ok_count": int(summary.get("ok") or 0),
+        "warning_count": int(summary.get("warning") or 0),
+        "faellig_count": int(summary.get("faellig") or 0),
+        "fehler_count": int(summary.get("fehler") or 0),
+        "problem_count": problem,
+        "abgerufen_am": payload.get("abgerufen_am"),
+        "tenant_id": tenant_id,
+    }
+
+
+@router.get("/items", summary="Externe Gates flach auflisten")
+async def list_gate_items(tenant_id: str = Depends(get_tenant_id)) -> list[dict[str, Any]]:
+    """Flache Gate-Liste fuer Studio-Cockpit-Tabelle."""
+    payload = await get_all_gates(tenant_id)
+    rows: list[dict[str, Any]] = []
+    for gate in payload.get("gates") or []:
+        if not isinstance(gate, dict):
+            continue
+        rows.append(
+            {
+                "id": gate.get("system_id"),
+                "system_id": gate.get("system_id"),
+                "label": gate.get("label"),
+                "kategorie": gate.get("kategorie"),
+                "status": gate.get("status"),
+                "hinweis": gate.get("hinweis") or "",
+                "simulated": bool(gate.get("simulated")),
+                "abgerufen_am": gate.get("abgerufen_am"),
+            }
+        )
+    return rows
+
+
 @router.get(
     "/{system_id}",
     summary="Gate-Status eines externen Systems abrufen",

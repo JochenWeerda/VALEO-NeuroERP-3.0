@@ -14,6 +14,10 @@ vi.mock('@/components/mask-builder/UniversalNativeDetailPage', () => ({
     screenId: string; entityId?: string; requestedSectionKey?: string
   }) => <output data-testid="party" data-screen-id={screenId} data-entity-id={entityId} data-section={requestedSectionKey} />,
 }))
+vi.mock('@/components/mask-builder/UniversalNativeCreatePage', () => ({
+  UniversalNativeCreatePage: ({ screenId, testId }: { screenId: string; testId?: string }) =>
+    <output data-testid={testId ?? 'native-create'} data-screen-id={screenId} />,
+}))
 
 describe('canonical native party entrypoints', () => {
   beforeEach(() => {
@@ -39,4 +43,9 @@ describe('canonical native party entrypoints', () => {
       expect(screen.getByTestId('party')).toHaveAttribute('data-section', 'masterdata')
     },
   )
+
+  it('LeadDetail ohne ID oeffnet die native Create-Maske', () => {
+    render(<LeadDetail />)
+    expect(screen.getByTestId('crm-lead-create')).toHaveAttribute('data-screen-id', 'crm/lead')
+  })
 })

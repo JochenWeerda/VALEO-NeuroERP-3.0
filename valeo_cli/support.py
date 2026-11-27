@@ -27,7 +27,9 @@ _PLACEHOLDER = re.compile(r"\{[^}]+\}")
 #: Platzhalter, die in Maskenaktionen die Zeile selbst meinen - dieselbe Kennung, die ``--id`` angibt (23.11.2026:
 #: Mahnung versenden, Kontoauszug abgleichen, Vorfall eskalieren/erledigen/wiederholen waren nur deshalb ohne CLI).
 #: Bewusst eine Liste: ``{approval_id}`` etwa ist nicht die Zeile, sondern gehoert dem DocFlow-Freigabe-Adapter.
-ZEILEN_KENNUNGEN = {"{id}", "{incident_id}", "{statement_id}"}
+ZEILEN_KENNUNGEN = {
+    "{id}", "{incident_id}", "{statement_id}", "{fahrzeug_id}", "{kontrakt_nr}",
+}
 
 
 def _unbekannte_platzhalter(endpoint: str) -> set[str]:

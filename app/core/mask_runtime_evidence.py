@@ -8,7 +8,8 @@ _VISIBLE_RUNTIME = re.compile(
     r'<(?:UniversalMaskRenderer|UniversalNative(?:Detail|Create|Cockpit)Page|NativeListPage|NativeAuditListPage|'
     r'CaptureScreenHost|MadeByStudio(?:List|Detail|Cockpit)RuntimeWire|'
     r'DocumentControlScopePage|SanktionsScopePage|PartyNativePage|UniversalMaskRolloutPilotPage)\b'
-    r'|\b(?:useUniversalMaskRuntime|createStammNative(?:Detail|Create|List)Page)\s*\('
+    # belegSeite → UniversalNativeDetailPage (BELEG-052 DocFlow); createStamm* → Native Create/Detail.
+    r'|\b(?:useUniversalMaskRuntime|createStammNative(?:Detail|Create|List)Page|belegSeite)\s*\('
 )
 
 
@@ -17,6 +18,27 @@ def has_visible_runtime(source: str) -> bool:
     if re.search(r'\bcreateLegacyMaskPage\s*\(', code):
         return False
     return bool(_VISIBLE_RUNTIME.search(_HIDDEN.sub('', code)))
+
+
+def is_navigate_only_redirect(source: str, *, filename: str = '') -> bool:
+    """Reine Umleitungsseiten sind keine Altmasken (technische Redirects).
+
+    Dececkt ``<Navigate … replace />`` und programmatische ``navigate(…, { replace: true })``
+    ohne Runtime-Host und ohne Legacy-ObjectPage/ListReport/Wizard.
+    """
+    if filename in ('NotFound.tsx', 'Login.tsx', 'Callback.tsx'):
+        return False
+    code = _HIDDEN.sub('', _COMMENTS.sub('', source))
+    has_jsx_navigate = bool(re.search(r'\bNavigate\b', code))
+    has_prog_navigate = bool(
+        re.search(r'\bnavigate\s*\([^)]*\{\s*replace\s*:\s*true\s*\}', code)
+    )
+    if not has_jsx_navigate and not has_prog_navigate:
+        return False
+    # Kein Runtime-Host und keine Legacy-ObjectPage — nur Umleitung.
+    if has_visible_runtime(code) or re.search(r'\bObjectPage\b|\bListReport\b|\bWizard\b', code):
+        return False
+    return not re.search(r'\bcreateLegacyMaskPage\s*\(', code)
 
 
 def bound_domain_runtime_ids(source: str, *, root: Path | None = None) -> frozenset[str]:

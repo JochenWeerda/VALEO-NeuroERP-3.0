@@ -17,7 +17,10 @@ vi.mock('@/app/routing/typed-router', () => ({ useNavigate: () => transport.navi
 beforeEach(() => { vi.restoreAllMocks(); vi.clearAllMocks(); transport.roles = [] })
 
 export function mountList(page: ReactNode, screenId: string, row: Record<string, unknown>, schema?: ScreenDefinition) {
-  if (schema) vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({ width: 1440, height: 600, top: 0, left: 0, right: 1440, bottom: 600, x: 0, y: 0, toJSON: () => ({}) })
+  // VirtualDataTable braucht eine Viewport-Groesse, sonst bleibt die Zelle unsichtbar (toBeVisible).
+  vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+    width: 1440, height: 600, top: 0, left: 0, right: 1440, bottom: 600, x: 0, y: 0, toJSON: () => ({}),
+  })
   const definition = schema ?? (definitions as unknown as Record<string, ScreenDefinition>)[screenId]
   transport.get.mockImplementation(async (url: string) => {
     if (url === `/api/v1/masks/${screenId.replaceAll('/', '__')}/screen-definition`) return { data: definition }

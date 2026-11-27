@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
 from app.core.nuts2_utils import derive_nuts2_from_postal_code, validate_nuts2_code
+from app.core.business_time import business_today
 from app.core.tenant import get_tenant_id
 from app.auth.finance_roles import beleg_read, beleg_write
 from app.auth.deps import get_current_user
@@ -344,6 +345,118 @@ async def create_harvest_acceptance(
         raise HTTPException(status_code=422, detail=exc.detail)
 
 
+class RohwareAcceptanceCreate(BaseModel):
+    """Wizard-/MCP-Payload der Rohware-Annahme (Paritaet zur Touch-Maske)."""
+    acceptance_mode: Optional[AcceptanceMode] = "STORAGE_ONLY"
+    artikel: str = Field(..., min_length=1)
+    brutto_kg: float = Field(..., ge=0)
+    tara_kg: float = Field(..., ge=0)
+    netto_kg: float = Field(..., ge=0)
+    feuchte_pct: Optional[float] = None
+    besatz_pct: Optional[float] = None
+    fallzahl: Optional[float] = None
+    lieferant: str = Field(..., min_length=1)
+    kennzeichen: str = Field(..., min_length=1)
+    lieferschein_nr: Optional[str] = None
+    lager_ziel: str = Field(..., min_length=1)
+    datum: Optional[str] = None
+    is_rohware: bool = True
+    customer_id: Optional[str] = None
+
+
+@router.post(
+    "/rohware",
+    dependencies=[Depends(beleg_write)],
+    response_model=HarvestAcceptanceOut,
+    status_code=201,
+    summary="Rohware-Annahme (Wizard-Compat)",
+)
+async def create_rohware_acceptance(
+    payload: RohwareAcceptanceCreate,
+    request: Request,
+    tenant_id: str = Depends(get_tenant_id),
+    db: Session = Depends(get_db),
+):
+    """Mappt Wizard-Felder auf HarvestAcceptanceCreate (Human/CI/MCP gleicher Kanal)."""
+    from app.services.business_partner_service import BusinessPartnerService
+
+    user_id = _get_user_id_from_request(request)
+    customer_id = (payload.customer_id or "").strip() or None
+    if not customer_id:
+        customer_id = BusinessPartnerService(db, tenant_id).find_customer_id_by_name(payload.lieferant)
+    if not customer_id:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Kein Debitor zu Lieferant "
+                f"'{payload.lieferant}' gefunden — customer_id setzen oder Kundenstamm pflegen."
+            ),
+        )
+
+    article_id: Optional[str] = None
+    article = (
+        db.query(Article)
+        .filter(Article.tenant_id == tenant_id, Article.name == payload.artikel)
+        .first()
+    )
+    if article is not None:
+        article_id = str(article.id)
+
+    delivery_date = business_today()
+    delivery_time: Optional[str] = None
+    if payload.datum:
+        raw = payload.datum.replace("Z", "+00:00")
+        try:
+            dt = datetime.fromisoformat(raw)
+            delivery_date = dt.date()
+            delivery_time = dt.strftime("%H:%M")
+        except ValueError:
+            try:
+                delivery_date = date.fromisoformat(payload.datum[:10])
+            except ValueError:
+                pass
+
+    remarks_parts = [
+        f"Rohware-Annahme STORAGE_ONLY",
+        f"Lieferant={payload.lieferant}",
+        f"Artikel={payload.artikel}",
+        f"Brutto={payload.brutto_kg}kg",
+        f"Tara={payload.tara_kg}kg",
+        f"Netto={payload.netto_kg}kg",
+        f"Lagerziel={payload.lager_ziel}",
+    ]
+    if payload.lieferschein_nr:
+        remarks_parts.append(f"Lieferschein={payload.lieferschein_nr}")
+    if payload.feuchte_pct is not None:
+        remarks_parts.append(f"Feuchte={payload.feuchte_pct}%")
+    if payload.besatz_pct is not None:
+        remarks_parts.append(f"Besatz={payload.besatz_pct}%")
+    if payload.fallzahl is not None:
+        remarks_parts.append(f"Fallzahl={payload.fallzahl}")
+
+    mapped = HarvestAcceptanceCreate(
+        delivery_date=delivery_date,
+        delivery_time=delivery_time,
+        customer_id=customer_id,
+        vehicle_plate=payload.kennzeichen[:20],
+        article_id=article_id,
+        acceptance_mode=payload.acceptance_mode or "STORAGE_ONLY",
+        ownership_type="OWN_STOCK",
+        vat_event="NO_INVOICE",
+        pricing_mode="spot_daily",
+        remarks="; ".join(remarks_parts),
+        print_remarks_on_acceptance_note=True,
+    )
+    try:
+        return _svc(db, tenant_id).create_acceptance(mapped, user_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=exc.detail)
+    except ConflictError as exc:
+        raise HTTPException(status_code=409, detail=exc.detail)
+    except ValidationFailedError as exc:
+        raise HTTPException(status_code=422, detail=exc.detail)
+
+
 @router.get("/", response_model=list[HarvestAcceptanceOut], summary="Harvest acceptances auflisten")
 async def list_harvest_acceptances(
     customer_id: Optional[str] = Query(None, description="Filter nach Kunde"),
@@ -554,10 +667,25 @@ class QualityBatchRowIn(BaseModel):
 
 
 class QualityBatchIn(BaseModel):
-    """Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch."""
+    """Batch-Nachtrag: mehrere Annahmescheine mit Laborwerten aus dem Laborbuch.
+
+    ``rows`` darf eine JSON-Zeichenkette sein (NativeListPage-Textarea / MCP).
+    """
     rows: list[QualityBatchRowIn] = Field(..., min_length=1)
     labor_code: Optional[str] = Field(None, description="Labor/Gerät, gilt für alle Zeilen")
     analysendatum: Optional[str] = Field(None, description="ISO-Datum der Analyse, gilt für alle Zeilen")
+
+    @field_validator("rows", mode="before")
+    @classmethod
+    def _coerce_rows_json(cls, value: object) -> object:
+        if isinstance(value, str):
+            import json
+            try:
+                parsed = json.loads(value)
+            except json.JSONDecodeError as exc:
+                raise ValueError("rows muss gültiges JSON sein") from exc
+            return parsed
+        return value
 
 
 class QualityBatchRowResult(BaseModel):

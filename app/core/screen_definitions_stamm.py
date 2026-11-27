@@ -359,6 +359,21 @@ def build_crm_kontakt_stamm() -> dict[str, Any]:
         ],
         entity_projection={key: f"data.{key}" for key in ("id", "name", "email", "phone", "position")},
         edit_permission="crm.contact.update",
+        creation={
+            # ContactCreate — Antwort ist {data:{id,…}}; NativeCreate liest nested data.id.
+            "endpoint": "/api/v1/crm/contacts/",
+            "permission": "crm.contact.create",
+            "detailRoute": "/crm/kontakt/{entity_id}",
+            "fields": [
+                {"key": "customer_id", "label": "Kunden-ID", "type": "text", "required": True},
+                {"key": "first_name", "label": "Vorname", "type": "text", "required": True},
+                {"key": "last_name", "label": "Nachname", "type": "text", "required": True},
+                {"key": "email", "label": "E-Mail", "type": "email", "required": True},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "position", "label": "Funktion", "type": "text"},
+                {"key": "department", "label": "Abteilung", "type": "text"},
+            ],
+        },
         test_id="crm-kontakt-stamm",
         purpose="Kontaktstammdaten.",
         prompts=['Welche E-Mail hat Kontakt {entity_id}?'],
@@ -381,6 +396,19 @@ def build_crm_betriebsprofil_stamm() -> dict[str, Any]:
         _feld("status", "Status"),
         ],
         edit_permission="crm.betriebsprofil.update",
+        creation={
+            "endpoint": "/api/v1/crm/betriebsprofile",
+            "permission": "crm.betriebsprofil.create",
+            "detailRoute": "/crm/betriebsprofile/{entity_id}",
+            "fields": [
+                {"key": "name", "label": "Betrieb", "type": "text", "required": True},
+                {"key": "betriebsform", "label": "Betriebsform", "type": "text"},
+                {"key": "flaeche_ha", "label": "Flaeche (ha)", "type": "number"},
+                {"key": "tierbestand", "label": "Tierbestand", "type": "number"},
+                {"key": "contact_id", "label": "Kontakt-ID", "type": "text"},
+                {"key": "notes", "label": "Notizen", "type": "textarea"},
+            ],
+        },
         test_id="crm-betriebsprofil-stamm",
         purpose="Betriebsprofil fuer Agrarkunden.",
         prompts=['Welche VVVO hat Betrieb {entity_id}?'],
@@ -629,6 +657,8 @@ def build_finance_bank_account_stamm() -> dict[str, Any]:
 
 
 def build_qualitaet_labor_stamm() -> dict[str, Any]:
+    # Listen-SD gleicher ID (domain_batch15) gewinnt fuer get_screen_definition —
+    # Create liegt an qualitaet/labor-detail.
     return _stamm(
         screen_id="qualitaet/labor-auftrag",
         domain="qualitaet",
@@ -772,6 +802,23 @@ def build_crm_vertreter_stamm() -> dict[str, Any]:
         _feld("vertretergruppe_nr", "Gruppe"),
         ],
         edit_permission="crm.vertreter.update",
+        creation={
+            "endpoint": "/api/v1/crm/vertreter",
+            "permission": "crm.vertreter.create",
+            "detailRoute": "/crm/vertreterstamm/{entity_id}",
+            "responseIdKey": "vertreter_nr",
+            "fields": [
+                {"key": "vertreter_nr", "label": "Vertreter-Nr.", "type": "text", "required": True},
+                {"key": "name", "label": "Name", "type": "text", "required": True},
+                {"key": "vorname", "label": "Vorname", "type": "text"},
+                {"key": "kuerzel", "label": "Kuerzel", "type": "text"},
+                {"key": "telefon", "label": "Telefon", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "vertretergruppe_nr", "label": "Vertretergruppe", "type": "text"},
+                {"key": "provisionsgruppe_nr", "label": "Provisionsgruppe", "type": "text"},
+                {"key": "gebiet", "label": "Gebiet", "type": "text"},
+            ],
+        },
         test_id="crm-vertreter-stamm",
         purpose="Vertreterstammdaten.",
         prompts=['Welche Gruppe hat Vertreter {entity_id}?'],

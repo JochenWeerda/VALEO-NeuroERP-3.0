@@ -2,15 +2,61 @@
   "schemaVersion": 1,
   "source": "require_roles der Kommandowege (scripts/generate_action_permission_projection.py)",
   "screens": {
-    "abrechnung/eb-lieferschein-kontrolle": {
-      "document_control.write": [
+    "admin-suite/connectoren": {
+      "admin.admin_suite.connectoren": [
         [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "admin-suite/ki-anbieter": {
+      "admin.admin_suite.ki": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin-suite/migration": {
+      "admin.admin_suite.migration": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin-suite/pos-fiscalization": {
+      "admin.admin_suite.pos": [
+        [
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "admin-suite/security": {
+      "admin.admin_suite.security": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin-suite/setup": {
+      "admin.admin_suite.setup": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/GapPipelineConsole": {
+      "studio.admin-ops.gap": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
           "admin"
         ]
       ]
@@ -22,9 +68,29 @@
         ]
       ]
     },
-    "admin/identity-budgets": {
-      "identity:quota:allocate": [
+    "admin/control-center/superglue": {
+      "studio.admin-control-center.superglue": [
         [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
           "admin"
         ]
       ]
@@ -65,6 +131,13 @@
         ]
       ]
     },
+    "admin/postfaecher-anmeldung-rueckruf": {
+      "studio.admin-ops.postfaecher": [
+        [
+          "admin"
+        ]
+      ]
+    },
     "admin/report-berechtigungen": {
       "admin.report_permission.update": [
         [
@@ -74,6 +147,20 @@
     },
     "admin/rollen-verwaltung": {
       "admin.role.update": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/setup/dms-integration": {
+      "studio.admin-ops.dms": [
+        [
+          "admin"
+        ]
+      ]
+    },
+    "admin/vordruck-editor": {
+      "studio.admin-ops.vordruck": [
         [
           "admin"
         ]
@@ -109,8 +196,99 @@
         ]
       ]
     },
+    "agrar/annahmen-qualitaet-nachtrag": {
+      "agrar.qualitaet_nachtrag.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/duenger": {
+      "agrar.duenger.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/duenger-liste": {
       "agrar.duenger.deactivate": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/ernte-annahme-erfassung": {
+      "agrar.ernte_annahme.write": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "CRM_LESEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "EINKAUF_LESEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FINANCE_LESEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "SALES_LESEN",
+          "admin"
+        ],
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/erntefenster-konfig": {
+      "agrar.erntefenster.create": [
+        [
+          "admin"
+        ]
+      ],
+      "agrar.erntefenster.backfill": [
         [
           "AGRAR_ADMIN",
           "AGRAR_BEARBEITEN",
@@ -335,8 +513,17 @@
         ]
       ]
     },
-    "agrar/ration": {
-      "futtermittel.rations.update": [
+    "agrar/rohwarengruppen": {
+      "agrar.rohwarengruppe.create": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/saatgut": {
+      "agrar.saatgut.create": [
         [
           "AGRAR_ADMIN",
           "AGRAR_BEARBEITEN",
@@ -365,11 +552,140 @@
         ]
       ]
     },
+    "agrar/sammelabrechnung": {
+      "agrar.sammelabrechnung.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "agrar.sammelabrechnung.berechnen": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "agrar.sammelabrechnung.buchen": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "agrar.sammelabrechnung.delete": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agrar/vermehrungsvertraege": {
+      "agrar.vermehrungsvertrag.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "agrar/vertraege/formular": {
       "agrar.vertraege.formular.update": [
         [
           "KONTRAKT_ADMIN",
           "KONTRAKT_BEARBEITEN"
+        ]
+      ]
+    },
+    "agrar/zinsabrechnung": {
+      "finance.zinsabrechnung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zinsabrechnung.buchen": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zinsabrechnung.drucken": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.zinsabrechnung.stornieren": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "agribusiness/field-service-tasks/neu": {
+      "agribusiness.field_service.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "annahme/abrechnung": {
+      "agrar.settlement.write": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
         ]
       ]
     },
@@ -593,32 +909,6 @@
         ]
       ]
     },
-    "auswertungen/auftrags-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/beleg-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
     "auswertungen/bonus-berechnung": {
       "reporting.bonus.write": [
         [
@@ -640,53 +930,6 @@
           "LAGER_BEARBEITEN",
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/lieferschein-kontrolle": {
-      "document_control.write": [
-        [
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FINANCE_ADMIN",
-          "FINANCE_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/sanktionspruefung-kunden": {
-      "compliance.sanctions.check": [
-        [
-          "AGRAR_ADMIN",
-          "AGRAR_BEARBEITEN",
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FUTTERMITTEL_ADMIN",
-          "FUTTERMITTEL_BEARBEITEN",
-          "LAGER_ADMIN",
-          "LAGER_BEARBEITEN",
-          "SALES_ADMIN",
-          "SALES_BEARBEITEN",
-          "admin"
-        ]
-      ]
-    },
-    "auswertungen/sanktionspruefung-personal": {
-      "compliance.sanctions.check": [
-        [
-          "AGRAR_ADMIN",
-          "AGRAR_BEARBEITEN",
-          "EINKAUF_ADMIN",
-          "EINKAUF_BEARBEITEN",
-          "FUTTERMITTEL_ADMIN",
-          "FUTTERMITTEL_BEARBEITEN",
-          "LAGER_ADMIN",
-          "LAGER_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"
@@ -740,6 +983,17 @@
     },
     "crm/aktivitaet": {
       "crm.activity.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/betriebsprofil": {
+      "crm.betriebsprofil.create": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",
@@ -860,6 +1114,17 @@
         ]
       ]
     },
+    "crm/kontakt": {
+      "crm.contact.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "crm/kunden-cockpit": {
       "crm.customer.update": [
         [
@@ -950,6 +1215,15 @@
           "SALES_BEARBEITEN",
           "admin"
         ]
+      ],
+      "crm.opportunity.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "crm/partner-klaerfaelle-liste": {
@@ -967,6 +1241,17 @@
     },
     "crm/segment": {
       "crm.segment.update": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "crm/vertreter": {
+      "crm.vertreter.create": [
         [
           "CRM_ADMIN",
           "CRM_BEARBEITEN",
@@ -1037,6 +1322,13 @@
           "EINKAUF_BEARBEITEN",
           "admin"
         ]
+      ],
+      "einkauf.anfrage.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "einkauf/anfragen": {
@@ -1063,7 +1355,21 @@
       ]
     },
     "einkauf/angebot": {
+      "einkauf.angebot.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
       "einkauf.angebot.order": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.angebot.create": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1102,7 +1408,21 @@
       ]
     },
     "einkauf/anlieferavis": {
+      "einkauf.anlieferavis.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
       "lager.wareneingang.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "einkauf.anlieferavis.create": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1258,6 +1578,48 @@
           "FINANCE_ADMIN",
           "admin"
         ]
+      ],
+      "fibu.abschluss_checklist.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fibu/geschaeftsjahre": {
+      "fibu.geschaeftsjahr.create": [
+        [
+          "FINANCE_ADMIN",
+          "admin"
+        ]
+      ]
+    },
+    "fibu/op-skonto-auszifferung": {
+      "fibu.op_auszifferung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fibu/stammdaten": {
+      "fibu.zahlungsformular.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fibu/zahlungsmeldungen": {
+      "fibu.zahlungsmeldung.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "finance/ar-open-item": {
@@ -1271,6 +1633,13 @@
     },
     "finance/bankkonto": {
       "finance.bankkonto.update": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "finance.bankkonto.create": [
         [
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
@@ -1344,6 +1713,13 @@
           "FINANCE_BEARBEITEN",
           "admin"
         ]
+      ],
+      "finance.kreditor.create": [
+        [
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "finance/payment-run": {
@@ -1412,6 +1788,19 @@
     },
     "fuhrpark/fahrzeug-stamm": {
       "logistics:write": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "fuhrpark/fahrzeug-vertiefung": {
+      "logistik.fuhrpark.write": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1547,6 +1936,15 @@
         ]
       ]
     },
+    "konditionen/konditionssystem": {
+      "agrar.konditionen.write": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "kontrakt-liste/mahnung": {
       "kontrakt.update": [
         [
@@ -1591,8 +1989,61 @@
         ]
       ]
     },
-    "lager/inventur-nebenlaeufe": {
-      "inventory.aux.write": [
+    "kontrakte/mengenzeitraeume": {
+      "kontrakte.mengenzeitraum.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "kontrakte.zuabschlag.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ],
+      "kontrakte.mengenzeitraum.delete": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/massebilanz": {
+      "lager.massebilanz.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/materialfluss": {
+      "lager.materialfluss.write": [
+        [
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "lager/permanente-inventur": {
+      "lager.piv.create": [
         [
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
@@ -1693,6 +2144,15 @@
         ]
       ]
     },
+    "personal/mitarbeiter/neu": {
+      "personal.mitarbeiter.create": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "personal/onboarding": {
       "hr:write": [
         [
@@ -1718,6 +2178,15 @@
         ]
       ],
       "personal.qualifikation.delete": [
+        [
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "personal/schulung-neu": {
+      "personal.schulung.create": [
         [
           "PERSONAL_ADMIN",
           "PERSONAL_BEARBEITEN",
@@ -1768,6 +2237,35 @@
         ]
       ]
     },
+    "preise/individualpreise": {
+      "preise.individualpreis.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "preise/rabattgruppen": {
+      "preise.rabattgruppe.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "preise/zu-abschlaggruppen": {
+      "preise.zuabschlaggruppe.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "produktion/produktionsleitstand": {
       "production.control.write": [
         [
@@ -1777,6 +2275,34 @@
           "FUTTERMITTEL_BEARBEITEN",
           "LAGER_ADMIN",
           "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "produktion/rezepturgruppen": {
+      "produktion.rezepturgruppe.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "qualitaet/labor-detail": {
+      "qualitaet.labor.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
           "admin"
         ]
       ]
@@ -1811,6 +2337,21 @@
           "SALES_BEARBEITEN",
           "admin"
         ]
+      ],
+      "qualitaet.reklamation.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
       ]
     },
     "schnittstelle/mde-inbox": {
@@ -1822,8 +2363,140 @@
         ]
       ]
     },
+    "service/anfrage-detail": {
+      "service.anfrage.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "service/anfrage/neu": {
+      "service.anfrage.create": [
+        [
+          "AGRAR_ADMIN",
+          "AGRAR_BEARBEITEN",
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "FINANCE_ADMIN",
+          "FINANCE_BEARBEITEN",
+          "FUTTERMITTEL_ADMIN",
+          "FUTTERMITTEL_BEARBEITEN",
+          "HARVEST_ADMIN",
+          "HARVEST_BEARBEITEN",
+          "KONTRAKT_ADMIN",
+          "KONTRAKT_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "PERSONAL_ADMIN",
+          "PERSONAL_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/artikel-stoffstrom": {
+      "stammdaten.stoffstrom.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/artikelbestandteile": {
+      "stammdaten.bestandteil.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/artikelverpackung": {
+      "stammdaten.verpackung.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/betriebsstaetten": {
+      "stammdaten.betriebsstaette.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "stammdaten/hausbank": {
       "finance.hausbank.update": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/hausbanken": {
+      "stammdaten.hausbank.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "stammdaten/individuelle-artikelnummern": {
+      "stammdaten.indiv_artikel.create": [
         [
           "EINKAUF_ADMIN",
           "EINKAUF_BEARBEITEN",
@@ -1848,6 +2521,28 @@
         ]
       ]
     },
+    "stammdaten/mengeneinheiten": {
+      "stammdaten.mengeneinheit.create": [
+        [
+          "EINKAUF_ADMIN",
+          "EINKAUF_BEARBEITEN",
+          "LAGER_ADMIN",
+          "LAGER_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "verkauf/dauerauftraege": {
+      "verkauf.dauerauftrag.create": [
+        [
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
     "verkauf/gutschrift-buchungsvorschlaege": {
       "verkauf.gutschrift.freigeben": [
         [
@@ -1855,6 +2550,28 @@
           "EINKAUF_BEARBEITEN",
           "FINANCE_ADMIN",
           "FINANCE_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "verkauf/kunde-neu": {
+      "verkauf.kunde.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
+          "SALES_ADMIN",
+          "SALES_BEARBEITEN",
+          "admin"
+        ]
+      ]
+    },
+    "verkauf/kunden-stamm-enhanced": {
+      "verkauf.kunde.create": [
+        [
+          "CRM_ADMIN",
+          "CRM_BEARBEITEN",
           "SALES_ADMIN",
           "SALES_BEARBEITEN",
           "admin"

@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./connectors-legacy'))
+/** Native Liste: ScreenDefinition admin-suite/connectors */
+export default function AdminSuiteConnectorsPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/connectors" testId="screen-admin-suite/connectors" />
+}

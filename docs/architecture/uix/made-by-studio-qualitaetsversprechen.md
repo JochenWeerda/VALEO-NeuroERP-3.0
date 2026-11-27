@@ -40,6 +40,7 @@ Bezug Entity-Profil: [studio-entity-release-20261021](../../quality-assurance/st
 
 - [ ] Nutzerroute → `UniversalNative*Page` / ListPage → freigegebene Screen-ID (Inventar: `runtime_wired`).
 - [ ] Commands/Datenwege Human = CLI = MCP (gleiche Rechte/Mandant); keine Stub-Wirkung.
+- [ ] Gegenueber dem abgeloesten Vorgaenger: keine Funktionsverluste und keine fehlenden Datenfelder (Create/Edit/Aktionen); Paritaet ist Abnahmekriterium, nicht optional.
 - [ ] Tabellenkatalog / Runtime-Catalog im Image/Dev-Deploy vorhanden (Compiler-Pflicht).
 
 ### D — Browser / Image (sichtbarer Nachweis)
@@ -64,22 +65,26 @@ Bezug Entity-Profil: [studio-entity-release-20261021](../../quality-assurance/st
 | Inventar „X Drafts“ | Draft ≠ `runtime_wired` |
 | Theme-Vorschau ohne Publikation | Kein Freigabenachweis |
 
-## Aktueller Belegstand (2026-10-22)
+## Aktueller Belegstand (2026-11-25, Europe/Berlin)
+
+Bezug: PR #213 / `cursor/studio-made-open-routes-8809`; Generator-Report
+[`made-by-studio-gate-report.md`](made-by-studio-gate-report.md); Inventar
+`mask_route_migration_inventory.py`.
 
 | Gate | Stand | Hinweis |
 |---|---|---|
-| A Entity-Stammdaten | weitgehend | Compiler/Profil/Rechte-Projektion auf main (`431cd5f66`+) |
-| B Entity CLI-Freigabe | weitgehend | SQL/CLI-Kette + Live-Probe dokumentiert; Image-CI-Nachlauf offen |
-| C Runtime Entity | teilweise | Generierte CRUD/Listen verdrahtet; Massen-Altmasken offen |
-| D Browser publiziert | **offen / Teil** | SSO+Dark Editor belegt; vollständige Live-Entity-Freigabe-UI + Image noch Pflicht |
-| E Ablösung | offen | 757 handgebaut; Nav-Pilot Saatgut/Dünger/Lieferant/Bestellung Detail |
+| A Entity-Stammdaten | **829/829** | `verify_made_by_studio_gates.py` — Meridian/Struktur grün |
+| B Entity CLI-Freigabe / Rechte | **829/829** | Action-Permission-Projektion; Draft-clean |
+| C Runtime Entity / Compiler | **829/829** | OpenAPI-Kanal + Advisory Ø **1.0** |
+| D Browser publiziert | **Teilbeleg** | Playwright Cockpit-Smoke **1160/1160** (580 Masken × Hell/Dunkel; inkl. Detail `native` + Create `native-create` + Cross-Domain NativeList; Specialized Landmark/Tablist, Mock-Auth); FlowSpine/Feed/Calendar/Chart/TileGrid/TwinPanel/Finance-Reports theme-tokenisiert; **Live-SSO** und Image-CI `table-catalog` weiter offen (Codex `STUDIO-ENTITY-RELEASE`) |
+| E Ablösung | **829/829** + Routen-`hand_built` **0** | Runtime-Aliase verdrahtet (inkl. `service/anfrage`); `pages_hand` 37 bewusst (`*-legacy`/Dlg/Charts, keine Routen) |
 
-**Fazit:** Das Qualitätskennzeichen darf **pro freigegebener Maske/Familie** vergeben
-werden, sobald A–D für diese Maske grün sind. Systemweites „alle Masken made by
-studio“ bleibt Ziel, kein Ist-Zustand.
+**Fazit:** A/B/C/E und Routen-Migration sind generatorseitig grün. Das Siegel A–D
+pro Maske braucht weiterhin Live-SSO + Image-CI (Gate D Rest). Systemweites
+„alle Masken made by studio“ bleibt Ziel, kein Ist-Zustand.
 
 ## Nächster Nachweis-Schritt (eine Lücke)
 
 1. Image-/CI-Nachlauf mit Runtime-Catalog (schließen D für Entity-Profil) — Codex `STUDIO-ENTITY-RELEASE`.
-2. CLI-Lebenszyklus **einer** Stamm-Maske aus `StammObjectPageParent` (alle 12 Children seit `UIX-STAMM-OBJECTPAGE-ALL-20261022` auf Parent, Gates A–C grün) → Siegel A–D — nicht 757 Routen.
+2. Live-SSO-Bedienung + Theme-Screenshots der *publizierten* Maske (Theme-Smoke mit Mock-Auth ersetzt das nicht).
 3. Beleg-Parent nur nach Codex-Handshake.

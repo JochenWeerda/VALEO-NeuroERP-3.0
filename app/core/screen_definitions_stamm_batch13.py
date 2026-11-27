@@ -3,9 +3,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.screen_definitions_intake_weighing import build_intake_quality, build_intake_registration
+from app.core.screen_definitions_intake_weighing import (
+    build_intake_quality,
+    build_intake_registration,
+    build_intake_rohware,
+)
 
-from app.core.stamm_list_parent import build_stamm_list_screen
+from app.core.stamm_list_parent import build_stamm_list_screen, stamm_list_export_action
 from app.core.stamm_object_page_parent import (
     build_stamm_object_page,
     stamm_entity_source,
@@ -64,9 +68,44 @@ def build_admin_agenten_integration() -> dict[str, Any]:
         edit_permission="admin.agenten-integration.update", bearbeiten_endpoint=None)
 
 def build_admin_ai_approvals() -> dict[str, Any]:
-    return _batch13_stamm("admin/ai-approvals", domain="admin", title="Ai approvals",
-        entity_endpoint="/api/v1/finance/ap/approval-workflow/status/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.ai-approvals.update", bearbeiten_endpoint=None)
+    """AI-Freigaben: offene Eingangsrechnungen — Paritaet zur Legacy-Worklist."""
+    return build_stamm_list_screen(
+        screen_id="admin/ai-approvals",
+        domain="admin",
+        title="AI-Aktionen zur Freigabe",
+        subtitle="Human-in-the-loop: Eingangsrechnungen zur manuellen Freigabe",
+        endpoint="/api/v1/belege/purchase_invoice?status=open&limit=50",
+        row_route=None,
+        bundle="admin",
+        columns=[
+            {"key": "beleg_nr", "label": "Beleg-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "partner_name", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "partner_nummer", "label": "Partner-Nr.", "filterable": True, "priority": "secondary"},
+            {"key": "brutto", "label": "Brutto", "numeric": True, "renderKind": "currency", "sortable": True,
+             "priority": "secondary"},
+            {"key": "waehrung", "label": "Währung", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[stamm_list_export_action()],
+        row_actions=[
+            {
+                "key": "freigeben",
+                "label": "Freigeben",
+                "dangerLevel": "moderate",
+                "permission": "admin.ai_approvals.approve",
+                "commandEndpoint": "/api/v1/finance/ap/approval-workflow/approve",
+                "method": "POST",
+                "requiresConfirmation": True,
+                "inputFields": [
+                    {"key": "invoice_id", "label": "Rechnungs-ID", "type": "text", "required": True},
+                    {"key": "comment", "label": "Kommentar", "type": "textarea"},
+                ],
+            },
+        ],
+        purpose="Eingangsrechnungen im Freigabe-Workflow finden und manuell freigeben.",
+        prompts=["Welche Eingangsrechnungen warten auf Freigabe?", "Gib Rechnung {entity_id} frei."],
+        no_workflow="Worklist; Freigabe erfolgt ueber den Approval-Workflow-Endpunkt.",
+    )
 
 def build_admin_api_keys() -> dict[str, Any]:
     return build_stamm_list_screen(
@@ -158,9 +197,89 @@ def build_admin_branch_detail() -> dict[str, Any]:
 
 
 def build_admin_command_monitor() -> dict[str, Any]:
-    return _batch13_stamm("admin/command-monitor", domain="admin", title="Command monitor",
-        entity_endpoint="/api/v1/articles/{entity_id}", identity_field="bezeichnung",
-        edit_permission="admin.command-monitor.update", bearbeiten_endpoint=None)
+    """Command Monitor — Idempotenz-Cockpit (Paritaet zur Legacy-Panel-Maske)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin/command-monitor",
+        domain="admin",
+        title="Command Monitor",
+        subtitle="Idempotenz-Nachweis, Replay-Schutz und Command-Abdeckung",
+        business_purpose=(
+            "Idempotente Process-Kernel-Commands und Replay-Schutz beobachten "
+            "(dieselbe Datenquelle wie das Legacy-IdempotencyMonitoringPanel)."
+        ),
+        example_prompts=[
+            "Wie hoch ist die Idempotenz-Abdeckung?",
+            "Welche Commands und Aggregate werden beobachtet?",
+        ],
+        test_id="admin-command-monitor",
+        summary=[
+            {"key": "confidence_score", "label": "Confidence %", "tone": "info"},
+            {"key": "total_commands", "label": "Commands gesamt", "tone": "neutral"},
+            {"key": "idempotent_commands", "label": "Idempotent", "tone": "success"},
+            {"key": "idempotent_coverage_pct", "label": "Abdeckung %", "tone": "success"},
+            {"key": "human_confirmation_commands", "label": "Human Confirm", "tone": "warning"},
+            {"key": "agent_ready_commands", "label": "Agent-ready", "tone": "info"},
+            {"key": "total_records", "label": "Store Records", "tone": "neutral"},
+            {"key": "execution_count", "label": "Execution-IDs", "tone": "neutral"},
+            {"key": "tenant_count", "label": "Mandanten", "tone": "neutral"},
+            {"key": "aggregate_count", "label": "Aggregate", "tone": "neutral"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/process/actions/idempotency/overview"),
+            cockpit_list_source("commands", "/api/v1/process/actions/idempotency/commands", page_size=200),
+            cockpit_list_source("aggregates", "/api/v1/process/actions/idempotency/aggregates", page_size=200),
+            cockpit_list_source("lookup_paths", "/api/v1/process/actions/idempotency/lookup-paths", page_size=20),
+        ],
+        tables=[
+            {
+                "key": "commands",
+                "label": "Commands",
+                "dataSourceKey": "commands",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "name", "label": "Command", "filterable": True, "priority": "primary"},
+                    {"key": "idempotent", "label": "Idempotent", "renderKind": "boolean", "priority": "secondary"},
+                    {"key": "human_confirmation", "label": "Human Confirm", "renderKind": "boolean", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "aggregates",
+                "label": "Aggregate",
+                "dataSourceKey": "aggregates",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "name", "label": "Aggregate", "filterable": True, "priority": "primary"},
+                    {"key": "kind", "label": "Art", "filterable": True, "priority": "secondary"},
+                    {"key": "record_count", "label": "Records", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "lookup_paths",
+                "label": "Lookup-Pfade",
+                "dataSourceKey": "lookup_paths",
+                "pageSize": 20,
+                "columns": [
+                    {"key": "path", "label": "Pfad", "filterable": True, "priority": "primary"},
+                    {"key": "purpose", "label": "Zweck", "priority": "secondary"},
+                    {"key": "method", "label": "Methode", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="admin.command_monitor.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Monitoring ohne eigenen Objekt-Lebenszyklus.",
+    )
 
 def build_admin_system_einstellungen() -> dict[str, Any]:
     return _batch13_stamm("admin/system-einstellungen", domain="admin", title="System einstellungen",
@@ -392,6 +511,10 @@ def build_annahme_muster() -> dict[str, Any]:
 
 def build_annahme_qualitaets_check() -> dict[str, Any]:
     return build_intake_quality()
+
+
+def build_annahme_rohware() -> dict[str, Any]:
+    return build_intake_rohware()
 
 
 def build_annahme_rohwaren_annahme() -> dict[str, Any]:
@@ -634,6 +757,7 @@ BATCH13_SCREEN_BUILDERS: dict[str, Any] = {
     "annahme/lkw-registrierung": build_annahme_lkw_registrierung,
     "annahme/muster": build_annahme_muster,
     "annahme/qualitaets-check": build_annahme_qualitaets_check,
+    "annahme/rohware": build_annahme_rohware,
     "annahme/rohwaren-annahme": build_annahme_rohwaren_annahme,
     "annahme/silo-zuweisung": build_annahme_silo_zuweisung,
     "annahme/trocknung": build_annahme_trocknung,
@@ -717,6 +841,7 @@ BATCH13_ROUTEN: dict[str, str] = {
     "annahme/lkw-registrierung": "/annahme/lkw-registrierung",
     "annahme/muster": "/annahme/muster",
     "annahme/qualitaets-check": "/annahme/qualitaets-check",
+    "annahme/rohware": "/annahme/rohware",
     "annahme/rohwaren-annahme": "/annahme/rohwaren-annahme",
     "annahme/silo-zuweisung": "/annahme/silo-zuweisung",
     "annahme/trocknung": "/annahme/trocknung",

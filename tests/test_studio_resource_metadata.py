@@ -29,7 +29,10 @@ def test_native_registry_case_survives_bounded_read_contract():
 def test_audit_host_requires_visible_runtime_not_an_import_or_decoy():
     from app.core.mask_runtime_evidence import has_visible_runtime
     assert has_visible_runtime('return <NativeAuditListPage screenId="kontrakte/FrmKontraktProtokoll" />')
+    assert has_visible_runtime("export default belegSeite('sales_order')")
+    assert has_visible_runtime("export default createStammNativeDetailPage('einkauf/angebot', 'einkauf-angebot-stamm')")
     assert not has_visible_runtime("import { NativeAuditListPage } from './NativeAuditListPage'")
     assert not has_visible_runtime('// return <NativeAuditListPage />')
     assert not has_visible_runtime('<span aria-hidden="true"><NativeAuditListPage /></span>')
     assert not has_visible_runtime('return createLegacyMaskPage(<NativeAuditListPage />)')
+    assert not has_visible_runtime("// export default belegSeite('sales_order')")

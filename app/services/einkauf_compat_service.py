@@ -35,20 +35,33 @@ _RECHNUNG_TRANSITIONS = {
 #: Die Tabelle heisst ``angebotsnummer``/``gesamtbetrag``; Artikel und Lieferzeit stehen
 #: an den Positionen. Bis 07.10.2026 las jeder Angebots-Weg Spalten, die keine
 #: Migration anlegt, und ein ``except`` machte "nicht gefunden" daraus.
+#: ``notizen`` traegt erweiterte Konditionen (mindestabnahme, Zahlungsbedingungen, Incoterms)
+#: als JSON — Paritaet zur Legacy-ObjectPage ohne Schema-Migration.
 _ANGEBOT_FELDER = (
     "a.id, a.angebotsnummer AS angebots_nummer, a.anfrage_id, a.lieferant_id, a.lieferant_name, "
     "(SELECT p.bezeichnung FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
     " ORDER BY p.pos_nr, p.id LIMIT 1) AS artikel_name, "
-    "a.gesamtbetrag AS netto_summe, a.waehrung, a.gueltig_bis, a.status, "
+    "(SELECT p.artikel_nr FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
+    " ORDER BY p.pos_nr, p.id LIMIT 1) AS artikel_nr, "
+    "(SELECT p.menge FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
+    " ORDER BY p.pos_nr, p.id LIMIT 1) AS menge, "
+    "(SELECT p.einheit FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
+    " ORDER BY p.pos_nr, p.id LIMIT 1) AS einheit, "
+    "(SELECT p.einheitspreis FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id "
+    " ORDER BY p.pos_nr, p.id LIMIT 1) AS einheitspreis, "
+    "a.gesamtbetrag AS netto_summe, a.waehrung, a.gueltig_bis, a.status, a.notizen, "
     "(SELECT MAX(p.lieferzeit_tage) FROM einkauf_angebote_positionen p WHERE p.angebot_id = a.id) "
     "AS lieferzeit_tage, a.created_at"
 )
 
 #: Ein Angebot in diesen Zustaenden wird nicht (noch einmal) bestellt.
 _NICHT_BESTELLBAR = {"IN_BESTELLUNG", "BESTELLT", "ABGELEHNT"}
-#: Spalten des Avis wie in der Migration ``einkauf_missing_tables_20260305``; ein Kennzeichen fuehrt die Tabelle nicht.
-_AVIS_FELDER = ("id, avis_nummer, bestell_nr AS bestellung_id, lieferant_name, status, "
-                "erwartetes_datum AS geplantes_anliefer_datum, NULL AS kennzeichen, created_at")
+#: Spalten des Avis wie in der Migration ``einkauf_missing_tables_20260305``.
+#: Fahrzeug/Positionen/Bemerkungen liegen in ``notizen`` (JSON) — Paritaet zur Legacy-ObjectPage.
+_AVIS_FELDER = (
+    "id, avis_nummer, bestell_nr AS bestellung_id, lieferant_id, lieferant_name, status, "
+    "erwartetes_datum AS geplantes_anliefer_datum, notizen, created_at"
+)
 
 
 class EinkaufCompatService:
@@ -107,31 +120,74 @@ class EinkaufCompatService:
         }
 
     @staticmethod
-    def _angebot_row_to_dict(m: Any) -> dict:
+    def _parse_notizen(raw: Any) -> dict[str, Any]:
+        if isinstance(raw, dict):
+            return raw
+        if isinstance(raw, str) and raw.strip():
+            try:
+                import json
+                parsed = json.loads(raw)
+                return parsed if isinstance(parsed, dict) else {}
+            except Exception:  # noqa: BLE001 — Notizen-Text ohne JSON bleibt Freitext
+                return {"bemerkungen": raw}
+        return {}
+
+    @classmethod
+    def _angebot_row_to_dict(cls, m: Any) -> dict:
+        extra = cls._parse_notizen(m.get("notizen"))
+        preis = float(m.get("netto_summe") or m.get("einheitspreis") or 0)
         return {
             "id": str(m.get("id")),
             "angebotNummer": m.get("angebots_nummer") or str(m.get("id")),
             "anfrage": str(m.get("anfrage_id") or ""),
+            "anfrageId": str(m.get("anfrage_id") or "") or None,
             "lieferant": m.get("lieferant_name") or "",
-            "artikel": m.get("artikel_name") or "",
-            "preis": float(m.get("netto_summe") or 0),
+            "lieferantId": str(m.get("lieferant_id") or "") or None,
+            "lieferant_id": str(m.get("lieferant_id") or "") or None,
+            "artikel": m.get("artikel_name") or m.get("artikel_nr") or extra.get("artikel") or "",
+            "menge": float(m.get("menge") or extra.get("menge") or 0) or None,
+            "einheit": m.get("einheit") or extra.get("einheit") or None,
+            "preis": preis,
+            "waehrung": m.get("waehrung") or "EUR",
             "gueltigBis": m.get("gueltig_bis").isoformat()[:10] if m.get("gueltig_bis") else None,
             "status": m.get("status") or "offen",
-            "lieferzeit": str(m.get("lieferzeit_tage") or ""),
+            "lieferzeit": (
+                int(m["lieferzeit_tage"]) if m.get("lieferzeit_tage") is not None
+                else extra.get("lieferzeit")
+            ),
+            "mindestabnahme": extra.get("mindestabnahme"),
+            "zahlungsbedingungen": extra.get("zahlungsbedingungen") or "",
+            "incoterms": extra.get("incoterms") or "",
+            "bemerkungen": extra.get("bemerkungen") or "",
             "createdAt": m.get("created_at").isoformat() if m.get("created_at") else None,
         }
 
-    @staticmethod
-    def _anlieferavis_row_to_dict(m: Any) -> dict:
+    @classmethod
+    def _anlieferavis_row_to_dict(cls, m: Any) -> dict:
+        extra = cls._parse_notizen(m.get("notizen"))
+        fahrzeug = extra.get("fahrzeug") if isinstance(extra.get("fahrzeug"), dict) else {}
+        if not fahrzeug and (extra.get("kennzeichen") or extra.get("fahrer") or extra.get("telefon")):
+            fahrzeug = {
+                "kennzeichen": extra.get("kennzeichen") or "",
+                "fahrer": extra.get("fahrer") or "",
+                "telefon": extra.get("telefon") or "",
+            }
+        datum = m.get("geplantes_anliefer_datum")
         return {
             "id": str(m.get("id")),
             "avisNummer": m.get("avis_nummer") or str(m.get("id")),
             "bestellung": str(m.get("bestellung_id") or ""),
+            "bestellungId": str(m.get("bestellung_id") or "") or None,
             "lieferant": m.get("lieferant_name") or "",
+            "lieferantId": str(m.get("lieferant_id") or "") or None,
             "status": m.get("status") or "offen",
-            "geplantesAnlieferDatum": m.get("geplantes_anliefer_datum").isoformat()[:10]
-                if m.get("geplantes_anliefer_datum") else None,
-            "kennzeichen": m.get("kennzeichen") or "",
+            "geplantesAnlieferDatum": datum.isoformat() if datum else None,
+            "kennzeichen": fahrzeug.get("kennzeichen") or extra.get("kennzeichen") or "",
+            "fahrer": fahrzeug.get("fahrer") or "",
+            "telefon": fahrzeug.get("telefon") or "",
+            "fahrzeug": fahrzeug,
+            "positionen": extra.get("positionen") if isinstance(extra.get("positionen"), list) else [],
+            "bemerkungen": extra.get("bemerkungen") or "",
             "createdAt": m.get("created_at").isoformat() if m.get("created_at") else None,
         }
 
@@ -297,6 +353,151 @@ class EinkaufCompatService:
             raise EntityNotFoundError("Angebot", angebot_id)
         return self._angebot_row_to_dict(row._mapping)
 
+    def _angebot_notizen_payload(self, payload: dict[str, Any]) -> str | None:
+        import json
+        body = {
+            "mindestabnahme": payload.get("mindestabnahme"),
+            "zahlungsbedingungen": payload.get("zahlungsbedingungen") or "",
+            "incoterms": payload.get("incoterms") or "",
+            "bemerkungen": payload.get("bemerkungen") or payload.get("notizen") or "",
+            "lieferzeit": payload.get("lieferzeit"),
+            "artikel": payload.get("artikel"),
+            "menge": payload.get("menge"),
+            "einheit": payload.get("einheit"),
+        }
+        if not any(v not in (None, "", []) for v in body.values()):
+            return None
+        return json.dumps(body, ensure_ascii=False)
+
+    def create_angebot(self, payload: dict[str, Any]) -> dict:
+        """Legt ein Angebot inkl. Kopf-/Positions-/Konditionsfeldern der Legacy-Maske an."""
+        from sqlalchemy import text
+        new_id = uuid7()
+        nummer = str(payload.get("angebotNummer") or payload.get("angebotsnummer") or f"ANG-{new_id[:8].upper()}")
+        lieferant_name = str(payload.get("lieferant") or payload.get("lieferant_name") or "").strip() or None
+        lieferant_id = payload.get("lieferantId") or payload.get("lieferant_id")
+        anfrage_id = payload.get("anfrageId") or payload.get("anfrage_id") or payload.get("anfrage")
+        gueltig_bis = payload.get("gueltigBis") or payload.get("gueltig_bis")
+        waehrung = str(payload.get("waehrung") or payload.get("currency") or "EUR")
+        menge = safe_float(payload.get("menge") or 0)
+        preis = safe_float(payload.get("preis") or payload.get("gesamtbetrag") or 0)
+        gesamt = preis * menge if menge and preis and not payload.get("gesamtbetrag") else preis
+        status = str(payload.get("status") or "ERFASST")
+        notizen = self._angebot_notizen_payload(payload)
+        self.db.execute(text("""
+            INSERT INTO einkauf_angebote
+                (id, tenant_id, anfrage_id, angebotsnummer, lieferant_id, lieferant_name,
+                 gesamtbetrag, waehrung, gueltig_bis, status, notizen, created_at, updated_at)
+            VALUES
+                (:id, :tid, :anfrage, :nr, :lid, :lname, :betrag, :whr, :gueltig, :status, :notizen,
+                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """), {
+            "id": new_id, "tid": self.tenant_id, "anfrage": str(anfrage_id) if anfrage_id else None,
+            "nr": nummer, "lid": str(lieferant_id) if lieferant_id else None,
+            "lname": lieferant_name, "betrag": gesamt, "whr": waehrung, "gueltig": gueltig_bis,
+            "status": status, "notizen": notizen,
+        })
+        artikel = str(payload.get("artikel") or "").strip()
+        if artikel or menge or preis:
+            pos_id = uuid7()
+            einheit = str(payload.get("einheit") or "Stk")
+            lieferzeit = payload.get("lieferzeit")
+            try:
+                lieferzeit_tage = int(lieferzeit) if lieferzeit not in (None, "") else None
+            except (TypeError, ValueError):
+                lieferzeit_tage = None
+            self.db.execute(text("""
+                INSERT INTO einkauf_angebote_positionen
+                    (id, angebot_id, pos_nr, artikel_nr, bezeichnung, menge, einheit,
+                     einheitspreis, gesamtpreis, lieferzeit_tage)
+                VALUES
+                    (:id, :aid, 1, :art, :bez, :menge, :einheit, :preis, :gesamt, :lt)
+            """), {
+                "id": pos_id, "aid": new_id, "art": artikel or None, "bez": artikel or None,
+                "menge": menge, "einheit": einheit, "preis": preis, "gesamt": gesamt,
+                "lt": lieferzeit_tage,
+            })
+        self.db.commit()
+        self._invalidate()
+        return self.get_angebot(new_id)
+
+    def update_angebot(self, angebot_id: str, payload: dict[str, Any]) -> dict:
+        """Aktualisiert Kopf-/Konditionsfelder — gleicher Vertrag wie Create (Human/CI/MCP)."""
+        from sqlalchemy import text
+        row = self._load_angebot_raw_row(angebot_id)
+        if row is None:
+            raise EntityNotFoundError("Angebot", angebot_id)
+        m = row._mapping
+        entity_id = str(m.get("id"))
+        lieferant_id = payload.get("lieferantId") or payload.get("lieferant_id")
+        if lieferant_id is None:
+            lieferant_id = m.get("lieferant_id")
+        lieferant_name = payload.get("lieferant") if "lieferant" in payload else m.get("lieferant_name")
+        anfrage_id = payload.get("anfrageId") or payload.get("anfrage_id") or payload.get("anfrage")
+        if anfrage_id is None and "anfrageId" not in payload and "anfrage" not in payload:
+            anfrage_id = m.get("anfrage_id")
+        gueltig_bis = payload.get("gueltigBis") if "gueltigBis" in payload else (
+            m.get("gueltig_bis").isoformat()[:10] if m.get("gueltig_bis") else None
+        )
+        waehrung = str(payload.get("waehrung") or m.get("waehrung") or "EUR")
+        status = str(payload.get("status") or m.get("status") or "ERFASST")
+        nummer = str(payload.get("angebotNummer") or m.get("angebots_nummer") or entity_id)
+        notizen = self._angebot_notizen_payload(payload)
+        if notizen is None and m.get("notizen"):
+            notizen = m.get("notizen") if isinstance(m.get("notizen"), str) else None
+        menge = safe_float(payload.get("menge") if "menge" in payload else (m.get("menge") or 0))
+        preis = safe_float(payload.get("preis") if "preis" in payload else (m.get("netto_summe") or 0))
+        gesamt = preis * menge if menge and preis and "gesamtbetrag" not in payload else preis
+        self.db.execute(text("""
+            UPDATE einkauf_angebote SET
+                angebotsnummer = :nr, anfrage_id = :anfrage, lieferant_id = :lid,
+                lieferant_name = :lname, gesamtbetrag = :betrag, waehrung = :whr,
+                gueltig_bis = :gueltig, status = :status, notizen = :notizen,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tid
+        """), {
+            "id": entity_id, "tid": self.tenant_id, "nr": nummer,
+            "anfrage": str(anfrage_id) if anfrage_id else None,
+            "lid": str(lieferant_id) if lieferant_id else None,
+            "lname": lieferant_name, "betrag": gesamt, "whr": waehrung,
+            "gueltig": gueltig_bis, "status": status, "notizen": notizen,
+        })
+        if any(k in payload for k in ("artikel", "menge", "einheit", "preis", "lieferzeit")):
+            artikel = str(payload.get("artikel") or m.get("artikel_name") or m.get("artikel_nr") or "").strip()
+            einheit = str(payload.get("einheit") or m.get("einheit") or "Stk")
+            try:
+                lieferzeit_tage = int(payload.get("lieferzeit")) if payload.get("lieferzeit") not in (None, "") else m.get("lieferzeit_tage")
+            except (TypeError, ValueError):
+                lieferzeit_tage = m.get("lieferzeit_tage")
+            existing = self.db.execute(text(
+                "SELECT id FROM einkauf_angebote_positionen WHERE angebot_id = :aid ORDER BY pos_nr, id LIMIT 1"
+            ), {"aid": entity_id}).fetchone()
+            if existing:
+                self.db.execute(text("""
+                    UPDATE einkauf_angebote_positionen SET
+                        artikel_nr = :art, bezeichnung = :bez, menge = :menge, einheit = :einheit,
+                        einheitspreis = :preis, gesamtpreis = :gesamt, lieferzeit_tage = :lt
+                    WHERE id = :id
+                """), {
+                    "id": existing[0], "art": artikel or None, "bez": artikel or None,
+                    "menge": menge, "einheit": einheit, "preis": preis, "gesamt": gesamt,
+                    "lt": lieferzeit_tage,
+                })
+            elif artikel or menge or preis:
+                self.db.execute(text("""
+                    INSERT INTO einkauf_angebote_positionen
+                        (id, angebot_id, pos_nr, artikel_nr, bezeichnung, menge, einheit,
+                         einheitspreis, gesamtpreis, lieferzeit_tage)
+                    VALUES (:id, :aid, 1, :art, :bez, :menge, :einheit, :preis, :gesamt, :lt)
+                """), {
+                    "id": uuid7(), "aid": entity_id, "art": artikel or None, "bez": artikel or None,
+                    "menge": menge, "einheit": einheit, "preis": preis, "gesamt": gesamt,
+                    "lt": lieferzeit_tage,
+                })
+        self.db.commit()
+        self._invalidate()
+        return self.get_angebot(entity_id)
+
     def _load_angebot_raw_row(self, angebot_id: str) -> Any:
         from sqlalchemy import text
         return self.db.execute(text(
@@ -402,6 +603,123 @@ class EinkaufCompatService:
         if row is None:
             raise EntityNotFoundError("Anlieferavis", avis_id)
         return self._anlieferavis_row_to_dict(row._mapping)
+
+    def _avis_notizen_payload(self, payload: dict[str, Any]) -> str | None:
+        import json
+        fahrzeug_in = payload.get("fahrzeug") if isinstance(payload.get("fahrzeug"), dict) else {}
+        fahrzeug = {
+            "kennzeichen": (
+                payload.get("kennzeichen")
+                or fahrzeug_in.get("kennzeichen")
+                or payload.get("fahrzeug.kennzeichen")
+                or ""
+            ),
+            "fahrer": (
+                payload.get("fahrer")
+                or fahrzeug_in.get("fahrer")
+                or payload.get("fahrzeug.fahrer")
+                or ""
+            ),
+            "telefon": (
+                payload.get("telefon")
+                or fahrzeug_in.get("telefon")
+                or payload.get("fahrzeug.telefon")
+                or ""
+            ),
+        }
+        body = {
+            "fahrzeug": fahrzeug,
+            "kennzeichen": fahrzeug["kennzeichen"],
+            "fahrer": fahrzeug["fahrer"],
+            "telefon": fahrzeug["telefon"],
+            "bemerkungen": payload.get("bemerkungen") or "",
+            "positionen": payload.get("positionen") if isinstance(payload.get("positionen"), list) else [],
+        }
+        if not any([
+            body["kennzeichen"], body["fahrer"], body["telefon"], body["bemerkungen"], body["positionen"],
+        ]):
+            return None
+        return json.dumps(body, ensure_ascii=False)
+
+    def create_anlieferavis(self, payload: dict[str, Any]) -> dict:
+        """Legt einen Anlieferavis inkl. Fahrzeug-/Positionsfeldern der Legacy-Maske an."""
+        from sqlalchemy import text
+        new_id = uuid7()
+        nummer = str(payload.get("avisNummer") or payload.get("avis_nummer") or f"AVIS-{new_id[:8].upper()}")
+        lieferant_name = str(payload.get("lieferant") or payload.get("lieferant_name") or "").strip() or None
+        lieferant_id = payload.get("lieferantId") or payload.get("lieferant_id")
+        bestell_nr = (
+            payload.get("bestellungId") or payload.get("bestellung")
+            or payload.get("bestell_nr") or payload.get("bestellung_id")
+        )
+        erwartetes = payload.get("geplantesAnlieferDatum") or payload.get("erwartetes_datum")
+        if isinstance(erwartetes, str) and "T" in erwartetes:
+            erwartetes = erwartetes[:10]
+        status = str(payload.get("status") or "GESENDET")
+        notizen = self._avis_notizen_payload(payload)
+        self.db.execute(text("""
+            INSERT INTO einkauf_anlieferavis
+                (id, tenant_id, avis_nummer, bestell_nr, lieferant_id, lieferant_name,
+                 erwartetes_datum, status, notizen, created_at, updated_at)
+            VALUES
+                (:id, :tid, :nr, :bestell, :lid, :lname, :datum, :status, :notizen,
+                 CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        """), {
+            "id": new_id, "tid": self.tenant_id, "nr": nummer,
+            "bestell": str(bestell_nr) if bestell_nr else None,
+            "lid": str(lieferant_id) if lieferant_id else None,
+            "lname": lieferant_name, "datum": erwartetes, "status": status, "notizen": notizen,
+        })
+        self.db.commit()
+        self._invalidate()
+        return self.get_anlieferavis(new_id)
+
+    def update_anlieferavis(self, avis_id: str, payload: dict[str, Any]) -> dict:
+        """Aktualisiert Avis-Felder — gleicher Vertrag wie Create (Human/CI/MCP)."""
+        from sqlalchemy import text
+        current = self.get_anlieferavis(avis_id)
+        entity_id = current["id"]
+        nummer = str(payload.get("avisNummer") or current.get("avisNummer") or entity_id)
+        bestell_nr = (
+            payload.get("bestellungId") if "bestellungId" in payload
+            else payload.get("bestellung") if "bestellung" in payload
+            else current.get("bestellungId") or current.get("bestellung")
+        )
+        lieferant_name = payload.get("lieferant") if "lieferant" in payload else current.get("lieferant")
+        lieferant_id = (
+            payload.get("lieferantId") if "lieferantId" in payload
+            else current.get("lieferantId")
+        )
+        erwartetes = (
+            payload.get("geplantesAnlieferDatum") if "geplantesAnlieferDatum" in payload
+            else current.get("geplantesAnlieferDatum")
+        )
+        if isinstance(erwartetes, str) and "T" in erwartetes:
+            erwartetes = erwartetes[:10]
+        status = str(payload.get("status") or current.get("status") or "GESENDET")
+        merged = {**current, **payload}
+        if "fahrzeug" not in payload and any(k in payload for k in ("kennzeichen", "fahrer", "telefon")):
+            merged["fahrzeug"] = {
+                "kennzeichen": payload.get("kennzeichen", current.get("kennzeichen")),
+                "fahrer": payload.get("fahrer", current.get("fahrer")),
+                "telefon": payload.get("telefon", current.get("telefon")),
+            }
+        notizen = self._avis_notizen_payload(merged)
+        self.db.execute(text("""
+            UPDATE einkauf_anlieferavis SET
+                avis_nummer = :nr, bestell_nr = :bestell, lieferant_id = :lid,
+                lieferant_name = :lname, erwartetes_datum = :datum, status = :status,
+                notizen = :notizen, updated_at = CURRENT_TIMESTAMP
+            WHERE id = :id AND tenant_id = :tid
+        """), {
+            "id": entity_id, "tid": self.tenant_id, "nr": nummer,
+            "bestell": str(bestell_nr) if bestell_nr else None,
+            "lid": str(lieferant_id) if lieferant_id else None,
+            "lname": lieferant_name, "datum": erwartetes, "status": status, "notizen": notizen,
+        })
+        self.db.commit()
+        self._invalidate()
+        return self.get_anlieferavis(entity_id)
 
     def transition_anlieferavis(self, avis_id: str, action: str) -> dict:
         from sqlalchemy import text

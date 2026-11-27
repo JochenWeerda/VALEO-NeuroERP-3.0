@@ -1,3 +1,9 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./setup-legacy'))
+/**
+ * Native Liste: ScreenDefinition admin-suite/setup
+ * Setup-Schritte + In-Arbeit/Abschliessen — Parität zur Legacy-Assistentenmaske.
+ */
+export default function AdminSuiteSetupPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/setup" testId="screen-admin-suite/setup" />
+}

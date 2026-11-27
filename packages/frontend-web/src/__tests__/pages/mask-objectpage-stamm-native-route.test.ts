@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { isStammCreationEntityId } from '@/components/mask-builder'
@@ -19,24 +19,47 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     expect(isStammCreationEntityId('DEB-001')).toBe(false)
   })
 
-  const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' | 'native' }> = [
-    { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'factory' },
-    { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'factory' },
-    { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'factory' },
+  const migrated: Array<{ file: string; screenId: string; kind: 'factory' | 'native-create' | 'native' | 'create-capture' }> = [
+    { file: 'finance/debitoren-stamm.tsx', screenId: 'finance/debitor', kind: 'create-capture' },
+    { file: 'finance/kreditoren-stamm.tsx', screenId: 'finance/kreditor', kind: 'native' },
+    { file: 'finance/bankkonten-stamm.tsx', screenId: 'finance/bankkonto', kind: 'native' },
     { file: 'futtermittel/einzelfuttermittel-stamm.tsx', screenId: 'futtermittel/einzelfuttermittel', kind: 'native-create' },
     { file: 'futtermittel/mischfuttermittel-stamm.tsx', screenId: 'futtermittel/mischfuttermittel', kind: 'native-create' },
-    { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'factory' },
-    { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'factory' },
-    { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'factory' },
-    { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'factory' },
-    { file: 'agrar/saatgut-stamm.tsx', screenId: 'agrar/saatgut', kind: 'factory' },
-    { file: 'einkauf/anfrage-stamm.tsx', screenId: 'einkauf/anfrage', kind: 'factory' },
-    { file: 'einkauf/angebot-stamm.tsx', screenId: 'einkauf/angebot', kind: 'factory' },
-    { file: 'einkauf/anlieferavis.tsx', screenId: 'einkauf/anlieferavis', kind: 'factory' },
+    { file: 'crm/opportunity-detail.tsx', screenId: 'crm/opportunity', kind: 'native' },
+    { file: 'agrar/duenger/stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
+    { file: 'agrar/saatgut/stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
+    { file: 'agrar/duenger-stamm.tsx', screenId: 'agrar/duenger', kind: 'native' },
+    { file: 'agrar/saatgut-stamm.tsx', screenId: 'agrar/saatgut', kind: 'native' },
+    { file: 'einkauf/anfrage-stamm.tsx', screenId: 'einkauf/anfrage', kind: 'native' },
+    { file: 'einkauf/angebot-stamm.tsx', screenId: 'einkauf/angebot', kind: 'native' },
+    { file: 'einkauf/anlieferavis.tsx', screenId: 'einkauf/anlieferavis', kind: 'native' },
     { file: 'einkauf/auftragsbestaetigung.tsx', screenId: 'einkauf/auftragsbestaetigung', kind: 'native' },
     { file: 'crm/lieferanten-stamm.tsx', screenId: 'einkauf/supplier', kind: 'native' },
     { file: 'crm/kunden-stamm.tsx', screenId: 'crm/customer-360', kind: 'native' },
-    { file: 'qualitaet/reklamation-detail.tsx', screenId: 'qualitaet/reklamation', kind: 'factory' },
+    { file: 'qualitaet/reklamation-detail.tsx', screenId: 'qualitaet/reklamation', kind: 'native' },
+    { file: 'stammdaten/artikelbestandteile.tsx', screenId: 'stammdaten/artikelbestandteile', kind: 'native' },
+    { file: 'stammdaten/artikelverpackung.tsx', screenId: 'stammdaten/artikelverpackung', kind: 'native' },
+    { file: 'stammdaten/artikel-stoffstrom.tsx', screenId: 'stammdaten/artikel-stoffstrom', kind: 'native' },
+    { file: 'stammdaten/individuelle-artikelnummern.tsx', screenId: 'stammdaten/individuelle-artikelnummern', kind: 'native' },
+    { file: 'verkauf/kunde-neu.tsx', screenId: 'verkauf/kunde-neu', kind: 'native' },
+    { file: 'verkauf/kunden-stamm-enhanced.tsx', screenId: 'verkauf/kunden-stamm-enhanced', kind: 'native' },
+    { file: 'preise/individualpreise.tsx', screenId: 'preise/individualpreise', kind: 'native' },
+    { file: 'preise/rabattgruppen.tsx', screenId: 'preise/rabattgruppen', kind: 'native' },
+    { file: 'preise/zu-abschlaggruppen.tsx', screenId: 'preise/zu-abschlaggruppen', kind: 'native' },
+    { file: 'verkauf/dauerauftraege.tsx', screenId: 'verkauf/dauerauftraege', kind: 'native' },
+    { file: 'produktion/rezepturgruppen.tsx', screenId: 'produktion/rezepturgruppen', kind: 'native' },
+    { file: 'fibu/geschaeftsjahre.tsx', screenId: 'fibu/geschaeftsjahre', kind: 'native' },
+    { file: 'lager/massebilanz.tsx', screenId: 'lager/massebilanz', kind: 'native' },
+    { file: 'lager/permanente-inventur.tsx', screenId: 'lager/permanente-inventur', kind: 'native' },
+    { file: 'fibu/zahlungsmeldungen.tsx', screenId: 'fibu/zahlungsmeldungen', kind: 'native' },
+    { file: 'fibu/op-skonto-auszifferung.tsx', screenId: 'fibu/op-skonto-auszifferung', kind: 'native' },
+    { file: 'fibu/stammdaten.tsx', screenId: 'fibu/stammdaten', kind: 'native' },
+    { file: 'finance/bank-stamm.tsx', screenId: 'finance/bankkonto', kind: 'native' },
+    { file: 'agribusiness/field-service-task-neu.tsx', screenId: 'agribusiness/field-service-tasks/neu', kind: 'native' },
+    { file: 'personal/schulung-neu.tsx', screenId: 'personal/schulung-neu', kind: 'native' },
+    { file: 'agrar/rohwarengruppen.tsx', screenId: 'agrar/rohwarengruppen', kind: 'native' },
+    { file: 'agrar/vermehrungsvertraege.tsx', screenId: 'agrar/vermehrungsvertraege', kind: 'native' },
+    { file: 'fibu/abschluss-checklist-detail.tsx', screenId: 'fibu/abschluss-checklist-detail', kind: 'native' },
   ]
 
   it('CRM-Kunden- und Lieferanten-Listen laufen ueber NativeListPage', () => {
@@ -54,6 +77,12 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(src).toContain('createStammNativeDetailPage')
       expect(src).toContain(`'${screenId}'`)
       expect(src).toContain('-legacy')
+    } else if (kind === 'create-capture') {
+      expect(src).toContain('createStammNativeDetailPage')
+      expect(src).toContain(`'${screenId}'`)
+      expect(src).toContain('<UniversalNativeCreatePage')
+      expect(src).toContain('finance/debitoren/new')
+      expect(src).not.toContain('-legacy')
     } else {
       expect(src).toContain('<UniversalNativeCreatePage')
       expect(src).toContain('<UniversalNativeDetailPage')
@@ -61,9 +90,9 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
     }
   })
 
-  it('alle 17 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
+  it('alle 40 Page-Wrapper sind in der produktiven Routenregistry eingetragen (Bestellung und Eingangsrechnung seit BELEG-052 in der Belegmaske)', () => {
     const routeTree = readFileSync(resolve(__dirname, '../../app/routing/route-tree.gen.tsx'), 'utf8')
-    expect(migrated).toHaveLength(17)
+    expect(migrated).toHaveLength(40)
     for (const { file } of migrated) {
       expect(routeTree).toContain(`renderPage("@/pages/${file.replace(/\.tsx$/, '')}")`)
     }
@@ -86,18 +115,34 @@ describe('Batch 5–6: Legacy-ObjectPage-Stamm → UniversalMaskRuntime', () => 
       expect(routeTree).toContain(`path: "${route}"`)
       expect(routeTree).toContain(`"module":"@/pages/${page}","legacyPath":"/${route}"`)
     }
+    // ObjectPage-Legacy-Altlasten entfernt — kanonisch sind Native-Stammseiten.
     for (const file of [
-      'agrar/saatgut-stamm-legacy.tsx', 'agrar/duenger-stamm-legacy.tsx',
       'crm/opportunity-detail-legacy.tsx',
-      'einkauf/anfrage-stamm-legacy.tsx', 'einkauf/angebot-stamm-legacy.tsx',
+      'einkauf/anfrage-stamm-legacy.tsx',
+      'einkauf/angebot-stamm-legacy.tsx',
       'einkauf/anlieferavis-legacy.tsx',
+      'finance/debitoren-stamm-legacy.tsx',
+      'finance/kreditoren-stamm-legacy.tsx',
+      'finance/bankkonten-stamm-legacy.tsx',
+      'agrar/duenger/stamm-legacy.tsx',
+      'agrar/saatgut/stamm-legacy.tsx',
+      'artikel/stamm-legacy.tsx',
+      'charge/stamm-legacy.tsx',
+      'finance/stamm-legacy.tsx',
+      'personal/stamm-legacy.tsx',
+      'futter/einzel/stamm-legacy.tsx',
+      'futter/misch/stamm-legacy.tsx',
+      'agrar/psm/stamm-legacy.tsx',
+      'crm/detail-legacy.tsx',
+      'fibu/detail-legacy.tsx',
+      'qualitaet/detail-legacy.tsx',
+      'service/detail-legacy.tsx',
+      'waage/detail-legacy.tsx',
     ]) {
-      expect(read(file)).toContain('isStammCreationEntityId')
+      expect(existsSync(resolve(pages, file))).toBe(false)
     }
-    for (const file of [
-      'finance/debitoren-stamm-legacy.tsx', 'finance/kreditoren-stamm-legacy.tsx',
-    ]) {
-      expect(read(file)).not.toMatch(/id:\s*['"]new['"]/)
-    }
+    expect(read('finance/debitoren-stamm.tsx')).toContain('UniversalNativeCreatePage')
+    expect(read('agrar/duenger/stamm.tsx')).toContain("createStammNativeDetailPage('agrar/duenger'")
+    expect(read('agrar/saatgut/stamm.tsx')).toContain("createStammNativeDetailPage('agrar/saatgut'")
   })
 })

@@ -10,6 +10,10 @@ export const entries: AutoGroupRouteEntry[] = [
     "path": "fahrzeug-stamm"
   },
   {
+    "module": "@/pages/fuhrpark/fahrzeug-vertiefung",
+    "path": "fahrzeug-vertiefung"
+  },
+  {
     "module": "@/pages/fuhrpark/fahrzeuge",
     "path": "fahrzeuge"
   },

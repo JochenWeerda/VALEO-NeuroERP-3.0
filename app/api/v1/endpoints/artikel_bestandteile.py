@@ -103,6 +103,21 @@ def list_bestandteile_def(
     return [BestandteilDefOut(**dict(r._mapping)) for r in rows]
 
 
+@router.get("/stamm/{bestandteil_nr}", response_model=BestandteilDefOut, summary="Bestandteil def abrufen")
+def get_bestandteil_def(
+    bestandteil_nr: str,
+    db=Depends(get_db),
+    tenant_id: str = Depends(get_tenant_id),
+):
+    row = db.execute(text("""
+        SELECT * FROM domain_shared.artikel_bestandteile_def
+        WHERE tenant_id = :tid AND bestandteil_nr = :nr
+    """), {"tid": tenant_id, "nr": bestandteil_nr}).fetchone()
+    if not row:
+        raise HTTPException(404, "Bestandteil nicht gefunden.")
+    return BestandteilDefOut(**dict(row._mapping))
+
+
 @router.post("/stamm", response_model=BestandteilDefOut, status_code=201, summary="Bestandteil def anlegen", dependencies=SCHREIBEN["STAMMDATEN"])
 def create_bestandteil_def(
     payload: BestandteilDefCreate,

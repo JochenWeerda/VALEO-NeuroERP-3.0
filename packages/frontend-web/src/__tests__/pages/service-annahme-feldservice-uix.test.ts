@@ -472,9 +472,10 @@ describe('Service/Annahme/Feldservice UIX', () => {
     expect(src).not.toContain('size="sm"')
   })
 
-  it('stellt Materialfluss mit 44-px-Speichern', () => {
+  it('stellt Materialfluss als Studio-Cockpit dar', () => {
     const src = read('../../pages/lager/materialfluss.tsx')
-    expect(src).toContain('min-h-touch')
+    expect(src).toContain('UniversalNativeCockpitPage')
+    expect(src).toContain('screenId="lager/materialfluss"')
     expect(src).not.toContain('size="sm"')
   })
 

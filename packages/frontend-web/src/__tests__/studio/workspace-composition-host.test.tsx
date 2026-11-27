@@ -6,7 +6,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from '@/app/routing/test-router'
 import type { InboxQueueItem } from '@/components/adaptive-workspace/inbox'
 import { formatStopLatLng } from '@/components/mask-builder/specialized/load-timeline'
-import WorkspaceCompositionPreviewPage from '@/pages/studio/workspace-composition-preview'
+// Geroutete Seite ist Studio-Wrapper; Authoring/Host-Verhalten bleibt in -legacy.
+import WorkspaceCompositionPreviewPage from '@/pages/studio/workspace-composition-preview-legacy'
 import { WORKSPACE_COMPOSITION_FIXTURE } from '@/studio/workspace-composition.fixture'
 import { WorkspaceCompositionHost } from '@/studio/WorkspaceCompositionHost'
 import { DISPOSITION_BOARD_ROUTE } from '@/studio/workspace-composition-runtime'
@@ -385,4 +386,17 @@ describe('WorkspaceCompositionHost', () => {
     expect(screen.getByTestId('workspace-composition-host-skipped')).toBeInTheDocument()
     expect(screen.queryByTestId('workspace-composition-host')).not.toBeInTheDocument()
   })
+
+  it('Preview: Reset und Authoring-Dialog decken Speichern/Zurücksetzen ab', async () => {
+    const user = userEvent.setup()
+    renderHost(<WorkspaceCompositionPreviewPage />)
+
+    await user.click(screen.getByTestId('workspace-composition-toggle-inbox').querySelector('input')!)
+    await user.click(screen.getByTestId('workspace-composition-reset'))
+    expect(screen.getByText(/Zurückgesetzt auf Fixture/i)).toBeInTheDocument()
+
+    await user.click(screen.getByTestId('workspace-composition-open-authoring-dialog'))
+    expect(screen.getByTestId('workspace-composition-authoring-dialog')).toBeInTheDocument()
+  })
 })
+

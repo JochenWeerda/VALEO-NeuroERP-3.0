@@ -502,6 +502,10 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
         # Eingabefluss der Maske: Ein Mensch fuellt das Formular (auch per CLI); Agenten bleiben gesperrt.
         return {"mcp_tool_id": None, "coverage": "blocked_human_only",
                 "notes": "Eingabefluss der Maske (humanForm); Menschen per Maske oder CLI, fuer Agenten gesperrt."}
+    if sd_action.get("surfaceOnly"):
+        # Spezialoberflaeche besitzt den Weg (mehrteilige Pfadparameter, Kontext aus der Maske).
+        return {"mcp_tool_id": None, "coverage": "blocked_human_only",
+                "notes": "surfaceOnly: Spezialoberflaeche besitzt den Ausfuehrungsweg; Agenten gesperrt."}
     if not sd_action.get("commandEndpoint"):
         return None
     block = agent_block(sd_action, screen_id)
@@ -511,7 +515,7 @@ def _generic_coverage(action: dict[str, Any]) -> dict[str, Any] | None:
     if block == "capability_nicht_freigegeben":
         return {"mcp_tool_id": None, "coverage": "blocked_unreleased",
                 "notes": "MCP-Schreibfähigkeit ohne explizit freigegebene Capability gesperrt."}
-    if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung"}:
+    if block in {"fuer_agenten_gesperrt", "menschliche_genehmigung", "pfadparameter_nur_adapter"}:
         return {"mcp_tool_id": None, "coverage": "blocked_human_only",
                 "notes": f"Maske behaelt die Aktion Menschen vor ({block}); CLI und Maske nutzen denselben Endpunkt."}
     return None

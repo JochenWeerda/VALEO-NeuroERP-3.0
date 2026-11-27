@@ -938,6 +938,24 @@ def build_crm_opportunity_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="crm.opportunity.update",
+        creation={
+            "endpoint": "/api/v1/crm/opportunities/",
+            "permission": "crm.opportunity.create",
+            "detailRoute": "/crm/opportunity/{entity_id}",
+            "defaults": {"status": "prospecting", "stage": "initial_contact"},
+            "fields": [
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "customer_id", "label": "Kunden-ID", "type": "text"},
+                {"key": "assigned_to", "label": "Verantwortlich", "type": "text"},
+                {"key": "stage", "label": "Phase", "type": "text"},
+                {"key": "amount", "label": "Wert", "type": "currency"},
+                {"key": "probability", "label": "Wahrscheinlichkeit %", "type": "number"},
+                {"key": "expected_close_date", "label": "Erwarteter Abschluss", "type": "date"},
+                {"key": "lead_source", "label": "Quelle", "type": "text"},
+                {"key": "status", "label": "Status", "type": "text"},
+                {"key": "description", "label": "Beschreibung", "type": "textarea"},
+            ],
+        },
         extra_actions=[
             {
                 "key": "create_activity",
@@ -1463,6 +1481,21 @@ def build_agrar_duenger_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="agrar.duenger.update",
+        creation={
+            "endpoint": "/api/v1/agrar/duenger/",
+            "permission": "agrar.duenger.create",
+            "detailRoute": "/agrar/duenger/{entity_id}",
+            "defaults": {"waehrung": "EUR"},
+            "fields": [
+                {"key": "artikelnummer", "label": "Artikel-Nr.", "type": "text", "required": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "typ", "label": "Typ", "type": "text", "required": True},
+                {"key": "hersteller", "label": "Hersteller", "type": "text"},
+                {"key": "n_gehalt", "label": "N %", "type": "number"},
+                {"key": "p_gehalt", "label": "P2O5 %", "type": "number"},
+                {"key": "k_gehalt", "label": "K2O %", "type": "number"},
+            ],
+        },
         no_workflow_reason="Duenger-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose=(
             "Duenger-Stammdaten: Naehrstoffgehalte, Verwendungshistorie und Preise fuer Duengungsplanung."
@@ -1526,6 +1559,21 @@ def build_agrar_saatgut_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="agrar.saatgut.update",
+        creation={
+            "endpoint": "/api/v1/agrar/saatgut/",
+            "permission": "agrar.saatgut.create",
+            "detailRoute": "/agrar/saatgut/{entity_id}",
+            "defaults": {"waehrung": "EUR"},
+            "fields": [
+                {"key": "artikelnummer", "label": "Artikel-Nr.", "type": "text", "required": True},
+                {"key": "name", "label": "Bezeichnung", "type": "text", "required": True},
+                {"key": "sorte", "label": "Sorte", "type": "text", "required": True},
+                {"key": "art", "label": "Kulturart", "type": "text", "required": True},
+                {"key": "zuechter", "label": "Zuechter", "type": "text"},
+                {"key": "zulassungsnummer", "label": "Zulassungs-Nr.", "type": "text"},
+                {"key": "tkm", "label": "TKG (g)", "type": "number"},
+            ],
+        },
         no_workflow_reason="Saatgut-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose=(
             "Saatgut-Stammdaten: Sorteninfo, Lagerbestaende und Anbauvertraege fuer Saatgutplanung."
@@ -1693,6 +1741,31 @@ def build_finance_kreditor_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="finance.kreditor.update",
+        creation={
+            # CreditorWrite-API (/finance/creditors) — Feldnamen 1:1 wie Backend-Schema.
+            "endpoint": "/api/v1/finance/creditors",
+            "permission": "finance.kreditor.create",
+            "detailRoute": "/finance/kreditor/{entity_id}",
+            "defaults": {"country": "Deutschland", "is_active": True},
+            "fields": [
+                {"key": "creditor_number", "label": "Kreditoren-Nr.", "type": "text", "required": True},
+                {"key": "company_name", "label": "Firmenname", "type": "text", "required": True},
+                {"key": "contact_person", "label": "Ansprechpartner", "type": "text"},
+                {"key": "email", "label": "E-Mail", "type": "email"},
+                {"key": "phone", "label": "Telefon", "type": "text"},
+                {"key": "street", "label": "Strasse", "type": "text"},
+                {"key": "postal_code", "label": "PLZ", "type": "text"},
+                {"key": "city", "label": "Ort", "type": "text"},
+                {"key": "country", "label": "Land", "type": "text"},
+                {"key": "tax_number", "label": "Steuernummer", "type": "text"},
+                {"key": "vat_id", "label": "USt-IdNr.", "type": "text"},
+                {"key": "payment_terms_days", "label": "Zahlungsziel (Tage)", "type": "number"},
+                {"key": "iban", "label": "IBAN", "type": "text"},
+                {"key": "bic", "label": "BIC", "type": "text"},
+                {"key": "bank_name", "label": "Bank", "type": "text"},
+                {"key": "is_active", "label": "Aktiv", "type": "boolean"},
+            ],
+        },
         no_workflow_reason="Kreditorenstamm ist Referenzdaten — kein Prozess-Lebenszyklus.",
         business_purpose=(
             "Kreditoren-Stammdaten: Zahlungsbedingungen, offene Posten und Bestellhistorie fuer Kreditorenbuchhaltung."
@@ -1778,6 +1851,20 @@ def build_finance_bankkonto_screen_definition() -> dict[str, Any]:
             ),
         ],
         edit_permission="finance.bankkonto.update",
+        creation={
+            "endpoint": "/api/v1/banken/konten",
+            "permission": "finance.bankkonto.create",
+            "detailRoute": "/finance/bankkonto/{entity_id}",
+            "defaults": {"waehrung": "EUR", "ist_aktiv": True, "saldo": 0},
+            "fields": [
+                {"key": "iban", "label": "IBAN", "type": "text", "required": True},
+                {"key": "bic", "label": "BIC", "type": "text", "required": True},
+                {"key": "bank_name", "label": "Bank", "type": "text", "required": True},
+                {"key": "kontoart", "label": "Kontoart", "type": "text", "required": True},
+                {"key": "waehrung", "label": "Waehrung", "type": "text"},
+                {"key": "ist_aktiv", "label": "Aktiv", "type": "boolean"},
+            ],
+        },
         no_workflow_reason="Bankkonten-Stammdaten sind Referenzdaten ohne Prozess-Lebenszyklus.",
         business_purpose="Bankkonto-Stamm: Kontodaten und Buchungshistorie fuer Finanzbuchhaltung.",
         example_prompts=[
@@ -1845,6 +1932,29 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
                          ]}]},
         ],
         "actions": [{"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.anfrage.update"}],
+        "creation": {
+            "endpoint": "/api/v1/einkauf/anfragen",
+            "permission": "einkauf.anfrage.create",
+            "detailRoute": "/einkauf/anfrage/{entity_id}",
+            "defaults": {"typ": "BANF", "prioritaet": "normal", "status": "ENTWURF", "einheit": "Stueck"},
+            "fields": [
+                {"key": "typ", "label": "Typ", "type": "select", "required": True,
+                 "options": [{"value": "BANF", "label": "Bedarfsanforderung (BANF)"},
+                             {"value": "ANF", "label": "Anfrage (ANF)"}]},
+                {"key": "anforderer", "label": "Anforderer", "type": "text", "required": True},
+                {"key": "abteilung", "label": "Abteilung", "type": "text"},
+                {"key": "prioritaet", "label": "Prioritaet", "type": "select",
+                 "options": [{"value": "niedrig", "label": "niedrig"}, {"value": "normal", "label": "normal"},
+                             {"value": "hoch", "label": "hoch"}, {"value": "dringend", "label": "dringend"}]},
+                {"key": "artikel", "label": "Artikel", "type": "text"},
+                {"key": "menge", "label": "Menge", "type": "number"},
+                {"key": "einheit", "label": "Einheit", "type": "text"},
+                {"key": "kostenstelle", "label": "Kostenstelle", "type": "text"},
+                {"key": "budget", "label": "Budget", "type": "currency"},
+                {"key": "begruendung", "label": "Begruendung", "type": "textarea"},
+                {"key": "notizen", "label": "Notizen", "type": "textarea"},
+            ],
+        },
         "noWorkflowReason": "Anfrage-Status wird durch Lieferantenantwort gesetzt — kein deklarativer Workflow.",
         "agentContract": {
             "businessPurpose": "Einkaufsanfrage: Kopfdaten und Positionen fuer Beschaffungsanfragen an Lieferanten.",
@@ -1879,7 +1989,54 @@ def build_einkauf_anfrage_screen_definition() -> dict[str, Any]:
 
 
 def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
-    """Native SD fuer einkauf/angebot (Lieferantenangebot)."""
+    """Native SD fuer einkauf/angebot — Feld-/Aktionsparitaet zur Legacy-ObjectPage.
+
+    Human, CI und MCP nutzen dieselben Endpunkte (MCP-WRITE-015 / Made-by-Studio Gate C).
+    """
+    _status_opts = [
+        {"value": "ERFASST", "label": "Erfasst"},
+        {"value": "GEPRUEFT", "label": "Geprueft"},
+        {"value": "GENEHMIGT", "label": "Genehmigt"},
+        {"value": "IN_BESTELLUNG", "label": "In Bestellung"},
+        {"value": "ABGELEHNT", "label": "Abgelehnt"},
+    ]
+    _einheit_opts = [
+        {"value": "kg", "label": "kg"}, {"value": "t", "label": "t"},
+        {"value": "l", "label": "l"}, {"value": "Stk", "label": "Stk"},
+    ]
+    _waehrung_opts = [
+        {"value": "EUR", "label": "EUR"}, {"value": "USD", "label": "USD"}, {"value": "GBP", "label": "GBP"},
+    ]
+    _incoterms = [
+        {"value": "EXW", "label": "EXW - Ab Werk"}, {"value": "FCA", "label": "FCA - Frei Frachtfuehrer"},
+        {"value": "CPT", "label": "CPT - Frachtfrei bezahlt bis"}, {"value": "CIP", "label": "CIP - Frachtfrei versichert bis"},
+        {"value": "DAT", "label": "DAT - Geliefert Terminal"}, {"value": "DAP", "label": "DAP - Geliefert benannter Ort"},
+        {"value": "DDP", "label": "DDP - Geliefert verzollt"},
+    ]
+    _kopf_fields = [
+        {"key": "angebotNummer", "label": "Angebot-Nr.", "type": "text", "readOnly": True},
+        {"key": "anfrageId", "label": "Anfrage", "type": "lookup", "dataSourceKey": "anfragen"},
+        {"key": "lieferantId", "label": "Lieferant", "type": "lookup", "dataSourceKey": "lieferanten", "required": True},
+        {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+    ]
+    _angebot_fields = [
+        {"key": "artikel", "label": "Artikel", "type": "lookup", "dataSourceKey": "artikel", "required": True},
+        {"key": "menge", "label": "Menge", "type": "number", "required": True},
+        {"key": "einheit", "label": "Einheit", "type": "select", "required": True, "options": _einheit_opts},
+        {"key": "preis", "label": "Preis", "type": "currency", "required": True},
+        {"key": "waehrung", "label": "Waehrung", "type": "select", "options": _waehrung_opts},
+        {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "type": "number", "required": True},
+        {"key": "gueltigBis", "label": "Gueltig bis", "type": "date", "required": True},
+    ]
+    _kondition_fields = [
+        {"key": "mindestabnahme", "label": "Mindestabnahme", "type": "number"},
+        {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+        {"key": "incoterms", "label": "Incoterms", "type": "select", "options": _incoterms},
+        {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+    ]
+    _edit_fields = [
+        {**f, "readOnly": False} for f in (_kopf_fields[1:] + _angebot_fields + _kondition_fields)
+    ]
     return {
         "schemaVersion": 1, "id": "einkauf/angebot", "domain": "einkauf", "mode": "detail",
         "title": "Lieferantenangebot", "subtitle": "Einkauf / Angebot",
@@ -1887,17 +2044,17 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/angebote/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/angebote/entity/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "anfragen", "endpoint": "/api/v1/einkauf/anfragen?status=FREIGEGEBEN"},
+            {"key": "lieferanten", "endpoint": "/api/v1/crm/business-partners?type=supplier"},
+            {"key": "artikel", "endpoint": "/api/v1/articles"},
         ],
         "tabs": [
-            {"key": "kopf", "label": "Angebot-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
-             "fields": [
-                 {"key": "angebotNummer", "label": "Angebot-Nr.", "type": "text", "readOnly": True},
-                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
-                 {"key": "artikel", "label": "Artikel", "type": "text"},
-                 {"key": "gueltigBis", "label": "Gueltig bis", "type": "date"},
-                 {"key": "preis", "label": "Gesamtbetrag", "type": "currency"},
-                 {"key": "status", "label": "Status", "type": "text"},
-             ]},
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kopf_fields},
+            {"key": "angebot", "label": "Angebotsdetails", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _angebot_fields},
+            {"key": "konditionen", "label": "Konditionen", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kondition_fields},
             {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
              "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
                          "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
@@ -1909,21 +2066,110 @@ def build_einkauf_angebot_screen_definition() -> dict[str, Any]:
                              {"key": "betrag", "label": "Betrag", "numeric": True, "sortable": True, "renderKind": "currency"},
                          ]}]},
         ],
-        "actions": [{"key": "bestellen", "label": "Bestellung erstellen", "kind": "primary", "dangerLevel": "safe", "permission": "einkauf.angebot.order", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST", "requiresConfirmation": True}],
-        "noWorkflowReason": "Angebots-Status wird durch Bestellvorgang gesetzt — kein separater Workflow.",
-        "agentContract": {
-            "businessPurpose": "Lieferantenangebot: Preise und Positionen fuer Angebotsvergleich und Bestellentscheidung.",
-            "examplePrompts": ["Wie lange ist Angebot {entity_id} gueltig?", "Zeige alle Positionen und Preise von Angebot {entity_id}."],
-            "sensitiveFields": ["gesamtbetrag", "einzelpreis"],
-            "testSelectors": {"screenRoot": "[data-testid='einkauf-angebot']", "primaryAction": "[data-testid='action-bestellen']", "summaryArea": "[data-testid='mask-summary']"},
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update", "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}",
+             "method": "PUT", "inputPrefill": "entity", "inputFields": _edit_fields},
+            {"key": "pruefen", "label": "Pruefen", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update",
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/review", "method": "POST"},
+            {"key": "genehmigen", "label": "Genehmigen", "kind": "primary", "dangerLevel": "safe",
+             "permission": "einkauf.angebot.update",
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/approve", "method": "POST"},
+            {"key": "ablehnen", "label": "Ablehnen", "kind": "secondary", "dangerLevel": "critical",
+             "permission": "einkauf.angebot.update", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/reject", "method": "POST"},
+            # Fachaktion bestellen = Maske/MCP/CLI/REST gleicher Weg (MCP-MASK-WRITES-NEXT + UIX-053)
+            {"key": "bestellen", "label": "In Bestellung", "kind": "secondary", "dangerLevel": "moderate",
+             "permission": "einkauf.angebot.order", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/angebote/{entity_id}/actions/bestellen", "method": "POST",
+             "resultNavigationRoute": "/einkauf/bestellung/{purchaseOrderId}"},
+        ],
+        "creation": {
+            "endpoint": "/api/v1/einkauf/angebote",
+            "permission": "einkauf.angebot.create",
+            "detailRoute": "/einkauf/angebot/{entity_id}",
+            "defaults": {"status": "ERFASST", "waehrung": "EUR", "einheit": "Stk"},
+            "dataSources": [
+                {"key": "anfragen", "endpoint": "/api/v1/einkauf/anfragen?status=FREIGEGEBEN"},
+                {"key": "lieferanten", "endpoint": "/api/v1/crm/business-partners?type=supplier"},
+                {"key": "artikel", "endpoint": "/api/v1/articles"},
+            ],
+            "fields": [
+                {"key": "anfrageId", "label": "Anfrage", "type": "lookup", "dataSourceKey": "anfragen"},
+                {"key": "lieferantId", "label": "Lieferant", "type": "lookup", "dataSourceKey": "lieferanten", "required": True},
+                {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+                {"key": "artikel", "label": "Artikel", "type": "lookup", "dataSourceKey": "artikel", "required": True},
+                {"key": "menge", "label": "Menge", "type": "number", "required": True},
+                {"key": "einheit", "label": "Einheit", "type": "select", "required": True, "options": _einheit_opts},
+                {"key": "preis", "label": "Preis", "type": "currency", "required": True},
+                {"key": "waehrung", "label": "Waehrung", "type": "select", "options": _waehrung_opts},
+                {"key": "lieferzeit", "label": "Lieferzeit (Tage)", "type": "number", "required": True},
+                {"key": "gueltigBis", "label": "Gueltig bis", "type": "date", "required": True},
+                {"key": "mindestabnahme", "label": "Mindestabnahme", "type": "number"},
+                {"key": "zahlungsbedingungen", "label": "Zahlungsbedingungen", "type": "text"},
+                {"key": "incoterms", "label": "Incoterms", "type": "select", "options": _incoterms},
+                {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+            ],
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "noWorkflowReason": "Angebots-Stand kommt aus Status + Aktionen pruefen/genehmigen/ablehnen/bestellen — kein separater Workflow-YAML.",
+        "agentContract": {
+            "businessPurpose": "Lieferantenangebot: Stammdaten, Angebotsdetails, Konditionen und Bestellueberfuehrung — gleiche Wege fuer Human, CI und MCP.",
+            "examplePrompts": [
+                "Wie lange ist Angebot {entity_id} gueltig?",
+                "Zeige alle Positionen und Preise von Angebot {entity_id}.",
+                "Genehmige Angebot {entity_id} und erzeuge eine Bestellung.",
+            ],
+            "sensitiveFields": ["preis", "mindestabnahme", "zahlungsbedingungen"],
+            "testSelectors": {
+                "screenRoot": "[data-testid='einkauf-angebot']",
+                "primaryAction": "[data-testid='action-genehmigen']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "workflow", "tableProfile": "standard",
+        },
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
 
 
 def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
-    """Native SD fuer einkauf/anlieferavis."""
+    """Native SD fuer einkauf/anlieferavis — Feld-/Aktionsparitaet zur Legacy-ObjectPage.
+
+    Human, CI und MCP nutzen dieselben Endpunkte (MCP-WRITE-015 / Made-by-Studio Gate C).
+    """
+    _status_opts = [
+        {"value": "GESENDET", "label": "Gesendet"},
+        {"value": "BESTAETIGT", "label": "Bestaetigt"},
+        {"value": "STORNIERT", "label": "Storniert"},
+        {"value": "ERHALTEN", "label": "Erhalten"},
+    ]
+    _kopf_fields = [
+        {"key": "bestellungId", "label": "Bestellung", "type": "lookup", "dataSourceKey": "bestellungen", "required": True},
+        {"key": "avisNummer", "label": "Avis-Nummer", "type": "text", "required": True},
+        {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+        {"key": "geplantesAnlieferDatum", "label": "Geplantes Anlieferdatum", "type": "datetime", "required": True},
+    ]
+    _fahrzeug_fields = [
+        {"key": "kennzeichen", "label": "Kennzeichen", "type": "text", "required": True},
+        {"key": "fahrer", "label": "Fahrer", "type": "text", "required": True},
+        {"key": "telefon", "label": "Telefon", "type": "text"},
+    ]
+    _belege_fields = [
+        {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+    ]
+    _position_row = [
+        {"key": "positionId", "label": "Bestellposition", "type": "text", "required": True},
+        {"key": "menge", "label": "Menge", "type": "number", "required": True},
+        {"key": "chargenNummer", "label": "Charge-Nr.", "type": "text"},
+        {"key": "verpackung", "label": "Verpackung", "type": "text"},
+    ]
+    _edit_fields = _kopf_fields + _fahrzeug_fields + _belege_fields + [
+        {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+         "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
+    ]
     return {
         "schemaVersion": 1, "id": "einkauf/anlieferavis", "domain": "einkauf", "mode": "detail",
         "title": "Anlieferavis", "subtitle": "Einkauf / Wareneingangsankuendigung",
@@ -1931,42 +2177,84 @@ def build_einkauf_anlieferavis_screen_definition() -> dict[str, Any]:
         "dataSources": [
             {"key": "entity", "endpoint": "/api/v1/einkauf/anlieferavis/{entity_id}"},
             {"key": "positionen", "endpoint": "/api/v1/masks/einkauf/anlieferavise/entity/{entity_id}/tabs/positionen", "pageSize": 25},
+            {"key": "bestellungen", "endpoint": "/api/v1/belege/purchase_order?status=open"},
         ],
         "tabs": [
-            {"key": "kopf", "label": "Avis-Kopf", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+            {"key": "kopf", "label": "Stammdaten", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _kopf_fields},
+            {"key": "fahrzeug", "label": "Fahrzeug & Fahrer", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _fahrzeug_fields},
+            {"key": "positionen", "label": "Positionen", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
              "fields": [
-                 {"key": "avisNummer", "label": "Avis-Nr.", "type": "text", "readOnly": True},
-                 {"key": "lieferant", "label": "Lieferant", "type": "text"},
-                 {"key": "geplantesAnlieferDatum", "label": "Lieferdatum", "type": "date"},
-                 {"key": "bestellung", "label": "Bestellung", "type": "text"},
-                 {"key": "kennzeichen", "label": "Kennzeichen", "type": "text"},
-                 {"key": "status", "label": "Status", "type": "text"},
+                 {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+                  "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
              ]},
-            {"key": "positionen", "label": "Positionen", "lazy": True, "keepAlive": False,
-             "tables": [{"key": "positionen", "label": "Positionen", "dataSourceKey": "positionen",
-                         "serverPagination": True, "pageSize": 25, "virtualized": True, "rowHeight": 52,
-                         "columns": [
-                             {"key": "artikel_nr", "label": "Artikel-Nr.", "sortable": True},
-                             {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "width": 200},
-                             {"key": "menge", "label": "Menge", "numeric": True, "sortable": True, "renderKind": "number"},
-                             {"key": "einheit", "label": "Einheit", "width": 70},
-                             {"key": "charge", "label": "Charge", "width": 120},
-                         ]}]},
+            {"key": "belege", "label": "Belege", "lazy": False, "keepAlive": True, "dataSourceKey": "entity",
+             "fields": _belege_fields},
         ],
-        "actions": [{"key": "wareneingang", "label": "Wareneingang buchen", "kind": "primary", "dangerLevel": "moderate", "permission": "lager.wareneingang.create", "requiresConfirmation": True, "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang", "method": "POST",
-            "inputFields": [
-                {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
-                {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
-                 "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
-            ]}],
-        "noWorkflowReason": "Avis-Status wird durch Wareneingangsbuchung automatisch gesetzt.",
-        "agentContract": {
-            "businessPurpose": "Anlieferavis: Ankuendigung eines Wareneingangs mit Positionen und Lieferdatum.",
-            "examplePrompts": ["Wann ist Avis {entity_id} angekuendigt?", "Zeige alle Positionen von Avis {entity_id}."],
-            "sensitiveFields": [],
-            "testSelectors": {"screenRoot": "[data-testid='einkauf-anlieferavis']", "primaryAction": "[data-testid='action-wareneingang']", "summaryArea": "[data-testid='mask-summary']"},
+        "actions": [
+            {"key": "bearbeiten", "label": "Bearbeiten", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}", "method": "PUT",
+             "inputPrefill": "entity", "inputFields": _edit_fields},
+            {"key": "senden", "label": "Avis senden", "kind": "primary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/send", "method": "POST"},
+            {"key": "bestaetigen", "label": "Bestaetigen", "kind": "secondary", "dangerLevel": "safe",
+             "permission": "einkauf.anlieferavis.update",
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/confirm", "method": "POST"},
+            {"key": "stornieren", "label": "Stornieren", "kind": "secondary", "dangerLevel": "critical",
+             "permission": "einkauf.anlieferavis.update", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/cancel", "method": "POST"},
+            {"key": "wareneingang", "label": "Wareneingang buchen", "kind": "secondary", "dangerLevel": "moderate",
+             "permission": "lager.wareneingang.create", "requiresConfirmation": True,
+             "commandEndpoint": "/api/v1/einkauf/anlieferavis/{entity_id}/actions/wareneingang", "method": "POST",
+             "inputFields": [
+                 {"key": "lieferschein_nr", "label": "Lieferschein-Nr.", "type": "text", "required": True},
+                 {"key": "lager_id", "label": "Lager", "type": "select", "required": True,
+                  "optionsSource": {"endpoint": "/api/v1/inventory/warehouses/", "valueKey": "id", "labelKey": "name"}},
+             ]},
+        ],
+        "creation": {
+            "endpoint": "/api/v1/einkauf/anlieferavis",
+            "permission": "einkauf.anlieferavis.create",
+            "detailRoute": "/einkauf/anlieferavis/{entity_id}",
+            "defaults": {"status": "GESENDET"},
+            "dataSources": [
+                {"key": "bestellungen", "endpoint": "/api/v1/belege/purchase_order?status=open"},
+            ],
+            "fields": [
+                {"key": "bestellungId", "label": "Bestellung", "type": "lookup", "dataSourceKey": "bestellungen", "required": True},
+                {"key": "avisNummer", "label": "Avis-Nummer", "type": "text", "required": True},
+                {"key": "status", "label": "Status", "type": "select", "required": True, "options": _status_opts},
+                {"key": "geplantesAnlieferDatum", "label": "Geplantes Anlieferdatum", "type": "datetime", "required": True},
+                {"key": "kennzeichen", "label": "Kennzeichen", "type": "text", "required": True},
+                {"key": "fahrer", "label": "Fahrer", "type": "text", "required": True},
+                {"key": "telefon", "label": "Telefon", "type": "text"},
+                {"key": "positionen", "label": "Avis-Positionen", "type": "table", "required": True,
+                 "rowFields": _position_row, "tableEditing": {"allowAdd": True, "allowDelete": True}},
+                {"key": "bemerkungen", "label": "Bemerkungen", "type": "textarea"},
+            ],
         },
-        "layout": {"preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44},
+        "noWorkflowReason": "Avis-Stand kommt aus Status + Aktionen senden/bestaetigen/stornieren/wareneingang — kein separater Workflow-YAML.",
+        "agentContract": {
+            "businessPurpose": "Anlieferavis: Bestellung, Fahrzeug, Positionen und Wareneingang — gleiche Wege fuer Human, CI und MCP.",
+            "examplePrompts": [
+                "Wann ist Avis {entity_id} angekuendigt?",
+                "Zeige alle Positionen von Avis {entity_id}.",
+                "Bestaetige Avis {entity_id} und buche den Wareneingang.",
+            ],
+            "sensitiveFields": [],
+            "testSelectors": {
+                "screenRoot": "[data-testid='einkauf-anlieferavis']",
+                "primaryAction": "[data-testid='action-senden']",
+                "summaryArea": "[data-testid='mask-summary']",
+            },
+        },
+        "layout": {
+            "preferredMode": "desktopDense", "mobileMode": "mobileStack", "touchTargetPx": 44,
+            "floorplan": "objectPage", "density": "compact", "contextRail": "workflow", "tableProfile": "standard",
+        },
         "performance": {"initialPayloadBudgetKb": 32, "requiresLazyTabs": True, "requiresVirtualTables": False, "lookupMinChars": 2, "bundleGroup": "einkauf"},
     }
 
@@ -2089,6 +2377,36 @@ def build_qualitaet_reklamation_screen_definition() -> dict[str, Any]:
             {"key": "edit", "label": "Bearbeiten", "kind": "primary", "dangerLevel": "safe", "permission": "qualitaet.reklamation.update"},
             {"key": "abschliessen", "label": "Abschliessen", "kind": "secondary", "dangerLevel": "moderate", "permission": "qualitaet.reklamation.close", "requiresConfirmation": True, "commandEndpoint": "/api/v1/reklamationen/{entity_id}/actions/abschliessen", "method": "POST"},
         ],
+        "creation": {
+            "endpoint": "/api/v1/reklamationen",
+            "permission": "qualitaet.reklamation.create",
+            "detailRoute": "/qualitaet/reklamation/{entity_id}",
+            "responseIdKey": "reklamation_id",
+            "defaults": {"typ": "qualitaet", "positionen": []},
+            "fields": [
+                {"key": "lieferant_id", "label": "Lieferanten-ID", "type": "text", "required": True},
+                {"key": "typ", "label": "Typ", "type": "select", "required": True,
+                 "options": [
+                     {"value": "qualitaet", "label": "Qualitaet"},
+                     {"value": "menge", "label": "Menge"},
+                     {"value": "preis", "label": "Preis"},
+                     {"value": "liefertermin", "label": "Liefertermin"},
+                     {"value": "sonstige", "label": "Sonstige"},
+                 ]},
+                {"key": "zustaendiger", "label": "Zustaendig", "type": "text", "required": True},
+                {"key": "frist_datum", "label": "Frist", "type": "date", "required": True},
+                {"key": "kontrakt_id", "label": "Kontrakt-ID", "type": "text"},
+                {"key": "positionen", "label": "Positionen", "type": "table", "required": True,
+                 "rowFields": [
+                     {"key": "artikel_id", "label": "Artikel-ID", "type": "text", "required": True},
+                     {"key": "charge_id", "label": "Charge", "type": "text"},
+                     {"key": "beanstandete_menge", "label": "Beanstandete Menge", "type": "number", "required": True},
+                     {"key": "beanstandeter_wert_eur", "label": "Wert EUR", "type": "currency", "required": True},
+                     {"key": "begruendung", "label": "Begruendung", "type": "textarea", "required": True},
+                 ],
+                 "tableEditing": {"allowAdd": True, "allowDelete": True}},
+            ],
+        },
         "noWorkflowReason": "Reklamations-Status wird manuell gesetzt — Massnahmentracking ist tabellenbasiert.",
         "agentContract": {
             "businessPurpose": "Reklamation: Qualitaetsmaengel mit Massnahmen und Dokumenten fuer Reklamationsbearbeitung.",
@@ -5428,6 +5746,71 @@ def _apply_season_profile(definition: dict[str, Any], today: str | None) -> None
     definition["tiles"] = sorted(tiles, key=lambda t: rank.get(t.get("key"), len(order)))
 
 
+def _ensure_table_query_flags(definition: dict[str, Any]) -> None:
+    """Advisory sort_whitelist/filter_columns: mind. eine sortier-/filterbare Spalte je Tabelle."""
+    trivial = {"id", "pk", "uuid", "key"}
+    tables = list(definition.get("tables") or [])
+    for tab in definition.get("tabs") or []:
+        tables.extend(tab.get("tables") or [])
+    for table in tables:
+        cols = [c for c in (table.get("columns") or []) if isinstance(c, dict) and c.get("key")]
+        if not cols:
+            continue
+        if not any(c.get("sortable") for c in cols):
+            target = next((c for c in cols if str(c.get("key", "")).lower() not in trivial), cols[0])
+            target["sortable"] = True
+        if not any(c.get("filterable") for c in cols):
+            target = next((c for c in cols if str(c.get("key", "")).lower() not in trivial), cols[0])
+            target["filterable"] = True
+
+
+_DEFAULT_DOCUMENT_PHASES = (
+    {"key": "ERFASST", "label": "Erfasst"},
+    {"key": "FREIGEGEBEN", "label": "Freigegeben"},
+    {"key": "GEBUCHT", "label": "Gebucht"},
+)
+
+
+def _ensure_process_band_phases(definition: dict[str, Any]) -> None:
+    """FSX-030: Beleg-/Kettenmasken ohne workflow.phases erhalten die DocFlow-Phasen."""
+    mode = definition.get("mode")
+    floor = (definition.get("layout") or {}).get("floorplan")
+    needs = mode in ("detail", "transaction") or floor in ("objectPage", "transaction")
+    if not needs:
+        return
+    workflow = definition.get("workflow")
+    if isinstance(workflow, dict) and workflow.get("phases"):
+        return
+    screen_id = str(definition.get("id") or "")
+    belegart = ((definition.get("variant") or {}).get("belegart")
+                or (definition.get("documentVariant") or {}).get("variantId"))
+    is_beleg = screen_id.startswith("beleg/") or bool(belegart)
+    if definition.get("noWorkflowReason") and not definition.get("processChain") and not is_beleg:
+        return
+    if not (definition.get("processChain") or (isinstance(workflow, dict) and workflow.get("processKey"))
+            or is_beleg):
+        return
+    process_key = (
+        (workflow or {}).get("processKey")
+        if isinstance(workflow, dict)
+        else None
+    ) or (f"beleg.{belegart}" if belegart else f"document.{screen_id or 'mask'}")
+    document_type = (workflow or {}).get("documentType") if isinstance(workflow, dict) else None
+    if not document_type and belegart:
+        document_type = belegart
+    phases = [dict(p) for p in _DEFAULT_DOCUMENT_PHASES]
+    variant = definition.get("variant") or {}
+    if is_beleg and "bucht" in variant and not variant.get("bucht"):
+        phases = [p for p in phases if p["key"] != "GEBUCHT"]
+    definition["workflow"] = {
+        **(workflow if isinstance(workflow, dict) else {}),
+        "processKey": process_key,
+        "phases": phases,
+        **({"documentType": document_type} if document_type else {}),
+    }
+    definition.pop("noWorkflowReason", None)
+
+
 def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: str | None) -> dict[str, Any]:
     definition = _with_meridian_action_contract(_with_meridian_identity(_with_meridian_layout(definition)))
     contract = definition.setdefault("agentContract", {})
@@ -5442,11 +5825,18 @@ def _hydrate_screen_definition(definition: dict[str, Any], mask_id: str, today: 
                 declared.add(action["key"])
     contract.setdefault("sensitiveFields", [])
     contract.setdefault("synonyms", _AGENT_SYNONYMS.get(mask_id, []))
-    _resolve_tile_routes(definition)
-    _apply_season_profile(definition, today)
+    if not contract.get("businessPurpose"):
+        contract["businessPurpose"] = definition.get("title") or mask_id
+    selectors = contract.setdefault("testSelectors", {})
+    if not selectors.get("screenRoot"):
+        selectors["screenRoot"] = f"[data-testid='screen-{mask_id}']"
+    _ensure_table_query_flags(definition)
     from app.core.process_chains import attach_process_chain
 
     attach_process_chain(definition, get_screen_list_route)
+    _ensure_process_band_phases(definition)
+    _resolve_tile_routes(definition)
+    _apply_season_profile(definition, today)
     return definition
 
 

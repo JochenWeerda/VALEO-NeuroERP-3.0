@@ -94,7 +94,11 @@ export default function RationsEditorPage(): JSX.Element {
   const rationId = new URLSearchParams(location.search).get('ration_id')
 
   return (
-    <div className="p-6">
+    <div
+      className="p-6"
+      role="region"
+      aria-label="Rationseditor Arbeitsbereich"
+    >
       {rationId ? <RationEditor rationId={rationId} /> : <RationWorklist />}
     </div>
   )

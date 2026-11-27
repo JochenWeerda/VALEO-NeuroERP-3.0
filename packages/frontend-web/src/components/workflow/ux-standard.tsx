@@ -59,7 +59,7 @@ export function RoleFocusBar<T extends string = string>({
           <p className="text-[12px] text-gray-500">{selected?.description}</p>
         </div>
         {typeof visibleCount === 'number' && typeof totalCount === 'number' ? (
-          <span className="text-[11px] font-bold uppercase tracking-wide text-gray-600">
+          <span className="text-2xs font-bold uppercase tracking-wide text-gray-600">
             {visibleCount} von {totalCount} sichtbar
           </span>
         ) : null}
@@ -99,7 +99,7 @@ export function OperationalTaskPlan({ title = 'Arbeitsplan', items }: { title?: 
       <div className="space-y-3">
         {items.map((item, index) => (
           <div key={item.label} className="flex items-start gap-3">
-            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[11px] font-black ${item.done ? 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] text-status-success' : 'border-border bg-muted text-muted-foreground'}`}>
+            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-2xs font-black ${item.done ? 'border-[hsl(var(--color-semantic-success-500-hsl))] bg-[hsl(var(--color-semantic-success-50-hsl))] text-status-success' : 'border-border bg-muted text-muted-foreground'}`}>
               {item.done ? <Check className="h-3.5 w-3.5" /> : index + 1}
             </div>
             <div className="min-w-0">
@@ -204,13 +204,13 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
           {decision.allowed ? <CheckCircle2 className="h-5 w-5 text-status-success" /> : <ShieldAlert className="h-5 w-5 text-status-error" />}
           <h2 className="text-base font-bold text-gray-900">Darf der Prozess abgeschlossen werden?</h2>
         </div>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-gray-600">Entscheidung</span>
+        <span className="text-2xs font-bold uppercase tracking-widest text-gray-600">Entscheidung</span>
       </div>
       <div className="flex flex-wrap items-start gap-8 p-6 lg:flex-nowrap lg:gap-12">
         <div className="flex-1 space-y-4">
           <p className="max-w-3xl text-sm leading-relaxed text-gray-600">{decision.summary}</p>
           {typeof decision.blockerCount === 'number' && decision.blockerCount > 0 ? (
-            <Callout variant="error" className="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide">
+            <Callout variant="error" className="inline-flex items-center gap-2 rounded border px-3 py-1.5 text-2xs font-bold uppercase tracking-wide">
               <AlertTriangle className="h-3.5 w-3.5" />
               {decision.blockerCount} aktive Stopper
             </Callout>
@@ -230,11 +230,11 @@ export function ManagementDecisionPanel({ decision }: { decision: ManagementDeci
       </div>
       <div className="grid border-t border-gray-100 bg-gray-50/60 md:grid-cols-2">
         <div className="border-b border-gray-100 p-4 md:border-b-0 md:border-r">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">Naechster Fokus</p>
+          <p className="text-2xs font-bold uppercase tracking-wide text-gray-600">Naechster Fokus</p>
           <p className="mt-1 text-sm font-bold text-gray-800">{decision.nextFocus ?? 'Regelpruefung terminieren'}</p>
         </div>
         <div className="p-4">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-gray-600">Vorlage Entscheidung</p>
+          <p className="text-2xs font-bold uppercase tracking-wide text-gray-600">Vorlage Entscheidung</p>
           {decision.template ? (
             <a href={decision.template.href} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-[#005ca5] hover:underline">
               {decision.template.label}
@@ -270,7 +270,7 @@ export function CrudCapabilityChecklist({ capabilities }: { capabilities: CrudCa
                 {Icon ? <Icon className={`h-3.5 w-3.5 ${capability.available ? 'text-status-success' : 'text-status-warning'}`} /> : null}
                 <span className={`text-[12px] font-bold ${capability.available ? 'text-status-success' : 'text-status-warning'}`}>{capability.label}</span>
               </div>
-              <p className="mt-1 text-[11px] text-gray-600">{capability.hint}</p>
+              <p className="mt-1 text-2xs text-gray-600">{capability.hint}</p>
             </Callout>
           )
         })}

@@ -28,10 +28,10 @@ import {
   type Rabattklasse,
   type Rabattsatz,
 } from '@/lib/api/konditionen'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Calculator, List, Percent, Tag, Trash2, Plus } from 'lucide-react'
 
 const TABS = ['Preislisten', 'Rabattgruppen', 'Rabattklassen', 'Rabattsätze', 'Individualpreise', 'Preisfindung'] as const
-type Tab = (typeof TABS)[number]
 
 function fmt(v: number) {
   return v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 4 })
@@ -42,24 +42,6 @@ function fmtEur(v: number) {
 }
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
-
-function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void }) {
-  return (
-    <div className="flex gap-1 border-b flex-wrap">
-      {TABS.map(t => (
-        <button
-          key={t}
-          onClick={() => onChange(t)}
-          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-            active === t ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
-          }`}
-        >
-          {t}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 function EmptyRow({ cols, msg = 'Keine Einträge' }: { cols: number; msg?: string }) {
   return (
@@ -842,8 +824,6 @@ function PreisfindungTab() {
 // ── Hauptseite ────────────────────────────────────────────────────────────────
 
 export default function KonditionssystemPage(): JSX.Element {
-  const [activeTab, setActiveTab] = useState<Tab>('Preislisten')
-
   return (
     <div className="p-6 space-y-4 max-w-6xl">
       <div>
@@ -853,14 +833,21 @@ export default function KonditionssystemPage(): JSX.Element {
         </p>
       </div>
 
-      <TabBar active={activeTab} onChange={setActiveTab} />
-
-      {activeTab === 'Preislisten' && <PreislistenTab />}
-      {activeTab === 'Rabattgruppen' && <RabattgruppenTab />}
-      {activeTab === 'Rabattklassen' && <RabattklassenTab />}
-      {activeTab === 'Rabattsätze' && <RabattsaetzeTab />}
-      {activeTab === 'Individualpreise' && <IndividualpreiseTab />}
-      {activeTab === 'Preisfindung' && <PreisfindungTab />}
+      <Tabs defaultValue="Preislisten">
+        <TabsList className="flex h-auto min-h-touch w-full flex-wrap justify-start" aria-label="Konditionssystem">
+          {TABS.map((tab) => (
+            <TabsTrigger key={tab} value={tab} className="min-h-touch whitespace-nowrap">
+              {tab}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value="Preislisten"><PreislistenTab /></TabsContent>
+        <TabsContent value="Rabattgruppen"><RabattgruppenTab /></TabsContent>
+        <TabsContent value="Rabattklassen"><RabattklassenTab /></TabsContent>
+        <TabsContent value="Rabattsätze"><RabattsaetzeTab /></TabsContent>
+        <TabsContent value="Individualpreise"><IndividualpreiseTab /></TabsContent>
+        <TabsContent value="Preisfindung"><PreisfindungTab /></TabsContent>
+      </Tabs>
     </div>
   )
 }

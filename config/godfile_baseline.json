@@ -2,7 +2,6 @@
   "description": "Exakte, nur sinkende Baseline produktiver Python-Endpunkte ueber 1000 LOC.",
   "loc_limit": 1000,
   "files": {
-    "app/api/v1/endpoints/admin_suite.py": 1035,
     "app/api/v1/endpoints/agrar_feldbuch.py": 1096,
     "app/api/v1/endpoints/business_partners.py": 2704,
     "app/api/v1/endpoints/compat.py": 2931,
@@ -11,7 +10,7 @@
     "app/api/v1/endpoints/mask_frontend_bridges.py": 1298,
     "app/api/v1/endpoints/personal.py": 3081,
     "app/api/v1/endpoints/portal_feldbuch.py": 1945,
-    "app/api/v1/endpoints/process_kernel_api.py": 6092,
+    "app/api/v1/endpoints/process_kernel_api.py": 6081,
     "app/api/v1/endpoints/rations_optimization.py": 8855
   }
 }

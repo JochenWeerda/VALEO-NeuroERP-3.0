@@ -113,7 +113,7 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 6:
 - `verladung/liste` — Verladungen
 - `verladung/lkw-beladung` — Lkw beladung
 
-Aktionen der Domaenenmasken: 58, davon serverwirksam 13; ohne CLI 0; nicht verfuegbar 11; nicht deklariert 3.
+Aktionen der Domaenenmasken: 64, davon serverwirksam 19; ohne CLI 2; nicht verfuegbar 11; nicht deklariert 3.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 

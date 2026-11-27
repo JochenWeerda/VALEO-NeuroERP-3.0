@@ -12,7 +12,7 @@ export const ARTICLE_FETCH_IMAGE_PATH = (articleId: string) =>
   `/api/v1/articles/${encodeURIComponent(articleId)}/fetch-image`
 
 /**
- * Domänen-UI-Defaults aus Artikelstamm (`stamm-legacy` DEFAULT_ARTIKEL /
+ * Domänen-UI-Defaults aus dem historischen Artikelstamm (DEFAULT_ARTIKEL /
  * kategorieOptions / einheitOptions). Keine Fantasiewerte:
  * - unit: 't' (Masken-Default fuer Neuanlage)
  * - category: 'Sonstige' (letzte Option / Fallback mapApiToForm)

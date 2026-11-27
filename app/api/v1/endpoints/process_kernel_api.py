@@ -536,17 +536,6 @@ def execute_action(
     return result.model_dump(mode="json")
 
 
-@router.get("/actions/idempotency/overview", response_model=ProcessKernelOut, summary="Idempotency overview abrufen")
-def get_idempotency_overview(tenant_id: str = Depends(get_tenant_id)) -> dict[str, Any]:
-    """Liefert einen Monitoring-Ãœberblick Ã¼ber den Idempotenz-Layer."""
-    return {
-        **build_idempotency_overview(tenant_id),
-        "lookup_paths": [
-            "/api/v1/process/actions/execute",
-            "/api/v1/process/actions/idempotency/{tenant_id}/{idempotency_key}",
-            "/api/v1/process/actions/{execution_id}",
-        ],
-    }
 
 
 @router.get("/actions/idempotency/{tenant_id}/{idempotency_key}", response_model=ProcessKernelOut, summary="Action by idempotency abrufen")

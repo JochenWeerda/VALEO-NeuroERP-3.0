@@ -268,11 +268,11 @@ export function DmsAnhangDialog({
         </DialogHeader>
 
         <Tabs defaultValue="anhaenge" className="flex-1 flex flex-col min-h-0">
-          <TabsList className="w-full justify-start">
+          <TabsList aria-label="DMS-Anhänge" className="w-full justify-start">
             <TabsTrigger value="anhaenge">
               Anhänge
               {documents.length > 0 && (
-                <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 text-[10px] font-semibold">
+                <span className="ml-1.5 rounded-full bg-primary/15 px-1.5 text-2xs tracking-wide uppercase font-semibold">
                   {documents.length}
                 </span>
               )}
@@ -281,7 +281,7 @@ export function DmsAnhangDialog({
               <Inbox className="h-3.5 w-3.5 mr-1" />
               Eingang (Scanner)
               {inboxDocs.length > 0 && (
-                <span className="ml-1.5 rounded-full bg-amber-500/20 text-amber-700 px-1.5 text-[10px] font-semibold">
+                <span className="ml-1.5 rounded-full bg-status-warning/20 text-status-warning px-1.5 text-2xs tracking-wide uppercase font-semibold">
                   {inboxDocs.length}
                 </span>
               )}

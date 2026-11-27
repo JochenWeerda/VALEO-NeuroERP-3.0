@@ -20,7 +20,7 @@ Erzeugt mit `python scripts/domaenen_abnahme.py` aus [`kontrakte-strecke.yaml`](
 | KS-08 | Preisfixierung (Matif, Praemie, Notierung) | Kontraktposition Matif?, Matif-Preis, Matif-Zuschlag; Fixierung Teilmengen | `kontrakte/vorgang/:variante/:id` (studio_versioniert)<br>`agrar/kontrakt-fixierung` (studio_versioniert) | KONTRAKT_BEARBEITEN; Bearbeiter aus dem Token | `tests/test_kontrakt_vorgang.py::test_trockenlauf_fixiert_nichts`<br>`tests/test_kontrakt_vorgang.py::test_fixieren_schreibt_den_bearbeiter_aus_dem_token`<br>`tests/test_kontrakt_vorgang.py::test_ueberfixieren_wird_abgelehnt`<br>`tests/test_kontrakt_vorgang.py::test_storno_verlangt_einen_grund`<br>`tests/test_kontrakt_vorgang.py::test_fremder_kontrakt_ist_fuer_kommandos_unbekannt` | abgenommen |
 | KS-09 | Kontraktabrechnung und Kontraktmahnung | Kontrakt-Abrechnung der Bewegungen; Mahnung ueberfaelliger Kontrakte | `kontrakte/vorgang/:variante/:id` (studio_versioniert)<br>`agrar/kontrakt-settlement` (studio_versioniert) | KONTRAKT_BEARBEITEN; Storno einer Bewegung mit Grund | `tests/test_kontrakt_vorgang.py::test_uebergabe_rechnet_die_offenen_bewegungen_ab`<br>`tests/test_kontrakt_vorgang.py::test_mahnen_nur_wenn_faellig`<br>`tests/test_kontrakt_vorgang.py::test_stornierter_kontrakt_ist_kein_mahnkandidat` | teilweise |
 | KS-10 | Kontrakt aendern, stornieren und loeschen | Kontrakt-Menue Kontrakte loeschen / Kontrakte modifizieren (Loesch-Nr.) | `kontrakte/:id` (studio_versioniert)<br>`agrar/kontrakte/:id` (studio_versioniert) | KONTRAKT_BEARBEITEN; Loeschen und manuelle Nummer KONTRAKT_ADMIN | — | teilweise |
-| KS-11 | Kontraktklassen, Mengenart und Mengenzeitraeume | Kontrakt-Maske Mengen-Art (Dropdown, z.B. Einzelmengen), Gesamt-Menge, Einheit | `kontrakte/kontraktklassen` (studio_versioniert)<br>`kontrakte/mengenzeitraeume` (studio_versioniert) | KONTRAKT_BEARBEITEN | — | teilweise |
+| KS-11 | Kontraktklassen, Mengenart und Mengenzeitraeume | Kontrakt-Maske Mengen-Art (Dropdown, z.B. Einzelmengen), Gesamt-Menge, Einheit | `kontrakte/kontraktklassen` (studio_versioniert)<br>`kontrakte/mengenzeitraeume` (screen_definition) | KONTRAKT_BEARBEITEN | — | teilweise |
 | KS-12 | Preisabsicherung (Hedge) zum Kontrakt | Matif-Bezug der Kontraktposition und Absicherung (Warenterminboerse) | `vertrag/neu` (studio_versioniert)<br>`vertrag/:id` (studio_versioniert) | KONTRAKT_BEARBEITEN | — | teilweise |
 | KS-13 | Rahmenvertraege (Mengenrahmen) | Rahmenkontrakte mit Abrufen; Rahmenvertragsnummer je Mandant | `vertrag/rahmenvertraege` (studio_versioniert, **Platzhalter**) | VERKAUF/EINKAUF lesen; Anlage mit Schreibrecht | `tests/test_rls_domain_ops_teil2.py::test_rahmenvertragsnummer_je_mandant`<br>`tests/test_rls_domain_ops_teil2.py::test_frachttarife_und_rahmenvertraege_im_eigenen_mandanten` | teilweise |
 | KS-14 | Streckengeschaeft erfassen (Einkaufs- und Verkaufsseite) | ERFASSUNG > Strecke (Strg+E, Kontrakte Lieferanten/Kunden - Strecke); Reiter STRECKE, LIEFERANTEN/KUNDEN, KONTRAKTE, BE-/ENTLADESTELLE, PARTIE/NLS | `strecke/streckengeschaeft` (studio_versioniert)<br>`strecke/menu` (studio_versioniert) | LOGISTIK (Schreibrecht); Nummer STR-JJJJ-NNNN je Mandant | — | teilweise |
@@ -107,7 +107,7 @@ Erzeugt mit `python scripts/domaenen_abnahme.py` aus [`kontrakte-strecke.yaml`](
 
 ## Maskenabnahme (maschinell)
 
-Bereiche im Inventar: contracts, kontrakte, nawaro, strecke, vertrag. Routen: 33 — screen_definition 1, studio_versioniert 32.
+Bereiche im Inventar: contracts, kontrakte, nawaro, strecke, vertrag. Routen: 33 — screen_definition 2, studio_versioniert 31.
 
 Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 3:
 
@@ -115,7 +115,7 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 3:
 - `strecke/speditionen-fracht-preise` — Speditionen fracht preise
 - `vertrag/rahmenvertraege` — Rahmenvertraege
 
-Aktionen der Domaenenmasken: 58, davon serverwirksam 13; ohne CLI 0; nicht verfuegbar 11; nicht deklariert 5.
+Aktionen der Domaenenmasken: 63, davon serverwirksam 18; ohne CLI 1; nicht verfuegbar 11; nicht deklariert 4.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 

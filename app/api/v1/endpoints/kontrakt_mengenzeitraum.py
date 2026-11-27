@@ -227,14 +227,24 @@ def delete_mengenzeitraum(
     return Response(status_code=204)
 
 
+class MengenzeitraeumeGenerierenIn(BaseModel):
+    """JSON-Body fuer Studio/MCP (Query-Parameter bleiben zusaetzlich gueltig)."""
+
+    von_datum: date
+    bis_datum: date
+    gesamt_menge_t: Decimal
+    variante: str = "monatl. lin. Abnahme"
+
+
 @router.post("/{kontrakt_nr}/mengenzeitraeume/generieren", summary="Mengenzeitraeume generiere",
     response_model=None, dependencies=SCHREIBEN["KONTRAKT"])
 def generiere_mengenzeitraeume(
     kontrakt_nr: str,
-    von_datum: date,
-    bis_datum: date,
-    gesamt_menge_t: Decimal,
+    von_datum: date | None = None,
+    bis_datum: date | None = None,
+    gesamt_menge_t: Decimal | None = None,
     variante: str = "monatl. lin. Abnahme",
+    body: MengenzeitraeumeGenerierenIn | None = None,
     db=Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
 ):
@@ -242,9 +252,19 @@ def generiere_mengenzeitraeume(
 
     Fachlich: Bei der Variante 'monatlich linear' wird die Gesamtmenge
     gleichmäßig auf die Monate des Kontraktzeitraums verteilt.
+
+    Human/CI/MCP: Query-Parameter (Legacy-Client) oder JSON-Body (NativeListPage).
     """
     from calendar import monthrange
     from datetime import timedelta
+
+    if body is not None:
+        von_datum = body.von_datum
+        bis_datum = body.bis_datum
+        gesamt_menge_t = body.gesamt_menge_t
+        variante = body.variante or variante
+    if von_datum is None or bis_datum is None or gesamt_menge_t is None:
+        raise HTTPException(422, "von_datum, bis_datum und gesamt_menge_t sind erforderlich.")
 
     # Monate berechnen
     monate = []

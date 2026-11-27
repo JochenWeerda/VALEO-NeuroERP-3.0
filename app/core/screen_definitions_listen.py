@@ -30,6 +30,1431 @@ def _liste(**kwargs: Any) -> dict[str, Any]:
     return build_stamm_list_screen(**kwargs)
 
 
+def build_agrar_zinsabrechnung_liste() -> dict[str, Any]:
+    """Zinsabrechnung: anlegen (alle Legacy-Felder), buchen, stornieren, drucken.
+
+    Paritaet zur handgebauten Maske ``agrar/zinsabrechnung-legacy.tsx`` —
+    Human/CI/MCP nutzen dieselben Endpunkte.
+    """
+    _create_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "lieferant_nr", "label": "Lieferant-Nr.", "type": "text", "required": True},
+        {"key": "lieferant_name", "label": "Lieferant-Name", "type": "text"},
+        {"key": "zinssatz_prozent", "label": "Zinssatz (%)", "type": "number", "required": True},
+        {"key": "basisbetrag_eur", "label": "Basisbetrag (€)", "type": "currency", "required": True},
+        {"key": "mwst_satz", "label": "MwSt-Satz (%)", "type": "number"},
+        {"key": "von_datum", "label": "Von Datum", "type": "date", "required": True},
+        {"key": "bis_datum", "label": "Bis Datum", "type": "date", "required": True},
+        {"key": "buchungs_periode", "label": "Buchungs-Periode (YYYY-MM)", "type": "period"},
+        {"key": "bemerkung", "label": "Bemerkung", "type": "textarea"},
+    ]
+    return _liste(
+        screen_id="agrar/zinsabrechnung", domain="agrar", title="Zinsabrechnung",
+        subtitle="Zinsen auf Kontrakte berechnen, buchen und stornieren",
+        endpoint="/api/v1/zinsabrechnung", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "lieferant_name", "label": "Lieferant", "filterable": True, "priority": "primary"},
+            {"key": "basisbetrag_eur", "label": "Basis €", "numeric": True, "renderKind": "currency", "sortable": True, "priority": "secondary"},
+            {"key": "zinssatz_prozent", "label": "Zinssatz %", "numeric": True, "priority": "secondary"},
+            {"key": "tage", "label": "Tage", "numeric": True, "priority": "tertiary"},
+            {"key": "zinsbetrag_eur", "label": "Zinsbetrag €", "numeric": True, "renderKind": "currency", "sortable": True, "priority": "primary"},
+            {"key": "mwst_betrag_eur", "label": "MwSt €", "numeric": True, "renderKind": "currency", "priority": "tertiary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "finance.zinsabrechnung.create",
+             "commandEndpoint": "/api/v1/zinsabrechnung", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "buchen", "label": "Buchen", "dangerLevel": "moderate",
+             "permission": "finance.zinsabrechnung.buchen",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/buchen", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt"]}},
+            {"key": "drucken", "label": "Drucken", "dangerLevel": "safe",
+             "permission": "finance.zinsabrechnung.drucken",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/drucken", "method": "POST",
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt", "gebucht"]}},
+            {"key": "stornieren", "label": "Stornieren", "dangerLevel": "critical",
+             "permission": "finance.zinsabrechnung.stornieren",
+             "commandEndpoint": "/api/v1/zinsabrechnung/{entity_id}/stornieren", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["berechnet", "offen", "gedruckt", "gebucht"]}},
+        ],
+        dangerous=[
+            {"key": "stornieren", "reason": "Erzeugt Stornobeleg und setzt Status storniert."},
+        ],
+        purpose="Zinsen auf Rohware-Einlagerungskontrakte berechnen, buchen und stornieren.",
+        prompts=["Welche Zinsabrechnungen sind noch nicht gebucht?", "Buche Zinsabrechnung {entity_id}."],
+        no_workflow="Status steht an der Zinsabrechnung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_agrar_sammelabrechnung_liste() -> dict[str, Any]:
+    """Rohware-Sammelabrechnung — Paritaet zur Wizard-Legacy-Maske.
+
+    Create-Felder und berechnen/buchen/loeschen nutzen dieselben Endpunkte wie
+    ``sammelabrechnung-legacy.tsx`` (Human/CI/MCP).
+    """
+    _create_fields = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "abrechnungsperiode", "label": "Abrechnungsperiode (YYYY-MM)", "type": "period", "required": True},
+        {"key": "sammeldatum", "label": "Sammeldatum", "type": "date"},
+        {"key": "abrechnungsschema_id", "label": "Abrechnungsschema-ID", "type": "text"},
+        {
+            "key": "harvest_acceptance_ids",
+            "label": "Ernteannahme-IDs (mind. 2)",
+            "type": "multiselect",
+            "required": True,
+            "optionsEndpoint": "/api/v1/agrar/harvest-acceptance/",
+            "optionValueKey": "id",
+            "optionLabelKey": "acceptance_number",
+        },
+    ]
+    return _liste(
+        screen_id="agrar/sammelabrechnung", domain="agrar", title="Rohware-Sammelabrechnung",
+        subtitle="Ernteannahmen sammeln, berechnen und buchen",
+        endpoint="/api/v1/agrar/sammelabrechnung", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "bezeichnung", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "abrechnungsperiode", "label": "Periode", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "renderKind": "status", "filterable": True, "priority": "primary"},
+            {"key": "summe_menge_kg", "label": "Menge kg", "numeric": True, "sortable": True, "priority": "secondary"},
+            {"key": "summe_betrag_eur", "label": "Betrag €", "numeric": True, "renderKind": "currency",
+             "sortable": True, "priority": "secondary"},
+            {"key": "erstellt_am", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Anlegen", "kind": "primary", "dangerLevel": "safe", "zone": "header",
+             "permission": "agrar.sammelabrechnung.create",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "berechnen", "label": "Berechnen", "dangerLevel": "moderate",
+             "permission": "agrar.sammelabrechnung.berechnen",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/berechnen", "method": "POST",
+             "visibleWhen": {"field": "status", "values": ["ENTWURF", "entwurf"]}},
+            {"key": "buchen", "label": "Buchen", "dangerLevel": "moderate",
+             "permission": "agrar.sammelabrechnung.buchen",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}/buchen", "method": "POST",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["BERECHNET", "berechnet"]}},
+            {"key": "loeschen", "label": "Loeschen", "dangerLevel": "critical",
+             "permission": "agrar.sammelabrechnung.delete",
+             "commandEndpoint": "/api/v1/agrar/sammelabrechnung/{entity_id}", "method": "DELETE",
+             "requiresConfirmation": True,
+             "visibleWhen": {"field": "status", "values": ["ENTWURF", "entwurf"]}},
+        ],
+        dangerous=[
+            {"key": "loeschen", "reason": "Loescht den Entwurf unwiderruflich."},
+            {"key": "buchen", "reason": "Bucht die Sammelabrechnung fest."},
+        ],
+        purpose="Mehrere Ernteannahmen zu einer Sammelabrechnung zusammenfassen, berechnen und buchen.",
+        prompts=["Lege eine Sammelabrechnung an.", "Berechne Sammelabrechnung {entity_id}."],
+        no_workflow="Status steht an der Sammelabrechnung; die Liste fuehrt keinen eigenen Ablauf.",
+    )
+
+
+def build_agrar_qualitaet_nachtrag_liste() -> dict[str, Any]:
+    """Unterbrochene Annahmen — Laborwerte nachtragen (Paritaet zur Legacy-Worklist)."""
+    _quality_fields = [
+        {"key": "feuchte_prozent", "label": "Feuchte %", "type": "number"},
+        {"key": "hektolitergewicht_kg_hl", "label": "hl-Gewicht kg/hl", "type": "number"},
+        {"key": "besatz", "label": "Besatz %", "type": "number"},
+        {"key": "protein_prozent", "label": "Protein %", "type": "number"},
+        {"key": "fallzahl", "label": "Fallzahl", "type": "number"},
+        {"key": "bemerkungen", "label": "Bemerkung", "type": "textarea"},
+        {"key": "labor_code", "label": "Labor / Geraet", "type": "text"},
+        {"key": "analysendatum", "label": "Analysendatum", "type": "date"},
+    ]
+    return _liste(
+        screen_id="agrar/annahmen-qualitaet-nachtrag", domain="agrar",
+        title="Qualitaets-Nachtrag",
+        subtitle="Annahmescheine ohne Laborwerte — zeilenweise oder per Batch",
+        endpoint="/api/v1/agrar/harvest-acceptance/?missing_quality=true",
+        row_route=None, bundle="agrar",
+        columns=[
+            {"key": "acceptance_number", "label": "Annahme-Nr.", "sortable": True, "filterable": True,
+             "priority": "primary"},
+            {"key": "delivery_date", "label": "Lieferdatum", "renderKind": "date", "sortable": True,
+             "priority": "primary"},
+            {"key": "customer_id", "label": "Kunde", "filterable": True, "priority": "secondary"},
+            {"key": "release_status", "label": "Status", "renderKind": "status", "filterable": True,
+             "priority": "primary"},
+            {"key": "vehicle_plate", "label": "Kennzeichen", "filterable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {
+                "key": "batch_nachtragen",
+                "label": "Batch speichern",
+                "kind": "primary",
+                "dangerLevel": "safe",
+                "zone": "header",
+                "permission": "agrar.qualitaet_nachtrag.create",
+                "commandEndpoint": "/api/v1/agrar/harvest-acceptance/quality-batch",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "labor_code", "label": "Labor / Geraet", "type": "text"},
+                    {"key": "analysendatum", "label": "Analysendatum", "type": "date"},
+                    {
+                        "key": "rows",
+                        "label": "Zeilen (JSON: acceptance_id + Messwerte)",
+                        "type": "textarea",
+                        "required": True,
+                    },
+                ],
+            },
+            _EXPORT,
+        ],
+        row_actions=[
+            {
+                "key": "nachtragen",
+                "label": "Nachtragen",
+                "dangerLevel": "safe",
+                "permission": "agrar.qualitaet_nachtrag.create",
+                "commandEndpoint": "/api/v1/agrar/harvest-acceptance/{entity_id}/qualitaetsprotokoll",
+                "method": "POST",
+                "inputFields": _quality_fields,
+            },
+        ],
+        purpose="Laborwerte aus dem Laborbuch auf Annahmen ohne Qualitaetsprotokoll nachtragen.",
+        prompts=["Welche Annahmen haben noch keine Qualitaetswerte?", "Trage Qualitaet fuer Annahme {entity_id} nach."],
+        no_workflow="Worklist ohne eigenen Ablauf; Nachtrag setzt das Qualitaetsprotokoll.",
+    )
+
+
+def build_admin_suite_home_cockpit() -> dict[str, Any]:
+    """Admin Suite Home — Go-Live-Readiness (Paritaet zur Legacy-Kartenmaske)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite",
+        domain="admin",
+        title="VALEO Admin Suite",
+        subtitle="Gefuehrte Produktionsvorbereitung mit nachvollziehbarer Evidenz",
+        business_purpose=(
+            "Go-Live-Readiness und Bereichsnachweise der Admin Suite beobachten "
+            "(dieselbe Datenquelle wie die Legacy-Readiness-Karten)."
+        ),
+        example_prompts=[
+            "Wie hoch ist der Go-Live-Readiness-Score?",
+            "Welche Evidenzbereiche sind blockiert?",
+        ],
+        test_id="admin-suite",
+        summary=[
+            {"key": "score", "label": "Readiness %", "tone": "info"},
+            {"key": "ready_count", "label": "Bereit", "tone": "success"},
+            {"key": "warning_count", "label": "Warnungen", "tone": "warning"},
+            {"key": "blocked_count", "label": "Blockiert", "tone": "warning"},
+            {"key": "unchecked_count", "label": "Nicht geprueft", "tone": "neutral"},
+            {"key": "evaluated_count", "label": "Bewertet", "tone": "neutral"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/readiness"),
+            cockpit_list_source("evidence", "/api/v1/admin-suite/readiness/evidence", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "evidence",
+                "label": "Evidenzbereiche",
+                "dataSourceKey": "evidence",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "Bereich", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "evidence", "label": "Nachweis", "priority": "secondary"},
+                    {"key": "source", "label": "Quelle", "filterable": True, "priority": "tertiary"},
+                    {"key": "details", "label": "Details", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        tiles=[
+            cockpit_nav_tile("setup", "Ersteinrichtung", target_route="/admin-suite/setup", tone="info"),
+            cockpit_nav_tile("migration", "Migration", target_route="/admin-suite/migration", tone="warning"),
+            cockpit_nav_tile("security", "Security", target_route="/admin-suite/security", tone="neutral"),
+            cockpit_nav_tile("connectors", "Connectors", target_route="/admin-suite/connectors", tone="neutral"),
+            cockpit_nav_tile("connectoren", "Auto-Capture", target_route="/admin-suite/connectoren", tone="neutral"),
+            cockpit_nav_tile("ki_anbieter", "KI-Anbieter", target_route="/admin-suite/ki-anbieter", tone="info"),
+            cockpit_nav_tile("pos_fiscalization", "POS-Fiskal", target_route="/admin-suite/pos-fiscalization", tone="warning"),
+            cockpit_nav_tile("devices", "Hardware", target_route="/admin-suite/devices", tone="neutral"),
+            cockpit_nav_tile("compliance", "Compliance", target_route="/admin-suite/compliance", tone="neutral"),
+            cockpit_nav_tile("operations", "Operations", target_route="/admin-suite/operations", tone="neutral"),
+            cockpit_nav_tile("system_status", "System Status", target_route="/admin-suite/system-status", tone="neutral"),
+        ],
+        actions=[cockpit_refresh_action(permission="admin.admin_suite.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def _admin_suite_ops_liste(
+    *,
+    screen_id: str,
+    title: str,
+    subtitle: str,
+    endpoint: str,
+    columns: list[dict[str, Any]],
+    purpose: str,
+) -> dict[str, Any]:
+    return _liste(
+        screen_id=screen_id,
+        domain="admin",
+        title=title,
+        subtitle=subtitle,
+        endpoint=endpoint,
+        row_route=None,
+        bundle="admin",
+        columns=columns,
+        actions=[_EXPORT],
+        row_actions=[],
+        purpose=purpose,
+        prompts=[f"Zeig die Eintraege von {title}."],
+        no_workflow="Ops-Evidenzliste ohne eigenen Objekt-Lebenszyklus.",
+        table_profile="audit",
+    )
+
+
+def build_admin_suite_connectors_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/connectors",
+        title="Connector Hub",
+        subtitle="Credential-Metadaten ohne Secret-Werte",
+        endpoint="/api/v1/admin-suite/connectors",
+        columns=[
+            {"key": "label", "label": "Connector", "filterable": True, "priority": "primary"},
+            {"key": "config_status", "label": "Config", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "live_status", "label": "Live", "filterable": True, "priority": "secondary"},
+            {"key": "credential_status", "label": "Credentials", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Redigierte Connector-Metadaten ohne Secrets oder Live-Probes.",
+    )
+
+
+def build_admin_suite_devices_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/devices",
+        title="Hardware Center",
+        subtitle="Geraete-Capabilities und Testaktionen",
+        endpoint="/api/v1/admin-suite/devices",
+        columns=[
+            {"key": "label", "label": "Geraet", "filterable": True, "priority": "primary"},
+            {"key": "registration_status", "label": "Registry", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "live_status", "label": "Live", "filterable": True, "priority": "secondary"},
+            {"key": "registry_source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Hardware-Capabilities und Registry-Status der Admin Suite.",
+    )
+
+
+def build_admin_suite_operations_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/operations",
+        title="Operations Center",
+        subtitle="Backup, Restore und Release-Evidenz",
+        endpoint="/api/v1/admin-suite/operations",
+        columns=[
+            {"key": "label", "label": "Bereich", "filterable": True, "priority": "primary"},
+            {"key": "implementation_status", "label": "Implementierung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Operations-Evidenz ohne Live-Probes.",
+    )
+
+
+def build_admin_suite_compliance_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/compliance",
+        title="Compliance Evidence",
+        subtitle="GoBD, DSGVO, TSE und Meldewesen",
+        endpoint="/api/v1/admin-suite/compliance",
+        columns=[
+            {"key": "label", "label": "Thema", "filterable": True, "priority": "primary"},
+            {"key": "implementation_status", "label": "Implementierung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "external_gate", "label": "Externes Gate", "filterable": True, "priority": "secondary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "target_path", "label": "Zielpfad", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Compliance-Evidenzmetadaten ohne externe Live-Erfolgsannahmen.",
+    )
+
+
+def build_admin_suite_system_status_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/system-status",
+        title="System Status",
+        subtitle="Probe-Metadaten ohne Live-Ausfuehrung",
+        endpoint="/api/v1/admin-suite/system-status",
+        columns=[
+            {"key": "label", "label": "Probe", "filterable": True, "priority": "primary"},
+            {"key": "probe_status", "label": "Probe", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "runtime_status", "label": "Runtime", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "target_path", "label": "Zielpfad", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Runtime-Probe-Metadaten der Admin Suite.",
+    )
+
+
+def build_admin_suite_diagnostics_liste() -> dict[str, Any]:
+    return _admin_suite_ops_liste(
+        screen_id="admin-suite/diagnostics",
+        title="Diagnosepaket",
+        subtitle="Erlaubte Diagnosekategorien ohne Datensammlung",
+        endpoint="/api/v1/admin-suite/diagnostics",
+        columns=[
+            {"key": "label", "label": "Kategorie", "filterable": True, "priority": "primary"},
+            {"key": "collection_status", "label": "Sammlung", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "redaction", "label": "Redaktion", "filterable": True, "priority": "secondary"},
+            {"key": "source", "label": "Quelle", "priority": "tertiary"},
+            {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+        ],
+        purpose="Diagnose-Manifest ohne automatische Datensammlung.",
+    )
+
+
+def build_admin_suite_setup_liste() -> dict[str, Any]:
+    """Ersteinrichtungs-Assistent — Schritte + Statuswechsel wie Legacy."""
+    return _liste(
+        screen_id="admin-suite/setup",
+        domain="admin",
+        title="Ersteinrichtungs-Assistent",
+        subtitle="Tenant-Setup-Schritte pruefen und abschliessen",
+        endpoint="/api/v1/admin-suite/setup/steps",
+        row_route=None,
+        bundle="admin",
+        columns=[
+            {"key": "label", "label": "Schritt", "filterable": True, "priority": "primary"},
+            {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+            {"key": "evidence", "label": "Evidenz", "priority": "secondary"},
+            {"key": "responsible", "label": "Verantwortlich", "priority": "tertiary"},
+            {"key": "target_path", "label": "Fachmaske", "priority": "secondary"},
+        ],
+        actions=[_EXPORT],
+        row_actions=[
+            {
+                "key": "in_arbeit",
+                "label": "In Arbeit",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.setup",
+                "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+                "method": "PATCH",
+                "inputFields": [
+                    {"key": "status", "label": "Status", "type": "text", "required": True, "defaultValue": "in_progress"},
+                ],
+            },
+            {
+                "key": "abschliessen",
+                "label": "Abschliessen",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.setup",
+                "commandEndpoint": "/api/v1/admin-suite/setup/steps/{entity_id}",
+                "method": "PATCH",
+                "requiresConfirmation": True,
+                "inputFields": [
+                    {"key": "status", "label": "Status", "type": "text", "required": True, "defaultValue": "completed"},
+                ],
+            },
+        ],
+        purpose="Setup-Schritte explizit pruefen und dokumentiert abschliessen.",
+        prompts=["Welche Setup-Schritte sind noch offen?", "Schließe Setup-Schritt {entity_id} ab."],
+        no_workflow="Setup-Fortschritt wird am Tenant gespeichert; die Liste fuehrt keinen eigenen Workflow.",
+        table_profile="audit",
+    )
+
+
+def build_admin_suite_migration_cockpit() -> dict[str, Any]:
+    """Migration Cockpit — Profile + Batches + Dry-Run-Anlage (Paritaet Legacy)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/migration",
+        domain="admin",
+        title="Migration Cockpit",
+        subtitle="Dry Run, Mapping-Version und Reconciliation vor jeder produktiven Freigabe",
+        business_purpose=(
+            "Import-Profile und Dry-Run-Batches der Admin Suite beobachten und freigeben; "
+            "Produktivimport bleibt gesperrt bis Reconciliation abgenommen ist."
+        ),
+        example_prompts=[
+            "Welche Migrationsprofile sind verfuegbar?",
+            "Lege einen Dry-Run-Batch fuer Profil l3 an.",
+        ],
+        test_id="admin-suite-migration",
+        summary=[
+            {"key": "profile_count", "label": "Profile", "tone": "neutral"},
+            {"key": "available_profiles", "label": "Verfuegbar", "tone": "success"},
+            {"key": "blocked_profiles", "label": "Gesperrt", "tone": "warning"},
+            {"key": "batch_count", "label": "Batches", "tone": "info"},
+            {"key": "approved_batches", "label": "Freigegeben", "tone": "success"},
+            {"key": "execute_locked", "label": "Execute gesperrt", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/migration/overview"),
+            cockpit_list_source("profiles", "/api/v1/admin-suite/migration/profiles", page_size=50),
+            cockpit_list_source("batches", "/api/v1/admin-suite/migration/batches", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "profiles",
+                "label": "Profile",
+                "dataSourceKey": "profiles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "Profil", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "adapter", "label": "Adapter", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "batches",
+                "label": "Batches",
+                "dataSourceKey": "batches",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "source_profile", "label": "Profil", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "mapping_version", "label": "Mapping", "priority": "secondary"},
+                    {"key": "source_hash", "label": "Hash", "priority": "tertiary"},
+                    {"key": "reconciliation_ok", "label": "Recon OK", "priority": "secondary"},
+                ],
+                "rowActions": [
+                    {
+                        "key": "freigeben",
+                        "label": "Freigeben",
+                        "dangerLevel": "moderate",
+                        "permission": "admin.admin_suite.migration",
+                        "commandEndpoint": "/api/v1/admin-suite/migration/batches/{entity_id}/approve",
+                        "method": "POST",
+                        "requiresConfirmation": True,
+                    },
+                ],
+            },
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "dry_run_anlegen",
+                "label": "Dry-Run anlegen",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.migration",
+                "commandEndpoint": "/api/v1/admin-suite/migration/batches",
+                "method": "POST",
+                "inputFields": [
+                    {"key": "source_profile", "label": "Profil-Key", "type": "text", "required": True},
+                    {"key": "source_ref", "label": "Quellen-Referenz", "type": "text", "required": True},
+                    {"key": "source_hash", "label": "Quellen-Hash", "type": "text", "required": True},
+                    {"key": "mapping_version", "label": "Mapping-Version", "type": "text", "required": True},
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Migration-Cockpit ohne eigenen Objekt-Lebenszyklus; Execute bleibt gesperrt.",
+    )
+
+
+def build_admin_suite_security_cockpit() -> dict[str, Any]:
+    """Security Governance — Menschen-/Agentenrollen + SoD-Simulation."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/security",
+        domain="admin",
+        title="Security und Agent Governance",
+        subtitle="Lesende Sicht auf RBAC-Pakete; Simulationen aendern keine Rechte",
+        business_purpose=(
+            "Bestehende Menschen- und Agentenrollen einsehen und effektive Rechte "
+            "serverseitig simulieren (SoD-Warnungen), ohne Rechte zu veraendern."
+        ),
+        example_prompts=[
+            "Welche Agentenrollen gibt es?",
+            "Simuliere effektive Rechte fuer admin und agent_readonly.",
+        ],
+        test_id="admin-suite-security",
+        summary=[
+            {"key": "human_role_count", "label": "Menschenrollen", "tone": "info"},
+            {"key": "agent_role_count", "label": "Agentenrollen", "tone": "neutral"},
+            {"key": "role_count", "label": "Rollen gesamt", "tone": "neutral"},
+            {"key": "sod_simulation_only", "label": "Nur Simulation", "tone": "warning"},
+            {"key": "agent_admin_blocked", "label": "Agent-Admin gesperrt", "tone": "success"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/security/overview"),
+            cockpit_list_source("roles", "/api/v1/admin-suite/security/roles", page_size=100),
+            cockpit_list_source("agent_roles", "/api/v1/admin-suite/security/agent-roles", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "roles",
+                "label": "Menschenrollen",
+                "dataSourceKey": "roles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "key", "label": "Rolle", "filterable": True, "priority": "primary"},
+                    {"key": "permission_count", "label": "Rechte", "priority": "secondary"},
+                    {"key": "permissions_text", "label": "Permissions", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "agent_roles",
+                "label": "Agentenrollen",
+                "dataSourceKey": "agent_roles",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "key", "label": "Rolle", "filterable": True, "priority": "primary"},
+                    {"key": "permission_count", "label": "Rechte", "priority": "secondary"},
+                    {"key": "permissions_text", "label": "Permissions", "priority": "secondary"},
+                    {"key": "notes", "label": "Hinweise", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "simulieren",
+                "label": "Rechte simulieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.security",
+                "commandEndpoint": "/api/v1/admin-suite/security/simulate",
+                "method": "POST",
+                "inputFields": [
+                    {
+                        "key": "roles",
+                        "label": "Rollen (kommagetrennt)",
+                        "type": "text",
+                        "required": True,
+                        "helpText": "Beispiel: admin,agent_readonly — Server splittet und validiert.",
+                    },
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Security-Cockpit ist Read-Model; Simulation aendert keine Rechte.",
+    )
+
+
+def build_admin_suite_ki_anbieter_cockpit() -> dict[str, Any]:
+    """KI-Anbieter (NeuroAI) — LLM-Gateway speichern/testen."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/ki-anbieter",
+        domain="admin",
+        title="KI-Anbieter (NeuroAI)",
+        subtitle="Anbieterunabhaengige LLM-Konfiguration fuer NeuroAI",
+        business_purpose=(
+            "LLM-Gateway (Anthropic / OpenAI-kompatibel / Ollama) konfigurieren und testen; "
+            "API-Keys werden nie ausgegeben."
+        ),
+        example_prompts=[
+            "Welcher KI-Anbieter ist aktiv?",
+            "Teste die LLM-Verbindung.",
+        ],
+        test_id="admin-suite-ki-anbieter",
+        summary=[
+            {"key": "provider", "label": "Anbieter", "tone": "info"},
+            {"key": "model", "label": "Modell", "tone": "neutral"},
+            {"key": "enabled", "label": "Aktiviert", "tone": "success"},
+            {"key": "available", "label": "Einsatzbereit", "tone": "success"},
+            {"key": "api_key_set", "label": "API-Key gesetzt", "tone": "neutral"},
+            {"key": "temperature", "label": "Temperatur", "tone": "neutral"},
+            {"key": "base_url", "label": "Base-URL", "tone": "tertiary"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/llm-gateway"),
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "speichern",
+                "label": "Speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.ki",
+                "commandEndpoint": "/api/v1/admin-suite/llm-gateway",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "provider", "label": "Anbieter", "type": "text", "required": True,
+                     "helpText": "anthropic | openai_compatible | ollama"},
+                    {"key": "base_url", "label": "Base-URL", "type": "text", "required": False},
+                    {"key": "model", "label": "Modell", "type": "text", "required": False},
+                    {"key": "api_key", "label": "API-Key (leer = behalten)", "type": "password", "required": False},
+                    {"key": "temperature", "label": "Temperatur", "type": "number", "required": False, "defaultValue": 0.2},
+                    {"key": "enabled", "label": "Aktiviert", "type": "boolean", "required": False, "defaultValue": True},
+                ],
+            },
+            {
+                "key": "testen",
+                "label": "Verbindung testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.ki",
+                "commandEndpoint": "/api/v1/admin-suite/llm-gateway/test",
+                "method": "POST",
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=False,
+        no_workflow_reason="Konfigurations-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_suite_connectoren_cockpit() -> dict[str, Any]:
+    """Auto-Capture-Connectoren (STT + IMAP) — flache PUT/Test/Poll-Aktionen."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/connectoren",
+        domain="admin",
+        title="Auto-Capture-Connectoren",
+        subtitle="STT- und IMAP-Einstellungen fuer automatische Kontakt-Erfassung",
+        business_purpose=(
+            "STT- und IMAP-Connectoren pro Mandant konfigurieren, testen und IMAP abrufen; "
+            "Secrets werden nie ausgegeben."
+        ),
+        example_prompts=[
+            "Ist der STT-Server konfiguriert?",
+            "Teste das IMAP-Postfach.",
+        ],
+        test_id="admin-suite-connectoren",
+        summary=[
+            {"key": "stt_configured", "label": "STT bereit", "tone": "success"},
+            {"key": "stt_enabled", "label": "STT aktiv", "tone": "info"},
+            {"key": "stt_model", "label": "STT-Modell", "tone": "neutral"},
+            {"key": "imap_configured", "label": "IMAP bereit", "tone": "success"},
+            {"key": "imap_enabled", "label": "IMAP aktiv", "tone": "info"},
+            {"key": "imap_host", "label": "IMAP-Host", "tone": "neutral"},
+            {"key": "imap_user", "label": "IMAP-User", "tone": "tertiary"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/admin-suite/capture-connectors/overview"),
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "stt_speichern",
+                "label": "STT speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "enabled", "label": "STT aktiviert", "type": "boolean", "required": False, "defaultValue": True},
+                    {"key": "base_url", "label": "Base-URL", "type": "text", "required": False},
+                    {"key": "model", "label": "Modell", "type": "text", "required": False},
+                    {"key": "language", "label": "Sprache", "type": "text", "required": False, "defaultValue": "de"},
+                    {"key": "api_key", "label": "API-Key (leer = behalten)", "type": "password", "required": False},
+                ],
+            },
+            {
+                "key": "stt_testen",
+                "label": "STT testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/stt/test",
+                "method": "POST",
+            },
+            {
+                "key": "imap_speichern",
+                "label": "IMAP speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "enabled", "label": "IMAP aktiviert", "type": "boolean", "required": False},
+                    {"key": "host", "label": "Host", "type": "text", "required": False},
+                    {"key": "port", "label": "Port", "type": "number", "required": False, "defaultValue": 993},
+                    {"key": "ssl", "label": "SSL", "type": "boolean", "required": False, "defaultValue": True},
+                    {"key": "user", "label": "Benutzer", "type": "text", "required": False},
+                    {"key": "password", "label": "Passwort (leer = behalten)", "type": "password", "required": False},
+                    {"key": "inbox", "label": "Posteingang", "type": "text", "required": False, "defaultValue": "INBOX"},
+                    {"key": "sent", "label": "Gesendet-Ordner", "type": "text", "required": False},
+                    {"key": "own_addresses", "label": "Eigene Adressen", "type": "text", "required": False},
+                    {"key": "poll_seconds", "label": "Poll-Intervall (s)", "type": "number", "required": False, "defaultValue": 60},
+                ],
+            },
+            {
+                "key": "imap_testen",
+                "label": "IMAP testen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/test",
+                "method": "POST",
+            },
+            {
+                "key": "imap_abrufen",
+                "label": "IMAP jetzt abrufen",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.connectoren",
+                "commandEndpoint": "/api/v1/admin-suite/capture-connectors/imap/poll",
+                "method": "POST",
+                "requiresConfirmation": True,
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=False,
+        no_workflow_reason="Connector-Konfiguration ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_suite_pos_fiscalization_cockpit() -> dict[str, Any]:
+    """POS-Fiskalisierung — Config speichern + Produkt-Readiness."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_nav_tile,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin-suite/pos-fiscalization",
+        domain="admin",
+        title="POS-Fiskalisierung",
+        subtitle="fiskaly oder Swissbit als TSE; DSFinV-K getrennt konfiguriert",
+        business_purpose=(
+            "Mandantenkonfiguration der POS-Fiskalisierung speichern und Readiness "
+            "(TSE, DSFinV-K, optionale Produkte) beobachten."
+        ),
+        example_prompts=[
+            "Ist die POS-Fiskalisierung bereit?",
+            "Speichere die TSE-Konfiguration.",
+        ],
+        test_id="admin-suite-pos-fiscalization",
+        summary=[
+            {"key": "ready", "label": "Bereit", "tone": "success"},
+            {"key": "configured", "label": "Konfiguriert", "tone": "info"},
+            {"key": "provider", "label": "TSE-Provider", "tone": "neutral"},
+            {"key": "dsfinvk_provider", "label": "DSFinV-K", "tone": "neutral"},
+            {"key": "sign_ready", "label": "Signatur bereit", "tone": "success"},
+            {"key": "dsfinvk_ready", "label": "DSFinV-K bereit", "tone": "success"},
+            {"key": "blocker_text", "label": "Blocker", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/pos/fiscalization/overview"),
+            cockpit_list_source("products", "/api/v1/pos/fiscalization/products", page_size=20),
+        ],
+        tables=[
+            {
+                "key": "products",
+                "label": "Optionale fiskaly-Produkte",
+                "dataSourceKey": "products",
+                "pageSize": 20,
+                "columns": [
+                    {"key": "label", "label": "Produkt", "filterable": True, "priority": "primary"},
+                    {"key": "ready", "label": "Bereit", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "blockers", "label": "Blocker", "priority": "secondary"},
+                    {"key": "execution_note", "label": "Hinweis", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        tiles=[
+            cockpit_nav_tile("home", "Zur Admin Suite", target_route="/admin-suite", tone="neutral"),
+        ],
+        actions=[
+            cockpit_refresh_action(permission="admin.admin_suite.read"),
+            {
+                "key": "speichern",
+                "label": "Konfiguration speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "permission": "admin.admin_suite.pos",
+                "commandEndpoint": "/api/v1/pos/fiscalization/config",
+                "method": "PUT",
+                "inputFields": [
+                    {"key": "provider", "label": "TSE-Provider", "type": "text", "required": True,
+                     "helpText": "fiskaly | swissbit_cloud | swissbit_gateway | simulation"},
+                    {"key": "dsfinvk_provider", "label": "DSFinV-K-Provider", "type": "text", "required": True,
+                     "defaultValue": "fiskaly"},
+                    {"key": "cash_register_id", "label": "Kassen-/TSS-ID", "type": "text", "required": True},
+                    {"key": "client_id", "label": "Client-ID", "type": "text", "required": True},
+                    {"key": "terminal_id", "label": "Terminal-ID", "type": "text", "required": False},
+                    {"key": "simulation_allowed", "label": "Simulation freigeben", "type": "boolean",
+                     "required": False, "defaultValue": False},
+                ],
+            },
+        ],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Fiskalisierungs-Konfiguration ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_agrar_kunden_schlagkartei_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_agrar_kunden_schlagkartei
+
+    return build_agrar_kunden_schlagkartei()
+
+
+def build_agrar_milchvieh_karte_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_agrar_milchvieh_karte
+
+    return build_agrar_milchvieh_karte()
+
+
+def build_agrar_ernte_annahme_erfassung_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_agrar_ernte_annahme_erfassung
+
+    return build_agrar_ernte_annahme_erfassung()
+
+
+def build_annahme_abrechnung_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_agrar_workbench import build_annahme_abrechnung
+
+    return build_annahme_abrechnung()
+
+
+def build_lager_materialfluss_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_lager_workbench import build_lager_materialfluss
+
+    return build_lager_materialfluss()
+
+
+def build_konditionen_konditionssystem_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_pricing_workbench import build_konditionen_konditionssystem
+
+    return build_konditionen_konditionssystem()
+
+
+def build_fuhrpark_fahrzeug_vertiefung_workbench() -> dict[str, Any]:
+    from app.core.screen_definitions_fleet_workbench import build_fuhrpark_fahrzeug_vertiefung
+
+    return build_fuhrpark_fahrzeug_vertiefung()
+
+
+def build_admin_externe_gates_cockpit() -> dict[str, Any]:
+    """Externe Gates — DATEV/ELSTER/TSE/DMS/Bank Status (Paritaet Legacy-Karten)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="admin/externe-gates",
+        domain="admin",
+        title="Externe Gates",
+        subtitle="Integrationsstatus: DATEV · ELSTER · TSE · DMS · Bank/SEPA",
+        business_purpose=(
+            "Status externer Integrationssysteme beobachten "
+            "(dieselbe Datenquelle wie die Legacy-Gate-Karten)."
+        ),
+        example_prompts=[
+            "Welche externen Gates haben Handlungsbedarf?",
+            "Ist DATEV OK?",
+        ],
+        test_id="admin-externe-gates",
+        summary=[
+            {"key": "gesamt", "label": "Systeme", "tone": "neutral"},
+            {"key": "ok_count", "label": "OK", "tone": "success"},
+            {"key": "warning_count", "label": "Warnungen", "tone": "warning"},
+            {"key": "faellig_count", "label": "Faellig", "tone": "warning"},
+            {"key": "fehler_count", "label": "Fehler", "tone": "warning"},
+            {"key": "problem_count", "label": "Handlungsbedarf", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/external-gates/overview"),
+            cockpit_list_source("gates", "/api/v1/external-gates/items", page_size=50),
+        ],
+        tables=[
+            {
+                "key": "gates",
+                "label": "Systeme",
+                "dataSourceKey": "gates",
+                "pageSize": 50,
+                "columns": [
+                    {"key": "label", "label": "System", "filterable": True, "priority": "primary"},
+                    {"key": "status", "label": "Status", "filterable": True, "renderKind": "status", "priority": "primary"},
+                    {"key": "kategorie", "label": "Kategorie", "filterable": True, "priority": "secondary"},
+                    {"key": "hinweis", "label": "Hinweis", "priority": "secondary"},
+                    {"key": "simulated", "label": "Simuliert", "priority": "tertiary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="admin.externe_gates.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Dashboard ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_admin_control_center_agent_ops_workbench() -> dict[str, Any]:
+    """Agent Ops Unterseite — Surface + Persistence-Read-Model (Paritaet Legacy)."""
+    return {
+        "schemaVersion": 1,
+        "id": "admin/control-center/agent-ops",
+        "domain": "admin",
+        "mode": "cockpit",
+        "title": "Admin Kontrollzentrum: Agent Ops",
+        "subtitle": "Ticket-Steuerung, Chain of Command und Persistenz-Nachweis",
+        "adapter": {"type": "native", "sourceId": "admin/control-center/agent-ops", "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "dataSources": [
+            {
+                "key": "entity",
+                "endpoint": "/api/v1/agents/neuroassist/ops/persistence",
+                "staleTimeMs": 15_000,
+            },
+        ],
+        "fields": [
+            {"key": "tenant_id", "label": "Mandant", "type": "text", "readOnly": True},
+            {"key": "persisted", "label": "Persistiert", "type": "boolean", "readOnly": True},
+            {"key": "history_count", "label": "History", "type": "number", "readOnly": True},
+            {"key": "state_path", "label": "State-Pfad", "type": "text", "readOnly": True},
+            {"key": "history_path", "label": "History-Pfad", "type": "text", "readOnly": True},
+            {"key": "persisted_at", "label": "Persistiert am", "type": "text", "readOnly": True},
+        ],
+        "actions": [
+            {
+                "key": "refresh",
+                "label": "Aktualisieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "studio.admin-control-center.read",
+                "localEffect": "refetch",
+            },
+        ],
+        "specialized": {"type": "admin_workbench", "id": "admin/control-center/agent-ops"},
+        "noWorkflowReason": "Ops-Read-Model ohne eigenen Beleg-Lebenszyklus.",
+        "noProcessChainReason": "Agent-Ops ist Leitstand, keine Belegkette.",
+        "performance": {
+            "initialPayloadBudgetKb": 100,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "admin",
+        },
+        "agentContract": {
+            "businessPurpose": "Agent-Ops-Zustand und Persistenznachweis einsehen.",
+            "examplePrompts": ["Ist Agent Ops persistiert?"],
+            "sensitiveFields": [],
+            "forbiddenAgentTasks": ["Agent-Ops-Zustand ohne Audit aendern"],
+            "testSelectors": {"screenRoot": "[data-testid='native-cockpit-admin-control-center-agent-ops']"},
+        },
+    }
+
+
+def build_admin_control_center_superglue_workbench() -> dict[str, Any]:
+    """Superglue Unterseite — Connector-/Policy-Surface mit denselben Commands wie Legacy."""
+    # OpenAPI deklariert {tenant_id}; Laufzeit nutzt denselben Pfad (z. B. tenant_id=default).
+    base = "/api/v1/agent/integrations/providers/superglue/tenants/{tenant_id}"
+    return {
+        "schemaVersion": 1,
+        "id": "admin/control-center/superglue",
+        "domain": "admin",
+        "mode": "cockpit",
+        "title": "Admin Kontrollzentrum: Superglue",
+        "subtitle": "Connector- und Policy-Overrides fuer Integrationen",
+        "adapter": {"type": "native", "sourceId": "admin/control-center/superglue", "temporary": False},
+        "layout": {"floorplan": "cockpit", "density": "compact", "contextRail": "audit", "tableProfile": "audit"},
+        "dataSources": [
+            {"key": "entity", "endpoint": f"{base}/admin-state", "staleTimeMs": 15_000},
+            {"key": "wizard", "endpoint": f"{base}/wizard", "staleTimeMs": 15_000},
+        ],
+        "fields": [
+            {"key": "tenant_id", "label": "Mandant", "type": "text", "readOnly": True},
+            {"key": "storage_path", "label": "Storage", "type": "text", "readOnly": True},
+            {"key": "connector_key", "label": "Connector", "type": "text"},
+            {"key": "system_url", "label": "System-URL", "type": "text"},
+            {"key": "run_retention_days", "label": "Run-Retention (Tage)", "type": "number"},
+            {"key": "artifact_retention_days", "label": "Artifact-Retention (Tage)", "type": "number"},
+            {"key": "execution_enabled", "label": "Execution aktiv", "type": "boolean"},
+            {"key": "require_tenant_secrets", "label": "Tenant-Secrets Pflicht", "type": "boolean"},
+        ],
+        "actions": [
+            {
+                "key": "refresh",
+                "label": "Aktualisieren",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "safe",
+                "permission": "studio.admin-control-center.read",
+                "localEffect": "refetch",
+            },
+            {
+                "key": "connector_override",
+                "label": "Connector Override speichern",
+                "kind": "primary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/connectors/{{connector_key}}/config",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "connector_key", "label": "Connector", "type": "text", "required": True},
+                    {"key": "system_url", "label": "System-URL", "type": "text", "required": True},
+                ],
+            },
+            {
+                "key": "policy_override",
+                "label": "Policy Override speichern",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/policy",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "execution_enabled", "label": "Execution aktiv", "type": "boolean"},
+                    {"key": "require_tenant_secrets", "label": "Tenant-Secrets Pflicht", "type": "boolean"},
+                    {"key": "run_retention_days", "label": "Run-Retention", "type": "number"},
+                    {"key": "artifact_retention_days", "label": "Artifact-Retention", "type": "number"},
+                ],
+            },
+            {
+                "key": "wizard_apply",
+                "label": "Wizard-Schritt anwenden",
+                "kind": "secondary",
+                "zone": "header",
+                "dangerLevel": "moderate",
+                "forbiddenForAgents": True,
+                "permission": "studio.admin-control-center.superglue",
+                "commandEndpoint": f"{base}/wizard/apply",
+                "method": "POST",
+                "surfaceOnly": True,
+                "inputFields": [
+                    {"key": "completed_step", "label": "Abgeschlossener Schritt", "type": "text", "required": True},
+                    {"key": "next_step", "label": "Naechster Schritt", "type": "text"},
+                ],
+            },
+        ],
+        "specialized": {"type": "admin_workbench", "id": "admin/control-center/superglue"},
+        "noWorkflowReason": "Integrations-Leitstand ohne eigenen Beleg-Lebenszyklus.",
+        "noProcessChainReason": "Superglue ist Connector-Steuerung, keine Belegkette.",
+        "performance": {
+            "initialPayloadBudgetKb": 100,
+            "requiresLazyTabs": True,
+            "requiresVirtualTables": False,
+            "lookupMinChars": 2,
+            "bundleGroup": "admin",
+        },
+        "agentContract": {
+            "businessPurpose": "Superglue-Connector- und Policy-Overrides steuern.",
+            "examplePrompts": ["Zeig den Superglue-Status.", "Speichere einen Connector-Override."],
+            "sensitiveFields": ["system_url"],
+            "forbiddenAgentTasks": ["Connector-Overrides ohne Audit aendern"],
+            "testSelectors": {"screenRoot": "[data-testid='native-cockpit-admin-control-center-superglue']"},
+        },
+    }
+
+
+def build_agrar_milchvieh_crosssell_cockpit() -> dict[str, Any]:
+    """Milchvieh Cross-Sell — KPI-Summary + Kundenliste + Produktgruppen (Legacy-Paritaet)."""
+    from app.core.cockpit_overview_parent import (
+        build_cockpit_overview_screen,
+        cockpit_entity_source,
+        cockpit_list_source,
+        cockpit_refresh_action,
+    )
+
+    return build_cockpit_overview_screen(
+        screen_id="agrar/milchvieh-crosssell",
+        domain="agrar",
+        title="Milchvieh Cross-Sell",
+        subtitle="Hygiene-Bedarf, Kraftfutter- und Umsatzpotenzial",
+        business_purpose=(
+            "Landhandel-Umsatzpotenzial, Kraftfutter und Eutergesundheit/Hygiene "
+            "je Milchvieh-Kunde auswerten (Read-Model)."
+        ),
+        example_prompts=[
+            "Welche Milchvieh-Kunden haben hohen Hygiene-Bedarf?",
+            "Zeig das Cross-Sell-Potenzial nach Produktgruppe.",
+        ],
+        test_id="agrar-milchvieh-crosssell",
+        summary=[
+            {"key": "kunden", "label": "Milchvieh-Kunden", "tone": "info"},
+            {"key": "milchmenge_l_jahr_gesamt", "label": "Milch l/Jahr", "tone": "neutral"},
+            {"key": "crosssell_eur_jahr_ziel", "label": "Cross-Sell Ziel €", "tone": "success"},
+            {"key": "dippmittel_l_jahr_gesamt", "label": "Dippmittel L/Jahr", "tone": "neutral"},
+            {"key": "kraftfutter_t_jahr_gesamt_min", "label": "Kraftfutter t min", "tone": "neutral"},
+            {"key": "kraftfutter_t_jahr_gesamt_max", "label": "Kraftfutter t max", "tone": "neutral"},
+            {"key": "crosssell_eur_jahr_gewinnbar_min", "label": "Gewinnbar € min", "tone": "warning"},
+            {"key": "crosssell_eur_jahr_gewinnbar_max", "label": "Gewinnbar € max", "tone": "warning"},
+        ],
+        data_sources=[
+            cockpit_entity_source("/api/v1/agrar/milchvieh-crosssell/summary"),
+            cockpit_list_source("kunden", "/api/v1/agrar/milchvieh-crosssell", page_size=100),
+            cockpit_list_source(
+                "produktgruppen",
+                "/api/v1/agrar/milchvieh-crosssell/produktgruppen",
+                page_size=50,
+            ),
+        ],
+        tables=[
+            {
+                "key": "kunden",
+                "label": "Kunden",
+                "dataSourceKey": "kunden",
+                "pageSize": 50,
+                "virtualized": True,
+                "rowHeight": 40,
+                "columns": [
+                    {"key": "name", "label": "Betrieb", "filterable": True, "priority": "primary"},
+                    {"key": "kunden_nr", "label": "Kunden-Nr.", "filterable": True, "priority": "secondary"},
+                    {"key": "plz", "label": "PLZ", "filterable": True, "priority": "tertiary"},
+                    {"key": "ort", "label": "Ort", "filterable": True, "priority": "secondary"},
+                    {"key": "herd_size_kuehe", "label": "Kühe", "numeric": True, "sortable": True,
+                     "priority": "primary"},
+                    {"key": "milchmenge_l_jahr", "label": "Milch l/J", "numeric": True, "sortable": True,
+                     "priority": "secondary"},
+                    {"key": "zellzahl_tsd_ml", "label": "Zellzahl", "numeric": True, "priority": "secondary"},
+                    {"key": "hygiene_bedarf", "label": "Hygiene", "filterable": True, "renderKind": "status",
+                     "priority": "primary"},
+                    {"key": "kraftfutter_t_jahr_min", "label": "KF t min", "numeric": True, "priority": "tertiary"},
+                    {"key": "kraftfutter_t_jahr_max", "label": "KF t max", "numeric": True, "priority": "tertiary"},
+                    {"key": "crosssell_ziel_eur", "label": "Ziel €", "numeric": True, "renderKind": "currency",
+                     "sortable": True, "priority": "primary"},
+                    {"key": "crosssell_gewinnbar_eur_min", "label": "Gewinnbar min", "numeric": True,
+                     "renderKind": "currency", "priority": "secondary"},
+                    {"key": "crosssell_gewinnbar_eur_max", "label": "Gewinnbar max", "numeric": True,
+                     "renderKind": "currency", "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+            {
+                "key": "produktgruppen",
+                "label": "Produktgruppen",
+                "dataSourceKey": "produktgruppen",
+                "pageSize": 25,
+                "columns": [
+                    {"key": "label", "label": "Produktgruppe", "filterable": True, "priority": "primary"},
+                    {"key": "key", "label": "Key", "filterable": True, "priority": "tertiary"},
+                    {"key": "eur_jahr_min", "label": "€/Jahr min", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                    {"key": "eur_jahr_max", "label": "€/Jahr max", "numeric": True, "renderKind": "currency",
+                     "priority": "secondary"},
+                ],
+                "rowActions": [],
+            },
+        ],
+        actions=[cockpit_refresh_action(permission="agrar.milchvieh_crosssell.read")],
+        context_rail="combined",
+        requires_virtual_tables=True,
+        no_workflow_reason="Read-Model-Cockpit ohne eigenen Objekt-Lebenszyklus.",
+    )
+
+
+def build_agrar_erntefenster_konfig_liste() -> dict[str, Any]:
+    """Erntefenster-Kampagnen — Paritaet zur Legacy-Konfig-Maske."""
+    _create_fields = [
+        {
+            "key": "template_id",
+            "label": "Vorlage",
+            "type": "select",
+            "required": True,
+            "optionsEndpoint": "/api/v1/admin/erntefenster-templates",
+            "optionValueKey": "id",
+            "optionLabelKey": "name",
+        },
+        {"key": "name", "label": "Kampagnenname", "type": "text", "required": True},
+        {"key": "year", "label": "Jahr", "type": "number", "required": True},
+        {"key": "start_mmdd", "label": "Start (MM-DD)", "type": "text"},
+        {"key": "end_mmdd", "label": "Ende (MM-DD)", "type": "text"},
+    ]
+    return _liste(
+        screen_id="agrar/erntefenster-konfig", domain="agrar",
+        title="Erntefenster-Konfiguration",
+        subtitle="Saisonale Kampagnen aus Vorlagen anlegen und Alt-Daten zuordnen",
+        endpoint="/api/v1/admin/erntefenster-campaigns", row_route=None, bundle="agrar",
+        columns=[
+            {"key": "name", "label": "Kampagne", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "start_date", "label": "Start", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "end_date", "label": "Ende", "renderKind": "date", "sortable": True, "priority": "primary"},
+            {"key": "process_key", "label": "Prozess", "filterable": True, "priority": "secondary"},
+            {"key": "template_id", "label": "Vorlage", "filterable": True, "priority": "tertiary"},
+            {"key": "created_at", "label": "Erstellt", "renderKind": "date", "sortable": True, "priority": "tertiary"},
+        ],
+        actions=[
+            {"key": "anlegen", "label": "Kampagne aus Vorlage", "kind": "primary", "dangerLevel": "safe",
+             "zone": "header", "permission": "agrar.erntefenster.create",
+             "commandEndpoint": "/api/v1/admin/erntefenster-from-template", "method": "POST",
+             "inputFields": _create_fields},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "settlement_pruefen", "label": "Settlement-Abschluss pruefen", "dangerLevel": "safe",
+             "permission": "agrar.erntefenster.read",
+             "navigationRoute": "/annahme/abrechnung?campaignId={id}&campaignName={name}&campaignStart={start_date}&campaignEnd={end_date}"},
+            {"key": "sandbox", "label": "In Sandbox pruefen", "dangerLevel": "safe",
+             "permission": "agrar.erntefenster.read",
+             "navigationRoute": "/workflow/workflow-sandbox?process={process_key}&date={start_date}&campaign={id}"},
+            {"key": "alt_daten_zuordnen", "label": "Alt-Daten zuordnen", "dangerLevel": "moderate",
+             "permission": "agrar.erntefenster.backfill",
+             "commandEndpoint": "/api/v1/agrar/settlements/campaign-reference/backfill/{entity_id}",
+             "method": "POST", "requiresConfirmation": True},
+        ],
+        purpose="Erntefenster-Kampagnen aus Vorlagen anlegen, Settlements pruefen und Alt-Daten zuordnen.",
+        prompts=["Lege eine Erntefenster-Kampagne an.", "Ordne Alt-Settlements der Kampagne {entity_id} zu."],
+        no_workflow="Kampagnen sind Konfiguration; der Ernteprozess laeuft in den Fachmasken.",
+    )
+
+
+def build_kontrakte_mengenzeitraeume_liste() -> dict[str, Any]:
+    """Kontrakt-Mengenzeiträume + Zu-/Abschläge — volle Legacy-Aktionsparitaet.
+
+    Ersetzt den reduzierten Stamm-Stub; Human/CI/MCP nutzen dieselben pfadgebundenen
+    Endpunkte wie ``mengenzeitraeume-legacy.tsx``.
+    """
+    _zeitraum_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "zeitraum_von", "label": "Von", "type": "date", "required": True},
+        {"key": "zeitraum_bis", "label": "Bis", "type": "date", "required": True},
+        {"key": "menge_t", "label": "Menge t", "type": "number", "required": True},
+        {"key": "variante", "label": "Variante", "type": "text"},
+        {"key": "bemerkung", "label": "Bemerkung", "type": "textarea"},
+    ]
+    _gen_fields = [
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+        {"key": "von_datum", "label": "Von Datum", "type": "date", "required": True},
+        {"key": "bis_datum", "label": "Bis Datum", "type": "date", "required": True},
+        {"key": "gesamt_menge_t", "label": "Gesamtmenge t", "type": "number", "required": True},
+        {"key": "variante", "label": "Variante", "type": "text"},
+    ]
+    _gruppe_fields = [
+        {"key": "gruppe_nr", "label": "Gruppe-Nr.", "type": "text", "required": True},
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "typ", "label": "Typ", "type": "text", "required": True},
+    ]
+    _abschlag_fields = [
+        {"key": "bezeichnung", "label": "Bezeichnung", "type": "text", "required": True},
+        {"key": "betrag_eur", "label": "Betrag €", "type": "currency"},
+        {"key": "prozent", "label": "Prozent", "type": "number"},
+        {"key": "einheit", "label": "Einheit", "type": "text"},
+        {"key": "kontrakt_nr", "label": "Kontrakt-Nr. (optional)", "type": "text"},
+    ]
+    return _liste(
+        screen_id="kontrakte/mengenzeitraeume", domain="kontrakte",
+        title="Kontrakt-Mengenzeiträume und Zu-/Abschläge",
+        subtitle="Abnahme-Staffeln und kontraktbezogene Zu-/Abschläge",
+        endpoint="/api/v1/kontrakte/zuabschlagsgruppen", row_route=None, bundle="kontrakte",
+        columns=[
+            {"key": "gruppe_nr", "label": "Gruppe-Nr.", "sortable": True, "filterable": True, "priority": "primary"},
+            {"key": "bezeichnung", "label": "Bezeichnung", "filterable": True, "priority": "primary"},
+            {"key": "typ", "label": "Typ", "filterable": True, "priority": "secondary"},
+            {"key": "aktiv", "label": "Aktiv", "renderKind": "boolean", "priority": "tertiary"},
+        ],
+        actions=[
+            # surfaceOnly: Kontrakt-/Zeitraum-Kontext aus der Listenoberflaeche; CLI-Pfadparameter mehrteilig.
+            {"key": "zeitraum_anlegen", "label": "Mengenzeitraum anlegen", "kind": "primary",
+             "dangerLevel": "safe", "zone": "header", "surfaceOnly": True,
+             "permission": "kontrakte.mengenzeitraum.create",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume", "method": "POST",
+             "inputFields": _zeitraum_fields},
+            {"key": "zeitraeume_generieren", "label": "Mengenzeiträume generieren",
+             "dangerLevel": "moderate", "zone": "header", "surfaceOnly": True,
+             "permission": "kontrakte.mengenzeitraum.create",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/generieren",
+             "method": "POST", "inputFields": _gen_fields},
+            {"key": "gruppe_anlegen", "label": "Zu-/Abschlagsgruppe anlegen",
+             "dangerLevel": "safe", "zone": "header",
+             "permission": "kontrakte.zuabschlag.create",
+             "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen", "method": "POST",
+             "inputFields": _gruppe_fields},
+            {"key": "zeitraum_loeschen", "label": "Mengenzeitraum loeschen",
+             "dangerLevel": "critical", "zone": "header", "surfaceOnly": True,
+             "permission": "kontrakte.mengenzeitraum.delete",
+             "commandEndpoint": "/api/v1/kontrakte/{kontrakt_nr}/mengenzeitraeume/{zeitraum_id}",
+             "method": "DELETE", "requiresConfirmation": True,
+             "inputFields": [
+                 {"key": "kontrakt_nr", "label": "Kontrakt-Nr.", "type": "text", "required": True},
+                 {"key": "zeitraum_id", "label": "Zeitraum-ID", "type": "text", "required": True},
+             ]},
+            _EXPORT,
+        ],
+        row_actions=[
+            {"key": "abschlag_anlegen", "label": "Zu-/Abschlag anlegen", "dangerLevel": "safe",
+             "permission": "kontrakte.zuabschlag.create",
+             "commandEndpoint": "/api/v1/kontrakte/zuabschlagsgruppen/{entity_id}/positionen",
+             "method": "POST", "inputFields": _abschlag_fields},
+        ],
+        dangerous=[
+            {"key": "zeitraum_loeschen", "reason": "Loescht einen offenen Mengenzeitraum."},
+        ],
+        purpose="Abnahme-Staffeln je Kontrakt pflegen und Zu-/Abschläge zuordnen.",
+        prompts=["Lege Mengenzeitraum fuer Kontrakt an.", "Generiere monatliche Staffeln."],
+        no_workflow="Workspace ohne eigenen Ablauf; Aktionen schreiben direkt auf die Kontrakt-APIs.",
+    )
+
+
 def build_einkauf_anfragen_liste() -> dict[str, Any]:
     """Bedarfsanforderungen: senden, in Bestellung ueberfuehren, Entwurf loeschen."""
     return _liste(
@@ -1482,7 +2907,7 @@ def build_fibu_zahlungslaeufe_liste() -> dict[str, Any]:
 def build_fibu_kostenstellen_liste() -> dict[str, Any]:
     return _liste(
         screen_id="fibu/kostenstellen-liste", domain="finance", title="Kostenstellen", subtitle="Kostenstellen und Zuordnungen",
-        endpoint="/api/v1/finance/kostenstellen", row_route=None, bundle="finance",
+        endpoint="/api/v1/kostenrechnung/kostenstellen", row_route=None, bundle="finance",
         columns=[
             {"key": "id", "label": "ID", "filterable": True, "priority": "secondary"},
             {"key": "name", "label": "Bezeichnung", "sortable": True, "filterable": True, "priority": "primary"},
@@ -3047,6 +4472,35 @@ LISTEN_SCREEN_BUILDERS = {
     "compliance/saatgut-nachbau-liste": build_compliance_saatgut_nachbau_liste,
     "admin/audit-log-liste": build_admin_audit_log_liste,
     "admin/webhooks-liste": build_admin_webhooks_liste,
+    "agrar/zinsabrechnung": build_agrar_zinsabrechnung_liste,
+    "agrar/sammelabrechnung": build_agrar_sammelabrechnung_liste,
+    "agrar/annahmen-qualitaet-nachtrag": build_agrar_qualitaet_nachtrag_liste,
+    "agrar/erntefenster-konfig": build_agrar_erntefenster_konfig_liste,
+    "agrar/milchvieh-crosssell": build_agrar_milchvieh_crosssell_cockpit,
+    "agrar/kunden-schlagkartei": build_agrar_kunden_schlagkartei_workbench,
+    "agrar/milchvieh-karte": build_agrar_milchvieh_karte_workbench,
+    "agrar/ernte-annahme-erfassung": build_agrar_ernte_annahme_erfassung_workbench,
+    "annahme/abrechnung": build_annahme_abrechnung_workbench,
+    "lager/materialfluss": build_lager_materialfluss_workbench,
+    "konditionen/konditionssystem": build_konditionen_konditionssystem_workbench,
+    "fuhrpark/fahrzeug-vertiefung": build_fuhrpark_fahrzeug_vertiefung_workbench,
+    "admin/externe-gates": build_admin_externe_gates_cockpit,
+    "admin/control-center/agent-ops": build_admin_control_center_agent_ops_workbench,
+    "admin/control-center/superglue": build_admin_control_center_superglue_workbench,
+    "admin-suite": build_admin_suite_home_cockpit,
+    "admin-suite/connectors": build_admin_suite_connectors_liste,
+    "admin-suite/devices": build_admin_suite_devices_liste,
+    "admin-suite/operations": build_admin_suite_operations_liste,
+    "admin-suite/compliance": build_admin_suite_compliance_liste,
+    "admin-suite/system-status": build_admin_suite_system_status_liste,
+    "admin-suite/diagnostics": build_admin_suite_diagnostics_liste,
+    "admin-suite/setup": build_admin_suite_setup_liste,
+    "admin-suite/migration": build_admin_suite_migration_cockpit,
+    "admin-suite/security": build_admin_suite_security_cockpit,
+    "admin-suite/ki-anbieter": build_admin_suite_ki_anbieter_cockpit,
+    "admin-suite/connectoren": build_admin_suite_connectoren_cockpit,
+    "admin-suite/pos-fiscalization": build_admin_suite_pos_fiscalization_cockpit,
+    "kontrakte/mengenzeitraeume": build_kontrakte_mengenzeitraeume_liste,
     "agrar/feldbuch-massnahmen-liste": build_agrar_feldbuch_massnahmen_liste,
     "agrar/feldbuch-schlagkartei-liste": build_agrar_feldbuch_schlagkartei_liste,
     "agrar/saatzucht-partien-liste": build_agrar_saatzucht_partien_liste,
@@ -3084,6 +4538,11 @@ LISTEN_SCREEN_BUILDERS = {
     "waage/waagen-liste": build_waage_waagen_liste,
     "waage/wiegungen-liste": build_waage_wiegungen_liste,    "agrar/bodenproben-liste": build_agrar_bodenproben_liste,    "agrar/ernte-annahme-energiemais-liste": build_agrar_ernte_annahme_energiemais_liste,    "agrar/feldbuch-flurstueck-kataster-liste": build_agrar_feldbuch_flurstueck_kataster_liste,    "agrar/kultur-stamm-liste": build_agrar_kultur_stamm_liste,    "agrar/maschinen-auslastung-liste": build_agrar_maschinen_auslastung_liste,    "agrar/nachhaltigkeit-eudr-liste": build_agrar_nachhaltigkeit_eudr_liste,    "agrar/pflanzenschutz-applikationen-liste": build_agrar_pflanzenschutz_applikationen_liste,    "agrar/psm-abgabedokumentation-liste": build_agrar_psm_abgabedokumentation_liste,    "agrar/psm-beratung-liste": build_agrar_psm_beratung_liste,    "agrar/psm-sachkunde-register-liste": build_agrar_psm_sachkunde_register_liste,    "agrar/psm-wasserschutz-liste": build_agrar_psm_wasserschutz_liste,    "agrar/saatgut-bestellungen-liste": build_agrar_saatgut_bestellungen_liste,    "agrar/saatgut-sortenregister-liste": build_agrar_saatgut_sortenregister_liste,    "agrar/schlaege-liste": build_agrar_schlaege_liste,    "agrar/schlaege-karte-liste": build_agrar_schlaege_karte_liste,    "agrar/schlaege-kulturhistorie-liste": build_agrar_schlaege_kulturhistorie_liste,    "agrar/vertrag-kontingente-liste": build_agrar_vertrag_kontingente_liste,    "charge/wareneingang-liste": build_charge_wareneingang_liste,    "compliance/bvl-umsatzmeldung-liste": build_compliance_bvl_umsatzmeldung_liste,    "compliance/eudr-compliance-liste": build_compliance_eudr_compliance_liste,    "compliance/export-pruefung-liste": build_compliance_export_pruefung_liste,    "compliance/gefahrstoff-doku-liste": build_compliance_gefahrstoff_doku_liste,    "controlling/plan-ist-liste": build_controlling_plan_ist_liste,    "crm/contact-detail-liste": build_crm_contact_detail_liste,    "crm/kontakt-management-liste": build_crm_kontakt_management_liste,    "einkauf/anfragen-create-liste": build_einkauf_anfragen_create_liste,    "einkauf/angebote-vergleich-liste": build_einkauf_angebote_vergleich_liste,    "einkauf/dienstleistungen-haltung-liste": build_einkauf_dienstleistungen_haltung_liste,    "einkauf/einkauf-vorgang-liste": build_einkauf_einkauf_vorgang_liste,    "einkauf/kontrakte-service-liste": build_einkauf_kontrakte_service_liste,    "einkauf/rechnung-abgleich-liste": build_einkauf_rechnung_abgleich_liste,    "einkauf/retouren-liste": build_einkauf_retouren_liste,    "etiketten/druck-liste": build_etiketten_druck_liste,    "export/intrastat-meldung-liste": build_export_intrastat_meldung_liste,    "export/umsatzsteuer-voranmeldung-liste": build_export_umsatzsteuer_voranmeldung_liste,    "fibu/anlagen-liste": build_fibu_anlagen_liste,    "fibu/debitoren-liste": build_fibu_debitoren_liste,    "fibu/hauptbuch-liste": build_fibu_hauptbuch_liste,    "fibu/kassenbuch-liste": build_fibu_kassenbuch_liste,    "fibu/kreditoren-liste": build_fibu_kreditoren_liste,    "fibu/schnittstelle-fibu-liste": build_fibu_schnittstelle_fibu_liste,    "fibu/verbindlichkeiten-liste": build_fibu_verbindlichkeiten_liste,
 }
+
+from app.core.screen_definitions_admin_ops_thin import ADMIN_OPS_THIN_BUILDERS, ADMIN_OPS_THIN_ROUTEN
+
+LISTEN_SCREEN_BUILDERS.update(ADMIN_OPS_THIN_BUILDERS)
+
 LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/einkauf/angebote",
                 "einkauf/anlieferavis-liste": "/einkauf/anlieferavis",
                 "einkauf/auftragsbestaetigungen": "/einkauf/auftragsbestaetigungen",
@@ -3151,6 +4610,35 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "admin/audit-log-liste": "/admin/audit-log",
                 "agrar/bodenproben-liste": "/agrar/bodenproben/liste",
                 "agrar/ernte-annahme-energiemais-liste": "/agrar/ernte-annahme-energiemais",
+                "agrar/zinsabrechnung": "/agrar/zinsabrechnung",
+                "agrar/sammelabrechnung": "/agrar/sammelabrechnung",
+                "agrar/annahmen-qualitaet-nachtrag": "/agrar/annahmen-qualitaet-nachtrag",
+                "agrar/erntefenster-konfig": "/agrar/erntefenster-konfig",
+                "agrar/milchvieh-crosssell": "/agrar/milchvieh-crosssell",
+                "agrar/kunden-schlagkartei": "/agrar/kunden-schlagkartei",
+                "agrar/milchvieh-karte": "/agrar/milchvieh-karte",
+                "agrar/ernte-annahme-erfassung": "/agrar/ernte-annahme-erfassung",
+                "annahme/abrechnung": "/annahme/abrechnung",
+                "lager/materialfluss": "/lager/materialfluss",
+                "konditionen/konditionssystem": "/konditionen/konditionssystem",
+                "fuhrpark/fahrzeug-vertiefung": "/fuhrpark/fahrzeug-vertiefung",
+                "admin/externe-gates": "/admin/externe-gates",
+                "admin/control-center/agent-ops": "/admin/control-center/agent-ops",
+                "admin/control-center/superglue": "/admin/control-center/superglue",
+                "admin-suite": "/admin-suite",
+                "admin-suite/connectors": "/admin-suite/connectors",
+                "admin-suite/devices": "/admin-suite/devices",
+                "admin-suite/operations": "/admin-suite/operations",
+                "admin-suite/compliance": "/admin-suite/compliance",
+                "admin-suite/system-status": "/admin-suite/system-status",
+                "admin-suite/diagnostics": "/admin-suite/diagnostics",
+                "admin-suite/setup": "/admin-suite/setup",
+                "admin-suite/migration": "/admin-suite/migration",
+                "admin-suite/security": "/admin-suite/security",
+                "admin-suite/ki-anbieter": "/admin-suite/ki-anbieter",
+                "admin-suite/connectoren": "/admin-suite/connectoren",
+                "admin-suite/pos-fiscalization": "/admin-suite/pos-fiscalization",
+                "kontrakte/mengenzeitraeume": "/kontrakte/mengenzeitraeume",
                 "agrar/feldbuch-schlagkartei-liste": "/agrar/feldbuch/ackerschlagkartei",
                 "agrar/feldbuch-flurstueck-kataster-liste": "/agrar/feldbuch/flurstueck-kataster",
                 "agrar/kultur-stamm-liste": "/agrar/kultur-stamm",
@@ -3199,7 +4687,15 @@ LISTEN_ROUTEN = {"einkauf/anfragen": "/einkauf/anfragen", "einkauf/angebote": "/
                 "fibu/schnittstelle-fibu-liste": "/fibu/schnittstelle-fibu",
                 "fibu/verbindlichkeiten-liste": "/fibu/verbindlichkeiten",
                 "fibu/zahlungslaeufe-liste": "/fibu/zahlungslaeufe"}
-LISTEN_SYNONYME = {"einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
+LISTEN_ROUTEN.update(ADMIN_OPS_THIN_ROUTEN)
+LISTEN_SYNONYME = {"admin/GapPipelineConsole": ["admin/gap-pipeline", "gap-pipeline", "gap pipeline"],
+                   "agrar/zinsabrechnung": ["zinsabrechnung", "zib", "kontraktzinsen"],
+                   "agrar/sammelabrechnung": ["sammelabrechnung", "rohware sammelabrechnung", "ernte sammeln"],
+                   "agrar/annahmen-qualitaet-nachtrag": ["qualitaets nachtrag", "laborbuch nachtrag", "fehlende qualitaet"],
+                   "agrar/erntefenster-konfig": ["erntefenster", "erntekampagne", "saisonale kampagne"],
+                   "agrar/milchvieh-crosssell": ["milchvieh cross sell", "kraftfutter potenzial", "hygiene bedarf"],
+                   "kontrakte/mengenzeitraeume": ["mengenzeitraum", "zu abschlag", "abnahme staffel"],
+                   "einkauf/anfragen": ["anfragen", "bedarfsanforderungen", "banf"],
                    "einkauf/angebote": ["angebote", "lieferantenangebote", "preisvergleich"],
                    "einkauf/anlieferavis-liste": ["avise", "lieferavise", "anlieferungen"],
                    "einkauf/auftragsbestaetigungen": ["auftragsbestaetigungen", "ab", "ordrsp"],

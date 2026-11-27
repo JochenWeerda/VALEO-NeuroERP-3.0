@@ -1,21 +1,10 @@
 {
   "_hinweis": "Handgebaute Altfassungen ohne Route/Navigation (Doku-Drift, 03.11.2026). Nicht loeschen ohne Paritaetspruefung gegen ihre Studio-Maske (docs/quality-assurance/doc-drift-page-orphan-audit-20261031.md); fehlende Funktionen erst in Studio nachbilden. Nur schrumpfen: scripts/doc_drift_report.py meldet behobene Eintraege.",
   "seiten": [
-    "Home-legacy.tsx",
     "Home.tsx",
-    "admin-suite/connectoren-legacy.tsx",
     "admin-suite/index-legacy.tsx",
     "admin/control-center/index-legacy.tsx",
-    "agrar/duenger/stamm-legacy.tsx",
-    "agrar/psm/stamm-legacy.tsx",
-    "agrar/saatgut/stamm-legacy.tsx",
-    "artikel/stamm-legacy.tsx",
-    "charge/stamm-legacy.tsx",
     "crm/detail.tsx",
-    "futter/einzel/stamm-legacy.tsx",
-    "futter/misch/stamm-legacy.tsx",
-    "konditionen/konditionssystem-legacy.tsx",
-    "rezepte/editor-legacy.tsx",
-    "waage/detail-legacy.tsx"
+    "rezepte/editor-legacy.tsx"
   ]
 }

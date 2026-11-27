@@ -1546,6 +1546,14 @@ beide **offen** (Plan, nicht reserviert). **StammObjectPageParent-Rollout abgesc
 Naechste Cluster: KontrollWorklist-Ausbau, weitere Listen Dual-Pfad;
 Codex STUDIO-BELEG-THEME / Touren/Training/Bestellvorschlag unangetastet.
 
+## STUDIO — Made-by-Studio Open Routes (Nachtrag 2026-11-26)
+
+Slice `STUDIO-MADE-OPEN-ROUTES-20261125` (PR #213, Batch 117): Routen `hand_built` **0**,
+Gates A/B/C/E **829/829**, Gate-D Mock **1160/1160**. `pages_hand` 37 bewusst.
+**Weiter offen:** Gate D Live-SSO + Image-CI `table-catalog` (`STUDIO-ENTITY-RELEASE-20261021`).
+Belege: [`studio-made-open-routes-20261125.md`](../quality-assurance/studio-made-open-routes-20261125.md),
+Handshake [`studio-made-open-routes-20261126.md`](../agent-ops/handshakes/studio-made-open-routes-20261126.md).
+
 ## STUDIO — Made-by-Studio Qualitätslücke (Nachtrag 2026-10-22)
 
 Nachweis-Katalog: [`made-by-studio-qualitaetsversprechen.md`](../architecture/uix/made-by-studio-qualitaetsversprechen.md).

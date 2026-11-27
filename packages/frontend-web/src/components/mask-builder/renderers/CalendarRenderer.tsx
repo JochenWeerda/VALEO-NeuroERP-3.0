@@ -20,13 +20,14 @@ type CalendarItem = {
   payload?: Record<string, unknown>
 }
 
+/** Kategoriale Layer-Farben nur aus Chart-Token-Slots (kein Rohpalette/Indigo). */
 const LAYER_TONE: Record<string, string> = {
-  finanzen: 'border-l-emerald-600',
-  fristen: 'border-l-amber-500',
-  crm: 'border-l-sky-600',
-  logistik: 'border-l-indigo-600',
-  personal: 'border-l-rose-600',
-  saison: 'border-l-lime-600',
+  finanzen: 'border-l-[hsl(var(--chart-1-hsl))]',
+  fristen: 'border-l-[hsl(var(--chart-2-hsl))]',
+  crm: 'border-l-[hsl(var(--chart-3-hsl))]',
+  logistik: 'border-l-[hsl(var(--chart-4-hsl))]',
+  personal: 'border-l-[hsl(var(--chart-5-hsl))]',
+  saison: 'border-l-[hsl(var(--chart-6-hsl))]',
 }
 
 function startOfToday(): Date {

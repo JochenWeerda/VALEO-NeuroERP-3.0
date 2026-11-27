@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { AgentenIntegrationWorkspace } from '@/pages/admin/agenten-integration'
+import { AgentenIntegrationWorkspace } from '@/components/mask-builder/specialized/admin/integration-workspace'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { apiClient } from '@/lib/api-client'

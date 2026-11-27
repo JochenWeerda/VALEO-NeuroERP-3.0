@@ -20,6 +20,8 @@ def validate_flow_spine_catalog(definition: dict) -> list[str]:
         FlowSpineCatalog.model_validate(metadata)
     except (ValidationError, TypeError, ValueError):
         return ["flow_spine_katalog_ungueltig"]
-    if definition.get("id") != "workflow/flow-spine-studio" or definition.get("mode") != "cockpit":
+    # Draft-Projektion setzt id auf tenant/… und behält die kanonische Maske in baseScreenId.
+    screen_id = definition.get("baseScreenId") or definition.get("id")
+    if screen_id != "workflow/flow-spine-studio" or definition.get("mode") != "cockpit":
         return ["flow_spine_katalog_maske_ungueltig"]
     return []

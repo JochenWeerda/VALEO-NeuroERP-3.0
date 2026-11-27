@@ -1,3 +1,11 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
 
-export default createLegacyMaskPage(() => import('./pos-fiscalization-legacy'))
+/** Native Cockpit: ScreenDefinition admin-suite/pos-fiscalization */
+export default function AdminSuitePosFiscalizationPage(): JSX.Element {
+  return (
+    <UniversalNativeCockpitPage
+      screenId="admin-suite/pos-fiscalization"
+      testId="screen-admin-suite/pos-fiscalization"
+    />
+  )
+}

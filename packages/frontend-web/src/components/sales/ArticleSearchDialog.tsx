@@ -227,7 +227,7 @@ export function ArticleSearchDialog({
           </div>
 
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
-            <TabsList>
+            <TabsList aria-label="Artikelsuche">
               <TabsTrigger value="all">alle Artikel</TabsTrigger>
               <TabsTrigger value="group">Artikel-Gruppe...</TabsTrigger>
               <TabsTrigger value="selection">Artikel-Selektion...</TabsTrigger>
@@ -275,7 +275,7 @@ export function ArticleSearchDialog({
           </div>
 
           <Tabs defaultValue="prices">
-            <TabsList>
+            <TabsList aria-label="Artikeldetails">
               <TabsTrigger value="alternatives">Alternativ-Artikel</TabsTrigger>
               <TabsTrigger value="prices">Preise</TabsTrigger>
               <TabsTrigger value="stock">Lager-Bestand</TabsTrigger>

@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./compliance-legacy'))
+/** Native Liste: ScreenDefinition admin-suite/compliance */
+export default function AdminSuiteCompliancePage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/compliance" testId="screen-admin-suite/compliance" />
+}

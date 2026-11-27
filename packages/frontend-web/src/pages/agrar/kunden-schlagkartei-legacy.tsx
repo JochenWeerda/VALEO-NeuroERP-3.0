@@ -343,23 +343,23 @@ function AnkaufsangebotDialog({
         {result ? (
           <div className="py-4 text-center space-y-3">
             <CheckCircle2 className="h-12 w-12 text-status-success mx-auto" />
-            <p className="font-semibold text-gray-900">
+            <p className="font-semibold text-foreground">
               {result.count} Empfehlung{result.count !== 1 ? 'en' : ''} erstellt
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Der Kunde sieht die Angebote beim nächsten Portal-Besuch im Empfehlungs-Banner.
             </p>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="rounded-lg bg-gray-50 p-3 space-y-1">
-              <p className="text-sm font-medium text-gray-700">Angebaute Kulturen ({kulturen.length}):</p>
+            <div className="rounded-lg bg-muted p-3 space-y-1">
+              <p className="text-sm font-medium text-foreground">Angebaute Kulturen ({kulturen.length}):</p>
               <div className="flex flex-wrap gap-1">
                 {kulturen.map((k) => (
                   <Badge variant="success" key={k}>{k}</Badge>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted-foreground mt-1">
                 Gesamtfläche: {gesamtFlaeche.toFixed(1)} ha
               </p>
             </div>
@@ -544,7 +544,7 @@ function SchlagkarteiFuerKunde({ kunde }: { kunde: PortalKundenkonto }) {
 
       {/* Tabs: Schläge / Maßnahmen */}
       <Tabs defaultValue="schlaege">
-        <TabsList className="h-auto min-h-11 w-full flex-wrap justify-start">
+        <TabsList aria-label="Schlagkartei" className="h-auto min-h-11 w-full flex-wrap justify-start">
           <TabsTrigger value="schlaege" className="min-h-11">Schläge ({schlaege?.count ?? 0})</TabsTrigger>
           <TabsTrigger value="massnahmen" className="min-h-11">Maßnahmen ({massnahmen?.count ?? 0})</TabsTrigger>
         </TabsList>

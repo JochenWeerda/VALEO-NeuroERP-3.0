@@ -23,9 +23,12 @@ def _screen(screen_id: str, title: str, fields: list[dict[str, Any]], actions: l
     intake = screen_id.startswith("annahme/")
     # Registration/quality are guided forms, creation is a single-step form.
     # Tickets are a multi-object operator workspace, never a fetched object page.
-    wizard = screen_id.endswith(("lkw-registrierung", "qualitaets-check", "/neu"))
+    wizard = screen_id.endswith(("lkw-registrierung", "qualitaets-check", "/neu", "rohware"))
     for action in actions:
-        if action["key"] in {"upload", "start", "quality", "repair", "clarify", "harvest", "calibrate", "close", "import", "retryImport", "dismissImport"}:
+        if action["key"] in {
+            "upload", "start", "quality", "repair", "clarify", "harvest", "billing",
+            "calibrate", "close", "import", "retryImport", "dismissImport",
+        }:
             action["surfaceOnly"] = True
     return {
         "schemaVersion": 1, "id": screen_id, "domain": "agrar", "mode": "wizard" if wizard else "cockpit",
@@ -44,6 +47,36 @@ def _screen(screen_id: str, title: str, fields: list[dict[str, Any]], actions: l
 def build_intake_registration() -> dict[str, Any]:
     fields = [_field("kennzeichen", "Kennzeichen", required=True), _field("lieferant", "Lieferant", required=True), _field("lieferscheinNr", "Lieferschein-Nr."), _field("articleId", "Artikel", required=True), _field("artikel", "Artikelbezeichnung"), _field("ankunftszeit", "Ankunftszeit", "datetime"), _field("prioritaet", "Priorität"), _field("attachmentIds", "Bildanhänge", "stringList")]
     return _screen("annahme/lkw-registrierung", "LKW-Registrierung", fields, [_action("register", "LKW registrieren", "/api/v1/annahme/lkw-registrierung", primary=True), _action("upload", "Bild hochladen", "/api/v1/annahme/upload"), _action("cancel", "Zur Warteschlange")], [("articles", "/api/v1/articles?limit=100")])
+
+
+def build_intake_rohware() -> dict[str, Any]:
+    """Rohware-Annahme — Wizard-Felder und Submit-Endpunkt wie Legacy-Touch-Flow (Gate C)."""
+    fields = [
+        _field("lieferant", "Lieferant", required=True),
+        _field("kennzeichen", "Kennzeichen", required=True),
+        _field("lieferscheinNr", "Lieferschein-Nr."),
+        _field("datum", "Datum/Uhrzeit", "datetime"),
+        _field("artikel", "Artikel", required=True),
+        _field("bruttoKg", "Bruttogewicht kg", "number", required=True),
+        _field("taraKg", "Taragewicht kg", "number", required=True),
+        _field("lagerZiel", "Lager-Ziel", required=True),
+        _field("feuchtePct", "Feuchte %", "number"),
+        _field("besatzPct", "Besatz %", "number"),
+        _field("fallzahl", "Fallzahl", "number"),
+        _field("customer_id", "Debitor-Kto."),
+    ]
+    return _screen(
+        "annahme/rohware",
+        "Rohware-Annahme",
+        fields,
+        [
+            _action("submit", "Rohware annehmen", "/api/v1/agrar/harvest-acceptance/rohware", primary=True),
+            _action("billing", "Zur Abrechnung"),
+            _action("cancel", "Zur Warteschlange"),
+        ],
+        # Kein /supply-chain/overview in OpenAPI — Legacy aggregiert Warteschlange(+Waage/Charge/Fracht).
+        [("supply", "/api/v1/annahme/warteschlange"), ("articles", "/api/v1/articles?limit=100")],
+    )
 
 
 def build_intake_quality() -> dict[str, Any]:

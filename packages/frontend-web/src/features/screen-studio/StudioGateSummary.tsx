@@ -7,12 +7,13 @@ export function StudioGateSummary({ report, publishedUnchanged, readyToPublish, 
   readyToPublish: boolean
   semanticPreview: boolean
 }): JSX.Element {
-  const errors = (report?.readiness.errors ?? []).filter(error =>
+  const errors = (report?.readiness?.errors ?? []).filter(error =>
     !(publishedUnchanged && error.startsWith('[non_temporary]')))
+  const violations = report?.violations ?? []
   return <>
     {!report ? <p role="status">Vertragsprüfung wird geladen oder ist derzeit nicht verfügbar.</p>
-      : report.violations.length ? <ul className="list-disc pl-4 text-sm text-destructive">
-        {report.violations.map(item => <li key={item}>{item}</li>)}
+      : violations.length ? <ul className="list-disc pl-4 text-sm text-destructive">
+        {violations.map(item => <li key={item}>{item}</li>)}
       </ul> : <p className="text-sm text-muted-foreground">Keine Studio-Verletzungen.</p>}
     <p className="text-sm">{publishedUnchanged
       ? 'Diese Fassung wurde bereits veröffentlicht. Der Laufzeitabruf prüft ihre Gültigkeit erneut; Änderungen benötigen eine neue Prüfung und Freigabe.'

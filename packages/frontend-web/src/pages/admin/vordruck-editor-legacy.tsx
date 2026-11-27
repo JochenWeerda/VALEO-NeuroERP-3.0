@@ -280,7 +280,11 @@ export default function VordruckEditorPage(): JSX.Element {
   const aktivesElement = entwurf && selectedElement !== null ? entwurf.layout[selectedElement] : null
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="Vordruck-Editor Arbeitsbereich"
+    >
       <div className="space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -359,7 +363,7 @@ export default function VordruckEditorPage(): JSX.Element {
                   <div
                     ref={canvasRef}
                     data-testid="vordruck-canvas"
-                    className="relative border bg-white shadow"
+                    className="relative border bg-card shadow"
                     style={{ width: seiteBreite * scale, height: seiteHoehe * scale }}
                     onPointerMove={onCanvasPointerMove}
                     onPointerUp={() => { dragRef.current = null }}
@@ -372,7 +376,7 @@ export default function VordruckEditorPage(): JSX.Element {
                           setSelectedElement(i)
                           dragRef.current = { index: i, startX: e.clientX, startY: e.clientY, elX: el.x, elY: el.y }
                         }}
-                        className={`absolute cursor-move select-none overflow-hidden border ${selectedElement === i ? 'border-blue-500 ring-1 ring-blue-400' : 'border-transparent hover:border-gray-300'}`}
+                        className={`absolute cursor-move select-none overflow-hidden border ${selectedElement === i ? 'border-primary ring-1 ring-primary/50' : 'border-transparent hover:border-border'}`}
                         style={{
                           left: el.x * scale,
                           top: el.y * scale,
@@ -381,8 +385,11 @@ export default function VordruckEditorPage(): JSX.Element {
                           fontSize: Math.max(el.font_size * scale * 0.35, 6),
                           fontWeight: el.bold ? 700 : 400,
                           textAlign: el.align,
-                          background: el.typ === 'qrcode' ? 'repeating-linear-gradient(45deg,#ddd,#ddd 2px,#fff 2px,#fff 4px)' : undefined,
-                          borderColor: el.typ === 'rechteck' ? '#666' : undefined,
+                          background:
+                            el.typ === 'qrcode'
+                              ? 'repeating-linear-gradient(45deg,hsl(var(--muted)),hsl(var(--muted)) 2px,hsl(var(--card)) 2px,hsl(var(--card)) 4px)'
+                              : undefined,
+                          borderColor: el.typ === 'rechteck' ? 'hsl(var(--muted-foreground))' : undefined,
                           borderStyle: el.typ === 'rechteck' ? 'solid' : undefined,
                         }}
                       >

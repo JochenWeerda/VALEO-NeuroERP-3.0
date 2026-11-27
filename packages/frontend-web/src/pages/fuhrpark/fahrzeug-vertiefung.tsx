@@ -1,7 +1,16 @@
-import { NativeListPage } from '@/components/mask-builder/NativeListPage'
+import { UniversalNativeCockpitPage } from '@/components/mask-builder/UniversalNativeCockpitPage'
+import { useScreenDefinition } from '@/lib/api/masks'
+import { useScreenPermissions } from '@/components/mask-builder/runtime/screen-permissions'
 
-export default function Page(): JSX.Element {
+/** Native Cockpit + fleet_workbench: ScreenDefinition fuhrpark/fahrzeug-vertiefung */
+export default function FahrzeugVertiefungPage(): JSX.Element {
+  const schema = useScreenDefinition('fuhrpark/fahrzeug-vertiefung')
+  const permissions = useScreenPermissions(schema.data)
   return (
-    <NativeListPage screenId="fuhrpark/fahrzeug-vertiefung" testId="screen-fuhrpark/fahrzeug-vertiefung" />
+    <UniversalNativeCockpitPage
+      screenId="fuhrpark/fahrzeug-vertiefung"
+      testId="screen-fuhrpark/fahrzeug-vertiefung"
+      permissions={permissions}
+    />
   )
 }

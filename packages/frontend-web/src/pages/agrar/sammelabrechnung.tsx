@@ -1,3 +1,9 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./sammelabrechnung-legacy'))
+/**
+ * Native Liste: ScreenDefinition agrar/sammelabrechnung
+ * (POST anlegen, berechnen/buchen/löschen) — Feld-/Aktionsparität zur Legacy-Wizard-Maske.
+ */
+export default function SammelabrechnungPage(): JSX.Element {
+  return <NativeListPage screenId="agrar/sammelabrechnung" testId="screen-agrar/sammelabrechnung" />
+}

@@ -1,37 +1,17 @@
-import { describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import { describe, expect, it } from 'vitest'
 
-async function renderSwitch(flags: { universal: boolean; maskBuilder: boolean }) {
-  vi.resetModules()
-  vi.doMock('@/features/crm-masks/customer-mask-support', () => ({
-    ENABLE_UNIVERSAL_MASK_CUSTOMER: flags.universal,
-    ENABLE_CUSTOMER_MASK_BUILDER_FORM: flags.maskBuilder,
-  }))
-  vi.doMock('@/pages/crm/customer-360-native', () => ({
-    default: () => <div>Native Customer</div>,
-  }))
-  vi.doMock('@/pages/crm/kunden-stamm-modern/CustomerMaskEditPage', () => ({
-    default: () => <div>Mask Builder</div>,
-  }))
-  vi.doMock('@/pages/crm/kunden-stamm-modern/LegacyKundenStammModern', () => ({
-    default: () => <div>Legacy Customer</div>,
-  }))
-
-  const { default: KundenStammModern } = await import('@/pages/crm/kunden-stamm-modern')
-  render(<KundenStammModern />)
-}
+const pageSrc = readFileSync(
+  resolve(__dirname, '../../../pages/crm/kunden-stamm-modern.tsx'),
+  'utf8',
+)
 
 describe('KundenStammModern route switch', () => {
-  it('uses the legacy fallback when the native flag is disabled', async () => {
-    await renderSwitch({ universal: false, maskBuilder: false })
-
-    expect(await screen.findByText('Legacy Customer')).toBeInTheDocument()
-  })
-
-  it('uses the native mask before the mask-builder page when enabled', async () => {
-    await renderSwitch({ universal: true, maskBuilder: true })
-
-    expect(await screen.findByText('Native Customer')).toBeInTheDocument()
-    expect(screen.queryByText('Mask Builder')).not.toBeInTheDocument()
+  it('re-exports the native customer-360 mask (no legacy fallback)', () => {
+    expect(pageSrc).toContain("export { default } from './customer-360-native'")
+    expect(pageSrc).not.toContain('LegacyKundenStammModern')
+    expect(pageSrc).not.toContain('CustomerMaskEditPage')
+    expect(pageSrc).not.toContain('ENABLE_UNIVERSAL_MASK_CUSTOMER')
   })
 })

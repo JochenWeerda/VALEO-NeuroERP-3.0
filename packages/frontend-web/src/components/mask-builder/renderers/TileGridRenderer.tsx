@@ -11,7 +11,7 @@ import type { RenderTilePlan } from '../render-plan/types'
  */
 const TONE_ACCENT: Record<RenderTilePlan['tone'], string> = {
   neutral: 'border-l-border',
-  warning: 'border-l-amber-500',
+  warning: 'border-l-status-warning',
   danger: 'border-l-destructive',
 }
 

@@ -204,7 +204,11 @@ export function RegistrationRenderer({ state }: { state: RegistrationState }): J
   ]
 
   return (
-    <div className="flex flex-col">
+    <div
+      className="flex flex-col"
+      role="region"
+      aria-label="LKW-Registrierung Arbeitsbereich"
+    >
       <div className="p-3 md:p-6">
         {workflowContext ? <div className="mb-6"><WorkflowProcessBand context={workflowContext} /></div> : null}
         <Wizard

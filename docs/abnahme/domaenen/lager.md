@@ -81,7 +81,7 @@ Erzeugt mit `python scripts/domaenen_abnahme.py` aus [`lager.yaml`](lager.yaml);
 
 ## Maskenabnahme (maschinell)
 
-Bereiche im Inventar: charge, inventory, lager. Routen: 36 — handgebaut 1, studio_versioniert 35.
+Bereiche im Inventar: charge, inventory, lager. Routen: 36 — studio_versioniert 36.
 
 Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 12:
 
@@ -98,20 +98,11 @@ Generische Platzhaltermasken (nur Kennung/Name/Status/Datum, nur Export): 12:
 - `lager/silo-uebersicht-liste` — Silo-Uebersicht
 - `lager/terminal` — Terminal
 
-Aktionen der Domaenenmasken: 80, davon serverwirksam 20; ohne CLI 0; nicht verfuegbar 1; nicht deklariert 22.
+Aktionen der Domaenenmasken: 86, davon serverwirksam 26; ohne CLI 0; nicht verfuegbar 1; nicht deklariert 22.
 
 ## Demo- und Festwerte (Stichwortsuche in den Seitenquellen)
 
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:100` const demoNodeTypes = { mfProcess: MfProcessNode } satisfies NodeTypes
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:102` const demoNodes: Node[] = [
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:126` const demoEdges: Edge[] = [
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:662` const displayNodes = !warehouseId ? demoNodes : hasLiveGraphData ? liveNodes : []
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:663` const displayEdges = !warehouseId ? demoEdges : hasLiveGraphData ? liveEdges : []
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:668` ? 'Materialfluss (React Flow — Demo)'
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:1379` const nodeTypes = useMemo(() => demoNodeTypes, [])
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:1443` <strong>Ohne Lagerwahl:</strong> React-Flow zeigt eine <strong>Demo-Vorschau</strong>. <strong>Mit L
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:1723` Noch keine Stammdaten — unten anlegen oder anderes Lager wählen. Demo bleibt nur ohne Lagerwahl sich
-- `packages/frontend-web/src/pages/lager/materialfluss.tsx:1729` key={warehouseId \|\| 'demo'}
+Keine Treffer.
 
 ## Rollen
 

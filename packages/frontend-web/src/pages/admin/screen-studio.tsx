@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { IntakeWeighingPage } from '@/components/mask-builder/specialized/intake/domain-runtime'
 
-export default createLegacyMaskPage(() => import('./screen-studio-legacy'))
+/** Native admin_workbench: ScreenDefinition admin/screen-studio (Batch 28b). */
+export default function Page(): JSX.Element {
+  return <IntakeWeighingPage screenId="admin/screen-studio" />
+}

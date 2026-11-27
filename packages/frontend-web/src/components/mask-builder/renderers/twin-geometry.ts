@@ -135,12 +135,11 @@ export interface CellStyle {
   hatched: boolean
 }
 
-/** Interpoliert einen Gold-Verlauf (hell→satt) nach Fuellstand 0..100. */
-function goldFill(pct: number): string {
+/** Fuellstand 0..100 als Chart-Token mit steigender Deckkraft (Theme-fähig). */
+function levelFill(pct: number): string {
   const p = Math.max(0, Math.min(100, pct)) / 100
-  // hell (#fdf6e3) → sattes Gold (#c8860a)
-  const lerp = (a: number, b: number) => Math.round(a + (b - a) * p)
-  return `rgb(${lerp(253, 200)}, ${lerp(246, 134)}, ${lerp(227, 10)})`
+  const alpha = (0.18 + 0.82 * p).toFixed(3)
+  return `hsl(var(--chart-4-hsl) / ${alpha})`
 }
 
 /**
@@ -151,18 +150,18 @@ export function cellStyle(
   metrics: TwinMetricDef[],
   values: Record<string, unknown>,
 ): CellStyle {
-  let fill = '#e5e7eb' // neutral, wenn kein Fuellstand
-  let stroke = '#94a3b8'
+  let fill = 'hsl(var(--muted))'
+  let stroke = 'hsl(var(--muted-foreground))'
   let strokeWidth = 1
   let hatched = false
 
   for (const metric of metrics) {
     const value = values[metric.key]
     if (metric.kind === 'percent' && isFiniteNumber(value)) {
-      fill = goldFill(value)
+      fill = levelFill(value)
     }
     if (metric.warnAbove !== undefined && isFiniteNumber(value) && value > metric.warnAbove) {
-      stroke = '#dc2626' // danger
+      stroke = 'hsl(var(--status-error-hsl))'
       strokeWidth = 2.5
     }
     if (metric.kind === 'flag' && value === true) {

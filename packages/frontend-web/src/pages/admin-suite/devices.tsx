@@ -1,3 +1,6 @@
-import { createLegacyMaskPage } from '@/components/mask-builder'
+import { NativeListPage } from '@/components/mask-builder'
 
-export default createLegacyMaskPage(() => import('./devices-legacy'))
+/** Native Liste: ScreenDefinition admin-suite/devices */
+export default function AdminSuiteDevicesPage(): JSX.Element {
+  return <NativeListPage screenId="admin-suite/devices" testId="screen-admin-suite/devices" />
+}
