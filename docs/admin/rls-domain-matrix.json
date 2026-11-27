@@ -1197,13 +1197,13 @@
     "app/api/v1/endpoints/compat.py:1570",
     "app/api/v1/endpoints/compat.py:1593",
     "app/services/mcp_execution_service.py:3138",
-    "modules/agrar/services/tax_profile_service.py:146",
-    "modules/agrar/services/tax_profile_service.py:162"
+    "modules/agrar/services/tax_profile_service.py:149",
+    "modules/agrar/services/tax_profile_service.py:165"
    ],
    "gemeinsam_stellen": [
     "app/services/mcp_execution_service.py:3138",
-    "modules/agrar/services/tax_profile_service.py:146",
-    "modules/agrar/services/tax_profile_service.py:162"
+    "modules/agrar/services/tax_profile_service.py:149",
+    "modules/agrar/services/tax_profile_service.py:165"
    ],
    "daten": {
     "zeilen": 6,

@@ -10,9 +10,10 @@ läuft in ``begin_nested``). Deshalb kein ``DocflowService.create_document`` /
 
 from __future__ import annotations
 
+from datetime import date, datetime, time, timezone
 from decimal import Decimal
 from hashlib import sha256
-from typing import Optional
+from typing import Optional, Union
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -36,8 +37,12 @@ def lege_self_billing_beleg_an(
     description: str,
     harvest_acceptance_id: Optional[str],
     akteur: str,
+    document_date: Optional[Union[date, datetime]] = None,
 ) -> str:
-    """Legt DocFlow-``purchase_invoice``-Entwurf an; ohne Session-Commit."""
+    """Legt DocFlow-``purchase_invoice``-Entwurf an; ohne Session-Commit.
+
+    ``document_date`` steuert historische Steuerschlüssel (Lieferdatum); Default: Geschäftstag.
+    """
     from app.api.v1.schemas.docflow_schemas import DocflowCreateRequest, DocflowLineInput
     from app.services.docflow_create_command import _apply_create
     from app.services.docflow_service import DocflowService
@@ -77,6 +82,12 @@ def lege_self_billing_beleg_an(
         einzelpreis=float(netto),
         steuerschluessel=tax_code,
     )
+    if document_date is None:
+        belegdatum = _belegtag()
+    elif isinstance(document_date, datetime):
+        belegdatum = document_date
+    else:
+        belegdatum = datetime.combine(document_date, time(), tzinfo=timezone.utc)
     anfrage = DocflowCreateRequest(
         doc_type=ART,
         doc_number=entwurf,
@@ -84,7 +95,7 @@ def lege_self_billing_beleg_an(
         source_system=QUELLE[:40],
         source_ref=referenz[:80],
         currency="EUR",
-        document_date=_belegtag(),
+        document_date=belegdatum,
         idempotency_key=None,  # Aufrufer (Ernte-_run) besitzt Idempotenz; kein create_snapshot-Commit
         **partner,
         items=[

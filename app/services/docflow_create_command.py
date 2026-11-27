@@ -67,6 +67,12 @@ def _apply_create(self: Any, payload: Any, context=None) -> str:
     doc_id = str(uuid4())
     self._kommando("create")
     total_net, total_tax, total_gross = Decimal("0"), Decimal("0"), Decimal("0")
+    from datetime import date as date_cls
+
+    document_date = payload.document_date or now
+    stichtag = document_date.date() if isinstance(document_date, datetime) else document_date
+    if not isinstance(stichtag, date_cls):
+        stichtag = None
     self.db.execute(
         text("""
             INSERT INTO domain_docflow.document_headers
@@ -85,12 +91,14 @@ def _apply_create(self: Any, payload: Any, context=None) -> str:
             "supplier_id": payload.supplier_id, "currency": payload.currency,
             "total_net": _money(total_net), "total_tax": _money(total_tax), "total_gross": _money(total_gross),
             "bausteine": _json.dumps(_kopfbausteine(payload.doc_type, getattr(payload, "bausteine", None)), default=str),
-            "document_date": payload.document_date or now,
+            "document_date": document_date,
             "posting_date": payload.posting_date,
             "created_by": self._wer(payload.created_by), "updated_by": self._wer(payload.created_by),
         },
     )
-    total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items, steuerrichtung(payload.doc_type))
+    total_net, total_tax, total_gross = self._insert_items(
+        doc_id, payload.items, steuerrichtung(payload.doc_type), am=stichtag
+    )
     self.db.execute(
         text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
         {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},

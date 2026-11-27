@@ -857,6 +857,7 @@ class HarvestAcceptanceService:
             description=f"Self-Billing {invoice.invoice_number}",
             harvest_acceptance_id=getattr(invoice, "harvest_acceptance_id", None),
             akteur=posted_by or "harvest_release",
+            document_date=delivery_date,
         )
         verknuepfe_erweiterung(
             self.db,

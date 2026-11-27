@@ -706,6 +706,10 @@ def test_concurrent_booking_second_session_conflicts(require_db):
                 {"t": tenant},
             )
             conn.execute(
+                text("DELETE FROM domain_crm.customers WHERE tenant_id=:t"),
+                {"t": tenant},
+            )
+            conn.execute(
                 text("DELETE FROM domain_erp.tax_keys WHERE tenant_id=:t"), {"t": tenant}
             )
             conn.execute(
@@ -727,6 +731,16 @@ def test_concurrent_booking_second_session_conflicts(require_db):
     try:
         with Session(engine) as db:
             db.add(Tenant(id=tenant, name="concurrent", domain=tenant + ".example.invalid"))
+            db.flush()
+            # harvest_acceptances.customer_id → domain_crm.customers (FK)
+            db.add(
+                Customer(
+                    id=supplier,
+                    tenant_id=tenant,
+                    customer_number="CONC",
+                    company_name="Concurrent supplier",
+                )
+            )
             db.flush()
             richte_skr03_ein(db, tenant)
             NumberRangeService(db).configure(tenant, "self_billing", "GS", 1, 6)
@@ -792,6 +806,7 @@ def test_concurrent_booking_second_session_conflicts(require_db):
                     description="concurrent",
                     harvest_acceptance_id=ha_id,
                     akteur="concurrent",
+                    document_date=date(2026, 1, 15),
                 )
                 verknuepfe_erweiterung(
                     session, tenant, self_billing_invoice_id=inv_id, docflow_header_id=doc
@@ -879,7 +894,9 @@ def test_storno_keeps_original_tax_context_after_profile_change(case):
         c.db, c.tenant, invoice=invoice, reason="Synthetic storno after profile change"
     )
     c.db.flush()
-    assert result["original_journal_id"] == journal.id
+    assert result["journal_entry_id"] == journal.id
+    assert result["reversal_entry_id"]
+    assert result["reversal_entry_id"] != journal.id
     reversed_orig = c.db.get(JournalEntry, journal.id)
     assert reversed_orig.status == "reversed"
     # Originalkontext unverändert am Beleg

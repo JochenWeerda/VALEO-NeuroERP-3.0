@@ -552,11 +552,18 @@ class DocflowService:
 
     # ── line helpers ──────────────────────────────────────────────────────────
 
-    def _steuer_der_position(self, nr: int, line: Any, saetze: dict[str, Decimal],
-                             richtung: str = "verkauf") -> tuple[Optional[str], Decimal]:
+    def _steuer_der_position(
+        self,
+        nr: int,
+        line: Any,
+        saetze: dict[str, Decimal],
+        richtung: str = "verkauf",
+        am: Optional[date] = None,
+    ) -> tuple[Optional[str], Decimal]:
         """Steuerschluessel und Satz der Position. Mit Schluessel kommt der Satz aus ``tax_keys``.
 
         Der Schluessel muss zur Belegart passen: Umsatzsteuerschluessel im Verkauf, Vorsteuerschluessel im Einkauf.
+        ``am`` = Belegdatum fuer historische Schluesselgueltigkeit.
         """
         code = (getattr(line, "tax_code", None) or "").strip() or None
         angegeben = getattr(line, "tax_rate", None)
@@ -564,7 +571,7 @@ class DocflowService:
             return None, Decimal(str(angegeben or 0))
         if code not in saetze:
             try:
-                saetze[code] = satz_des_schluessels(self.db, self.tenant_id, code, richtung)
+                saetze[code] = satz_des_schluessels(self.db, self.tenant_id, code, richtung, am=am)
             except Steuerklaerung as klaerung:
                 raise ValidationFailedError(f"Position {nr}: {klaerung}") from klaerung
         if angegeben is not None and Decimal(str(angegeben)) != saetze[code]:
@@ -574,7 +581,13 @@ class DocflowService:
             )
         return code, saetze[code]
 
-    def _insert_items(self, header_id: str, items: list[Any], richtung: str = "verkauf") -> tuple[Decimal, Decimal, Decimal]:
+    def _insert_items(
+        self,
+        header_id: str,
+        items: list[Any],
+        richtung: str = "verkauf",
+        am: Optional[date] = None,
+    ) -> tuple[Decimal, Decimal, Decimal]:
         total_net = total_tax = total_gross = Decimal("0")
         saetze: dict[str, Decimal] = {}
         for idx, line in enumerate(items, start=1):
@@ -582,7 +595,7 @@ class DocflowService:
             price = Decimal(str(line.unit_price))
             discount = Decimal(str(line.discount_percent))
             price_unit_quantity = Decimal(str(getattr(line, "price_unit_quantity", None) or 1))
-            tax_code, tax_rate = self._steuer_der_position(idx, line, saetze, richtung)
+            tax_code, tax_rate = self._steuer_der_position(idx, line, saetze, richtung, am=am)
             line_net, line_tax, line_gross = _line_amounts(qty, price, discount, tax_rate, price_unit_quantity)
             total_net += line_net; total_tax += line_tax; total_gross += line_gross
             self.db.execute(
