@@ -1,0 +1,51 @@
+slice_id: CLOUD-AGENT-PG-SOP
+title: Cloud-Agent CI-only Postgres-Evidence (Alternative A)
+owner: Cursor-Cloud-bc-e6058277
+status: zur_abnahme
+created_at: 2026-11-27
+coordination: >
+  Lead-Freigabe Feinplan Alternative A; Claim 2026-11-27 Europe/Berlin.
+  Doku-PR bereit; abgeschlossen erst nach Merge durch Claude Admin.
+  Kein Workflow-/Compose-/Environment-Edit; DISPATCH und ENV bleiben aussen.
+goal: >
+  Cloud-Agenten ohne lokalen valeo_probe dokumentiert auf CI-Postgres
+  (require_db + QG-Backend) als kanonischen Nachweis festlegen.
+file_ownership:
+  - docs/quality-assurance/cloud-agent-postgres-pruefstand.md
+  - docs/quality-assurance/pruefstand-datenbank.md
+  - docs/quality-assurance/test-database-resource-policy-20261001.md
+  - AGENTS.md
+  - docs/agent-ops/session-start-checklist.md
+  - docs/agent-ops/slices/CLOUD-AGENT-PG-SOP.yaml
+  - docs/agent-ops/active-workboard.md
+acceptance:
+  - SOP + Querverweise + Checklist/AGENTS-Cloud-Zweig vorhanden
+  - kein Workflow-/Compose-/Secret-Diff
+  - Docs-Gates des Doku-PRs gruen
+tests:
+  - node scripts/docs-governance-check.cjs
+  - manuelle Review: Cloud-Zweig widerspricht Host-Pruefstand-Regel nicht
+risks:
+  - Agenten interpretieren CI-only als Freibrief, P0-Postgres-Faelle zu skippen
+  - Doku erwaehnt Connection-Strings oder Passwoerter
+ai_harness:
+  fachlicher_vertrag: >
+    Cloud-Agenten liefern Postgres-Verhaltenstests als Code; Nachweis kommt aus
+    autorisierter CI. Fehlende lokale Probe ist kein Abnahmeverzicht fuer P0.
+  architektur_vertrag: >
+    Kein neues Subsystem. Bestehende Workflows und Pruefstand-Governance bleiben
+    Source of Truth; SOP ist Betriebsvertrag fuer Cloud-VMs.
+  daten_vertrag: >
+    Keine neue DB/Container. CI-Job-DB ephemer. Host-valeo_probe unveraendert.
+    Keine Secrets in Doku.
+  test_vertrag: >
+    Abnahme dokumentarisch + Docs-Governance. Keine neuen pytest-Faelle in diesem Slice.
+  security_vertrag: >
+    Keine Portoeffnung, keine Zugangsdaten in Chat/Reports/Commits, keine
+    eigenmaechtigen Environment-Aenderungen.
+  betriebs_vertrag: >
+    Rollback = Doku-PR reverten. Kein Betriebs-Impact auf laufende Services.
+  dokumentations_vertrag: >
+    SOP, AGENTS, Session-Checklist, Runbook-Querverweise, Workboard, Slice-YAML, Handshake.
+external_gates:
+  - not_applicable

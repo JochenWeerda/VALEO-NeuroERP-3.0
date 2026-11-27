@@ -31,6 +31,13 @@ Testsuite werden durch diese Vorgabe ersetzt.
 5. CI verwendet die Datenbank des Jobs; Tests erzeugen darin keine weiteren
    Datenbanken, Container oder Volumes. In-Memory-Tests benötigen keinen Docker.
 
+Cursor-Cloud-VMs ohne erreichbaren Host-`valeo_probe` dürfen dort weder eine
+neue Testdatenbank noch einen Container anlegen. Für sie ist die ephemere
+CI-Job-Datenbank der autorisierte Postgres-Prüfstand (keine Proliferation in der
+Cloud-VM). Betriebsvertrag:
+[Cloud-Agent PostgreSQL-Prüfstand](cloud-agent-postgres-pruefstand.md).
+Der Host-Pfad mit gemeinsamem `valeo_probe` bleibt unverändert.
+
 Kein pauschales Docker-Prune und keine Löschung fremder Datenbanken, Images,
 Container oder Volumes. Eine bereits laufende fremde Ressource ist keine
 herrenlose Ressource. Diese Regel reduziert Datenbank-/Containerkopien; sie

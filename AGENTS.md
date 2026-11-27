@@ -76,6 +76,24 @@ Sie ersetzt nicht die fachliche Dokumentation, sondern legt die verbindliche Sta
 
 Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resource-policy-20261001.md).
 
+### Cloud-Agenten ohne lokalen Pruefstand
+
+Cursor-Cloud-VMs haben typischerweise weder Docker noch einen erreichbaren
+`valeo_probe`. Dann gilt verbindlich Alternative A (CI-only Evidence):
+
+- Keine neue Datenbank oder Container in der Cloud-VM anlegen.
+- Keine Portoeffnung und keine Remote-Zugangsdaten zum Entwicklerhost.
+- PostgreSQL-Verhaltenstests (`needs_live_db`) schreiben und den Nachweis aus
+  den bestehenden GitHub-Actions-Jobs beziehen
+  (`.github/workflows/pytest-postgres-require-db.yml`, Quality-Gate-Backend).
+- Schema-/Katalog-Drift ueber CI-Artifacts beheben, nicht ueber lokalen Harvest.
+- Fehlende lokale Probe ist kein Grund, P0-Postgres-Nachweise auszulassen oder
+  herabzustufen.
+
+Runbook: [Cloud-Agent PostgreSQL-Pruefstand](docs/quality-assurance/cloud-agent-postgres-pruefstand.md).
+Host-Agenten mit vorhandenem `valeo_probe` folgen weiterhin dem gemeinsamen
+Pruefstand-Runbook unveraendert.
+
 ## Parallelbetrieb mit zwei oder mehr Agenten
 
 - Ein Agent ist `Lead` fuer Priorisierung und Integration.

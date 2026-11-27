@@ -38,7 +38,20 @@ Diese Checkliste minimiert Kontextverlust bei Neustarts oder Agentenwechseln.
   keine Ruecksetzung oder Migration waehrend fremder Nutzung. Verbindliche
   Ressourcenregel in [AGENTS.md](../../AGENTS.md) und
   [Pruefstand-Runbook](../quality-assurance/test-database-resource-policy-20261001.md).
+- Laeuft diese Sitzung in einer Cloud-VM ohne erreichbaren Pruefstand
+  (kein :5432 / kein Docker / keine TEST_DATABASE_URL)? Wenn ja: CI-only
+  Evidence laut [Cloud-Agent-Pruefstand-SOP](../quality-assurance/cloud-agent-postgres-pruefstand.md);
+  keine DB-/Container-Anlage, keine Portoeffnung. Wenn nein (Host mit Probe):
+  bestehende Pruefstand-Regel unveraendert.
 - Welche Doku muss nachgezogen werden?
+
+## Cloud-VM ohne Postgres
+
+1. DB-freie Checks lokal ausfuehren.
+2. `needs_live_db`-Tests trotzdem implementieren.
+3. Nach Push CI-Jobs require_db und Quality-Gate-Backend als Nachweis fuehren.
+4. Bei Katalog-Drift CI-Artifact konsumieren und committen.
+5. Interaktives Schema-Debug an Host-Agent mit `valeo_probe` handoffen.
 
 ## Vor dem ersten Edit
 
