@@ -241,3 +241,20 @@ def test_buche_self_billing_idempotent_conflict(monkeypatch):
             gruppen=groups,
             posted_by="u",
         )
+
+
+def test_vorsteuergruppe_uses_half_up_like_harvest_calculator():
+    """5417.50 × 7 % → 379.23 (HALF_UP), nicht 379.22 (Banker's)."""
+    from app.services.self_billing_buchung import build_vorsteuergruppen_from_resolved
+
+    groups = build_vorsteuergruppen_from_resolved(
+        {
+            "rate": Decimal("7"),
+            "tax_code": "8",
+            "expense_account": "3300",
+            "vorsteuerkonto": "1571",
+        },
+        netto=Decimal("5417.50"),
+    )
+    assert groups[0].steuer == Decimal("379.23")
+    assert groups[0].netto == Decimal("5417.50")
