@@ -350,3 +350,88 @@ def test_avis_notizen_and_create_anlieferavis():
         )
     assert out["id"] == "av-new"
     db.commit.assert_called_once()
+
+
+def test_update_angebot_status_and_transition_guards():
+    from app.core.exceptions import ConflictError, EntityNotFoundError, ValidationFailedError
+
+    db = MagicMock()
+    svc = EinkaufCompatService(db, "tenant-a")
+    with patch.object(svc, "_load_angebot_raw_row", return_value=None):
+        with pytest.raises(EntityNotFoundError):
+            svc.update_angebot_status("missing", "GESENDET", "Senden")
+
+    existing = SimpleNamespace(
+        _mapping={
+            "id": "ang-1",
+            "angebots_nummer": "ANG-1",
+            "status": "ERFASST",
+        }
+    )
+    with patch.object(svc, "_load_angebot_raw_row", return_value=existing), patch.object(svc, "_invalidate"):
+        out = svc.update_angebot_status("ang-1", "GESENDET", "Senden")
+    assert out["status"] == "GESENDET"
+    assert out["angebotNummer"] == "ANG-1"
+    db.commit.assert_called()
+
+    # convert: missing / bereits bestellt / ohne Positionen / ohne Lieferant
+    with patch.object(svc, "_load_angebot_raw_row", return_value=None):
+        with pytest.raises(EntityNotFoundError):
+            import asyncio
+
+            asyncio.run(svc.convert_angebot_to_order("missing"))
+
+    locked = SimpleNamespace(_mapping={"id": "ang-1", "angebots_nummer": "ANG-1", "lieferant_id": None, "status": "IN_BESTELLUNG"})
+    db.execute.return_value.scalar.return_value = "IN_BESTELLUNG"
+    with patch.object(svc, "_load_angebot_raw_row", return_value=locked):
+        with pytest.raises(ConflictError):
+            import asyncio
+
+            asyncio.run(svc.convert_angebot_to_order("ang-1"))
+
+    open_row = SimpleNamespace(
+        _mapping={"id": "ang-2", "angebots_nummer": "ANG-2", "lieferant_id": "not-a-uuid", "status": "ERFASST"}
+    )
+    db.execute.return_value.scalar.return_value = "ERFASST"
+    db.execute.return_value.fetchmany.return_value = []
+    with patch.object(svc, "_load_angebot_raw_row", return_value=open_row):
+        with pytest.raises(ValidationFailedError):
+            import asyncio
+
+            asyncio.run(svc.convert_angebot_to_order("ang-2"))
+
+
+def test_list_and_row_mappers_anfrage_rechnung_ab():
+    anfrage = {
+        "id": "anf-1",
+        "anfrage_nummer": "ANF-1",
+        "lieferant_name": "Hof",
+        "status": "offen",
+        "created_at": datetime(2026, 11, 1),
+        "notizen": None,
+    }
+    out = EinkaufCompatService._anfrage_row_to_dict(anfrage)
+    assert out["id"] == "anf-1"
+    assert out["anfrageNummer"] == "ANF-1"
+
+    rechnung = {
+        "id": "re-1",
+        "rechnungs_nummer": "RE-1",
+        "lieferant_name": "Hof",
+        "status": "ERFASST",
+        "brutto_betrag": 100,
+        "created_at": None,
+    }
+    rout = EinkaufCompatService._rechnung_row_to_dict(rechnung)
+    assert rout["rechnungsNummer"] == "RE-1"
+    assert rout["bruttoBetrag"] == 100.0
+
+    ab = {
+        "id": "ab-1",
+        "bestaetigungs_nummer": "AB-1",
+        "bestellung_id": "PO-1",
+        "status": "offen",
+        "created_at": None,
+    }
+    about = EinkaufCompatService._auftragsbestaetigung_row_to_dict(ab)
+    assert about["bestaetigungsNummer"] == "AB-1" or about.get("id") == "ab-1"

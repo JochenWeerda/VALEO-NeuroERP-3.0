@@ -1,8 +1,33 @@
+import { AxiosError } from 'axios'
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { MemoryRouter } from '@/app/routing/test-router'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import AnnahmeAbrechnungPage from '@/pages/annahme/abrechnung-legacy'
+
+function axiosConflict(): AxiosError {
+  const err = new AxiosError('conflict')
+  err.response = {
+    data: { detail: { code: 'row_version_conflict', message: 'stale' } },
+    status: 409,
+    statusText: 'Conflict',
+    headers: {},
+    config: {} as never,
+  }
+  return err
+}
+
+function axiosBoom(message = 'boom'): AxiosError {
+  const err = new AxiosError(message)
+  err.response = {
+    data: { detail: message },
+    status: 500,
+    statusText: 'Err',
+    headers: {},
+    config: {} as never,
+  }
+  return err
+}
 
 const apiGetMock = vi.hoisted(() => vi.fn())
 const apiPostMock = vi.hoisted(() => vi.fn())
@@ -472,5 +497,61 @@ describe('AnnahmeAbrechnungPage', () => {
     await waitFor(() =>
       expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Lieferant fehlt' })),
     )
+  })
+
+  it('meldet Daten veraltet bei 409 auf Freigabe/Fibu und generischen Storno-Fehler', async () => {
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/freigabe')) throw axiosConflict()
+      if (url.includes('/post-fibu')) throw axiosConflict()
+      if (url.includes('/cancel')) throw axiosBoom('storno failed')
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zur Freigabe' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Daten veraltet' })),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'In Fibu buchen' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Daten veraltet' })),
+    )
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Stornieren' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Fehler' })),
+    )
+    confirmSpy.mockRestore()
+  })
+
+  it('meldet Daten veraltet bei 409 auf Storno und generischen Freigabe/Fibu-Fehler', async () => {
+    apiPostMock.mockImplementation(async (url: string) => {
+      if (url.includes('/cancel')) throw axiosConflict()
+      if (url.includes('/freigabe')) throw axiosBoom('freigabe down')
+      if (url.includes('/post-fibu')) throw axiosBoom('fibu down')
+      return { data: {} }
+    })
+    renderPage()
+    expect(await screen.findByText('SET-DRAFT')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Zur Freigabe' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Fehler' })),
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'In Fibu buchen' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Fehler' })),
+    )
+
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    fireEvent.click(screen.getByRole('button', { name: 'Stornieren' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Daten veraltet' })),
+    )
+    confirmSpy.mockRestore()
   })
 })

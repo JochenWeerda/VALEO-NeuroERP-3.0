@@ -595,7 +595,11 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
       const billing = billingPreview.data ?? (await billingPreview.mutateAsync())
       billingWeightKg = billing.billing_weight_kg
     }
-    await createSettlement.mutateAsync({ billingWeightKg, drying: useDrying, deductions: useDeductions })
+    try {
+      await createSettlement.mutateAsync({ billingWeightKg, drying: useDrying, deductions: useDeductions })
+    } catch {
+      // onError zeigt Toast; Caller (void saveSettlement) darf keine unhandled Rejection sehen.
+    }
   }
 
   const shortcuts = buildCoreMaskShortcuts({
@@ -920,12 +924,13 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                           variant="outline"
                           className="min-h-touch touch-manipulation"
                           onClick={() => {
+                            // onError zeigt Toast; Rejection darf nicht unhandled bleiben.
                             void approveSettlement.mutateAsync({
                               settlementId: s.id,
                               targetStatus: 'ZUR_FREIGABE',
                               reason: 'Abrechnung aus der Maske zur Freigabe eingereicht.',
                               expectedRowVersion: settlementRowVersion(s),
-                            })
+                            }).catch(() => undefined)
                           }}
                           disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
@@ -942,7 +947,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                               targetStatus: 'FREIGEGEBEN',
                               reason: 'Abrechnung fachlich freigegeben.',
                               expectedRowVersion: settlementRowVersion(s),
-                            })
+                            }).catch(() => undefined)
                           }}
                           disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
@@ -959,7 +964,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                               targetStatus: 'ABGELEHNT',
                               reason: 'Abrechnung zur Korrektur abgelehnt.',
                               expectedRowVersion: settlementRowVersion(s),
-                            })
+                            }).catch(() => undefined)
                           }}
                           disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
@@ -976,7 +981,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                               targetStatus: 'ENTWURF',
                               reason: 'Abrechnung zur Ueberarbeitung in Entwurf zurueckgesetzt.',
                               expectedRowVersion: settlementRowVersion(s),
-                            })
+                            }).catch(() => undefined)
                           }}
                           disabled={approveSettlement.isPending && approvePendingId === s.id}
                         >
@@ -987,7 +992,10 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                         variant="outline"
                         className="min-h-touch touch-manipulation"
                         onClick={() => {
-                          void postSettlement.mutateAsync({ settlementId: s.id, expectedRowVersion: settlementRowVersion(s) })
+                          void postSettlement.mutateAsync({
+                            settlementId: s.id,
+                            expectedRowVersion: settlementRowVersion(s),
+                          }).catch(() => undefined)
                         }}
                         disabled={(postSettlement.isPending && postPendingId === s.id) || !s.can_post_fibu}
                       >
@@ -1001,7 +1009,7 @@ export default function AnnahmeAbrechnungPage(): JSX.Element {
                           void cancelSettlement.mutateAsync({
                             settlementId: s.id,
                             expectedRowVersion: settlementRowVersion(s),
-                          })
+                          }).catch(() => undefined)
                         }}
                         disabled={
                           (cancelSettlement.isPending && cancelPendingId === s.id)
