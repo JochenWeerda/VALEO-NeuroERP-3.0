@@ -13,6 +13,28 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
+## ARCH-IMPACT-PREFLIGHT-MAP — reserviert, Cursor Cloud Agent
+
+Meilenstein: M0 / Architecture OS Qualitaet (Generator-Drift-Praevention).
+**Owner:** Cursor Cloud Agent (bc-bf6a9f4b). **Stand:** reserviert 2026-11-27 (Europe/Berlin).
+**Ziel:** deklarative Impact-Map + Matcher. Pfadlisten werden auf Architekturvertraege und Generatorpflichten abgebildet; Ausgabe deterministisch aus der Map.
+**Dateibesitz (exklusiv):** `config/architecture-impact-map.yaml`, `scripts/architecture_impact_map.py`, `tests/test_architecture_impact_map.py`, `tests/fixtures/architecture_impact/**`, `docs/architecture/quality-gates/architecture-impact-preflight.md`, `docs/agent-ops/slices/ARCH-IMPACT-PREFLIGHT-MAP.yaml`, Workboard-Zeile.
+**Nicht anfassen:** CLI (`architecture_impact_preflight.py`), `vor_push.py`, Generatoren (`generate_*.py` / `rls_*.py` / `check_all_doc_generators.sh`), `AGENTS.md`, `architecture-index.yaml`, Process Kernel, PR-232-Fachcode.
+**Abnahme:** zehn Pflichtklassen inkl. PR-232-Refs R1b/R2b/R3b/R4a/R5; Schema-Validierung; Fixtures gruen ohne DB; Quality-Gate-Doku.
+**Blocked_by:** — (P1). **Gibt frei:** ARCH-IMPACT-PREFLIGHT-CLI.
+
+## ARCH-IMPACT-PREFLIGHT-CLI — offen (blocked_by MAP)
+
+Meilenstein: M0 / Architecture OS Qualitaet.
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** offen 2026-11-27.
+**Ziel:** CLI `--print/--json/--check-dbfree`. **Dateibesitz:** `scripts/architecture_impact_preflight.py`, `tests/test_architecture_impact_preflight.py`, CLI-Abschnitt Gate-Doc, Slice-YAML. **Reuse:** `vor_push._geaenderte_dateien`, Map-Matcher. **Nicht:** vor_push-Wire, AGENTS-Commit. **Blocked_by:** ARCH-IMPACT-PREFLIGHT-MAP.
+
+## ARCH-IMPACT-PREFLIGHT-WIRE — offen (blocked_by CLI)
+
+Meilenstein: M0 / Architecture OS Qualitaet.
+**Owner:** — (Status `offen`, nicht reserviert). **Stand:** offen 2026-11-27.
+**Ziel:** vor_push ruft Preflight (Print vor DB-Zwang); Fail-safe; AGENTS-Anti-Loop-Absatz; Protocol After. **Dateibesitz:** `vor_push.py`, `test_vor_push.py`, `AGENTS.md` (Absatz), Protocol/Rollout/Drift-Checks-Querverweise, Slice-YAML. **Nicht:** externes Hook-Home, Auftrag C, Selective default-on ohne Lead-OK. **Blocked_by:** ARCH-IMPACT-PREFLIGHT-CLI.
+
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
 Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
