@@ -111,7 +111,18 @@ def _apply_update(self, doc_id: str, payload: Any) -> None:
             text("DELETE FROM domain_docflow.document_items WHERE tenant_id = :tenant_id AND header_id = :header_id"),
             {"tenant_id": self.tenant_id, "header_id": doc_id},
         )
-        total_net, total_tax, total_gross = self._insert_items(doc_id, payload.items, steuerrichtung(effective_doc_type))
+        from datetime import date, datetime
+
+        raw_date = payload.document_date if payload.document_date is not None else header.get("document_date")
+        if isinstance(raw_date, datetime):
+            stichtag = raw_date.date()
+        elif isinstance(raw_date, date):
+            stichtag = raw_date
+        else:
+            stichtag = None
+        total_net, total_tax, total_gross = self._insert_items(
+            doc_id, payload.items, steuerrichtung(effective_doc_type), am=stichtag
+        )
         self.db.execute(
             text("UPDATE domain_docflow.document_headers SET total_net=:n, total_tax=:t, total_gross=:g WHERE id=:id AND tenant_id=:tenant_id"),
             {"id": doc_id, "tenant_id": self.tenant_id, "n": _money(total_net), "t": _money(total_tax), "g": _money(total_gross)},

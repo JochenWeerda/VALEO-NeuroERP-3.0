@@ -704,6 +704,12 @@ class SelfBillingInvoice(Base):
     # Pflichttexte
     mandatory_texts = Column(JSONB(astext_type=Text()), nullable=True, comment="Array von Pflichttexten (JSONB)")
 
+    # DocFlow-Führungsbeleg + FiBu (M3-Konsolidierung; Agrar-Erweiterung)
+    docflow_header_id = Column(String, nullable=True, comment="Führender DocFlow-Beleg (purchase_invoice)")
+    journal_entry_id = Column(String, nullable=True, comment="Gebuchtes Journal (Idempotenz)")
+    taxation_type = Column(String(20), nullable=True, comment="regular / ustg24_flat_rate / small_business")
+    tax_context = Column(JSONB(astext_type=Text()), nullable=True, comment="Original-Steuerkontext für Storno")
+
     # Audit
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     created_by = Column(String(64), nullable=True)

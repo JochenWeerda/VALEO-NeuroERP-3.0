@@ -107,7 +107,11 @@ def _grain_chain(db, seed, checks):
                           address="Simulation", city="Simulation", postal_code="00000")
     db.add_all([actor, customer, article, warehouse]); db.flush()
     from app.finance.steuerschluessel import richte_skr03_ein
+    from modules.agrar.services.tax_profile_service import ensure_self_billing_purchase_ready
     richte_skr03_ein(db, seed)
+    ensure_self_billing_purchase_ready(
+        db, seed, customer.id, partner_name="Simulation self-billing supplier"
+    )
     from app.services.number_range_service import NumberRangeService
     NumberRangeService(db).configure(seed, "self_billing", "GS", 1, 6)
     db.execute(text("INSERT INTO domain_shared.system_properties "
@@ -176,18 +180,30 @@ def _grain_chain(db, seed, checks):
     release_body = FinancialReleaseIn(idempotency_key=uuid4(), expected_calculation_hash=calculation["calculation_hash"])
     svc.release_acceptance(acceptance_id, "final", True, True, actor.id, command=release_body)
     acceptance = db.get(HarvestAcceptance, acceptance_id)
-    invoice = SelfBillingRepositoryImpl(db).get_invoice_by_id(acceptance.invoice_id)
+    billing_repo = SelfBillingRepositoryImpl(db, commit_on_success=False)
+    invoice = billing_repo.get_invoice_by_id(acceptance.invoice_id)
     checks["self_billing"] = invoice is not None and invoice.harvest_acceptance_id == acceptance_id
-    issued = issue_invoice(SelfBillingRepositoryImpl(db), invoice.id, actor.id)
-    checks["self_billing"] &= issued.status == "issued"
-    checks["tax"] = invoice.total_vat_amount_eur == (invoice.total_net_amount_eur * Decimal("0.07")).quantize(Decimal("0.01"))
+    # M3: Freigabe bucht bereits (Status booked + Journal posted). Nur Drafts separat ausgeben.
+    if invoice is not None and invoice.status == "draft":
+        issued = issue_invoice(billing_repo, invoice.id, actor.id)
+        checks["self_billing"] &= issued.status == "issued"
+    elif invoice is not None:
+        checks["self_billing"] &= (
+            invoice.status == "booked" and getattr(invoice, "journal_entry_id", None) is not None
+        )
+    from decimal import ROUND_HALF_UP
+    checks["tax"] = invoice.total_vat_amount_eur == (
+        invoice.total_net_amount_eur * Decimal("0.07")
+    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     stock = db.get(StockMovement, acceptance.stock_movement_id)
     checks["stock"] = stock.quantity == Decimal("10000") and stock.new_stock - stock.previous_stock == stock.quantity
     fin = FinanceTransactionService(db, seed)
     journal = db.query(JournalEntry).filter_by(tenant_id=seed, reference=invoice.invoice_number).one_or_none()
     checks["ledger"] = journal is not None
     if journal is not None:
-        fin.post(journal.id, actor.id)
+        # M3: buche_self_billing postet bereits; Drafts hier nachziehen.
+        if journal.status == "draft":
+            fin.post(journal.id, actor.id)
         lines = db.query(JournalEntryLine).filter_by(journal_entry_id=journal.id).all()
         checks["ledger"] &= journal.status == "posted" and sum(line.debit_amount for line in lines) == sum(line.credit_amount for line in lines)
         tax_id = fin.account_id_for_number("1571")

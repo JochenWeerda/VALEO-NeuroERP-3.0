@@ -1375,3 +1375,14 @@ Personenkonto auch in Verkaufs-/Einkaufsgutschrift und Ernte-Abrechnung; Storno 
 Personenkonto auch fuer Genossenschaft (Auseinandersetzungsguthaben § 73 GenG: Kreditorenkonto des Partners ueber business_partner_cooperative_memberships.membership_number) und Fracht (Spediteur als Lieferant). Damit tragen alle Journal-Buchungswege auf die Sammelkonten das Personenkonto, ausser der defekten Selbstfakturierung (Entscheid USt-Pauschalierung offen).
 ## M7-LIZENZPRUEFUNG-20261126 — zur Abnahme, Claude Code (M7)
 Lizenzpruefung: app/core/lizenz.py (Ed25519-Signatur ueber kanonisches JSON: Kunde, Module, Mandanten, Ablauf), ModuleRegistry.is_enabled schneidet in STAGING/PRODUCTION (VALEO_UMGEBUNG ausdruecklich) mit der Lizenz; ohne gueltige Lizenz nur core. Herstellerwerkzeug scripts/lizenz_ausstellen.py (privater Schluessel nie im Repo). Produktions-Compose setzt VALEO_UMGEBUNG=production und verlangt Lizenzdatei + oeffentlichen Schluessel.
+
+## SELF-BILLING-ATOMIC-M3-KONSOLIDIERUNG — in Arbeit, Cursor Cloud (Claim-Owner)
+
+Meilenstein: M3. Lead-Plan freigegeben (Agent-Store `docs/self-billing-atomic-plan.md`).
+**Owner:** Cursor Cloud (User: Claude/Cursor uebernimmt; Codex nicht aktiv am Slice).
+**Stand:** in Arbeit 2026-11-27; Branch `cursor/self-billing-atomic-m3-34fe`.
+**Ziel:** Konsolidierung Self-Billing auf einen kreditorischen Kern (`buche_eingangsrechnung`), Multi-Parameter-Steuer, DocFlow BELEG-052 fuehrend (`purchase_invoice` + Agrar-Erweiterung `SelfBillingInvoice`), endgueltige Freigabe posted+Personenkonto+1 OP, API nur Adapter, Storno Originalkontext, Vereinbarungspflicht (`self_billing_purchase`), DB-Idempotenz.
+**Dateibesitz:** `app/api/v1/endpoints/self_billing.py`, `app/services/harvest_acceptance_service.py` (Self-Billing-Buchungsweg), `modules/agrar/services/tax_profile_service.py`, `modules/agrar/services/harvest_rule_store.py` (`_accounting_context`), `modules/agrar/services/self_billing_service.py`, `modules/agrar/repositories/self_billing_repo.py`, neu `app/services/self_billing_buchung.py`, neu `app/services/self_billing_docflow.py`, Migration Self-Billing-Erweiterung, zugehoerige Tests/QA/Handshake/Workboard.
+**Nicht anfassen:** fremde M3-Personenkonto-Slices ausser Nutzung von `buche_eingangsrechnung`/`personenkonto`; kein Reset Prüfstand.
+**Abnahme:** P0 laut Plan; Contract + PostgreSQL-Verhaltenstests; Claude-Admin-Merge (kein Self-Merge).
+**Hinweis:** Historischer Slice `SELF-BILLING-ATOMIC-20261014` bleibt abgeschlossen — kein aktiver Claim.

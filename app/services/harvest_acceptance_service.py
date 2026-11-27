@@ -668,16 +668,20 @@ class HarvestAcceptanceService:
 
         # Erstelle Self-Billing Gutschrift (wenn gewünscht und final)
         if create_credit_note and release_status == "final" and not obj.invoice_id:
-            if not obj.total_gross_amount_eur:
-                raise ValidationFailedError("Cannot create credit note: total_gross_amount_eur is not set. Please calculate settlement first.")
-
-            vat_rate_percent = Decimal("0")
-            if obj.vat_rate_percent is None:
-                raise ValidationFailedError("Expliziter Steuersatz fuer Self-Billing fehlt.")
-            vat_rate_percent = obj.vat_rate_percent
+            if obj.total_net_amount_eur is None:
+                raise ValidationFailedError(
+                    "Cannot create credit note: total_net_amount_eur is not set. Please calculate settlement first."
+                )
 
             billing_repo = SelfBillingRepositoryImpl(self.db, commit_on_success=False)
             from app.services.number_range_service import NumberRangeService
+            from decimal import ROUND_HALF_UP
+            from modules.agrar.services.tax_profile_service import (
+                TRANSACTION_TYPE_SELF_BILLING,
+                require_self_billing_agreement,
+                resolve_self_billing_tax_code,
+            )
+
             try:
                 invoice_number = NumberRangeService(self.db).next_number("self_billing", self.tenant_id)
             except ValueError as error:
@@ -685,34 +689,81 @@ class HarvestAcceptanceService:
             # Leave room for SB- and the canonical STORNO- prefix in the 20-char journal field.
             if len(invoice_number) > 10:
                 raise ValidationFailedError("Self-Billing-Nummernkreis muss hoechstens 10 Zeichen liefern.")
+
+            customer = None
+            supplier_id = None
+            if obj.customer_id:
+                customer = self.db.query(Customer).filter(
+                    Customer.id == obj.customer_id, Customer.tenant_id == self.tenant_id
+                ).first()
+                supplier_id = (
+                    customer.business_partner_id
+                    if customer and customer.business_partner_id
+                    else obj.customer_id
+                )
+            if not supplier_id:
+                raise ValidationFailedError("Self-Billing erfordert einen Lieferanten an der Annahme.")
+            require_self_billing_agreement(self.db, self.tenant_id, supplier_id)
+            taxation_type = get_taxation_type_for_supplier(
+                db=self.db,
+                supplier_id=supplier_id,
+                tenant_id=self.tenant_id,
+                effective_date=obj.delivery_date,
+                require_profile=True,
+            )
+            # Belegsteuer = kanonischer Resolver (nicht Artikel-MWSt allein), sonst
+            # widerspricht die Betragsratsche bei §24 / §19 / Kleinunternehmer.
+            article_tax_class = None
+            if taxation_type == "regular" and obj.vat_rate_percent is not None:
+                rate = Decimal(str(obj.vat_rate_percent))
+                if rate == Decimal("19"):
+                    article_tax_class = "standard"
+                elif rate == Decimal("7"):
+                    article_tax_class = "reduced"
+                elif rate == 0:
+                    article_tax_class = "zero"
+            resolved = resolve_self_billing_tax_code(
+                self.db,
+                tenant_id=self.tenant_id,
+                supplier_id=supplier_id,
+                taxation_type=taxation_type,
+                article_tax_class=article_tax_class,
+                transaction_type=TRANSACTION_TYPE_SELF_BILLING,
+                delivery_date=obj.delivery_date,
+            )
+            netto = Decimal(str(obj.total_net_amount_eur)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            vat_rate_percent = Decimal(str(resolved["rate"]))
+            total_vat = (netto * vat_rate_percent / Decimal("100")).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            total_gross = (netto + total_vat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            obj.total_vat_amount_eur = total_vat
+            obj.total_gross_amount_eur = total_gross
+            obj.vat_rate_percent = vat_rate_percent
+
             credit_note_input = CreditNoteCreate(
                 invoice_number=invoice_number,
                 tenant_id=self.tenant_id,
                 harvest_acceptance_id=acceptance_id,
-                total_net_amount_eur=obj.total_net_amount_eur or Decimal("0"),
-                total_vat_amount_eur=obj.total_vat_amount_eur or Decimal("0"),
-                total_gross_amount_eur=obj.total_gross_amount_eur,
+                total_net_amount_eur=netto,
+                total_vat_amount_eur=total_vat,
+                total_gross_amount_eur=total_gross,
                 vat_rate_percent=vat_rate_percent,
                 created_by=user_id,
             )
-
-            taxation_type = "regular"
-            if obj.customer_id:
-                customer = self.db.query(Customer).filter(Customer.id == obj.customer_id,
-                    Customer.tenant_id == self.tenant_id).first()
-                taxation_type = get_taxation_type_for_supplier(
-                    db=self.db,
-                    supplier_id=(customer.business_partner_id if customer and customer.business_partner_id else obj.customer_id),
-                    tenant_id=self.tenant_id,
-                    effective_date=obj.delivery_date,
-                )
 
             invoice = _create_credit_note_svc(billing_repo, credit_note_input, taxation_type=taxation_type)
             obj.invoice_id = invoice.id
             obj.release_status = "credit_note_created"
 
-            # FIBU-Buchung: Self-Billing Gutschrift buchen (Eingangsseite)
-            self._book_self_billing_credit_note(invoice, obj.delivery_date)
+            # FIBU: kanonischer Kern (posted + Personenkonto + OP) + DocFlow-Führungsbeleg
+            self._book_self_billing_credit_note(
+                invoice,
+                obj.delivery_date,
+                supplier_id=supplier_id,
+                article_id=getattr(obj, "article_id", None),
+                posted_by=user_id,
+            )
 
         if commit:
             self.db.commit()
@@ -721,45 +772,112 @@ class HarvestAcceptanceService:
         self.db.refresh(obj)
         return _to_dict_with_positions(obj, self.db)
 
-    def _book_self_billing_credit_note(self, invoice: Any, delivery_date: Any) -> None:
-        """Create an input-side journal draft in the acceptance transaction."""
-        from sqlalchemy import text
-        from app.finance.steuerschluessel import Steuerklaerung, vorsteuergruppen
-        from app.services.finance_eingangsrechnung_buchung import kreditorenkonto, summen
-        from app.services.finance_transaction_service import FinanceTransactionService
+    def _book_self_billing_credit_note(
+        self,
+        invoice: Any,
+        delivery_date: Any,
+        *,
+        supplier_id: Optional[str] = None,
+        article_id: Optional[str] = None,
+        posted_by: Optional[str] = None,
+    ) -> None:
+        """Kanonische Self-Billing-Buchung: DocFlow + posted Eingangsjournal + OP."""
+        from datetime import date as _date
+        from modules.agrar.services.tax_profile_service import (
+            TRANSACTION_TYPE_SELF_BILLING,
+            get_taxation_type_for_supplier,
+            resolve_self_billing_tax_code,
+        )
+        from app.services.self_billing_buchung import (
+            buche_self_billing,
+            build_vorsteuergruppen_from_resolved,
+        )
+        from app.services.self_billing_docflow import lege_self_billing_beleg_an, verknuepfe_erweiterung
 
-        code = self.db.execute(text(
-            "SELECT property_value FROM domain_shared.system_properties "
-            "WHERE tenant_id=:tenant AND property_key='agrar.self_billing.tax_code'"
-        ), {"tenant": self.tenant_id}).scalar()
-        if not isinstance(code, str) or not code.strip():
-            raise ValidationFailedError("Self-Billing benötigt einen ausdrücklich konfigurierten Eingangssteuerschlüssel.")
-        try:
-            groups = vorsteuergruppen(self.db, self.tenant_id, [(
-                1, code.strip(), invoice.vat_rate_percent, invoice.total_net_amount_eur, None,
-            )])
-            net, vat, gross = summen(groups)
-            if (net, vat, gross) != (invoice.total_net_amount_eur, invoice.total_vat_amount_eur, invoice.total_gross_amount_eur):
-                raise Steuerklaerung("Self-Billing-Beleg und Steuerschlüssel widersprechen sich.")
-            liability = kreditorenkonto(self.db, self.tenant_id, {})
-        except Steuerklaerung as error:
-            raise ValidationFailedError(str(error)) from error
-        fin = FinanceTransactionService(self.db, self.tenant_id, commit_on_success=False)
-        lines = []
-        for group in groups:
-            lines.append({"account_id": fin.account_id_for_number(group.aufwandskonto),
-                          "debit_amount": group.netto, "credit_amount": 0, "description": "Wareneinkauf Ernte"})
-            if group.steuer:
-                lines.append({"account_id": fin.account_id_for_number(group.vorsteuerkonto),
-                              "debit_amount": group.steuer, "credit_amount": 0, "description": "Vorsteuer Self-Billing"})
-        lines.append({"account_id": fin.account_id_for_number(liability), "debit_amount": 0,
-                      "credit_amount": gross, "description": "Verbindlichkeit Self-Billing"})
         if delivery_date is None:
             from app.core.business_time import business_today
             delivery_date = business_today()
-        fin.create(entry_number=f"SB-{invoice.invoice_number}", description=f"Self-Billing {invoice.invoice_number}",
-                   entry_date=delivery_date, lines=lines, reference=invoice.invoice_number,
-                   source="self_billing", document_type="credit_note", period=str(delivery_date)[:7])
+        if isinstance(delivery_date, str):
+            delivery_date = _date.fromisoformat(delivery_date[:10])
+
+        if not supplier_id:
+            raise ValidationFailedError("Self-Billing-Buchung erfordert supplier_id.")
+
+        taxation_type = get_taxation_type_for_supplier(
+            self.db, supplier_id, self.tenant_id, delivery_date, require_profile=True
+        )
+        # Align mit Freigabe: regular anhand Beleg-/Artikel-Satz; sonst Profil allein.
+        article_tax_class = None
+        inv_rate = getattr(invoice, "vat_rate_percent", None)
+        if taxation_type == "regular" and inv_rate is not None:
+            rate = Decimal(str(inv_rate))
+            if rate == Decimal("19"):
+                article_tax_class = "standard"
+            elif rate == Decimal("7"):
+                article_tax_class = "reduced"
+            elif rate == 0:
+                article_tax_class = "zero"
+        _ = article_id  # Signatur/Erweiterbarkeit
+
+        resolved = resolve_self_billing_tax_code(
+            self.db,
+            tenant_id=self.tenant_id,
+            supplier_id=supplier_id,
+            taxation_type=taxation_type,
+            article_tax_class=article_tax_class,
+            transaction_type=TRANSACTION_TYPE_SELF_BILLING,
+            delivery_date=delivery_date,
+        )
+        gruppen = build_vorsteuergruppen_from_resolved(
+            resolved, netto=Decimal(str(invoice.total_net_amount_eur))
+        )
+        # Server-Beträge: Steuer/Brutto aus Resolver, Beleg muss matchen (Kern prüft)
+        tax_context = {
+            **resolved,
+            "groups": [
+                {
+                    "tax_code": g.tax_code,
+                    "satz": str(g.satz),
+                    "netto": str(g.netto),
+                    "steuer": str(g.steuer),
+                    "aufwandskonto": g.aufwandskonto,
+                    "vorsteuerkonto": g.vorsteuerkonto,
+                }
+                for g in gruppen
+            ],
+        }
+
+        doc_id = lege_self_billing_beleg_an(
+            self.db,
+            self.tenant_id,
+            supplier_id=supplier_id,
+            invoice_number=str(invoice.invoice_number),
+            tax_code=resolved["tax_code"],
+            net_amount=Decimal(str(invoice.total_net_amount_eur)),
+            description=f"Self-Billing {invoice.invoice_number}",
+            harvest_acceptance_id=getattr(invoice, "harvest_acceptance_id", None),
+            akteur=posted_by or "harvest_release",
+            document_date=delivery_date,
+        )
+        verknuepfe_erweiterung(
+            self.db,
+            self.tenant_id,
+            self_billing_invoice_id=str(invoice.id),
+            docflow_header_id=doc_id,
+        )
+        invoice.docflow_header_id = doc_id
+
+        buche_self_billing(
+            self.db,
+            self.tenant_id,
+            invoice=invoice,
+            supplier_id=supplier_id,
+            delivery_date=delivery_date,
+            tax_context=tax_context,
+            gruppen=gruppen,
+            posted_by=posted_by,
+            harvest_acceptance_id=getattr(invoice, "harvest_acceptance_id", None),
+        )
 
     def calculate_settlement(self, acceptance_id: str, *, command=None) -> dict:
         if self._settlement_control is not None:

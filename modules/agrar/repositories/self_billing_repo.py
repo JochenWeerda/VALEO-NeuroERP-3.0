@@ -46,6 +46,10 @@ class SelfBillingRepositoryImpl:
             einvoice_sent_at=db_model.einvoice_sent_at,
             einvoice_received_at=db_model.einvoice_received_at,
             mandatory_texts=db_model.mandatory_texts,
+            docflow_header_id=getattr(db_model, "docflow_header_id", None),
+            journal_entry_id=getattr(db_model, "journal_entry_id", None),
+            taxation_type=getattr(db_model, "taxation_type", None),
+            tax_context=getattr(db_model, "tax_context", None),
             created_at=db_model.created_at,
             created_by=db_model.created_by,
             updated_at=db_model.updated_at,
@@ -74,6 +78,10 @@ class SelfBillingRepositoryImpl:
             einvoice_sent_at=service_model.einvoice_sent_at,
             einvoice_received_at=service_model.einvoice_received_at,
             mandatory_texts=service_model.mandatory_texts,
+            docflow_header_id=service_model.docflow_header_id,
+            journal_entry_id=service_model.journal_entry_id,
+            taxation_type=service_model.taxation_type,
+            tax_context=service_model.tax_context,
             created_at=service_model.created_at,
             created_by=service_model.created_by,
             updated_at=service_model.updated_at,
@@ -110,26 +118,30 @@ class SelfBillingRepositoryImpl:
         self.db.refresh(db_model)
         return self._to_service_invoice(db_model)
     
-    def get_invoice_by_id(self, invoice_id: str) -> Optional[ServiceSelfBillingInvoice]:
-        """Ruft eine Gutschrift anhand der ID ab."""
-        db_model = self.db.query(SelfBillingInvoice).filter(
-            SelfBillingInvoice.id == invoice_id
-        ).first()
-        
+    def get_invoice_by_id(
+        self, invoice_id: str, *, tenant_id: Optional[str] = None
+    ) -> Optional[ServiceSelfBillingInvoice]:
+        """Ruft eine Gutschrift anhand der ID ab (optional mandantengebunden)."""
+        q = self.db.query(SelfBillingInvoice).filter(SelfBillingInvoice.id == invoice_id)
+        if tenant_id is not None:
+            q = q.filter(SelfBillingInvoice.tenant_id == tenant_id)
+        db_model = q.first()
         if not db_model:
             return None
-        
         return self._to_service_invoice(db_model)
     
-    def get_invoice_by_harvest_acceptance(self, harvest_acceptance_id: str) -> Optional[ServiceSelfBillingInvoice]:
-        """Ruft die Gutschrift für eine Ernte-Annahme ab."""
-        db_model = self.db.query(SelfBillingInvoice).filter(
+    def get_invoice_by_harvest_acceptance(
+        self, harvest_acceptance_id: str, *, tenant_id: Optional[str] = None
+    ) -> Optional[ServiceSelfBillingInvoice]:
+        """Ruft die Gutschrift für eine Ernte-Annahme ab (optional mandantengebunden)."""
+        q = self.db.query(SelfBillingInvoice).filter(
             SelfBillingInvoice.harvest_acceptance_id == harvest_acceptance_id
-        ).first()
-        
+        )
+        if tenant_id is not None:
+            q = q.filter(SelfBillingInvoice.tenant_id == tenant_id)
+        db_model = q.first()
         if not db_model:
             return None
-        
         return self._to_service_invoice(db_model)
     
     def update_invoice(self, invoice_id: str, updates: dict) -> ServiceSelfBillingInvoice:

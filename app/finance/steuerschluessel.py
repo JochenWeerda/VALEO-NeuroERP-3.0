@@ -215,21 +215,27 @@ class Schluesselwahl(BaseModel):
     reverse_charge: bool = False
 
 
-def schluessel_auswahl(db: Session, tenant_id: str, richtung: str) -> list[Schluesselwahl]:
-    """Die heute gueltigen, aktiven Steuerschluessel des Mandanten fuer Verkaufs- oder Eingangsbelege."""
+def schluessel_auswahl(
+    db: Session, tenant_id: str, richtung: str, am: Optional[date] = None
+) -> list[Schluesselwahl]:
+    """Gueltige, aktive Steuerschluessel des Mandanten fuer Verkaufs- oder Eingangsbelege.
+
+    ``am`` ist der Stichtag (Beleg-/Lieferdatum). Ohne Angabe gilt ``CURRENT_DATE`` (Maskenauswahl).
+    """
     if richtung not in RICHTUNGEN:
         raise ValueError(f"Unbekannte Richtung {richtung!r}; erlaubt: verkauf, einkauf.")
     zeilen = db.execute(
         text(
             "SELECT code, bezeichnung, steuersatz, par_24_ustg, reverse_charge FROM domain_erp.tax_keys "
-            "WHERE tenant_id = :tid AND active AND gueltig_von <= CURRENT_DATE "
-            "AND (gueltig_bis IS NULL OR gueltig_bis >= CURRENT_DATE) "
+            "WHERE tenant_id = :tid AND active "
+            "AND gueltig_von <= COALESCE(CAST(:am AS date), CURRENT_DATE) "
+            "AND (gueltig_bis IS NULL OR gueltig_bis >= COALESCE(CAST(:am AS date), CURRENT_DATE)) "
             # Die Richtung ist eine der beiden festen Bedingungen aus RICHTUNGEN.
             "AND CASE WHEN :richtung = 'verkauf' THEN (credit_account IS NOT NULL OR debit_account IS NULL) "
             "         ELSE (debit_account IS NOT NULL OR credit_account IS NULL) END "
             "ORDER BY LPAD(code, 2, '0')"
         ),
-        {"tid": tenant_id, "richtung": richtung},
+        {"tid": tenant_id, "richtung": richtung, "am": am},
     ).fetchall()
     return [
         Schluesselwahl(code=str(z[0]), bezeichnung=str(z[1]), steuersatz=Decimal(str(z[2])),
@@ -238,13 +244,16 @@ def schluessel_auswahl(db: Session, tenant_id: str, richtung: str) -> list[Schlu
     ]
 
 
-def satz_des_schluessels(db: Session, tenant_id: str, code: str, richtung: str) -> Decimal:
+def satz_des_schluessels(
+    db: Session, tenant_id: str, code: str, richtung: str, am: Optional[date] = None
+) -> Decimal:
     """Der Satz des Schluessels — oder eine ``Steuerklaerung``, wenn er fuer die Richtung nicht gilt.
 
     Belege und Stammdaten speichern den Satz nur noch als Abbild des Schluessels; angegeben wird der Schluessel.
+    ``am`` = Beleg-/Lieferdatum fuer historische Schluessel (Jahresgrenze); Default: heute.
     """
     code = (code or "").strip()
-    for wahl in schluessel_auswahl(db, tenant_id, richtung):
+    for wahl in schluessel_auswahl(db, tenant_id, richtung, am=am):
         if wahl.code == code:
             return wahl.steuersatz
     art = "Verkaufsbelege" if richtung == "verkauf" else "Eingangsbelege"

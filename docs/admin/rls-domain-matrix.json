@@ -831,13 +831,12 @@
     "app/services/wf_trigger_service.py"
    ],
    "schreiber": [
-    "app/api/v1/endpoints/self_billing.py",
     "app/services/mobile_sync_service.py",
     "app/services/qs_charge_service.py"
    ],
    "worker": [],
    "identitaet": {
-    "token": 2
+    "token": 1
    },
    "standardmandant_stellen": [],
    "null_stellen": [],
@@ -1045,6 +1044,7 @@
     "app/api/v1/endpoints/prospecting.py",
     "app/api/v1/endpoints/rag.py",
     "app/api/v1/endpoints/sales_reports.py",
+    "app/api/v1/endpoints/self_billing.py",
     "app/api/v1/endpoints/stammdaten_bearbeiten.py",
     "app/api/v1/endpoints/tapi.py",
     "app/api/v1/schemas/__init__.py",
@@ -1111,6 +1111,7 @@
     "app/services/webshop_integration_service.py",
     "app/services/whatsapp_agent_service.py",
     "app/workers/compliance_monitor.py",
+    "modules/agrar/services/tax_profile_service.py",
     "services/crm-ai/app/api/v1/endpoints/ai.py",
     "services/crm-ai/app/schemas/ai.py",
     "services/crm-analytics/app/api/v1/endpoints/analytics.py",
@@ -1164,7 +1165,7 @@
     "dienst": 14,
     "nutzlast": 8,
     "standardmandant": 6,
-    "token": 27
+    "token": 28
    },
    "standardmandant_stellen": [
     "app/integrations/adapters/superglue/tool_sync.py:427",
@@ -1195,10 +1196,14 @@
     "app/api/v1/endpoints/compat.py:1563",
     "app/api/v1/endpoints/compat.py:1570",
     "app/api/v1/endpoints/compat.py:1593",
-    "app/services/mcp_execution_service.py:3138"
+    "app/services/mcp_execution_service.py:3138",
+    "modules/agrar/services/tax_profile_service.py:149",
+    "modules/agrar/services/tax_profile_service.py:165"
    ],
    "gemeinsam_stellen": [
-    "app/services/mcp_execution_service.py:3138"
+    "app/services/mcp_execution_service.py:3138",
+    "modules/agrar/services/tax_profile_service.py:149",
+    "modules/agrar/services/tax_profile_service.py:165"
    ],
    "daten": {
     "zeilen": 6,
@@ -1592,7 +1597,7 @@
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
     "app/api/v1/endpoints/financial_reports.py:325",
-    "app/finance/steuerschluessel.py:281"
+    "app/finance/steuerschluessel.py:290"
    ],
    "daten": {
     "zeilen": 49,
@@ -1667,6 +1672,7 @@
     "app/services/finance_dunning_service.py",
     "app/services/finance_eingangsrechnung_buchung.py",
     "app/services/sales_posting_service.py",
+    "app/services/self_billing_buchung.py",
     "app/services/wf_trigger_service.py"
    ],
    "worker": [
@@ -2820,7 +2826,7 @@
     "app/api/v1/endpoints/compat.py:1593"
    ],
    "gemeinsam_stellen": [
-    "app/finance/steuerschluessel.py:281"
+    "app/finance/steuerschluessel.py:290"
    ],
    "daten": {
     "zeilen": 79,
@@ -3233,6 +3239,7 @@
     "app/api/v1/endpoints/rations_lifecycle.py",
     "app/api/v1/endpoints/rations_readiness.py",
     "app/api/v1/endpoints/rations_reference_data.py",
+    "app/api/v1/endpoints/self_billing.py",
     "app/api/v1/endpoints/system_metrics.py",
     "app/api/v1/endpoints/tank_adapter.py",
     "app/api/v1/schemas/__init__.py",
@@ -3314,7 +3321,6 @@
     "app/api/v1/endpoints/rations_optimization.py",
     "app/api/v1/endpoints/rations_zugang.py",
     "app/api/v1/endpoints/recent_documents.py",
-    "app/api/v1/endpoints/self_billing.py",
     "app/api/v1/endpoints/users.py",
     "app/api/v1/endpoints/ux_overlays.py",
     "app/auth/scopes.py",

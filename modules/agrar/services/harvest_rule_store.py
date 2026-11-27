@@ -360,27 +360,67 @@ class HarvestRuleStore:
                 "calculation_approval": approval["payload"]["result"] if approval else None}
 
     def _accounting_context(self, customer, *, locked):
+        from app.core.business_time import business_today
         from app.finance.steuerschluessel import KONTENRAHMEN_SCHLUESSEL, KREDITORENKONTO
+        from modules.agrar.services.tax_profile_service import (
+            TRANSACTION_TYPE_SELF_BILLING,
+            get_taxation_type_for_supplier,
+            resolve_self_billing_tax_code,
+        )
         suffix = " FOR SHARE" if locked else ""
         properties = self.db.execute(text("SELECT property_key,property_value FROM domain_shared.system_properties "
             "WHERE tenant_id=:tenant AND property_key=ANY(:keys) ORDER BY property_key" + suffix),
-            {"tenant": self.tenant_id, "keys": ["agrar.self_billing.tax_code", KONTENRAHMEN_SCHLUESSEL]}).mappings().all()
+            {"tenant": self.tenant_id, "keys": [
+                "agrar.self_billing.tax_code",  # legacy, deprecated
+                "agrar.self_billing.tax_code.regular",
+                "agrar.self_billing.tax_code.ustg24_flat_rate",
+                "agrar.self_billing.tax_code.small_business",
+                KONTENRAHMEN_SCHLUESSEL,
+            ]}).mappings().all()
         props = {row["property_key"]: row["property_value"] for row in properties}
-        key = self.db.execute(text("SELECT code,steuersatz,debit_account,expense_account,reverse_charge,credit_account,"
-            "active,gueltig_von,gueltig_bis FROM domain_erp.tax_keys WHERE tenant_id=:tenant AND code=:code" + suffix),
-            {"tenant": self.tenant_id, "code": props.get("agrar.self_billing.tax_code")}).mappings().first()
+        supplier = customer.business_partner_id or customer.id
+        profiles = self.db.execute(text("SELECT id,supplier_id,taxation_type,valid_from,valid_to "
+            "FROM domain_crm.supplier_tax_profiles WHERE tenant_id=:tenant AND supplier_id=:supplier "
+            "ORDER BY valid_from,id" + suffix),
+            {"tenant": self.tenant_id, "supplier": supplier}).mappings().all()
+        resolved = None
+        key = None
+        try:
+            taxation_type = get_taxation_type_for_supplier(
+                self.db, supplier, self.tenant_id, business_today(), require_profile=False
+            )
+            if profiles:
+                # Profil vorhanden → dieselbe Multi-Parameter-Auflösung wie die Buchung
+                resolved = resolve_self_billing_tax_code(
+                    self.db,
+                    tenant_id=self.tenant_id,
+                    supplier_id=str(supplier),
+                    taxation_type=taxation_type,
+                    article_tax_class=None,
+                    transaction_type=TRANSACTION_TYPE_SELF_BILLING,
+                    delivery_date=business_today(),
+                )
+                key = self.db.execute(text(
+                    "SELECT code,steuersatz,debit_account,expense_account,reverse_charge,credit_account,"
+                    "active,gueltig_von,gueltig_bis,par_24_ustg FROM domain_erp.tax_keys "
+                    "WHERE tenant_id=:tenant AND code=:code" + suffix
+                ), {"tenant": self.tenant_id, "code": resolved["tax_code"]}).mappings().first()
+        except Exception:  # noqa: BLE001 — Kontext bleibt lesbar; Freigabe scheitert später hart
+            resolved = None
         numbers = [KREDITORENKONTO.get(props.get(KONTENRAHMEN_SCHLUESSEL))]
-        if key: numbers.extend([key["debit_account"], key["expense_account"]])
+        if key:
+            numbers.extend([key["debit_account"], key["expense_account"]])
         accounts = self.db.execute(text("SELECT id,account_number,is_active,is_summary,deleted_at "
             "FROM domain_erp.chart_of_accounts WHERE tenant_id=:tenant AND account_number=ANY(:numbers) "
             "ORDER BY account_number" + suffix),
             {"tenant": self.tenant_id, "numbers": [n for n in numbers if n]}).mappings().all()
-        profiles = self.db.execute(text("SELECT id,supplier_id,taxation_type,valid_from,valid_to "
-            "FROM domain_crm.supplier_tax_profiles WHERE tenant_id=:tenant AND supplier_id=:supplier "
-            "ORDER BY valid_from,id" + suffix),
-            {"tenant": self.tenant_id, "supplier": customer.business_partner_id or customer.id}).mappings().all()
-        return {"properties": props, "tax_key": dict(key) if key else None,
-                "accounts": [dict(row) for row in accounts], "supplier_tax_profiles": [dict(row) for row in profiles]}
+        return {
+            "properties": props,
+            "tax_key": dict(key) if key else None,
+            "resolved_tax": resolved,
+            "accounts": [dict(row) for row in accounts],
+            "supplier_tax_profiles": [dict(row) for row in profiles],
+        }
 
     def _expect_context(self, acceptance_id, expected):
         current = self.context(acceptance_id, locked=True)

@@ -183,12 +183,17 @@ def test_failed_proof_insert_rolls_back_business_changes(case, monkeypatch):
 def financial_ready(c):
     from app.finance.steuerschluessel import richte_skr03_ein
     from app.services.number_range_service import NumberRangeService
+    from modules.agrar.services.tax_profile_service import ensure_self_billing_purchase_ready
     richte_skr03_ein(c.db, c.tenant)
     NumberRangeService(c.db).configure(c.tenant, "self_billing", "GS", 1, 6)
     c.db.execute(text("INSERT INTO domain_shared.system_properties "
         "(id,tenant_id,property_key,property_value,property_type,category) "
         "VALUES (:id,:tenant,'agrar.self_billing.tax_code','8','string','agrar')"),
         {"id": str(uuid4()), "tenant": c.tenant})
+    # Lieferant = Kunde der Annahme (ohne separates business_partner_id)
+    ensure_self_billing_purchase_ready(
+        c.db, c.tenant, c.acceptance.customer_id, partner_name="Synthetic self-billing supplier"
+    )
     c.db.commit()
     ready(c); result = calculate(c); approve(c, result)
     return FinancialReleaseIn(idempotency_key=uuid4(), expected_calculation_hash=result["calculation_hash"])

@@ -56,6 +56,16 @@ def kreditorkonto_fuer_lieferant(db: Session, tenant_id: str, lieferant_id: Opti
         "ON bp.partner_id::text = l.partner_id AND bp.tenant_id = l.tenant_id "
         "WHERE l.tenant_id = :t AND (l.id::text = :k OR l.lieferantennummer = :k OR l.partner_id = :k) LIMIT 1"),
         {"t": tenant_id, "k": str(lieferant_id)}).scalar()
+    if konto:
+        return str(konto)
+    # Self-Billing / Partner ohne Lieferantenstamm: direktes Kreditorenkonto am business_partner
+    konto = db.execute(
+        text(
+            "SELECT creditor_account FROM domain_crm.business_partners "
+            "WHERE tenant_id = :t AND partner_id::text = :k LIMIT 1"
+        ),
+        {"t": tenant_id, "k": str(lieferant_id)},
+    ).scalar()
     return str(konto) if konto else None
 
 

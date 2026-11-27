@@ -121,7 +121,7 @@ def storniere_eingangsrechnung(db: Session, tenant_id: str, *, nummer: str, grun
     satz = db.execute(
         text(
             "SELECT id, status FROM domain_erp.journal_entries WHERE tenant_id = :t AND reference = :n "
-            "AND source IN ('ap_invoice', 'ap_invoice_kernel', 'einkauf_rechnungseingang', 'purchase_invoice') "
+            "AND source IN ('ap_invoice', 'ap_invoice_kernel', 'einkauf_rechnungseingang', 'purchase_invoice', 'self_billing') "
             "ORDER BY created_at LIMIT 1"
         ),
         {"t": tenant_id, "n": nummer},
