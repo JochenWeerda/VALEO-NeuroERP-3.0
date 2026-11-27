@@ -13,14 +13,14 @@ from typing import Optional, Protocol, Literal, List
 from app.core.uuid7 import uuid7
 
 
-InvoiceStatus = Literal["draft", "issued", "paid", "disputed", "cancelled"]
+InvoiceStatus = Literal["draft", "issued", "booked", "paid", "disputed", "cancelled"]
 DisputeStatus = Literal["none", "raised", "resolved", "rejected"]
 DisputeType = Literal["amount", "quality", "quantity", "other"]
 
 
 @dataclass
 class SelfBillingInvoice:
-    """Self-Billing Gutschrift-Datenstruktur."""
+    """Self-Billing Gutschrift-Datenstruktur (Agrar-Erweiterung am DocFlow-Beleg)."""
     id: str
     tenant_id: str
     invoice_number: str
@@ -39,10 +39,16 @@ class SelfBillingInvoice:
     einvoice_pdf: Optional[bytes] = None
     einvoice_sent_at: Optional[datetime] = None
     einvoice_received_at: Optional[datetime] = None
-    
+
     # Pflichttexte
     mandatory_texts: Optional[list[dict]] = None  # JSONB: [{"type": "...", "text": "..."}]
-    
+
+    # DocFlow / FiBu (M3)
+    docflow_header_id: Optional[str] = None
+    journal_entry_id: Optional[str] = None
+    taxation_type: Optional[str] = None
+    tax_context: Optional[dict] = None
+
     # Audit
     created_at: Optional[datetime] = None
     created_by: Optional[str] = None
@@ -292,7 +298,7 @@ def generate_einvoice_xrechnung(
          xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
     <cbc:ID>{invoice.invoice_number}</cbc:ID>
     <cbc:IssueDate>{invoice.created_at.strftime('%Y-%m-%d') if invoice.created_at else date.today().isoformat()}</cbc:IssueDate>
-    <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
+    <cbc:InvoiceTypeCode>389</cbc:InvoiceTypeCode>
     <cbc:DocumentCurrencyCode>EUR</cbc:DocumentCurrencyCode>
     
     <cac:AccountingSupplierParty>

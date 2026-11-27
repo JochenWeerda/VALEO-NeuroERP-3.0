@@ -85,16 +85,16 @@ class SelfBillingInvoiceOut(BaseModel):
 
 
 class CreditNoteCreateIn(BaseModel):
-    """Input-Model für Gutschrift-Erstellung."""
+    """Input-Model für Gutschrift-Erstellung (Beträge Decimal; Client-Werte werden serverseitig geprüft)."""
     harvest_acceptance_id: str
     invoice_number: Optional[str] = None
     provisional_invoice_number: Optional[str] = None
-    total_net_amount_eur: float = Field(..., gt=0)
-    total_vat_amount_eur: float = Field(..., ge=0)
-    total_gross_amount_eur: float = Field(..., gt=0)
-    vat_rate_percent: float = Field(..., ge=0, le=100)
+    total_net_amount_eur: Decimal = Field(..., gt=0)
+    total_vat_amount_eur: Decimal = Field(..., ge=0)
+    total_gross_amount_eur: Decimal = Field(..., gt=0)
+    vat_rate_percent: Decimal = Field(..., ge=0, le=100)
     mandatory_texts: Optional[list[dict]] = None
-    taxation_type: str = "regular"  # regular / ustg24_flat_rate / small_business
+    taxation_type: Optional[str] = None  # nur Entwurfshinweis; endgültig aus Profil
 
 
 class DisputeCreateIn(BaseModel):
@@ -158,13 +158,14 @@ async def create_credit_note_endpoint(
 ):
     """Erstellt eine Self-Billing Gutschrift für eine Ernte-Annahme."""
     user_id = _get_user_id_from_request(request)
+    taxation_hint = payload.taxation_type or "regular"
     dq_result = evaluate_self_billing_datensatz(
         _build_self_billing_dq_datensatz(
             harvest_acceptance_id=harvest_acceptance_id,
-            net_amount=payload.total_net_amount_eur,
-            gross_amount=payload.total_gross_amount_eur,
-            vat_rate=payload.vat_rate_percent,
-            taxation_type=payload.taxation_type,
+            net_amount=float(payload.total_net_amount_eur),
+            gross_amount=float(payload.total_gross_amount_eur),
+            vat_rate=float(payload.vat_rate_percent),
+            taxation_type=taxation_hint,
         )
     )
     if not dq_result.bestanden:
@@ -182,24 +183,32 @@ async def create_credit_note_endpoint(
         mandatory_texts=payload.mandatory_texts,
         created_by=user_id,
     )
-    
-    repo = SelfBillingRepositoryImpl(db)
-    invoice = create_credit_note(repo, create_input, taxation_type=payload.taxation_type)
 
-    # Belegbruch schließen: HarvestAcceptance.invoice_id zurückverknüpfen
-    try:
-        db.execute(
-            text("""
-                UPDATE domain_agrar.harvest_acceptances
-                SET invoice_id = :inv_id, updated_at = NOW()
-                WHERE id = :ha_id AND tenant_id = :tid AND invoice_id IS NULL
-            """),
-            {"inv_id": invoice.id, "ha_id": harvest_acceptance_id, "tid": tenant_id},
-        )
-        db.commit()
-    except Exception:  # noqa: BLE001 — Rückkopplung nicht kritisch für Gutschrift-Erstellung
-        pass
+    repo = SelfBillingRepositoryImpl(db, commit_on_success=False)
+    invoice = create_credit_note(repo, create_input, taxation_type=taxation_hint)
 
+    # Atomare Rückverknüpfung in derselben Transaktion (kein stilles except:pass)
+    updated = db.execute(
+        text("""
+            UPDATE domain_inventory.harvest_acceptances
+            SET invoice_id = :inv_id, updated_at = NOW()
+            WHERE id = :ha_id AND tenant_id = :tid AND invoice_id IS NULL
+        """),
+        {"inv_id": invoice.id, "ha_id": harvest_acceptance_id, "tid": tenant_id},
+    )
+    if updated.rowcount == 0:
+        exists = db.execute(
+            text(
+                "SELECT invoice_id FROM domain_inventory.harvest_acceptances "
+                "WHERE id = :ha_id AND tenant_id = :tid"
+            ),
+            {"ha_id": harvest_acceptance_id, "tid": tenant_id},
+        ).scalar()
+        if exists is None:
+            raise HTTPException(status_code=404, detail="Ernte-Annahme nicht gefunden")
+        if exists != invoice.id:
+            raise HTTPException(status_code=409, detail="Ernte-Annahme hat bereits eine Gutschrift")
+    db.commit()
     return _to_out(invoice)
 
 
@@ -248,19 +257,52 @@ async def issue_invoice_endpoint(
     tenant_id: str = Depends(get_tenant_id),
     request: Request = None,
 ):
-    """Gibt eine Gutschrift aus (Status: draft → issued)."""
+    """Gibt eine Gutschrift aus (Status: draft → issued). Vereinbarung + Steuerprofil Pflicht."""
+    from app.core.exceptions import DomainError
+    from app.infrastructure.models import Customer, HarvestAcceptance
+    from modules.agrar.services.tax_profile_service import (
+        get_taxation_type_for_supplier,
+        require_self_billing_agreement,
+    )
+
     user_id = _get_user_id_from_request(request)
-    
+
     repo = SelfBillingRepositoryImpl(db)
-    invoice = repo.get_invoice_by_id(invoice_id)
-    
+    invoice = repo.get_invoice_by_id(invoice_id, tenant_id=tenant_id)
+
     if not invoice:
         raise HTTPException(status_code=404, detail=f"Invoice {invoice_id} not found")
-    
+
     if invoice.tenant_id != tenant_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
-    invoice = issue_invoice(repo, invoice_id, updated_by=user_id)
+
+    try:
+        supplier_id = None
+        delivery = None
+        if invoice.harvest_acceptance_id:
+            harvest = db.query(HarvestAcceptance).filter(
+                HarvestAcceptance.id == invoice.harvest_acceptance_id,
+                HarvestAcceptance.tenant_id == tenant_id,
+            ).first()
+            if harvest and harvest.customer_id:
+                customer = db.query(Customer).filter(
+                    Customer.id == harvest.customer_id, Customer.tenant_id == tenant_id
+                ).first()
+                supplier_id = (
+                    customer.business_partner_id
+                    if customer and customer.business_partner_id
+                    else harvest.customer_id
+                )
+                delivery = harvest.delivery_date
+        if not supplier_id:
+            raise HTTPException(status_code=422, detail="Lieferant für Ausstellung nicht ermittelbar")
+        require_self_billing_agreement(db, tenant_id, supplier_id)
+        get_taxation_type_for_supplier(
+            db, supplier_id, tenant_id, delivery, require_profile=True
+        )
+        invoice = issue_invoice(repo, invoice_id, updated_by=user_id)
+    except DomainError as err:
+        raise HTTPException(status_code=getattr(err, "http_status", 422), detail=str(err)) from err
     return _to_out(invoice)
 
 
@@ -359,9 +401,9 @@ async def create_dispute_endpoint(
 
 class PreviewIn(BaseModel):
     harvest_acceptance_id: str
-    total_net_amount_eur: float = Field(0, ge=0)
-    total_gross_amount_eur: float = Field(0, ge=0)
-    vat_rate_percent: float = Field(0, ge=0, le=100)
+    total_net_amount_eur: Decimal = Field(Decimal("0"), ge=0)
+    total_gross_amount_eur: Decimal = Field(Decimal("0"), ge=0)
+    vat_rate_percent: Decimal = Field(Decimal("0"), ge=0, le=100)
     taxation_type: str = "regular"
 
 
@@ -372,15 +414,15 @@ async def preview_self_billing(
     tenant_id: str = Depends(get_tenant_id),
 ):
     """
-    Preview Self-Billing für Ernte-Annahme.
-    Liefert Draft mit Beträgen, MwSt, Positionen ohne Persistierung.
+    Preview Self-Billing für Ernte-Annahme (ohne Persistierung; Mandantenfilter Pflicht).
+    Entwürfe/Vorschau ohne Steuerprofil erlaubt.
     """
     dq_result = evaluate_self_billing_datensatz(
         _build_self_billing_dq_datensatz(
             harvest_acceptance_id=payload.harvest_acceptance_id,
-            net_amount=payload.total_net_amount_eur,
-            gross_amount=payload.total_gross_amount_eur,
-            vat_rate=payload.vat_rate_percent,
+            net_amount=float(payload.total_net_amount_eur),
+            gross_amount=float(payload.total_gross_amount_eur),
+            vat_rate=float(payload.vat_rate_percent),
             taxation_type=payload.taxation_type,
         )
     )
@@ -388,43 +430,62 @@ async def preview_self_billing(
         raise HTTPException(status_code=422, detail=build_dq_error_detail("SelfBilling", dq_result))
 
     from sqlalchemy import text as sa_text
+
+    owned = db.execute(
+        sa_text(
+            "SELECT id FROM domain_inventory.harvest_acceptances "
+            "WHERE id = :ha_id AND tenant_id = :tid"
+        ),
+        {"ha_id": payload.harvest_acceptance_id, "tid": tenant_id},
+    ).first()
+    if not owned:
+        raise HTTPException(status_code=404, detail="Ernte-Annahme nicht gefunden")
+
     line_items = []
-    try:
-        rows = db.execute(sa_text("""
+    rows = db.execute(
+        sa_text("""
             SELECT hap.position_number, hap.description,
                    COALESCE(hap.quantity_kg, 0) AS menge_kg,
                    COALESCE(hap.unit_price_eur_per_t, 0) AS preis_eur_t,
                    COALESCE(hap.quality_grade, '') AS qualitaet
             FROM domain_inventory.harvest_acceptance_positions hap
+            JOIN domain_inventory.harvest_acceptances ha
+              ON ha.id = hap.harvest_acceptance_id AND ha.tenant_id = :tid
             WHERE hap.harvest_acceptance_id = :ha_id
             ORDER BY hap.position_number
-        """), {"ha_id": payload.harvest_acceptance_id}).fetchall()
+        """),
+        {"ha_id": payload.harvest_acceptance_id, "tid": tenant_id},
+    ).fetchall()
 
-        for r in rows:
-            menge_t = float(r.menge_kg) / 1000.0
-            netto = round(menge_t * float(r.preis_eur_t), 2)
-            line_items.append({
-                "position": r.position_number,
-                "description": r.description or "",
-                "quantity_kg": float(r.menge_kg),
-                "quantity_t": round(menge_t, 3),
-                "unit_price_eur_t": float(r.preis_eur_t),
-                "net_amount_eur": netto,
-                "quality_grade": r.qualitaet,
-            })
-    except Exception:  # noqa: BLE001 — Positionen aus harvest_acceptance nicht verfügbar; line_items bleibt leer
-        pass
+    for r in rows:
+        menge_t = Decimal(str(r.menge_kg)) / Decimal("1000")
+        netto = (menge_t * Decimal(str(r.preis_eur_t))).quantize(Decimal("0.01"))
+        line_items.append({
+            "position": r.position_number,
+            "description": r.description or "",
+            "quantity_kg": float(r.menge_kg),
+            "quantity_t": float(menge_t.quantize(Decimal("0.001"))),
+            "unit_price_eur_t": float(r.preis_eur_t),
+            "net_amount_eur": float(netto),
+            "quality_grade": r.qualitaet,
+        })
 
-    calculated_net = sum(li["net_amount_eur"] for li in line_items) if line_items else payload.total_net_amount_eur
-    vat_amount = round(calculated_net * (payload.vat_rate_percent / 100), 2)
+    calculated_net = (
+        sum((Decimal(str(li["net_amount_eur"])) for li in line_items), Decimal("0"))
+        if line_items
+        else Decimal(str(payload.total_net_amount_eur))
+    )
+    vat_amount = (calculated_net * Decimal(str(payload.vat_rate_percent)) / Decimal("100")).quantize(
+        Decimal("0.01")
+    )
 
     return {
         "harvest_acceptance_id": payload.harvest_acceptance_id,
         "status": "draft",
-        "total_net_amount_eur": round(calculated_net, 2),
-        "total_vat_amount_eur": vat_amount,
-        "total_gross_amount_eur": round(calculated_net + vat_amount, 2),
-        "vat_rate_percent": payload.vat_rate_percent,
+        "total_net_amount_eur": float(calculated_net.quantize(Decimal("0.01"))),
+        "total_vat_amount_eur": float(vat_amount),
+        "total_gross_amount_eur": float((calculated_net + vat_amount).quantize(Decimal("0.01"))),
+        "vat_rate_percent": float(payload.vat_rate_percent),
         "line_items": line_items,
     }
 
@@ -448,29 +509,46 @@ async def storno_invoice(
     if invoice.tenant_id != tenant_id:
         raise HTTPException(status_code=403, detail="Access denied")
 
-    if invoice.status not in ("issued", "paid"):
-        raise HTTPException(status_code=400, detail="Nur issued/paid Gutschriften können storniert werden")
+    if invoice.status not in ("issued", "paid", "booked"):
+        raise HTTPException(status_code=400, detail="Nur issued/paid/booked Gutschriften können storniert werden")
 
-    # Storno: Negative Gutschrift mit gleicher Nummer + Storno-Suffix
-    storno_number = f"{invoice.invoice_number}-ST"
-    storno_input = CreditNoteCreate(
-        tenant_id=tenant_id,
-        harvest_acceptance_id=invoice.harvest_acceptance_id or "",
-        invoice_number=storno_number,
-        provisional_invoice_number=invoice.provisional_invoice_number,
-        total_net_amount_eur=-Decimal(str(invoice.total_net_amount_eur)),
-        total_vat_amount_eur=-Decimal(str(invoice.total_vat_amount_eur)),
-        total_gross_amount_eur=-Decimal(str(invoice.total_gross_amount_eur)),
-        vat_rate_percent=Decimal(str(invoice.vat_rate_percent)),
-        mandatory_texts=invoice.mandatory_texts,
-        created_by=user_id,
-    )
-    storno_invoice_entity = create_credit_note(repo, storno_input, taxation_type="regular")
+    # Originalkontext — keine Neuberechnung aktueller Steuersätze
+    original_taxation = getattr(invoice, "taxation_type", None) or (
+        (invoice.tax_context or {}).get("taxation_type") if getattr(invoice, "tax_context", None) else None
+    ) or "regular"
+
+    from app.services.self_billing_buchung import storno_self_billing
+    from app.core.exceptions import DomainError
+
+    try:
+        if getattr(invoice, "journal_entry_id", None):
+            storno_self_billing(
+                db, tenant_id, invoice=invoice, reason=f"Storno Self-Billing {invoice.invoice_number}"
+            )
+        storno_number = f"{invoice.invoice_number}-ST"
+        storno_input = CreditNoteCreate(
+            tenant_id=tenant_id,
+            harvest_acceptance_id=invoice.harvest_acceptance_id or "",
+            invoice_number=storno_number,
+            provisional_invoice_number=invoice.provisional_invoice_number,
+            total_net_amount_eur=-Decimal(str(invoice.total_net_amount_eur)),
+            total_vat_amount_eur=-Decimal(str(invoice.total_vat_amount_eur)),
+            total_gross_amount_eur=-Decimal(str(invoice.total_gross_amount_eur)),
+            vat_rate_percent=Decimal(str(invoice.vat_rate_percent)),
+            mandatory_texts=invoice.mandatory_texts,
+            created_by=user_id,
+        )
+        storno_invoice_entity = create_credit_note(repo, storno_input, taxation_type=original_taxation)
+        db.commit()
+    except DomainError as err:
+        db.rollback()
+        raise HTTPException(status_code=getattr(err, "http_status", 422), detail=str(err)) from err
 
     return {
         "message": "Storno erstellt",
         "storno_invoice": _to_out(storno_invoice_entity),
         "original_invoice_id": invoice_id,
+        "taxation_type": original_taxation,
     }
 
 
@@ -552,90 +630,81 @@ async def buche_gutschrift(
     invoice_id: str,
     db: Session = Depends(get_db),
     tenant_id: str = Depends(get_tenant_id),
+    request: Request = None,
 ):
     """
-    Buche Gutschrift in Buchhaltung (Fibu).
-    
-    Erstellt Buchungssatz:
-    - Soll: Lieferantenkonto (Kreditor)
-    - Haben: Erlöskonto / Umsatzsteuer
+    Adapter auf den kanonischen Self-Billing-Buchungskern.
+
+    Keine Umgehung der Erntefreigabe: nur nach endgültiger Freigabe / credit_note_created
+    und mit Vereinbarung + Steuerprofil. Bereits verbucht → 409.
     """
-    from app.infrastructure.models import Buchung, BusinessPartner
-    from modules.agrar.repositories.self_billing_repo import SelfBillingRepositoryImpl
-    
-    repo = SelfBillingRepositoryImpl(db)
-    invoice = repo.get_invoice_by_id(invoice_id)
-    
+    from app.core.exceptions import DomainError
+    from app.infrastructure.models import Customer, HarvestAcceptance
+    from app.services.harvest_acceptance_service import HarvestAcceptanceService
+    from modules.agrar.services.tax_profile_service import require_self_billing_agreement
+
+    repo = SelfBillingRepositoryImpl(db, commit_on_success=False)
+    invoice = repo.get_invoice_by_id(invoice_id, tenant_id=tenant_id)
+
     if not invoice:
         raise HTTPException(status_code=404, detail=f"Gutschrift {invoice_id} nicht gefunden")
-    
+
     if invoice.tenant_id != tenant_id:
         raise HTTPException(status_code=403, detail="Access denied")
-    
-    if invoice.status != "issued":
-        raise HTTPException(status_code=400, detail="Gutschrift muss erst issued sein")
-    
-    # Hole Harvest Acceptance für Lieferanten-Info
-    from app.infrastructure.models import HarvestAcceptance
-    harvest = db.query(HarvestAcceptance).filter(
-        HarvestAcceptance.id == invoice.harvest_acceptance_id
-    ).first()
-    
-    if not harvest:
-        raise HTTPException(status_code=400, detail="Ernte-Annahme nicht gefunden")
-    
-    # Hole Lieferant
-    supplier = db.query(BusinessPartner).filter(
-        BusinessPartner.id == harvest.supplier_id,
-        BusinessPartner.tenant_id == tenant_id
-    ).first()
-    
-    # Generiere Buchungssatz
-    from app.core.uuid7 import uuid7
-    from datetime import date
-    from decimal import Decimal
 
-    buchung = Buchung(
-        id=uuid7(),
-        tenant_id=tenant_id,
-        belegnr=f"SB-{invoice.invoice_number}",
-        datum=date.today(),
-        soll_konto="1600",  # Kreditoren
-        haben_konto="4200",  # Erlöse Landwirtschaft
-        betrag=Decimal(str(invoice.total_net_amount_eur)),
-        text=f"Gutschrift {invoice.invoice_number} - {supplier.name if supplier else 'Lieferant'}",
-        belart="SB",  # Self-Billing
-        created_at=datetime.now(),
-    )
-    db.add(buchung)
-    
-    # Erstelle auch Umsatzsteuer-Buchung
-    if invoice.total_vat_amount_eur > 0:
-        buchung_st = Buchung(
-            id=uuid7(),
-            tenant_id=tenant_id,
-            belegnr=f"SB-{invoice.invoice_number}",
-            datum=date.today(),
-            soll_konto="1600",  # Kreditoren
-            haben_konto="1400",  # Umsatzsteuer
-            betrag=Decimal(str(invoice.total_vat_amount_eur)),
-            text=f"UST Gutschrift {invoice.invoice_number}",
-            belart="SB",
-            created_at=datetime.now(),
+    if getattr(invoice, "journal_entry_id", None) or invoice.status == "booked":
+        raise HTTPException(status_code=409, detail="Self-Billing-Beleg ist bereits verbucht")
+
+    if not invoice.harvest_acceptance_id:
+        raise HTTPException(status_code=422, detail="Buchung nur über Ernte-Annahme / Freigabekette")
+
+    harvest = db.query(HarvestAcceptance).filter(
+        HarvestAcceptance.id == invoice.harvest_acceptance_id,
+        HarvestAcceptance.tenant_id == tenant_id,
+    ).first()
+    if not harvest:
+        raise HTTPException(status_code=404, detail="Ernte-Annahme nicht gefunden")
+
+    if harvest.release_status not in ("final", "credit_note_created", "paid") and harvest.invoice_id != invoice.id:
+        raise HTTPException(
+            status_code=422,
+            detail="API-Buchung ohne endgültige Erntefreigabe ist nicht erlaubt",
         )
-        db.add(buchung_st)
-    
-    # Markiere Gutschrift als gebucht
-    invoice.status = "booked"
-    invoice.updated_at = datetime.now()
-    
-    db.commit()
-    
+
+    customer = None
+    supplier_id = None
+    if harvest.customer_id:
+        customer = db.query(Customer).filter(
+            Customer.id == harvest.customer_id, Customer.tenant_id == tenant_id
+        ).first()
+        supplier_id = (
+            customer.business_partner_id if customer and customer.business_partner_id else harvest.customer_id
+        )
+    if not supplier_id:
+        raise HTTPException(status_code=422, detail="Lieferant an der Annahme fehlt")
+
+    try:
+        require_self_billing_agreement(db, tenant_id, supplier_id)
+        actor = _get_user_id_from_request(request) if request is not None else None
+        HarvestAcceptanceService(db, tenant_id)._book_self_billing_credit_note(
+            invoice,
+            harvest.delivery_date,
+            supplier_id=supplier_id,
+            article_id=getattr(harvest, "article_id", None),
+            posted_by=actor,
+        )
+        db.commit()
+    except DomainError as err:
+        db.rollback()
+        raise HTTPException(status_code=getattr(err, "http_status", 422), detail=str(err)) from err
+
+    refreshed = repo.get_invoice_by_id(invoice_id, tenant_id=tenant_id)
     return {
         "message": "Gutschrift gebucht",
-        "buchung_id": buchung.id,
-        "belegnr": buchung.belegnr,
-        "betrag": float(buchung.betrag),
+        "buchung_id": getattr(refreshed, "journal_entry_id", None),
+        "belegnr": f"SB-{invoice.invoice_number}",
+        "docflow_header_id": getattr(refreshed, "docflow_header_id", None),
+        "betrag": float(invoice.total_gross_amount_eur),
     }
 
 

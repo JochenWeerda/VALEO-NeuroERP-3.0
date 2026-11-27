@@ -1376,11 +1376,11 @@ Personenkonto auch fuer Genossenschaft (Auseinandersetzungsguthaben § 73 GenG: 
 ## M7-LIZENZPRUEFUNG-20261126 — zur Abnahme, Claude Code (M7)
 Lizenzpruefung: app/core/lizenz.py (Ed25519-Signatur ueber kanonisches JSON: Kunde, Module, Mandanten, Ablauf), ModuleRegistry.is_enabled schneidet in STAGING/PRODUCTION (VALEO_UMGEBUNG ausdruecklich) mit der Lizenz; ohne gueltige Lizenz nur core. Herstellerwerkzeug scripts/lizenz_ausstellen.py (privater Schluessel nie im Repo). Produktions-Compose setzt VALEO_UMGEBUNG=production und verlangt Lizenzdatei + oeffentlichen Schluessel.
 
-## SELF-BILLING-ATOMIC-M3-KONSOLIDIERUNG — reserviert, Cursor Cloud (Claim-Owner)
+## SELF-BILLING-ATOMIC-M3-KONSOLIDIERUNG — in Arbeit, Cursor Cloud (Claim-Owner)
 
 Meilenstein: M3. Lead-Plan freigegeben (Agent-Store `docs/self-billing-atomic-plan.md`).
 **Owner:** Cursor Cloud (User: Claude/Cursor uebernimmt; Codex nicht aktiv am Slice).
-**Stand:** reserviert 2026-11-27.
+**Stand:** in Arbeit 2026-11-27; Branch `cursor/self-billing-atomic-m3-34fe`.
 **Ziel:** Konsolidierung Self-Billing auf einen kreditorischen Kern (`buche_eingangsrechnung`), Multi-Parameter-Steuer, DocFlow BELEG-052 fuehrend (`purchase_invoice` + Agrar-Erweiterung `SelfBillingInvoice`), endgueltige Freigabe posted+Personenkonto+1 OP, API nur Adapter, Storno Originalkontext, Vereinbarungspflicht (`self_billing_purchase`), DB-Idempotenz.
 **Dateibesitz:** `app/api/v1/endpoints/self_billing.py`, `app/services/harvest_acceptance_service.py` (Self-Billing-Buchungsweg), `modules/agrar/services/tax_profile_service.py`, `modules/agrar/services/harvest_rule_store.py` (`_accounting_context`), `modules/agrar/services/self_billing_service.py`, `modules/agrar/repositories/self_billing_repo.py`, neu `app/services/self_billing_buchung.py`, neu `app/services/self_billing_docflow.py`, Migration Self-Billing-Erweiterung, zugehoerige Tests/QA/Handshake/Workboard.
 **Nicht anfassen:** fremde M3-Personenkonto-Slices ausser Nutzung von `buche_eingangsrechnung`/`personenkonto`; kein Reset Prüfstand.
