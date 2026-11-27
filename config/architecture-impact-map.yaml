@@ -37,6 +37,7 @@ classes:
     globs:
       - "app/services/**"
       - "modules/**/services/**"
+      - "config/architecture-domain-prefixes.yaml"
     contracts:
       - service-inventory
       - architecture-index
@@ -87,11 +88,11 @@ classes:
 
   - id: table-consumer
     description: "Code-Tabellenverbrauch ohne Migration (RLS-Matrix, Lineage)."
+    # Eingabe wie rls_rollout.CODE_ROOTS / rls_domain_matrix: app/, modules/, services/
     globs:
-      - "app/services/**/*.py"
-      - "app/infrastructure/**/*.py"
-      - "app/**/repositories/**/*.py"
+      - "app/**/*.py"
       - "modules/**/*.py"
+      - "services/**/*.py"
     contracts:
       - rls-domain-matrix
       - table-catalog-lineage
@@ -104,14 +105,17 @@ classes:
     register_ids:
       - "RLS-Domaenenmatrix"
       - "Tabellenkatalog (Lineage)"
-    hints: []
+    hints:
+      - "Laerm ok vs. Miss — Generator scannt alle drei CODE_ROOTS dateiweit"
     requires_db: false
     pr232_refs:
       - R3b
 
   - id: baseline-improvement
     description: "Business-Time-/Improvement-Baselines und Ratschen."
+    # check_business_time_usage scannt APP_ROOT.rglob('*.py'); reine Baseline-JSON reicht nicht.
     globs:
+      - "app/**/*.py"
       - "config/*baseline*.json"
       - "config/business_time_usage_baseline.json"
       - "scripts/check_baseline_integrity.py"
@@ -127,12 +131,14 @@ classes:
       - "python scripts/run_improvement_pipelines.py"
       - "python scripts/check_baseline_integrity.py"
     checks_dbfree:
+      - "python scripts/check_business_time_usage.py"
       - "python scripts/check_baseline_integrity.py --base origin/main"
       - "python scripts/run_improvement_pipelines.py"
     register_ids:
       - "Baseline-Integritaet"
       - "Improvement-Pipelines (Godfiles, Paginierung, ...)"
-    hints: []
+    hints:
+      - "Business-Time-Ratsche: bei date.today/datetime.now-Abbau Baseline absenken"
     requires_db: false
     pr232_refs:
       - R1b

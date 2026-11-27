@@ -37,10 +37,10 @@ Ungültige Map (fehlende Pflichtfelder, unbekannte `register_ids`) → `ImpactMa
 | id | PR-232 | requires_db |
 | --- | --- | --- |
 | `api-router` | R2b | nein |
-| `service-stem` | R4a | nein |
+| `service-stem` | R4a (inkl. isoliertes `config/architecture-domain-prefixes.yaml`) | nein |
 | `migration-schema` | R5 (Schema) | **ja** |
-| `table-consumer` | R3b | nein |
-| `baseline-improvement` | R1b | nein |
+| `table-consumer` | R3b (`app/**/*.py`, `modules/**/*.py`, `services/**/*.py` = RLS `CODE_ROOTS`) | nein |
+| `baseline-improvement` | R1b (auch produktives `app/**/*.py`, nicht nur Baseline-JSON) | nein |
 | `frontend-masks` | — | nein |
 | `status-process-studio` | R4b (Hinweis) | Hinweis require_db |
 | `finance-gobd` | — | Hinweis Tests/CI |

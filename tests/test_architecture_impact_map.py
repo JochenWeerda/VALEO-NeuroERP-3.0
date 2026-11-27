@@ -102,7 +102,10 @@ def test_all_map_register_ids_are_known():
         "service_stem.json",
         "migration.json",
         "rls_consumer.json",
+        "rls_finance_steuerschluessel.json",
         "baseline_touch.json",
+        "baseline_api_endpoint.json",
+        "domain_prefixes_only.json",
         "multi_class.json",
         "unmapped_structural.json",
     ],
@@ -144,9 +147,43 @@ def test_api_only_not_migration_schema_db_duty():
     data = _fixture("api_only.json")
     report = match_paths(data["paths"], map_path=MAP_PATH)
     assert "api-router" in report.class_ids
+    assert "baseline-improvement" in report.class_ids
     assert "migration-schema" not in report.class_ids
     assert report.requires_db is False
     assert any("generate_openapi.py --check" in c for c in report.checks_dbfree)
+    assert any("check_business_time_usage.py" in c for c in report.checks_dbfree)
+
+
+def test_baseline_r1b_from_productive_python_endpoint():
+    """PR-232 R1b: date.today-Abbau in Endpoint → Business-Time-Check, nicht nur Baseline-JSON."""
+    report = match_paths(
+        ["app/api/v1/endpoints/self_billing.py"],
+        map_path=MAP_PATH,
+    )
+    assert "baseline-improvement" in report.class_ids
+    assert report.unmapped_structural is False
+    assert "python scripts/check_business_time_usage.py" in report.checks_dbfree
+
+
+def test_rls_r3b_finance_steuerschluessel_is_table_consumer():
+    """PR-232 R3b: app/finance/steuerschluessel.py muss RLS-Matrix triggern."""
+    report = match_paths(["app/finance/steuerschluessel.py"], map_path=MAP_PATH)
+    assert "table-consumer" in report.class_ids
+    assert "RLS-Domaenenmatrix" in report.register_ids
+    assert "python scripts/rls_domain_matrix.py --check" in report.checks_dbfree
+
+
+def test_r4a_isolated_domain_prefixes_triggers_arch_index():
+    """Isolierte Prefix-SoT-Aenderung → Architecture-Index-Check (R4a)."""
+    report = match_paths(
+        ["config/architecture-domain-prefixes.yaml"],
+        map_path=MAP_PATH,
+    )
+    assert report.class_ids == ["service-stem"]
+    assert any(
+        "generate_architecture_index.py --check --require-complete" in c
+        for c in report.checks_dbfree
+    )
 
 
 def test_migration_requires_db():
@@ -172,10 +209,13 @@ def test_union_of_multiple_paths():
 
 
 def test_unmapped_structural_flag():
-    report = match_paths(["app/obscure/new_thing.py"], map_path=MAP_PATH)
+    report = match_paths(
+        ["packages/frontend-web/src/lib/obscure_util.ts"],
+        map_path=MAP_PATH,
+    )
     assert report.unmapped_structural is True
     assert report.class_ids == []
-    assert report.unmapped_paths == ["app/obscure/new_thing.py"]
+    assert report.unmapped_paths == ["packages/frontend-web/src/lib/obscure_util.ts"]
 
 
 def test_non_structural_unmapped_not_flagged():

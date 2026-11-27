@@ -2,11 +2,13 @@
   "paths": [
     "app/api/v1/endpoints/self_billing.py"
   ],
-  "expect_class_ids": ["api-router", "finance-gobd"],
+  "expect_class_ids_contains": ["api-router", "finance-gobd", "baseline-improvement", "table-consumer"],
   "forbid_sole_class": "migration-schema",
   "expect_requires_db": false,
   "expect_checks_dbfree_contains": [
-    "python scripts/generate_openapi.py --check"
+    "python scripts/generate_openapi.py --check",
+    "python scripts/check_business_time_usage.py",
+    "python scripts/rls_domain_matrix.py --check"
   ],
-  "expect_pr232_refs": ["R2b"]
+  "expect_pr232_refs": ["R2b", "R1b", "R3b"]
 }

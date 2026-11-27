@@ -1,0 +1,14 @@
+{
+  "paths": [
+    "app/finance/steuerschluessel.py"
+  ],
+  "expect_class_ids_contains": ["table-consumer", "finance-gobd"],
+  "expect_register_ids_contains": [
+    "RLS-Domaenenmatrix",
+    "Tabellenkatalog (Lineage)"
+  ],
+  "expect_checks_dbfree_contains": [
+    "python scripts/rls_domain_matrix.py --check"
+  ],
+  "expect_pr232_refs_contains": ["R3b"]
+}
