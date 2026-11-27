@@ -91,6 +91,55 @@ describe('ration-optimization helpers (new-code coverage)', () => {
     expect(next.feedMaxFm.f1).toBe(12)
   })
 
+  it('übernimmt relaxation_policy, policy_profile sowie Fix/Unfix/Remove', () => {
+    const withPolicy = applyRationPatch(baseWizard() as never, {
+      relaxation_policy: 'relaxed',
+      policy_profile: 'herd_a',
+      set_feed_min_fm: {},
+    })
+    expect(withPolicy.relaxationPolicy).toBe('relaxed')
+    expect(withPolicy.policyProfile).toBe('herd_a')
+
+    const fixed = applyRationPatch(baseWizard() as never, {
+      fix_feed_fm: { f1: 7, bad: Number.NaN, zero: 0 },
+      add_feed_ids: ['f2'],
+    })
+    expect(fixed.feedMinFm?.f1).toBe(7)
+    expect(fixed.feedMaxFm.f1).toBe(7)
+    expect(fixed.selectedFeedIds.has('f2')).toBe(true)
+
+    const unfixed = applyRationPatch(fixed as never, { unfix_feed_ids: ['f1'] })
+    expect(unfixed.feedMinFm?.f1).toBeUndefined()
+    expect(unfixed.feedMaxFm.f1).toBeUndefined()
+
+    const removed = applyRationPatch(
+      { ...fixed, feedMinFm: { f1: 7, f2: 1 }, feedMaxFm: { f1: 7, f2: 9 }, selectedFeedIds: new Set(['f1', 'f2']) } as never,
+      { remove_feed_ids: ['f2'], set_feed_min_fm: { f3: 0, f4: 5 } },
+    )
+    expect(removed.selectedFeedIds.has('f2')).toBe(false)
+    expect(removed.feedMinFm?.f2).toBeUndefined()
+    expect(removed.feedMinFm?.f3).toBe(0)
+    expect(removed.feedMinFm?.f4).toBe(5)
+
+    const nullProfile = applyRationPatch(baseWizard() as never, { policy_profile: null })
+    expect(nullProfile.policyProfile).toBeNull()
+  })
+
+  it('behandelt fehlende Milch-EP-Felder als 0', () => {
+    expect(
+      getMilkEpExcessKg({
+        forage_only: {},
+        supplemented: { milk_from_protein_kg: 12, milk_from_energy_kg: 10 },
+      }),
+    ).toEqual({ ist: 0, neu: 2 })
+    expect(
+      getMilkEpExcessKg({
+        forage_only: { milk_from_protein_kg: 5 },
+        supplemented: {},
+      }),
+    ).toEqual({ ist: 5, neu: 0 })
+  })
+
   it('rechnet FM/TM-Grenzen in beide Richtungen', () => {
     expect(limitFmToDisplay(undefined, 0.4, 'FM')).toBe('')
     expect(limitFmToDisplay(10, 0.4, 'TM')).toBe(4)

@@ -595,6 +595,52 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'API-Fehler' })))
   })
 
+  it('setzt Kontaminations-/Spülschutz zurück bei Fehler und meldet Busy', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'open',
+      contamination_guard_enabled: false,
+      flush_required: false,
+    }]
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Guard gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const selects = within(edgeSection).getAllByRole('combobox')
+    fireEvent.change(selects[1], { target: { value: '1' } }) // Schutz an
+    await waitFor(() => expect(fixture.patchEdge).toHaveBeenCalled())
+    await waitFor(() => expect(selects[1]).toHaveValue('0'))
+
+    fixture.patchEdge.mockRejectedValueOnce(new Error('Flush gesperrt'))
+    fireEvent.change(selects[2], { target: { value: '1' } }) // Spülcharge nötig
+    await waitFor(() => expect(selects[2]).toHaveValue('0'))
+  })
+
+  it('setzt Knoten-Status zurück bei Fehler', async () => {
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+    }]
+    fixture.patchNode.mockRejectedValueOnce(new Error('Knoten gesperrt'))
+    render(<MaterialflussPage />)
+    selectWarehouse()
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    const statusSelect = within(nodeRow).getByRole('combobox')
+    fireEvent.change(statusSelect, { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.patchNode).toHaveBeenCalled())
+    await waitFor(() => expect(statusSelect).toHaveValue('active'))
+  })
+
   it('lehnt Transfer ohne Zellen und ungültige Kapazität ab', async () => {
     fixture.nodes = [
       { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
