@@ -31,6 +31,10 @@
 
 Lokal in dieser Cloud-VM: kein Postgres/Docker — SQL-Verhaltenstests skippen bis CI/`valeo_probe`. Contract-Mocks sind die Primärnachweise hier; CI muss Migration + Suite fahren.
 
+## CI-Nachzug (Head nach b35a57138)
+
+3. Tabellenkatalog-Drift nach Migration: `docs/admin/table-catalog.{json,md}` aus frischem Schema (CI-Artifact / `generate_table_catalog.py`).
+
 ## CI-Nachzug (Head nach ac3a23afa)
 
 1. Domain-Mapping: `self_billing_buchung` → finance, `self_billing_docflow` → dms-compliance, `self_billing` → agrar (`exact_service_stems` + Index-Regen).
