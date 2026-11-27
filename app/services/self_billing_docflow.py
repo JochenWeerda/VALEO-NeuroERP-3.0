@@ -2,18 +2,24 @@
 
 ``domain_finance.self_billing_invoices`` bleibt Agrar-Erweiterung (Steuerkontext, E-Rechnung,
 Dispute) und verweist auf den DocFlow-Kopf — keine dauerhafte Doppelbelegführung.
+
+Wichtig: Die Anlage hier darf die Aufrufer-Transaktion nicht committen (Erntefreigabe
+läuft in ``begin_nested``). Deshalb kein ``DocflowService.create_document`` /
+``create_snapshot`` (die committen), sondern ``_apply_create`` + ``flush``.
 """
 
 from __future__ import annotations
 
 from decimal import Decimal
-from typing import Any, Optional
+from hashlib import sha256
+from typing import Optional
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.core.belegvertrag import BELEGARTEN
 from app.core.exceptions import ConflictError, ValidationFailedError
-from app.services.beleg_anlage import Position, lege_beleg_an
+from app.services.beleg_anlage import Position, _belegtag
 
 QUELLE = "self_billing"
 ART = "purchase_invoice"
@@ -31,7 +37,11 @@ def lege_self_billing_beleg_an(
     harvest_acceptance_id: Optional[str],
     akteur: str,
 ) -> str:
-    """Legt DocFlow-``purchase_invoice``-Entwurf an; Wiederholung je Annahme/Nummer verhindert."""
+    """Legt DocFlow-``purchase_invoice``-Entwurf an; ohne Session-Commit."""
+    from app.api.v1.schemas.docflow_schemas import DocflowCreateRequest, DocflowLineInput
+    from app.services.docflow_create_command import _apply_create
+    from app.services.docflow_service import DocflowService
+
     if harvest_acceptance_id:
         existing = db.execute(
             text(
@@ -47,31 +57,51 @@ def lege_self_billing_beleg_an(
     else:
         referenz = invoice_number
 
-    # Eine Position mit Netto als Menge*Preis (Menge 1) — Beträge serverseitig
     netto = Decimal(str(net_amount)).quantize(Decimal("0.01"))
     if netto <= 0:
         raise ValidationFailedError("Self-Billing-Netto muss positiv sein.")
 
-    return lege_beleg_an(
-        db,
-        tenant_id,
-        ART,
-        partner_id=supplier_id,
-        quelle=QUELLE,
-        referenz=referenz[:80],
-        entwurf_nr=invoice_number[:40],
-        akteur=akteur or "self_billing",
-        idempotenz=f"self_billing:{tenant_id}:{referenz}",
-        positionen=[
-            Position(
-                artikel_nr="SELF-BILLING",
-                bezeichnung=(description or f"Self-Billing {invoice_number}")[:500],
-                menge=1.0,
-                einzelpreis=float(netto),
-                steuerschluessel=tax_code,
+    idempotenz = f"self_billing:{tenant_id}:{referenz}"
+    variante = BELEGARTEN[ART]
+    anhang = sha256(idempotenz.encode()).hexdigest()[:6]
+    entwurf = f"{invoice_number}"[:72] + f"-{anhang}"
+    partner = (
+        {"supplier_id": supplier_id}
+        if variante.partnerrolle == "lieferant"
+        else {"customer_id": supplier_id}
+    )
+    position = Position(
+        artikel_nr="SELF-BILLING",
+        bezeichnung=(description or f"Self-Billing {invoice_number}")[:500],
+        menge=1.0,
+        einzelpreis=float(netto),
+        steuerschluessel=tax_code,
+    )
+    anfrage = DocflowCreateRequest(
+        doc_type=ART,
+        doc_number=entwurf,
+        status="draft",
+        source_system=QUELLE[:40],
+        source_ref=referenz[:80],
+        currency="EUR",
+        document_date=_belegtag(),
+        idempotency_key=None,  # Aufrufer (Ernte-_run) besitzt Idempotenz; kein create_snapshot-Commit
+        **partner,
+        items=[
+            DocflowLineInput(
+                article_number=position.artikel_nr,
+                description=position.bezeichnung,
+                quantity=position.menge,
+                unit=position.einheit,
+                unit_price=position.einzelpreis if variante.mit_preisen else 0,
+                tax_code=position.steuerschluessel,
             )
         ],
     )
+    service = DocflowService(db, tenant_id, akteur or "self_billing")
+    doc_id = _apply_create(service, anfrage, None)
+    db.flush()
+    return str(doc_id)
 
 
 def verknuepfe_erweiterung(
@@ -100,10 +130,14 @@ def verknuepfe_erweiterung(
             {"id": self_billing_invoice_id, "t": tenant_id},
         ).scalar()
         if current != docflow_header_id:
-            raise ConflictError("Self-Billing-Erweiterung ist bereits mit einem anderen DocFlow-Beleg verknüpft.")
+            raise ConflictError(
+                "Self-Billing-Erweiterung ist bereits mit einem anderen DocFlow-Beleg verknüpft."
+            )
 
 
-def assert_fuehrender_beleg_ist_docflow(db: Session, tenant_id: str, self_billing_invoice_id: str) -> None:
+def assert_fuehrender_beleg_ist_docflow(
+    db: Session, tenant_id: str, self_billing_invoice_id: str
+) -> None:
     """Ratsche: gebuchte Self-Billing-Erweiterung braucht DocFlow-Kopf."""
     row = db.execute(
         text(

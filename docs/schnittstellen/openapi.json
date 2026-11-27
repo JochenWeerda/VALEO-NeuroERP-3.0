@@ -41722,7 +41722,7 @@
         "type": "object"
       },
       "CreditNoteCreateIn": {
-        "description": "Input-Model für Gutschrift-Erstellung.",
+        "description": "Input-Model für Gutschrift-Erstellung (Beträge Decimal; Client-Werte werden serverseitig geprüft).",
         "properties": {
           "harvest_acceptance_id": {
             "title": "Harvest Acceptance Id",
@@ -41766,30 +41766,64 @@
             "title": "Provisional Invoice Number"
           },
           "taxation_type": {
-            "default": "regular",
-            "title": "Taxation Type",
-            "type": "string"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taxation Type"
           },
           "total_gross_amount_eur": {
-            "exclusiveMinimum": 0.0,
-            "title": "Total Gross Amount Eur",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Total Gross Amount Eur"
           },
           "total_net_amount_eur": {
-            "exclusiveMinimum": 0.0,
-            "title": "Total Net Amount Eur",
-            "type": "number"
+            "anyOf": [
+              {
+                "exclusiveMinimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Total Net Amount Eur"
           },
           "total_vat_amount_eur": {
-            "minimum": 0.0,
-            "title": "Total Vat Amount Eur",
-            "type": "number"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Total Vat Amount Eur"
           },
           "vat_rate_percent": {
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Vat Rate Percent",
-            "type": "number"
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Vat Rate Percent"
           }
         },
         "required": [
@@ -184638,23 +184672,44 @@
             "type": "string"
           },
           "total_gross_amount_eur": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Total Gross Amount Eur",
-            "type": "number"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Total Gross Amount Eur"
           },
           "total_net_amount_eur": {
-            "default": 0,
-            "minimum": 0.0,
-            "title": "Total Net Amount Eur",
-            "type": "number"
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Total Net Amount Eur"
           },
           "vat_rate_percent": {
-            "default": 0,
-            "maximum": 100.0,
-            "minimum": 0.0,
-            "title": "Vat Rate Percent",
-            "type": "number"
+            "anyOf": [
+              {
+                "maximum": 100.0,
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "default": "0",
+            "title": "Vat Rate Percent"
           }
         },
         "required": [
@@ -228311,7 +228366,7 @@
     },
     "/api/v1/agrar/self-billing/preview": {
       "post": {
-        "description": "Preview Self-Billing für Ernte-Annahme.\nLiefert Draft mit Beträgen, MwSt, Positionen ohne Persistierung.",
+        "description": "Preview Self-Billing für Ernte-Annahme (ohne Persistierung; Mandantenfilter Pflicht).\nEntwürfe/Vorschau ohne Steuerprofil erlaubt.",
         "operationId": "preview_self_billing_api_v1_agrar_self_billing_preview_post",
         "requestBody": {
           "content": {
@@ -228412,7 +228467,7 @@
     },
     "/api/v1/agrar/self-billing/{invoice_id}/buchung": {
       "post": {
-        "description": "Buche Gutschrift in Buchhaltung (Fibu).\n\nErstellt Buchungssatz:\n- Soll: Lieferantenkonto (Kreditor)\n- Haben: Erlöskonto / Umsatzsteuer",
+        "description": "Adapter auf den kanonischen Self-Billing-Buchungskern.\n\nKeine Umgehung der Erntefreigabe: nur nach endgültiger Freigabe / credit_note_created\nund mit Vereinbarung + Steuerprofil. Bereits verbucht → 409.",
         "operationId": "buche_gutschrift_api_v1_agrar_self_billing__invoice_id__buchung_post",
         "parameters": [
           {
@@ -228701,7 +228756,7 @@
     },
     "/api/v1/agrar/self-billing/{invoice_id}/issue": {
       "post": {
-        "description": "Gibt eine Gutschrift aus (Status: draft → issued).",
+        "description": "Gibt eine Gutschrift aus (Status: draft → issued). Vereinbarung + Steuerprofil Pflicht.",
         "operationId": "issue_invoice_endpoint_api_v1_agrar_self_billing__invoice_id__issue_post",
         "parameters": [
           {

@@ -180,9 +180,10 @@ def _grain_chain(db, seed, checks):
     release_body = FinancialReleaseIn(idempotency_key=uuid4(), expected_calculation_hash=calculation["calculation_hash"])
     svc.release_acceptance(acceptance_id, "final", True, True, actor.id, command=release_body)
     acceptance = db.get(HarvestAcceptance, acceptance_id)
-    invoice = SelfBillingRepositoryImpl(db).get_invoice_by_id(acceptance.invoice_id)
+    billing_repo = SelfBillingRepositoryImpl(db, commit_on_success=False)
+    invoice = billing_repo.get_invoice_by_id(acceptance.invoice_id)
     checks["self_billing"] = invoice is not None and invoice.harvest_acceptance_id == acceptance_id
-    issued = issue_invoice(SelfBillingRepositoryImpl(db), invoice.id, actor.id)
+    issued = issue_invoice(billing_repo, invoice.id, actor.id)
     checks["self_billing"] &= issued.status == "issued"
     checks["tax"] = invoice.total_vat_amount_eur == (invoice.total_net_amount_eur * Decimal("0.07")).quantize(Decimal("0.01"))
     stock = db.get(StockMovement, acceptance.stock_movement_id)
