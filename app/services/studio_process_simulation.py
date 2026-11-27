@@ -185,7 +185,10 @@ def _grain_chain(db, seed, checks):
     checks["self_billing"] = invoice is not None and invoice.harvest_acceptance_id == acceptance_id
     issued = issue_invoice(billing_repo, invoice.id, actor.id)
     checks["self_billing"] &= issued.status == "issued"
-    checks["tax"] = invoice.total_vat_amount_eur == (invoice.total_net_amount_eur * Decimal("0.07")).quantize(Decimal("0.01"))
+    from decimal import ROUND_HALF_UP
+    checks["tax"] = invoice.total_vat_amount_eur == (
+        invoice.total_net_amount_eur * Decimal("0.07")
+    ).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     stock = db.get(StockMovement, acceptance.stock_movement_id)
     checks["stock"] = stock.quantity == Decimal("10000") and stock.new_stock - stock.previous_stock == stock.quantity
     fin = FinanceTransactionService(db, seed)

@@ -8,7 +8,7 @@ Idempotenz: vorhandenes journal_entry_id / Unique je Annahme.
 from __future__ import annotations
 
 from datetime import date
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import Any, Optional
 
 from sqlalchemy import text
@@ -18,6 +18,8 @@ from app.core.business_time import business_today
 from app.core.exceptions import ConflictError, ValidationFailedError
 from app.finance.steuerschluessel import Steuerklaerung, Vorsteuergruppe
 from app.services.finance_eingangsrechnung_buchung import buche_eingangsrechnung, summen
+
+_CENT = Decimal("0.01")
 
 
 def _as_date(value: Any) -> date:
@@ -33,15 +35,20 @@ def build_vorsteuergruppen_from_resolved(
     *,
     netto: Decimal,
 ) -> list[Vorsteuergruppe]:
-    """Baut Vorsteuergruppen aus dem Multi-Parameter-Resolver (Stichtag schon geprüft)."""
+    """Baut Vorsteuergruppen aus dem Multi-Parameter-Resolver (Stichtag schon geprüft).
+
+    Rundung: ``ROUND_HALF_UP`` wie ``app.finance.steuerschluessel`` und
+    ``harvest_calculator.round_money`` — sonst scheitert die Betragsratsche
+    (z. B. 5417.50 × 7 % → 379.23 vs. Banker's 379.22).
+    """
     satz = Decimal(str(resolved["rate"]))
     aufwand = resolved.get("expense_account")
     if not aufwand:
         raise ValidationFailedError(
             f"Steuerschlüssel {resolved['tax_code']} hat kein Aufwandskonto."
         )
-    netto_q = Decimal(str(netto)).quantize(Decimal("0.01"))
-    steuer = (netto_q * satz / Decimal("100")).quantize(Decimal("0.01"))
+    netto_q = Decimal(str(netto)).quantize(_CENT, rounding=ROUND_HALF_UP)
+    steuer = (netto_q * satz / Decimal("100")).quantize(_CENT, rounding=ROUND_HALF_UP)
     return [
         Vorsteuergruppe(
             tax_code=str(resolved["tax_code"]),
