@@ -9,7 +9,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi import HTTPException
 
-from app.api.v1.endpoints import artikel_bestandteile, inventur_piv, mask_registry, rohwarengruppen
+from app.api.v1.endpoints import artikel_bestandteile, inventur_piv, mask_registry, milchvieh_crosssell, rohwarengruppen
+from app.services.einkauf_compat_service import EinkaufCompatService
 from app.services.studio_draft_store import StudioStorageUnavailable
 
 
@@ -154,6 +155,29 @@ def test_rohwarengruppen_list_active_filter():
     assert listed[0].gruppe_nr == "GE"
     sql = str(db.execute.call_args.args[0])
     assert "tenant_id" in sql
+
+
+def test_milchvieh_produktgruppen_flacht_summary():
+    db = MagicMock()
+    with patch("app.api.v1.endpoints.milchvieh_crosssell.MilchviehCrossSellService") as svc_cls:
+        svc_cls.return_value.summary.return_value = {"produktgruppen": [{"name": "Dipp"}, {"name": "KF"}]}
+        assert milchvieh_crosssell.crosssell_produktgruppen(db=db) == [{"name": "Dipp"}, {"name": "KF"}]
+        svc_cls.return_value.summary.return_value = {"produktgruppen": "x"}
+        assert milchvieh_crosssell.crosssell_produktgruppen(db=db) == []
+        svc_cls.return_value.summary.return_value = "bad"
+        assert milchvieh_crosssell.crosssell_produktgruppen(db=db) == []
+
+
+def test_einkauf_compat_list_suppliers_and_invalidate():
+    db = MagicMock()
+    row = SimpleNamespace(_mapping={"id": "s1", "name": "Hof", "tenant_id": "t1", "is_active": True})
+    db.execute.return_value.fetchall.return_value = [row]
+    svc = EinkaufCompatService(db, "t1")
+    out = svc.list_suppliers(search="Hof", is_active=True, limit=10, skip=0)
+    assert out["total"] == 1
+    assert out["items"][0]["name"] == "Hof"
+    with patch("app.core.cache.cache_delete_prefix", side_effect=RuntimeError("cache down")):
+        svc._invalidate()  # Fehler wird geschluckt
 
 
 def test_inventur_piv_list_and_get_404():

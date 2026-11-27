@@ -496,6 +496,43 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Sync fehlgeschlagen' })))
   })
 
+  it('speichert leeres Silozellen-Layout und Knoten-Status-Erfolg', async () => {
+    fixture.cells = [{
+      id: 'cell-a',
+      cell_code: 'CELL-A',
+      name: 'Testzelle',
+      qs_status: 'frei',
+      layout_x: '1',
+      layout_y: '2',
+    }]
+    fixture.nodes = [{
+      id: 'node-a',
+      code: 'NODE-A',
+      name: 'A',
+      node_type: 'intake',
+      status: 'active',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    const cellRow = screen.getByRole('row', { name: /CELL-A/ })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_x'), { target: { value: '' } })
+    fireEvent.change(within(cellRow).getByPlaceholderText('layout_y'), { target: { value: '' } })
+    fireEvent.click(within(cellRow).getByRole('button', { name: 'Position speichern' }))
+    await waitFor(() =>
+      expect(fixture.patchCell).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({ layout_x: null, layout_y: null }),
+        }),
+      ),
+    )
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Silozellen-Layout gespeichert' })))
+
+    const nodeRow = screen.getByRole('row', { name: /NODE-A/ })
+    fireEvent.change(within(nodeRow).getByRole('combobox'), { target: { value: 'maintenance' } })
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Knoten-Status gespeichert' })))
+  })
+
   it('lehnt ungültiges Knoten-Layout ab und meldet VK-Fehler', async () => {
     fixture.cells = [{
       id: 'cell-a',

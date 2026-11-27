@@ -386,4 +386,17 @@ describe('WorkspaceCompositionHost', () => {
     expect(screen.getByTestId('workspace-composition-host-skipped')).toBeInTheDocument()
     expect(screen.queryByTestId('workspace-composition-host')).not.toBeInTheDocument()
   })
+
+  it('Preview: Reset und Authoring-Dialog decken Speichern/Zurücksetzen ab', async () => {
+    const user = userEvent.setup()
+    renderHost(<WorkspaceCompositionPreviewPage />)
+
+    await user.click(screen.getByTestId('workspace-composition-toggle-inbox').querySelector('input')!)
+    await user.click(screen.getByTestId('workspace-composition-reset'))
+    expect(screen.getByText(/Zurückgesetzt auf Fixture/i)).toBeInTheDocument()
+
+    await user.click(screen.getByTestId('workspace-composition-open-authoring-dialog'))
+    expect(screen.getByTestId('workspace-composition-authoring-dialog')).toBeInTheDocument()
+  })
 })
+
