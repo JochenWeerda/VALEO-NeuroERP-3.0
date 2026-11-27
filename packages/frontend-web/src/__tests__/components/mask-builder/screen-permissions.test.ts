@@ -311,4 +311,37 @@ describe('studio workbench permission prefixes (M2 open routes)', () => {
       'agribusiness.field_service.create',
     ])
   })
+
+  it('deckt Manager-/Admin-Alternativrollen und fehlende scopes/roles ab', () => {
+    const bare = { sub: 'x', name: 'X', email: 'x@example.invalid', exp: 9 } as User
+    expect(getScreenPermissions(screen, bare)).toEqual([])
+
+    const mgr = user([], ['manager'])
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), mgr)).toEqual(['agrar.rohwarengruppe.create'])
+    expect(getScreenPermissions(action('kontrakte.mengenzeitraum.create'), mgr)).toEqual(['kontrakte.mengenzeitraum.create'])
+    expect(getScreenPermissions(action('finance.zinsabrechnung.create'), mgr)).toEqual(['finance.zinsabrechnung.create'])
+    expect(getScreenPermissions(action('admin.ai_approvals.read'), mgr)).toEqual(['admin.ai_approvals.read'])
+    expect(getScreenPermissions(action('admin.command_monitor.read'), mgr)).toEqual(['admin.command_monitor.read'])
+    expect(getScreenPermissions(action('admin.admin_suite.read'), mgr)).toEqual(['admin.admin_suite.read'])
+    expect(getScreenPermissions(action('lager.materialfluss.read'), mgr)).toEqual(['lager.materialfluss.read'])
+    expect(getScreenPermissions(action('agrar.schlagkartei.read'), mgr)).toEqual(['agrar.schlagkartei.read'])
+    expect(getScreenPermissions(action('personal.mitarbeiter.create'), mgr)).toEqual(['personal.mitarbeiter.create'])
+    expect(getScreenPermissions(action('service.anfrage.create'), mgr)).toEqual(['service.anfrage.create'])
+
+    expect(getScreenPermissions(action('agrar.rohwarengruppe.create'), user([], ['LAGER_ADMIN']))).toEqual([
+      'agrar.rohwarengruppe.create',
+    ])
+    expect(getScreenPermissions(action('kontrakte.zuabschlag.create'), user([], ['KONTRAKT_ADMIN']))).toEqual([
+      'kontrakte.zuabschlag.create',
+    ])
+    expect(getScreenPermissions(action('finance.kreditor.create'), user([], ['FINANCE_ADMIN']))).toEqual([
+      'finance.kreditor.create',
+    ])
+    expect(getScreenPermissions(action('lager.materialfluss.read'), user([], ['LAGER_LESEN']))).toEqual([
+      'lager.materialfluss.read',
+    ])
+    expect(getScreenPermissions(action('agrar.settlement.read'), user([], ['AGRAR_LESEN']))).toEqual([
+      'agrar.settlement.read',
+    ])
+  })
 })
