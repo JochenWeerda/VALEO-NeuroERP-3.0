@@ -218,6 +218,7 @@ def create_credit_note(
         total_vat_amount_eur=create_input.total_vat_amount_eur,
         total_gross_amount_eur=create_input.total_gross_amount_eur,
         vat_rate_percent=create_input.vat_rate_percent,
+        taxation_type=taxation_type,
         mandatory_texts=mandatory_texts,
         created_at=datetime.now(),
         created_by=create_input.created_by,

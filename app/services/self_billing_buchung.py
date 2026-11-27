@@ -139,13 +139,18 @@ def buche_self_billing(
         text(
             "UPDATE domain_finance.self_billing_invoices SET "
             "journal_entry_id = :jid, taxation_type = :tt, tax_context = CAST(:ctx AS jsonb), "
-            "status = 'booked', updated_at = NOW() "
+            "vat_rate_percent = :rate, status = 'booked', updated_at = NOW() "
             "WHERE id = :id AND tenant_id = :t AND journal_entry_id IS NULL"
         ),
         {
             "jid": journal_id,
             "tt": tax_context.get("taxation_type"),
             "ctx": __import__("json").dumps(tax_context, default=str),
+            "rate": (
+                Decimal(str(tax_context["rate"])).quantize(_CENT)
+                if tax_context.get("rate") is not None
+                else Decimal(str(getattr(invoice, "vat_rate_percent", 0) or 0)).quantize(_CENT)
+            ),
             "id": str(invoice.id),
             "t": tenant_id,
         },
@@ -163,6 +168,8 @@ def buche_self_billing(
         invoice.journal_entry_id = journal_id
     if hasattr(invoice, "taxation_type"):
         invoice.taxation_type = tax_context.get("taxation_type")
+    if hasattr(invoice, "vat_rate_percent") and tax_context.get("rate") is not None:
+        invoice.vat_rate_percent = Decimal(str(tax_context["rate"])).quantize(_CENT)
     # Entry number uses AP- prefix from buche_eingangsrechnung; keep source self_billing via quelle.
     return journal_id, used
 

@@ -618,7 +618,9 @@ def test_year_boundary_uses_historical_tax_profile_and_key(case):
             tenant_id=c.tenant,
         )
     )
+    # Lieferdatum + Vertragsregel müssen vor ready/bind zur Annahme passen
     c.acceptance.delivery_date = date(2024, 6, 15)
+    c.terms = c.terms.model_copy(update={"valid_from": date(2020, 1, 1)})
     c.db.commit()
     ready(c)
     result = calculate(c)
@@ -735,9 +737,9 @@ def test_concurrent_booking_second_session_conflicts(require_db):
                 text(
                     "INSERT INTO domain_inventory.harvest_acceptances "
                     "(id, tenant_id, acceptance_number, delivery_date, customer_id, "
-                    " operator_id, status, release_status) "
+                    " operator_id, release_status) "
                     "VALUES (:id, :t, 'CONC', DATE '2026-01-15', :s, "
-                    " 'concurrent-op', 'draft', 'final')"
+                    " 'concurrent-op', 'final')"
                 ),
                 {"id": ha_id, "t": tenant, "s": supplier},
             )
@@ -941,7 +943,8 @@ def test_api_buchung_without_final_release_is_blocked(case):
             )
         )
     assert exc.value.status_code == 422
-    assert "Freigabe" in str(exc.value.detail)
+    detail = str(exc.value.detail).lower()
+    assert "freigabe" in detail, detail
 
 
 def test_api_create_credit_note_alone_does_not_post_journal(case):

@@ -38,19 +38,22 @@ def ensure_self_billing_purchase_ready(
     from uuid import uuid4
 
     stichtag = valid_from or date(2020, 1, 1)
+    creditor = f"7{abs(hash(partner_id)) % 100000:05d}"[:6]
     db.execute(
         text(
             "INSERT INTO domain_crm.business_partners "
-            "(partner_id, tenant_id, partner_number, name_1, is_supplier, status) "
-            "VALUES (:id, :t, :nr, :name, true, 'active') "
+            "(partner_id, tenant_id, partner_number, name_1, is_supplier, status, creditor_account) "
+            "VALUES (:id, :t, :nr, :name, true, 'active', :cred) "
             "ON CONFLICT (partner_id) DO UPDATE SET "
-            "tenant_id = EXCLUDED.tenant_id, is_supplier = true, status = 'active'"
+            "tenant_id = EXCLUDED.tenant_id, is_supplier = true, status = 'active', "
+            "creditor_account = COALESCE(domain_crm.business_partners.creditor_account, EXCLUDED.creditor_account)"
         ),
         {
             "id": partner_id,
             "t": tenant_id,
             "nr": f"SB-{partner_id.replace('-', '')[:12]}",
             "name": partner_name,
+            "cred": creditor,
         },
     )
     db.execute(
@@ -229,17 +232,19 @@ def resolve_self_billing_tax_code(
             return is_p24
         if taxation_type == "small_business":
             return (not is_p24) and satz == 0
-        # regular: Eingangskey ohne §24; article_tax_class kann Satz andeuten (reduced/standard)
+        # regular: Eingangskey ohne §24; Nullsatz nur bei expliziter Steuerklasse zero
         if is_p24:
             return False
+        if satz == 0:
+            return article_tax_class in ("zero", "0", "steuerfrei")
         if article_tax_class in ("reduced", "7", "ermäßigt") and satz == Decimal("7"):
             return True
         if article_tax_class in ("standard", "19", "voll") and satz == Decimal("19"):
             return True
-        if article_tax_class in ("zero", "0", "steuerfrei") and satz == 0:
-            return True
-        # ohne article_tax_class: reduzierter Eingangskey bevorzugt, sonst erster passender
-        return not is_p24
+        if article_tax_class in ("zero", "0", "steuerfrei"):
+            return False
+        # ohne article_tax_class: jeder positive Nicht-§24-Eingangskey (7% wird unten bevorzugt)
+        return True
 
     candidates = [r for r in rows if _match(r)]
     if preferred:

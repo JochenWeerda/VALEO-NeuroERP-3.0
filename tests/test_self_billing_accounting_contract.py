@@ -56,6 +56,51 @@ def test_agreement_required():
         require_self_billing_agreement(db, "own", "sup-1")
 
 
+def test_resolve_regular_ignores_zero_rate_keys():
+    """Regular darf den Nullsatz-Schlüssel nicht greifen (sonst vat_rate_percent=0)."""
+    db = MagicMock()
+    db.execute.side_effect = [
+        MagicMock(fetchall=MagicMock(return_value=[])),
+        MagicMock(
+            mappings=MagicMock(
+                return_value=MagicMock(
+                    all=MagicMock(
+                        return_value=[
+                            {
+                                "code": "0",
+                                "steuersatz": Decimal("0"),
+                                "debit_account": None,
+                                "expense_account": "3300",
+                                "par_24_ustg": False,
+                                "reverse_charge": False,
+                            },
+                            {
+                                "code": "8",
+                                "steuersatz": Decimal("7"),
+                                "debit_account": "1571",
+                                "expense_account": "3300",
+                                "par_24_ustg": False,
+                                "reverse_charge": False,
+                            },
+                        ]
+                    )
+                )
+            )
+        ),
+    ]
+    resolved = resolve_self_billing_tax_code(
+        db,
+        tenant_id="own",
+        supplier_id="sup",
+        taxation_type="regular",
+        article_tax_class=None,
+        transaction_type=TRANSACTION_TYPE_SELF_BILLING,
+        delivery_date=date(2026, 6, 1),
+    )
+    assert resolved["tax_code"] == "8"
+    assert resolved["rate"] == Decimal("7")
+
+
 def test_resolve_ustg24_only_p24_keys():
     db = MagicMock()
     db.execute.side_effect = [
