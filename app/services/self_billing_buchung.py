@@ -150,6 +150,19 @@ def buche_self_billing(
             "t": tenant_id,
         },
     )
+    # Raw SQL umgeht die Identity-Map — ORM und Aufrufer-Objekt nachziehen,
+    # sonst sieht grain.v1/studio noch status=draft und postet das Journal doppelt.
+    from app.infrastructure.models import SelfBillingInvoice
+
+    orm = db.get(SelfBillingInvoice, str(invoice.id))
+    if orm is not None:
+        db.refresh(orm)
+    if hasattr(invoice, "status"):
+        invoice.status = "booked"
+    if hasattr(invoice, "journal_entry_id"):
+        invoice.journal_entry_id = journal_id
+    if hasattr(invoice, "taxation_type"):
+        invoice.taxation_type = tax_context.get("taxation_type")
     # Entry number uses AP- prefix from buche_eingangsrechnung; keep source self_billing via quelle.
     return journal_id, used
 

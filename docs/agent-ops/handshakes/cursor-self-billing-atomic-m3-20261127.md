@@ -31,6 +31,11 @@
 
 Lokal in dieser Cloud-VM: kein Postgres/Docker — SQL-Verhaltenstests skippen bis CI/`valeo_probe`. Contract-Mocks sind die Primärnachweise hier; CI muss Migration + Suite fahren.
 
+## CI-Nachzug (Head nach ac3a23afa)
+
+1. Domain-Mapping: `self_billing_buchung` → finance, `self_billing_docflow` → dms-compliance, `self_billing` → agrar (`exact_service_stems` + Index-Regen).
+2. Studio grain.v1: Freigabe bucht bereits (`booked` + Journal posted) — Simulation akzeptiert gebuchten Status, postet Drafts nur nach; ORM nach Raw-SQL-Update refreshen.
+
 ## Merge
 
 CI am Head abwarten → **Claude Admin-Merge** („bereit zum Merge, Head \<sha\>”). Kein Self-Merge.

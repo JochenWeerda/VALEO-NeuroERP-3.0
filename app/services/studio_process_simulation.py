@@ -183,8 +183,14 @@ def _grain_chain(db, seed, checks):
     billing_repo = SelfBillingRepositoryImpl(db, commit_on_success=False)
     invoice = billing_repo.get_invoice_by_id(acceptance.invoice_id)
     checks["self_billing"] = invoice is not None and invoice.harvest_acceptance_id == acceptance_id
-    issued = issue_invoice(billing_repo, invoice.id, actor.id)
-    checks["self_billing"] &= issued.status == "issued"
+    # M3: Freigabe bucht bereits (Status booked + Journal posted). Nur Drafts separat ausgeben.
+    if invoice is not None and invoice.status == "draft":
+        issued = issue_invoice(billing_repo, invoice.id, actor.id)
+        checks["self_billing"] &= issued.status == "issued"
+    elif invoice is not None:
+        checks["self_billing"] &= (
+            invoice.status == "booked" and getattr(invoice, "journal_entry_id", None) is not None
+        )
     from decimal import ROUND_HALF_UP
     checks["tax"] = invoice.total_vat_amount_eur == (
         invoice.total_net_amount_eur * Decimal("0.07")
@@ -195,7 +201,9 @@ def _grain_chain(db, seed, checks):
     journal = db.query(JournalEntry).filter_by(tenant_id=seed, reference=invoice.invoice_number).one_or_none()
     checks["ledger"] = journal is not None
     if journal is not None:
-        fin.post(journal.id, actor.id)
+        # M3: buche_self_billing postet bereits; Drafts hier nachziehen.
+        if journal.status == "draft":
+            fin.post(journal.id, actor.id)
         lines = db.query(JournalEntryLine).filter_by(journal_entry_id=journal.id).all()
         checks["ledger"] &= journal.status == "posted" and sum(line.debit_amount for line in lines) == sum(line.credit_amount for line in lines)
         tax_id = fin.account_id_for_number("1571")
