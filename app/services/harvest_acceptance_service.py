@@ -668,16 +668,20 @@ class HarvestAcceptanceService:
 
         # Erstelle Self-Billing Gutschrift (wenn gewünscht und final)
         if create_credit_note and release_status == "final" and not obj.invoice_id:
-            if not obj.total_gross_amount_eur:
-                raise ValidationFailedError("Cannot create credit note: total_gross_amount_eur is not set. Please calculate settlement first.")
-
-            vat_rate_percent = Decimal("0")
-            if obj.vat_rate_percent is None:
-                raise ValidationFailedError("Expliziter Steuersatz fuer Self-Billing fehlt.")
-            vat_rate_percent = obj.vat_rate_percent
+            if obj.total_net_amount_eur is None:
+                raise ValidationFailedError(
+                    "Cannot create credit note: total_net_amount_eur is not set. Please calculate settlement first."
+                )
 
             billing_repo = SelfBillingRepositoryImpl(self.db, commit_on_success=False)
             from app.services.number_range_service import NumberRangeService
+            from decimal import ROUND_HALF_UP
+            from modules.agrar.services.tax_profile_service import (
+                TRANSACTION_TYPE_SELF_BILLING,
+                require_self_billing_agreement,
+                resolve_self_billing_tax_code,
+            )
+
             try:
                 invoice_number = NumberRangeService(self.db).next_number("self_billing", self.tenant_id)
             except ValueError as error:
@@ -685,18 +689,6 @@ class HarvestAcceptanceService:
             # Leave room for SB- and the canonical STORNO- prefix in the 20-char journal field.
             if len(invoice_number) > 10:
                 raise ValidationFailedError("Self-Billing-Nummernkreis muss hoechstens 10 Zeichen liefern.")
-            credit_note_input = CreditNoteCreate(
-                invoice_number=invoice_number,
-                tenant_id=self.tenant_id,
-                harvest_acceptance_id=acceptance_id,
-                total_net_amount_eur=obj.total_net_amount_eur or Decimal("0"),
-                total_vat_amount_eur=obj.total_vat_amount_eur or Decimal("0"),
-                total_gross_amount_eur=obj.total_gross_amount_eur,
-                vat_rate_percent=vat_rate_percent,
-                created_by=user_id,
-            )
-
-            from modules.agrar.services.tax_profile_service import require_self_billing_agreement
 
             customer = None
             supplier_id = None
@@ -718,6 +710,46 @@ class HarvestAcceptanceService:
                 tenant_id=self.tenant_id,
                 effective_date=obj.delivery_date,
                 require_profile=True,
+            )
+            # Belegsteuer = kanonischer Resolver (nicht Artikel-MWSt allein), sonst
+            # widerspricht die Betragsratsche bei §24 / §19 / Kleinunternehmer.
+            article_tax_class = None
+            if taxation_type == "regular" and obj.vat_rate_percent is not None:
+                rate = Decimal(str(obj.vat_rate_percent))
+                if rate == Decimal("19"):
+                    article_tax_class = "standard"
+                elif rate == Decimal("7"):
+                    article_tax_class = "reduced"
+                elif rate == 0:
+                    article_tax_class = "zero"
+            resolved = resolve_self_billing_tax_code(
+                self.db,
+                tenant_id=self.tenant_id,
+                supplier_id=supplier_id,
+                taxation_type=taxation_type,
+                article_tax_class=article_tax_class,
+                transaction_type=TRANSACTION_TYPE_SELF_BILLING,
+                delivery_date=obj.delivery_date,
+            )
+            netto = Decimal(str(obj.total_net_amount_eur)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            vat_rate_percent = Decimal(str(resolved["rate"]))
+            total_vat = (netto * vat_rate_percent / Decimal("100")).quantize(
+                Decimal("0.01"), rounding=ROUND_HALF_UP
+            )
+            total_gross = (netto + total_vat).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            obj.total_vat_amount_eur = total_vat
+            obj.total_gross_amount_eur = total_gross
+            obj.vat_rate_percent = vat_rate_percent
+
+            credit_note_input = CreditNoteCreate(
+                invoice_number=invoice_number,
+                tenant_id=self.tenant_id,
+                harvest_acceptance_id=acceptance_id,
+                total_net_amount_eur=netto,
+                total_vat_amount_eur=total_vat,
+                total_gross_amount_eur=total_gross,
+                vat_rate_percent=vat_rate_percent,
+                created_by=user_id,
             )
 
             invoice = _create_credit_note_svc(billing_repo, credit_note_input, taxation_type=taxation_type)
@@ -774,10 +806,18 @@ class HarvestAcceptanceService:
         taxation_type = get_taxation_type_for_supplier(
             self.db, supplier_id, self.tenant_id, delivery_date, require_profile=True
         )
-        # article_tax_class: optionaler Resolver-Parameter (Stammdaten-Spalte noch nicht kanonisch);
-        # Freigabekontext kann ihn später setzen. Kein riskantes Schema-Probe in der Buchungstransaktion.
+        # Align mit Freigabe: regular anhand Beleg-/Artikel-Satz; sonst Profil allein.
         article_tax_class = None
-        _ = article_id  # für Signatur/Erweiterbarkeit behalten
+        inv_rate = getattr(invoice, "vat_rate_percent", None)
+        if taxation_type == "regular" and inv_rate is not None:
+            rate = Decimal(str(inv_rate))
+            if rate == Decimal("19"):
+                article_tax_class = "standard"
+            elif rate == Decimal("7"):
+                article_tax_class = "reduced"
+            elif rate == 0:
+                article_tax_class = "zero"
+        _ = article_id  # Signatur/Erweiterbarkeit
 
         resolved = resolve_self_billing_tax_code(
             self.db,

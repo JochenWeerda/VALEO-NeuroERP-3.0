@@ -349,6 +349,25 @@ def generate_einvoice_xrechnung(
         <cbc:TaxInclusiveAmount currencyID="EUR">{invoice.total_gross_amount_eur}</cbc:TaxInclusiveAmount>
         <cbc:PayableAmount currencyID="EUR">{invoice.total_gross_amount_eur}</cbc:PayableAmount>
     </cac:LegalMonetaryTotal>
+{''.join(
+        f'''
+    <cac:InvoiceLine>
+        <cbc:ID>{idx}</cbc:ID>
+        <cbc:InvoicedQuantity unitCode="{(item.get('unit') or 'C62')}">{item.get('quantity', 1)}</cbc:InvoicedQuantity>
+        <cbc:LineExtensionAmount currencyID="EUR">{item.get('line_net', invoice.total_net_amount_eur)}</cbc:LineExtensionAmount>
+        <cac:Item>
+            <cbc:Name>{(item.get('description') or 'Position')}</cbc:Name>
+            <cac:ClassifiedTaxCategory>
+                <cbc:ID>S</cbc:ID>
+                <cbc:Percent>{item.get('vat_rate', invoice.vat_rate_percent)}</cbc:Percent>
+            </cac:ClassifiedTaxCategory>
+        </cac:Item>
+        <cac:Price>
+            <cbc:PriceAmount currencyID="EUR">{item.get('unit_price', item.get('line_net', invoice.total_net_amount_eur))}</cbc:PriceAmount>
+        </cac:Price>
+    </cac:InvoiceLine>'''
+        for idx, item in enumerate(line_items or [{"description": "Self-Billing", "quantity": 1, "unit": "C62", "unit_price": invoice.total_net_amount_eur, "line_net": invoice.total_net_amount_eur, "vat_rate": invoice.vat_rate_percent}], start=1)
+    )}
 </Invoice>"""
     
     return xml

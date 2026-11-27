@@ -60,8 +60,9 @@ def build_xrechnung_xml(
         "urn:cen.eu:en16931:2017#conformant#urn:factur-x.eu:1p0:extended"
     )
     doc.header.id = invoice.invoice_number
-    doc.header.type_code = "380"  # Rechnung; 381 = Gutschrift
-    doc.header.name = "RECHNUNG"
+    # Self-Billing / Gutschriftverfahren: UNTDID 1001 code 389 (nicht 380 Handelsrechnung).
+    doc.header.type_code = "389"
+    doc.header.name = "SELF-BILLING"
     doc.header.issue_date_time = invoice.created_at.date() if invoice.created_at else date.today()
     if hasattr(doc.header, "languages"):
         doc.header.languages.add("de")

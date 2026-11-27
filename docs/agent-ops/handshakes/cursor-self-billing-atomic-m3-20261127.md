@@ -40,6 +40,13 @@ Lokal in dieser Cloud-VM: kein Postgres/Docker — SQL-Verhaltenstests skippen b
 1. Domain-Mapping: `self_billing_buchung` → finance, `self_billing_docflow` → dms-compliance, `self_billing` → agrar (`exact_service_stems` + Index-Regen).
 2. Studio grain.v1: Freigabe bucht bereits (`booked` + Journal posted) — Simulation akzeptiert gebuchten Status, postet Drafts nur nach; ORM nach Raw-SQL-Update refreshen.
 
+## Lead-Auftrag A + D (P0-Nachweise)
+
+- Freigabe: Beleg-VAT aus Multi-Param-Resolver (Align §24/19/Kleinunternehmer).
+- Postgres-Verhalten: `tests/test_self_billing_m3_verhalten.py` (8 Punkte).
+- E-Rechnung: Typ 389 + EN16931-Mindest-UBL; drafthorse `type_code=389`.
+- Auftrag D: Business-Time-Baseline — Entfernung von 2× `date.today` in `self_billing.py` nach Umstellung auf `business_today` (Ratsche **verschärft**, keine Absenkung).
+
 ## Merge
 
 CI am Head abwarten → **Claude Admin-Merge** („bereit zum Merge, Head \<sha\>”). Kein Self-Merge.
