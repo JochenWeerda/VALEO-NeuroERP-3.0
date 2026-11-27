@@ -1597,7 +1597,7 @@
     "app/api/v1/endpoints/financial_reports.py:178",
     "app/api/v1/endpoints/financial_reports.py:282",
     "app/api/v1/endpoints/financial_reports.py:325",
-    "app/finance/steuerschluessel.py:281"
+    "app/finance/steuerschluessel.py:290"
    ],
    "daten": {
     "zeilen": 49,
@@ -2826,7 +2826,7 @@
     "app/api/v1/endpoints/compat.py:1593"
    ],
    "gemeinsam_stellen": [
-    "app/finance/steuerschluessel.py:281"
+    "app/finance/steuerschluessel.py:290"
    ],
    "daten": {
     "zeilen": 79,
