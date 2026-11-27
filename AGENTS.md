@@ -78,15 +78,19 @@ Runbook: [Gemeinsamer Testpruefstand](docs/quality-assurance/test-database-resou
 
 ### Cloud-Agenten ohne lokalen Pruefstand
 
-Cursor-Cloud-VMs haben typischerweise weder Docker noch einen erreichbaren
-`valeo_probe`. Dann gilt verbindlich Alternative A (CI-only Evidence):
+Zuerst Agententyp und Erreichbarkeit der autorisierten Probe pruefen. Nur wenn
+die Probe von der Sitzung aus nicht erreichbar ist (typisch Cursor-Cloud-VM),
+gilt verbindlich Alternative A (CI-only Evidence):
 
 - Keine neue Datenbank oder Container in der Cloud-VM anlegen.
 - Keine Portoeffnung und keine Remote-Zugangsdaten zum Entwicklerhost.
-- PostgreSQL-Verhaltenstests (`needs_live_db`) schreiben und den Nachweis aus
-  den bestehenden GitHub-Actions-Jobs beziehen
+- PostgreSQL-Verhaltenstests (`needs_live_db`) schreiben; Nachweis ueber PR gegen
+  `main`/`develop` und die zugehoerigen Jobs
   (`.github/workflows/pytest-postgres-require-db.yml`, Quality-Gate-Backend).
-- Schema-/Katalog-Drift ueber CI-Artifacts beheben, nicht ueber lokalen Harvest.
+- Pro gefordertem P0-Fall Test-ID, PostgreSQL-Fixture und Ergebnis im verlinkten
+  Lauf belegen; Skip oder fehlende Auswahl laesst den Fall offen.
+- Schema-/Katalog-Drift ueber CI-Artifacts des konkreten PR-Laufs beheben
+  (Artifact-SHA ≠ Checkout-Head), nicht ueber lokalen Harvest.
 - Fehlende lokale Probe ist kein Grund, P0-Postgres-Nachweise auszulassen oder
   herabzustufen.
 

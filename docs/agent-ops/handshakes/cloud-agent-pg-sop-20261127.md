@@ -6,13 +6,19 @@
 
 ## Stand (zur Abnahme, Europe/Berlin)
 
-- Branch: `cursor/cloud-agent-pg-sop-ce0c`
-- SOP: `docs/quality-assurance/cloud-agent-postgres-pruefstand.md`
+- Branch: `cursor/cloud-agent-pg-sop-ce0c` · PR #233
+- SOP: `docs/quality-assurance/cloud-agent-postgres-pruefstand.md` (v1.1 nach Lead REQUEST CHANGES)
 - Querverweise: `AGENTS.md`, `docs/agent-ops/session-start-checklist.md`,
   `docs/quality-assurance/pruefstand-datenbank.md`,
   `docs/quality-assurance/test-database-resource-policy-20261001.md`
 - Slice-YAML: `docs/agent-ops/slices/CLOUD-AGENT-PG-SOP.yaml`
 - Workboard: `CLOUD-AGENT-PG-SOP` → zur Abnahme (kein Self-Merge)
+
+## Review-Nachzug (Lead REQUEST CHANGES)
+
+- P1: P0-Evidence pro Fall (Test-ID, Fixture, Ergebnis); Skip/Deselect = offen
+- P2: Erkennung zuerst Agententyp/Probe; PR-Trigger statt Feature-Push;
+  Artifact-SHA = `github.sha` des Laufs, Identitätsmodell `consume_backend_evidence.py`
 
 ## Abnahme
 
