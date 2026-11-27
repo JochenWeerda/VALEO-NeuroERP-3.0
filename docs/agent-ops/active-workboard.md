@@ -13,6 +13,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
+## CLOUD-AGENT-PG-SOP — reserviert, Cursor Cloud (bc-e6058277)
+
+Meilenstein: M0 (CI-/Agent-Betrieb).
+**Owner:** Cursor Cloud `bc-e6058277-d007-5f6b-a9b0-a58684d8ce0c`. **Stand:** reserviert 2026-11-27 (Europe/Berlin). **Ziel:** Alternative A (CI-only Evidence) verbindlich dokumentieren: Cloud-Agenten ohne lokalen `valeo_probe` nutzen GitHub-Actions-Postgres als Prüfstand; Artifact-Consume und Verbotsliste klar; `AGENTS.md` + Session-Checklist um Cloud-Pfad ergänzen. **Dateibesitz:** `docs/quality-assurance/cloud-agent-postgres-pruefstand.md` (neu); Querverweise in `docs/quality-assurance/pruefstand-datenbank.md`, `docs/quality-assurance/test-database-resource-policy-20261001.md`; `AGENTS.md`; `docs/agent-ops/session-start-checklist.md`; Slice-YAML `docs/agent-ops/slices/CLOUD-AGENT-PG-SOP.yaml`; dieses Workboard; optional Handshake. **Abnahme:** SOP mit Erkennung/CI-Evidence/Artifact/Handoff/Verbotsliste; Cloud-Zweig widerspricht Host-`valeo_probe`-Regel nicht; kein Workflow-/Compose-/Secret-Diff; Docs-Gates grün; kein Self-Merge. **Abgrenzung:** kein Workflow-Edit, kein Compose, kein Environment-Postgres; `CLOUD-AGENT-PG-DISPATCH` und ENV bleiben außen; Fachslices PR #232 unberührt. **Risiken:** Doku-Drift vs. Host-Prüfstand-Regel; keine Abschwächung von P0-Postgres-Nachweisen; keine Secrets in Doku.
+
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
 Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
