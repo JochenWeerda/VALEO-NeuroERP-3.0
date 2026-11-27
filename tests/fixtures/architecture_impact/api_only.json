@@ -1,0 +1,12 @@
+{
+  "paths": [
+    "app/api/v1/endpoints/self_billing.py"
+  ],
+  "expect_class_ids": ["api-router", "finance-gobd"],
+  "forbid_sole_class": "migration-schema",
+  "expect_requires_db": false,
+  "expect_checks_dbfree_contains": [
+    "python scripts/generate_openapi.py --check"
+  ],
+  "expect_pr232_refs": ["R2b"]
+}

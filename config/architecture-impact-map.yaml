@@ -1,0 +1,283 @@
+# Architecture Impact Map — deklarative Pfad→Vertrags-/Generator-Klassen.
+# Source of Truth fuer Impact-Preflight (P1). Generatoren bleiben Owner ihrer Artefakte.
+# register_ids = exakte Namen aus scripts/vor_push.py REGISTER (Spalte 0).
+version: 1
+structural_prefixes:
+  - app/
+  - alembic/
+  - modules/
+  - packages/frontend-web/
+classes:
+  - id: api-router
+    description: "API-/Router-Aenderungen (OpenAPI, Endpoint-Inventar)."
+    globs:
+      - "app/api/**"
+      - "app/**/endpoints/**"
+      - "app/**/router*.py"
+      - "packages/*/src/**/api/**"
+    contracts:
+      - openapi
+      - endpoint-inventory
+    generators:
+      - "python scripts/generate_openapi.py"
+      - "python scripts/generate_code_inventories.py"
+    checks_dbfree:
+      - "python scripts/generate_openapi.py --check"
+      - "python scripts/generate_code_inventories.py --check"
+    register_ids:
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+    hints:
+      - "openapi-drift (Workflow)"
+    requires_db: false
+    pr232_refs:
+      - R2b
+
+  - id: service-stem
+    description: "Backend-Service-Stem (Service-Inventar, Architecture Index, Domain-Prefix)."
+    globs:
+      - "app/services/**"
+      - "modules/**/services/**"
+    contracts:
+      - service-inventory
+      - architecture-index
+      - domain-prefix-mapping
+    generators:
+      - "python scripts/generate_code_inventories.py"
+      - "python scripts/generate_architecture_index.py"
+    checks_dbfree:
+      - "python scripts/generate_code_inventories.py --check"
+      - "python scripts/generate_architecture_index.py --check --require-complete"
+    register_ids:
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+    hints:
+      - "bei neuem Stem: config/architecture-domain-prefixes.yaml (service_prefixes / exact_service_stems)"
+      - "pnpm arch:validate"
+      - "pnpm arch:drift"
+    requires_db: false
+    pr232_refs:
+      - R4a
+
+  - id: migration-schema
+    description: "Alembic-Migrationen (Schema, Katalog, RLS-Inventar) — DB-pflichtig."
+    globs:
+      - "alembic/versions/**"
+    contracts:
+      - migration-inventory
+      - table-catalog-schema
+      - rls-inventory
+      - domain-table-ownership
+      - required-domain-schemas
+    generators:
+      - "python scripts/generate_code_inventories.py"
+      - "python scripts/generate_table_catalog.py"
+      - "python scripts/rls_inventory.py"
+    checks_dbfree:
+      - "python scripts/generate_code_inventories.py --check"
+    register_ids:
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+      - "RLS-Inventar (frisches Schema)"
+      - "Pflichtstruktur der Domaenen"
+      - "Tabellenzuordnung der Domaenen"
+    hints:
+      - "generate_table_catalog.py braucht migrierte DB (Pruefstand/CI)"
+      - "Tabellenkatalog (Lineage) nur wenn Lineage mitkommt"
+    requires_db: true
+    pr232_refs:
+      - R5
+
+  - id: table-consumer
+    description: "Code-Tabellenverbrauch ohne Migration (RLS-Matrix, Lineage)."
+    globs:
+      - "app/services/**/*.py"
+      - "app/infrastructure/**/*.py"
+      - "app/**/repositories/**/*.py"
+      - "modules/**/*.py"
+    contracts:
+      - rls-domain-matrix
+      - table-catalog-lineage
+    generators:
+      - "python scripts/rls_domain_matrix.py"
+      - "python scripts/tabellenkatalog_lineage.py"
+    checks_dbfree:
+      - "python scripts/rls_domain_matrix.py --check"
+      - "python scripts/tabellenkatalog_lineage.py --check"
+    register_ids:
+      - "RLS-Domaenenmatrix"
+      - "Tabellenkatalog (Lineage)"
+    hints: []
+    requires_db: false
+    pr232_refs:
+      - R3b
+
+  - id: baseline-improvement
+    description: "Business-Time-/Improvement-Baselines und Ratschen."
+    globs:
+      - "config/*baseline*.json"
+      - "config/business_time_usage_baseline.json"
+      - "scripts/check_baseline_integrity.py"
+      - "scripts/check_business_time_usage.py"
+      - "scripts/run_improvement_pipelines.py"
+      - "scripts/check_file_size.py"
+      - "scripts/check_pagination.py"
+    contracts:
+      - business-time-baseline
+      - improvement-ratchets
+    generators:
+      - "python scripts/check_business_time_usage.py"
+      - "python scripts/run_improvement_pipelines.py"
+      - "python scripts/check_baseline_integrity.py"
+    checks_dbfree:
+      - "python scripts/check_baseline_integrity.py --base origin/main"
+      - "python scripts/run_improvement_pipelines.py"
+    register_ids:
+      - "Baseline-Integritaet"
+      - "Improvement-Pipelines (Godfiles, Paginierung, ...)"
+    hints: []
+    requires_db: false
+    pr232_refs:
+      - R1b
+
+  - id: frontend-masks
+    description: "Frontend-Routen, Masken, ScreenDefinitions, Navigation."
+    globs:
+      - "packages/frontend-web/src/pages/**"
+      - "**/screen_definitions*"
+      - "**/mask*"
+      - "packages/frontend-web/src/app/navigation/**"
+      - "packages/frontend-web/src/app/routing/**"
+    contracts:
+      - route-inventory
+      - screen-registry
+      - screen-action-catalog
+      - mcp-mask-action-map
+      - mask-family-versions
+      - document-screen-versions
+      - studio-screen-versions
+      - cli-mask-commands
+    generators:
+      - "python scripts/generate_capture_screens.py"
+      - "python scripts/generate_screen_registry_snapshot.py"
+      - "python scripts/generate_screen_action_catalog.py"
+      - "python scripts/generate_mcp_mask_action_map.py"
+      - "python scripts/generate_cli_mask_commands.py"
+      - "python scripts/generate_mask_family_versions.py"
+      - "python scripts/generate_document_screen_versions.py"
+      - "python scripts/generate_studio_screen_versions.py"
+      - "python scripts/mask_studio_inventory.py"
+    checks_dbfree:
+      - "python scripts/generate_cli_mask_commands.py --check"
+      - "python scripts/generate_screen_action_catalog.py --check"
+      - "python scripts/mask_studio_inventory.py --check"
+      - "python scripts/generate_mask_family_versions.py --check"
+      - "python scripts/generate_document_screen_versions.py --check"
+      - "python scripts/generate_studio_screen_versions.py --check"
+    register_ids:
+      - "CLI-Register der Maskenaktionen"
+      - "Aktionskatalog der KI-Bedienung"
+      - "Masken-Studio-Ratsche"
+      - "Maskenfamilien-Versionen"
+      - "Belegmasken-Versionen"
+      - "Studio-Screen-Katalog"
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+    hints: []
+    requires_db: false
+
+  - id: status-process-studio
+    description: "Status-/Process-/Studio-Simulation — Verhaltensvertrag, oft require_db (kein reines Doc-Regen)."
+    globs:
+      - "**/studio_process*"
+      - "**/grain*"
+      - "**/process_kernel*"
+      - "app/**/status*.py"
+      - "app/**/workflow*.py"
+    contracts:
+      - studio-grain-process-evidence
+      - mask-studio-ratchet
+      - require-db-status-behavior
+    generators:
+      - "python scripts/mask_studio_inventory.py"
+    checks_dbfree:
+      - "python scripts/mask_studio_inventory.py --check"
+    register_ids:
+      - "Masken-Studio-Ratsche"
+      - "Domaenenabnahme (M4)"
+    hints:
+      - "require_db / Studio-Evidence in CI — kein stilles Doc-only"
+      - "PR-232 R4b Status booked: Verhaltensvertrag, nicht nur Generator"
+    requires_db: false
+    pr232_refs:
+      - R4b
+
+  - id: finance-gobd
+    description: "Finance-/Buchung-/GoBD-Aenderungen — Tests und Compliance-Gates."
+    globs:
+      - "app/**/buchung*"
+      - "app/**/finance*"
+      - "app/**/self_billing*"
+      - "app/**/steuerschluessel*"
+      - "**/self_billing*"
+      - "services/finance/**"
+      - "tests/**/test_journal*"
+      - "tests/**/self_billing*"
+      - "tests/**/gobd*"
+    contracts:
+      - booking-invariants
+      - journal-op-integrity
+      - gobd-compliance
+    generators: []
+    checks_dbfree: []
+    register_ids: []
+    hints:
+      - "CI Finance GoBD / compliance-check.yml gobd"
+      - "pytest test_journal_* / Self-Billing-Contract"
+      - "Architecture Index nur bei neuem Stem/API als Nebenwirkung"
+    requires_db: false
+
+  - id: c4-container-adr
+    description: "C4 Workspace, Container-Inventar, ADR-Navigation."
+    globs:
+      - "docs/architecture/c4/workspace.dsl"
+      - "docs/architecture/c4/**"
+      - "docs/adr/**"
+      - "docker-compose*.yml"
+      - "**/container*inventory*"
+    contracts:
+      - structurizr-views
+      - container-inventory
+      - adr-nav
+    generators:
+      - "python scripts/render_c4_views.py"
+      - "python scripts/generate_container_inventory.py"
+      - "python scripts/generate_adr_nav.py"
+    checks_dbfree:
+      - "python scripts/render_c4_views.py --check"
+      - "python scripts/generate_container_inventory.py --check"
+      - "python scripts/generate_adr_nav.py --check"
+    register_ids:
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+    hints:
+      - "pnpm arch:render"
+      - "pnpm arch:validate"
+    requires_db: false
+
+  - id: agent-handbuch-docs
+    description: "Agent-Handbuch und Docs-Governance."
+    globs:
+      - "scripts/generate_agent_handbuch.py"
+      - "scripts/agent_handbuch_sources.py"
+      - "scripts/docs-governance-check.cjs"
+      - "docs/agent-handbuch/**"
+      - "docs/workflows/**"
+    contracts:
+      - agent-handbuch
+      - docs-governance
+    generators:
+      - "python scripts/generate_agent_handbuch.py"
+    checks_dbfree:
+      - "python scripts/generate_agent_handbuch.py --check"
+      - "node scripts/docs-governance-check.cjs"
+    register_ids:
+      - "Docs-Governance"
+      - "Doc-Generatoren (OpenAPI, C4, Architektur-Index, MCP, Aktionsmatrix)"
+    hints: []
+    requires_db: false

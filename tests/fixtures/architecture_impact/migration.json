@@ -1,0 +1,8 @@
+{
+  "paths": [
+    "alembic/versions/self_billing_m3_20261127.py"
+  ],
+  "expect_class_ids_contains": ["migration-schema"],
+  "expect_requires_db": true,
+  "expect_pr232_refs_contains": ["R5"]
+}

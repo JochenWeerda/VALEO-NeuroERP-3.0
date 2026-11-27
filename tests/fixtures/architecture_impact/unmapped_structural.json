@@ -1,0 +1,7 @@
+{
+  "paths": [
+    "app/obscure/new_thing.py"
+  ],
+  "expect_unmapped_structural": true,
+  "expect_class_ids": []
+}

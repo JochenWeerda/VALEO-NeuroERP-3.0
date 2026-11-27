@@ -13,10 +13,10 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
-## ARCH-IMPACT-PREFLIGHT-MAP — reserviert, Cursor Cloud Agent
+## ARCH-IMPACT-PREFLIGHT-MAP — in Arbeit, Cursor Cloud Agent
 
 Meilenstein: M0 / Architecture OS Qualitaet (Generator-Drift-Praevention).
-**Owner:** Cursor Cloud Agent (bc-bf6a9f4b). **Stand:** reserviert 2026-11-27 (Europe/Berlin).
+**Owner:** Cursor Cloud Agent (bc-bf6a9f4b). **Stand:** in Arbeit 2026-11-27 (Europe/Berlin).
 **Ziel:** deklarative Impact-Map + Matcher. Pfadlisten werden auf Architekturvertraege und Generatorpflichten abgebildet; Ausgabe deterministisch aus der Map.
 **Dateibesitz (exklusiv):** `config/architecture-impact-map.yaml`, `scripts/architecture_impact_map.py`, `tests/test_architecture_impact_map.py`, `tests/fixtures/architecture_impact/**`, `docs/architecture/quality-gates/architecture-impact-preflight.md`, `docs/agent-ops/slices/ARCH-IMPACT-PREFLIGHT-MAP.yaml`, Workboard-Zeile.
 **Nicht anfassen:** CLI (`architecture_impact_preflight.py`), `vor_push.py`, Generatoren (`generate_*.py` / `rls_*.py` / `check_all_doc_generators.sh`), `AGENTS.md`, `architecture-index.yaml`, Process Kernel, PR-232-Fachcode.

@@ -1,0 +1,11 @@
+{
+  "paths": [
+    "app/services/harvest_acceptance_service.py"
+  ],
+  "expect_class_ids_contains": ["table-consumer"],
+  "expect_register_ids_contains": [
+    "RLS-Domaenenmatrix",
+    "Tabellenkatalog (Lineage)"
+  ],
+  "expect_pr232_refs_contains": ["R3b"]
+}
