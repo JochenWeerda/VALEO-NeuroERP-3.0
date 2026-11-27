@@ -46,9 +46,23 @@ function successState(): RohwareState {
     validateRohwareStep: vi.fn(() => null),
     handleRohwareStepValidationError: vi.fn(),
     handleFinish: vi.fn(),
-    shortcuts: {},
+    shortcuts: [],
     plan: { screenId: 'annahme/rohware', fieldsByKey: {} },
   } as unknown as RohwareState
+}
+
+function wizardState(overrides: Partial<RohwareState> = {}): RohwareState {
+  return {
+    ...successState(),
+    acceptanceResult: null,
+    supplyOps: { bottleneck: 'Waage', pressure: 'mittel', nextAction: 'Wiegen' },
+    transferSummary: {
+      transferPressure: 'niedrig',
+      handoverRisk: 1,
+      nextAction: 'Übergabe prüfen',
+    },
+    ...overrides,
+  } as RohwareState
 }
 
 describe('RohwareRenderer', () => {
@@ -70,6 +84,17 @@ describe('RohwareRenderer', () => {
       },
     })
     fireEvent.click(screen.getByRole('button', { name: 'Zur Warteschlange' }))
+    expect(navigateMock).toHaveBeenCalledWith('/annahme/warteschlange')
+  })
+
+  it('rendert Wizard-Schritte und bricht ab', () => {
+    const updateField = vi.fn()
+    render(<RohwareRenderer state={wizardState({ updateField })} />)
+    expect(screen.getByRole('region', { name: /Rohware-Annahme/i })).toBeTruthy()
+    expect(screen.getAllByText('Lieferant & Fahrzeug').length).toBeGreaterThan(0)
+    expect(screen.getByText('Übergabedruck')).toBeTruthy()
+    expect(screen.getByText('Waage')).toBeTruthy()
+    fireEvent.click(screen.getByRole('button', { name: 'Abbrechen' }))
     expect(navigateMock).toHaveBeenCalledWith('/annahme/warteschlange')
   })
 })

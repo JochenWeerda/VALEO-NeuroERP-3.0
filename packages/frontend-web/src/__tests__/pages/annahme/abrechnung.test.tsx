@@ -445,4 +445,32 @@ describe('AnnahmeAbrechnungPage', () => {
     renderPage()
     expect(await screen.findByText(/Liste down|fehlgeschlagen|konnten nicht/i)).toBeInTheDocument()
   })
+
+  it('zeigt ungefilterte Settlement-Liste ohne Kampagnenkontext', async () => {
+    const { renderPage: renderBare } = (() => {
+      function renderBarePage() {
+        const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+        return render(
+          <QueryClientProvider client={client}>
+            <MemoryRouter initialEntries={['/annahme/abrechnung']}>
+              <AnnahmeAbrechnungPage />
+            </MemoryRouter>
+          </QueryClientProvider>,
+        )
+      }
+      return { renderPage: renderBarePage }
+    })()
+    renderBare()
+    expect(await screen.findByText('SET-1')).toBeInTheDocument()
+    expect(screen.getByText('SET-2')).toBeInTheDocument()
+  })
+
+  it('blockiert Vorschau ohne Lieferant', async () => {
+    renderPage()
+    expect(await screen.findByText('SET-1')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Vorschau' }))
+    await waitFor(() =>
+      expect(toastMock).toHaveBeenCalledWith(expect.objectContaining({ title: 'Lieferant fehlt' })),
+    )
+  })
 })

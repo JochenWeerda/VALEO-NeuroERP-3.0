@@ -564,4 +564,70 @@ describe('Materialfluss-Arbeitsplatz: Lagerbindung und Eingaben', () => {
     fireEvent.click(within(nodeRow).getByRole('button', { name: 'Position speichern' }))
     await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'layout_y ungültig' })))
   })
+
+  it('deckt Route-Warnungen, Ablehnung, API-Fehler und fehlende Knoten ab', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Knoten fehlen' })))
+
+    fireEvent.change(screen.getByLabelText('Von-Knoten'), { target: { value: 'node-a' } })
+    fireEvent.change(screen.getByLabelText('Nach-Knoten'), { target: { value: 'node-b' } })
+
+    fixture.validateRoute.mockResolvedValueOnce({
+      ok: true,
+      warnings: ['Kapazität knapp', 'Spülcharge empfohlen', 'Hinweis 3', 'Hinweis 4', 'Hinweis 5'],
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Route geprüft' })))
+
+    fixture.validateRoute.mockResolvedValueOnce({ ok: false, reason: 'Verschleppungsrisiko' })
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Route nicht freigegeben' })))
+
+    fixture.validateRoute.mockRejectedValueOnce(new Error('Route-API down'))
+    fireEvent.click(screen.getByRole('button', { name: 'Route validieren' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'API-Fehler' })))
+  })
+
+  it('lehnt Transfer ohne Zellen und ungültige Kapazität ab', async () => {
+    fixture.nodes = [
+      { id: 'node-a', code: 'NODE-A', name: 'A', node_type: 'intake', status: 'active' },
+      { id: 'node-b', code: 'NODE-B', name: 'B', node_type: 'scale', status: 'active' },
+    ]
+    fixture.edges = [{
+      id: 'edge-a',
+      from_node_id: 'node-a',
+      to_node_id: 'node-b',
+      edge_mode: 'gravity',
+      status: 'active',
+      contamination_guard_enabled: false,
+      flush_required: false,
+      max_capacity_kg_h: '100',
+    }]
+    render(<MaterialflussPage />)
+    selectWarehouse()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Transfer buchen' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'Zellen fehlen' })))
+
+    const edgeSection = screen.getByText('Kanten').closest('div')!
+    const capacityInput = within(edgeSection).getByDisplayValue('100')
+    fireEvent.change(capacityInput, { target: { value: '-5' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() => expect(fixture.toast).toHaveBeenCalledWith(expect.objectContaining({ title: 'kg/h ungültig' })))
+
+    fireEvent.change(capacityInput, { target: { value: '' } })
+    fireEvent.click(within(edgeSection).getByRole('button', { name: 'Kapazität' }))
+    await waitFor(() =>
+      expect(fixture.patchEdge).toHaveBeenCalledWith(
+        expect.objectContaining({ body: expect.objectContaining({ max_capacity_kg_h: null }) }),
+      ),
+    )
+  })
 })

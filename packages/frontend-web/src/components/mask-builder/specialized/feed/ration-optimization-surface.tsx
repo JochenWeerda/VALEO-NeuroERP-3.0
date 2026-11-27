@@ -471,7 +471,7 @@ function ampelDot(state: AmpelState) {
   return <span className="inline-block h-3 w-3 rounded-full" style={{ backgroundColor: col }} />
 }
 
-function RationBlocksPanel({
+export function RationBlocksPanel({
   blocks,
   compact = false,
 }: {
@@ -512,7 +512,7 @@ function RationBlocksPanel({
   )
 }
 
-function ForagePerformancePanel({
+export function ForagePerformancePanel({
   result,
   compact = false,
 }: {
