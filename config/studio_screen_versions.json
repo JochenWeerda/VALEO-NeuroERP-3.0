@@ -4040,7 +4040,7 @@
       "version": "1.0.0"
     },
     "crm/kunden-liste": {
-      "definition_hash": "e10b1427a55a8a7805ab86e5fd9249daebb202ca9ee5a8bcf38aaf5aca18628a",
+      "definition_hash": "6ac7954908b2a534b8d3831c186fe2cafff6efefe1c07a004b146f35a7989f03",
       "gates_passed": [
         "A",
         "B",

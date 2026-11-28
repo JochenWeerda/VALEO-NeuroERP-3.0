@@ -23,7 +23,6 @@ from app.integrations.crm_core_client import (
     create_customer as _crm_create,
     delete_customer as _crm_delete,
     get_customer as _crm_get,
-    list_customers as _crm_list,
     update_customer as _crm_update,
 )
 
@@ -646,17 +645,18 @@ class CustomerService:
             "updated_at": row.updated_at,
         }
 
-    def _list_fallback_db(
+    def _list_from_db(
         self,
         skip: int,
         limit: int,
         search: Optional[str],
         effective_tenant: str,
     ) -> tuple[list[dict[str, Any]], int]:
-        """Direct DB fallback when crm-core is unavailable."""
+        """Read one page of the tenant's operational customer records."""
         where_clauses = []
         params: dict[str, Any] = {}
         where_clauses.append("tenant_id = :tenant_id")
+        where_clauses.append("deleted_at IS NULL")
         params["tenant_id"] = effective_tenant
         if search:
             where_clauses.append(
@@ -675,7 +675,7 @@ class CustomerService:
                        email, phone, address, customer_type, credit_limit, payment_terms,
                        is_active, chefanweisung, business_partner_id, created_at, updated_at
                 FROM domain_crm.customers WHERE {where_sql}
-                ORDER BY company_name DESC LIMIT :limit OFFSET :offset
+                ORDER BY company_name DESC, id LIMIT :limit OFFSET :offset
             """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
@@ -736,16 +736,8 @@ class CustomerService:
         limit: int = 50,
         search: Optional[str] = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        effective_tenant = self.tenant_id
-        try:
-            core_items, _ = await _crm_list(skip=skip, limit=limit, search=search)
-            eigene = self._eigene_kunden({str(c.id) for c in core_items})
-            items = [_adapt_customer(c, self.tenant_id) for c in core_items if str(c.id) in eigene]
-            items = self.merge_extensions_for_list(items)
-            return items, self._anzahl_eigene_kunden()
-        except Exception as exc:
-            logger.warning("crm-core unavailable, DB fallback: %s: %s", type(exc).__name__, exc)
-            return self._list_fallback_db(skip, limit, search, effective_tenant)
+        items, total = self._list_from_db(skip, limit, search, self.tenant_id)
+        return self.merge_extensions_for_list(items), total
 
     async def get_customer(self, customer_id: str) -> dict[str, Any]:
         customer = None
@@ -1086,12 +1078,6 @@ class CustomerService:
             {"tid": self.tenant_id, "k": sorted(kennungen)},
         ).scalars().all()
         return set(zeilen)
-
-    def _anzahl_eigene_kunden(self) -> int:
-        return int(self.db.execute(
-            text("SELECT count(*) FROM domain_crm.customers WHERE tenant_id = :tid AND deleted_at IS NULL"),
-            {"tid": self.tenant_id},
-        ).scalar() or 0)
 
     def quick_search(self, term: str, limit: int = 8) -> list[dict[str, Any]]:
         if not term.strip():

@@ -1205,9 +1205,11 @@ Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte, PR #190) und M4-PM-P0 (Charge/Fre
 
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
 
-### M4-CRM-KUNDENLISTE-AKTENROUTE — reserviert, Codex
+### M4-CRM-KUNDENLISTE-AKTENROUTE — in Arbeit, Codex
 
 Teilabnahme CR-01. Dateibesitz: ScreenDefinition der CRM-Kundenliste, ihre generierten Projektionen und der Browserfall Liste → Kundenakte. Abnahme: Eine Zeile verwendet die ID aus dem mandantengebundenen Aktenvertrag und öffnet dieselbe Akte wie der Detail-Endpunkt.
+
+Liste und Akte verwenden denselben Kundenvertrag. Studio-Katalog und Agentenhandbuch sind regeneriert. Vor Freigabe bleibt der Browserfall offen. Bei aktivem CRM-Dienst ist außerdem zu prüfen, ob der Dienst vor der Seitenbildung nach Mandant filtert und auch lokal angelegte Kunden liefert.
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
 
 main 5f5888862 integriert. Architekturindex frisch und vollstaendig (1.146 Routen, 349 Dienste, 474 Endpoint-Module). L3-YAML-Vorspann repariert; Validator meldet 8 Tabellen, 26 Zuordnungen, 0 Fehler, 0 Warnungen. CI behandelt einen Validatorfehler jetzt als Fehler. Kein L3-Datenimport durchgefuehrt.

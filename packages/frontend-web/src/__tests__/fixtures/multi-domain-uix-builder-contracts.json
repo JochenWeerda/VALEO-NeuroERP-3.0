@@ -1104,7 +1104,7 @@
     "domain": "crm",
     "mode": "list",
     "title": "Kunden",
-    "subtitle": "Operativer Kundenstamm mit Umsatz und Status",
+    "subtitle": "Operativer Kundenstamm",
     "adapter": {
       "type": "native",
       "sourceId": "crm/kunden-liste",
@@ -1113,7 +1113,7 @@
     "dataSources": [
       {
         "key": "list",
-        "endpoint": "/api/v1/crm/customers/lookup?q=&limit=1000",
+        "endpoint": "/api/v1/crm/customers/",
         "pageSize": 100
       }
     ],
@@ -1150,33 +1150,33 @@
         "rowHeight": 40,
         "columns": [
           {
-            "key": "name",
+            "key": "company_name",
             "label": "Firma / Name",
             "sortable": true,
             "filterable": true,
             "priority": "primary"
           },
           {
-            "key": "kunden_nr",
+            "key": "customer_number",
             "label": "Kunden-Nr.",
             "sortable": true,
             "filterable": true,
             "priority": "primary"
           },
           {
-            "key": "ort",
+            "key": "city",
             "label": "Ort",
             "filterable": true,
             "priority": "secondary"
           },
           {
-            "key": "plz",
+            "key": "postal_code",
             "label": "PLZ",
             "filterable": true,
             "priority": "tertiary"
           },
           {
-            "key": "telefon",
+            "key": "phone",
             "label": "Telefon",
             "priority": "tertiary"
           },
@@ -1187,9 +1187,9 @@
             "priority": "secondary"
           },
           {
-            "key": "status",
-            "label": "Status",
-            "renderKind": "status",
+            "key": "is_active",
+            "label": "Aktiv",
+            "renderKind": "boolean",
             "filterable": true,
             "priority": "primary"
           }
