@@ -13,6 +13,12 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
+## M1-DOCFLOW-POSTGRES-NACHWEIS — in Arbeit, Codex (M1)
+
+Owner: Codex. M1-Fachreste (Bestellversand, Drei-Wege-Abgleich und Beleg-E-Rechnung) im strikten PostgreSQL-Lauf pruefen. Dateibesitz: die drei zugehoerigen Testsuiten, Slice-YAML und dieser Eintrag. Abnahme: Auswahl mit needs_live_db, echte Transaktionspruefungen, kein stiller Fallback.
+
+Die drei Suiten verwenden die gemeinsame `require_db`-Fixture. PostgreSQL-Abnahme offen: Der lokale Prüfstand steht auf `mandantenantrag_20261126` aus `wt-m6t`. Den Prüfstand unverändert lassen und den strikten PR-Lauf auf passendem Schema auswerten.
+
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
 Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
