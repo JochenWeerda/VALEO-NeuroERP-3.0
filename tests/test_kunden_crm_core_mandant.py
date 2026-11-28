@@ -25,7 +25,7 @@ HAUS_A = f"kcc-a-{uuid.uuid4().hex[:6]}"
 HAUS_B = f"kcc-b-{uuid.uuid4().hex[:6]}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def sitzung(require_db):
     from sqlalchemy import text
     from sqlalchemy.orm import sessionmaker
@@ -83,11 +83,12 @@ def test_liste_paginiert_eigene_kunden_aus_dem_operativen_stamm(db):
     eigene = {_kunde(db, HAUS_A), _kunde(db, HAUS_A)}
     _kunde(db, HAUS_B)
     dienst = _dienst(db)
-    erste, total = asyncio.run(dienst.list_customers(limit=1))
-    zweite, zweites_total = asyncio.run(dienst.list_customers(skip=1, limit=1))
+    erste, total = dienst.list_customers(limit=1)
+    zweite, zweites_total = dienst.list_customers(skip=1, limit=1)
     assert [len(erste), len(zweite)] == [1, 1]
     assert {erste[0]["id"], zweite[0]["id"]} == eigene
-    assert total == zweites_total == 2
+    assert total == 2
+    assert zweites_total == 2
 
 
 def test_fremder_kunde_ist_nicht_abrufbar_aenderbar_oder_loeschbar(db):

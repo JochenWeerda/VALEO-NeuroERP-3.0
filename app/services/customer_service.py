@@ -682,55 +682,59 @@ class CustomerService:
         items: list[dict[str, Any]] = []
         for row in rows:
             try:
-                # Kanonisches Adress-Value-Object (app/core/address.py) — normalisiert
-                # dict-/JSON-String-/Freitext-Formen inkl. Alias-Keys (plz/zip/ort/…).
-                city = postal_code = country = address_str = None
-                if row.address:
-                    _addr = parse_address(row.address)
-                    city = _addr.city
-                    postal_code = _addr.postal_code
-                    country = _addr.country
-                    address_str = _addr.street or (row.address if isinstance(row.address, str) else str(row.address))
-                payment_terms_val = 30
-                if row.payment_terms:
-                    try:
-                        payment_terms_val = int(row.payment_terms) if str(row.payment_terms).isdigit() else 30
-                    except Exception:
-                        payment_terms_val = 30
-                items.append({
-                    "id": str(row.id),
-                    "tenant_id": _tenant_as_uuid(row.tenant_id),
-                    "customer_number": row.customer_number or f"CUST-{str(row.id)[:8].upper()}",
-                    "company_name": row.company_name or "",
-                    "name": row.company_name or "",
-                    "contact_person": row.contact_person,
-                    "email": row.email,
-                    "phone": row.phone,
-                    "address": address_str,
-                    "city": city,
-                    "postal_code": postal_code,
-                    "country": country,
-                    "industry": None,
-                    "website": None,
-                    "price_group": None,
-                    "tax_category": None,
-                    "credit_limit": float(row.credit_limit) if row.credit_limit is not None else None,
-                    "payment_terms": payment_terms_val,
-                    "tax_id": None,
-                    "chefanweisung": getattr(row, "chefanweisung", None),
-                    "business_partner_id": getattr(row, "business_partner_id", None),
-                    "is_active": row.is_active if row.is_active is not None else True,
-                    "deleted_at": None,
-                    "created_at": row.created_at,
-                    "updated_at": row.updated_at,
-                })
+                items.append(self._operational_customer_row(row))
             except Exception as exc:
                 logger.error("Error mapping customer %s: %s", row.id, exc)
         return items, total
 
+    @staticmethod
+    def _operational_customer_row(row: Any) -> dict[str, Any]:
+        # Kanonisches Adress-Value-Object (app/core/address.py) — normalisiert
+        # dict-/JSON-String-/Freitext-Formen inkl. Alias-Keys (plz/zip/ort/…).
+        city = postal_code = country = address_str = None
+        if row.address:
+            _addr = parse_address(row.address)
+            city = _addr.city
+            postal_code = _addr.postal_code
+            country = _addr.country
+            address_str = _addr.street or (row.address if isinstance(row.address, str) else str(row.address))
+        payment_terms_val = 30
+        if row.payment_terms:
+            try:
+                payment_terms_val = int(row.payment_terms) if str(row.payment_terms).isdigit() else 30
+            except Exception:
+                payment_terms_val = 30
+        return {
+            "id": str(row.id),
+            "tenant_id": _tenant_as_uuid(row.tenant_id),
+            "customer_number": row.customer_number or f"CUST-{str(row.id)[:8].upper()}",
+            "company_name": row.company_name or "",
+            "name": row.company_name or "",
+            "contact_person": row.contact_person,
+            "email": row.email,
+            "phone": row.phone,
+            "address": address_str,
+            "city": city,
+            "postal_code": postal_code,
+            "country": country,
+            "industry": None,
+            "website": None,
+            "price_group": None,
+            "tax_category": None,
+            "credit_limit": float(row.credit_limit) if row.credit_limit is not None else None,
+            "payment_terms": payment_terms_val,
+            "tax_id": None,
+            "chefanweisung": getattr(row, "chefanweisung", None),
+            "business_partner_id": getattr(row, "business_partner_id", None),
+            "is_active": row.is_active if row.is_active is not None else True,
+            "deleted_at": None,
+            "created_at": row.created_at,
+            "updated_at": row.updated_at,
+        }
+
     # ── crm-core delegation (async) ───────────────────────────────────────────
 
-    async def list_customers(
+    def list_customers(
         self,
         skip: int = 0,
         limit: int = 50,
