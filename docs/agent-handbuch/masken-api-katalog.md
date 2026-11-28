@@ -4,7 +4,7 @@ type: reference
 audience: [ki-agent, entwickler, integrator]
 owner: Cursor
 status: aktiv
-last_reviewed: 2026-11-26
+last_reviewed: 2026-11-28
 version: 3.0.0
 description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions.
 ---
@@ -12008,7 +12008,7 @@ description: ScreenDefinitions mit AgentMaskContract, REST-Endpoints und Actions
 
 **Data Sources:**
 
-- `list` → `/api/v1/crm/customers/lookup?q=&limit=1000`
+- `list` → `/api/v1/crm/customers/`
 
 **MCP-Tools (Domäne):**
 

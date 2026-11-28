@@ -126,7 +126,7 @@ describe('Batch 11 route inventory (source-level evidence only)', () => {
     }))
     window.history.replaceState(null, '', '/')
     mountBatchList(createElement(KundenListePage), 'crm/kunden-liste', {
-      id: 'synthetic-customer', name: 'SYNTHETIC-CUSTOMER', kunden_nr: 'K-001', ort: 'Bremen',
+      id: 'synthetic-customer', company_name: 'SYNTHETIC-CUSTOMER', customer_number: 'K-001', city: 'Bremen',
     })
     const name = await screen.findByText('SYNTHETIC-CUSTOMER')
     expect(transport.get).toHaveBeenCalledWith('/api/v1/masks/crm__kunden-liste/screen-definition', expect.anything())

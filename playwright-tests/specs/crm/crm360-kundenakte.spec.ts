@@ -66,6 +66,12 @@ test.describe('Kundenakte @full', () => {
     const gespeichert = await leseKunde(request, decodeURIComponent(id))
     expect(gespeichert.customer_number).toBe(`E2E-${lauf}`)
     expect(gespeichert.company_name).toBe(`E2E Neukunde ${lauf}`)
+
+    await page.goto('/crm/kunden-liste')
+    await page.getByRole('row').filter({ hasText: `E2E-${lauf}` }).click()
+    await page.getByRole('button', { name: 'In Vollansicht öffnen' }).click()
+    await expect(page).toHaveURL(new RegExp(`/crm/kunden/${encodeURIComponent(gespeichert.id)}$`))
+    await expect(page.getByTestId('action-bearbeiten')).toBeVisible()
   })
 
   test('Abschnitte der Akte laden ohne Fehler', async ({ page, request }) => {
