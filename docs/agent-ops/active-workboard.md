@@ -18,6 +18,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 Meilenstein: M0 (CI-/Agent-Betrieb).
 **Owner:** Cursor Cloud `bc-e6058277-d007-5f6b-a9b0-a58684d8ce0c`. **Stand:** zur Abnahme 2026-11-27 (Europe/Berlin) — Doku-PR bereit, kein Self-Merge; Status `abgeschlossen` erst nach Merge durch Claude Admin. **Ziel:** Alternative A (CI-only Evidence) verbindlich dokumentieren: Cloud-Agenten ohne lokalen `valeo_probe` nutzen GitHub-Actions-Postgres als Prüfstand; Artifact-Consume und Verbotsliste klar; `AGENTS.md` + Session-Checklist um Cloud-Pfad ergänzen. **Dateibesitz:** `docs/quality-assurance/cloud-agent-postgres-pruefstand.md` (neu); Querverweise in `docs/quality-assurance/pruefstand-datenbank.md`, `docs/quality-assurance/test-database-resource-policy-20261001.md`; `AGENTS.md`; `docs/agent-ops/session-start-checklist.md`; Slice-YAML `docs/agent-ops/slices/CLOUD-AGENT-PG-SOP.yaml`; dieses Workboard; Handshake `docs/agent-ops/handshakes/cloud-agent-pg-sop-20261127.md`. **Abnahme:** SOP mit Erkennung/CI-Evidence/Artifact/Handoff/Verbotsliste; Cloud-Zweig widerspricht Host-`valeo_probe`-Regel nicht; kein Workflow-/Compose-/Secret-Diff; Docs-Gates grün; kein Self-Merge. **Abgrenzung:** kein Workflow-Edit, kein Compose, kein Environment-Postgres; `CLOUD-AGENT-PG-DISPATCH` und ENV bleiben außen; Fachslices PR #232 unberührt. **Risiken:** Doku-Drift vs. Host-Prüfstand-Regel; keine Abschwächung von P0-Postgres-Nachweisen; keine Secrets in Doku.
 
+## M3-M7-ABNAHMESIMULATION — reserviert, Codex
+
+Meilensteine M3 bis M7. Owner: Codex. Dateibesitz: Abnahme-Skill, assessornahe Simulation und Szenariobericht. Abnahme: synthetische Praxisfaelle mit Gegenproben; externe Freigaben bleiben separat.
+
+### M6-SPIEGEL-NULLBETRAG — zur Abnahme, Codex
+
+Dateibesitz: Betragsnormalisierung im Spiegel-Belegabgleich. Abnahme: Numerische Null bleibt ein Vergleichswert. Fehlende Beträge bleiben leer.
+
+Die Gegenprobe aus der Abnahmesimulation hat einen L3-Nullbetrag gegen 42,00 im VALEO-Beleg verglichen und die erwartete Abweichung geliefert. Numerische und textuelle Null werden gleich normalisiert. Geprüft wurde mit simuliertem Datenzugriff.
+
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
 Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
@@ -1209,6 +1219,12 @@ Abnahme: Integrationstest gegen PostgreSQL mit Fremdmandant 404/leere Liste; eig
 Hinweis Bahn: M4-LO-P0 (ops_fahrer/transporte, PR #190) und M4-PM-P0 (Charge/Freigabe) bleiben offen fuer Bahn Logistik bzw. Produktion.
 
 ## M4-CRM-KUNDENAKTE-PARITAET-20261123 — offen, P1 (M4, Bahn CRM)
+
+### M4-CRM-KUNDENLISTE-AKTENROUTE — in Arbeit, Codex
+
+Teilabnahme CR-01. Dateibesitz: ScreenDefinition der CRM-Kundenliste, ihre generierten Projektionen und der Browserfall Liste → Kundenakte. Abnahme: Eine Zeile verwendet die ID aus dem mandantengebundenen Aktenvertrag und öffnet dieselbe Akte wie der Detail-Endpunkt.
+
+Liste und Akte verwenden denselben Kundenvertrag. Studio-Katalog und Agentenhandbuch sind regeneriert. Vor Freigabe bleibt der Browserfall offen. Bei aktivem CRM-Dienst ist außerdem zu prüfen, ob der Dienst vor der Seitenbildung nach Mandant filtert und auch lokal angelegte Kunden liefert.
 Befund aus M0-E2E-FULL-UAT: Die native Kundenakte crm/customer-360 bietet Bearbeiten, Aktivitaet anlegen und die Pflege der sechs Partner-Untertabellen; die Schnellaktionen des frueheren Cockpits fehlen: Drucken, Waehlen/TAPI mit Kontaktprotokoll, Ansprechpartner-Detail, KI-Zusammenfassung, Angebot/Auftrag mit Kundenkontext anlegen, Beleg aus dem Register oeffnen (keine Zeilenroute), Sprung in finance/op-debitoren mit Kundenfilter, Lead-Register und Karte, Unterlagenablage (Register Dokumente zeigt offene Posten). Abnahme: die test.fixme in playwright-tests/specs/crm/crm360-kundenakte.spec.ts sind scharf und gruen; Teilschliessungen pro Aktion erlaubt.
 
 main 5f5888862 integriert. Architekturindex frisch und vollstaendig (1.146 Routen, 349 Dienste, 474 Endpoint-Module). L3-YAML-Vorspann repariert; Validator meldet 8 Tabellen, 26 Zuordnungen, 0 Fehler, 0 Warnungen. CI behandelt einen Validatorfehler jetzt als Fehler. Kein L3-Datenimport durchgefuehrt.

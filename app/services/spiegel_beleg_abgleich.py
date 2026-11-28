@@ -34,7 +34,7 @@ FELDER = ("datum", "netto", "brutto")
 
 
 def _betrag(roh: Any) -> Decimal | None:
-    wert = str(roh or "").strip()
+    wert = str(roh if roh is not None else "").strip()
     if not wert:
         return None
     if "," in wert and "." not in wert:
