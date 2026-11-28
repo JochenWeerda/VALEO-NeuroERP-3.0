@@ -13,7 +13,6 @@ crm-core wird simuliert; Datenbank ist der Pruefstand (``TEST_DATABASE_URL``/``D
 from __future__ import annotations
 
 import asyncio
-import os
 import uuid
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
@@ -22,32 +21,24 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
-DB_URL = os.environ.get(
-    "TEST_DATABASE_URL",
-    os.environ.get("DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe"),
-)
-
 HAUS_A = f"kcc-a-{uuid.uuid4().hex[:6]}"
 HAUS_B = f"kcc-b-{uuid.uuid4().hex[:6]}"
 
 
-@pytest.fixture(scope="module")
-def sitzung():
-    from sqlalchemy import create_engine, text
+@pytest.fixture
+def sitzung(require_db):
+    from sqlalchemy import text
     from sqlalchemy.orm import sessionmaker
+    from app.core.database import engine
+    from testgrenze import pruefstand_erlaubt
 
-    try:
-        motor = create_engine(DB_URL)
-        with motor.connect() as conn:
-            conn.execute(text("SELECT 1 FROM domain_crm.customers LIMIT 0"))
-    except Exception as fehler:  # noqa: BLE001
-        pytest.skip(f"Datenbank nicht erreichbar: {fehler}")
-    with motor.begin() as v:
+    assert pruefstand_erlaubt(engine.url)
+    with engine.begin() as v:
         for haus in (HAUS_A, HAUS_B):
             v.execute(text("INSERT INTO domain_shared.tenants (id, name) VALUES (:id, :n) ON CONFLICT (id) DO NOTHING"),
                       {"id": haus, "n": f"Pruefbetrieb {haus}"})
-    yield sessionmaker(bind=motor)
-    with motor.begin() as v:
+    yield sessionmaker(bind=engine)
+    with engine.begin() as v:
         v.execute(text("DELETE FROM domain_crm.customers WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
         # Seit der Partnerbruecke (01.11.2026) legt jede Kundenanlage auch einen Geschaeftspartner an.
         v.execute(text("DELETE FROM domain_crm.business_partners WHERE tenant_id = ANY(:h)"), {"h": [HAUS_A, HAUS_B]})
@@ -88,12 +79,16 @@ def flach():
         yield
 
 
-def test_liste_zeigt_nur_eigene_crm_core_kunden(db):
-    eigen, fremd = _kunde(db, HAUS_A), _kunde(db, HAUS_B)
-    with patch("app.services.customer_service._crm_list", AsyncMock(return_value=([_core(eigen), _core(fremd)], 2))):
-        items, total = asyncio.run(_dienst(db).list_customers())
-    assert [i["id"] for i in items] == [eigen]
-    assert total == 1
+def test_liste_paginiert_eigene_kunden_aus_dem_operativen_stamm(db):
+    eigene = {_kunde(db, HAUS_A), _kunde(db, HAUS_A)}
+    _kunde(db, HAUS_B)
+    dienst = _dienst(db)
+    erste, total = dienst.list_customers(limit=1)
+    zweite, zweites_total = dienst.list_customers(skip=1, limit=1)
+    assert [len(erste), len(zweite)] == [1, 1]
+    assert {erste[0]["id"], zweite[0]["id"]} == eigene
+    assert total == 2
+    assert zweites_total == 2
 
 
 def test_fremder_kunde_ist_nicht_abrufbar_aenderbar_oder_loeschbar(db):

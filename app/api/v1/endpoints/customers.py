@@ -120,7 +120,7 @@ async def create_customer(
 
 
 @router.get("/", response_model=PaginatedResponse[Customer], summary="Customers auflisten")
-async def list_customers(
+def list_customers(
     tenant_id: str = Depends(get_tenant_id),
     skip: int = Query(0, ge=0, description="Number of items to skip"),
     limit: int = Query(50, ge=1, le=200, description="Maximum number of items to return"),
@@ -128,7 +128,7 @@ async def list_customers(
     db: Session = Depends(get_db),
 ) -> PaginatedResponse[Customer]:
     effective_tenant = tenant_id
-    items_raw, total = await _svc(db, effective_tenant).list_customers(skip=skip, limit=limit, search=search)
+    items_raw, total = _svc(db, effective_tenant).list_customers(skip=skip, limit=limit, search=search)
     items = [Customer.model_validate(d) for d in items_raw]
     pages = ceil(total / limit) if total else 1
     return PaginatedResponse[Customer](

@@ -2,19 +2,33 @@
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 import pytest
 from sqlalchemy import text
 
 from app.core.database import SessionLocal
 from app.services.legacy_interface_adapter_service import LegacyInterfaceAdapterService
-from app.services.spiegel_beleg_abgleich import abgleichen
+from app.services.spiegel_beleg_abgleich import _Lauf, abgleichen
 
 pytestmark = pytest.mark.integration
 
 MAPPING = {"TYP": "record_type", "QUELLE": "source_ref", "BELEGART": "belegart", "BELEGNR": "belegnummer",
            "DATUM": "datum", "NETTO": "netto", "BRUTTO": "brutto"}
 VERTRAG = {"encoding": "utf-8", "record_types": ["beleg"], "sample_hash": "synthetisch", "export_stand": "Test"}
+
+
+@pytest.mark.parametrize("nullbetrag", [0, Decimal("0"), "0,00"])
+def test_belegabgleich_meldet_numerischen_nullbetrag(monkeypatch, nullbetrag):
+    monkeypatch.setattr(
+        "app.services.spiegel_beleg_abgleich._valeo_beleg",
+        lambda *_: {"datum": "2026-11-20", "netto": Decimal("42.00"), "brutto": Decimal("42.00")},
+    )
+    status, differenzen = _Lauf().bewerte(
+        None, "probe", {"belegart": "sales_invoice", "belegnummer": "VR-0", "netto": None, "brutto": nullbetrag}
+    )
+    assert status == "geaendert"
+    assert differenzen == {"brutto": {"valeo": "42.00", "l3": "0.00"}}
 
 
 @pytest.fixture

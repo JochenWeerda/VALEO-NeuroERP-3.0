@@ -23,7 +23,6 @@ from app.integrations.crm_core_client import (
     create_customer as _crm_create,
     delete_customer as _crm_delete,
     get_customer as _crm_get,
-    list_customers as _crm_list,
     update_customer as _crm_update,
 )
 
@@ -646,17 +645,18 @@ class CustomerService:
             "updated_at": row.updated_at,
         }
 
-    def _list_fallback_db(
+    def _list_from_db(
         self,
         skip: int,
         limit: int,
         search: Optional[str],
         effective_tenant: str,
     ) -> tuple[list[dict[str, Any]], int]:
-        """Direct DB fallback when crm-core is unavailable."""
+        """Read one page of the tenant's operational customer records."""
         where_clauses = []
         params: dict[str, Any] = {}
         where_clauses.append("tenant_id = :tenant_id")
+        where_clauses.append("deleted_at IS NULL")
         params["tenant_id"] = effective_tenant
         if search:
             where_clauses.append(
@@ -675,77 +675,73 @@ class CustomerService:
                        email, phone, address, customer_type, credit_limit, payment_terms,
                        is_active, chefanweisung, business_partner_id, created_at, updated_at
                 FROM domain_crm.customers WHERE {where_sql}
-                ORDER BY company_name DESC LIMIT :limit OFFSET :offset
+                ORDER BY company_name DESC, id LIMIT :limit OFFSET :offset
             """),  # nosec B608  # reviewed-safe: column names code-controlled, values parameterized
             params,
         ).fetchall()
         items: list[dict[str, Any]] = []
         for row in rows:
             try:
-                # Kanonisches Adress-Value-Object (app/core/address.py) — normalisiert
-                # dict-/JSON-String-/Freitext-Formen inkl. Alias-Keys (plz/zip/ort/…).
-                city = postal_code = country = address_str = None
-                if row.address:
-                    _addr = parse_address(row.address)
-                    city = _addr.city
-                    postal_code = _addr.postal_code
-                    country = _addr.country
-                    address_str = _addr.street or (row.address if isinstance(row.address, str) else str(row.address))
-                payment_terms_val = 30
-                if row.payment_terms:
-                    try:
-                        payment_terms_val = int(row.payment_terms) if str(row.payment_terms).isdigit() else 30
-                    except Exception:
-                        payment_terms_val = 30
-                items.append({
-                    "id": str(row.id),
-                    "tenant_id": _tenant_as_uuid(row.tenant_id),
-                    "customer_number": row.customer_number or f"CUST-{str(row.id)[:8].upper()}",
-                    "company_name": row.company_name or "",
-                    "name": row.company_name or "",
-                    "contact_person": row.contact_person,
-                    "email": row.email,
-                    "phone": row.phone,
-                    "address": address_str,
-                    "city": city,
-                    "postal_code": postal_code,
-                    "country": country,
-                    "industry": None,
-                    "website": None,
-                    "price_group": None,
-                    "tax_category": None,
-                    "credit_limit": float(row.credit_limit) if row.credit_limit is not None else None,
-                    "payment_terms": payment_terms_val,
-                    "tax_id": None,
-                    "chefanweisung": getattr(row, "chefanweisung", None),
-                    "business_partner_id": getattr(row, "business_partner_id", None),
-                    "is_active": row.is_active if row.is_active is not None else True,
-                    "deleted_at": None,
-                    "created_at": row.created_at,
-                    "updated_at": row.updated_at,
-                })
+                items.append(self._operational_customer_row(row))
             except Exception as exc:
                 logger.error("Error mapping customer %s: %s", row.id, exc)
         return items, total
 
+    @staticmethod
+    def _operational_customer_row(row: Any) -> dict[str, Any]:
+        # Kanonisches Adress-Value-Object (app/core/address.py) — normalisiert
+        # dict-/JSON-String-/Freitext-Formen inkl. Alias-Keys (plz/zip/ort/…).
+        city = postal_code = country = address_str = None
+        if row.address:
+            _addr = parse_address(row.address)
+            city = _addr.city
+            postal_code = _addr.postal_code
+            country = _addr.country
+            address_str = _addr.street or (row.address if isinstance(row.address, str) else str(row.address))
+        payment_terms_val = 30
+        if row.payment_terms:
+            try:
+                payment_terms_val = int(row.payment_terms) if str(row.payment_terms).isdigit() else 30
+            except Exception:
+                payment_terms_val = 30
+        return {
+            "id": str(row.id),
+            "tenant_id": _tenant_as_uuid(row.tenant_id),
+            "customer_number": row.customer_number or f"CUST-{str(row.id)[:8].upper()}",
+            "company_name": row.company_name or "",
+            "name": row.company_name or "",
+            "contact_person": row.contact_person,
+            "email": row.email,
+            "phone": row.phone,
+            "address": address_str,
+            "city": city,
+            "postal_code": postal_code,
+            "country": country,
+            "industry": None,
+            "website": None,
+            "price_group": None,
+            "tax_category": None,
+            "credit_limit": float(row.credit_limit) if row.credit_limit is not None else None,
+            "payment_terms": payment_terms_val,
+            "tax_id": None,
+            "chefanweisung": getattr(row, "chefanweisung", None),
+            "business_partner_id": getattr(row, "business_partner_id", None),
+            "is_active": row.is_active if row.is_active is not None else True,
+            "deleted_at": None,
+            "created_at": row.created_at,
+            "updated_at": row.updated_at,
+        }
+
     # ── crm-core delegation (async) ───────────────────────────────────────────
 
-    async def list_customers(
+    def list_customers(
         self,
         skip: int = 0,
         limit: int = 50,
         search: Optional[str] = None,
     ) -> tuple[list[dict[str, Any]], int]:
-        effective_tenant = self.tenant_id
-        try:
-            core_items, _ = await _crm_list(skip=skip, limit=limit, search=search)
-            eigene = self._eigene_kunden({str(c.id) for c in core_items})
-            items = [_adapt_customer(c, self.tenant_id) for c in core_items if str(c.id) in eigene]
-            items = self.merge_extensions_for_list(items)
-            return items, self._anzahl_eigene_kunden()
-        except Exception as exc:
-            logger.warning("crm-core unavailable, DB fallback: %s: %s", type(exc).__name__, exc)
-            return self._list_fallback_db(skip, limit, search, effective_tenant)
+        items, total = self._list_from_db(skip, limit, search, self.tenant_id)
+        return self.merge_extensions_for_list(items), total
 
     async def get_customer(self, customer_id: str) -> dict[str, Any]:
         customer = None
@@ -1086,12 +1082,6 @@ class CustomerService:
             {"tid": self.tenant_id, "k": sorted(kennungen)},
         ).scalars().all()
         return set(zeilen)
-
-    def _anzahl_eigene_kunden(self) -> int:
-        return int(self.db.execute(
-            text("SELECT count(*) FROM domain_crm.customers WHERE tenant_id = :tid AND deleted_at IS NULL"),
-            {"tid": self.tenant_id},
-        ).scalar() or 0)
 
     def quick_search(self, term: str, limit: int = 8) -> list[dict[str, Any]]:
         if not term.strip():
