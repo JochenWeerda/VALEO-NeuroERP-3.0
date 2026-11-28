@@ -13,6 +13,16 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
+## M3-M7-ABNAHMESIMULATION — reserviert, Codex
+
+Meilensteine M3 bis M7. Owner: Codex. Dateibesitz: Abnahme-Skill, assessornahe Simulation und Szenariobericht. Abnahme: synthetische Praxisfaelle mit Gegenproben; externe Freigaben bleiben separat.
+
+### M6-SPIEGEL-NULLBETRAG — zur Abnahme, Codex
+
+Dateibesitz: Betragsnormalisierung im Spiegel-Belegabgleich. Abnahme: Numerische Null bleibt ein Vergleichswert. Fehlende Beträge bleiben leer.
+
+Die Gegenprobe aus der Abnahmesimulation hat einen L3-Nullbetrag gegen 42,00 im VALEO-Beleg verglichen und die erwartete Abweichung geliefert. Numerische und textuelle Null werden gleich normalisiert. Geprüft wurde mit simuliertem Datenzugriff.
+
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
 Meilenstein: M2 (Zuordnung M0-Bereinigung 23.11.2026, bitte pruefen).
