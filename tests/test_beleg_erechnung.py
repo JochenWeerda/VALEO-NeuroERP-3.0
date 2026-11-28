@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import asyncio
 import base64
-import os
 import uuid
 
 import pytest
@@ -18,20 +17,16 @@ from sqlalchemy.orm import Session
 
 pytestmark = pytest.mark.integration
 
-DB_URL = os.environ.get("TEST_DATABASE_URL", "postgresql://valeo_dev:valeo_dev_2024@127.0.0.1:5432/valeo_probe")
 NUTZER = {"sub": "verkauf-1", "roles": ["SALES_BEARBEITEN"]}
 
 
 @pytest.fixture
-def w():
+def w(require_db):
+    from app.core.database import engine
     from testgrenze import pruefstand_erlaubt
 
-    try:
-        engine = sa.create_engine(DB_URL, connect_args={"connect_timeout": 5, "application_name": "agent:claude"})
-        verbindung = engine.connect()
-    except Exception as fehler:  # noqa: BLE001
-        pytest.skip(f"Datenbank nicht erreichbar: {fehler}")
     assert pruefstand_erlaubt(engine.url)
+    verbindung = engine.connect()
     aussen = verbindung.begin()
     s = Session(bind=verbindung, join_transaction_mode="create_savepoint")
     t, kunde = f"er-{uuid.uuid4().hex[:8]}", str(uuid.uuid4())
