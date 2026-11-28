@@ -1,0 +1,12 @@
+{
+  "paths": [
+    "app/services/self_billing_buchung.py"
+  ],
+  "expect_class_ids_contains": ["service-stem"],
+  "expect_hints_contains_any": [
+    "architecture-domain-prefixes.yaml",
+    "pnpm arch:drift",
+    "exact_service_stems"
+  ],
+  "expect_pr232_refs_contains": ["R4a"]
+}

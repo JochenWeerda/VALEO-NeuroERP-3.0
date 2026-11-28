@@ -1,0 +1,61 @@
+slice_id: ARCH-IMPACT-PREFLIGHT-MAP
+title: Architecture Impact Preflight — deklarative Map (P1)
+owner: Cursor Cloud Agent (bc-bf6a9f4b)
+status: in_arbeit
+created_at: "2026-11-27"
+started_at: "2026-11-27"
+milestone: M0
+coordination: >-
+  Lead-Freigabe Feinplan architecture-impact-preflight-feinplan.md.
+  Nur P1 — kein CLI, kein vor_push-Wire. Gibt frei ARCH-IMPACT-PREFLIGHT-CLI.
+goal: >-
+  Diff-Pfade werden auf Architekturvertraege und Generatorpflichten abgebildet;
+  Ausgabe ist deterministisch und reproduzierbar aus der Map.
+file_ownership:
+  - config/architecture-impact-map.yaml
+  - scripts/architecture_impact_map.py
+  - tests/test_architecture_impact_map.py
+  - tests/fixtures/architecture_impact/
+  - docs/architecture/quality-gates/architecture-impact-preflight.md
+  - docs/agent-ops/slices/ARCH-IMPACT-PREFLIGHT-MAP.yaml
+  - docs/agent-ops/active-workboard.md
+non_scope:
+  - scripts/architecture_impact_preflight.py (P2)
+  - scripts/vor_push.py Wire (P3)
+  - Generator-Umbau (generate_*.py, rls_*.py, check_all_doc_generators.sh)
+  - AGENTS.md Anti-Loop-Absatz (P3)
+  - architecture-index.yaml manuell
+  - PR-232 Self-Billing Fachcode
+acceptance:
+  - YAML laedt; Schema scheitert bei fehlenden Pflichtfeldern / unbekannten register_ids
+  - Zehn Pflichtklassen; PR-232-Refs R1b R2b R3b R4a R5 dokumentiert
+  - Fixture api_only → api-router, nicht migration-schema als DB-Pflicht
+  - Fixture service_stem → service-stem + Prefix-/arch-Hinweise
+  - Fixture migration → migration-schema mit requires_db=true
+  - Fixture rls_consumer → table-consumer → RLS-Domaenenmatrix + Tabellenkatalog (Lineage)
+  - pytest tests/test_architecture_impact_map.py gruen ohne DB
+  - Quality-Gate-Doku vorhanden und verlinkt Drift-Checks
+tests:
+  - "python3 -m pytest tests/test_architecture_impact_map.py --noconftest -p no:cacheprovider --no-cov -o addopts= -q"
+risks:
+  - Zu breite Globs erzeugen Laerm — dokumentiert; Verfeinerung Folge-Slice
+  - REGISTER-Umbenennung — Test vergleicht Whitelist mit vor_push.REGISTER
+ai_harness:
+  fachlicher_vertrag: >-
+    Diff-Pfade werden auf Architekturvertraege und Generatorpflichten abgebildet;
+    Ausgabe ist deterministisch und reproduzierbar aus der Map.
+  architektur_vertrag: >-
+    Wiederverwendung Architecture OS / vor_push.REGISTER-IDs; kein paralleles Inventar;
+    architecture-index.yaml bleibt generiert und unberührt.
+  daten_vertrag: >-
+    Keine DB; keine Secrets; nur Pfadstrings und YAML-Konfiguration.
+  test_vertrag: >-
+    Unit-Tests + JSON-Fixtures ohne Postgres; Schema-Validierung.
+  security_vertrag: >-
+    Keine Credential-Ausgabe; keine Netzwerkcalls.
+  betriebs_vertrag: >-
+    Map versioniert im Repo; Fehler bei ungueltiger Map = Exit/Exception fuer Aufrufer.
+  dokumentations_vertrag: >-
+    docs/architecture/quality-gates/architecture-impact-preflight.md + Workboard + Slice-YAML.
+external_gates:
+  - not_applicable

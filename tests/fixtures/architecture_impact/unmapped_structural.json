@@ -1,0 +1,7 @@
+{
+  "paths": [
+    "packages/frontend-web/src/lib/obscure_util.ts"
+  ],
+  "expect_unmapped_structural": true,
+  "expect_class_ids": []
+}

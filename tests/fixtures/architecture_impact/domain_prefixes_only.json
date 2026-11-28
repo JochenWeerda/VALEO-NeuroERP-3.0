@@ -1,0 +1,11 @@
+{
+  "paths": [
+    "config/architecture-domain-prefixes.yaml"
+  ],
+  "expect_class_ids": ["service-stem"],
+  "expect_checks_dbfree_contains": [
+    "python scripts/generate_architecture_index.py --check --require-complete"
+  ],
+  "expect_pr232_refs_contains": ["R4a"],
+  "expect_unmapped_structural": false
+}

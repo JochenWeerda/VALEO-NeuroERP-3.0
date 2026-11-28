@@ -1,0 +1,11 @@
+{
+  "paths": [
+    "config/business_time_usage_baseline.json"
+  ],
+  "expect_class_ids_contains": ["baseline-improvement"],
+  "expect_register_ids_contains": [
+    "Baseline-Integritaet",
+    "Improvement-Pipelines (Godfiles, Paginierung, ...)"
+  ],
+  "expect_pr232_refs_contains": ["R1b"]
+}

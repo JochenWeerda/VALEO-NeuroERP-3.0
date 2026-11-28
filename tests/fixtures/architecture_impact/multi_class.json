@@ -1,0 +1,14 @@
+{
+  "paths": [
+    "app/api/v1/endpoints/self_billing.py",
+    "app/services/self_billing_buchung.py",
+    "alembic/versions/self_billing_m3_20261127.py"
+  ],
+  "expect_min_classes": 3,
+  "expect_class_ids_contains": [
+    "api-router",
+    "service-stem",
+    "migration-schema"
+  ],
+  "expect_requires_db": true
+}

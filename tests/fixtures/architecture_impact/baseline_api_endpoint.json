@@ -1,0 +1,16 @@
+{
+  "paths": [
+    "app/api/v1/endpoints/self_billing.py"
+  ],
+  "expect_class_ids_contains": ["baseline-improvement"],
+  "expect_checks_dbfree_contains": [
+    "python scripts/check_business_time_usage.py"
+  ],
+  "expect_register_ids_contains": [
+    "Baseline-Integritaet",
+    "Improvement-Pipelines (Godfiles, Paginierung, ...)"
+  ],
+  "expect_pr232_refs_contains": ["R1b"],
+  "expect_requires_db": false,
+  "expect_unmapped_structural": false
+}
