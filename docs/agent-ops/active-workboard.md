@@ -17,9 +17,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 Meilensteine M3 bis M7. Owner: Codex. Dateibesitz: Abnahme-Skill, assessornahe Simulation und Szenariobericht. Abnahme: synthetische Praxisfaelle mit Gegenproben; externe Freigaben bleiben separat.
 
-### M6-SPIEGEL-NULLBETRAG — reserviert, Codex
+### M6-SPIEGEL-NULLBETRAG — zur Abnahme, Codex
 
 Dateibesitz: Betragsnormalisierung im Spiegel-Belegabgleich. Abnahme: Numerische Null bleibt ein Vergleichswert. Fehlende Beträge bleiben leer.
+
+Die Gegenprobe aus der Abnahmesimulation hat einen L3-Nullbetrag gegen 42,00 im VALEO-Beleg verglichen und die erwartete Abweichung geliefert. Numerische und textuelle Null werden gleich normalisiert. Geprüft wurde mit simuliertem Datenzugriff.
 
 ## PREISE-OHNE-SCHEINWERTE-20261104 — lokal abgenommen, Codex
 
