@@ -38,7 +38,27 @@ Diese Checkliste minimiert Kontextverlust bei Neustarts oder Agentenwechseln.
   keine Ruecksetzung oder Migration waehrend fremder Nutzung. Verbindliche
   Ressourcenregel in [AGENTS.md](../../AGENTS.md) und
   [Pruefstand-Runbook](../quality-assurance/test-database-resource-policy-20261001.md).
+- Ist die autorisierte Probe (`valeo_probe` / `TEST_DATABASE_URL`) von dieser
+  Sitzung aus erreichbar? Wenn nein (typisch Cloud-VM): CI-only Evidence laut
+  [Cloud-Agent-Pruefstand-SOP](../quality-assurance/cloud-agent-postgres-pruefstand.md);
+  keine DB-/Container-Anlage, keine Portoeffnung. Docker/Port/Env nur Diagnose —
+  fehlendes Docker allein schaltet nicht um, solange die Probe erreichbar ist.
+  Wenn ja (Host mit Probe): bestehende Pruefstand-Regel unveraendert.
 - Welche Doku muss nachgezogen werden?
+
+## Cloud-VM ohne Postgres
+
+1. Zuerst Agententyp und Erreichbarkeit der autorisierten Probe pruefen;
+   Docker/Port/Env nur als Diagnose.
+2. DB-freie Checks lokal ausfuehren.
+3. `needs_live_db`-Tests trotzdem implementieren.
+4. PR gegen `main`/`develop` oeffnen oder aktualisieren; require_db und
+   Quality-Gate-Backend am zugehoerigen Lauf pruefen (Feature-Push allein startet sie nicht).
+5. P0-Evidence pro Fall: Test-ID, PostgreSQL-Fixture, Ergebnis im verlinkten Lauf;
+   Skip/Deselect laesst den Fall offen.
+6. Bei Katalog-Drift CI-Artifact des konkreten PR-Laufs konsumieren
+   (Artifact-SHA ≠ Checkout-Head); fehlendes Artefakt = Nachweis offen.
+7. Interaktives Schema-Debug an Host-Agent mit `valeo_probe` handoffen.
 
 ## Vor dem ersten Edit
 

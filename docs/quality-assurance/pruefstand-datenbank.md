@@ -124,3 +124,9 @@ Er sagt nichts darüber, ob die gewachsene Datenbank **noch** zum Schema passt.
 Diese Frage beantwortet `scripts/check_schema_drift.py` (Slice
 `SCHEMA-DRIFT-GATE`), das beide vergleicht und jede Abweichung ausweist statt
 sie zu erraten.
+
+## Cloud-Agenten
+
+Cursor-Cloud-Sitzungen ohne lokalen Postgres nutzen nicht diesen Host-Prüfstand,
+sondern die job-lokale CI-Datenbank. Details und Verbote:
+[Cloud-Agent PostgreSQL-Prüfstand](cloud-agent-postgres-pruefstand.md).

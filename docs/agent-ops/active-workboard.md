@@ -13,6 +13,11 @@ description: Aktives Arbeits-Board fuer laufende und abgeschlossene Slices — k
 
 > M0-Bereinigung 23.11.2026: Hier stehen nur offene Eintraege (offen, reserviert, in Arbeit, zur Abnahme), jeder mit Meilenstein-ID nach docs/roadmap/fahrplan-verkaufsprodukt.md. Abgeschlossene und Altabschnitte ohne Status stehen woertlich in [archive/workboard-bis-2026-11-23.md](archive/workboard-bis-2026-11-23.md). Statuswoerter: offen, reserviert, in Arbeit, zur Abnahme, abgeschlossen, verworfen. Abgeschlossenes wandert beim naechsten Aufraeumen ins Archiv.
 
+## CLOUD-AGENT-PG-SOP — zur Abnahme, Cursor Cloud (bc-e6058277)
+
+Meilenstein: M0 (CI-/Agent-Betrieb).
+**Owner:** Cursor Cloud `bc-e6058277-d007-5f6b-a9b0-a58684d8ce0c`. **Stand:** zur Abnahme 2026-11-27 (Europe/Berlin) — Doku-PR bereit, kein Self-Merge; Status `abgeschlossen` erst nach Merge durch Claude Admin. **Ziel:** Alternative A (CI-only Evidence) verbindlich dokumentieren: Cloud-Agenten ohne lokalen `valeo_probe` nutzen GitHub-Actions-Postgres als Prüfstand; Artifact-Consume und Verbotsliste klar; `AGENTS.md` + Session-Checklist um Cloud-Pfad ergänzen. **Dateibesitz:** `docs/quality-assurance/cloud-agent-postgres-pruefstand.md` (neu); Querverweise in `docs/quality-assurance/pruefstand-datenbank.md`, `docs/quality-assurance/test-database-resource-policy-20261001.md`; `AGENTS.md`; `docs/agent-ops/session-start-checklist.md`; Slice-YAML `docs/agent-ops/slices/CLOUD-AGENT-PG-SOP.yaml`; dieses Workboard; Handshake `docs/agent-ops/handshakes/cloud-agent-pg-sop-20261127.md`. **Abnahme:** SOP mit Erkennung/CI-Evidence/Artifact/Handoff/Verbotsliste; Cloud-Zweig widerspricht Host-`valeo_probe`-Regel nicht; kein Workflow-/Compose-/Secret-Diff; Docs-Gates grün; kein Self-Merge. **Abgrenzung:** kein Workflow-Edit, kein Compose, kein Environment-Postgres; `CLOUD-AGENT-PG-DISPATCH` und ENV bleiben außen; Fachslices PR #232 unberührt. **Risiken:** Doku-Drift vs. Host-Prüfstand-Regel; keine Abschwächung von P0-Postgres-Nachweisen; keine Secrets in Doku.
+
 ## M3-M7-ABNAHMESIMULATION — reserviert, Codex
 
 Meilensteine M3 bis M7. Owner: Codex. Dateibesitz: Abnahme-Skill, assessornahe Simulation und Szenariobericht. Abnahme: synthetische Praxisfaelle mit Gegenproben; externe Freigaben bleiben separat.
